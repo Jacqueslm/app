@@ -121,7 +121,30 @@ test('the roof opens only after ten floors, and walking out of a fight costs not
   assert.match(floors, /roofReady\?'fight':'ten floors first'/);
   const leave = block('function gameLeaveFight(){', 'function game3dWon(){');
   assert.doesNotMatch(leave, /losses|cleared|g\.f=/, 'leaving the fight changes no score');
-  assert.match(block('function game3dLost(', 'function gameNextBuilding'), /if\(!draw\)g\.losses\+\+/);
+  // A draw never costs a loss, and neither does going back into a floor already
+  // cleared - that is practice, so the record it would land on is the wrong one.
+  const lost = block('function game3dLost(', 'function gameNextBuilding');
+  assert.match(lost, /if\(!draw&&gmReplay==null\)g\.losses\+\+/);
+  const won = block('function game3dWon(){', 'function renderJump(){');
+  assert.match(won, /if\(gmReplay!=null\)/, 'a replay win must return before the climb moves');
+  assert.ok(won.indexOf('if(gmReplay!=null)') < won.indexOf('g.wins++'),
+    'the replay check comes before anything is counted');
+});
+
+test('a cleared floor can be walked back into, and it changes nothing', () => {
+  const floors = block('function renderFloors(){', 'function gameFloorGo(');
+  assert.match(floors, /done\?'gameFloorReplay\('\+n\+'\)'/, 'a cleared floor is tappable again');
+  assert.match(floors, /gmReplay=null/, 'walking the stairs clears any replay');
+  // Going back to floor two on the way up must never move the climb back to two.
+  const go = block('function gameFloorGo(n){', 'function gmFloor(');
+  assert.match(go, /gmReplay=null/, 'picking the live floor is not a replay');
+  const again = block('function gameFightAgain(){', 'function gameStartOver(){');
+  assert.match(again, /g\.cleared\[gmFloor\(\)\]\?gmFloor\(\):null/,
+    'a lost fight is a straight retry; a won one is a replay');
+  // Starting over is asked for out loud and never touches recovery data.
+  const over = block('function gameStartOver(){', 'function gameFighter(){');
+  assert.match(over, /appConfirm\(/, 'starting over asks first');
+  assert.doesNotMatch(over, /S\.journal|S\.startDate|S\.lessonDay/, 'it resets the game, not the recovery');
 });
 
 test('the fight is handed this person\'s own things, never invented ones', () => {

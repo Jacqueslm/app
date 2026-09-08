@@ -6880,21 +6880,49 @@ function renderApproach(){
 function gameGoIn(){const g=gameState();g.inside=true;save();renderFloors();}
 // The climb. One fight a floor, then the roof.
 function renderFloors(){
+  gmReplay=null;
   const g=gameState(),B=gameBuilding();
   gmPhoto('boss',gameBossImg());gmMini('guard');
   const rows=[];
   for(let n=GAME_FLOORS;n>=1;n--){
     const done=!!g.cleared[n],here=g.f===n&&!done;
-    rows.push(`<button class="g2-flr ${done?'done':''} ${here?'here':''}" ${here?'onclick="gameFloorGo('+n+')"':'disabled'}>
-      <b>${n}</b><span>${gmEsc(gameFloorEl(n))}</span><i>${done?'cleared':here?'fight':'locked'}</i></button>`);
+    const go=here?'gameFloorGo('+n+')':done?'gameFloorReplay('+n+')':'';
+    rows.push(`<button class="g2-flr ${done?'done':''} ${here?'here':''}" ${go?'onclick="'+go+'"':'disabled'}>
+      <b>${n}</b><span>${gmEsc(gameFloorEl(n))}</span><i>${done?'cleared &middot; go again':here?'fight':'locked'}</i></button>`);
   }
   const roofReady=Object.keys(g.cleared).length>=GAME_FLOORS;
   gmBody(`<div class="g2-cat">${gmEsc(B.name)} · ${gmEsc(B.kind)}</div>
     <button class="g2-flr roof ${roofReady?'here':''}" ${roofReady?'onclick="gameFloorGo(11)"':'disabled'}>
       <b>&#9650;</b><span>The roof &middot; the source</span><i>${roofReady?'fight':'ten floors first'}</i></button>
-    <div class="g2-flrs">${rows.join('')}</div>`);
+    <div class="g2-flrs">${rows.join('')}</div>
+    <button class="g2-ghost" style="margin-top:14px" onclick="gameStartOver()">Start the whole thing over</button>`);
 }
-function gameFloorGo(n){const g=gameState();g.f=n;save();gmTop();renderRoofDoor();}
+function gameFloorGo(n){gmReplay=null;const g=gameState();g.f=n;save();gmTop();renderRoofDoor();}
+// Walking back into a fight you already cleared (Jacques, 8 Sep 2026). It changes
+// nothing: the floor is not re-cleared, and the win and loss counts are left alone.
+// Progress only ever moves forward the first time through, so going back to floor
+// two on your way up cannot cost you floors three to seven.
+let gmReplay=null;
+function gmFloor(){const g=gameState();return gmReplay!=null?gmReplay:g.f;}
+function gameFloorReplay(n){gmReplay=n;gmTop();renderRoofDoor();}
+function gameFightAgain(){
+  const g=gameState();
+  // The one just won is already marked cleared, so going again is a replay. A fight
+  // that was lost cleared nothing and g.f never moved - that is a straight retry.
+  gmReplay=g.cleared[gmFloor()]?gmFloor():null;
+  gmTop();renderRoofDoor();
+}
+// Start the whole thing over: building one, floor one, nothing cleared. Asked for
+// out loud, never offered mid-fight, and it says what it costs before it does it.
+function gameStartOver(){
+  appConfirm('Start the whole fight over? Every building and every floor goes back to the beginning. Your days, journal and lessons are not touched.',
+    ()=>{
+      const g=gameState();
+      g.b=1;g.f=1;g.cleared={};g.inside=false;g.wins=0;g.losses=0;g.rides={};g.lastRide='';
+      gmReplay=null;gmFight=null;gmBusy=false;
+      save();gmTop();renderBuilding();
+    },{okText:'Start over'});
+}
 
 function gameFighter(){const g=gameState();return Math.max(1,Math.min(5,(g.fighter|0)||(((g.boxer-1)%5)+1)));}
 function gameSetFighter(n){const g=gameState();g.fighter=Math.max(1,Math.min(5,n|0));save();renderRoofDoor();}
@@ -6902,12 +6930,14 @@ function gmCrowdLevel(level){try{if(!gmCrowd){gmCrowd=new Audio('audio/fight/cro
   clearInterval(gmCrowdT);const target=Math.min(1,level*4);gmCrowdT=setInterval(()=>{if(!gmCrowd)return clearInterval(gmCrowdT);const d=target-gmCrowd.volume;if(Math.abs(d)<.02){gmCrowd.volume=target;clearInterval(gmCrowdT);if(target===0)gmCrowd.pause();return;}if(gmCrowd.paused)gmCrowd.play().catch(()=>{});gmCrowd.volume=Math.max(0,Math.min(1,gmCrowd.volume+d*.2));},60);}catch(e){}}
 function renderRoofDoor(){
   const g=gameState(),T=gameTier(),str=gameStrength(),boss=gameBossName();
-  const roof=g.f>GAME_FLOORS;
+  const F=gmFloor(),again=gmReplay!=null;
+  const roof=F>GAME_FLOORS;
   gmPhoto('boss',gameBossImg());gmMini('guard');
   const rows=str.parts.map(p=>`<div><span>${gmEsc(p.k)}</span><b>${p.v?'+'+p.v:'—'}</b>${p.hint?`<small>${gmEsc(p.hint)}</small>`:''}</div>`).join('');
-  gmBody(`<div class="g2-cat">${gmEsc(gameBuilding().name)} · ${roof?'the roof':'floor '+g.f+' · '+gmEsc(gameFloorEl(g.f))} · ${T.label}</div>
+  gmBody(`<div class="g2-cat">${gmEsc(gameBuilding().name)} · ${roof?'the roof':'floor '+F+' · '+gmEsc(gameFloorEl(F))} · ${T.label}</div>
     <h1 class="g2-h1">${roof?`${gmEsc(boss)} <em>itself.</em>`:`${gmEsc(boss)} is <em>waiting.</em>`}</h1>
-    <div class="g2-from" style="text-align:left">${roof?'The source. No element, no disguise.':gmEsc(gameFloorEl(g.f))+' in the ring.'} It swings from one side, you go the other &middot; swipe or use the arrows</div>
+    <div class="g2-from" style="text-align:left">${roof?'The source. No element, no disguise.':gmEsc(gameFloorEl(F))+' in the ring.'} It swings from one side, you go the other &middot; swipe or use the arrows</div>
+    ${again?'<div class="g2-from" style="text-align:left">You have already cleared this one. Go as many rounds as you want &mdash; nothing here counts against you.</div>':''}
     <div class="g2-strength"><b>${str.total}</b><span>Strength · earned in the app</span></div>
     <div class="g2-strrows">${rows}</div>
     <div class="g2-pick g2-gloves" role="group" aria-label="Your fighter">${[1,2,3,4,5].map(n=>`<button class="g2-gl ${gameFighter()===n?'on':''}" aria-pressed="${gameFighter()===n}" onclick="gameSetFighter(${n})">Fighter ${n}</button>`).join('')}</div>
@@ -6939,13 +6969,13 @@ async function startFight(){
   gmFight={round:0,you:str.total,youMax:str.total,building:g.b};
   gmCrowdLevel(0);
   try{gm('g2').classList.add('g2-full');document.body.classList.add('g2-fighting');}catch(e){}
-  gmBody(`<button class="g2-exit" title="Leave the fight" onclick="gameLeaveFight()">&#10005;</button><iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(gameBuilding().k)}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}&floor=${g.f>GAME_FLOORS?0:g.f}"></iframe>`);
+  gmBody(`<button class="g2-exit" title="Leave the fight" onclick="gameLeaveFight()">&#10005;</button><iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(gameBuilding().k)}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}&floor=${gmFloor()>GAME_FLOORS?0:gmFloor()}"></iframe>`);
   const f=gm('g2-3d');if(!f)return;
   if(!window.__g3d){window.__g3d=true;addEventListener('message',game3dMessage);}
   f.addEventListener('load',()=>{try{f.contentWindow.postMessage({to:'fightofyourlife',
     bossKey:gameBuilding().k,bossName:gameBossName(),lines:game3dLines(),
     support:game3dSupport(),tempt:game3dLines().map(q=>q.line).slice(0,6),
-    place:gamePlace().k,glove:g.glove,fighter:gameFighter(),building:g.b,floor:(g.f>GAME_FLOORS?0:g.f),name:(S.name||'you')},'*');}catch(e){}});
+    place:gamePlace().k,glove:g.glove,fighter:gameFighter(),building:g.b,floor:(gmFloor()>GAME_FLOORS?0:gmFloor()),name:(S.name||'you')},'*');}catch(e){}});
 }
 function game3dMessage(ev){
   const d=ev&&ev.data;if(!d||d.from!=='fightofyourlife')return;
@@ -6961,6 +6991,17 @@ function gameLeaveFight(){
 function game3dWon(){
   const F=gmFight,g=gameState();
   try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
+  // A floor walked back into is practice: it was already cleared, so nothing is
+  // added to the record and the climb does not move.
+  if(gmReplay!=null){
+    const n=gmReplay;
+    gmBody(`<div class="g2-reveal up" style="font-size:3rem">Took it again</div>
+    <div class="g2-cat g2-center">Floor ${n} &middot; round ${F.round}</div>
+    <p class="g2-lead g2-center">This one was already yours. Nothing counted, nothing moved &mdash; you just wanted the round.</p>
+    <button class="g2-big" onclick="gameFightAgain()">Again</button>
+    <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">The stairs</button>`);
+    gmFight=null;gmBusy=false;return;
+  }
   const roof=g.f>GAME_FLOORS;
   g.wins++;
   if(!roof){g.cleared[g.f]=true;g.f=Math.min(GAME_FLOORS+1,g.f+1);}
@@ -6973,6 +7014,7 @@ function game3dWon(){
   <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. I am on the next one too.</div>
   <p class="g2-lead g2-center">It is waiting one floor up, in ${gmEsc(String(nextEl))}. Same thing, different face.</p>
   <button class="g2-big" onclick="gameFloorGo(${g.f})">${g.f>GAME_FLOORS?'Up to the roof':'Floor '+g.f}</button>
+  <button class="g2-ghost" style="margin-top:8px" onclick="gameFightAgain()">Fight that one again</button>
   <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">The stairs</button>`);
   gmFight=null;gmBusy=false;
 }
@@ -6991,7 +7033,8 @@ function renderJump(){
 function game3dLost(draw){
   const g=gameState();
   try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
-  if(!draw)g.losses++;
+  // Losing a floor you already cleared costs nothing either - it was practice.
+  if(!draw&&gmReplay==null)g.losses++;
   save();
   gmBody(`<div class="g2-reveal" style="font-size:2.6rem">${draw?'Even':'Saved by the bell'}</div>
   <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>

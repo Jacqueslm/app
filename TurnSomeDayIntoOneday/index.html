@@ -886,7 +886,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <p style="margin-bottom:12px">By creating an account and using Turn Someday Into Day One, you agree to the terms below.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">What this app is</h3>
-      <p style="margin-bottom:8px">A recovery companion offering daily lessons, journaling, streak tracking, an AI chat companion (Friendly), and related tools. Free features remain free; some features require a paid Pro subscription.</p>
+      <p style="margin-bottom:8px">A recovery companion offering daily lessons, journaling, streak tracking, an AI chat companion (Friendly), and related tools. Every feature is free.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Not medical or professional advice</h3>
       <p style="margin-bottom:8px">Nothing in this app — including anything Friendly says — is medical, psychiatric, legal, or professional advice, and it does not create a therapist-patient or doctor-patient relationship. It is a self-help and support tool. If you are in crisis or danger, contact the 988 Suicide &amp; Crisis Lifeline or emergency services immediately, not this app.</p>
@@ -986,7 +986,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div>
       <div style="display:flex;align-items:center;gap:6px">
         <span class="nova-name">Friendly</span>
-        <span class="nova-badge" id="nova-tier-lbl">Free · Pro only</span>
         <span class="nova-mode-chip" id="nova-mode-chip" style="display:none"></span>
       </div>
       <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:.5rem"></i> AI recovery companion · Non-judgmental · Confidential</div>
@@ -1013,7 +1012,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="typing" id="novaTyping"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
   <div class="limit-bar" id="limitBar">
     <i class="ti ti-info-circle" style="font-size:1rem;color:#854F0B;flex-shrink:0"></i>
-    <span id="limitBarText">Friendly is a <strong>Pro</strong> feature</span><strong id="chatsLeft" style="display:none">0</strong>
+    <span id="limitBarText">Chats left today</span><strong id="chatsLeft" style="display:none">0</strong>
     <!-- No "Go Pro" button here. This is the screen people open at 3am when
          they are struggling, and the AI's own instructions forbid it from
          mentioning Pro to someone in distress - a permanent sales button on the
@@ -1098,9 +1097,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           </div>
         </div>
         <div id="jour-insights-pro" style="display:none"></div>
-        <div id="jour-insights-free" style="display:none;background:var(--s1);border:0.5px dashed var(--bdr2);border-radius:12px;padding:14px;margin-bottom:14px;cursor:pointer;text-align:center;color:var(--ts);font-size:.78125rem" onclick="openProTool('proJournal')">
-          Friendly insights — emotional trends and patterns from your own entries — are part of <span style="color:var(--accent);font-weight:500">Pro</span>
-        </div>
         <div id="journalList"></div>
       </div>
     </div>
@@ -5731,10 +5727,7 @@ function buildJournalWeeklySummary(){
 }
 function renderJournalInsights(){
   const proBox=document.getElementById('jour-insights-pro');
-  const freeBox=document.getElementById('jour-insights-free');
-  if(!proBox||!freeBox)return;
-  // Insights are free now (17 Aug 2026).
-  freeBox.style.display='none';
+  if(!proBox)return;
   if(!(S.journals||[]).length){proBox.style.display='none';return;}
   proBox.style.display='block';
   proBox.innerHTML=`<div class="card" style="margin-bottom:14px">
@@ -8569,9 +8562,6 @@ const SUPPORTER_TEXT={
   'plans-free-counter':'Day counter & milestones',
   // Session 2 hid the craving tracker and the timeline from supporters, so the free
   // tier can't keep advertising them as things she gets.
-  'plans-free-tracker':'Journal & lesson history',
-  'plans-free-letter':'Your letter — say it once, properly',
-  'plans-pro-together':'✓ The live rooms — real people on the same road, 6am–10pm Central',
   'rem-urge-title':'Hard-hour alerts',
   'rem-urge-sub':'Based on when your hardest hours have been',
   'rem-risk-title':'Heavy-day check-ins',
@@ -11224,98 +11214,24 @@ function categoryFallbackNote(){
   return CATEGORY_FALLBACK_NOTES[S.currentAddiction]||'';
 }
 
-// ─── RELAPSE TOOLKIT: PRO TOOL GATING (generic teaser+blur+upgrade pattern) ───
+// A name-to-function map, kept only because a dozen onclick handlers call
+// openProTool('key'). Nothing here is gated - the app is free.
 const PRO_TOOLS={
-  couples:{
-    title:'Do this together',
-    teaser:"A 30-day program the two of you do together — ten minutes a day, phones down. Plus the anytime exercises: the weekly check-in, the craving signal, the slip plan you agree on before you need it. Recovery is a team sport — this is the playbook.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Day 1. Two Jobs, One Table<br>Day 2. The Rules Of This Table<br>Day 3. What It Is And What It Is Not<br>… 30 days, plus the anytime exercises</div>',
-    open:'openCouplesExercises'
-  },
-  partnerCheck:{
-    title:'Partner self-check',
-    teaser:"Ten gentle yes-or-no questions your partner answers privately — because sometimes the person supporting you is quietly fighting something of their own, and naming it is where their recovery starts too.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Q1. Is there a habit you hide or minimize?<br>Q2. Do you feel restless when you can\'t...?<br>...</div>',
-    open:'openPartnerCheck'
-  },
-  urgeSurf:{
-    title:'Urge Surfing Timer',
-    teaser:"A guided 1-10 minute countdown with rotating encouragement to help you ride out an urge instead of acting on it — most urges peak and pass within minutes.",
-    mock:'<div style="text-align:center"><div style="font-size:2.125rem;font-weight:700;color:var(--green)">04:32</div><div style="font-size:.75rem;color:var(--tm);margin-top:6px">"You\'re already past the hardest part..."</div></div>',
-    open:'openUrgeSurf'
-  },
-  panic:{
-    title:'Panic Mode',
-    teaser:"Rapid stabilization steps plus a faster guided breathing coach, for moments that feel like an emergency, not just a craving.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">1. ●●●●●●●●●●●●●●<br>2. ●●●●●●●●●●●●●●●●●<br>3. Box breathing — in 4, hold 4...</div>',
-    open:'openPanicMode'
-  },
-  emergency:{
-    title:'Emergency Plan',
-    teaser:"A plan you build once, ahead of time — your safe contact and your steps, ready to open the instant things get hard.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Contact: ●●●● ●●●●●●<br>Step 1: ●●●●●●●●●●●●<br>Step 2: ●●●●●●●●●●●●●●●</div>',
-    open:'openEmergencyPlan'
-  },
-  patterns:{
-    title:'Pattern Detection',
-    teaser:"A real report built from your own logged cravings and journal entries — your top triggers, riskiest times, and a prevention strategy written around your actual data.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Top trigger: ●●●●●● (●●%)<br>Riskiest time: ●●●●●●●●●<br>Strategy: ●●●●●●●●●●●●●●●●●●</div>',
-    open:'openPatternReport'
-  },
-  scripts:{
-    title:'Category-Specific Recovery Scripts',
-    teaser:()=>`Step-by-step recovery scripts written specifically for ${recoveryTerm()==='sober'?'your recovery focus':S.currentAddiction||'your focus area'} — not generic advice.`,
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">If ●●●●●● happens: ●●●●●●●●●●●●●●<br>Say to yourself: "●●●●●●●●●●●●"</div>',
-    open:'openCategoryScripts'
-  },
-  distraction:{
-    title:'Distraction Generator',
-    teaser:"An always-ready list of quick, doable distractions for the exact moment you need one — tap for another suggestion any time.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">→ ●●●●●●●●●●●●●●●<br>→ ●●●●●●●●●●●●●<br><span style="color:var(--accent)">Give me another →</span></div>',
-    open:'openDistractionGen'
-  },
-  reminders:{
-    title:'Accountability Reminders',
-    teaser:"A real daily check-in that greets you when you open the app — not a fake notification, an honest nudge to reflect every day.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">"Good morning — how are you feeling about today?"</div>',
-    open:'openAccountabilityReminders'
-  },
-  weeklyReports:{
-    title:'Weekly Recovery Reports',
-    teaser:"See your emotional patterns, triggers, and progress each week — a real report built from what you've actually logged, plus personalized recommendations.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Top mood: ●●●●●● (●●%)<br>Top trigger: ●●●●●●<br>Risk level: ●●●●●●●●</div>',
-    open:'openWeeklyReportsScreen'
-  },
-  smartReminders:{
-    title:'Smart Reminders',
-    teaser:"Smart reminders help you stay grounded during urges and emotional spikes — personalized to your patterns, triggers, and preferred times.",
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">You usually feel urges around ●●pm.<br>Your ●●●●●● was high today.<br>Good morning. What\'s ●●●●●●●●●?</div>',
-    open:'openSmartReminderSettings'
-  },
-  proJournal:{
-    title:'Pro Journal',
-    teaser:'Guided prompts and emotional insights — free, tap to use — category-specific and slip-aware prompts, mood tracking, and insights drawn from your own entries.',
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
-    open:'openProJournalWhenPro'
-  },
-  streaks:{
-    title:'Advanced Streaks',
-    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, comeback tracking, and streak coaching, all built from your real data.',
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Your streak is strongest on ●●●●●●●●.<br>Longest streak: ●● days<br>You recovered in ● days last time.</div>',
-    open:'openAdvancedStreaksScreen'
-  },
-  analytics:{
-    title:'Analytics',
-    teaser:'Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you\'ve actually logged, not charts or dashboards.',
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Strongest trigger: ●●●●●●●●<br>Vulnerable time: ●●pm<br>Emotional trend: ●●●●●●●●</div>',
-    open:'openAnalyticsScreen'
-  },
-  habitCoach:{
-    title:'Habit Coach',
-    teaser:'Pro helps you build stronger habits with personalized guidance — consistency insights, vulnerability windows, and habit suggestions built from what you\'ve actually logged.',
-    mock:'<div style="font-size:.8125rem;line-height:1.9;text-align:left">Most consistent: ●●●●●●●●<br>Vulnerable window: ●●●●●●●●<br>Suggestion: ●●●●●●●●●●●●●●●●</div>',
-    open:'openHabitCoachScreen'
-  }
+  couples:{open:'openCouplesExercises'},
+  partnerCheck:{open:'openPartnerCheck'},
+  urgeSurf:{open:'openUrgeSurf'},
+  panic:{open:'openPanicMode'},
+  emergency:{open:'openEmergencyPlan'},
+  patterns:{open:'openPatternReport'},
+  scripts:{open:'openCategoryScripts'},
+  distraction:{open:'openDistractionGen'},
+  reminders:{open:'openAccountabilityReminders'},
+  weeklyReports:{open:'openWeeklyReportsScreen'},
+  smartReminders:{open:'openSmartReminderSettings'},
+  proJournal:{open:'openProJournalWhenPro'},
+  streaks:{open:'openAdvancedStreaksScreen'},
+  analytics:{open:'openAnalyticsScreen'},
+  habitCoach:{open:'openHabitCoachScreen'}
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){

@@ -932,12 +932,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <i class="ti ti-arrow-right" style="font-size:1.125rem;color:#0F6E56"></i>
   </div>
 
-  <div class="nova-promo" id="home-faith-card" onclick="openPack('spiritual')" style="margin-top:10px;display:none;background:var(--s2);border:1px solid var(--bdr)">
-    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-sun-high" style="font-size:1.25rem;color:#fff"></i></div>
-    <div style="flex:1"><div style="font-size:.875rem;font-weight:500;color:var(--tp)">Spiritual Path</div><div style="font-size:.75rem;color:var(--tm)">Your faith &amp; recovery track — day by day, God as you understand God</div></div>
-    <i class="ti ti-arrow-right" style="font-size:1.125rem;color:var(--tm)"></i>
-  </div>
-
   <div style="padding:12px 16px 0">
     <div class="sos-btn" id="home-sos-btn" onclick="openSOS()"><i class="ti ti-alert-triangle"></i> I'm having a craving — SOS</div>
   </div>
@@ -3447,7 +3441,7 @@ function renderHomeClimb(){
   el.textContent=n?('Step '+n+' of 90'):'Your steps up the mountain';
 }
 function renderTodayLesson(){
-  updateHomeFaithCard();renderHomeClimb();
+  renderHomeClimb();
   const switchRow=document.getElementById('lesson-track-switch-row');
   if(switchRow){
     switchRow.style.display=S.selectedAddictions.length>1?'flex':'none';
@@ -4981,11 +4975,6 @@ function closeMeditation(){
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
-  // The faith choice has to survive a reload. chooseFaith() paints this card at
-  // the moment of choosing, but nothing repainted it at boot - so the card the
-  // spiritual question promises quietly vanished on the next app open, which
-  // read as "the God thing doesn't work."
-  updateHomeFaithCard();
   document.getElementById('autoupd-toggle').classList.toggle('on',S.autoUpdate!==false);
   maybeAutoUpdate();
   updateSpeedBtns();
@@ -9723,13 +9712,13 @@ function chooseFaith(v){
     const el=document.getElementById('fc-'+k);
     if(el)el.classList.toggle('on',k===v);
   });
-  // The choice must DO something: yes/open opens the Spiritual Path in the
-  // plan immediately (Day 1 ready) so the app visibly changes. "No" keeps
-  // faith out everywhere, as promised.
+  // Faith is not a second track (Jacques, 8 Sep 2026): saying yes puts a line
+  // inside every day's lesson, and that is where it lives. The 30-day Spiritual
+  // Path stays readable in the Lesson Library, opened at Day 1 for anyone who
+  // goes looking. "No" keeps faith out everywhere, as promised.
   if(v!=='no'){
     S.customPackProgress=Object.assign({},S.customPackProgress||{},{spiritual:1});
   }
-  updateHomeFaithCard();
   renderFaithLead();
   save();
 }
@@ -9815,10 +9804,6 @@ function dailyLineIndex(){
   try{save();}catch(e){}
   return i;
 }
-function updateHomeFaithCard(){
-  const el=document.getElementById('home-faith-card');
-  if(el)el.style.display=faithOn()?'flex':'none';
-}
 // The lead paragraph names the person's OWN habit back to them before they
 // answer - a general question about faith is easy to wave off; this one isn't.
 function renderFaithLead(){
@@ -9830,7 +9815,7 @@ function renderFaithLead(){
     return;
   }
   if(S.faithPath==='no'){
-    el.textContent="Understood — the app will keep faith out of it. Nothing further on this, and the Spiritual Path stays in Tools if you ever want it.";
+    el.textContent="Understood — the app will keep faith out of it. Nothing further on this.";
     return;
   }
   // One line per chosen area, so two areas get two answers rather than a blur.

@@ -1140,7 +1140,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div style="padding:14px 0 4px">
         <a href="tel:988" class="crisis-bar">
           <i class="ti ti-phone"></i>
-          <div style="flex:1"><div class="cb-title">Need to talk to someone right now?</div><div class="cb-sub">Call or text 988 — free, confidential, 24/7</div></div>
+          <div style="flex:1"><div class="cb-title">You are not alone</div><div class="cb-sub">Call or text 988 — free, confidential, 24/7</div></div>
           <i class="ti ti-chevron-right"></i>
         </a>
       </div>
@@ -1399,6 +1399,36 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd">Insights</div>
         <div id="insightCards"></div>
       </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">See how far you have come</div>
+        <div class="setting-row" onclick="openClimb()">
+          <i class="ti ti-mountain"></i>
+          <div class="setting-row-txt"><p>The Climb</p><span>Your 90 steps up the mountain — one for every day you show up</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openFilm()">
+          <i class="ti ti-movie"></i>
+          <div class="setting-row-txt"><p>Your film</p><span>A short video of your own numbers, made on this phone</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="switchTo('insights');actBn('bn-tools')">
+          <i class="ti ti-chart-dots"></i>
+          <div class="setting-row-txt"><p>Patterns &amp; weekly reports</p><span>What your days have in common, and the week in writing</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="shareMyMilestone()">
+          <i class="ti ti-share"></i>
+          <div class="setting-row-txt"><p>Share my milestone</p><span>Inspire someone else</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMilestones()">
+          <span>Milestones</span>
+          <span id="milestones-toggle-lbl" style="font-size:.75rem;color:var(--accent);font-weight:400">Show all</span>
+        </div>
+        <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
+      </div>
     </div>
 
     <!-- RELAPSE TOOLKIT -->
@@ -1411,78 +1441,61 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </a>
       </div>
       <div class="sec">
-        <div class="sec-hd">Free tools — always available</div>
+        <div class="sec-hd">Right now</div>
         <div class="setting-row" onclick="startVoiceGuide()">
           <i class="ti ti-headphones" style="color:#1D9E75"></i>
-          <div class="setting-row-txt"><p>Talk me through it</p><span>Hands-free voice guide — just listen and breathe</span></div>
+          <div class="setting-row-txt"><p>Talk me through it</p><span>Hands-free — a calm voice walks you through it, nothing to read</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" onclick="breathe()">
-          <i class="ti ti-wind" style="color:#1D9E75"></i>
-          <div class="setting-row-txt"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="openMeditation()">
-          <i class="ti ti-moon-stars" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Meditation room</p><span>5–15 min guided quiet — breathing, calm sound, timer</span></div>
+        <div class="setting-row" onclick="openBreathe()">
+          <i class="ti ti-wind" style="color:#4A9EE2"></i>
+          <div class="setting-row-txt"><p>Breathe with me</p><span>Calm down, ride the urge out, or sit quiet for a while</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="open5to1()">
-          <i class="ti ti-hand-stop" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Step-by-step sensory grounding</span></div>
+          <i class="ti ti-hand-stop" style="color:#F5A623"></i>
+          <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Back in the room, one sense at a time</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openTriggeredFlow()">
-          <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
-          <div class="setting-row-txt"><p>I'm triggered</p><span>Name it, get simple coping steps</span></div>
+          <i class="ti ti-alert-triangle" style="color:#E24B4A"></i>
+          <div class="setting-row-txt"><p>I'm triggered</p><span>Name it and get something to do instead</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" id="toolkit-slipped-row" onclick="openSlippedFlow()">
-          <i class="ti ti-heart" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>I slipped</p><span>No judgment — here's what's next</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-                <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
-          <i class="ti ti-heart" style="color:#E24B4A"></i>
-          <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
+        <div class="setting-row" onclick="openSlippedFlow()">
+          <i class="ti ti-lifebuoy" style="color:#9B7BE2"></i>
+          <div class="setting-row-txt"><p>I slipped</p><span>No judgment. Here is what comes next</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       </div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">Advanced tools</div>
-        <div class="setting-row" onclick="openProTool('urgeSurf')">
-          <i class="ti ti-clock" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Urge Surfing Timer</p><span>Guided countdown to ride out an urge</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="closeSOS&&closeSOS();openWave()">
-          <i class="ti ti-ripple" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Ride the wave</p><span>A 3-minute breathing game — the urge rises, peaks, and passes</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="openProTool('panic')">
-          <i class="ti ti-alert-triangle" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Panic Mode</p><span>Rapid stabilization + advanced breathing coach</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
+        <div class="sec-hd">Keep for the hard days</div>
         <div class="setting-row" onclick="openProTool('emergency')">
-          <i class="ti ti-phone" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Emergency Plan</p><span>Your contact and steps, ready when it's hard</span></div>
+          <i class="ti ti-shield" style="color:#E24B4A"></i>
+          <div class="setting-row-txt"><p>Your emergency plan</p><span>The person you call and the steps you take, written down</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
-                <div class="setting-row" onclick="openProTool('scripts')">
-          <i class="ti ti-notebook" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Category-Specific Recovery Scripts</p><span>Prevention steps written for your focus area</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="openProTool('distraction')">
-          <i class="ti ti-sparkles" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Distraction Generator</p><span>Quick, doable distractions on demand</span></div>
+        <div class="setting-row" onclick="openProTool('scripts')">
+          <i class="ti ti-file-text" style="color:#1D9E75"></i>
+          <div class="setting-row-txt"><p>What to say</p><span>Lines for the moments that catch you out</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openProTool('reminders')">
           <i class="ti ti-bell" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Accountability Reminders</p><span>A real daily check-in when you open the app</span></div>
+          <div class="setting-row-txt"><p>Daily check-in</p><span>A real question when you open the app</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">People</div>
+        <div class="setting-row" onclick="switchTo('nova');actBn('bn-nova')">
+          <i class="ti ti-message-circle" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Talk to Friendly</p><span>Someone to say it out loud to, right now</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
+          <i class="ti ti-heart" style="color:#E24B4A"></i>
+          <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help them understand — and fight this together</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       </div>
@@ -1622,10 +1635,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">Recovery tools</div></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">When you need it</div></div>
       <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-tools')">
         <i class="ti ti-hand-stop"></i>
-        <div class="setting-row-txt"><p id="toolkit-row-title">Recovery Toolkit</p><span id="toolkit-row-sub">Grounding, "I'm triggered", "I slipped" — plus advanced tools</span></div>
+        <div class="setting-row-txt"><p id="toolkit-row-title">When it's hard</p><span id="toolkit-row-sub">Breathe, ground yourself, name it, or reach someone</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" id="tools-craving-row" onclick="switchTo('craving');actBn('bn-tools')">
@@ -1633,79 +1646,43 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
-        <i class="ti ti-heart" style="color:#E24B4A"></i>
-        <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="openLessonLibrary()">
-        <i class="ti ti-book"></i>
-        <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app — all tracks, the Spiritual Path, Together, and every pack. Search it, or read any day you like.</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-        <div class="setting-row" onclick="switchTo('stories');actBn('bn-tools')">
-          <i class="ti ti-headphones" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Stories</p><span>Narrated stories of falling and coming back — ten on the shelf, six to ten minutes each</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-      <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
-        <i class="ti ti-users"></i>
-        <div class="setting-row-txt"><p>Rooms</p><span>A new set of written reflections every day. No comments, no messaging.</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Journal</div></div>
       <div class="setting-row" onclick="switchTo('journal');actBn('bn-tools')">
         <i class="ti ti-notebook"></i>
         <div class="setting-row-txt"><p>Journal</p><span>Write freely, or use guided prompts</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-            <div style="height:8px;background:var(--s0)"></div>
-            <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Progress &amp; insights</div></div>
-      <div class="setting-row" onclick="switchTo('progress');actBn('bn-tools')">
-        <i class="ti ti-chart-line"></i>
-        <div class="setting-row-txt"><p>Progress</p><span>Hours, savings, and streak history</span></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Read and listen</div></div>
+      <div class="setting-row" onclick="openLessonLibrary()">
+        <i class="ti ti-book"></i>
+        <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app — all tracks, the Spiritual Path, Together, and every pack</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-        <div class="setting-row" onclick="openClimb()">
-          <i class="ti ti-mountain" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>The Climb</p><span>Your 90 steps up the mountain — one for every day you show up</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="openTower()">
-          <i class="ti ti-building" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>The Fight of Your Life</p><span>The thing you’re fighting waits on the roof, by name. Your strength comes from the work you do here</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="openFilm()">
-          <i class="ti ti-movie" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Your film</p><span>A short video of your own numbers, made on this phone — post it or keep it</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="switchTo('insights');actBn('bn-tools')">
-          <i class="ti ti-chart-dots" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Insights &amp; reports</p><span>Patterns, habits, streak insights, and weekly reports — one place</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-            <div class="setting-row" onclick="shareMyMilestone()">
-        <i class="ti ti-share"></i>
-        <div class="setting-row-txt"><p>Share my milestone</p><span id="share-row-sub">Inspire someone else</span></div>
+      <div class="setting-row" onclick="switchTo('stories');actBn('bn-tools')">
+        <i class="ti ti-headphones"></i>
+        <div class="setting-row-txt"><p>Stories</p><span>Narrated stories of falling and coming back — ten on the shelf</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="sec" style="padding-bottom:0;padding-top:4px">
-        <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMilestones()">
-          <span>Milestones</span>
-          <span id="milestones-toggle-lbl" style="font-size:.75rem;color:var(--accent);font-weight:400">Show all</span>
-        </div>
-        <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
+      <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
+        <i class="ti ti-users"></i>
+        <div class="setting-row-txt"><p>Rooms</p><span>A new set of written reflections every day. No comments, no messaging</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Understand your patterns</div></div>
-                        <div class="setting-row" id="timeline-row" onclick="switchTo('timeline');actBn('bn-tools')">
+      <div class="setting-row" id="timeline-row" onclick="switchTo('timeline');actBn('bn-tools')">
         <i class="ti ti-clock"></i>
         <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Look back</div></div>
+      <div class="setting-row" onclick="switchTo('progress');actBn('bn-tools')">
+        <i class="ti ti-chart-line"></i>
+        <div class="setting-row-txt"><p>Progress</p><span>Days, hours, savings, milestones and your weekly reports</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
+        <i class="ti ti-heart"></i>
+        <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help them understand — and fight this together</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
     </div>
@@ -2206,6 +2183,28 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div><!-- /main-app -->
 
 <!-- SOS MODAL -->
+<div class="sos-modal" id="breathe-pick" onclick="if(event.target===this)closeBreathe()">
+  <div class="sos-sheet">
+    <div class="sos-title">Breathe with me</div>
+    <div class="sos-sub">However long you have.</div>
+    <div class="sos-opt" onclick="pickBreathe('calm')">
+      <i class="ti ti-wind" style="color:#4A9EE2"></i>
+      <div class="sos-opt-info"><p>Calm down</p><span>About a minute — in, hold, out</span></div>
+      <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+    </div>
+    <div class="sos-opt" onclick="pickBreathe('wave')">
+      <i class="ti ti-ripple" style="color:#1D9E75"></i>
+      <div class="sos-opt-info"><p>Ride it out</p><span>Three minutes — the urge rises, peaks, and passes</span></div>
+      <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+    </div>
+    <div class="sos-opt" onclick="pickBreathe('quiet')">
+      <i class="ti ti-moon" style="color:#9B7BE2"></i>
+      <div class="sos-opt-info"><p>Sit quiet</p><span>Five to fifteen minutes — sound, and nothing to do</span></div>
+      <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+    </div>
+    <button class="ob-btn outline" style="margin-top:10px;color:var(--ts);border-color:var(--bdr)" onclick="closeBreathe()">Not now</button>
+  </div>
+</div>
 <div class="sos-modal" id="sos-modal" onclick="if(event.target===this)closeSOS()">
   <div class="sos-sheet">
     <div class="sos-title">🆘 You're not alone</div>
@@ -2218,11 +2217,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <i class="ti ti-headphones" style="color:#1D9E75"></i>
       <div class="sos-opt-info"><p>Talk me through it</p><span>Hands-free — a calm voice guides you, nothing to read</span></div>
     </div>
-        <div class="setting-row" onclick="closeSOS&&closeSOS();openWave()">
-          <i class="ti ti-ripple" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Ride the wave</p><span>A 3-minute breathing game — the urge rises, peaks, and passes</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
       <div class="sos-opt-info"><p>Talk to Friendly</p><span id="sos-nova-sub">Your AI recovery companion, right now</span></div>
@@ -2235,13 +2229,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <i class="ti ti-heart" style="color:#534AB7"></i>
       <div class="sos-opt-info"><p>I slipped</p><span>No judgment — here's what's next</span></div>
     </div>
-    <div class="sos-opt" onclick="breathe()">
+    <div class="sos-opt" onclick="closeSOS();openBreathe()">
       <i class="ti ti-wind" style="color:#1D9E75"></i>
-      <div class="sos-opt-info"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
+      <div class="sos-opt-info"><p>Breathe with me</p><span>A minute to calm down, three to ride it out, or sit quiet</span></div>
     </div>
     <div class="sos-opt" id="sos-craving-opt" onclick="logCravingFromSOS()">
       <i class="ti ti-activity" style="color:#BA7517"></i>
       <div class="sos-opt-info"><p>Log this craving</p><span>Track it and let it pass</span></div>
+    </div>
+    <div class="sos-opt" onclick="closeSOS();switchTo('relapse-toolkit');actBn('bn-tools')">
+      <i class="ti ti-hand-stop" style="color:var(--tm)"></i>
+      <div class="sos-opt-info"><p>Everything else that helps</p><span>Grounding, your emergency plan, what to say</span></div>
     </div>
     <button class="sos-close" onclick="closeSOS()">I'm okay — close</button>
   </div>
@@ -9354,7 +9352,13 @@ function takePledge(){
 }
 
 // ─── SOS ──────────────────────────────────────────────────────────────────────
-function openSOS(){document.getElementById('sos-modal').classList.add('open');}
+// Breathing was four rows saying much the same thing. One row now, three lengths behind it.
+function openBreathe(){const el=document.getElementById('breathe-pick');if(el)el.classList.add('open');}
+function closeBreathe(){const el=document.getElementById('breathe-pick');if(el)el.classList.remove('open');}
+function pickBreathe(k){closeBreathe();if(k==='calm')breathe();else if(k==='wave')openWave();else openMeditation();}
+// One door for a hard moment. The red button used to open a pop-up that repeated most of
+// the toolkit; now both land on the same list, so nothing is hidden inside something else.
+function openSOS(){closeSOS();switchTo('relapse-toolkit');actBn('bn-tools');}
 function closeSOS(){document.getElementById('sos-modal').classList.remove('open');}
 
 // ─── BREATHE ──────────────────────────────────────────────────────────────────
@@ -12393,7 +12397,7 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':"When it's hard",'weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -12478,7 +12482,7 @@ function switchTo(id,opts){
   if(id==='pack-list'){renderPackList();}
   if(id==='pack-lesson'){renderPackLesson();}
   if(id==='plans'){renderPlansScreen();}
-  if(id==='tools'){renderMilestones();}
+  if(id==='tools'||id==='progress'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
   if(id==='tower'){renderTower();}
   if(id==='home'&&typeof renderHomeClimb==='function')renderHomeClimb();

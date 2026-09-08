@@ -1198,27 +1198,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
 
     <!-- COMMUNITY (single room) -->
-    <div id="s-community" class="scr">
-      <div class="sec" style="padding-bottom:0">
-      </div>
-      <div class="sec" style="padding-top:6px;padding-bottom:0"><div class="sec-hd">Your private reflections</div></div>
-      <div class="compose">
-        <div class="av av-p" id="compose-av" style="width:32px;height:32px;font-size:.75rem">J</div>
-        <input id="postInput" placeholder="Write a private reflection..." onkeydown="if(event.key==='Enter'){submitPost();event.preventDefault()}">
-        <button onclick="submitPost()"><i class="ti ti-send" style="font-size:.9375rem"></i></button>
-      </div>
-      <div class="sec" style="padding-top:14px">
-        <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.75rem;color:var(--acc-t);line-height:1.5">
-          This is your private space — reflections you write here stay on this device (and sync to your account if you're signed in) but aren't shown to other users. Write with the same honesty you'd want to read from someone else.
-        </div>
-        <div id="userPostList"></div>
-        <div class="sec-hd" style="margin:18px 0 8px">Today's stories</div>
-        <div style="font-size:.75rem;color:var(--tm);margin-bottom:12px;line-height:1.6">A new set every day. These are <strong>written reflections</strong> — the things people in this room live through most often, put into words. They're not live posts, and the names aren't real people. (The live posts are up top.)<br><br><strong>There's no commenting, replying or messaging anywhere in Rooms, and there won't be.</strong> That's deliberate. Recovery spaces online turn toxic fast — pile-ons, comparison, people preying on someone at their lowest. You can like a story to keep it. Nothing is sent to anyone, and nobody can reach you here.</div>
-        <div id="postList"></div>
-      </div>
-    </div>
-
-    <!-- TIMELINE -->
     <div id="s-timeline" class="scr">
       <div class="sec" style="padding-bottom:0">
         <div class="sec-hd" id="tl-title">Withdrawal timeline</div>
@@ -2868,12 +2847,12 @@ let S = {
   notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],lastDailyWinDay:0,
   pledged:false,pledgeDate:'',
   chatsLeft:FREE_CHAT_DAILY_LIMIT,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',novaSpeakReplies:false,
-  currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
+  currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,audioPillExplained:false,navTourDone:false,welcomeShown:false,
-  userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
+  userType:'recovering',partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
   partnerName:'',letterLink:'',letterSentAt:'',cameFromLetter:'',
   bothLetterDraft:'',bothLetterSavedAt:'',bothLetterRelation:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
@@ -2957,11 +2936,6 @@ function load(){
   // Supporter accounts created before the relation question existed were all
   // written partner-first, so partner/spouse is the accurate default.
   if(S.userType==='partner'&&!S.partnerRelation)S.partnerRelation='partner';
-  // Migrate private reflections written before Rooms existed - tag them with
-  // whatever the user's focus was at the time so they still show up somewhere.
-  (S.communityPosts||[]).forEach(p=>{
-    if(!p.category)p.category=S.currentAddiction||'Other';
-  });
   // Strip the sample journal/craving entries that older builds seeded into every new
   // account - they were mockup filler, not anything the user wrote, and they polluted
   // streak/insight calculations with fake data.
@@ -8494,12 +8468,6 @@ function renderCrvChart(){
 // the feed shows a slice of it that moves one story per day, so the room is
 // different tomorrow without ever going empty.
 let ROOM_STORIES={};
-async function loadRoomStories(){
-  try{
-    const res=await fetch('data/stories.json');
-    if(res.ok)ROOM_STORIES=await res.json();
-  }catch(e){/* offline - the room falls back to your own reflections */}
-}
 const STORIES_PER_DAY=5;
 // Days since epoch in LOCAL time, so the feed turns over at the user's
 // midnight rather than UTC's.
@@ -8507,22 +8475,6 @@ function storyDayIndex(){
   const n=new Date();
   return Math.floor(new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime()/86400000);
 }
-// Slide the window by one each day: mostly familiar, one new face daily, and it
-// never runs out because it wraps.
-function todaysStories(room){
-  const pool=ROOM_STORIES[room]||[];
-  if(!pool.length)return [];
-  const offset=storyDayIndex()%pool.length;
-  const out=[];
-  for(let i=0;i<Math.min(STORIES_PER_DAY,pool.length);i++)out.push(pool[(offset+i)%pool.length]);
-  return out;
-}
-// "3h ago" on a feed that turns over daily would be a lie by lunchtime. These
-// are stamped relative to today so the timing is at least internally honest.
-const STORY_AGES=['this morning','2h ago','5h ago','9h ago','yesterday'];
-const ROOM_AV_CLASSES=['av-t','av-c','av-b','av-o'];
-
-let currentRoom=null;
 
 
 // ─── LIVE ROOM ───────────────────────────────────────────────────────────────
@@ -8544,105 +8496,8 @@ let currentRoom=null;
 // out so the lockout targets abuse, not people.
 const ROOM_BLOCK_WORDS=['fuck','fucking','fucked','fucker','fuckers','motherfucker','motherfuckers','shit','bullshit','bitch','bitches','asshole','assholes','cunt','cunts','bastard','bastards','whore','whores','slut','sluts','twat','twats','dickhead','dickheads','prick','pricks','wanker','wankers','bollocks','arsehole','arseholes','douchebag','jackass','jackasses','pussy','nigga','nigger','faggot','faggots','retard','retards','kike','tranny','trannies','chink','gook','spic','spics','wetback','wetbacks','beaner','beaners','coon','jigaboo','sambo','raghead','towelhead','cameljockey','kraut','dago','wop','polack','mick','injun','redskin','gyp','halfbreed','shemale','cripple','mongoloid','porchmonkey','zipperhead','sandnigger','niger'];
 const ROOM_BLOCK_PHRASES=['kill yourself','kill urself','neck yourself','end it all','go die','die in a fire','kys'];
-function roomFilterHits(txt){
-  const t=' '+String(txt).toLowerCase()+' ';
-  if(ROOM_BLOCK_PHRASES.some(p=>t.includes(p)))return true;
-  // Hate aimed at a person or a group. "I hate my addiction" and "I don't
-  // hate you" must both stay sayable — recovery runs on that honesty — so
-  // only object-directed hate trips this, and a "don't / not / never" right
-  // before the word disarms it.
-  if(/\bhate\s+(?:all\s+of\s+|all\s+|on\s+)?(you|yourself|everyone|people|anyone|women|men|girls|boys|kids|children|black|white|whites|gays?|lesbians?|jews?|muslims?|christians?|immigrants?|refugees?|hispanics?|asians?|trans)\b/i.test(t)){
-    if(/\b(don't|dont|doesn't|doesnt|didn't|didnt|not|never|no)\s+hate\b/i.test(t)){/* "don't hate" is support, not abuse */}
-    else return true;
-  }
-  return ROOM_BLOCK_WORDS.some(w=>{
-    if(w.length<=3)return t.includes(' '+w+' ')||t.includes(' '+w+'s ')||t.includes(' '+w+'es ');
-    return t.includes(w);
-  });
-}
-function submitPost(){
-  const inp=document.getElementById('postInput');
-  const txt=inp.value.trim();if(!txt)return;
-  if(roomFilterHits(txt)){
-    appInfo('Room locked out',"That message can't be posted here. Rooms exist to support people — language that attacks, hates, or discriminates is locked out, no exceptions. Reword it and it will go through.");
-    return;
-  }
-  S.communityPosts.unshift({date:new Date().toISOString(),name:S.name||'You',days:getDays(),body:txt,likes:0,category:currentRoom||S.currentAddiction||'Other'});
-  save();
-  inp.value='';
-  renderCommunityPosts();
-}
-function likePost(btn){
-  const span=btn.querySelector('span');
-  const liked=btn.classList.toggle('liked');
-  span.textContent=parseInt(span.textContent)+(liked?1:-1);
-  // Persist it against the post itself, otherwise the heart resets on reload.
-  const wrapper=btn.closest('[data-post-idx]');
-  if(wrapper){
-    const post=S.communityPosts[Number(wrapper.getAttribute('data-post-idx'))];
-    if(post){post.likes=Math.max(0,(post.likes||0)+(liked?1:-1));save();}
-  }
-}
 // Story likes are private and local - liking one tells nobody and contacts
 // nobody. It's a bookmark for the reader, not a signal to a stranger.
-function likeStory(btn,id){
-  const span=btn.querySelector('span');
-  const liked=btn.classList.toggle('liked');
-  span.textContent=Math.max(0,parseInt(span.textContent)+(liked?1:-1));
-  S.likedStories=S.likedStories||[];
-  if(liked){if(!S.likedStories.includes(id))S.likedStories.push(id);}
-  else S.likedStories=S.likedStories.filter(x=>x!==id);
-  save();
-}
-function reportPost(btn){
-  appConfirm("Hide this post? You won't see it again.",()=>{
-    const wrapper=btn.closest('[data-post-idx]');
-    if(wrapper){
-      S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
-      save();
-      renderCommunityPosts();
-    }else{
-      btn.closest('.post').remove();
-    }
-  });
-}
-function renderCommunityPosts(){
-  const room=currentRoom||S.currentAddiction||'Other';
-  const titleEl=document.getElementById('room-title');
-  const subEl=document.getElementById('room-sub');
-  if(titleEl)titleEl.textContent=`${CATEGORY_EMOJI[room]||'✨'} ${room==='Other'?'Other / general recovery':room}`;
-  if(subEl)subEl.textContent='Back to Rooms';
-
-  const container=document.getElementById('userPostList');
-  if(container){
-    container.innerHTML='';
-    const roomTerm=RECOVERY_TERMS[room]||'sober';
-    S.communityPosts.forEach((p,idx)=>{
-      if((p.category||'Other')!==room)return;
-      const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-      const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
-      div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${(p.name||'').replace(/</g,'&lt;')}</div><div class="pm">${p.days} days ${roomTerm} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:1rem"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:1rem"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:.875rem"></i> Report</button></div>`;
-      container.appendChild(div);
-    });
-  }
-
-  const roomContainer=document.getElementById('postList');
-  if(roomContainer){
-    const stories=todaysStories(room);
-    const term=RECOVERY_TERMS[room]||'sober';
-    roomContainer.innerHTML=stories.length?stories.map((s,i)=>{
-      const initials=s.name.split(' ').map(w=>w[0]).join('').toUpperCase();
-      const avClass=ROOM_AV_CLASSES[i%ROOM_AV_CLASSES.length];
-      const liked=(S.likedStories||[]).includes(s.id);
-      return `<div class="post">
-        <div class="ph"><div class="av ${avClass}">${initials}</div><div><div class="pu">${escapeHtml(s.name)}</div><div class="pm">${s.days} days ${term} · ${STORY_AGES[i%STORY_AGES.length]}</div></div></div>
-        <div class="pb">${escapeHtml(s.body)}</div>
-        <div class="pacts"><button class="pa${liked?' liked':''}" onclick="likeStory(this,'${s.id}')"><i class="ti ti-heart" style="font-size:1rem"></i> <span>${s.likes+(liked?1:0)}</span></button></div>
-      </div>`;
-    }).join(''):'<div style="font-size:.8125rem;color:var(--tm);padding:4px 0">Stories for this room load when you\'re online. Your own reflections above are always here.</div>';
-  }
-  renderIcons(document.getElementById('s-community'));
-}
 
 // ─── TIMELINE ─────────────────────────────────────────────────────────────────
 // Physical-dependency timeline - only accurate for substances the body actually withdraws from.
@@ -11926,7 +11781,7 @@ Address the interactions of their unique blueprint and assign structured daily r
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
-  community:'s-community',timeline:'s-timeline',progress:'s-progress',
+  timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
   insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
@@ -11940,8 +11795,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',community:'Reflections',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':"When it's hard",'weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',community:'bn-tools',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':"When it's hard",'weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -11963,7 +11818,7 @@ function goBackScreen(){
 // Which bottom-nav tab each screen belongs to, so back also fixes the
 // highlight instead of leaving the wrong tab lit.
 const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'bn-tools',
-  community:'bn-tools',timeline:'bn-tools',progress:'bn-tools',
+  timeline:'bn-tools',progress:'bn-tools',
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
@@ -12015,7 +11870,6 @@ function switchTo(id,opts){
   if(id==='home'){renderMilestones();}
   if(id==='lesson'){viewingDay=null;renderTodayLesson();loadLessonAudioManifest();}
   if(id==='nova'){maybeShowNovaDisclaimer();}
-  if(id==='community'){renderCommunityPosts();}
   if(id==='stories'){renderStories();}
   if(id==='insights'){renderAnalytics();maybeAutoGenerateWeeklyReport();renderWeeklyReports();renderHabitCoach();renderAdvancedStreaks();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}
@@ -13071,8 +12925,6 @@ function eraseMyHistory(){
       S.streakHistory=[];
       S.activityLog=[];
       S.weeklyReports=[];
-      S.communityPosts=[];
-      S.likedStories=[];
       // Lesson progress, including any custom pack the user was partway through.
       S.lessonProgress={};
       S.currentDay=1;
@@ -14374,7 +14226,6 @@ function enterApp(){
   document.addEventListener('click',armAppBackTrap,true);
   updateAccountUI();
   loadLessonPacks();
-  loadRoomStories();
   // Also checked on open, not only after a lesson. The lesson hook alone meant
   // the ask could never reach somebody in their first half hour - which is
   // exactly when people rate an app they like.

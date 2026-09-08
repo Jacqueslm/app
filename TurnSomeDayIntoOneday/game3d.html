@@ -61,6 +61,12 @@
     .supers{bottom:calc(148px + env(safe-area-inset-bottom))}
     .row.pick button{font-size:.48rem;padding:5px 1px}
   }
+  /* The walk-in runs about forty seconds. Worth watching once; not every time. */
+  .skipwalk{position:absolute;top:calc(10px + env(safe-area-inset-top));left:10px;z-index:9;
+    background:rgba(0,0,0,.55);color:#dfe4ff;border:1px solid rgba(255,255,255,.22);
+    border-radius:999px;padding:8px 14px;font:600 .72rem/1 inherit;letter-spacing:.04em;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .skipwalk[hidden]{display:none}
   .note{position:absolute;left:0;right:0;bottom:0;background:#000;color:#8a93bd;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:5px}
 </style>
 <div id="stage">
@@ -78,6 +84,7 @@
     <div class="row pick" id="fighters"><button data-f="1"><i style="background:#c8262a"></i>Fighter 1</button><button data-f="2"><i style="background:#2f5fd6"></i>Fighter 2</button><button data-f="3"><i style="background:#141418"></i>Fighter 3</button><button data-f="4"><i style="background:#d7a13a"></i>Fighter 4</button><button data-f="5"><i style="background:#2f9e5c"></i>Fighter 5</button></div>
     <div class="row one" id="bellrow"><button class="x" id="go">Ring the bell</button></div>
   </div>
+  <button class="skipwalk" id="skipwalk" hidden>Skip the walk-in</button>
   <div class="load" id="load">LOADING THE ROOF…</div>
 </div>
 <script>
@@ -698,7 +705,10 @@ if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{VOICES=null;
 // commentary. It reads what actually happened, never invents a number, and gives way to anyone else speaking.
 let lastCall=0,callBusy=false;
 function call(lines,force){const now=performance.now();if(!force&&(now-lastCall<3400||callBusy))return;lastCall=now;const t=Array.isArray(lines)?lines[Math.floor(Math.random()*lines.length)]:lines;$('stage').querySelectorAll('.call').forEach(n=>n.remove());const e=document.createElement('div');e.className='call';e.textContent=t;$('stage').appendChild(e);setTimeout(()=>e.remove(),2600);callBusy=true;speak(t,'Announcer');setTimeout(()=>callBusy=false,1700);}
-function say(t,who){$('v').innerHTML='<small>'+(who||'The Drink')+'</small>'+t;if(who&&who!=='Corner'||who===undefined&&t!=='…')speak(t,who||ADD().name);}
+// 'Corner' and 'Ring card' are captions only - the corner is heard through its own
+// clip, and the round number is the round-N recording. Speaking them as well put two
+// or three voices on the same line.
+function say(t,who){$('v').innerHTML='<small>'+(who||'The Drink')+'</small>'+t;if(who&&who!=='Corner'&&who!=='Ring card'||who===undefined&&t!=='…')speak(t,who||ADD().name);}
 setInterval(()=>{if(!running||downState)return;timeLeft=Math.max(0,timeLeft-1);clockShow();if(timeLeft===10)call('Ten seconds.',true);if(timeLeft===0)endRound();},1000);
 async function announce(lines,arm){if(!ANN)return;await castWalk(ANN,new T.Vector3(-1.15,0,-0.95),1.3);castFace(ANN,cam.position);ANN.play('talking',{loop:true,fade:.2});for(const l of lines){say(l,'Announcer');await wait(2300);}if(arm){const a=ANN.play('hand_raising',{fade:.2});await wait(1700);if(a)a.paused=true;await wait(2200);if(a)a.paused=false;await wait(800);}ANN.idle();await castWalk(ANN,ANN.home,1.5);}
 // between rounds your corner comes to you and its corner comes to it. Tap water, towel or a word, once each.
@@ -754,42 +764,88 @@ const walkSpot=new T.SpotLight(0xffffff,0,16,.5,.5,1.4);walkSpot.position.set(0,
 let followWho=null;
 function follow(F,color,power){followWho=F;walkSpot.color.set(color||0xffffff);walkSpot.intensity=power||120;}
 function followOff(){followWho=null;walkSpot.intensity=0;}
-async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clown,W=CORNER.wrestler;
+// Skipping the walk-in does not fast-forward the animations - it puts the room in
+// exactly the state the last line of ringWalks leaves it in, then the bell goes.
+// Anything less and the fighters start a round mid-stride, halfway up the aisle.
+let skipWalk=false;
+function snapToCorners(){
+  const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clown,W=CORNER.wrestler,a=ADD();
+  followOff();camWalkOff();aisleOff();shaftsOff();
+  spot.intensity=60;spot.color.set(PLACES[place].key);
+  partRopes('S',false,0);partRopes('N',false,0);
+  YOU.root.visible=true;BOSS.root.visible=true;
+  aura.visible=true;aura.scale.set(3.6,3.6,1);floorGlow.visible=true;rim.intensity=140;propsShow(true);
+  YOU.root.position.copy(CORNERPOS.you);BOSS.root.position.copy(CORNERPOS.boss);
+  for(const F of [YOU,BOSS]){F.root.position.y=0;F.root.lookAt(0,F.root.position.y,0);F.idle();}
+  for(const C of [T2,C2,K,W,ANN])if(C&&C.home){C.root.position.copy(C.home);C.idle&&C.idle();}
+  refWalk(ref.userData.home);refIdle();
+  shot('tv',0);
+}
+async function ringWalks(){
+  skipWalk=false;
+  const sk=$('skipwalk');
+  if(sk){sk.hidden=false;sk.onclick=()=>{skipWalk=true;sk.hidden=true;};}
+  const done=()=>{if(sk)sk.hidden=true;};
+  const out=()=>{if(skipWalk){snapToCorners();done();return true;}return false;};
+  try{ await walkIn(out); }finally{ done(); }
+}
+async function walkIn(out){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clown,W=CORNER.wrestler;
   // an empty ring: both fighters are still outside it, and the addiction does not exist yet
   YOU.root.visible=false;BOSS.root.visible=false;aura.visible=false;floorGlow.visible=false;rim.intensity=0;propsShow(false);
   // yours
   spot.intensity=34;crowdOn(.62);shaftsOn(0xdfe9ff,.16);aisleOn(-0.4,9.9,2.2,0x6fa8ff);YOU.root.position.set(-0.4,0,9.4);YOU.root.visible=true;T2.root.position.set(-1.15,0,10.7);C2.root.position.set(-1.9,0,11.2);camWalk(YOU,'front',0);
   follow(YOU,0xdff0ff,150);say('Making the walk to the ring…','Announcer');roar();chant('R',SUPPORT);await wait(1600);
+  if(out())return;
   say('From the roof of '+PLACES[place].name.replace('The ','the ')+'.','Announcer');camWalk(YOU,'back',900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,5.2),0.72),castWalk(T2,new T.Vector3(-1.15,0,6.6),0.72),castWalk(C2,new T.Vector3(-1.9,0,7.1),0.72)]);
+  if(out())return;
   roar();say('In the blue corner: '+YOUNAME+'.','Announcer');await wait(1900);
+  if(out())return;
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,3.0),0.8),castWalk(T2,new T.Vector3(-1.15,0,4.4),0.8),castWalk(C2,new T.Vector3(-1.9,0,4.9),0.8)]);roar();await wait(900);
+  if(out())return;
   await fighterWalk(YOU,new T.Vector3(-1.05,0,3.15),0.9,new T.Vector3(-1.05,0,0));entryShot('S',800);partRopes('S',true,420);await wait(560);
+  if(out())return;
   await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0));
+  if(out())return;
   partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
+  if(out())return;
   // its
   followOff();const a=ADD();aisleOff();shaftsOn(a.glow,.2);aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
   follow(BOSS,ADD().glow,170);say('And the opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);camWalk(BOSS,'back',1000);
+  if(out())return;
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-5.4),0.66),castWalk(K,new T.Vector3(-1.35,0,-6.8),0.66),castWalk(W,new T.Vector3(-2.1,0,-7.3),0.66)]);
+  if(out())return;
   boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);camWalk(BOSS,'back',900);
+  if(out())return;
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-1.35,0,-4.5),0.78),castWalk(W,new T.Vector3(-2.1,0,-5.0),0.78)]);boo();await wait(1000);
+  if(out())return;
   await fighterWalk(BOSS,new T.Vector3(0.55,0,-3.15),0.85,new T.Vector3(0.55,0,0));entryShot('N',800);partRopes('N',true,420);await wait(560);
+  if(out())return;
   await fighterWalk(BOSS,CORNERPOS.boss,0.58,new T.Vector3(0,0,0));
+  if(out())return;
   partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
+  if(out())return;
   // introductions at centre ring, then the referee's instructions
   followOff();camWalkOff();aisleOff();shaftsOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.6,0,0.2),1.3,BOSS.root.position),fighterWalk(BOSS,new T.Vector3(0.6,0,-0.2),1.3,YOU.root.position),castWalk(ANN,new T.Vector3(0.05,0,-0.75),1.4),refWalk(new T.Vector3(0.05,0,0.7))]);castFace(ANN,cam.position);refFace(actionLook());
+  if(out())return;
   ANN.play('talking',{loop:true,fade:.2});for(const l of ['Six rounds on the roof of '+PLACES[place].name.replace('The ','the ')+'.','In the blue corner: '+YOUNAME+'.','In the red corner: '+a.name+'.']){say(l,'Announcer');await wait(2400);}
+  if(out())return;
   const arm=ANN.play('hand_raising',{fade:.2});await wait(1500);if(arm)arm.paused=true;await wait(1200);if(arm)arm.paused=false;ANN.idle();castWalk(ANN,ANN.home,1.5);
+  if(out())return;
   refPlay('talking',{loop:true,fade:.2});for(const l of ['Protect yourself at all times.','Obey my commands.','Touch gloves.']){say(l,'Referee');await wait(2000);}refIdle();
+  if(out())return;
   YOU.play('lead_jab',{speed:.55});BOSS.play('lead_jab',{speed:.55});await wait(1300);YOU.idle();BOSS.idle();refWalk(ref.userData.home);
+  if(out())return;
   await Promise.all([fighterWalk(YOU,CORNERPOS.you,1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss,1.4,new T.Vector3(0,0,0))]);await wait(400);}
 async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;poseOff();fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;showControls(LIVE);ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
   await ringWalks();
   await nextRound();ai();youAI();}
 async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
   bossHP=100;youHP=Math.min(100,youHP+25);bars();landed={you:0,boss:0};downs={you:0,boss:0};timeLeft=ROUND_SECS;clockShow();
-  snd('round-'+round);say('Round '+round+'.','Announcer');
+  // The round-N recording says it. The announcer used to say it again over the top,
+  // and the ring card a third time - all three at once (Jacques, 8 Sep 2026).
+  snd('round-'+round);
   await walkTheCard(round);
   await toMarks();shot('tv',700);await wait(500);snd('bell');roar();crowdOn(.35);running=true;}
 // the bell: the round is scored ten-point must and the corner gets its ten seconds

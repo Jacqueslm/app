@@ -88,6 +88,9 @@
     border-radius:999px;padding:9px 16px;font:600 .72rem/1 inherit;letter-spacing:.04em;
     white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
   .skipwalk[hidden]{display:none}
+  /* if the picture ever fails, the reason goes here - small, red, screenshot-able */
+  .diag{position:absolute;left:10px;right:10px;bottom:calc(218px + env(safe-area-inset-bottom));z-index:12;font-size:.62rem;letter-spacing:.06em;color:#ff8a80;text-align:center;pointer-events:none;text-shadow:0 1px 3px #000}
+  .diag[hidden]{display:none}
   /* build stamp, so a screenshot from any phone says which fight it is showing */
   .ver{position:absolute;right:6px;bottom:calc(2px + env(safe-area-inset-bottom));z-index:3;font-size:.5rem;letter-spacing:.1em;color:#5a6390;pointer-events:none}
   .note{position:absolute;left:0;right:0;bottom:0;background:#000;color:#8a93bd;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:5px}
@@ -110,7 +113,8 @@
   </div>
   <button class="getup" id="getup" hidden>GET UP</button>
   <button class="skipwalk" id="skipwalk" hidden>Skip the walk-in</button>
-  <div class="ver" aria-hidden="true">3.3</div>
+  <div class="ver" aria-hidden="true">3.4</div>
+  <div class="diag" id="diag" hidden></div>
   <div class="load" id="load">LOADING THE ROOF…</div>
 </div>
 <script>
@@ -127,7 +131,7 @@ const ART=BASE+'img/fight/',AUDIO=BASE+'audio/fight/';
 // files cache-first, and the six fighter models were re-exported this month - so a
 // phone that had the old ones kept using them, and the new code stood the old model
 // up facing the wrong way. A new address is never in an old cache. (iPhone, 8 Sep 2026)
-const AV='?v=3.3';
+const AV='?v=3.4';
 // models load from img/fight/
 const canvas=$('c'),R=new T.WebGLRenderer({canvas,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
 const scene=new T.Scene();scene.background=new T.Color(0x05070d);scene.fog=new T.FogExp2(0x05070d,.075);
@@ -1226,7 +1230,7 @@ let orbYaw=0,orbPitch=0,orbZoom=1,dragging=false,dragX=0,dragY=0,pinch=0;
 // once the bell has gone the view stays on the side of the ring you fight from.
 function yawLimit(){return (running||downState)?0.5:Math.PI;}
 function clampYaw(y){const L=yawLimit();return Math.max(-L,Math.min(L,y));}
-function orbit(pos,look){if(!orbYaw&&!orbPitch&&orbZoom===1)return pos;const v=pos.clone().sub(look);const r=v.length();let th=Math.atan2(v.x,v.z)+orbYaw,ph=Math.asin(Math.max(-1,Math.min(1,v.y/r)))+orbPitch;ph=Math.max(-0.5,Math.min(1.15,ph));const rr=r*orbZoom;return new T.Vector3(look.x+rr*Math.cos(ph)*Math.sin(th),look.y+rr*Math.sin(ph),look.z+rr*Math.cos(ph)*Math.cos(th));}
+function orbit(pos,look){if(!orbYaw&&!orbPitch&&orbZoom===1)return pos;const v=pos.clone().sub(look);const r=v.length();if(r<1e-6)return pos;let th=Math.atan2(v.x,v.z)+orbYaw,ph=Math.asin(Math.max(-1,Math.min(1,v.y/r)))+orbPitch;ph=Math.max(-0.5,Math.min(1.15,ph));const rr=r*orbZoom;return new T.Vector3(look.x+rr*Math.cos(ph)*Math.sin(th),look.y+rr*Math.sin(ph),look.z+rr*Math.cos(ph)*Math.cos(th));}
 canvas.addEventListener('pointerdown',e=>{if(tapCard(e))return;dragging=true;dragX=e.clientX;dragY=e.clientY;canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-dragX,dy=e.clientY-dragY;dragX=e.clientX;dragY=e.clientY;orbYaw=clampYaw(orbYaw-dx*0.008);orbPitch+=dy*0.005;orbPitch=Math.max(-0.5,Math.min(1.15,orbPitch));
   // nine seconds is a third of a round to spend pointed the wrong way
@@ -1327,9 +1331,30 @@ setInterval(()=>{
   if(++autoCut%3===0)shot(curShot==='tv'?'shoulder':'tv',600);},3400);
 // nothing is ever right up against the lens: if the camera ends a move too close to what it
 // is looking at, it backs off along its own sight line rather than filling the frame with a body
-function camClear(p,l,min){const v=p.clone().sub(l);const d=v.length();if(d>=min)return p;
+function camClear(p,l,min){const v=p.clone().sub(l);const d=v.length();if(d>=min||d<1e-6)return p;
   if(d<0.02)v.set(0,0.2,1);v.normalize();return l.clone().add(v.multiplyScalar(min));}
-function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
+// The black screen with the clock still running (Jacques and his wife, 8 Sep 2026).
+// The picture is drawn by this loop; the clock and the bars are not. So if one frame
+// throws, or the camera's position ever stops being a number, the picture goes black
+// or freezes while everything else carries on - and nothing said why. Now: a bad frame
+// is caught and the next one is still drawn; a camera that is not a number is put back
+// on its shot; and whatever happened is written on the screen so a screenshot says it.
+let frameErrs=0,camFixes=0;
+function diag(t){const d=$('diag');if(!d)return;d.textContent=t||'';d.hidden=!t;}
+function camSane(){
+  const c=cam.position,l=look;
+  if(isFinite(c.x+c.y+c.z+l.x+l.y+l.z))return;
+  camFixes++;const S2=SHOTS[curShot]&&SHOTS[curShot].pos?SHOTS[curShot]:SHOTS.shoulder;
+  try{cam.position.copy(S2.pos());look.copy(S2.look());}catch(e){cam.position.set(0.85,1.75,2.55);look.set(0,1.2,0);}
+  camTo=null;kick.set(0,0,0);shake=0;orbYaw=0;orbPitch=0;orbZoom=1;cam.rotation.z=0;
+  diag('camera reset '+camFixes);
+}
+function frame(){
+  try{camSane();frameBody();}
+  catch(e){frameErrs++;diag('draw error '+frameErrs+': '+String(e&&e.message||e).slice(0,80));}
+  requestAnimationFrame(frame);
+}
+function frameBody(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   if(aura&&BOSS){const pulse=1+Math.sin(performance.now()/650)*.06;aura.scale.set(3.6*pulse,3.6*pulse,1);aura.material.opacity=.75+Math.sin(performance.now()/650)*.1;const bp=BOSS.root.position,dir=bp.clone().sub(cam.position);dir.y=0;dir.normalize();aura.position.set(bp.x+dir.x*1.1,1.25,bp.z+dir.z*1.1);rim.position.set(bp.x+dir.x*2.6,1.5,bp.z+dir.z*2.6);floorGlow.position.set(bp.x+dir.x*.3,.012,bp.z+dir.z*.3);if(YOU){const yp=YOU.root.position;fillYou.position.set(yp.x-dir.x*1.2+0.3,1.9,yp.z-dir.z*1.2);}}for(const p of PROPS)if(p.userData.ember)p.material.color.setHex(Math.random()<.1?0xffc27a:0xff7a2b);if(BOSS)BOSS.mixer.update(dt);if(YOU)YOU.mixer.update(dt);
   sparkTick(dt0);sweatTick(dt0);trailTick(dt0);tweenTick(dt0);elemTick(dt0);shaftTick();if(followWho){const p=followWho.root.position;walkSpot.position.set(p.x,4.6,p.z+0.6);walkSpot.target.position.set(p.x,0.9,p.z);walkSpot.target.updateMatrixWorld();}
   if(REF&&!fightOver&&!downState&&curShot!=='walk'&&curShot!=='entry'&&performance.now()>refLock&&YOU&&BOSS){
@@ -1338,6 +1363,10 @@ function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
     while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;ref.rotation.y+=d*Math.min(1,dt0*2.2);}
   if(REF)REF.mixer.update(dt);if(ANN)ANN.mixer.update(dt);if(GIRL)GIRL.mixer.update(dt);for(const k in CORNER)CORNER[k].mixer.update(dt);if(card&&card.visible&&cardHand){const h=new T.Vector3();cardHand.getWorldPosition(h);const toCam=cam.position.clone().sub(h).setY(0).normalize();card.position.copy(h).add(new T.Vector3(0,0.22,0)).addScaledVector(toCam,0.16);card.lookAt(cam.position);}crowdTick(dt);
   if(shake>0){const S2=SHOTS[curShot]||SHOTS.shoulder;const base=camTo?cam.position.clone():S2.pos();cam.position.x=base.x+(Math.random()-.5)*shake;cam.position.y=base.y+(Math.random()-.5)*shake;shake*=.85;if(shake<.004){shake=0;if(!camTo)cam.position.copy(S2.pos());}}
-  camDrift(dt0);if(performance.now()<kickUntil)cam.position.add(kick);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(camClear(orbit(cam.position,_l),_l,1.15));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}
+  camDrift(dt0);if(performance.now()<kickUntil)cam.position.add(kick);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(camClear(orbit(cam.position,_l),_l,1.15));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);}
+// a phone can take the graphics context away under memory pressure; with this it is
+// handed back and drawing resumes, instead of black for the rest of the fight
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();diag('graphics reset - hold on');});
+canvas.addEventListener('webglcontextrestored',()=>{diag('');});
 requestAnimationFrame(frame);
 </script>

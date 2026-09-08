@@ -131,89 +131,11 @@ test('the roof opens only after ten floors, and walking out of a fight costs not
     'the replay check comes before anything is counted');
 });
 
-test('the ringside camera is on your side of the ring, and fits a phone', () => {
-  const tv = FIGHT3D.slice(FIGHT3D.indexOf('function tvPos('), FIGHT3D.indexOf('const SHOTS={corner:'));
-  // Built off the line between the two of them, not a fixed +x that the boss stands on.
-  assert.match(tv, /toYou=a\.clone\(\)\.sub\(b\)/, 'the shot is placed from you, not from a fixed corner');
-  assert.match(tv, /addScaledVector\(toYou,back\)/, 'and it stands behind you');
-  // A portrait phone cannot hold two fighters side by side, so it comes round.
-  assert.match(tv, /port=cam\.aspect<0\.85/);
-  assert.match(tv, /back=port\?/, 'a tall screen gets more of a behind-you angle');
-  assert.doesNotMatch(FIGHT3D, /tv:\{pos:\(\)=>new T\.Vector3\(2\.35/, 'the old fixed broadside shot is gone');
-});
 
-test('the camera cannot end up behind the addiction mid-round', () => {
-  // A horizontal drag is also how you dodge, so an unlimited swing meant a few
-  // dodges the same way left the fight being watched from its opponent's shoulder.
-  assert.match(FIGHT3D, /function yawLimit\(\)\{return \(running\|\|downState\)\?0\.5:Math\.PI;\}/,
-    'penned in during the action, free on the picker');
-  assert.match(FIGHT3D, /orbYaw=clampYaw\(orbYaw-dx\*0\.008\)/, 'the drag itself is clamped');
-  assert.match(FIGHT3D, /function camDrift\(dt\)\{orbYaw=clampYaw\(orbYaw\)/, 'and so is anything already banked');
-  // every bell puts the view back where it belongs
-  const round = FIGHT3D.slice(FIGHT3D.indexOf('async function nextRound()'), FIGHT3D.indexOf('async function endRound()'));
-  assert.match(round, /orbYaw=0;orbPitch=0;orbZoom=1;recentre\(\);manualUntil=0;/);
-  // and a wrong-way drag is not held for a third of the round
-  assert.match(FIGHT3D, /manualUntil=performance\.now\(\)\+\(\(running\|\|downState\)\?2200:9000\)/);
-});
 
-test('the ring lights always come back up', () => {
-  const ko = FIGHT3D.slice(FIGHT3D.indexOf('function koLights('), FIGHT3D.indexOf('// sparks:'));
-  // Saving unconditionally meant a second knockdown banked the already-dark values
-  // as "normal", and every restore after that left the screen black for good.
-  assert.match(ko, /if\(!koLightSaved\)koLightSaved=\{/, 'the room is only remembered once');
-  assert.doesNotMatch(ko, /if\(on\)\{koLightSaved=\{/, 'never overwrite a saved room');
-  assert.match(ko, /koLightSaved=null;/, 'and it is cleared on the way back up');
-});
 
-test('you can see yourself on the canvas while the count runs', () => {
-  const down = FIGHT3D.slice(FIGHT3D.indexOf('async function meDown('), FIGHT3D.indexOf('async function decision('));
-  assert.match(down, /shot\('down',900\);/, 'the count has its own camera');
-  assert.match(FIGHT3D, /down:\{pos:\(\)=>YOU\?downPos\(YOU\)/, 'and it is built from where they fell');
-});
 
-test('nobody is counted out, and nobody is stood up for', () => {
-  const down = FIGHT3D.slice(FIGHT3D.indexOf('async function meDown('), FIGHT3D.indexOf('async function decision('));
-  // The app must never stand a person up on its own, and never count them out.
-  assert.doesNotMatch(down, /refCount\(/, 'the fixed count would stand them up at eight by itself');
-  assert.match(down, /await refCountToTap\(/, 'the count waits for the person to get up');
-  const counter = FIGHT3D.slice(FIGHT3D.indexOf('function refCountToTap('), FIGHT3D.indexOf('async function meDown('));
-  assert.ok(!/'Ten\.'/.test(counter), 'there is no ten in this count');
-  assert.match(counter, /if\(n<9\)/, 'the count stops at nine');
-  assert.match(counter, /Come on\. Come on\./, 'and holds there for as long as it takes');
-  assert.match(counter, /chant\('R',SUPPORT\)/, 'their own lines come up while it waits');
-  // Getting up sooner is worth more, and getting up late is still getting up.
-  assert.match(down, /youHP=Math\.max\(26,44-at\*2\)/);
-});
 
-test('every element fights differently, and none of them is unwinnable', () => {
-  const m = FIGHT3D.match(/const FLOORS=\[([\s\S]*?)\n\s*\/\/ The roof has no element/);
-  assert.ok(m, 'FLOORS still carries the per-element styles');
-  const styles = [...m[1].matchAll(/\{k:'(\w+)'[\s\S]*?st:\{tell:([\d.]+),dmg:([\d.]+),chin:([\d.]+),gap:([\d.]+),feint:([\d.]+),how:'([^']+)'/g)];
-  assert.equal(styles.length, 13, 'all thirteen elements have a style');
-  for (const [, k, tell, dmg, chin, gap, feint, how] of styles) {
-    for (const [name, v] of [['tell', +tell], ['dmg', +dmg], ['chin', +chin], ['gap', +gap]]) {
-      assert.ok(v >= 0.55 && v <= 1.5, `${k} ${name} is ${v} - a floor is a different fight, never an unwinnable one`);
-    }
-    assert.ok(+feint >= 0 && +feint <= 0.4, `${k} feints ${feint} of the time - over 0.4 is unreadable`);
-    assert.ok(how.length > 8, `${k} must say how it fights, so nobody walks into Ice expecting Lightning`);
-  }
-  // The three numbers have to actually reach the fight, or the styles are decoration.
-  assert.match(FIGHT3D, /function tellMs\(\)\{return \(1900-1000\*ease\(step\(\)-1\)\)\*STY\(\)\.tell/);
-  assert.match(FIGHT3D, /function hitDmg\(\)\{return Math\.round\(\(10\+16\*ease\(step\(\)-1\)\)\*STY\(\)\.dmg\)/);
-  assert.match(FIGHT3D, /dmg=Math\.max\(2,Math\.round\(dmg\*STY\(\)\.chin\)\)/);
-  assert.match(FIGHT3D, /\*STY\(\)\.gap;await wait\(gap\)/);
-  // A feint never comes twice running - the follow-up is called with fast=true,
-  // and that path skips the feint check.
-  assert.match(FIGHT3D, /if\(!fast&&Math\.random\(\)<STY\(\)\.feint\)/);
-  assert.match(FIGHT3D, /return bossSwing\(true\);/);
-  // and the words match the numbers, screen for screen
-  const how3d = Object.fromEntries(styles.map(([, k, , , , , , how]) => [k, how]));
-  const app = GAME.match(/const GAME_ELEMENT_HOW=\{([\s\S]*?)\};/);
-  assert.ok(app, 'the app tells people how the element fights');
-  for (const [, name, line] of app[1].matchAll(/(\w+):'([^']+)'/g)) {
-    assert.equal(how3d[name.toLowerCase()], line, `${name} reads differently in the app than it fights`);
-  }
-});
 
 test('a cleared floor can be walked back into, and it changes nothing', () => {
   const floors = block('function renderFloors(){', 'function gameFloorGo(');

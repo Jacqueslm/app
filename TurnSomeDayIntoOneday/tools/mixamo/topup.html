@@ -1,0 +1,22 @@
+<meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./three/package/build/three.module.js","three/addons/":"./three/package/examples/jsm/"}}</script>
+<script type="module">
+import * as T from 'three';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+const L=new GLTFLoader();
+const moves=await new Promise((r,j)=>L.load('fighter-all4.glb',r,undefined,j));
+window.topup=async function(file){
+  const g=await new Promise((r,j)=>L.load('./fighters/'+file+'.glb',r,undefined,j));
+  const bones=new Set();let hips='';g.scene.traverse(o=>{if(o.isBone){bones.add(o.name);if(/Hips$/.test(o.name)&&!hips)hips=o.name;}});
+  const prefix=hips.replace(/Hips$/,'');
+  const have=new Set((g.animations||[]).map(c=>c.name));
+  const add=[];
+  for(const c of moves.animations){ if(have.has(c.name))continue;
+    const tracks=c.tracks.map(t=>{const i=t.name.lastIndexOf('.'),b=t.name.slice(0,i).replace(/^mixamorig\d*/,prefix),p=t.name.slice(i+1);return bones.has(b)?new t.constructor(b+'.'+p,t.times,t.values):null;}).filter(Boolean);
+    if(tracks.length)add.push(new T.AnimationClip(c.name,c.duration,tracks));}
+  const all=(g.animations||[]).concat(add);
+  const glb=await new Promise((r,j)=>new GLTFExporter().parse(g.scene,r,j,{binary:true,animations:all}));
+  const u8=new Uint8Array(glb);let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+  window.B64=btoa(s);return {file,before:(g.animations||[]).length,added:add.length,total:all.length,size:glb.byteLength};
+};
+window.READY=true;
+</script>

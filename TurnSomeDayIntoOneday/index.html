@@ -946,7 +946,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
   <div class="setting-row" id="home-climb" onclick="openClimb()" style="margin:12px 16px 0;border-radius:12px">
     <i class="ti ti-mountain" style="color:#534AB7"></i>
-    <div class="setting-row-txt"><p>The Climb</p><span id="home-climb-sub">Your 90 steps up the mountain · today’s lesson takes the step</span></div>
+    <div class="setting-row-txt"><p>The Climb</p><span id="home-climb-sub">Your steps up the mountain</span></div>
     <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
   </div>
 
@@ -1637,7 +1637,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" id="cost-row" onclick="openCostModal()">
         <i class="ti ti-coin"></i>
-        <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
+        <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>What it cost you a day</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openCategorySwitcher()">
@@ -1654,7 +1654,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Reminders</div></div>
       <div class="setting-row" onclick="toggleNotif()">
         <i class="ti ti-bell"></i>
-        <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
+        <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge if today's lesson is waiting</span></div>
         <div class="toggle-sw on" id="notif-toggle"><div class="toggle-knob"></div></div>
       </div>
       <div class="setting-row" id="reminder-window-row" style="align-items:flex-start">
@@ -1676,7 +1676,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="sendTestPush()">
         <i class="ti ti-bell"></i>
-        <div class="setting-row-txt"><p>Send me a test reminder</p><span>Proves reminders reach this phone with the app closed</span></div>
+        <div class="setting-row-txt"><p>Send me a test reminder</p><span>One now, to prove they arrive</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openProTool('smartReminders')">
@@ -1710,7 +1710,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="toggleDiscretionMode()">
         <i class="ti ti-eye-off"></i>
-        <div class="setting-row-txt"><p>Discretion mode</p><span id="discretion-sub">Home screen shows a neutral name — nobody can tell what this app is by glancing at your phone</span></div>
+        <div class="setting-row-txt"><p>Discretion mode</p><span id="discretion-sub">A neutral name on your home screen</span></div>
         <div class="toggle-sw" id="discretion-toggle"><div class="toggle-knob"></div></div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1722,7 +1722,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="openHelpFinder()">
         <i class="ti ti-lifebuoy" style="color:#1D9E75"></i>
-        <div class="setting-row-txt"><p>Find anything</p><span>Type what you're looking for — get taken straight there</span></div>
+        <div class="setting-row-txt"><p>Find anything</p><span>Type it, land on the right screen</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="window.location.href='tel:988'">
@@ -1735,7 +1735,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="owner-updates-wrap"><div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates <span id="upd-hosted-note" style="display:none;color:var(--tm);font-weight:400">— hosted, updates arrive automatically</span></div></div>
       <div class="setting-row" onclick="toggleAutoUpdate()">
         <i class="ti ti-refresh"></i>
-        <div class="setting-row-txt"><p>Automatic updates</p><span>New versions install by themselves when the app opens</span></div>
+        <div class="setting-row-txt"><p>Automatic updates</p><span>New versions install themselves</span></div>
         <div class="toggle-sw on" id="autoupd-toggle"><div class="toggle-knob"></div></div>
       </div>
       <div class="setting-row" onclick="checkForAppUpdates()">
@@ -1745,7 +1745,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="runAppUpdate()">
         <i class="ti ti-download"></i>
-        <div class="setting-row-txt"><p>Update the app</p><span id="upd-run-sub">Installs the latest version — your data is kept</span></div>
+        <div class="setting-row-txt"><p>Update the app</p><span id="upd-run-sub">Install the latest, keep your data</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="toggleUpdateToken()">
@@ -1772,12 +1772,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="openReviewModal()">
         <i class="ti ti-message-2"></i>
-        <div class="setting-row-txt"><p>Leave a review</p><span id="review-row-sub">A line about whether this helped — it goes on the reviews page</span></div>
+        <div class="setting-row-txt"><p>Leave a review</p><span id="review-row-sub">A line for the reviews page</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" id="rate-app-row" style="display:none" onclick="goRateApp()">
         <i class="ti ti-star"></i>
-        <div class="setting-row-txt"><p>Rate this app</p><span>A line on Google Play is how the next person finds it</span></div>
+        <div class="setting-row-txt"><p>Rate this app</p><span>Google Play, for the next person</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openLegalOverlay('privacy')">
@@ -1798,17 +1798,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="color:#E24B4A">Account</div></div>
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
-        <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
+        <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in. Data stays here</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="logOutFromProfile()">
         <i class="ti ti-logout"></i>
-        <div class="setting-row-txt"><p>Log out</p><span>Sign out of this account on this device</span></div>
+        <div class="setting-row-txt"><p>Log out</p><span>Sign out on this device</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="logOutEverywhere()">
         <i class="ti ti-devices"></i>
-        <div class="setting-row-txt"><p>Log out on all devices</p><span>Signs out every other phone or computer — this one stays in</span></div>
+        <div class="setting-row-txt"><p>Log out on all devices</p><span>Every other phone and computer</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="sec">
@@ -3479,7 +3479,7 @@ function renderLessonExtras(day){
 function renderHomeClimb(){
   const el=document.getElementById('home-climb-sub');if(!el)return;
   const n=Math.min(999,S.climbSteps||0),today=new Date().toDateString();
-  el.textContent=(n?'Step '+n+' of 90':'Your 90 steps up the mountain')+(S.climbLastStep===today?' · today’s step taken by your lesson':' · today’s lesson takes the next step');
+  el.textContent=n?('Step '+n+' of 90'):'Your steps up the mountain';
 }
 function renderTodayLesson(){
   updateHomeFaithCard();renderHomeClimb();

@@ -6882,7 +6882,7 @@ function gameGoIn(){const g=gameState();g.inside=true;save();renderFloors();}
 function renderFloors(){
   gmReplay=null;
   const g=gameState(),B=gameBuilding();
-  gmPhoto('boss',gameBossImg());gmMini('guard');
+  gmPhoto('boss',gameBossImg());gmMiniHide();
   const rows=[];
   for(let n=GAME_FLOORS;n>=1;n--){
     const done=!!g.cleared[n],here=g.f===n&&!done;

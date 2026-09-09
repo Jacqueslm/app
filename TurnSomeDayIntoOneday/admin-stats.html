@@ -185,6 +185,13 @@ function loadBackups(){
     h+='<div style="margin:10px 0"><button onclick="downloadBackup()">Download latest backup</button> '
       +'<button onclick="runBackup(this)">Back up now</button></div>';
     h+='<div id="bk-msg" class="note"></div>';
+    h+='<div class="note" style="margin-top:16px"><b>Put a backup back</b><br>'
+      +'Pick a <code>.sqlite</code> file \u2014 one of the daily ones out of your email, or a download from above \u2014 '
+      +'and it becomes the database. Everything in the app right now is replaced. '
+      +'The copy it replaces is kept on the server first, so a wrong file is not the end of it.</div>';
+    h+='<div style="margin:10px 0"><input type="file" id="bk-file" accept=".sqlite,.db"> '
+      +'<button onclick="restoreBackup(this)">Restore</button></div>';
+    h+='<div id="bk-rmsg" class="note"></div>';
     if(!s.length)h+='<div class="note">No backup taken yet. Tap <b>Back up now</b>.</div>';
     else h+=s.map(x=>`<div class="card" style="text-align:left;max-width:none;margin-bottom:6px">
       <div><b>${esc(x.name)}</b></div><div class="l">${esc(x.mb)} MB \u00b7 ${esc(new Date(x.at).toLocaleString())}</div></div>`).join('');
@@ -192,6 +199,28 @@ function loadBackups(){
   }).catch(()=>{});
 }
 function downloadBackup(){ window.location='/api/backup/download'; }
+// The other half of Download, added 9 Sep 2026 after a day spent finding out the
+// app could make backups and had no way to take one back. It asks twice, because
+// from here there is no undo: the file replaces every account at once.
+function restoreBackup(btn){
+  const msg=document.getElementById('bk-rmsg');
+  const f=document.getElementById('bk-file').files[0];
+  if(!f){msg.innerHTML='<span class="err">Pick a file first.</span>';return;}
+  if(prompt('This replaces every account in the app with the contents of '+f.name+'.\n\nType RESTORE to go ahead.')!=='RESTORE'){
+    msg.textContent='Cancelled. Nothing was changed.';return;
+  }
+  btn.disabled=true;btn.textContent='Restoring\u2026';
+  f.arrayBuffer().then(b=>fetch('/api/backup/restore',{
+    method:'POST',headers:{'Content-Type':'application/octet-stream'},body:b
+  })).then(r=>r.json()).then(d=>{
+    if(d.error){msg.innerHTML='<span class="err">'+esc(d.error)+'</span>';return;}
+    msg.innerHTML='Restored \u2014 <b>'+esc(d.users)+'</b> accounts are back. '
+      +'The app is restarting itself; wait a few seconds and reload this page.'
+      +(d.replaced?'<br>What it replaced was kept as '+esc(d.replaced)+'.':'');
+  }).catch(()=>{
+    msg.textContent='The connection dropped, which is what happens \u2014 the app restarts the second it finishes. Wait a few seconds, reload, and check the numbers.';
+  }).finally(()=>{btn.disabled=false;btn.textContent='Restore';});
+}
 function runBackup(btn){
   const msg=document.getElementById('bk-msg');
   btn.disabled=true;btn.textContent='Backing up\u2026';

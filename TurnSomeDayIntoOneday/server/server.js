@@ -910,7 +910,11 @@ app.post(
     // that was just replaced, so anything written now goes nowhere.
     console.log(`Database restored: ${out.users} accounts, ${out.bytes} bytes. Restarting.`);
     res.json({ ok: true, users: out.users, replaced: out.replaced });
-    setTimeout(() => process.exit(0), 500);
+    // Exit non-zero on purpose. A clean exit reads to the host as "this job is
+    // finished" and it does not start the app again - which on 9 Sep took the
+    // site down after a restore and left it showing 502. A failure exit is what
+    // makes the host boot it back up, which is the whole point of exiting here.
+    setTimeout(() => process.exit(1), 500);
   }
 );
 app.get('/api/backup/download', requireAuth, (req, res) => {

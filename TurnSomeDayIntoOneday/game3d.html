@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>The Fight of Your Life</title>
 <style>
   :root{--lamp:#f2a93b;--hit:#e24b4a;--you:#2fd08a;--chalk:#eef1ff;--dim:#a9b1d6;--ink:#070a14}
@@ -586,7 +587,18 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 function stepIn(F,dist,ms){const root=F.root,from=root.position.clone(),dir=new T.Vector3(Math.sin(root.rotation.y),0,Math.cos(root.rotation.y)),to=from.clone().addScaledVector(dir,dist),t0=performance.now();F.home=F.home||from.clone();F.stepping=true;(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,1-Math.pow(1-t,2));if(t<1&&F.stepping)requestAnimationFrame(step);})();}
 function stepBack(F,ms){F.stepping=false;if(!F.home)return;const root=F.root,from=root.position.clone(),to=F.home.clone(),t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);})();}
 const SND=(()=>{const o={},n=['bell','cheer','winner','boss-down','down','getup','crowd','boss-hit-1','boss-hit-2','boss-hit-3','boss-hit-4','you-m-hit-1','you-m-hit-2','you-m-hit-3'];for(const k of n)o[k]=AUDIO+k+'.mp3';for(let i=1;i<=6;i++)o['round-'+i]=AUDIO+'round-'+i+'.mp3';return o;})();
-let AC=null;function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}
+let AC=null;function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();primeSpeech();return AC;}
+let spoken=false;
+function primeSpeech(){
+  if(spoken||!('speechSynthesis' in window))return;
+  spoken=true;
+  try{
+    VOICES=null;speechSynthesis.getVoices();
+    const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);
+  }catch(e){}
+}
+// any first touch counts, not only the bell - the preview talks before anyone taps it
+['pointerdown','touchstart','click'].forEach(ev=>addEventListener(ev,()=>{try{ac();primeSpeech();}catch(e){}},{once:true,capture:true}));
 function thud(kind){try{const c=ac(),t=c.currentTime,g=c.createGain();g.connect(c.destination);const f={jab:150,hook:110,up:85,block:220}[kind]||120;const o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.3,t+.13);const og=c.createGain();og.gain.setValueAtTime(kind==='up'?1:kind==='block'?.5:.8,t);og.gain.exponentialRampToValueAtTime(.001,t+.17);o.connect(og);og.connect(g);o.start(t);o.stop(t+.2);const len=Math.floor(c.sampleRate*.08),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);const n=c.createBufferSource();n.buffer=buf;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=kind==='block'?2600:1100;bp.Q.value=.7;const ng=c.createGain();ng.gain.setValueAtTime(kind==='block'?.6:.4,t);ng.gain.exponentialRampToValueAtTime(.001,t+.1);n.connect(bp);bp.connect(ng);ng.connect(g);n.start(t);}catch(e){}}
 function whoosh(){try{const c=ac(),t=c.currentTime,len=Math.floor(c.sampleRate*.25),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/len);const n=c.createBufferSource();n.buffer=buf;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.setValueAtTime(600,t);bp.frequency.exponentialRampToValueAtTime(2400,t+.2);bp.Q.value=1.5;const g=c.createGain();g.gain.value=.35;n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);}catch(e){}}
 let crowd=null;function crowdOn(v){try{if(!crowd){crowd=new Audio(SND.crowd);crowd.loop=true;crowd.volume=0;}crowd.volume=v;if(v>0)crowd.play().catch(()=>{});}catch(e){}}

@@ -150,7 +150,7 @@ function prop(kind,glow){const mat=(c,e)=>new T.MeshStandardMaterial({color:c,em
   if(kind==='ember'){let head=null;if(BOSS)BOSS.root.traverse(o=>{if(o.isBone&&/Head$/.test(o.name))head=o;});if(!head)return [];const sc=new T.Vector3();head.getWorldScale(sc);const e=new T.Mesh(new T.SphereGeometry(.012/sc.x,8,8),new T.MeshBasicMaterial({color:0xff7a2b}));e.position.set(3,6,12);const l=new T.PointLight(0xff7a2b,1.5,.9,2);l.position.set(3,6,14);head.add(e,l);e.userData.ember=true;return [e,l];}
   return [];}
 function bossLook(){if(!BOSS)return;const A=ADD(),F=(typeof FL==='function')&&FL();const a={name:A.name,prop:A.prop,glow:F?F.c:A.glow};const dark=new T.Color(a.glow).multiplyScalar(0.13),lit=new T.Color(a.glow).multiplyScalar(0.26);
-  BOSS.root.traverse(o=>{if(o.isMesh&&!o.userData.fit&&!o.userData.prop&&o.material.emissive){o.material.color.copy(dark);o.material.emissive.copy(lit);o.material.emissiveIntensity=.45;o.material.roughness=.3;o.material.metalness=.35;}});rim.color.set(a.glow);rim.intensity=180;aura.material.color.set(a.glow);floorGlow.material.color.set(a.glow);clearProps();PROPS=prop(a.prop,a.glow);for(const p of PROPS){p.userData.prop=true;p.traverse&&p.traverse(o=>{o.userData.prop=true;});if(!p.parent)scene.add(p);}}
+  if(!BOSS.ownSkin)BOSS.root.traverse(o=>{if(o.isMesh&&!o.userData.fit&&!o.userData.prop&&o.material.emissive){o.material.color.copy(dark);o.material.emissive.copy(lit);o.material.emissiveIntensity=.45;o.material.roughness=.3;o.material.metalness=.35;}});rim.color.set(a.glow);rim.intensity=180;aura.material.color.set(a.glow);floorGlow.material.color.set(a.glow);clearProps();PROPS=prop(a.prop,a.glow);for(const p of PROPS){p.userData.prop=true;p.traverse&&p.traverse(o=>{o.userData.prop=true;});if(!p.parent)scene.add(p);}}
 function bossTint(){bossLook();}
 let place='rooftop';function setPlace(k){if(!PLACES[k])return;place=k;const P=PLACES[k];if(!wallTex[k]){wallTex[k]=new T.TextureLoader().load(PICS[k]);wallTex[k].colorSpace=T.SRGBColorSpace;}wall.material.map=wallTex[k];wall.material.color.set(P.wall);wall.material.needsUpdate=true;spot.color.set(P.key);bossTint();scene.fog.color.set(P.fog);scene.background.set(P.fog);floor.material.color.set(P.floor);amb.color.set(P.amb);document.querySelectorAll('#places button').forEach(b=>b.classList.toggle('on',b.dataset.p===k));}
 const floor=new T.Mesh(new T.CircleGeometry(7,48),new T.MeshStandardMaterial({color:0x1a1d26,roughness:.32,metalness:.35}));
@@ -492,7 +492,7 @@ function fitGlove(hand,color){let tip=null;hand.traverse(o=>{if(o.isBone&&/HandM
   const gl=new T.Mesh(new T.SphereGeometry(r,18,14),new T.MeshStandardMaterial({color,roughness:.3}));gl.scale.set(1,.92,1.18);gl.position.copy(local);hand.add(gl);gl.userData.fit={len:+len.toFixed(3),r:+(r*sc.x).toFixed(3)};return gl;}
 function fighter(gltfScene,clips,opts){const gloves=[];
   const root=T.SkeletonUtils?T.SkeletonUtils.clone(gltfScene):gltfScene;
-  root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.material=new T.MeshStandardMaterial({color:opts.color,roughness:.35,metalness:.25,emissive:opts.emissive||0,emissiveIntensity:1});}});
+  root.traverse(o=>{if(o.isMesh){o.castShadow=true;if(!opts.keepSkin)o.material=new T.MeshStandardMaterial({color:opts.color,roughness:.35,metalness:.25,emissive:opts.emissive||0,emissiveIntensity:1});}});
   root.updateMatrixWorld(true);root.traverse(o=>{if(o.isBone&&/(Left|Right)Hand$/.test(o.name))gloves.push(fitGlove(o,opts.glove));});
   const mixer=new T.AnimationMixer(root),acts={};clips.forEach(c=>{acts[c.name]=mixer.clipAction(c);});
   const F={root,mixer,acts,cur:null,gloves};
@@ -568,7 +568,30 @@ function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'
 // clone helper for skinned meshes (SkeletonUtils is not in the bundle): load the model twice instead
 let loaded=0;const loader=new GLTFLoader();
 function loadOne(cb){loader.load(ART+'fighter.glb',g=>cb(g),undefined,e=>console.error(e));}
-loadOne(g=>{BOSS=fighter(g.scene,g.animations,{color:0x07070a,emissive:0x120c04,glove:0x111111});BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();MOVES=g.animations;seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
+// The addiction wears its own body where one exists - img/fight/boss-<key>.glb -
+// and stays the plain shadow where it does not, which is what all thirteen looked
+// like before. A boss file only has to be a Mixamo rig: every move still comes out
+// of fighter.glb, so these carry no animation of their own and cost nothing but
+// their skin. Loaded per fight, so a phone only ever fetches the one it is facing.
+let bossBodyKey=null;
+const SHADOW={color:0x07070a,emissive:0x120c04,glove:0x111111};
+function placeBoss(F,ownSkin){
+  if(BOSS&&BOSS.root.parent)scene.remove(BOSS.root);
+  BOSS=F;BOSS.ownSkin=!!ownSkin;
+  BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();
+  if(YOU)faceOff();
+}
+function setBossBody(key,shadowGltf){
+  if(bossBodyKey===key)return;bossBodyKey=key;
+  loader.load(ART+'boss-'+key+'.glb',
+    gb=>placeBoss(fighter(gb.scene,MOVES||[],{keepSkin:true,glove:0x111111}),true),
+    undefined,
+    ()=>{ // nothing drawn for this one yet: the shadow, exactly as before
+      if(shadowGltf)placeBoss(fighter(shadowGltf.scene,shadowGltf.animations,SHADOW),false);
+      else loadOne(g2=>placeBoss(fighter(g2.scene,g2.animations,SHADOW),false));
+    });
+}
+loadOne(g=>{MOVES=g.animations;setBossBody(addictionKey,g);seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7a13a,green:0x2f9e5c,pink:0xe0559a};
@@ -686,7 +709,7 @@ const LINES={drink:[{line:"One?"},{line:"Just tonight."},{line:"You've earned it
 // the app posts the person's own opponent, lines, boxer and gloves in; the fight posts the result back.
 function tellParent(m){try{if(window.parent&&window.parent!==window)window.parent.postMessage(Object.assign({from:'fightofyourlife'},m),'*');}catch(e){}}
 addEventListener('message',ev=>{const d=ev.data;if(!d||d.to!=='fightofyourlife')return;
-  if(d.bossKey&&ADDICTIONS[d.bossKey]){addictionKey=d.bossKey;bossLook();$('bossname').textContent=ADD().name;}
+  if(d.bossKey&&ADDICTIONS[d.bossKey]){addictionKey=d.bossKey;setBossBody(addictionKey);bossLook();$('bossname').textContent=ADD().name;}
   if(d.bossName){ADDICTIONS[addictionKey].name=d.bossName;$('bossname').textContent=d.bossName;}
   if(Array.isArray(d.lines)&&d.lines.length)LINES[addictionKey]=d.lines;
   if(Array.isArray(d.support)&&d.support.length)SUPPORT.splice(0,SUPPORT.length,...d.support);

@@ -890,11 +890,27 @@ async function bossSwing(){if(!running||busy||downState||!BOSS)return;dodge=null
   if(youHP<=0)meDown();else if(bsp>=100&&running)bossSpecial();}
 // it goes down: the mandatory eight. It beats the count unless this is its fourth trip to the canvas,
 // and three in one round is the referee's stoppage
+// A fall is animation, and animation runs on mixer time, which slow motion scales
+// down - slowMo puts it to a third and freeze stops it dead. The referee's walk
+// and his count run on real time. So a fixed wait here let the official arrive
+// and start counting while the body was still on its way down: the count over a
+// man still on his feet, which is exactly what people saw. Wait for the fall
+// itself to finish instead. The cap is there so a missing or stuck clip can
+// never leave the fight hanging.
+function fallen(F,name,capMs){
+  const a=F&&F.acts&&F.acts[name];
+  if(!a)return wait(0);
+  const until=performance.now()+(capMs||7000);
+  return new Promise(res=>{(function look(){
+    const c=a.getClip();
+    if(!a.isRunning()||a.time>=c.duration-0.05||performance.now()>until)return res();
+    requestAnimationFrame(look);})();});
+}
 async function knockdown(){if(downState)return;downState=true;busy=true;slam('DOWN');snd('boss-down');call('Down it goes.',true);snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
   downs.boss++;downsFight.boss++;
   BOSS.play('knocked_out',{speed:1.2});YOU.play('victory',{loop:true,fade:.4});
   shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(BOSS,true);
-  await wait(2100);
+  await fallen(BOSS,'knocked_out');
   await refWalk(new T.Vector3(.8,0,-1.0));
   const out=downsFight.boss>=4,stopped=!out&&downs.boss>=3;
   await refCount(out?10:8,BOSS.root.position);
@@ -909,7 +925,7 @@ async function knockdown(){if(downState)return;downState=true;busy=true;slam('DO
 async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam('DOWN');snd('down');call('You are down. Get up.',true);crowdJump('L',1);chant('L',TEMPT);
   downs.you++;downsFight.you++;
   YOU.play('knocked_out',{speed:1.2});shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(YOU,true);
-  await wait(2100);await refWalk(new T.Vector3(.55,0,-.15));
+  await fallen(YOU,'knocked_out');await refWalk(new T.Vector3(.55,0,-.15));
   await refCount(8,YOU.root.position);
   snd('getup');call('Up at eight.',true);YOU.play('getting_up',{speed:1.2});await wait(4200);koLights(YOU,false);
   await stagger(YOU);youHP=30;bars();shot('tv',800);

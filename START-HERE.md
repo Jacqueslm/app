@@ -557,7 +557,17 @@ the person struggling (porn, alcohol, food, gambling).
   **Rule of thumb: `main` is the record, `claude/vibe-code-uwxxlk` is what runs.**
   Anything that has to actually work for Jacques — the site or Studio — belongs
   on both.
-- **Host:** Railway, auto-deploys the site from `claude/vibe-code-uwxxlk` on push.
+- **Host:** Railway — REBUILT 9 Sep 2026 after the old account was deleted.
+  New project `prolific-expression`, service `app`, region US East. It deploys
+  **`main`**, not `claude/vibe-code-uwxxlk`, and auto-deploys on every push to
+  `main`. Root directory is set to `TurnSomeDayIntoOneday` in the service's
+  Settings -> Source; without it the build fails, because the repo root has no
+  package.json. The old paid plan died with the old account; this is a fresh
+  Hobby subscription on a different card.
+  **The deploy branch changed: it is `main` now.** The lines above about
+  `claude/vibe-code-uwxxlk` being what runs are history, not current.
+  Still to do on this host: attach a volume for the SQLite database, set the
+  environment variables, and point the domain at the new service.
 - **DNS: Cloudflare, not IONOS** (moved 8 Aug 2026). The domain is still bought
   from IONOS, but its nameservers point at Cloudflare — `adi` and `glen`
   `.ns.cloudflare.com`. **Change DNS records in Cloudflare. IONOS DNS is dead.**

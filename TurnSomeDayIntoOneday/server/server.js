@@ -890,6 +890,29 @@ app.post('/api/backup/run', requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Restoring is owner-only like the rest of these, and the process exits when it
+// is done on purpose: the open database handle still points at the file that was
+// just swapped out, so only a fresh boot picks up the restored one. The host
+// starts it straight back up.
+app.post(
+  '/api/backup/restore',
+  express.raw({ type: 'application/octet-stream', limit: '128mb' }),
+  requireAuth,
+  (req, res) => {
+    if (!ownerOnly(req, res)) return;
+    let out;
+    try {
+      out = backup.restoreFromBuffer(req.body);
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    // Deliberately not db.logError here: that handle is pointed at the database
+    // that was just replaced, so anything written now goes nowhere.
+    console.log(`Database restored: ${out.users} accounts, ${out.bytes} bytes. Restarting.`);
+    res.json({ ok: true, users: out.users, replaced: out.replaced });
+    setTimeout(() => process.exit(0), 500);
+  }
+);
 app.get('/api/backup/download', requireAuth, (req, res) => {
   if (!ownerOnly(req, res)) return;
   const snaps = backup.listSnapshots();

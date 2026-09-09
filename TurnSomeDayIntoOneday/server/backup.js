@@ -145,8 +145,75 @@ function startBackupScheduler(emailer, ownerEmail, logError) {
   setInterval(once, DAY_MS);
 }
 
+// ── Putting one back ─────────────────────────────────────────────────────────
+// A backup nobody can restore is a comfort, not a safeguard. This half was
+// missing until 9 Sep 2026, the day the host was deleted and the only surviving
+// copies were the ones that had been emailed out. Everything below exists
+// because a restore replaces every account in the app in a single move.
+const SQLITE_MAGIC = Buffer.from('SQLite format 3\u0000', 'binary');
+
+function restoreFromBuffer(buf) {
+  if (!Buffer.isBuffer(buf) || buf.length < 512) {
+    throw new Error('That file is empty or cut short.');
+  }
+  if (!buf.subarray(0, 16).equals(SQLITE_MAGIC)) {
+    throw new Error('That is not a database file.');
+  }
+  const dest = dbPath();
+  const dir = path.dirname(dest);
+  fs.mkdirSync(dir, { recursive: true });
+
+  // Prove the file before trusting it. It is written to a temp path in the same
+  // directory, opened, and has to carry this app's own tables. A database from
+  // somewhere else, or one that only half downloaded, stops here - and the live
+  // database has not been touched at that point.
+  const tmp = path.join(dir, `restore-${Date.now()}.sqlite.tmp`);
+  fs.writeFileSync(tmp, buf);
+  let users = 0;
+  try {
+    const { DatabaseSync } = require('node:sqlite');
+    const probe = new DatabaseSync(tmp);
+    try {
+      const t = probe
+        .prepare("SELECT COUNT(*) AS n FROM sqlite_master WHERE type='table' AND name IN ('users','user_state')")
+        .get();
+      if (!t || t.n < 2) {
+        throw new Error('That database does not have this app\u2019s tables in it.');
+      }
+      users = probe.prepare('SELECT COUNT(*) AS n FROM users').get().n;
+    } finally {
+      probe.close();
+    }
+  } catch (err) {
+    try { fs.unlinkSync(tmp); } catch (_) {}
+    throw err;
+  }
+
+  // Keep whatever is being replaced. If the wrong file is ever restored, the one
+  // it overwrote is still sitting in the backups folder beside it.
+  let replaced = null;
+  if (fs.existsSync(dest)) {
+    try {
+      fs.mkdirSync(backupDir(), { recursive: true });
+      const keep = path.join(backupDir(), `before-restore-${stamp(new Date())}.sqlite`);
+      fs.copyFileSync(dest, keep);
+      replaced = path.basename(keep);
+    } catch (_) { replaced = null; }
+  }
+  // Rename inside one directory is atomic: the database is either the old file
+  // or the new one, never a half-written mixture of the two.
+  fs.renameSync(tmp, dest);
+  // The -wal and -shm files belong to the database that just went. Left beside a
+  // different file they are how a restore comes back corrupt.
+  for (const suffix of ['-wal', '-shm']) {
+    try { fs.unlinkSync(dest + suffix); } catch (_) {}
+  }
+  return { users, replaced, bytes: buf.length };
+}
+
 module.exports = {
   listSnapshots,
+  restoreFromBuffer,
   emailSnapshot,
   createSnapshot,
   runBackup,

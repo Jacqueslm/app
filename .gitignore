@@ -73,3 +73,7 @@ TurnSomeDayIntoOneday/server/backups/
 
 # the three.js source package the Mixamo workshop imports — fetched with npm pack, not kept in git
 TurnSomeDayIntoOneday/tools/mixamo/three/
+
+# Node dependencies — npm install fetches these on every machine
+node_modules/
+

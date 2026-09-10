@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f0c29">
+<title>Your AI</title>
+<style>
+:root{
+  --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;--bg:#14121f;--card:#1d1a30;
+  --line:#2c2747;--ink:#f4f2ff;--mut:#a9a4cc;--err:#f38b8a;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f);display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--brand);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--accent);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}
+h1{font-size:17px;font-weight:700;letter-spacing:.02em}
+.tag{font-size:11px;color:var(--mut)}
+.badge{margin-left:auto;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:rgba(126,232,162,.12);color:var(--green);border:1px solid rgba(126,232,162,.35)}
+.badge.off{background:rgba(243,139,138,.1);color:var(--err);border-color:rgba(243,139,138,.35)}
+.badge.warn{background:rgba(255,200,120,.1);color:#ffd28a;border-color:rgba(255,200,120,.35)}
+.wrap{display:flex;flex:1;min-height:0}
+aside{width:260px;min-width:260px;border-right:1px solid var(--line);padding:14px 14px 20px;overflow:auto;background:var(--brand)}
+aside h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:14px 0 8px}
+aside p.note{font-size:11px;color:var(--mut);line-height:1.5;margin-bottom:8px}
+.doc{display:flex;align-items:flex-start;gap:8px;padding:7px 8px;border-radius:8px;font-size:13px;line-height:1.35;cursor:pointer}
+.doc:hover{background:rgba(255,255,255,.04)}
+.doc input{margin-top:2px;accent-color:var(--green)}
+.doc .n{color:var(--mut);font-size:11px;white-space:nowrap;margin-left:auto;padding-left:8px}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat{flex:1;overflow:auto;padding:18px 20px 8px;display:flex;flex-direction:column;gap:14px;max-width:860px;width:100%;margin:0 auto}
+.msg{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14.5px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+.msg p{margin:0 0 8px}
+.msg p:last-child{margin-bottom:0}
+.user{align-self:flex-end;background:var(--accent);border-bottom-right-radius:4px}
+.ai{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px;white-space:normal}
+.ai b{color:var(--green);font-weight:700}
+.ai i{color:#d9d4f5}
+.ai code{background:rgba(126,232,162,.1);color:var(--green);padding:1px 5px;border-radius:5px;font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.meta{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:11px;color:var(--mut)}
+.meta button{background:none;border:1px solid var(--line);color:var(--mut);font-size:11px;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:var(--f)}
+.meta button:hover{color:var(--ink);border-color:var(--green)}
+.typing{align-self:flex-start;display:flex;gap:5px;padding:12px 16px;background:var(--card);border:1px solid var(--line);border-radius:14px;border-bottom-left-radius:4px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;max-width:860px;width:100%;margin:0 auto;padding:0 20px 6px}
+.chip{font-size:12.5px;color:var(--mut);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--green)}
+.banner{max-width:860px;width:100%;margin:8px auto 0;padding:10px 16px;font-size:13px;border-radius:10px;background:rgba(243,139,138,.08);border:1px solid rgba(243,139,138,.3);color:var(--err);line-height:1.5;display:none}
+.banner b{display:block}
+.composer{border-top:1px solid var(--line);background:var(--brand);padding:12px 20px calc(14px + env(safe-area-inset-bottom))}
+.composer-in{max-width:860px;margin:0 auto;display:flex;gap:10px;align-items:flex-end}
+textarea{flex:1;resize:none;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--ink);font-family:var(--f);font-size:14.5px;padding:11px 14px;line-height:1.45;max-height:160px;outline:none}
+textarea:focus{border-color:var(--green)}
+.send{background:var(--accent);color:#fff;border:none;border-radius:12px;width:48px;height:44px;font-size:19px;cursor:pointer;flex-shrink:0}
+.send:hover{background:#6659d8}
+.send:disabled{opacity:.45;cursor:default}
+.hint{max-width:860px;margin:6px auto 0;font-size:11px;color:var(--mut);text-align:center}
+@media (max-width:760px){
+  .wrap{flex-direction:column}
+  aside{width:100%;min-width:0;max-height:200px;border-right:none;border-bottom:1px solid var(--line)}
+  .msg{max-width:92%}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">∞</div>
+  <div>
+    <h1>Your AI</h1>
+    <div class="tag">private · runs on this machine</div>
+  </div>
+  <div class="badge off" id="badge">checking…</div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <h2>What it knows</h2>
+    <p class="note">Tick the files to bring into the conversation. They are read fresh from disk with every message, so your latest edits are what it sees.</p>
+    <div id="docs"></div>
+  </aside>
+
+  <main>
+    <div class="banner" id="banner"></div>
+    <div class="chips" id="chips"></div>
+    <div class="chat" id="chat"></div>
+    <div class="composer">
+      <div class="composer-in">
+        <textarea id="input" rows="1" placeholder="Ask anything… (Enter to send, Shift+Enter for a new line)"></textarea>
+        <button class="send" id="send" title="Send">➤</button>
+      </div>
+      <div class="hint">Your questions and files never leave this machine except to the AI provider you keyed.</div>
+    </div>
+  </main>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const chat = $('#chat'), input = $('#input'), sendBtn = $('#send');
+let history = [];      // [{role:'user'|'assistant', content}]
+let docs = [];         // discovered docs
+let busy = false;
+
+// --- tiny safe markdown ------------------------------------------------------
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function md(t){
+  let lines = esc(t).split('\n');
+  let out = [], i = 0;
+  while (i < lines.length){
+    const ln = lines[i];
+    if (!ln.trim()){ out.push('<p>&nbsp;</p>'); i++; continue; }
+    const b = ln.match(/^\s*[-*•]\s+(.*)/);
+    if (b){
+      const items = [];
+      while (i < lines.length && (m = lines[i].match(/^\s*[-*•]\s+(.*)/))){ items.push(m[1]); i++; }
+      out.push('<p>' + items.map(x => '• ' + x).join('<br>') + '</p>');
+      continue;
+    }
+    out.push('<p>' + ln + '</p>');
+    i++;
+  }
+  return out.join('').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<i>$2</i>').replace(/`([^`]+)`/g,'<code>$1</code>');
+}
+
+// --- helpers -----------------------------------------------------------------
+function fmtSize(n){ if (n >= 1048576) return (n/1048576).toFixed(1)+' MB'; if (n >= 1024) return Math.round(n/1024)+' KB'; return n+' B'; }
+function fmtMoney(n){
+  if (n <= 0) return '$0.00';
+  if (n < 0.01) return '$' + n.toFixed(4).replace(/0+$/,'').replace(/\.$/,'.0');
+  return '$' + n.toFixed(3).replace(/0+$/,'').replace(/\.$/,'.0');
+}
+function fmtTokens(n){ return n >= 1000 ? (n/1000).toFixed(1).replace(/\.0$/,'')+'k' : String(n); }
+
+function addMsg(role, html, meta){
+  const el = document.createElement('div');
+  el.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+  if (role === 'user') el.textContent = html; else el.innerHTML = html;
+  if (meta){
+    const m = document.createElement('div');
+    m.className = 'meta';
+    m.innerHTML = meta;
+    el.appendChild(m);
+  }
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+  return el;
+}
+
+function typing(on){
+  const old = document.querySelector('.typing');
+  if (old) old.remove();
+  if (!on) return;
+  const t = document.createElement('div');
+  t.className = 'typing';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(t);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function banner(text){
+  const el = $('#banner');
+  el.innerHTML = text;
+  el.style.display = text ? 'block' : 'none';
+}
+
+function badgeState(st){
+  const b = $('#badge');
+  b.classList.remove('off','warn');
+  if (st.provider){ b.textContent = st.provider === 'gemini' ? 'Gemini · on' : 'Claude · on'; }
+  else if (st.anthropic || st.gemini){ b.textContent = 'key set but unreachable'; b.classList.add('warn'); }
+  else { b.textContent = 'no key yet'; b.classList.add('off'); }
+}
+
+// --- docs panel ---------------------------------------------------------------
+function renderDocs(){
+  const wrap = $('#docs');
+  wrap.innerHTML = '';
+  for (const d of docs){
+    const lab = document.createElement('label');
+    lab.className = 'doc';
+    lab.innerHTML = '<input type="checkbox" data-key="'+esc(d.key)+'">' +
+      '<span>'+esc(d.label)+'<span class="n">'+fmtSize(d.size)+'</span></span>';
+    lab.querySelector('input').checked = !!d.core;
+    wrap.appendChild(lab);
+  }
+}
+function checkedKeys(){ return [...document.querySelectorAll('#docs input:checked')].map(i => i.dataset.key); }
+
+// --- chat ----------------------------------------------------------------------
+async function send(){
+  const text = input.value.trim();
+  if (!text || busy) return;
+  input.value = '';
+  input.style.height = 'auto';
+  addMsg('user', text);
+  history.push({ role:'user', content: text });
+  const keys = checkedKeys();
+  busy = true; sendBtn.disabled = true; typing(true);
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history, docs: keys }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok){
+      if (data.hint){ banner('<b>'+esc(data.error||'Something went wrong.')+'</b>'+esc(data.hint)); }
+      else { banner('<b>'+esc(data.error||'Something went wrong.')+'</b>'); }
+      history.pop();
+      return;
+    }
+    banner('');
+    history.push({ role:'assistant', content: data.text });
+    const cost = fmtMoney(data.costUsd || 0);
+    const meta = '≈ '+cost+' · '+fmtTokens(data.usage.input)+' in · '+fmtTokens(data.usage.output)+' out' +
+      (data.docs && data.docs.length ? ' · files: '+esc(data.docs.map(d=>d.split('/').pop()).join(', ')) : '') +
+      ' <button class="copy">Copy</button>';
+    const el = addMsg('assistant', md(data.text), meta);
+    el.querySelector('.copy').onclick = () => {
+      navigator.clipboard.writeText(data.text).then(() => {
+        const c = el.querySelector('.copy'); c.textContent = 'Copied'; setTimeout(()=>c.textContent='Copy', 1200);
+      });
+    };
+  } catch (e){
+    banner('<b>Could not reach the server.</b> Is it still running? Restart it with the launcher.');
+  } finally {
+    typing(false); busy = false; sendBtn.disabled = false; input.focus();
+  }
+}
+
+function newChat(){ history = []; chat.innerHTML = ''; banner(''); }
+
+// --- starters --------------------------------------------------------------------
+const STARTERS = [
+  'Write me a TikTok caption for the hangxiety video',
+  'Is this line safe to publish? "your brain heals in 90 days"',
+  'Who is on my outreach list this week?',
+  'What is free in the app right now?',
+];
+const chips = $('#chips');
+for (const s of STARTERS){
+  const c = document.createElement('button');
+  c.className = 'chip';
+  c.textContent = s;
+  c.onclick = () => { input.value = s; input.focus(); };
+  chips.appendChild(c);
+}
+
+// --- boot ---------------------------------------------------------------------------
+(async function boot(){
+  try {
+    const h = await fetch('/api/health').then(r => r.json());
+    badgeState(h);
+  } catch (_) { badgeState({}); }
+  try {
+    const d = await fetch('/api/docs').then(r => r.json());
+    docs = d.docs || [];
+  } catch (_) { docs = []; }
+  renderDocs();
+  input.focus();
+})();
+
+sendBtn.onclick = send;
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+});
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+});
+</script>
+</body>
+</html>

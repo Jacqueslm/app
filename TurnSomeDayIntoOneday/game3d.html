@@ -492,6 +492,16 @@ function fitGlove(hand,color){let tip=null;hand.traverse(o=>{if(o.isBone&&/HandM
   const gl=new T.Mesh(new T.SphereGeometry(r,18,14),new T.MeshStandardMaterial({color,roughness:.3}));gl.scale.set(1,.92,1.18);gl.position.copy(local);hand.add(gl);gl.userData.fit={len:+len.toFixed(3),r:+(r*sc.x).toFixed(3)};return gl;}
 function fighter(gltfScene,clips,opts){const gloves=[];
   const root=T.SkeletonUtils?T.SkeletonUtils.clone(gltfScene):gltfScene;
+  // Every other body in the room is stood to the same height - the fighters, the
+  // cast, the crowd. A body downloaded from Mixamo arrives at whatever size it was
+  // drawn: the addiction came out of the box under a metre, half a fighter, and
+  // small enough to lose behind him in a close shot.
+  // Measured off the head, not off a box round the whole model, because a box takes
+  // in ears, hats and tails and a body wearing any of them ends up short.
+  root.updateMatrixWorld(true);let hd=null;root.traverse(o=>{if(o.isBone&&/Head$/.test(o.name)&&!hd)hd=o;});
+  let sk=0;if(hd){const hv=new T.Vector3();hd.getWorldPosition(hv);if(hv.y>0.2)sk=1.60/hv.y;}
+  if(!sk){const bh=new T.Box3().setFromObject(root).getSize(new T.Vector3()).y;if(bh>0.2)sk=1.8/bh;}
+  if(sk>0&&Math.abs(sk-1)>0.02){root.scale.multiplyScalar(sk);root.updateMatrixWorld(true);}
   root.traverse(o=>{if(o.isMesh){o.castShadow=true;if(!opts.keepSkin)o.material=new T.MeshStandardMaterial({color:opts.color,roughness:.35,metalness:.25,emissive:opts.emissive||0,emissiveIntensity:1});}});
   root.updateMatrixWorld(true);root.traverse(o=>{if(o.isBone&&/(Left|Right)Hand$/.test(o.name))gloves.push(fitGlove(o,opts.glove));});
   const mixer=new T.AnimationMixer(root),acts={};clips.forEach(c=>{acts[c.name]=mixer.clipAction(c);});
@@ -502,7 +512,8 @@ function fighter(gltfScene,clips,opts){const gloves=[];
 }
 // the six fighters Jacques pulled from Mixamo, bodies only. Their moves are the shadow's thirteen (and the
 // mirrors), renamed onto each body's bones at load. Skins ride as plain images, like the ref's.
-let MOVES=null,fighterN=3;
+let MOVES=null,fighterN=3,MOVE_HIPS=0,REF_HIPS=0;
+function hipsRest(root){let y=0;root.traverse(o=>{if(o.isBone&&/Hips$/.test(o.name)&&!y)y=Math.abs(o.position.y);});return y;}
 const CROWD_SIDE={L:['c18','c2','c5'],R:['c3','c0','c17']};const SEATS=[];
 let ANN=null,GIRL=null,REFCLIPS=null,card=null,cardHand=null,cardFront=true;const CORNER={};let cornerUsed={};
 function retarget(clips,root){const bones=new Set();let hips='';root.traverse(o=>{if(!o.isSkinnedMesh)return;o.skeleton.bones.forEach(b=>{if(!b.userData.sk){b.userData.sk=true;b.name=b.name+'_b';}bones.add(b.name);if(/Hips_b$/.test(b.name)&&!hips)hips=b.name;});});const prefix=hips.replace(/Hips_b$/,'');return clips.map(c=>{const tracks=c.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i),prop=t.name.slice(i+1),nb=bone.replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix)+'_b';if(!bones.has(nb))return null;return new t.constructor(nb+'.'+prop,t.times,t.values);}).filter(Boolean);return new T.AnimationClip(c.name,c.duration,tracks);});}
@@ -522,7 +533,10 @@ function groundFeet(F){
   }
   F.root.position.y=y0;
   if(!isFinite(lo)||Math.abs(lo)<0.012){F.grounded=true;return;}
-  for(const c of F.root.children)c.position.y-=lo;
+  // lo is a world distance and the shift goes on children inside the root, so it
+  // has to be taken back through the root's own scale or it lands 100x out
+  const rs=F.root.scale.y||1;
+  for(const c of F.root.children)c.position.y-=lo/rs;
   F.root.updateMatrixWorld(true);F.grounded=true;
 }
 function skinned(root,tex,clips,gloveColor,noGloves){const gloves=[];
@@ -540,6 +554,11 @@ function skinned(root,tex,clips,gloveColor,noGloves){const gloves=[];
 // walking at her stride, facing where she goes, then standing
 function castWalk(F,to,mps){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);F.play('walking',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);const y=root.position.y;root.position.lerpVectors(from,to,t);root.position.y=y;if(t<1)requestAnimationFrame(step);else{F.idle();res();}})();});}
 function castFace(F,at){F.root.rotation.y=Math.atan2(at.x-F.root.position.x,at.z-F.root.position.z);}
+// The two behind the addiction leave the way they came in: straight back down the
+// aisle first, then across to their spot. Cutting the corner walked them through
+// the seating - the risers run from x -5.9 to -1.3 and 0.3 to 4.9 behind the far
+// ropes, and the only clear lane between them is the aisle itself.
+function castHome(F,mps){return castWalk(F,new T.Vector3(F.root.position.x,0,-3.4),mps).then(()=>castWalk(F,F.home,mps));}
 // the round card: white, the round number, and the corner's line on the back
 function cardTex(text,big){const c=document.createElement('canvas');c.width=256;c.height=340;const x=c.getContext('2d');x.fillStyle='#f4efe4';x.fillRect(0,0,256,340);x.strokeStyle='#c8262a';x.lineWidth=14;x.strokeRect(12,12,232,316);x.fillStyle='#141413';x.textAlign='center';if(big){x.font='bold 48px Impact,Arial';x.fillText('ROUND',128,120);x.font='bold 150px Impact,Arial';x.fillText(text,128,270);}else{x.font='bold 30px Arial';const words=text.split(' ');let line='',y=110;for(const w of words){const t=line?line+' '+w:w;if(x.measureText(t).width>210){x.fillText(line,128,y);line=w;y+=38;}else line=t;}x.fillText(line,128,y);}const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;}
 function cloneSkinned(src){const sl=new Map(),cl=new Map();const c=src.clone();(function par(a,b){sl.set(b,a);cl.set(a,b);for(let i=0;i<a.children.length;i++)par(a.children[i],b.children[i]);})(src,c);c.traverse(n=>{if(!n.isSkinnedMesh)return;const sm=sl.get(n),ss=sm.skeleton;n.skeleton=ss.clone();n.bindMatrix.copy(sm.bindMatrix);n.skeleton.bones=ss.bones.map(b=>cl.get(b));n.bind(n.skeleton,n.bindMatrix);});return c;}
@@ -554,14 +573,32 @@ function seatCrowd(cb){let left=0;for(const k in CROWD_SIDE)for(const key of CRO
       mixer.addEventListener('finished',()=>seat.play('sitting_idle'));seat.play('sitting_idle');if(acts.sitting_idle)acts.sitting_idle.time=Math.random()*3;SEATS.push(seat);});
     if(--left===0)cb();},undefined,e=>console.error(e));}}
 // the walk for a fighter: the ref's walking clip renamed onto its bones (plain names on the shadow, marked names on a skinned body)
-function giveWalk(F,marked){if(!F||!REFCLIPS||F.acts.walk)return;const w=REFCLIPS.find(c=>c.name==='walking');if(!w)return;let clip;if(marked)clip=retarget([w],F.root)[0];else{let hips='';F.root.traverse(o=>{if(o.isBone&&/Hips$/.test(o.name)&&!hips)hips=o.name;});const prefix=hips.replace(/Hips$/,'');const names=new Set();F.root.traverse(o=>{if(o.isBone)names.add(o.name);});clip=new T.AnimationClip('walk',w.duration,w.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i).replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix),prop=t.name.slice(i+1);return names.has(bone)?new t.constructor(bone+'.'+prop,t.times,t.values):null;}).filter(Boolean));}clip.name='walk';F.acts.walk=F.mixer.clipAction(clip);}
+function giveWalk(F,marked){if(!F||!REFCLIPS||F.acts.walk)return;const w=REFCLIPS.find(c=>c.name==='walking');if(!w)return;let clip;if(marked)clip=retarget([w],F.root)[0];else{let hips='';F.root.traverse(o=>{if(o.isBone&&/Hips$/.test(o.name)&&!hips)hips=o.name;});const prefix=hips.replace(/Hips$/,'');const names=new Set();F.root.traverse(o=>{if(o.isBone)names.add(o.name);});clip=new T.AnimationClip('walk',w.duration,w.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i).replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix),prop=t.name.slice(i+1);return names.has(bone)?new t.constructor(bone+'.'+prop,t.times,t.values):null;}).filter(Boolean));}if(F.ownSkin)clip=inPlace([clip],F.root,REF_HIPS)[0];clip.name='walk';F.acts.walk=F.mixer.clipAction(clip);}
 function fighterWalk(F,to,mps,faceAfter,clip){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(250,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);
   // a named clip rides the walk instead of the walk cycle: the climb through the ropes
   if(clip&&F.acts[clip])F.play(clip,{fade:.2,speed:Math.max(.5,(F.acts[clip].getClip().duration*1000)/ms)});else if(F.acts.walk)F.play('walk',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();res();}})();});}
 const MARK={you:new T.Vector3(-0.25,0,0.3),boss:new T.Vector3(0,0,-0.55)},CORNERPOS={you:new T.Vector3(-1.85,0,1.85),boss:new T.Vector3(1.85,0,-1.85)};
-const stoolGeo=new T.CylinderGeometry(.20,.17,.50,12),stoolMat=new T.MeshStandardMaterial({color:0x2b2f3a,roughness:.8});const stools={};[['you',CORNERPOS.you],['boss',CORNERPOS.boss]].forEach(([k,p])=>{const m=new T.Mesh(stoolGeo,stoolMat);m.position.set(p.x,.25,p.z);m.visible=false;scene.add(m);stools[k]=m;});
-async function toCorners(){stools.you.visible=stools.boss.visible=true;await Promise.all([fighterWalk(YOU,CORNERPOS.you.clone().add(new T.Vector3(.05,0,-.05)),1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss.clone().add(new T.Vector3(-.05,0,.05)),1.4,new T.Vector3(0,0,0))]);
-  for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.set(CORNERPOS[k].x,0,CORNERPOS[k].z);F.root.rotation.y=Math.atan2(-CORNERPOS[k].x,-CORNERPOS[k].z);F.play('sitting_idle',{loop:true,fade:.3});}}
+// The corner stool. The sit puts a body's hips a little over half its standing
+// height up, so the seat belongs just under them - and it has to be measured off
+// the body that sits on it, because an addiction can be two thirds the size of a
+// fighter and a stool built for the fighter would stand up through it.
+const SEAT_Y=.50;const stoolGeo=new T.CylinderGeometry(.20,.17,SEAT_Y,12),stoolMat=new T.MeshStandardMaterial({color:0x2b2f3a,roughness:.8});const stools={};[['you',CORNERPOS.you],['boss',CORNERPOS.boss]].forEach(([k,p])=>{const m=new T.Mesh(stoolGeo,stoolMat);m.position.set(p.x,SEAT_Y/2,p.z);m.visible=false;scene.add(m);stools[k]=m;});
+function hipsY(F){if(!F)return null;let b=null;F.root.traverse(o=>{if(o.isBone&&/Hips(_b)?$/.test(o.name)&&!b)b=o;});
+  if(!b)return null;F.root.updateMatrixWorld(true);const v=new T.Vector3();b.getWorldPosition(v);return v.y-F.root.position.y;}
+function showStool(k,h){const m=stools[k];if(!m)return;m.scale.y=h/SEAT_Y;m.position.y=h/2;m.visible=true;}
+// The seat is measured while the sit is actually running, and the crossfade out of
+// standing takes a moment - so it is the lowest the hips get over a second of
+// sitting that counts, not wherever they happen to be the instant it is asked.
+async function sitStools(){
+  const F={you:YOU,boss:BOSS},lo={you:1e9,boss:1e9};
+  for(const k in F)if(F[k]&&F[k].seatH!=null)showStool(k,F[k].seatH);
+  for(let i=0;i<12;i++){await wait(90);
+    for(const k in F){const y=hipsY(F[k]);if(y!=null&&y<lo[k])lo[k]=y;}}
+  for(const k in F){if(!F[k]||!isFinite(lo[k]))continue;
+    F[k].seatH=Math.min(.60,Math.max(.12,lo[k]-.055));showStool(k,F[k].seatH);}}
+async function toCorners(){await Promise.all([fighterWalk(YOU,CORNERPOS.you.clone().add(new T.Vector3(.05,0,-.05)),1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss.clone().add(new T.Vector3(-.05,0,.05)),1.4,new T.Vector3(0,0,0))]);
+  for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.set(CORNERPOS[k].x,0,CORNERPOS[k].z);F.root.rotation.y=Math.atan2(-CORNERPOS[k].x,-CORNERPOS[k].z);F.play('sitting_idle',{loop:true,fade:.3});}
+  await sitStools();}
 async function toMarks(){for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;F.idle();}stools.you.visible=stools.boss.visible=false;await Promise.all([fighterWalk(YOU,MARK.you,1.5),fighterWalk(BOSS,MARK.boss,1.5)]);youHome.copy(YOU.root.position);YOU.home=null;BOSS.home=null;faceOff();}
 function loadCast(key,cb){loader.load(ART+key+'.glb',g=>{const F=skinned(g.scene,null,g.animations&&g.animations.length?g.animations:REFCLIPS,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;if(h>0.3)F.root.scale.multiplyScalar(1.78/h);scene.add(F.root);F.idle();cb(F);},undefined,e=>console.error(e));}
 function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(YOU.root);/* measured before the feet are grounded: after it, this box hangs below the floor */const top=bb.max.y;YOU.bh=Math.max(1.2,bb.max.y-bb.min.y);YOU.bmid=(bb.max.y+bb.min.y)/2;groundFeet(YOU);camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
@@ -579,32 +616,42 @@ function placeBoss(F,ownSkin){
   if(BOSS&&BOSS.root.parent)scene.remove(BOSS.root);
   BOSS=F;BOSS.ownSkin=!!ownSkin;
   BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();
+  // a body swapped in mid-session has to be stood on the canvas and taught the walk
+  // the same way the first one was, or it slides to the ring with its feet still
+  groundFeet(BOSS);if(REFCLIPS)giveWalk(BOSS,false);
   if(YOU)faceOff();
 }
-// The moves were authored on fighter.glb, whose skeleton is in centimetres - 180
-// units tall. A body downloaded from Mixamo arrives in metres, about 1.3 units.
-// Rotation does not care about that; the hips position track does, and applying
-// centimetre distances to a metre-sized rig threw the addiction several metres
-// out of the ring while the fight carried on without it. The game puts fighters
-// where it wants them anyway, so the boss takes rotation only and stays on its
-// own root whatever scale it happens to be.
-function inPlace(clips){
-  return clips.map(c=>new T.AnimationClip(c.name,c.duration,
-    c.tracks.filter(t=>!/\.position$/.test(t.name))));
+// The moves were authored on fighter.glb, whose skeleton is in centimetres - the
+// hips sit 104 units up. A body downloaded from Mixamo arrives in metres, hips at
+// about a third of one. Rotation does not care about that; the hips position track
+// does, and feeding centimetres to a metre-sized rig threw the addiction several
+// metres out of the ring while the fight carried on without it.
+// Dropping the track kept it on its mark but took the drop out of the knockdown -
+// a body has to travel to the floor to fall. So the track is rescaled onto the new
+// rig instead: one ratio, the rig it was drawn on against the rig it is going to,
+// measured off where each one's hips rest. It has to be the same ratio for every
+// clip - scaling each clip by its own first frame stands the sit up straight.
+function inPlace(clips,body,srcHips){
+  const src=srcHips||MOVE_HIPS,hy=hipsRest(body),k=(src&&hy)?hy/src:0;
+  return clips.map(c=>new T.AnimationClip(c.name,c.duration,c.tracks.map(t=>{
+    if(!/\.position$/.test(t.name))return t;
+    if(!k||!/Hips\.position$/.test(t.name))return null;
+    return new t.constructor(t.name,t.times,t.values.map(v=>v*k));
+  }).filter(Boolean)));
 }
 function setBossBody(key,shadowGltf,done){
   if(bossBodyKey===key){if(done)done();return;}
   bossBodyKey=key;
   const finish=(F,own)=>{placeBoss(F,own);if(done)done();};
   loader.load(ART+'boss-'+key+'.glb',
-    gb=>finish(fighter(gb.scene,inPlace(MOVES||[]),{keepSkin:true,glove:0x111111}),true),
+    gb=>finish(fighter(gb.scene,inPlace(MOVES||[],gb.scene),{keepSkin:true,glove:0x111111}),true),
     undefined,
     ()=>{ // nothing drawn for this one yet: the shadow, exactly as before
       if(shadowGltf)finish(fighter(shadowGltf.scene,shadowGltf.animations,SHADOW),false);
       else loadOne(g2=>finish(fighter(g2.scene,g2.animations,SHADOW),false));
     });
 }
-loadOne(g=>{MOVES=g.animations;setBossBody(addictionKey,g,ready);seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
+loadOne(g=>{MOVES=g.animations;MOVE_HIPS=hipsRest(g.scene);setBossBody(addictionKey,g,ready);seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7a13a,green:0x2f9e5c,pink:0xe0559a};
@@ -617,7 +664,7 @@ function ready(){if(++loaded<11)return;tellParent({type:'ready'});if(BOSS)ground
   setTimeout(()=>{if(fightOver)startFight();},LIVE?700:900);}
 loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
   const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>{acts[c.name]=mixer.clipAction(c);});ref.add(root);
-  REF={root,mixer,acts,cur:null};refIdle();REFCLIPS=g.animations;
+  REF={root,mixer,acts,cur:null};refIdle();REFCLIPS=g.animations;REF_HIPS=hipsRest(root);
   loadCast('announcer',F=>{ANN=F;F.home=new T.Vector3(-3.5,0,-1.5);F.root.position.copy(F.home);F.root.rotation.y=1.17;ready();});
   [['trainer',-3.0,3.0,2.36],['cutman',-3.8,2.4,2.13],['clown',3.0,-3.0,-0.79],['wrestler',3.8,-2.4,-1.01]].forEach(([k,x,z,ry])=>loadCast(k,F=>{CORNER[k]=F;F.home=new T.Vector3(x,0,z);F.root.position.copy(F.home);F.root.rotation.y=ry;ready();}));
   loadCast('ringgirl',F=>{GIRL=F;F.home=new T.Vector3(1.6,0,3.4);F.root.position.copy(F.home);F.root.rotation.y=-2.7;let hand=null;F.root.traverse(o=>{if(o.isBone&&/RightHand_b$/.test(o.name))hand=o;});if(hand){cardHand=hand;card=new T.Mesh(new T.PlaneGeometry(.30,.40),new T.MeshBasicMaterial({map:cardTex('1',true),side:T.DoubleSide,toneMapped:false,depthTest:false}));card.renderOrder=10;card.visible=false;scene.add(card);}ready();});
@@ -820,14 +867,14 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0));
   partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
   // its
-  followOff();const a=ADD();aisleOff();shaftsOn(a.glow,.2);aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
+  followOff();const a=ADD();aisleOff();shaftsOn(a.glow,.2);aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-0.15,0,-10.9);W.root.position.set(-1.05,0,-11.4);camWalk(BOSS,'front',0);
   follow(BOSS,ADD().glow,170);say('And the opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);camWalk(BOSS,'back',1000);
-  await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-5.4),0.66),castWalk(K,new T.Vector3(-1.35,0,-6.8),0.66),castWalk(W,new T.Vector3(-2.1,0,-7.3),0.66)]);
+  await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-5.4),0.66),castWalk(K,new T.Vector3(-0.15,0,-6.8),0.66),castWalk(W,new T.Vector3(-1.05,0,-7.3),0.66)]);
   boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);camWalk(BOSS,'back',900);
-  await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-1.35,0,-4.5),0.78),castWalk(W,new T.Vector3(-2.1,0,-5.0),0.78)]);boo();await wait(1000);
+  await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-0.15,0,-4.5),0.78),castWalk(W,new T.Vector3(-1.05,0,-5.0),0.78)]);boo();await wait(1000);
   await fighterWalk(BOSS,new T.Vector3(0.55,0,-3.15),0.85,new T.Vector3(0.55,0,0));entryShot('N',800);partRopes('N',true,420);await wait(560);
   await fighterWalk(BOSS,CORNERPOS.boss,0.58,new T.Vector3(0,0,0));
-  partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
+  partRopes('N',false,500);castHome(K,1.3);castHome(W,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
   // introductions at centre ring, then the referee's instructions
   followOff();camWalkOff();aisleOff();shaftsOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.6,0,0.2),1.3,BOSS.root.position),fighterWalk(BOSS,new T.Vector3(0.6,0,-0.2),1.3,YOU.root.position),castWalk(ANN,new T.Vector3(0.05,0,-0.75),1.4),refWalk(new T.Vector3(0.05,0,0.7))]);castFace(ANN,cam.position);refFace(actionLook());

@@ -581,12 +581,23 @@ function placeBoss(F,ownSkin){
   BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();
   if(YOU)faceOff();
 }
+// The moves were authored on fighter.glb, whose skeleton is in centimetres - 180
+// units tall. A body downloaded from Mixamo arrives in metres, about 1.3 units.
+// Rotation does not care about that; the hips position track does, and applying
+// centimetre distances to a metre-sized rig threw the addiction several metres
+// out of the ring while the fight carried on without it. The game puts fighters
+// where it wants them anyway, so the boss takes rotation only and stays on its
+// own root whatever scale it happens to be.
+function inPlace(clips){
+  return clips.map(c=>new T.AnimationClip(c.name,c.duration,
+    c.tracks.filter(t=>!/\.position$/.test(t.name))));
+}
 function setBossBody(key,shadowGltf,done){
   if(bossBodyKey===key){if(done)done();return;}
   bossBodyKey=key;
   const finish=(F,own)=>{placeBoss(F,own);if(done)done();};
   loader.load(ART+'boss-'+key+'.glb',
-    gb=>finish(fighter(gb.scene,MOVES||[],{keepSkin:true,glove:0x111111}),true),
+    gb=>finish(fighter(gb.scene,inPlace(MOVES||[]),{keepSkin:true,glove:0x111111}),true),
     undefined,
     ()=>{ // nothing drawn for this one yet: the shadow, exactly as before
       if(shadowGltf)finish(fighter(shadowGltf.scene,shadowGltf.animations,SHADOW),false);

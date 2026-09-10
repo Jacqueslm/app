@@ -1171,9 +1171,13 @@ function roll(a,ms){rollAmt=a*(Math.random()<.5?-1:1);rollUntil=performance.now(
 function punchIn(){cam.fov=fovBase*.85;cam.updateProjectionMatrix();}
 function slowMo(ms){slow=.3;setTimeout(()=>slow=1,ms);}
 // the director: during a round it cuts between the TV view and your shoulder every few seconds unless you picked a camera yourself
-// the director. In the preview it never sits still: it works the whole room,
-// ringside, over the shoulder, down on the canvas, up in the house.
-const AUTOCUTS=['tv','shoulder','low','crowd','corner','tv','shoulder','low'];
+// the director. Watching, it never sits still: it works the whole room,
+// ringside, down on the canvas, up in the house - but never from behind your
+// own man's head. That shot puts you behind him with the addiction hidden
+// behind him, which is the backwards view, and it is no better to watch than
+// it was to box. It still does the knockdowns and the exchanges in a live
+// round, where the camera is not cycling.
+const AUTOCUTS=['tv','low','crowd','tv','corner','low','tv','crowd'];
 setInterval(()=>{
   if(performance.now()<manualUntil)return;
   if(curShot==='walk'||curShot==='entry'||curShot==='girl')return;

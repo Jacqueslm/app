@@ -506,16 +506,16 @@ function fitGlove(hand,color){let tip=null;hand.traverse(o=>{if(o.isBone&&/HandM
   const gl=new T.Mesh(new T.SphereGeometry(r,18,14),new T.MeshStandardMaterial({color,roughness:.3}));gl.scale.set(1,.92,1.18);gl.position.copy(local);hand.add(gl);gl.userData.fit={len:+len.toFixed(3),r:+(r*sc.x).toFixed(3)};return gl;}
 function fighter(gltfScene,clips,opts){const gloves=[];
   const root=T.SkeletonUtils?T.SkeletonUtils.clone(gltfScene):gltfScene;
-  // Every other body in the room is stood to the same height - the fighters, the
-  // cast, the crowd. A body downloaded from Mixamo arrives at whatever size it was
-  // drawn: the addiction came out of the box under a metre, half a fighter, and
-  // small enough to lose behind him in a close shot.
-  // Measured off the head, not off a box round the whole model, because a box takes
-  // in ears, hats and tails and a body wearing any of them ends up short.
-  root.updateMatrixWorld(true);let hd=null;root.traverse(o=>{if(o.isBone&&/Head$/.test(o.name)&&!hd)hd=o;});
-  let sk=0;if(hd){const hv=new T.Vector3();hd.getWorldPosition(hv);if(hv.y>0.2)sk=1.60/hv.y;}
-  if(!sk){const bh=new T.Box3().setFromObject(root).getSize(new T.Vector3()).y;if(bh>0.2)sk=1.8/bh;}
-  if(sk>0&&Math.abs(sk-1)>0.02){root.scale.multiplyScalar(sk);root.updateMatrixWorld(true);}
+  // Every other body in the room is stood to the same height, top to toe, and the
+  // addiction is no different: the fighters, the cast and the crowd are all put to
+  // 1.8 the same way. A body downloaded from Mixamo arrives at whatever size it was
+  // drawn - the addictions run from 0.65 to 2.4 - so it is measured and put to the
+  // same height as the man it is fighting.
+  // Not off the head bone. A drawn character carries most of its head above that
+  // bone, so standing the bone at a person's eye line made a cat two and a half
+  // times the size it should be, tall enough to fill the lens on a knockdown.
+  root.updateMatrixWorld(true);const bh=new T.Box3().setFromObject(root).getSize(new T.Vector3()).y;
+  if(bh>0.2&&Math.abs(1.8/bh-1)>0.02){root.scale.multiplyScalar(1.8/bh);root.updateMatrixWorld(true);}
   root.traverse(o=>{if(o.isMesh){o.castShadow=true;if(!opts.keepSkin)o.material=new T.MeshStandardMaterial({color:opts.color,roughness:.35,metalness:.25,emissive:opts.emissive||0,emissiveIntensity:1});}});
   root.updateMatrixWorld(true);root.traverse(o=>{if(o.isBone&&/(Left|Right)Hand$/.test(o.name))gloves.push(fitGlove(o,opts.glove));});
   const mixer=new T.AnimationMixer(root),acts={};clips.forEach(c=>{acts[c.name]=mixer.clipAction(c);});
@@ -1053,7 +1053,7 @@ async function finisher(){
   thud('up');snd('boss-hit-'+(1+Math.floor(Math.random()*4)));crowdJump('R',1);
   BOSS.play('big_head_hit',{speed:1.1});
   await wait(640);slow=1;$('lines').classList.remove('on');}
-async function knockdown(){if(downState)return;downState=true;busy=true;countStop=false;slam('DOWN');snd('boss-down');call('Down it goes.',true);snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
+async function knockdown(){if(downState)return;downState=true;busy=true;countStop=false;downWho=BOSS;slam('DOWN');snd('boss-down');call('Down it goes.',true);snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
   downs.boss++;downsFight.boss++;
   BOSS.play('knocked_out',{speed:1.2});YOU.play('victory',{loop:true,fade:.4});
   shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(BOSS,true);
@@ -1064,12 +1064,12 @@ async function knockdown(){if(downState)return;downState=true;busy=true;countSto
   if(out){await wait(600);koLights(BOSS,false);return decision('ko');}
   BOSS.play('getting_up',{speed:1.2});await wait(3000);koLights(BOSS,false);await stagger(BOSS);bossHP=30;bars();
   if(stopped){refWalk(ref.userData.home);return decision('tko');}
-  refWalk(ref.userData.home);shot('tv',800);BOSS.idle();YOU.idle();
+  downWho=null;refWalk(ref.userData.home);shot('tv',800);BOSS.idle();YOU.idle();
   say('It beats the count. Round scored '+(10-downs.boss)+' against it.','Corner');
   downState=false;busy=false;if(timeLeft===0)endRound();}
 // you go down: the mandatory eight, and you are up at eight. Three in a round and the referee stops it,
 // on your feet, walking out
-async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam('DOWN');snd('down');call('You are down. Get up.',true);crowdJump('L',1);chant('L',TEMPT);
+async function meDown(){if(busy&&!downState)return;busy=true;downState=true;downWho=YOU;slam('DOWN');snd('down');call('You are down. Get up.',true);crowdJump('L',1);chant('L',TEMPT);
   downs.you++;downsFight.you++;
   YOU.play('knocked_out',{speed:1.2});shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(YOU,true);
   countStop=false;
@@ -1079,11 +1079,11 @@ async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam
     await refWalk(new T.Vector3(.55,0,-.15));
     if(!countStop)await refCount(8,YOU.root.position);})());
   snd('getup');call(onOwn?'Up on your own.':'Up at eight.',true);YOU.play('getting_up',{speed:1.2});await wait(4200);koLights(YOU,false);
-  await stagger(YOU);youHP=30;bars();shot('tv',800);
+  await stagger(YOU);downWho=null;youHP=30;bars();shot('tv',800);
   if(downs.you>=3){koLights(YOU,false);refWalk(ref.userData.home);return decision('stopped');}
   refWalk(ref.userData.home);downState=false;busy=false;say('…you got up. Hands up.','Corner');if(timeLeft===0)endRound();}
 // the end: a knockout, a stoppage, or the cards after six. It can end a fight. It never ends you.
-async function decision(how){running=false;fightOver=true;result=how;downState=false;busy=false;crowdOn(.25);setTimeout(()=>crowdOn(0),9000);for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;}stools.you.visible=stools.boss.visible=false;
+async function decision(how){running=false;fightOver=true;result=how;downState=false;busy=false;downWho=null;crowdOn(.25);setTimeout(()=>crowdOn(0),9000);for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;}stools.you.visible=stools.boss.visible=false;
   const you=how==='ko'||how==='tko'||(how==='cards'&&cards.you>cards.boss),draw=how==='cards'&&cards.you===cards.boss;
   const line={ko:'It is counted out. Knockout, round '+round+'.',tko:'Three knockdowns this round. The referee stops it. TKO, round '+round+'.',stopped:'Three knockdowns this round. The referee stops it, round '+round+'. You walk out on your feet. Same time tomorrow.',cards:draw?'The cards are even, '+cards.you+'-'+cards.boss+'. A draw. Same time tomorrow.':you?'Six rounds, nobody counted out. Technical knockout on the cards, '+cards.you+'-'+cards.boss+'. Your fight.':'Six rounds, nobody counted out. Technical knockout on the cards, '+cards.boss+'-'+cards.you+'. It takes this one. You went the distance with it. Same time tomorrow.'}[how];
   say(line,'Announcer');announce([line],you);
@@ -1199,6 +1199,21 @@ let sx=null;canvas.addEventListener('pointerup',e=>{if(sx==null)return;const dx=
 // them went off the edge. It is built off the line between them now: mostly behind
 // you and a little to the side on a tall screen, broadside on a wide one. You are
 // always the one nearest the lens, and both of you are always in frame.
+// Down on the canvas. It used to sit at one fixed corner looking at the middle of
+// the ring, so whoever was still standing came between it and the person on the
+// floor - a screen full of the addiction's back while the referee counted. It
+// stands off the one who is down now, on the side away from the other, far enough
+// back to hold them both.
+let downWho=null;
+function downLowPos(){
+  if(!downWho)return new T.Vector3(-1.7,0.5,1.9);
+  const d=downWho.root.position,other=(downWho===YOU&&BOSS)?BOSS.root.position:(YOU?YOU.root.position:null);
+  const away=other?d.clone().sub(other).setY(0):new T.Vector3(0,0,1);
+  if(away.lengthSq()<0.01)away.set(0,0,1);
+  away.normalize();
+  const side=new T.Vector3(away.z,0,-away.x).multiplyScalar(1.05);
+  return d.clone().setY(1.18).addScaledVector(away,2.6).add(side);
+}
 function tvPos(a,b,mid,d){
   const toYou=a.clone().sub(b);toYou.y=0;
   if(toYou.lengthSq()<0.01)toYou.set(0,0,1);
@@ -1208,7 +1223,7 @@ function tvPos(a,b,mid,d){
   const back=port?(2.35+d*0.35):(1.15+d*0.3), off=port?1.45:(2.05+d*0.5);
   return mid.clone().setY(port?1.42:1.2).addScaledVector(toYou,back).addScaledVector(side,off);
 }
-const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)},
+const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>downLowPos(),look:()=>downWho?downWho.root.position.clone().setY(0.34):new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)},
   // from above: the roof you are fighting on, the ring as a square with two people in it
   sky:{pos:()=>{const m=actionLook();return new T.Vector3(m.x+0.5,6.6,m.z+2.6);},look:()=>actionLook()},
   rafters:{pos:()=>{const m=actionLook();return new T.Vector3(m.x-2.9,4.5,m.z-2.9);},look:()=>actionLook()},

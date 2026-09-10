@@ -522,13 +522,18 @@ were completed. Do not let that lapse unclaimed.
 
 ## What this repo is
 
-Two separate apps in one repo (kept fully separate on disk):
+Three separate apps in one repo (kept fully separate on disk):
 
 - **`TurnSomeDayIntoOneday/`** — the recovery app + companion for the person who
   loves them. A web app (Node/Express server + `index.html` front end) wrapped as
   an Android TWA for the Play Store. This is the one in active launch.
 - **`Studio/`** — an AI music-video / content-creation tool (separate product;
   used here to produce marketing videos: teleprompter, webcam recorder, AI scenes).
+- **`YourAI/`** — Jacques's private chat assistant (built 10 Sep 2026). Runs
+  locally like Studio; a chat AI that reads the repo's business docs (rules,
+  keywords, scripts, outreach, medical-claims audit). Launchers in the folder;
+  port 4410; key in `YourAI/.env` (Claude or Gemini, same providers as
+  Friendly).
 
 **Positioning:** "the recovery app that includes the person who loves them."
 **Lead audience:** the partner (usually a wife) of someone who drinks. Secondary:

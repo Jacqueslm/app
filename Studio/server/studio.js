@@ -37,6 +37,29 @@ function persistEnvKey(name, value) {
   fs.writeFileSync(ENV_PATH, lines.join('\n') + '\n');
 }
 function persistFalKey(key) { persistEnvKey('FAL_KEY', key); }
+function persistGeminiKey(key) { persistEnvKey('GEMINI_API_KEY', key); }
+
+// The watermarked free tier (AI Scenes quality 'free'): Google's image model
+// via the Gemini API. Same key family as Friendly's Gemini fallback in the
+// recovery app. Costs $0 on the free tier (Google allows a few images a day);
+// every image from this path goes through bakeFreeWatermark() so a $0 scene
+// can never pass for a paid one. Model id is env-overridable for the day
+// Google renames it (the 2.5-flash -> 3.6-flash retirement already cost one
+// chat once — don't let it cost this too).
+let GEMINI_API_KEY = process.env.GEMINI_API_KEY; // mutable: settable from the app
+const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+const GEMINI_IMAGE_BASE = process.env.GEMINI_IMAGE_BASE || 'https://generativelanguage.googleapis.com/v1beta';
+// Same house mark the video export uses (server/watermark.png) — replace that
+// file to change the logo everywhere at once.
+const FREE_WATERMARK_FILE = path.join(__dirname, 'watermark.png');
+
+// The keyless free tier (AI Scenes quality 'poli'): Pollinations.ai serves
+// open-source image models for free with no API key — verified live 10 Sep
+// 2026 (POST /prompt returned a real image in <1s). nologo=true stops
+// Pollinations' own corner mark so every free image carries only the house
+// watermark. Model id env-overridable like the Gemini one.
+const POLLINATIONS_BASE = process.env.POLLINATIONS_BASE || 'https://image.pollinations.ai'; // keyless free tier
+const POLLINATIONS_MODEL = process.env.POLLINATIONS_MODEL || 'flux';
 
 // Model ids move fast in this space - override any of these in .env without code changes.
 const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/dev';
@@ -529,6 +552,150 @@ function extractMediaUrl(result, expect) {
   return null;
 }
 
+// Verify a pasted Google key without spending anything: the models list is
+// open to any valid key.
+async function geminiKeyCheck(key) {
+  try {
+    const res = await fetch(`${GEMINI_IMAGE_BASE}/models?pageSize=1`, {
+      headers: { 'x-goog-api-key': key },
+    });
+    if (res.ok) return { ok: true, why: 'Key verified — free images are ready.' };
+    const data = await res.json().catch(() => ({}));
+    const msg = (data.error && data.error.message) || `HTTP ${res.status}`;
+    return { ok: false, why: `Google said: ${String(msg).slice(0, 160)}` };
+  } catch (err) {
+    return { ok: false, why: `Could not reach Google: ${err.message}` };
+  }
+}
+
+// Bake the house mark into a free image so nobody can mistake a $0 scene for a
+// paid one. PNG overlay only — no fonts, no new dependencies (ffmpeg-static
+// ships with Studio, same binary everything else uses). The raw file is
+// deleted on success, so an unwatermarked free image never exists on disk.
+function bakeFreeWatermark(rawName) {
+  return new Promise((resolve, reject) => {
+    const out = rawName.replace(/\.(png|jpe?g)$/i, '-wm.png');
+    const src = mediaPath(rawName);
+    const dst = mediaPath(out);
+    const proc = spawn(ffmpegBin(), [
+      '-y', '-i', src, '-i', FREE_WATERMARK_FILE,
+      '-filter_complex',
+      "[1:v]scale=96:-1,format=rgba,colorchannelmixer=aa=0.55[wm];" +
+      "[0:v][wm]overlay=W-w-16:H-h-16:format=auto",
+      '-frames:v', '1', dst,
+    ]);
+    proc.on('error', () => reject(new Error('Could not start ffmpeg to watermark the free image — run npm install in server/ (or install ffmpeg / set FFMPEG_PATH).')));
+    proc.on('close', (code) => {
+      if (code === 0 && fs.existsSync(dst)) {
+        try { fs.unlinkSync(src); } catch (_) {}
+        resolve(out);
+      } else {
+        reject(new Error('Watermarking the free image failed — nothing was saved, nothing was charged.'));
+      }
+    });
+  });
+}
+
+// Advance one free (Gemini) image job. Runs server-side on the same sweeper
+// that finishes fal jobs, so the picture lands even if the tab closes.
+async function refreshFreeImageJob(job) {
+  if (job.status !== 'running' || !job.free || job._refreshing) return;
+  job._refreshing = true;
+  try {
+    const f = job.free;
+    const body = {
+      contents: [{ role: 'user', parts: [{ text: f.prompt }] }],
+      generationConfig: Object.assign(
+        { responseModalities: ['IMAGE', 'TEXT'] },
+        f.aspectRatio ? { imageConfig: { aspectRatio: f.aspectRatio } } : {}
+      ),
+    };
+    const res = await fetch(`${GEMINI_IMAGE_BASE}/models/${encodeURIComponent(GEMINI_IMAGE_MODEL)}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = (data.error && data.error.message) || `HTTP ${res.status}`;
+      if (res.status === 429 || /quota|rate|limit|insufficient/i.test(String(msg))) {
+        throw new Error(`Google's free allowance is out for now — ${String(msg).slice(0, 160)}. It resets daily; switch the quality chip to a fal tier for more.`);
+      }
+      throw new Error(`Free image failed: ${String(msg).slice(0, 200)}`);
+    }
+    const cand = (data.candidates && data.candidates[0]) || null;
+    const parts = (cand && cand.content && cand.content.parts) || [];
+    const img = parts.find((p) => p.inlineData && p.inlineData.data);
+    if (!img) {
+      const reason = (cand && cand.finishReason) || 'no picture in the reply';
+      throw new Error(`Free image returned no picture (${reason}) — Google's free tier can refuse silently when its quota is gone. Wait a bit, or switch quality to a fal tier.`);
+    }
+    const buf = Buffer.from(img.inlineData.data, 'base64');
+    const rawName = newFilename(job.userId, '.png');
+    fs.writeFileSync(mediaPath(rawName), buf);
+    const filename = await bakeFreeWatermark(rawName);
+    const meta = { ...(f.meta || {}), source: 'gemini-free', quality: 'free', watermark: true, prompt: f.prompt, imageSize: f.imageSize || 'landscape_16_9' };
+    job.assetId = db.createAsset(job.userId, 'image', f.label, filename, f.characterId || null, meta);
+    db.incrementImageCount(job.userId, todayUTC());
+    job.progress = 100;
+    job.status = 'done';
+  } catch (err) {
+    job.status = 'error';
+    job.error = err.message;
+  } finally {
+    job._refreshing = false;
+    // No fal receipt here — a free job billed nothing, so there is nothing to recover.
+  }
+}
+
+// Advance one keyless free (Pollinations) image job. One POST returns the
+// whole image — no status polling — so the job usually finishes on the first
+// pass; the sweeper and client polls just retry it if that first call is slow.
+async function refreshPollinationsJob(job) {
+  if (job.status !== 'running' || !job.poli || job._refreshing) return;
+  job._refreshing = true;
+  try {
+    const f = job.poli;
+    const res = await fetch(`${POLLINATIONS_BASE}/prompt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: f.prompt,
+        width: f.width,
+        height: f.height,
+        model: POLLINATIONS_MODEL,
+        nologo: true,
+        seed: f.seed,
+      }),
+    });
+    if (!res.ok) {
+      const msg = (await res.text().catch(() => '')) || `HTTP ${res.status}`;
+      if (res.status === 429 || /too many|rate|quota|busy/i.test(msg)) {
+        throw new Error(`Pollinations is busy right now (it's a free shared service) — ${msg.slice(0, 140)}. Wait a minute and try again, or pick a paid tier.`);
+      }
+      throw new Error(`Free image failed: ${msg.slice(0, 200)}`);
+    }
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (!buf.length) throw new Error('Pollinations returned an empty image — try again, or pick a paid tier.');
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    const ext = ct.includes('png') ? '.png' : '.jpg';
+    const rawName = newFilename(job.userId, ext);
+    fs.writeFileSync(mediaPath(rawName), buf);
+    const filename = await bakeFreeWatermark(rawName);
+    const meta = { ...(f.meta || {}), source: 'pollinations-free', model: POLLINATIONS_MODEL, prompt: f.prompt, quality: 'free', watermark: true, imageSize: f.imageSize || 'landscape_16_9' };
+    job.assetId = db.createAsset(job.userId, 'image', f.label, filename, null, meta);
+    db.incrementImageCount(job.userId, todayUTC());
+    job.progress = 100;
+    job.status = 'done';
+  } catch (err) {
+    job.status = 'error';
+    job.error = err.message;
+  } finally {
+    job._refreshing = false;
+    // No fal receipt here — a free job billed nothing, so there is nothing to recover.
+  }
+}
+
 async function refreshFalJob(job) {
   if (job.status !== 'running') return;
   // Guard against the background sweeper and a browser poll advancing the same
@@ -661,8 +828,8 @@ function startFalSweeper() {
   if (falSweeperTimer) return;
   falSweeperTimer = setInterval(async () => {
     for (const job of jobs.values()) {
-      if (job.status === 'running' && job.fal && !job._refreshing) {
-        try { await refreshFalJob(job); } catch (_) {}
+      if (job.status === 'running' && (job.fal || job.free || job.poli) && !job._refreshing) {
+        try { if (job.free) await refreshFreeImageJob(job); else if (job.poli) await refreshPollinationsJob(job); else await refreshFalJob(job); } catch (_) {}
       }
     }
   }, 6000);
@@ -692,6 +859,8 @@ router.get('/config', (req, res) => {
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
   res.json({
     falAvailable: Boolean(FAL_KEY),
+    geminiAvailable: Boolean(GEMINI_API_KEY),
+    poliAvailable: true, // Pollinations needs no key — this tier is always on,
     stockAvailable: Boolean(PEXELS_KEY),
     bufferAvailable: Boolean(BUFFER_KEY),
     // Narrators run on this computer - free, offline, nothing per word. The
@@ -793,6 +962,28 @@ router.post('/settings/falkey', async (req, res) => {
 // "Is my key still good?" - same check, without re-pasting anything.
 router.post('/settings/falkey/test', async (req, res) => {
   const check = await falKeyCheck(FAL_KEY);
+  res.json({ verified: check.ok, note: check.why });
+});
+
+/* ---------------- settings: free Google images key ---------------- */
+router.post('/settings/geminikey', async (req, res) => {
+  const { key } = req.body || {};
+  const clean = typeof key === 'string' ? key.trim() : '';
+  if (clean && (clean.length < 10 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like a Gemini key. Get a free one at aistudio.google.com → Get API key." });
+  }
+  try {
+    persistGeminiKey(clean || null);
+    GEMINI_API_KEY = clean || undefined;
+    const check = clean ? await geminiKeyCheck(clean) : { ok: false, why: 'Key removed.' };
+    res.json({ geminiAvailable: Boolean(GEMINI_API_KEY), verified: check.ok, note: check.why });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+router.post('/settings/geminikey/test', async (req, res) => {
+  const check = await geminiKeyCheck(GEMINI_API_KEY);
   res.json({ verified: check.ok, note: check.why });
 });
 
@@ -2346,7 +2537,7 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
 }
 
 router.post('/scene', async (req, res) => {
-  if (!FAL_KEY) {
+  if (!FAL_KEY && !(req.body?.quality === 'free' && GEMINI_API_KEY) && req.body?.quality !== 'poli') {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
   const { prompt, characterId, characterIds, imageSize, count, quality, locationId } = req.body || {};
@@ -2356,11 +2547,61 @@ router.post('/scene', async (req, res) => {
   }
   {
     const hasChar = !!characterId || (Array.isArray(characterIds) && characterIds.length > 0);
-    const imgCost = quality === 'best' ? estActionCost('imageBest', { count: howMany })
+    const imgCost = (quality === 'free' || quality === 'poli') ? 0 // the free tiers are never billed
+      : quality === 'best' ? estActionCost('imageBest', { count: howMany })
       : quality === 'gpt' ? estActionCost('imageGpt', { count: howMany })
       : estActionCost('image', { characterId: hasChar, count: howMany });
     const capMsg = overDailyCap(req.userId, imgCost);
     if (capMsg) return res.status(429).json({ error: capMsg });
+  }
+
+  if (quality === 'free') {
+    // The free tier is prompt-only: no character face lock, no location photos,
+    // no fal at all — Google returns the image inline and we watermark it.
+    const cleanPrompt = String(prompt || '').trim();
+    if (!cleanPrompt) return res.status(400).json({ error: 'Describe the shot first.' });
+    const aspect = ({ landscape_16_9: '16:9', portrait_16_9: '9:16', square_hd: '1:1' })[imageSize] || '16:9';
+    const jobs = [];
+    for (let i = 0; i < howMany; i++) {
+      const job = createJob(req.userId, 'ai-image', {
+        free: {
+          prompt: cleanPrompt,
+          aspectRatio: aspect,
+          imageSize: imageSize || 'landscape_16_9',
+          label: `${cleanPrompt.slice(0, 80)}${howMany > 1 ? ` (${i + 1}/${howMany})` : ''}`,
+          characterId: null,
+          meta: { source: 'gemini-free', model: GEMINI_IMAGE_MODEL, prompt: cleanPrompt, quality: 'free', watermark: true },
+        },
+      });
+      refreshFreeImageJob(job); // start now; sweeper + client polls advance it too
+      jobs.push(job);
+    }
+    return res.status(202).json({ job: jobJson(jobs[0]), jobs: jobs.map(jobJson) });
+  }
+
+  if (quality === 'poli') {
+    // The keyless free tier is prompt-only like the Google one: no character
+    // face lock, no location photos — and always watermarked.
+    const cleanPrompt = String(prompt || '').trim();
+    if (!cleanPrompt) return res.status(400).json({ error: 'Describe the shot first.' });
+    const dims = ({ landscape_16_9: [1280, 720], portrait_16_9: [720, 1280], square_hd: [1024, 1024] })[imageSize] || [1280, 720];
+    const jobs = [];
+    for (let i = 0; i < howMany; i++) {
+      const job = createJob(req.userId, 'ai-image', {
+        poli: {
+          prompt: cleanPrompt,
+          width: dims[0],
+          height: dims[1],
+          imageSize: imageSize || 'landscape_16_9',
+          seed: Math.floor(Math.random() * 1e9),
+          label: '' + cleanPrompt.slice(0, 80) + (howMany > 1 ? ' (' + (i + 1) + '/' + howMany + ')' : ''),
+          meta: { source: 'pollinations-free', model: POLLINATIONS_MODEL, prompt: cleanPrompt, quality: 'free', watermark: true },
+        },
+      });
+      refreshPollinationsJob(job); // start now; sweeper + client polls advance it too
+      jobs.push(job);
+    }
+    return res.status(202).json({ job: jobJson(jobs[0]), jobs: jobs.map(jobJson) });
   }
 
   let built;
@@ -5571,6 +5812,8 @@ router.get('/jobs/:id', async (req, res) => {
   const job = jobs.get(req.params.id);
   if (!job || job.userId !== req.userId) return res.status(404).json({ error: 'Job not found.' });
   if (job.fal) await refreshFalJob(job);
+  else if (job.free) await refreshFreeImageJob(job);
+  else if (job.poli) await refreshPollinationsJob(job);
   res.json({ job: jobJson(job) });
 });
 
@@ -5594,6 +5837,7 @@ router.get('/docs/pricelist.pdf', (req, res) => sendStudioDoc(res, 'Studio-Price
 function estReceiptCost(r) {
   if (r.expect === 'audio') return null; // voice length isn't stored — don't guess
   let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
+  if (meta.quality === 'free' || meta.source === 'gemini-free' || meta.source === 'pollinations-free') return 0; // the free tiers were never billed
   const c = estActionCost(r.expect, { tier: r.tier, seconds: meta.seconds, characterId: r.character_id });
   return c || (r.expect === 'video' || r.expect === 'image' ? c : null);
 }
@@ -5669,4 +5913,4 @@ router.post('/fal/import', async (req, res) => {
   }
 });
 
-module.exports = { router, deleteUserAssets };
+module.exports = { router, deleteUserAssets, refreshFreeImageJob, refreshPollinationsJob, geminiKeyCheck };

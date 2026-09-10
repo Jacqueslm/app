@@ -459,6 +459,17 @@ body.simple-only #view-simple{display:flex !important}
       <button class="btn2 quiet" id="falkey-test" style="margin-top:6px">🔌 Is my key still working?</button>
       <p class="usage" id="falkey-note" style="margin:4px 0 0"></p>
     </div>
+    <div class="card" id="gemikey-card" style="display:none">
+      <h3>🆓 Free images (Google) <span class="usage">(optional — $0, watermarked)</span></h3>
+      <p class="usage" id="gemikey-hint">No fal credit needed. Get a free key at <b>aistudio.google.com → Get API key</b> (uses your Google account). The free tier allows a few images a day, and every free image gets the house watermark so it can never be mistaken for a paid scene. Prompt-only: no face lock, no location photos.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="input" id="gemikey-input" placeholder="Paste your Google Gemini key" style="flex:1;min-width:140px" autocomplete="off">
+        <button class="btn2" id="gemikey-save">Save</button>
+      </div>
+      <button class="btn2 quiet" id="gemikey-test" style="margin-top:6px">🔌 Is my key still working?</button>
+      <p class="usage" id="gemikey-note" style="margin:4px 0 0"></p>
+      <p class="usage" id="gemikey-manage" style="display:none">Google key is saved on this server. <a href="#" id="gemikey-change">Change it</a> · <a href="#" id="gemikey-remove">Remove it</a>.</p>
+    </div>
     <div class="banner" id="scenes-banner" style="display:none"></div>
     <div class="card" id="scenes-form" style="display:none">
       <h3>Generate a scene</h3>
@@ -2293,17 +2304,25 @@ async function bootStudio() {
     for (const id of ['#scenes-banner', '#chars-banner', '#seq-banner']) { $(id).innerHTML = msg; $(id).style.display = 'block'; }
     return;
   }
-  if (st.cfg.falAvailable) {
+  if (st.cfg.falAvailable || st.cfg.geminiAvailable || st.cfg.poliAvailable) {
     $('#ai-badge').style.display = 'inline-block';
     $('#scenes-form').style.display = 'flex';
-    $('#dance-card').style.display = 'flex';
-    $('#lp-card').style.display = 'flex';
-    renderDanceTiers();
+    if (st.cfg.falAvailable) {
+      $('#dance-card').style.display = 'flex';
+      $('#lp-card').style.display = 'flex';
+      renderDanceTiers();
+    }
     $('#falkey-card').style.display = 'none';
     $('#falkey-manage').style.display = 'block';
   } else {
     $('#falkey-card').style.display = 'flex';
     $('#falkey-manage').style.display = 'none';
+  }
+  if (st.cfg.geminiAvailable) {
+    $('#gemikey-card').style.display = 'none';
+    $('#gemikey-manage').style.display = 'block';
+  } else {
+    $('#gemikey-card').style.display = 'flex';
   }
   renderLanAddresses();
   loadScripts();
@@ -3642,6 +3661,8 @@ function renderSceneChips() {
     { key: 'standard', label: `Flux${p ? ` · $${(chipChar ? p.characterImageRate : p.imageRate).toFixed(2)}` : ''}` },
     { key: 'best', label: `✨ Banana Pro${p ? ` · $${p.imageBestRate.toFixed(2)}` : ''}` },
     { key: 'gpt', label: `🤖 GPT-Image${p && p.imageGptRate ? ` · $${p.imageGptRate.toFixed(2)}` : ''}` },
+    ...(st.cfg?.geminiAvailable ? [{ key: 'free', label: '🆓 Free (Google) · watermarked' }] : []),
+    { key: 'poli', label: '🆓 Free (no key) · watermarked' },
   ];
   chipRow($('#scene-quality'), QUALITIES, st.sceneQuality, (k) => { st.sceneQuality = k; renderSceneChips(); });
   chipRow($('#scene-counts'), SCENE_COUNTS, st.sceneCount, (k) => { st.sceneCount = Number(k); renderSceneChips(); });
@@ -3651,9 +3672,10 @@ function renderSceneChips() {
   // Quoting imageRate here while charging characterImageRate made the button
   // say ~$0.04 and the receipt say ~$0.09 — the receipt was the honest one.
   const withChar = !!($('#scene-char')?.value || $('#scene-char2')?.value);
-  const rate = p ? (st.sceneQuality === 'best' ? p.imageBestRate : st.sceneQuality === 'gpt' ? p.imageGptRate : (withChar ? p.characterImageRate : p.imageRate)) : null;
-  const price = rate ? ` · ~$${(rate * n).toFixed(2)}` : '';
-  $('#scene-gen').textContent = (n > 1 ? `Generate ${n} images (${n} takes)` : 'Generate scene image') + price;
+  const isFree = st.sceneQuality === 'free' || st.sceneQuality === 'poli';
+  const rate = p && !isFree ? (st.sceneQuality === 'best' ? p.imageBestRate : st.sceneQuality === 'gpt' ? p.imageGptRate : (withChar ? p.characterImageRate : p.imageRate)) : 0;
+  const price = isFree ? ' · $0 · watermarked' : (rate ? ` · ~$${(rate * n).toFixed(2)}` : '');
+  $('#scene-gen').textContent = (isFree ? (n > 1 ? `Generate ${n} free images` : 'Generate free scene image') : (n > 1 ? `Generate ${n} images (${n} takes)` : 'Generate scene image')) + price + (isFree && chipChar ? ' (no face lock on free)' : '');
 }
 function renderSceneCharSelect() {
   const opts = '<option value="">No character (plain scene)</option>' +
@@ -3745,8 +3767,10 @@ $('#scene-gen').onclick = async () => {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         prompt,
-        characterIds: [$('#scene-char').value, $('#scene-char2').value].filter(Boolean),
-        locationId: $('#scene-location').value || undefined,
+        // The free tier is prompt-only — characters and location photos can't
+        // condition it, so don't send them.
+        characterIds: (st.sceneQuality === 'free' || st.sceneQuality === 'poli') ? [] : [$('#scene-char').value, $('#scene-char2').value].filter(Boolean),
+        locationId: (st.sceneQuality === 'free' || st.sceneQuality === 'poli') ? undefined : ($('#scene-location').value || undefined),
         imageSize: st.sceneSize, count: st.sceneCount, quality: st.sceneQuality,
       }),
     });
@@ -3834,6 +3858,48 @@ $('#falkey-remove').onclick = async (e) => {
   if (!confirm('Remove the AI key from this server? AI features will turn off (your fal balance is untouched).')) return;
   try {
     await jfetch('/api/studio/settings/falkey', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: '' }),
+    });
+    location.reload();
+  } catch (err) { setErr('#seq-err', err.message); }
+};
+
+document.getElementById('gemikey-change') && (document.getElementById('gemikey-change').onclick = (e) => {
+  e.preventDefault();
+  $('#gemikey-card').style.display = 'flex';
+  $('#gemikey-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => $('#gemikey-input').focus(), 200);
+});
+$('#gemikey-save').onclick = async () => {
+  setErr('#scenes-err', null);
+  const key = $('#gemikey-input').value.trim();
+  if (!key) return setErr('#scenes-err', 'Paste your Google Gemini key first.');
+  $('#gemikey-save').disabled = true;
+  try {
+    const r = await jfetch('/api/studio/settings/geminikey', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }),
+    });
+    $('#gemikey-input').value = '';
+    if (r.verified === false) { $('#gemikey-note').textContent = '⚠ Saved, but ' + r.note; $('#gemikey-save').disabled = false; return; }
+    if (r.verified === null) $('#gemikey-note').textContent = r.note || '';
+    location.reload(); // lights up the free quality chip
+  } catch (e) { setErr('#scenes-err', e.message); $('#gemikey-save').disabled = false; }
+};
+if (document.getElementById('gemikey-test')) $('#gemikey-test').onclick = async () => {
+  const b = $('#gemikey-test'); const note = $('#gemikey-note');
+  b.disabled = true; const old = b.textContent;
+  b.innerHTML = '<span class="spinner"></span>Asking Google…';
+  try {
+    const r = await jfetch('/api/studio/settings/geminikey/test', { method: 'POST' });
+    note.textContent = (r.verified === true ? '✅ ' : r.verified === false ? '⚠ ' : '') + (r.note || '');
+  } catch (e) { note.textContent = e.message; }
+  b.disabled = false; b.textContent = old;
+};
+$('#gemikey-remove').onclick = async (e) => {
+  e.preventDefault();
+  if (!confirm('Remove the Google key from this server? The free quality chip will disappear.')) return;
+  try {
+    await jfetch('/api/studio/settings/geminikey', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: '' }),
     });
     location.reload();
@@ -5175,7 +5241,7 @@ function renderLibrary() {
       const SHOTS = [['wide', 'Wide'], ['medium', 'Medium'], ['closeup', 'Close-up'], ['ots', 'Over-shoulder'], ['detail', 'Detail']];
       const picked = new Set(SHOTS.map(([k]) => k));
       const p = st.cfg?.pricing;
-      const perShot = p ? (a.meta?.quality === 'best' ? p.imageBestRate : a.meta?.quality === 'gpt' ? p.imageGptRate : (a.characterId || a.meta?.castIds ? p.characterImageRate : p.imageRate)) : null;
+      const perShot = p ? (a.meta?.quality === 'free' ? 0 : a.meta?.quality === 'best' ? p.imageBestRate : a.meta?.quality === 'gpt' ? p.imageGptRate : (a.characterId || a.meta?.castIds ? p.characterImageRate : p.imageRate)) : null;
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
       const goLabel = () => `🎥 Shoot coverage (${picked.size} shot${picked.size === 1 ? '' : 's'}${perShot ? ` · ~$${(perShot * picked.size).toFixed(2)}` : ''})`;

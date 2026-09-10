@@ -695,8 +695,9 @@ function swell(){if(!crowd)return;crowd.volume=Math.min(1,crowd.volume+.35);setT
 const TEMPT=['One won\'t hurt.','You\'ve earned it.','Nobody would know.','Just tonight.','Everyone else is.'],SUPPORT=['Breathe.','Hands up.','Day one, again.','You\'ve got this.','Call somebody.','Water. Walk. Wait.'];
 let chantT=null;function chant(side,arr){const el=$(side==='L'?'cl':'cr');el.textContent=arr[Math.floor(Math.random()*arr.length)];el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800);}
 function snd(n){try{const a=new Audio(SND[n]);a.volume=.9;a.play().catch(()=>{});}catch(e){}}
-// the fight, on the Unified Rules of Boxing, shortened: six rounds of sixty seconds with
-// ten seconds in the corner (a real round is three minutes with a minute's rest).
+// the fight, on the Unified Rules of Boxing, shortened: six rounds of thirty seconds
+// with fourteen in the corner (a real round is three minutes with a minute's rest).
+// Thirty is deliberate and matches docs/GAME-SPEC.md - do not put it back to sixty.
 // Ten-point must: the round's winner gets 10, the loser 9, an even round 10-10, and every
 // knockdown takes one more point off the fighter dropped (10-8, 10-7). A knockdown gets the
 // mandatory eight count; a fighter still down at ten is knocked out. Three knockdowns in one

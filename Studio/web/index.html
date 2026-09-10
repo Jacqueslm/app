@@ -3,36 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f0c29">
+<meta name="theme-color" content="#0d0d0f">
 <title>Studio</title>
 <link rel="icon" href="/icons/icon-192.png">
 <style>
 :root{
-  --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;--green-dim:rgba(126,232,162,0.15);
+  --brand:#0d0d0f;--accent:#e5484d;--green:#7ee8a2;--green-dim:rgba(126,232,162,0.15);
   --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
   --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
   --bdr:rgba(0,0,0,0.10);--bdr2:rgba(0,0,0,0.18);
-  --acc:#EEEDFE;--acc-t:#3C3489;
+  --acc:#fdeaea;--acc-t:#b3252a;
   --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
 @media(prefers-color-scheme:dark){:root{
-  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --s0:#101013;--s1:#191a1e;--s2:#212227;
   --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
   --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
-  --acc:#26215C;--acc-t:#AFA9EC;
+  --acc:#2b1416;--acc-t:#ff8a8d;
 }}
 :root[data-theme="dark"]{
-  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --s0:#101013;--s1:#191a1e;--s2:#212227;
   --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
   --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
-  --acc:#26215C;--acc-t:#AFA9EC;
+  --acc:#2b1416;--acc-t:#ff8a8d;
 }
 /* Force light even when the OS is in dark mode (manual toggle). */
 :root[data-theme="light"]{
   --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
   --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
   --bdr:rgba(0,0,0,0.10);--bdr2:rgba(0,0,0,0.18);
-  --acc:#EEEDFE;--acc-t:#3C3489;
+  --acc:#fdeaea;--acc-t:#b3252a;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;background:var(--brand);font-family:var(--f)}
@@ -40,7 +40,7 @@ body{display:flex;justify-content:center}
 .app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column}
 .shell{flex:1;display:flex;flex-direction:column}
 .hdr{background:var(--brand);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
-.hdr a{color:#8892c0;text-decoration:none;font-size:22px;line-height:1;padding:4px 6px 4px 0}
+.hdr a{color:#9a9aa4;text-decoration:none;font-size:22px;line-height:1;padding:4px 6px 4px 0}
 .hdr h1{font-size:17px;font-weight:600;flex:1}
 .hdr .ai-badge{font-size:11px;font-weight:600;letter-spacing:.4px;background:var(--green-dim);color:var(--green);border:0.5px solid rgba(126,232,162,0.4);border-radius:20px;padding:4px 10px;display:none}
 .body{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
@@ -76,9 +76,9 @@ textarea::placeholder{color:var(--tm)}
 .err.show{display:block}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.mtabs{display:none}
+.mtabs{display:none !important}
 .mtabs::-webkit-scrollbar{display:none}
-.mtabs button{border:0.5px solid rgba(255,255,255,0.18);background:transparent;color:#8892c0;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer;white-space:nowrap}
+.mtabs button{border:0.5px solid rgba(255,255,255,0.18);background:transparent;color:#9a9aa4;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer;white-space:nowrap}
 .mtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .mtabs button{position:relative}
 .mtabs button .due-dot{display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#ff5f57}
@@ -104,14 +104,7 @@ textarea::placeholder{color:var(--tm)}
 .tp-val{color:var(--green);font-weight:700;min-width:22px;text-align:center}
 .view{display:none;flex-direction:column;gap:14px}
 .view.on{display:flex}
-/* SIMPLE MODE: one screen only — hide the tab bar and every other view */
-body.simple-only #mtabs{display:none}
-body.simple-only .view{display:none !important}
-body.simple-only #view-simple{display:flex !important}
-#view-simple .big-btn{width:100%;padding:16px;font-size:16px;font-weight:700;border-radius:14px;border:none;cursor:pointer;font-family:var(--f);background:var(--s1);color:var(--tp);margin-top:8px}
-#view-simple .big-btn.go{background:var(--accent);color:#fff}
-#view-simple .big-btn:disabled{opacity:.6;cursor:default}
-.card{background:var(--s2);border:0.5px solid var(--bdr);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+var(--s2);border:0.5px solid var(--bdr);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .card h3{font-size:14px;color:var(--tp)}
 .input{width:100%;background:var(--s0);border:0.5px solid var(--bdr2);border-radius:10px;padding:11px 12px;font-size:14px;color:var(--tp);font-family:var(--f);outline:none}
 /* Show/hide password. Typing a password blind on a phone keyboard is the main
@@ -164,7 +157,7 @@ body.simple-only #view-simple{display:flex !important}
 .lib-item img,.lib-item video{cursor:zoom-in}
 
 /* ---- Studio shell, 8 Sep 2026: one nav, five places, tools grouped ---- */
-.hdr h1 small{font-size:11px;font-weight:500;color:#8892c0;margin-left:8px}
+.hdr h1 small{font-size:11px;font-weight:500;color:#9a9aa4;margin-left:8px}
 #snav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);position:fixed;left:0;right:0;bottom:0;z-index:6;padding:6px 4px calc(6px + env(safe-area-inset-bottom));justify-content:center}
 #snav button{flex:1;max-width:96px;border:none;background:transparent;color:var(--tm);font-family:var(--f);font-size:11px;font-weight:600;padding:6px 2px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
 #snav button i{font-style:normal;font-size:20px;line-height:1}
@@ -182,7 +175,6 @@ body.simple-only #view-simple{display:flex !important}
 .stages button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 #view-seq[data-stage="start"] > .card:not([data-stage="start"]),#view-seq[data-stage="build"] > .card:not([data-stage="build"]),#view-seq[data-stage="words"] > .card:not([data-stage="words"]),#view-seq[data-stage="export"] > .card:not([data-stage="export"]),#view-seq[data-stage="more"] > .card:not([data-stage="more"]){display:none !important}
 .stage-hint{font-size:12px;color:var(--tm);line-height:1.5;padding:0 4px}
-#mode-toggle{display:none !important}
 /* Fold-up cards: the title is the button. Closed shows the title only. */
 .card.fold > h3{cursor:pointer;position:relative;user-select:none;margin:-14px;padding:14px 44px 14px 14px;border-radius:14px;line-height:1.4}
 .card.fold > h3::after{content:"›";position:absolute;right:16px;top:50%;margin-top:-13px;font-size:20px;line-height:26px;color:var(--tm);transform:rotate(90deg);transition:transform .15s}
@@ -199,7 +191,6 @@ body.simple-only #view-simple{display:flex !important}
   #snav button .due-dot{top:8px;right:10px}
   .body{max-width:760px;width:100%;margin:0 auto;padding:22px 26px 60px}
   .lib-grid{grid-template-columns:repeat(4,1fr)}
-  #s-thumbs{grid-template-columns:repeat(5,1fr) !important}
   .stages{top:58px}
 }
 @media(min-width:1180px){.body{max-width:860px}}
@@ -208,7 +199,7 @@ body.simple-only #view-simple{display:flex !important}
 <body>
 <div class="app">
   <div class="hdr">
-    <h1>🎬 Studio <small title="If this number doesn't match what Claude says is latest, your browser is running old files">b0879</small></h1>
+    <h1>🎬 Studio <small title="If this number doesn't match what Claude says is latest, your browser is running old files">b0880</small></h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
@@ -239,33 +230,6 @@ body.simple-only #view-simple{display:flex !important}
     <button data-view="scenes" class="on">✨ AI Scenes</button>
     <button data-view="chars">🧑 Characters</button>
   </div>
-  <div class="view" id="view-simple">
-    <div class="card" style="border-color:var(--accent);border-width:1.5px">
-      <h3>🎬 Make my video</h3>
-      <p class="usage" style="margin:0">Three steps. All free — nothing here spends money.</p>
-
-      <p class="usage" style="margin:12px 0 0"><b>①  📷  Pick your pictures &amp; videos</b> — tap the ones you want in the video</p>
-      <div id="s-thumbs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0"></div>
-      <p class="usage" id="s-media-note">Nothing in your gallery yet — add some below.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2 quiet" id="s-add-media" style="flex:1">⬆ Add from my computer</button>
-        <button class="btn2 quiet" id="s-select-all" style="flex:1">Select all</button>
-        <button class="btn2 quiet" id="s-select-none" style="flex:1">Clear</button>
-      </div>
-
-      <button class="big-btn" id="s-add-song" style="margin-top:12px">②  🎵  Add my song</button>
-      <p class="usage" id="s-song-note">No song yet.</p>
-
-      <button class="big-btn go" id="s-make">③  🎬  Make my video</button>
-      <div class="progress-line" id="s-prog"><div></div></div>
-      <p class="usage" id="s-status"></p>
-      <div class="err" id="s-err"></div>
-      <div class="stage" id="s-stage"><video id="s-video" controls playsinline></video></div>
-      <a class="dl-btn" id="s-dl">⬇ Download my video</a>
-
-      <p style="text-align:center;margin-top:10px"><a href="#" id="s-show-all" style="color:var(--tm);font-size:13px">Show all tools →</a></p>
-    </div>
-  </div><!-- /view-simple -->
 
   <div class="view on" id="view-media">
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
@@ -765,8 +729,6 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <p class="usage">A template remembers your camera moves, timings and words — next time, drop in new pictures, hit Use, then Assemble.</p>
     </div>
-
-    <button class="btn2 quiet" id="mode-toggle" style="width:100%">🛠 Show studio tools</button>
 
     <div class="card adv-card" id="motion-card" data-stage="build">
       <h3>Stills → Motion <span class="usage">(Ken Burns camera moves, free)</span></h3>
@@ -1379,7 +1341,7 @@ function mulberry32(a){
 
 /* ---------- palettes ---------- */
 const PALETTES = {
-  dusk:   { label: 'Dusk',   bg: '#0f0c29', colors: ['#534AB7', '#8f7ae5', '#e0709b', '#f7b267', '#7ee8a2'] },
+  dusk:   { label: 'Redline', bg: '#0d0d0f', colors: ['#e5484d', '#ff8a8d', '#e0709b', '#f7b267', '#7ee8a2'] },
   ocean:  { label: 'Ocean',  bg: '#04121f', colors: ['#125d98', '#3c8dad', '#5fc9c9', '#a7e8e1', '#f4f1de'] },
   ember:  { label: 'Ember',  bg: '#1a0a08', colors: ['#7a1e0c', '#c1440e', '#e8871e', '#f5c26b', '#ffe8c2'] },
   forest: { label: 'Forest', bg: '#08130c', colors: ['#1f4d2e', '#3a7d44', '#69b578', '#a3e0af', '#e6f5d0'] },
@@ -2349,7 +2311,7 @@ async function bootStudio() {
 
 async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
-  renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
+  renderLibrary(); renderSeqPickers(); renderMediaPage(); renderVoiceCard();
   renderSocialAssetPicker();
   reportMissingFiles();
 }
@@ -2907,7 +2869,7 @@ function buildFacecamPreview(canvas, prefs, W, H) {
   row.style.cssText = 'font-size:11px;color:#b8bfe8;margin-top:6px;display:flex;align-items:center;justify-content:space-between';
   row.innerHTML = '<span>Drag bubble to place it</span>';
   const sizes = document.createElement('span');
-  const styleBtns = () => { [...sizes.children].forEach((c) => { const on = c.dataset.s === prefs.size; c.style.borderColor = on ? '#534AB7' : '#33305c'; c.style.background = on ? '#534AB7' : 'transparent'; }); };
+  const styleBtns = () => { [...sizes.children].forEach((c) => { const on = c.dataset.s === prefs.size; c.style.borderColor = on ? '#e5484d' : '#3a2224'; c.style.background = on ? '#e5484d' : 'transparent'; }); };
   for (const s of ['small', 'medium', 'large']) {
     const btn = document.createElement('button');
     btn.textContent = s[0].toUpperCase(); btn.title = s; btn.dataset.s = s;
@@ -3009,7 +2971,7 @@ async function startCompositeRecording(screenStream, camStream, b, note) {
     ctx.restore();
     // 3px brand-accent border
     ctx.beginPath(); ctx.arc(cx, cy, r - 1.5, 0, Math.PI * 2);
-    ctx.lineWidth = 3; ctx.strokeStyle = '#534AB7'; ctx.stroke();
+    ctx.lineWidth = 3; ctx.strokeStyle = '#e5484d'; ctx.stroke();
   }
   const drawTimer = setInterval(drawFrame, 33); // ~30fps
 
@@ -3476,92 +3438,6 @@ async function mediaAddAll(kind) {
 $('#media-add-all-images').onclick = () => mediaAddAll('image');
 $('#media-add-all-videos').onclick = () => mediaAddAll('video');
 
-/* ---------------- SIMPLE MODE: one screen, three steps, all free ---------------- */
-function simpleMedia() { return st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay); }
-st.simpleSel = st.simpleSel || null; // Set of picked asset ids (null = not initialised yet)
-function renderSimpleScreen() {
-  if (!document.getElementById('view-simple')) return;
-  const media = simpleMedia();
-  // first time we see the gallery, pick everything so it "just works"; after
-  // that, respect the user's taps and auto-keep only ids that still exist
-  if (st.simpleSel === null) st.simpleSel = new Set(media.map((a) => a.id));
-  else st.simpleSel = new Set([...st.simpleSel].filter((id) => media.some((a) => a.id === id)));
-  const box = $('#s-thumbs');
-  box.innerHTML = '';
-  media.forEach((a) => {
-    const on = st.simpleSel.has(a.id);
-    const cell = document.createElement('div');
-    cell.style.cssText = `position:relative;cursor:pointer;border-radius:10px;overflow:hidden;outline:${on ? '3px solid var(--accent)' : '3px solid transparent'};opacity:${on ? '1' : '.5'}`;
-    cell.innerHTML = (a.kind === 'video'
-      ? `<video src="${a.url}" muted playsinline style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block"></video>`
-      : `<img src="${a.url}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block">`)
-      + `<span style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:${on ? 'var(--accent)' : 'rgba(0,0,0,.5)'};color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center">${on ? '✓' : ''}</span>`;
-    cell.onclick = () => { if (st.simpleSel.has(a.id)) st.simpleSel.delete(a.id); else st.simpleSel.add(a.id); renderSimpleScreen(); };
-    box.appendChild(cell);
-  });
-  const picked = media.filter((a) => st.simpleSel.has(a.id)).length;
-  $('#s-media-note').textContent = media.length
-    ? `Using ${picked} of ${media.length} — tap to pick which ones go in the video (they play top-to-bottom).`
-    : 'Nothing in your gallery yet — add some below.';
-  const song = firstMusicAsset();
-  $('#s-song-note').textContent = song ? `♪ ${song.label}` : 'No song yet.';
-}
-$('#s-add-media').onclick = () => pickFiles('image/*,video/*', async (files) => {
-  setErr('#s-err', null);
-  const b = $('#s-add-media'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Adding…';
-  try {
-    const added = [];
-    for (const f of files) added.push(await uploadFile(f, (f.type || '').startsWith('video') ? 'video' : 'image'));
-    await loadAssets();
-    // auto-select whatever you just added
-    if (st.simpleSel) added.forEach((a) => a && st.simpleSel.add(a.id));
-    renderSimpleScreen();
-  } catch (e) { setErr('#s-err', e.message); }
-  b.disabled = false; b.textContent = old;
-});
-$('#s-select-all').onclick = () => { st.simpleSel = new Set(simpleMedia().map((a) => a.id)); renderSimpleScreen(); };
-$('#s-select-none').onclick = () => { st.simpleSel = new Set(); renderSimpleScreen(); };
-$('#s-add-song').onclick = () => pickFile('audio/*', async (file) => {
-  setErr('#s-err', null);
-  const b = $('#s-add-song'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Adding…';
-  try { const a = await uploadFile(file, 'audio'); await loadAssets(); addMusicUnique(a.id); renderMusicList(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft(); renderSimpleScreen(); }
-  catch (e) { setErr('#s-err', e.message); }
-  b.disabled = false; b.textContent = old;
-});
-$('#s-make').onclick = async () => {
-  setErr('#s-err', null);
-  const media = simpleMedia().filter((a) => st.simpleSel && st.simpleSel.has(a.id));
-  if (!media.length) return setErr('#s-err', simpleMedia().length ? 'Tap the pictures/videos you want in the video first (they turn blue with a ✓).' : 'Add at least one picture or video first (button ①).');
-  const b = $('#s-make'); b.disabled = true; const old = b.innerHTML; b.innerHTML = '<span class="spinner"></span>Making your video…';
-  $('#s-status').textContent = 'Putting your pictures and song together…';
-  try {
-    // build the timeline from ALL your media, in order — pictures hold 4s,
-    // your video clips play as-is. No AI, no spend.
-    st.seq = media.map((a) => a.kind === 'image'
-      ? { assetId: a.id, kind: 'image', label: a.label, url: a.url, holdDur: 4, start: 0, eq: null }
-      : { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: null });
-    st.trans = st.seq.slice(0, -1).map(() => ({ type: 'fade', duration: 0.5 }));
-    st.seqFormat = '16:9'; st.seqRes = '1080';
-    $('#enhance-auto').checked = true; $('#music-fadeout').checked = true;
-    renderSeq(); persistDraft();
-    const asset = await runRender(null, '#s-make', { prog: '#s-prog', stage: '#s-stage', video: '#s-video', dl: '#s-dl' });
-    $('#s-status').textContent = asset ? '🎉 Done! Press play above, or Download my video.' : '';
-  } catch (e) { setErr('#s-err', e.message); $('#s-status').textContent = ''; }
-  b.disabled = false; b.innerHTML = old;
-};
-$('#s-show-all').onclick = (e) => {
-  e.preventDefault();
-  document.body.classList.remove('simple-only');
-  try { localStorage.setItem('studioSimple', 'off'); } catch (_) {}
-  document.querySelector('#mtabs button[data-view="media"]').click();
-};
-// NOTE: the app opens as the normal, full multi-tab app. The one-screen
-// "simple" layout is no longer forced on anyone (it was confusing as a
-// default). It stays in the code, dormant, in case it's wanted later.
-(function clearForcedSimpleMode() {
-  try { localStorage.removeItem('studioSimple'); } catch (_) {}
-  document.body.classList.remove('simple-only');
-})();
 async function loadCharacters() {
   st.characters = (await jfetch('/api/studio/characters')).characters;
   renderCharacters(); renderSceneCharSelect(); renderRelationships();
@@ -4889,7 +4765,7 @@ $('#set-reset').onclick = async () => {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: 'DELETE' }),
     });
     // clear the client's working state too, then reload into a clean app
-    st.seq = []; st.trans = []; st.musicList = []; st.captions = []; st.overlays = []; st.simpleSel = new Set();
+    st.seq = []; st.trans = []; st.musicList = []; st.captions = []; st.overlays = []; st.simpleSel = null;
     try { localStorage.removeItem('tsid-studio-draft'); } catch (_) {}
     $('#set-reset-status').textContent = `✅ ${d.message} Reloading…`;
     setTimeout(() => location.reload(), 900);
@@ -7116,7 +6992,7 @@ function renderOverlays() {
     card.style.flexDirection = 'column';
     card.style.alignItems = 'stretch';
     card.innerHTML = `
-      <canvas class="ov-prev" style="width:100%;border-radius:8px;background:linear-gradient(135deg,#20204a,#0f0c29)"></canvas>
+      <canvas class="ov-prev" style="width:100%;border-radius:8px;background:linear-gradient(135deg,#26262b,#0d0d0f)"></canvas>
       <input class="input ov-text" value="${escapeHtml(o.text)}" placeholder="Your text (use \\n for a second line)">
       <div class="trim">
         <select class="input ov-font" style="width:auto;padding:5px 8px;font-size:12px">${FONTS.map((f) => `<option${f === o.font ? ' selected' : ''}>${f}</option>`).join('')}</select>
@@ -9156,12 +9032,6 @@ function applySimpleMode() {
   if (typeof crewSongLabel === 'function') crewSongLabel();
   if ($('#crew-lyrics') && $('#lyr-text') && !$('#crew-lyrics').value && $('#lyr-text').value) $('#crew-lyrics').value = $('#lyr-text').value;
 }
-$('#mode-toggle').onclick = () => {
-  const simple = localStorage.getItem('tsid-studio-simple') !== '0';
-  localStorage.setItem('tsid-studio-simple', simple ? '0' : '1');
-  applySimpleMode();
-};
-
 function renderQkFormat() {
   chipRow($('#qk-format'), [
     { key: '9:16', label: 'Phone 9:16' }, { key: '16:9', label: 'YouTube 16:9' }, { key: '1:1', label: 'Square 1:1' },

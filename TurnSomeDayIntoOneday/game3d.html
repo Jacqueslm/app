@@ -77,7 +77,9 @@
     <div class="row" id="moverow"><button class="d" id="dl">&#9664; Dodge</button><button class="d" id="bl">&#128737; Block</button><button class="d" id="dr">Dodge &#9654;</button></div>
     <div class="row" id="corner" hidden><button class="d" id="cw">Water</button><button class="d" id="ct">Towel</button><button class="d" id="cd">A word</button></div>
     <div class="row pick" id="fighters"><button data-f="1"><i style="background:#c8262a"></i>Fighter 1</button><button data-f="2"><i style="background:#2f5fd6"></i>Fighter 2</button><button data-f="3"><i style="background:#141418"></i>Fighter 3</button><button data-f="4"><i style="background:#d7a13a"></i>Fighter 4</button><button data-f="5"><i style="background:#2f9e5c"></i>Fighter 5</button></div>
-    <div class="row one" id="bellrow"><button class="x" id="go">Ring the bell</button></div>
+    <div class="row one" id="uprow" hidden><button class="x" id="getup">Get up</button></div>
+    <div class="row one" id="skiprow" hidden><button class="d" id="skipwalk">Skip the walk in</button></div>
+    <div class="row one" id="bellrow"><button class="x" id="go">Start fighting</button></div>
   </div>
   <div class="load" id="load">LOADING THE ROOF…</div>
 </div>
@@ -431,10 +433,22 @@ function refFace(target){const dx=target.x-ref.position.x,dz=target.z-ref.positi
 // her walk clip covers 1.69 m a second at full speed; she walks at 1.35, so the clip runs at 0.8 and the floor moves under her feet at the same rate
 function refWalk(to){return new Promise(res=>{refFace(to);const from=ref.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/1.35*1000);refLock=performance.now()+ms+400;refPlay('walking',{loop:true,fade:.15,speed:.8});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);ref.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{refIdle();res();}})();});}
 // her count clip, measured: she bends by 0.5 s, points for one at 2.4 s and every 0.87 s after, ten at 10.2 s, straight again by 13 s
+// You can get yourself up. The referee counts either way, but the button is there
+// from the moment you land, and taking it is quicker than waiting for the eight.
+let upWait=null,countStop=false;
+// armed when the body lands - fallen() calls armUp the moment the hips hit the canvas
+function offerUp(){if(auto)return new Promise(()=>{});return new Promise(res=>{upWait=res;});}
+function armUp(){if(upWait)$('uprow').hidden=false;}
+async function raceUp(counting){
+  const early=await Promise.race([counting.then(()=>false),offerUp().then(()=>true)]);
+  if(early)countStop=true;
+  $('uprow').hidden=true;upWait=null;return early;}
 async function refCount(upto,over){refFace(over);const t0=performance.now();refPlay('counting',{fade:.2});
   const words=['One.','Two.','Three.','Four.','Five.','Six.','Seven.','Eight.','Nine.','Ten.'];
-  for(let i=1;i<=upto;i++){const at=2400+(i-1)*870;await wait(Math.max(0,at-(performance.now()-t0)));refFace(over);count(i);say(words[i-1],'Referee');
-    if(i===8&&upto>8)setTimeout(()=>say('Are you alright? Come on.','Referee'),400);}if(upto>=10)await wait(Math.max(0,13000-(performance.now()-t0)));else{await wait(300);refIdle();}}
+  for(let i=1;i<=upto;i++){const at=2400+(i-1)*870;await wait(Math.max(0,at-(performance.now()-t0)));if(countStop)break;refFace(over);count(i);say(words[i-1],'Referee');
+    if(i===8&&upto>8)setTimeout(()=>say('Are you alright? Come on.','Referee'),400);}
+  if(countStop){await wait(200);refIdle();return;}
+  if(upto>=10)await wait(Math.max(0,13000-(performance.now()-t0)));else{await wait(300);refIdle();}}
 
 // ── sweat, breath, and the referee waving it off ────────────────────────────
 const SWEAT=[];
@@ -552,7 +566,8 @@ function skinned(root,tex,clips,gloveColor,noGloves){const gloves=[];
   F.play=(n,opts2={})=>{const a=acts[n];if(!a)return;const prev=F.cur;a.reset();a.setLoop(opts2.loop?T.LoopRepeat:T.LoopOnce,Infinity);a.clampWhenFinished=!opts2.loop;a.timeScale=opts2.speed||1;if(prev&&prev!==a){prev.crossFadeTo(a,opts2.fade??.15,false);}a.play();F.cur=a;return a;};
   F.idle=()=>F.play('idle',{loop:true,fade:.25});return F;}
 // walking at her stride, facing where she goes, then standing
-function castWalk(F,to,mps){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);F.play('walking',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);const y=root.position.y;root.position.lerpVectors(from,to,t);root.position.y=y;if(t<1)requestAnimationFrame(step);else{F.idle();res();}})();});}
+function castWalk(F,to,mps){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);
+  if(walking&&walkSkip){const y0=root.position.y;root.position.copy(to);root.position.y=y0;F.idle();return res();}F.play('walking',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);const y=root.position.y;root.position.lerpVectors(from,to,t);root.position.y=y;if(t<1)requestAnimationFrame(step);else{F.idle();res();}})();});}
 function castFace(F,at){F.root.rotation.y=Math.atan2(at.x-F.root.position.x,at.z-F.root.position.z);}
 // The two behind the addiction leave the way they came in: straight back down the
 // aisle first, then across to their spot. Cutting the corner walked them through
@@ -575,6 +590,7 @@ function seatCrowd(cb){let left=0;for(const k in CROWD_SIDE)for(const key of CRO
 // the walk for a fighter: the ref's walking clip renamed onto its bones (plain names on the shadow, marked names on a skinned body)
 function giveWalk(F,marked){if(!F||!REFCLIPS||F.acts.walk)return;const w=REFCLIPS.find(c=>c.name==='walking');if(!w)return;let clip;if(marked)clip=retarget([w],F.root)[0];else{let hips='';F.root.traverse(o=>{if(o.isBone&&/Hips$/.test(o.name)&&!hips)hips=o.name;});const prefix=hips.replace(/Hips$/,'');const names=new Set();F.root.traverse(o=>{if(o.isBone)names.add(o.name);});clip=new T.AnimationClip('walk',w.duration,w.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i).replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix),prop=t.name.slice(i+1);return names.has(bone)?new t.constructor(bone+'.'+prop,t.times,t.values):null;}).filter(Boolean));}if(F.ownSkin)clip=inPlace([clip],F.root,REF_HIPS)[0];clip.name='walk';F.acts.walk=F.mixer.clipAction(clip);}
 function fighterWalk(F,to,mps,faceAfter,clip){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(250,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);
+  if(walking&&walkSkip){root.position.copy(to);if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();return res();}
   // a named clip rides the walk instead of the walk cycle: the climb through the ropes
   if(clip&&F.acts[clip])F.play(clip,{fade:.2,speed:Math.max(.5,(F.acts[clip].getClip().duration*1000)/ms)});else if(F.acts.walk)F.play('walk',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();res();}})();});}
 const MARK={you:new T.Vector3(-0.25,0,0.3),boss:new T.Vector3(0,0,-0.55)},CORNERPOS={you:new T.Vector3(-1.85,0,1.85),boss:new T.Vector3(1.85,0,-1.85)};
@@ -669,7 +685,13 @@ loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){
   [['trainer',-3.0,3.0,2.36],['cutman',-3.8,2.4,2.13],['clown',3.0,-3.0,-0.79],['wrestler',3.8,-2.4,-1.01]].forEach(([k,x,z,ry])=>loadCast(k,F=>{CORNER[k]=F;F.home=new T.Vector3(x,0,z);F.root.position.copy(F.home);F.root.rotation.y=ry;ready();}));
   loadCast('ringgirl',F=>{GIRL=F;F.home=new T.Vector3(1.6,0,3.4);F.root.position.copy(F.home);F.root.rotation.y=-2.7;let hand=null;F.root.traverse(o=>{if(o.isBone&&/RightHand_b$/.test(o.name))hand=o;});if(hand){cardHand=hand;card=new T.Mesh(new T.PlaneGeometry(.30,.40),new T.MeshBasicMaterial({map:cardTex('1',true),side:T.DoubleSide,toneMapped:false,depthTest:false}));card.renderOrder=10;card.visible=false;scene.add(card);}ready();});
   ready();},undefined,e=>console.error(e));
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
+// Skipping the walk in: while it is running every wait is nothing and every walk
+// snaps to where it was going, so the whole entrance plays through in a frame or
+// two with all its lighting and its cues in the same order, and lands exactly
+// where it would have landed. Outside the walk in these do nothing at all.
+let walking=false,walkSkip=false;
+const wait=ms=>new Promise(r=>setTimeout(r,(walking&&walkSkip)?0:ms));
+function skipWalk(){if(walking)walkSkip=true;}
 // a punch steps in: the body moves along its facing by `dist` over `ms`, holds, then comes back
 function stepIn(F,dist,ms){const root=F.root,from=root.position.clone(),dir=new T.Vector3(Math.sin(root.rotation.y),0,Math.cos(root.rotation.y)),to=from.clone().addScaledVector(dir,dist),t0=performance.now();F.home=F.home||from.clone();F.stepping=true;(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,1-Math.pow(1-t,2));if(t<1&&F.stepping)requestAnimationFrame(step);})();}
 function stepBack(F,ms){F.stepping=false;if(!F.home)return;const root=F.root,from=root.position.clone(),to=F.home.clone(),t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);})();}
@@ -855,6 +877,8 @@ let followWho=null;
 function follow(F,color,power){followWho=F;walkSpot.color.set(color||0xffffff);walkSpot.intensity=power||120;}
 function followOff(){followWho=null;walkSpot.intensity=0;}
 async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clown,W=CORNER.wrestler;
+  walking=true;walkSkip=false;$('skiprow').hidden=false;
+  try{
   // an empty ring: both fighters are still outside it, and the addiction does not exist yet
   YOU.root.visible=false;BOSS.root.visible=false;aura.visible=false;floorGlow.visible=false;rim.intensity=0;propsShow(false);
   // yours
@@ -883,10 +907,13 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   const arm=ANN.play('hand_raising',{fade:.2});await wait(1500);if(arm)arm.paused=true;await wait(1200);if(arm)arm.paused=false;ANN.idle();castWalk(ANN,ANN.home,1.5);
   refPlay('talking',{loop:true,fade:.2});for(const l of ['Protect yourself at all times.','Obey my commands.','Touch gloves.']){say(l,'Referee');await wait(2000);}refIdle();
   YOU.play('lead_jab',{speed:.55});BOSS.play('lead_jab',{speed:.55});await wait(1300);YOU.idle();BOSS.idle();refWalk(ref.userData.home);
-  await Promise.all([fighterWalk(YOU,CORNERPOS.you,1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss,1.4,new T.Vector3(0,0,0))]);await wait(400);}
+  await Promise.all([fighterWalk(YOU,CORNERPOS.you,1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss,1.4,new T.Vector3(0,0,0))]);await wait(400);
+  }finally{if(!walkSkip)walking=false;$('skiprow').hidden=true;}}
 async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;poseOff();fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;showControls(LIVE);ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
   await ringWalks();
-  await nextRound();ai();youAI();}
+  await nextRound();
+  walking=false;walkSkip=false;   // whatever was skipped, the fight itself runs at its own speed
+  ai();youAI();}
 async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
   bossHP=100;youHP=Math.min(100,youHP+25);bars();landed={you:0,boss:0};downs={you:0,boss:0};timeLeft=ROUND_SECS;clockShow();
   snd('round-'+round);say('Round '+round+'.','Announcer');
@@ -940,14 +967,14 @@ function land(kind,dmg,blocked){if(kind==='up'||kind==='combo2')punchIn();flashG
 let queued=null,queuedAt=0;
 setInterval(()=>{if(queued&&running&&!busy&&!downState){const k=queued;queued=null;punch(k);}if(queued&&performance.now()-queuedAt>800)queued=null;},50);
 async function punch(kind){if(!running||downState||!YOU)return;if(busy){queued=kind;queuedAt=performance.now();return;}busy=true;
-  if(kind==='combo'){YOU.play('jab_cross',{speed:1.3});stepIn(YOU,.3,400/1.3);await wait(400/1.3);land('jab',7,bossBlocks());await wait(270/1.3);land('combo2',10,bossBlocks());await wait(420);YOU.idle();stepBack(YOU,300);if(bossHP<=0){busy=false;return knockdown();}await wait(200);BOSS.idle();busy=false;return;}
+  if(kind==='combo'){YOU.play('jab_cross',{speed:1.3});stepIn(YOU,.3,400/1.3);await wait(400/1.3);land('jab',7,bossBlocks());await wait(270/1.3);land('combo2',10,bossBlocks());await wait(420);YOU.idle();stepBack(YOU,300);if(bossHP<=0){await finisher();busy=false;return knockdown();}await wait(200);BOSS.idle();busy=false;return;}
   hand[kind]=hand[kind]==='L'?'R':'L';const clip={jab:['lead_jab','right_jab'],hook:['hook','right_hook'],up:['uppercut','right_uppercut']}[kind][hand[kind]==='L'?0:1],at={jab:500,hook:400,up:470}[kind]/1.3,dmg={jab:9,hook:12,up:16}[kind];
   YOU.play(clip,{speed:1.3});trail(YOU,hand[kind]==='L'?0:1,GLOVES[glove]||0xc8262a,at+320);stepIn(YOU,{jab:.3,hook:.28,up:.3}[kind],at);
   await wait(at);
   land(kind,dmg,bossBlocks());
   await wait(240);YOU.idle();stepBack(YOU,240);
   if(bossHP>0&&bossHP<=28){call(['It is hurt.','It is holding on.','It has nothing left.'],true);if(Math.random()<.5)BOSS.play('stunned',{speed:1.1});}
-  if(bossHP<=0){busy=false;return knockdown();}
+  if(bossHP<=0){await finisher();busy=false;return knockdown();}
   await wait(260);BOSS.idle();busy=false;}
 // its swing: it winds up (the tell), then throws. Slip the way the arrow points, or block.
 async function bossSwing(){if(!running||busy||downState||!BOSS)return;dodge=null;block=false;swingAt=performance.now();
@@ -968,7 +995,7 @@ async function bossSwing(){if(!running||busy||downState||!BOSS)return;dodge=null
     if(Math.random()<0.42){
       slam('COUNTER');ding();call(['Slipped it and made it pay.','Straight back at it.','Read it all the way.'],true);
       YOU.play('right_hook',{speed:1.4});stepIn(YOU,.3,400/1.4);await wait(400/1.4);land('hook',9,false);ysp=Math.min(100,ysp+12);bars();await wait(400);YOU.idle();stepBack(YOU,300);
-      if(bossHP<=0){BOSS.idle();busy=false;return knockdown();}}
+      if(bossHP<=0){await finisher();BOSS.idle();busy=false;return knockdown();}}
     else await wait(120);}
   else if(blocked){youHP=Math.max(0,youHP-6);landed.boss+=6;bsp=Math.min(100,bsp+8);bars();slam('BLOCKED');thud('block');shake=.05;$('red').style.opacity=.4;setTimeout(()=>$('red').style.opacity=0,400);await wait(260);}
   else{const react=['big_head_hit','side_hit','head_hit','hit_back'][Math.floor(Math.random()*4)];YOU.play(react,{speed:1.5});shake=.12;youHP=Math.max(0,youHP-dmgHit);landed.boss+=dmgHit;bsp=Math.min(100,bsp+24);const at2=glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35);hitFx(at2,0xff6a5a,true);sparks(at2,ADD().glow,true);impactRing(at2,0xff8a70,true);sweat(headAt(YOU),12);camKick(BOSS.root.position,YOU.root.position,.16);freeze(120);bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(360);}
@@ -985,16 +1012,48 @@ async function bossSwing(){if(!running||busy||downState||!BOSS)return;dodge=null
 // man still on his feet, which is exactly what people saw. Wait for the fall
 // itself to finish instead. The cap is there so a missing or stuck clip can
 // never leave the fight hanging.
+// The sound of somebody hitting the canvas. Watched off the hips rather than timed,
+// so it lands with the body whatever size it is and however fast the clip is played.
+function floorThud(){try{const c=ac(),t=c.currentTime;
+  const o=c.createOscillator(),og=c.createGain();o.type='sine';
+  o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(36,t+.24);
+  og.gain.setValueAtTime(.9,t);og.gain.exponentialRampToValueAtTime(.001,t+.5);
+  o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+.55);
+  const len=Math.floor(c.sampleRate*.2),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+  const n=c.createBufferSource();n.buffer=buf;
+  const f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(300,t);
+  const ng=c.createGain();ng.gain.setValueAtTime(.55,t);
+  n.connect(f);f.connect(ng);ng.connect(c.destination);n.start(t);}catch(e){}}
 function fallen(F,name,capMs){
   const a=F&&F.acts&&F.acts[name];
   if(!a)return wait(0);
+  const stand=hipsY(F)||0;let hit=false;
   const until=performance.now()+(capMs||7000);
   return new Promise(res=>{(function look(){
+    if(!hit&&stand>0.2&&hipsY(F)<stand*0.45){hit=true;floorThud();shake=Math.max(shake,.13);armUp();}
     const c=a.getClip();
     if(!a.isRunning()||a.time>=c.duration-0.05||performance.now()>until)return res();
     requestAnimationFrame(look);})();});
 }
-async function knockdown(){if(downState)return;downState=true;busy=true;slam('DOWN');snd('boss-down');call('Down it goes.',true);snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
+// The punch that finishes it gets its own moment: the room slows, the last right
+// hand lands on its own with nothing else going on, and then it goes down.
+async function finisher(){
+  if(!YOU||!BOSS)return;
+  $('lines').classList.add('on');slowMo(1600);shot('low',260);slam('FINISH');ding();
+  call(['That is the one.','Right through it.','It has been coming all night.'],true);
+  crowdReact('R','cheer');swell();chant('R',SUPPORT);
+  YOU.play('right_uppercut',{speed:1.05});trail(YOU,1,GLOVES[glove]||0xc8262a,900);
+  stepIn(YOU,.34,430);await wait(430);
+  const at=glovePos(YOU).lerp(BOSS.root.position.clone().setY(1.35),.35);
+  punchIn();freeze(220);shake=.22;roll(.2,1100);
+  hitFx(at,0xfff4d0,true);sparks(at,0xfff0c0,true);sparks(at.clone().setY(at.y+.12),0xffffff,true);
+  impactRing(at,0xfff4d0,true);sweat(headAt(BOSS),16);
+  camKick(YOU.root.position,BOSS.root.position,.24);
+  thud('up');snd('boss-hit-'+(1+Math.floor(Math.random()*4)));crowdJump('R',1);
+  BOSS.play('big_head_hit',{speed:1.1});
+  await wait(640);slow=1;$('lines').classList.remove('on');}
+async function knockdown(){if(downState)return;downState=true;busy=true;countStop=false;slam('DOWN');snd('boss-down');call('Down it goes.',true);snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
   downs.boss++;downsFight.boss++;
   BOSS.play('knocked_out',{speed:1.2});YOU.play('victory',{loop:true,fade:.4});
   shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(BOSS,true);
@@ -1013,9 +1072,13 @@ async function knockdown(){if(downState)return;downState=true;busy=true;slam('DO
 async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam('DOWN');snd('down');call('You are down. Get up.',true);crowdJump('L',1);chant('L',TEMPT);
   downs.you++;downsFight.you++;
   YOU.play('knocked_out',{speed:1.2});shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(YOU,true);
-  await fallen(YOU,'knocked_out');await refWalk(new T.Vector3(.55,0,-.15));
-  await refCount(8,YOU.root.position);
-  snd('getup');call('Up at eight.',true);YOU.play('getting_up',{speed:1.2});await wait(4200);koLights(YOU,false);
+  countStop=false;
+  // offered the moment you land, not once the fall has played out and the referee
+  // has walked over: by then you have spent six seconds on the floor being counted
+  const onOwn=await raceUp((async()=>{await fallen(YOU,'knocked_out');
+    await refWalk(new T.Vector3(.55,0,-.15));
+    if(!countStop)await refCount(8,YOU.root.position);})());
+  snd('getup');call(onOwn?'Up on your own.':'Up at eight.',true);YOU.play('getting_up',{speed:1.2});await wait(4200);koLights(YOU,false);
   await stagger(YOU);youHP=30;bars();shot('tv',800);
   if(downs.you>=3){koLights(YOU,false);refWalk(ref.userData.home);return decision('stopped');}
   refWalk(ref.userData.home);downState=false;busy=false;say('…you got up. Hands up.','Corner');if(timeLeft===0)endRound();}
@@ -1032,9 +1095,9 @@ async function decision(how){running=false;fightOver=true;result=how;downState=f
   $('go').textContent='Again';showControls(false);}
 // pick a fighter: the preview starts over with them, and the pick carries into the live fight
 document.querySelectorAll('#fighters button').forEach(b=>b.onclick=()=>{const n=+b.dataset.f;if(n===fighterN)return;fighterN=n;if(!LIVE)goLive(false);else if(fightOver)loadFighter(n);});
-$('go').onclick=()=>{ac();if(!LIVE)return goLive(true);if(fightOver){if(round){shot('shoulder',0);refWalk(ref.userData.home);}startFight();}};
+$('go').onclick=()=>{ac();if(!LIVE)return takeOver();if(fightOver){if(round){shot('shoulder',0);refWalk(ref.userData.home);}startFight();}};
 $('jl').onpointerdown=e=>{e.preventDefault();autoOff();punch('jab')};$('cb').onpointerdown=e=>{e.preventDefault();autoOff();punch('combo')};$('hk').onpointerdown=e=>{e.preventDefault();autoOff();punch('hook')};$('up').onpointerdown=e=>{e.preventDefault();autoOff();punch('up')};
-const LIVE=(new URLSearchParams(location.search).get('live')==='1');
+let LIVE=(new URLSearchParams(location.search).get('live')==='1');
 let auto=!LIVE,swingSide=null;
 // the picker screen: stand the fighter head to toe in the clear space above the controls
 let posing=true,voW=0,voH=0,voY=-1;
@@ -1062,7 +1125,15 @@ function poseOff(){posing=false;}
 // some previews the addiction reads it right and wins
 let autoSkill=0.28+Math.random()*0.5;
 function autoSet(v){if(v)autoSkill=0.28+Math.random()*0.5;auto=v;const b=$('auto');if(b)b.classList.toggle('on',auto);}
-function autoOff(){if(!LIVE)return goLive(true);if(auto)autoSet(false);}
+function autoOff(){if(!LIVE)return takeOver();if(auto)autoSet(false);}
+// Ringing in off the watch: you take the fight over where it stands. It used to
+// reload the page, which meant the walk-in and the announcements played through a
+// second time before you got a punch in. Nothing restarts now - the round you were
+// watching carries on, with you boxing it.
+function takeOver(){LIVE=true;autoSet(false);
+  const q=new URLSearchParams(location.search);q.set('live','1');q.set('fighter',fighterN);
+  try{history.replaceState(null,'',location.pathname+'?'+q.toString());}catch(e){}
+  if(fightOver)startFight();else showControls(true);}
 // in a fight: punches, blocks and dodges. before one: your fighter and the bell. nothing else.
 function showControls(fighting){$('punchrow').hidden=!fighting;$('moverow').hidden=!fighting;$('fighters').hidden=fighting;$('bellrow').hidden=fighting;}
 function goLive(live){const q=new URLSearchParams(location.search);if(live)q.set('live','1');else q.delete('live');q.set('fighter',fighterN);location.search=q.toString();}
@@ -1089,6 +1160,8 @@ let swingAt=0,guardTimer=null;
 const youHome=new T.Vector3();
 function doDodge(dir){if(!YOU||downState||!running)return;dodge=dir;YOU.play(dir==='L'?'dodging':'dodging_right',{speed:2.2,fade:.08});const dx=dir==='L'?-.3:.3;YOU.root.position.x=youHome.x+dx;if(curShot==='shoulder')cam.position.x=camBase.x+dx*.6;clearTimeout(guardTimer);guardTimer=setTimeout(()=>{if(!busy){YOU.idle();YOU.root.position.x=youHome.x;if(curShot==='shoulder')cam.position.x=camBase.x;}},650);}
 function doBlock(){if(!YOU||downState||!running)return;block=true;YOU.play('center_block',{speed:1.6,fade:.08});clearTimeout(guardTimer);guardTimer=setTimeout(()=>{if(!busy)YOU.idle();},800);}
+$('getup').onclick=()=>{ac();if(upWait){const f=upWait;upWait=null;f();}};
+$('skipwalk').onclick=()=>{ac();skipWalk();};
 $('dl').onpointerdown=e=>{e.preventDefault();autoOff();doDodge('L')};$('dr').onpointerdown=e=>{e.preventDefault();autoOff();doDodge('R')};$('bl').onpointerdown=e=>{e.preventDefault();autoOff();doBlock()};
 const ray=new T.Raycaster(),ndc=new T.Vector2();
 function tapCard(e){if(!card||!card.visible)return false;const r=canvas.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);if(!ray.intersectObject(card,false).length)return false;cardFront=!cardFront;card.material.map=cardFront?cardTex(String(round+1),true):cardTex($('v').textContent.replace(/^Corner/,''),false);card.material.needsUpdate=true;return true;}
@@ -1135,7 +1208,11 @@ function tvPos(a,b,mid,d){
   const back=port?(2.35+d*0.35):(1.15+d*0.3), off=port?1.45:(2.05+d*0.5);
   return mid.clone().setY(port?1.42:1.2).addScaledVector(toYou,back).addScaledVector(side,off);
 }
-const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
+const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)},
+  // from above: the roof you are fighting on, the ring as a square with two people in it
+  sky:{pos:()=>{const m=actionLook();return new T.Vector3(m.x+0.5,6.6,m.z+2.6);},look:()=>actionLook()},
+  rafters:{pos:()=>{const m=actionLook();return new T.Vector3(m.x-2.9,4.5,m.z-2.9);},look:()=>actionLook()},
+  overhead:{pos:()=>{const m=actionLook();return new T.Vector3(m.x+0.25,3.9,m.z+1.15);},look:()=>actionLook()}};
 let walkCam=null;
 const runnerMat=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,blending:T.AdditiveBlending,depthWrite:false});
 const runner=new T.Mesh(new T.PlaneGeometry(1.8,9),runnerMat);runner.rotation.x=-Math.PI/2;runner.position.set(-0.5,.014,0);runner.visible=false;scene.add(runner);
@@ -1177,7 +1254,7 @@ function slowMo(ms){slow=.3;setTimeout(()=>slow=1,ms);}
 // behind him, which is the backwards view, and it is no better to watch than
 // it was to box. It still does the knockdowns and the exchanges in a live
 // round, where the camera is not cycling.
-const AUTOCUTS=['tv','low','crowd','tv','corner','low','tv','crowd'];
+const AUTOCUTS=['tv','overhead','low','crowd','tv','sky','corner','low','tv','rafters','crowd','overhead'];
 setInterval(()=>{
   if(performance.now()<manualUntil)return;
   if(curShot==='walk'||curShot==='entry'||curShot==='girl')return;

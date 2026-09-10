@@ -667,7 +667,21 @@ function setBossBody(key,shadowGltf,done){
       else loadOne(g2=>finish(fighter(g2.scene,g2.animations,SHADOW),false));
     });
 }
-loadOne(g=>{MOVES=g.animations;MOVE_HIPS=hipsRest(g.scene);setBossBody(addictionKey,g,ready);seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
+// Two more moves off Mixamo: a four-punch combination and a bag workout. They
+// arrived in metres and were converted to centimetres to match the library, so
+// they can just be folded in - every fighter and every addiction gets them, and
+// the addiction's rescaling handles them like any other clip.
+function loadExtra(names,done){
+  let left=names.length; if(!left)return done();
+  names.forEach(n=>loader.load(ART+'move-'+n+'.glb',
+    g=>{ if(MOVES&&g.animations)MOVES=MOVES.concat(g.animations); if(!--left)done(); },
+    undefined,
+    ()=>{ if(!--left)done(); }));           // a missing one is not worth a dead roof
+}
+loadOne(g=>{MOVES=g.animations;MOVE_HIPS=hipsRest(g.scene);
+  loadExtra(['quad','bag'],()=>{
+    setBossBody(addictionKey,g,ready);seatCrowd(ready);
+    loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});});
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7a13a,green:0x2f9e5c,pink:0xe0559a};
@@ -890,7 +904,9 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,3.0),0.8),castWalk(T2,new T.Vector3(-1.15,0,4.4),0.8),castWalk(C2,new T.Vector3(-1.9,0,4.9),0.8)]);roar();await wait(900);
   await fighterWalk(YOU,new T.Vector3(-1.05,0,3.15),0.9,new T.Vector3(-1.05,0,0));entryShot('S',800);partRopes('S',true,420);await wait(560);
   await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0));
-  partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
+  partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);
+  // warming up on the spot, rather than celebrating a fight that has not happened
+  YOU.play(YOU.acts.punching_bag?'punching_bag':'victory',{loop:true,fade:.3});roar();await wait(2600);
   // its
   followOff();const a=ADD();aisleOff();shaftsOn(a.glow,.2);aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-0.15,0,-10.9);W.root.position.set(-1.05,0,-11.4);camWalk(BOSS,'front',0);
   follow(BOSS,ADD().glow,170);say('And the opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);camWalk(BOSS,'back',1000);
@@ -931,9 +947,34 @@ async function endRound(){if(!running||fightOver)return;running=false;snd('bell'
   BOSS.idle();YOU.idle();crowdChat();if(round<ROUNDS){await toCorners();cornersIn();await wait(REST_SECS*1000);say('Seconds out.','Announcer');await cornersOut();}
   await nextRound();}
 async function superMove(){if(!running||busy||downState||ysp<100)return;busy=true;inSuper=true;ysp=0;bars();$('super').hidden=true;$('lines').classList.add('on');snd('cheer');swell();chant('R',SUPPORT);call('Day one. Here it comes.',true);say('Day one. Again.','You');
-  shot('low',300);slowMo(1400);const seq=[['lead_jab','jab',8,500],['right_jab','jab',8,500],['hook','hook',12,400],['right_uppercut','up',18,470]];
-  for(const [clip,kind,dmg,at] of seq){YOU.play(clip,{speed:1.3});stepIn(YOU,.3,at/1.3);await wait(at/1.3*1.6);land(kind,dmg);await wait(260);stepBack(YOU,200);if(bossHP<=0)break;}
+  shot('low',300);slowMo(1400);
+  await combo();
   $('lines').classList.remove('on');slow=1;inSuper=false;YOU.idle();stepBack(YOU,300);shot('tv',700);crowdReact('R','cheer');if(bossHP<=0){busy=false;return knockdown();}await wait(300);BOSS.idle();busy=false;}
+// The four-punch combination, one continuous piece of mocap rather than four
+// clips glued end to end. The hits are hung off the clip's own clock, not a
+// stopwatch: measured on the rig, the fists reach at 0.51, 0.70, 0.92 and 1.18
+// seconds, and reading the clip means they still land on the fists when the
+// whole thing is running in slow motion.
+const QUAD=[[0.51,'jab',8],[0.70,'jab',9],[0.92,'hook',12],[1.18,'up',18]];
+async function combo(){
+  const a=YOU.acts.quad_punch?YOU.play('quad_punch',{speed:1}):null;
+  if(!a){   // the clip never arrived: the old four, one after another
+    for(const [clip,kind,dmg,at] of [['lead_jab','jab',8,500],['right_jab','jab',8,500],['hook','hook',12,400],['right_uppercut','up',18,470]]){
+      YOU.play(clip,{speed:1.3});stepIn(YOU,.3,at/1.3);await wait(at/1.3*1.6);land(kind,dmg);await wait(260);stepBack(YOU,200);if(bossHP<=0)break;}
+    return;
+  }
+  stepIn(YOU,.34,1100);
+  // One punch per frame at the most. On a phone the clip advances about a
+  // sixtieth of a second a frame and each hit lands on its own mark; on
+  // something slow enough to skip a whole punch's worth of clip in one frame
+  // they still arrive one after another instead of four landing at once.
+  await new Promise(res=>{let n=0;(function watch(){
+    if(n<QUAD.length&&a.time>=QUAD[n][0]){land(QUAD[n][1],QUAD[n][2]);n++;if(bossHP<=0)return res();}
+    if(n>=QUAD.length)return res();
+    if(!a.isRunning()&&a.time<QUAD[n][0])return res();   // cut short by something else
+    requestAnimationFrame(watch);})();});
+  await wait(300);stepBack(YOU,260);
+}
 $('super').onclick=superMove;
 async function bossSpecial(){if(!running||busy||downState)return;busy=true;bsp=0;bars();aura.scale.set(5.5,5.5,1);rim.intensity=420;$('lines').classList.add('on');call('It is throwing everything.',true);say('Last call.',ADD().name);chant('L',TEMPT);crowdReact('L','cheer');shot('low',300);slowMo(1200);
   for(const [clip,at] of [['hook',400],['right_hook',400],['uppercut',470]]){BOSS.play(clip,{speed:1.4});stepIn(BOSS,.3,at/1.4);await wait(at/1.4*1.6);const b=block;const d=b?4:10;youHP=Math.max(0,youHP-d);landed.boss+=d;YOU.play(b?'center_block':'head_hit',{speed:1.5});hitFx(glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35),ADD().glow,!b);freeze(80);bars();thud(b?'block':'hook');await wait(240);stepBack(BOSS,200);if(youHP<=0)break;}
@@ -998,8 +1039,10 @@ async function bossSwing(){if(!running||busy||downState||!BOSS)return;dodge=null
       if(bossHP<=0){await finisher();BOSS.idle();busy=false;return knockdown();}}
     else await wait(120);}
   else if(blocked){youHP=Math.max(0,youHP-6);landed.boss+=6;bsp=Math.min(100,bsp+8);bars();slam('BLOCKED');thud('block');shake=.05;$('red').style.opacity=.4;setTimeout(()=>$('red').style.opacity=0,400);await wait(260);}
-  else{const react=['big_head_hit','side_hit','head_hit','hit_back'][Math.floor(Math.random()*4)];YOU.play(react,{speed:1.5});shake=.12;youHP=Math.max(0,youHP-dmgHit);landed.boss+=dmgHit;bsp=Math.min(100,bsp+24);const at2=glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35);hitFx(at2,0xff6a5a,true);sparks(at2,ADD().glow,true);impactRing(at2,0xff8a70,true);sweat(headAt(YOU),12);camKick(BOSS.root.position,YOU.root.position,.16);freeze(120);bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(360);}
-  BOSS.idle();YOU.idle();stepBack(BOSS,300);if(curShot==='shoulder')cam.position.x=camBase.x;YOU.root.position.x=youHome.x;dodge=null;block=false;say(dodged?'Lucky.':blocked?'Cover up all you like.':'Sit down.',ADD().name);
+  else{const react=['big_head_hit','side_hit','head_hit','hit_back'][Math.floor(Math.random()*4)];if(!inSuper)YOU.play(react,{speed:1.5});shake=.12;youHP=Math.max(0,youHP-dmgHit);landed.boss+=dmgHit;bsp=Math.min(100,bsp+24);const at2=glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35);hitFx(at2,0xff6a5a,true);sparks(at2,ADD().glow,true);impactRing(at2,0xff8a70,true);sweat(headAt(YOU),12);camKick(BOSS.root.position,YOU.root.position,.16);freeze(120);bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(360);}
+  // Mid-combination your body keeps throwing it. A swing that was already in the
+  // air still lands and still hurts - it just does not take the punches off you.
+  BOSS.idle();if(!inSuper)YOU.idle();stepBack(BOSS,300);if(curShot==='shoulder')cam.position.x=camBase.x;YOU.root.position.x=youHome.x;dodge=null;block=false;say(dodged?'Lucky.':blocked?'Cover up all you like.':'Sit down.',ADD().name);
   if(dodged)call(['Slipped it.','Not there.','Made it miss.']);else if(blocked)call(['Blocked.','Took it on the gloves.']);else if(youHP<=28)call(['Hands up. Hands up.','That one landed.','Needs the bell.'],true);
   busy=false;
   if(youHP<=0)meDown();else if(bsp>=100&&running)bossSpecial();}

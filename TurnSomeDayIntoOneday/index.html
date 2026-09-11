@@ -922,9 +922,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
        (.friendly-door) and revealed only when /api/friendly/access says this
        account is on the list, exactly like Friendly's own doors - so if that
        check never runs or fails, the door stays shut rather than half-open.
-       Not a tab: the bar stays four. -->
+       This row and the matching Zodiacs switch in the bar are the only two
+       ways into the page from inside the app. -->
   <div class="setting-row friendly-door" data-friendly="1" id="home-key-row" onclick="location.href='/key'" style="margin:8px 16px 0;border-radius:12px">
-    <i class="ti ti-key" style="color:#9B7BE2"></i>
+    <i class="ti ti-moon" style="color:#9B7BE2"></i>
     <div class="setting-row-txt"><p>Life's Zodiacs</p><span>The Key &mdash; private to you</span></div>
     <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
   </div>
@@ -1835,6 +1836,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="bn" id="bn-game" onclick="openTower();actBn('bn-game')"><i class="ti ti-glove"></i><span>The Fight</span></div>
     <div class="bn friendly-door" data-friendly="1" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
+    </div>
+    <!-- The Key: the private Life's Zodiacs, as a switch in the bar rather
+         than a row to scroll to. friendly-door like every other way in, so it
+         is here only for accounts the server has already said yes to. -->
+    <div class="bn friendly-door" data-friendly="1" id="bn-key" onclick="location.href='/key'">
+      <i class="ti ti-moon"></i><span>Zodiacs</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
@@ -12489,7 +12496,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='4.9';
+const APP_VERSION='5.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

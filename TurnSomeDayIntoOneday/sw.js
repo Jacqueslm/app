@@ -9,7 +9,7 @@
 // gone. Anyone who chose Deep had the one voice that goes silent offline.
 // Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
 // cannot drift apart unnoticed again.
-const CACHE_NAME = 'tsid-shell-v4.8';
+const CACHE_NAME = 'tsid-shell-v4.9';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -105,6 +105,12 @@ self.addEventListener('fetch', (event) => {
   // a redirected response from inside a service worker is exactly the kind of
   // thing that breaks for installed users only, so it never enters the worker.
   if (url.pathname === '/play' || url.pathname.startsWith('/play/')) return;
+
+  // The Key is private: /key sends anyone not signed in and on the allowlist
+  // back to /app. Caching a 200 response for /key would put the page in the
+  // shell cache, and the offline fallback below would then hand it out with no
+  // check at all. Like /play, it never enters the worker.
+  if (url.pathname === '/key' || url.pathname === '/key.html') return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

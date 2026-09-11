@@ -12497,6 +12497,9 @@ function updateProfileEditUI(){
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
 const APP_VERSION='5.0';
+// The server not answering is said in five places, and it had been typed out
+// five times — which is how five copies of one sentence quietly drift apart.
+const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -13029,7 +13032,7 @@ async function submitChangePassword(){
     closeChangePasswordModal();
     appInfo('Password changed','Your password has been updated.');
   }catch(e){
-    errEl.textContent='Could not reach the server. Check your connection and try again.';
+    errEl.textContent=OFFLINE_ERR;
   }
 }
 
@@ -13897,7 +13900,7 @@ async function hardResetApp(){
           return;
         }
       }catch(e){
-        pwConfirmError('Could not reach the server. Check your connection and try again.');
+        pwConfirmError(OFFLINE_ERR);
         return;
       }
       closePwConfirmModal();
@@ -14112,7 +14115,7 @@ async function deleteAccountFlow(){
         document.getElementById('onboarding').style.display='none';
         showAuthGate();
       }catch(e){
-        pwConfirmError('Could not reach the server. Check your connection and try again.');
+        pwConfirmError(OFFLINE_ERR);
       }
     });
   },{okText:'Delete account',cancelText:'Keep my account'});
@@ -14182,7 +14185,7 @@ async function forgotPassword(){
     if(res.status===429){errEl.textContent=data.error||'Too many reset requests. Try again later.';return;}
     appInfo('Check your email',"If that email has an account, a reset link is on its way. It works once and expires in an hour — check spam if you don't see it.");
   }catch(e){
-    errEl.textContent='Could not reach the server. Check your connection and try again.';
+    errEl.textContent=OFFLINE_ERR;
   }
 }
 
@@ -14245,7 +14248,7 @@ async function submitGateAuth(){
     save();
     enterApp();
   }catch(e){
-    errEl.textContent='Could not reach the server. Check your connection and try again.';
+    errEl.textContent=OFFLINE_ERR;
     releaseGate();
   }
 }

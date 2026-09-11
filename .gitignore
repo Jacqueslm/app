@@ -77,3 +77,8 @@ TurnSomeDayIntoOneday/tools/mixamo/three/
 # Node dependencies — npm install fetches these on every machine
 node_modules/
 
+# Left behind by The Key's installer (private/install.js in the Zodiac repo), which
+# keeps a .bak beside every file it edits. robots.txt.bak would be readable at the
+# site root, so they stay out of git.
+*.bak
+

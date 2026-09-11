@@ -161,7 +161,19 @@ app.use('/server', (req, res) => res.status(404).end());
 // The admin page is served only through the owner-gated /admin/stats route below.
 // It carries no data of its own, but static would hand out the shell to anyone.
 app.get('/admin-stats.html', (req, res) => res.status(404).end());
+// Same reason as the line above: static would hand this out to anyone.
+app.get('/key.html', (req, res) => res.status(404).end());
 app.use(express.static(path.join(__dirname, '..')));
+
+// The Key — private. Signed in AND on the allowlist, or you go to /app without
+// learning the page is there. A redirect rather than requireAuth, which answers
+// 401 JSON — right for an API call, wrong for somebody opening a page.
+app.get('/key', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'key.html'));
+});
+
 
 // Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
 // flyers, and video end cards, instead of the .html extension.
@@ -934,6 +946,18 @@ function isOwnerRequest(req) {
   const user = db.getUserById(userId);
   return !!(user && user.email === DIAG_OWNER_EMAIL);
 }
+
+/* Who may see The Key. isValidSession() only says the cookie is good — it does
+   NOT set req.userId, only requireAuth does — so this reads the payload the
+   same way isOwnerRequest above does. */
+function isFriendlyRequest(req) {
+  const token = req.cookies && req.cookies[COOKIE_NAME];
+  const payload = token && verifySession(token);
+  const userId = req.userId || (payload && payload.userId);
+  if (!userId) return false;
+  return isFriendlyAllowed(db.getUserById(userId));
+}
+
 function requireOwner(req, res) {
   if (!DIAG_OWNER_EMAIL) {
     res.status(403).json({ error: 'Admin stats are unavailable: APP_OWNER_EMAIL is not configured.' });

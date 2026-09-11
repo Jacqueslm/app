@@ -9,5 +9,6 @@ Disallow: /unsubscribe
 # most personal thing anybody writes in this app.
 Disallow: /l/
 Disallow: /letter.html
+Disallow: /key
 
 Sitemap: https://www.turnsomedayintodayone.com/sitemap.xml

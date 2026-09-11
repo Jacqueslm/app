@@ -918,6 +918,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
   </div>
 
+  <!-- The Key: the private Life's Zodiacs at /key. Hidden in CSS by default
+       (.friendly-door) and revealed only when /api/friendly/access says this
+       account is on the list, exactly like Friendly's own doors - so if that
+       check never runs or fails, the door stays shut rather than half-open.
+       Not a tab: the bar stays four. -->
+  <div class="setting-row friendly-door" data-friendly="1" id="home-key-row" onclick="location.href='/key'" style="margin:8px 16px 0;border-radius:12px">
+    <i class="ti ti-key" style="color:#9B7BE2"></i>
+    <div class="setting-row-txt"><p>Life's Zodiacs</p><span>The Key &mdash; private to you</span></div>
+    <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+  </div>
+
 
 
   <div class="row">
@@ -12478,7 +12489,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='4.8';
+const APP_VERSION='4.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

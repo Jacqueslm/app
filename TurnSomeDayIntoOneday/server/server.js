@@ -51,6 +51,29 @@ const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
 // actually accept - MINIMAL additionally requires thought signatures and 400s
 // without them. Overridable if Friendly ever needs to think harder.
 const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
+// The Key's Gemini reading (private page at /key, route /api/key-reading). A
+// reading is long, so it gets its own budget rather than Friendly's, and more
+// room to think than Friendly gets - a reply wants to be quick, a reading
+// wants to be right.
+const KEY_READING_MAX_TOKENS = Number(process.env.KEY_READING_MAX_TOKENS || 6000);
+const KEY_READING_THINKING_LEVEL = process.env.KEY_READING_THINKING_LEVEL || 'MEDIUM';
+
+// The Key's Gemini reading (POST /api/key-reading), for the private page at
+// /key. Mounted up here because server.js only reaches its AI code at the end
+// of the file; the route, its prompt and its gate live in their own modules so
+// they can be tested directly. It attaches its own cookieParser and
+// express.json because it mounts above the global ones - without them every
+// request would fail the gate, which would look private and be broken.
+require('./key-reading-route').mount(app, {
+  isFriendlyRequest,
+  gemini: {
+    key: GEMINI_API_KEY,
+    model: GEMINI_MODEL,
+    maxTokens: KEY_READING_MAX_TOKENS,
+    thinkingLevel: KEY_READING_THINKING_LEVEL,
+  },
+  ownerEmail: () => DIAG_OWNER_EMAIL,
+});
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // The app is free (Jacques, 8 Sep 2026). Friendly is not a paid feature, it is a
 // private one: an allowlist of emails, checked here rather than in the client so

@@ -91,7 +91,10 @@ test('the private page is present, noindex, and carries no key of its own', () =
   assert.match(page, /noindex/, 'the page carries its own noindex, which a crawler cannot ignore');
   assert.ok(!/sk-ant/.test(page), 'the AI key must never be in the page');
   assert.ok(!/apiKey|API_KEY/.test(page), 'nor named in it');
-  assert.match(page, /\/api\/chat/, 'the AI lives on the server, reached by calling /api/chat');
+  // The AI pass used to go through Friendly's /api/chat, which could not carry
+  // this app's 48 weeks. It has its own private route now, gated the same way.
+  assert.match(page, /\/api\/key-reading/,
+    'the AI lives on the server, reached by calling /api/key-reading');
 });
 
 test('the service worker never caches the private page', () => {

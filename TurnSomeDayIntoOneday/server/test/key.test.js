@@ -33,6 +33,17 @@ test('the home screen has a door to /key', () => {
     'and it must carry friendly-door, or it is visible before the server has said yes');
 });
 
+test('the bar carries a Zodiacs switch, hidden the same way', () => {
+  // The row answers "where do I go"; this answers "how do I switch between the
+  // two apps" - a place in the bar, not something to scroll for. Same door, so
+  // the same rule applies: invisible until the server has said yes.
+  const tab = APP.match(/<div class="[^"]*" data-friendly="1" id="bn-key"[^>]*onclick="location\.href='\/key'"/);
+  assert.ok(tab, 'bn-key must exist in the bottom bar and open /key');
+  assert.match(tab[0], /\bfriendly-door\b/,
+    'and it must carry friendly-door, or the switch is visible to everybody');
+  assert.match(tab[0], /class="bn[ "]/, 'and it must be a bar item (.bn), not a stray div');
+});
+
 test('the door is hidden unless the server says this account is on the list', () => {
   // Hidden in CSS by default, so a failed or never-run access check leaves the
   // door shut rather than half-open.

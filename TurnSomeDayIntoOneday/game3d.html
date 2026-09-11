@@ -444,6 +444,7 @@ async function raceUp(counting){
   if(early)countStop=true;
   $('uprow').hidden=true;upWait=null;return early;}
 async function refCount(upto,over){refFace(over);const t0=performance.now();refPlay('counting',{fade:.2});
+  holdCam(2400+upto*900+1200);   // a count is the one moment you want the lens to stop
   const words=['One.','Two.','Three.','Four.','Five.','Six.','Seven.','Eight.','Nine.','Ten.'];
   for(let i=1;i<=upto;i++){const at=2400+(i-1)*870;await wait(Math.max(0,at-(performance.now()-t0)));if(countStop)break;refFace(over);count(i);say(words[i-1],'Referee');
     if(i===8&&upto>8)setTimeout(()=>say('Are you alright? Come on.','Referee'),400);}
@@ -1241,9 +1242,12 @@ function camDrift(dt){if(dragging){manualUntil=performance.now()+9000;orbTarget.
   const manual=performance.now()<manualUntil;
   if(!manual&&autoCam&&performance.now()>holdUntil){
     const pz=posing&&fightOver;/* on the picker the swing stays gentle and the push in and out stops, so nobody gets cropped */
-    orbTarget.yaw=(Math.sin(driftT*0.10)*0.20+Math.sin(driftT*0.043)*0.09)*(pz?0.4:1);
-    orbTarget.pitch=pz?0:0.03+Math.sin(driftT*0.077)*0.05;
-    orbTarget.zoom=pz?1:0.93+Math.sin(driftT*0.055)*0.09;
+    // Halved, and slowed. Between this and a cut every few seconds the camera was
+    // never once still: seventeen degrees of swing and a push in and out, on top
+    // of a new position every three seconds. Nothing to settle your eye on.
+    orbTarget.yaw=(Math.sin(driftT*0.07)*0.10+Math.sin(driftT*0.031)*0.04)*(pz?0.4:1);
+    orbTarget.pitch=pz?0:0.02+Math.sin(driftT*0.054)*0.025;
+    orbTarget.zoom=pz?1:0.97+Math.sin(driftT*0.039)*0.04;
   }else if(!manual){orbTarget.yaw=0;orbTarget.pitch=0;orbTarget.zoom=1;}
   const k=Math.min(1,dt*(manual?0.55:1.1));
   orbYaw+=(orbTarget.yaw-orbYaw)*k;orbPitch+=(orbTarget.pitch-orbPitch)*k;orbZoom+=(orbTarget.zoom-orbZoom)*k;}
@@ -1339,7 +1343,8 @@ const AUTOCUTS=['tv','overhead','low','crowd','tv','sky','corner','low','tv','ra
 setInterval(()=>{
   if(performance.now()<manualUntil)return;
   if(curShot==='walk'||curShot==='entry'||curShot==='girl')return;
-  if(auto&&!downState){shot(AUTOCUTS[(++autoCut)%AUTOCUTS.length],750);return;}
+  // and the move itself glides rather than snaps: same distance, twice as long
+  if(auto&&!downState){shot(AUTOCUTS[(++autoCut)%AUTOCUTS.length],1500);return;}
   if(!running||downState)return;
   // Measured 8 Sep 2026: the round used to cut between the ringside camera and the
   // over-the-shoulder one every few seconds. Ringside you see your own fighter's
@@ -1348,7 +1353,7 @@ setInterval(()=>{
   // and it switched while you were trying to read a punch. That is the backwards.
   // The round stays ringside now. The other cameras still do the walk-in, the
   // knockdowns and the preview, where nobody is trying to dodge anything.
-  if(curShot!=='tv')shot('tv',600);},3400);
+  if(curShot!=='tv')shot('tv',600);},7000);
 // nothing is ever right up against the lens: if the camera ends a move too close to what it
 // is looking at, it backs off along its own sight line rather than filling the frame with a body
 function camClear(p,l,min){const v=p.clone().sub(l);const d=v.length();if(d>=min)return p;

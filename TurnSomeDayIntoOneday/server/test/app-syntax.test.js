@@ -52,7 +52,10 @@ test('every inline script in index.html actually parses', () => {
 
 test('the other shipped HTML pages parse too', () => {
   const dirHtml = path.join(__dirname, '..', '..');
-  const pages = ['letter.html', 'reviews.html', 'admin-stats.html', 'landing.html'];
+  // key.html is in here because it carries more inline script than any of the
+  // others put together — the whole Key, its questionnaire and its AI pass — and
+  // a SyntaxError in it leaves the page looking private and doing nothing.
+  const pages = ['key.html', 'letter.html', 'reviews.html', 'admin-stats.html', 'landing.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

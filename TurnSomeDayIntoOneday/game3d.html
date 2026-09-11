@@ -593,7 +593,16 @@ function fighterWalk(F,to,mps,faceAfter,clip){return new Promise(res=>{const roo
   if(walking&&walkSkip){root.position.copy(to);if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();return res();}
   // a named clip rides the walk instead of the walk cycle: the climb through the ropes
   if(clip&&F.acts[clip])F.play(clip,{fade:.2,speed:Math.max(.5,(F.acts[clip].getClip().duration*1000)/ms)});else if(F.acts.walk)F.play('walk',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();res();}})();});}
-const MARK={you:new T.Vector3(-0.25,0,0.3),boss:new T.Vector3(0,0,-0.55)},CORNERPOS={you:new T.Vector3(-1.85,0,1.85),boss:new T.Vector3(1.85,0,-1.85)};
+// The marks. They used to stand 0.89 apart, which for two bodies 1.8 tall is
+// inside one another - and an addiction drawn as a wide cartoon overlapped the
+// man completely. A step in on a punch takes 0.3 off this, so it has to hold
+// them clear at about 1.2 as well.
+const MARK={you:new T.Vector3(-0.2,0,0.45),boss:new T.Vector3(0,0,-1.05)},CORNERPOS={you:new T.Vector3(-1.85,0,1.85),boss:new T.Vector3(1.85,0,-1.85)};
+// The two corners that belong to nobody. A fighter is sent to the nearer one
+// while the other is counted, which is the rule and also stops you standing on
+// top of somebody who is on the canvas.
+const NEUTRAL=[new T.Vector3(1.85,0,1.85),new T.Vector3(-1.85,0,-1.85)];
+function neutralFor(p){ return p.distanceTo(NEUTRAL[0])<=p.distanceTo(NEUTRAL[1])?NEUTRAL[0]:NEUTRAL[1] }
 // The corner stool. The sit puts a body's hips a little over half its standing
 // height up, so the seat belongs just under them - and it has to be measured off
 // the body that sits on it, because an addiction can be two thirds the size of a
@@ -1101,11 +1110,13 @@ async function knockdown(){if(downState)return;downState=true;busy=true;countSto
   BOSS.play('knocked_out',{speed:1.2});YOU.play('victory',{loop:true,fade:.4});
   shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(BOSS,true);
   await fallen(BOSS,'knocked_out');
+  fighterWalk(YOU,neutralFor(YOU.root.position),1.7,BOSS.root.position);
   await refWalk(new T.Vector3(.8,0,-1.0));
   const out=downsFight.boss>=4,stopped=!out&&downs.boss>=3;
   await refCount(out?10:8,BOSS.root.position);
   if(out){await wait(600);koLights(BOSS,false);return decision('ko');}
   BOSS.play('getting_up',{speed:1.2});await wait(3000);koLights(BOSS,false);await stagger(BOSS);bossHP=30;bars();
+  await fighterWalk(YOU,MARK.you,1.7,BOSS.root.position);   // back to your mark
   if(stopped){refWalk(ref.userData.home);return decision('tko');}
   downWho=null;refWalk(ref.userData.home);shot('tv',800);BOSS.idle();YOU.idle();
   say('It beats the count. Round scored '+(10-downs.boss)+' against it.','Corner');
@@ -1119,10 +1130,13 @@ async function meDown(){if(busy&&!downState)return;busy=true;downState=true;down
   // offered the moment you land, not once the fall has played out and the referee
   // has walked over: by then you have spent six seconds on the floor being counted
   const onOwn=await raceUp((async()=>{await fallen(YOU,'knocked_out');
+    fighterWalk(BOSS,neutralFor(BOSS.root.position),1.7,YOU.root.position);
     await refWalk(new T.Vector3(.55,0,-.15));
     if(!countStop)await refCount(8,YOU.root.position);})());
   snd('getup');call(onOwn?'Up on your own.':'Up at eight.',true);YOU.play('getting_up',{speed:1.2});await wait(4200);koLights(YOU,false);
-  await stagger(YOU);downWho=null;youHP=30;bars();shot('tv',800);
+  await stagger(YOU);downWho=null;youHP=30;bars();
+  await fighterWalk(BOSS,MARK.boss,1.7,YOU.root.position);
+  shot('tv',800);
   if(downs.you>=3){koLights(YOU,false);refWalk(ref.userData.home);return decision('stopped');}
   refWalk(ref.userData.home);downState=false;busy=false;say('…you got up. Hands up.','Corner');if(timeLeft===0)endRound();}
 // the end: a knockout, a stoppage, or the cards after six. It can end a fight. It never ends you.
@@ -1250,12 +1264,16 @@ let sx=null;canvas.addEventListener('pointerup',e=>{if(sx==null)return;const dx=
 let downWho=null;
 function downLowPos(){
   if(!downWho)return new T.Vector3(-1.7,0.5,1.9);
-  const d=downWho.root.position,other=(downWho===YOU&&BOSS)?BOSS.root.position:(YOU?YOU.root.position:null);
-  const away=other?d.clone().sub(other).setY(0):new T.Vector3(0,0,1);
-  if(away.lengthSq()<0.01)away.set(0,0,1);
-  away.normalize();
-  const side=new T.Vector3(away.z,0,-away.x).multiplyScalar(1.05);
-  return d.clone().setY(1.18).addScaledVector(away,2.6).add(side);
+  const d=downWho.root.position;
+  // Off the house side, always. It used to stand away from whichever fighter was
+  // still up - and once that fighter was sent to a neutral corner it dragged the
+  // camera out through the ropes into the dark, looking at nothing.
+  // and off to the left, because the referee always counts from the right - this
+  // way the body is between the two of them rather than behind him
+  return new T.Vector3(
+    Math.max(-2.2,Math.min(2.2, d.x-1.15)),
+    1.15,
+    Math.max(1.2,Math.min(3.2, d.z+2.0)));
 }
 function tvPos(a,b,mid,d){
   const toYou=a.clone().sub(b);toYou.y=0;
@@ -1266,7 +1284,7 @@ function tvPos(a,b,mid,d){
   const back=port?(2.35+d*0.35):(1.15+d*0.3), off=port?1.45:(2.05+d*0.5);
   return mid.clone().setY(port?1.42:1.2).addScaledVector(toYou,back).addScaledVector(side,off);
 }
-const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>downLowPos(),look:()=>downWho?downWho.root.position.clone().setY(0.34):new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)},
+const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>downLowPos(),look:()=>downWho?downWho.root.position.clone().setY(0.42):new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)},
   // from above: the roof you are fighting on, the ring as a square with two people in it
   sky:{pos:()=>{const m=actionLook();return new T.Vector3(m.x+0.5,6.6,m.z+2.6);},look:()=>actionLook()},
   rafters:{pos:()=>{const m=actionLook();return new T.Vector3(m.x-2.9,4.5,m.z-2.9);},look:()=>actionLook()},
@@ -1290,6 +1308,11 @@ function entryShot(side,ms){SHOTS.entry=side==='N'?{pos:()=>new T.Vector3(0.15,1
 let curShot='shoulder',camFrom=null,camTo=null,camT=0,camMs=0,lookFrom=null,lookTo=null,manualUntil=0,autoCut=0,slow=1;
 function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;recentre();if(!ms){cam.position.copy(S2.pos());look.copy(S2.look());camTo=null;return;}camFrom=cam.position.clone();camTo=S2.pos();lookFrom=look.clone();lookTo=S2.look();camT=0;camMs=ms;}
 function actionLook(){
+  // While somebody is down the camera watches the body, not the midpoint between
+  // the two. The midpoint was fine when both stood together; now the one still up
+  // is sent to a neutral corner, and aiming halfway between them pointed the lens
+  // at empty air with the man on the canvas out of frame.
+  if(downWho) return downWho.root.position.clone().setY(0.45);
   if(YOU&&BOSS){const m=YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5);m.y=1.2;return m;}
   return LOOK.clone();}
 function camTick(dt){liftFrame();if(posing&&fightOver&&!document.getElementById('fighters').hidden){poseFrame();return;}

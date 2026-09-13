@@ -12,7 +12,7 @@
 const path = require('path');
 const fs = require('fs');
 
-const BACKUP_DIR = path.join(__dirname, 'backups', 'auto');
+const { BACKUP_DIR } = require('./locations');
 const SNAPSHOT_RE = /^studio-\d{8}-\d{6}\.sqlite$/;
 const KEEP = 8;
 

@@ -481,6 +481,114 @@ ol.steps li b{color:var(--gold); font-weight:600}
 .ai-out.bad p{color:#ffd9de}
 .ai-out.bad .ai-still{color:var(--dim); font-size:14px; font-style:italic}
 </style>
+
+<!-- ─── THE VOICE, ON EVERY SCREEN ───────────────────────────────────────────
+     Jacques, 13 Sep 2026: "add voice all the way through the horoscope app — it
+     only reads for birthday nothing else." He was right: pressing Read it to me
+     read the birthday reading and The Key, and on the other five tabs there was
+     no button at all.
+
+     Why this block is up here in the head and not beside the rest of the voice
+     code: the editor this was written with cannot reach past roughly the first
+     60KB of a 1.3MB file, and the voice code lives at the very bottom of it.
+     A head script that waits for DOMContentLoaded runs AFTER the page's own
+     script has finished (that one sits at the end of the body), so it can do
+     what sleeping beside the voice code would have done: put the same read bar
+     on the five tabs that had none, and replace readableBlocks() so the voice
+     reads whichever tab is actually open.
+
+     Everything else about the voice — the engine quirks, the read-along
+     lighting, the voice picker, the keep-awake — is untouched and still where
+     it was. If this file is ever edited with a tool that reaches the bottom,
+     folding this block back in beside that code is the tidy thing to do. -->
+<script>
+(function(){
+  'use strict';
+
+  /* The five tabs that had no bar. The birthday and The Key keep their own —
+     they came first, and their copies are written for a long read. */
+  const BARS = ['panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel'];
+  const BAR =
+    '<div class="tools">'
+    + '<button class="btn ghost sm speak-btn" data-act="speak">Read it to me</button>'
+    + '<button class="btn ghost sm stop-btn" data-act="stop" hidden>Stop</button>'
+    + '<button class="btn ghost sm" data-act="voice" title="Choose the voice">Voice</button>'
+    + '</div>'
+    + '<div class="voicebar" hidden>'
+    + '<label>Voice</label>'
+    + '<select class="voice-pick" aria-label="Voice"></select>'
+    + '<button class="btn ghost sm" data-act="try">Hear it</button>'
+    + '<p class="note">Whatever your phone or computer has installed. Your choice is remembered, and it is the same voice on every screen.</p>'
+    + '</div>';
+
+  /* Which box on the open tab holds the words. One line per tab; the birthday
+     reading is the only screen with two versions of itself. */
+  const ROOT = {
+    'panel-key':    'k-result',
+    'panel-people': 'people-list',
+    'panel-pair':   'pair-result',
+    'panel-matrix': 'matrix-box',
+    'panel-game':   'game-box',
+    'panel-wheel':  'wheel-list',
+  };
+
+  let NOTE = null;
+
+  function readRoot(){
+    const open = document.querySelector('.panel:not([hidden])');
+    if(!open) return null;
+    if(open.id === 'panel-read'){
+      /* Whichever version of the birthday reading is showing — reading the one
+         that is hidden aloud is worse than reading nothing. */
+      const box = document.getElementById('simple-box');
+      return (box && !box.hidden) ? box : document.getElementById('reading-full');
+    }
+    const id = ROOT[open.id];
+    return id ? document.getElementById(id) : null;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+
+    /* 1. The bar, on every tab that had none. */
+    BARS.forEach(function(id){
+      const panel = document.getElementById(id);
+      if(panel && !panel.querySelector('[data-act="speak"]')) panel.insertAdjacentHTML('afterbegin', BAR);
+    });
+
+    /* 2. What gets read. The same filters the original used — no disclaimers, no
+       notes, and none of the AI block's own pitch — plus the things the other
+       tabs are made of: a saved person's card, a pair reading, a period on The
+       48, a quiz question with its answers, and on the matrix the names down the
+       side, the legend and the tally (the cells themselves are three marks in a
+       grid — read aloud they are noise, so they are left out on purpose). */
+    readableBlocks = function(){
+      const src = readRoot();
+      if(!src) return [];
+      return Array.prototype.slice.call(src.querySelectorAll(
+          'h2, h3, h4, .dt, .db, .pn, .pd, .pp, .pt, .q, .vt, .sub2, .legend span, .tally div, th, p, li, button.mbtn, button.opt'))
+        .filter(function(e){ return !e.classList.contains('disclaim') && !e.classList.contains('note'); })
+        .filter(function(e){ return !e.closest('.ai-ask') || e.closest('.ai-out'); })
+        .map(function(e){ return {el:e, text:(e.textContent || '').trim()}; })
+        .filter(function(b){ return b.text.length > 1; });
+    };
+
+    /* 3. A screen with nothing on it says so. An empty People list, or a pair
+       nobody has picked yet, used to make the button do nothing at all — which
+       reads as broken rather than as empty. */
+    const pageSpeech = speakReading;
+    speakReading = function(){
+      if(!SPEAKING && !readableBlocks().length){
+        speakLabel('Nothing here to read yet');
+        clearTimeout(NOTE);
+        NOTE = setTimeout(function(){ speakLabel('Read it to me'); }, 2200);
+        return;
+      }
+      clearTimeout(NOTE);
+      return pageSpeech();
+    };
+  });
+})();
+</script>
 </head>
 <body>
 <canvas id="stars"></canvas>

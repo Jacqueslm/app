@@ -1,8 +1,116 @@
 # MASTER STATUS — every request, one place
 
-**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 26, 2026.
+**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Sep 13, 2026.
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
+
+---
+
+## 🛠 13 SEP 2026 — REVIEWS DELETED, STUDIO MOVED INSIDE THE APP
+
+Jacques: *"remove review pages thanks for review"* and *"add studio to the app"*
+(he is using up his Railway subscription, so the move is a move, not a second
+host).
+
+**Reviews are gone, all of it.** Deleted: `reviews.html` and the `/reviews`
+route, the in-app "Leave a review" row + modal + its 90 lines of client script,
+`/api/reviews` `/mine` `/public` `/queue` `/action`, the `reviews` table and
+its five db functions, the day-30 "one honest line" email and its schedule
+runner, the review list on `/admin/stats`, `data/reviews.json`, the sitemap
+entry, and every link to it from the landing page and the three pages that still
+carried the "what people say" line. `/reviews` now answers **410**, same as the
+rest of the retired pages.
+
+**Studio is served by this app.** It was a separate program on his own computer
+with its own accounts; now:
+- **`/studio`** is the screen (the old `Studio/web/index.html`).
+- **`/api/studio`** is Studio's whole router, unchanged, mounted behind the
+  app's `requireAuth`.
+- **One sign-in.** `server/studio/auth.js` has no accounts and no password any
+  more: it asks the app who is signed in, files that person's Studio row by
+  email the first time (32 random bytes as the unused password), and reuses it
+  after that. A signed-out visitor gets the app's own 401.
+- **The code lives in `TurnSomeDayIntoOneday/server/studio/`** — Railway's root
+  directory is `TurnSomeDayIntoOneday`, so `Studio/` was never in the build.
+  `Studio/` keeps only content and tooling (guide PDFs, end cards, lessons).
+- **Data follows the volume:** `server/studio/locations.js` puts Studio's
+  sqlite, `media/` and `backups/` beside `DB_PATH`, so a deploy cannot throw
+  the library away. Home installs keep the old layout.
+- **Studio's in-place updater is off** (`/update/check` answers `hosted:true`,
+  `/update` refuses). It ships and updates with the app now.
+- **Two doors in the app**, both `data-friendly` so they appear only for an
+  account the server has already said yes to: a **Studio** switch in the bottom
+  bar, and a **Studio** row on Today.
+- The "Open Studio on your phone (same Wi-Fi)" card now shows the app's own
+  address, and a **← App** button was added to Studio's header.
+
+**No new dependencies were added, and that is on purpose:** Studio's post
+scheduling, the library, uploads, characters and scripts need none. The sequencer,
+narration and the ZIP export need `ffmpeg-static`, `sherpa-onnx-node` and
+`archiver` — if he wants them hosted, they go in `server/package.json` and the
+lockfile, as one deliberate step.
+
+**Two side fixes:** the service worker no longer caches `/studio` (same rule as
+`/key` — a cached 200 must not be handed out offline with no check), and Studio's
+two background timers are `unref`'d, because a refd interval meant any process
+that merely *required* Studio could never exit.
+
+**Verified, not assumed:** booted the server against a throwaway database —
+`/studio` 200 (575KB page), `/api/studio/config` **401 signed out**, and with one
+app session **200** on config, assets, schedule, scripts, characters and the
+update check, with exactly one Studio row created. `/reviews` 410. **139 of 139
+server checks pass.** Not opened in a browser.
+
+---
+
+## 🛠 13 SEP 2026 — THE APP IS PRIVATE NOW. TWO PEOPLE, ONE LIST.
+
+Jacques: *"I want to make my whole app private for me and my wife for free"* and
+*"just me and wife have access to it through friendly emails."* **They are
+already on that list** — so there is nothing new to configure and no second list
+to keep in step.
+
+**The door is the Friendly list.** `FRIENDLY_EMAILS` (Railway) now does both
+jobs: it opens Friendly, and it opens the app. An empty list is the ordinary
+public app — that is the safety net, not an oversight, so a missing or
+misspelled variable can never lock him out of his own deployment. (Friendly is
+deliberately the other way round — shut unless the list says otherwise — because
+every Friendly message costs money.) Adding somebody is still the one Railway
+edit it has always been.
+
+What is shut:
+- **Signing up** — turned away before an account exists.
+- **Signing in** — checked BEFORE the password, so somebody not on the list gets
+  one answer whether or not the account is real. Same care `/api/auth/forgot`
+  already takes about never confirming who has an account.
+- **A letter link** (`POST /api/letter/:token/accept`) — the SECOND way an
+  account gets made in this app, and it stood open when the door first went in.
+  Found while writing the tests: the front door was shut, the side one was not.
+- **Every signed-in route** — `requireAuth` is a wrapper over the session check
+  now, so one place covers all forty-odd of them. Somebody still holding a
+  session from before the door closed is answered exactly like a signed-out
+  visitor, and their cookie goes with it. Signing back in is where they are told
+  plainly why.
+
+403 for anyone else, with one sentence: *"This app is private right now — only
+the emails on its list can sign in."* Rules live in `server/private-app.js` so
+they can be tested without booting the server. **120/120 server tests pass**,
+including a real HTTP test that mounts the guard in a throwaway express app and
+makes the actual request.
+
+**Still open, and it needs his answer: the public pages.** The quiz, `for-her`,
+`when-he-drinks`, the comparison pages and the lead form are all still open —
+only the app itself is shut. "My whole app" was read as the app. Say the word
+and the site can be shut too.
+
+### Studio is posting and scheduling, nothing else — 13 Sep 2026
+
+Studio's nav is **📅 Post** and **⚙ Settings**, and it opens on Post. My Media,
+AI Scenes, Characters and Make video are out of the nav but kept in the file on
+purpose: `#mtabs` is the switch every "go to tab" call in there uses, so
+deleting a button would break those calls. Markup-only change, and an honest
+caveat — it was not opened in a browser from this session, because there is no
+browser in this workspace.
 
 ---
 

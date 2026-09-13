@@ -112,6 +112,11 @@ self.addEventListener('fetch', (event) => {
   // check at all. Like /play, it never enters the worker.
   if (url.pathname === '/key' || url.pathname === '/key.html') return;
 
+  // Studio is the same kind of door as The Key: it is served only to somebody
+  // the server has already accepted, and a cached 200 for /studio would be
+  // handed straight back offline with no check in between. Never cached here.
+  if (url.pathname === '/studio' || url.pathname === '/studio.html') return;
+
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 
   if (isPage) {

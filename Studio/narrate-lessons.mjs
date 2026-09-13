@@ -39,7 +39,11 @@ const arg = (name, dflt) => {
   const i = process.argv.indexOf(`--${name}`);
   return i >= 0 ? (process.argv[i + 1] ?? true) : dflt;
 };
-const STUDIO = String(arg('studio', 'http://127.0.0.1:4400')).replace(/\/$/, '');
+// Studio is served by the Turn Someday Into Day One app now (13 Sep 2026), at
+// /studio on the app's own address — so the default is the app's default port,
+// and --email/--password are the APP's login, not a Studio-only account.
+// Point at the hosted app instead with:  --studio https://www.turnsomedayintodayone.com
+const STUDIO = String(arg('studio', 'http://127.0.0.1:3000')).replace(/\/$/, '');
 // One folder PER VOICE, named after the voice, because the resume logic skips
 // files that already exist - point a second voice at the first voice's folder
 // and every lesson looks finished, the run "succeeds" in seconds, and you get

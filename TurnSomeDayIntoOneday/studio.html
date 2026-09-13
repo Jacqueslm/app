@@ -199,39 +199,52 @@ var(--s2);border:0.5px solid var(--bdr);border-radius:14px;padding:14px;display:
 <body>
 <div class="app">
   <div class="hdr">
-    <h1>🎬 Studio <small title="If this number doesn't match what Claude says is latest, your browser is running old files">b0880</small></h1>
+    <h1>🎬 Studio <small title="If this number doesn't match what Claude says is latest, your browser is running old files">b0881</small></h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
       <span id="zoom-val" style="font-size:11px;color:var(--ts);min-width:34px;text-align:center">100%</span>
       <button id="zoom-in" title="Make everything bigger (stretch the app out)" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A+</button>
-      <button id="logout-btn" title="Sign out of Studio on this device" style="display:none;height:30px;padding:0 10px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:12px;cursor:pointer;margin-left:6px">Sign out</button>
+      <button id="back-to-app" title="Back to Turn Someday Into Day One" onclick="location.href='/app'" style="height:30px;padding:0 10px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:12px;cursor:pointer;margin-left:6px">← App</button>
+      <button id="logout-btn" title="Sign out of the app on this device" style="display:none;height:30px;padding:0 10px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:12px;cursor:pointer;margin-left:6px">Sign out</button>
     </span>
   </div>
   <div class="mtabs" id="mtabs">
-    <button data-view="media" class="on">🖼 My Media</button>
+    <button data-view="media">🖼 My Media</button>
     <button data-view="scenes">AI Scenes</button>
     <button data-view="chars">Characters</button>
     <button data-view="seq">Sequencer</button>
-    <button data-view="social">📅 Post<span class="due-dot"></span></button>
+    <button data-view="social" class="on">📅 Post<span class="due-dot"></span></button>
     <button data-view="art">⚙ Settings</button>
   </div>
   <div class="shell">
+  <!-- 13 Sep 2026 — Studio is posting and scheduling, nothing else. Jacques' call.
+       The other four places stay in the DOM on purpose: #mtabs is the switch every
+       "go to tab" call in this file uses, so deleting a button would break those
+       calls. They are out of the nav, not out of the app. -->
   <nav id="snav" aria-label="Studio">
-    <button data-go="media" class="on"><i>🖼</i>My Media</button>
-    <button data-go="scenes"><i>✨</i>Create</button>
-    <button data-go="seq"><i>🎬</i>Make video</button>
-    <button data-go="social"><i>📅</i>Post<span class="due-dot"></span></button>
+    <button data-go="social" class="on"><i>📅</i>Post<span class="due-dot"></span></button>
     <button data-go="art"><i>⚙</i>Settings</button>
+    <button data-go="media" style="display:none"><i>🖼</i>My Media</button>
+    <button data-go="scenes" style="display:none"><i>✨</i>Create</button>
+    <button data-go="seq" style="display:none"><i>🎬</i>Make video</button>
   </nav>
+  <script>
+  /* 13 Sep 2026 — Studio opens on Post. Set here, not in the markup, because the
+     class attribute on #view-social sits past the point this file can be patched. */
+  document.addEventListener('DOMContentLoaded', function () {
+    var post = document.querySelector('#mtabs button[data-view="social"]');
+    if (post) post.click();
+  });
+  </script>
   <div class="body">
   <div class="subseg" id="create-seg">
     <button data-view="scenes" class="on">✨ AI Scenes</button>
     <button data-view="chars">🧑 Characters</button>
   </div>
 
-  <div class="view on" id="view-media">
+  <div class="view" id="view-media">
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🖼 My Media <span class="usage">— everything you've uploaded or made, as pictures</span></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -316,7 +329,7 @@ var(--s2);border:0.5px solid var(--bdr);border-radius:14px;padding:14px;display:
       <hr style="border:none;border-top:1px solid var(--bdr);margin:4px 0">
       <div id="lan-card">
         <div style="font-size:13px;font-weight:600;color:var(--tp);margin-bottom:4px">📱 Open Studio on your phone</div>
-        <p class="usage" style="margin:0 0 8px">Same Wi-Fi as this computer. Type this in your phone's browser once, then add it to your home screen — that's how finished clips get onto your phone for posting.</p>
+        <p class="usage" style="margin:0 0 8px">Studio lives inside the app now, so it is the same address you are already on. Add it to your home screen once and finished clips go straight onto your phone for posting.</p>
         <div id="lan-list"></div>
       </div>
       <hr style="border:none;border-top:1px solid var(--bdr);margin:4px 0">
@@ -1984,6 +1997,14 @@ function pickFiles(accept, cb) {
       if (!s) return;
       try {
         const d = await jfetch('/api/studio/update/check');
+        if (d.hosted) {
+          // Studio is part of the app now: it updates when the app updates, so
+          // the button and the token box would both be lies.
+          s.textContent = d.message || 'Studio updates with the app — nothing to do here.';
+          const upd = document.getElementById('set-update');
+          if (upd) upd.style.display = 'none';
+          return;
+        }
         s.textContent = d.upToDate ? "✅ You're on the latest version."
           : !d.current ? 'Press "Update my app" once and it syncs to the latest version.'
           : `⬆ Update available — press "Update my app".`;
@@ -2532,12 +2553,11 @@ document.addEventListener('keydown', (e) => {
 async function renderLanAddresses() {
   const wrap = $('#lan-list');
   if (!wrap) return;
-  let addresses = [];
-  try { addresses = (await jfetch('/api/studio-lan')).addresses || []; } catch (e) { /* offline */ }
-  if (!addresses.length) {
-    wrap.innerHTML = '<p class="usage" style="margin:0">Could not find this computer\'s Wi-Fi address. Make sure you\'re on Wi-Fi (not just a cable) and reopen Studio.</p>';
-    return;
-  }
+  // One address, and it is the one already in the bar. The LAN lookup was how
+  // finished clips got to a phone when Studio ran on a computer at home; hosted
+  // with the app there is no home network to find, and /api/studio-lan does not
+  // exist any more (it lived in Studio's own server entry, which is gone).
+  const addresses = [{ name: 'app', url: location.origin + '/studio' }];
   wrap.innerHTML = '';
   for (const a of addresses) {
     const row = document.createElement('div');
@@ -2559,7 +2579,7 @@ async function renderLanAddresses() {
   const note = document.createElement('p');
   note.className = 'usage';
   note.style.margin = '4px 0 0';
-  note.textContent = 'First time, Windows may ask to allow Studio through the firewall — choose Allow on private networks. This computer has to be on with Studio running.';
+  note.textContent = 'Sign in with the same email and password as the app. Nothing to install, nothing to allow through a firewall.';
   wrap.appendChild(note);
 }
 

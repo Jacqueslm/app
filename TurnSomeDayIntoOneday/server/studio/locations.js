@@ -8,15 +8,19 @@
 // so Studio's data goes beside it — otherwise every push to the repo would
 // throw away every clip, character and scheduled post.
 //
-// A local install (no DB_PATH) keeps the old layout exactly: a data.sqlite,
-// media/ and backups/ folder next to this file.
+// A local install (no DB_PATH, no volume) keeps the old layout exactly: a
+// data.sqlite, media/ and backups/ folder next to this file.
+//
+// 13 Sep 2026 — VOLUME_DIR comes from volume.js, the same answer the app's own
+// database uses. It was DB_PATH-only here before, which meant a deployment that
+// found its volume Railway's way would have put the app's data on the volume and
+// Studio's clips on the throwaway disk — the exact split this line prevents.
 const fs = require('fs');
 const path = require('path');
+const { VOLUME_DIR } = require('../volume');
 
 const DATA_DIR = process.env.STUDIO_DATA_DIR
-  || (process.env.DB_PATH
-    ? path.join(path.dirname(process.env.DB_PATH), 'studio')
-    : __dirname);
+  || (VOLUME_DIR ? path.join(VOLUME_DIR, 'studio') : __dirname);
 
 // Made here, once, before any caller opens a file in it: node:sqlite will not
 // create the folder itself, and a fresh volume is an empty folder. Failing to

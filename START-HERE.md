@@ -63,6 +63,34 @@ Do not steer him off these; work with them:
 
 ---
 
+## ⭐ 13 SEP 2026 — THE APP IS PRIVATE, THE PAGES ARE GONE, STUDIO MOVED IN.
+
+`FRIENDLY_EMAILS` (Railway) now opens **the app** as well as Friendly, and **they
+are already on it** — nothing new to configure anywhere. An empty list means the
+ordinary public app, deliberately: a missing variable can never lock him out of
+his own deployment. Shut: signing up, signing in, every signed-in route (one
+wrapper, not forty call sites), and the letter-link signup — which was the side
+door nobody had noticed. Rules in `server/private-app.js`.
+
+**The pages went too** (same day, his second ask): the quiz, `for-her`, every
+comparison page and the landing page now answer **410**, and a page added
+tomorrow is shut by default. The short list of what stays open, and why, is in
+`private-app.js` — the app, `/key`, `/studio`, `/admin/stats`, the two pages
+Google Play requires, letters, and the unsubscribe link in every email.
+
+**Reviews are deleted** (same day): the `/reviews` page, the in-app "Leave a
+review" flow, `/api/reviews*`, the day-30 review email, the admin moderation
+list and `data/reviews.json`. He does not want the page, so nothing should
+still be feeding it.
+
+**Studio is part of the app now**, at `/studio`, behind the SAME sign-in — one
+password, one list, no second account. It moved inside `TurnSomeDayIntoOneday/`
+because that is Railway's root directory; anything left in `Studio/` would never
+have shipped. Studio's nav is still Post + Settings only. Full detail in
+MASTER-STATUS.md.
+
+---
+
 ## ⭐ CURRENT STATUS (28 Aug 2026) — NEWEST. READ THIS BEFORE THE 24 AUG SECTION.
 
 ### The headline: THE APP CAN TAKE MONEY. Proven end to end, first time since launch.

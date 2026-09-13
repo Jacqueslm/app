@@ -17,10 +17,21 @@ const {
   verifyPassword,
   signSession,
   verifySession,
-  requireAuth,
+  // Names are load-bearing: the private-app gate further down is a wrapper
+  // around this one, and the wrapper is what every route in this file uses.
+  requireAuth: requireSession,
   verifyUnsubToken,
   isValidSession,
 } = require('./auth');
+const {
+  TURNED_AWAY, isPrivate, appAllows, doorMiddleware,
+  PAGE_GONE, isPagePath, pageIsServed,
+} = require('./private-app');
+// Studio: the video and posting app that used to run on its own computer.
+// It is part of this one now, so it loads with it. Its own door is in
+// studio/auth.js - it asks this app who is signed in and hands Studio that
+// person's id, so there is one sign-in and one private list, not two.
+const studio = require('./studio/studio');
 
 const app = express();
 // Don't advertise the framework in every response header.
@@ -91,8 +102,42 @@ function isFriendlyAllowed(user) {
   return FRIENDLY_EMAILS.includes(email);
 }
 
+// ----------------------------------------------------------------- the door --
+// 13 Sep 2026 — the app is private, not only Friendly. "Just me and wife have
+// access to it through friendly emails." ONE list doing both jobs, so there is
+// nothing new to configure and adding somebody is still the single Railway edit
+// it has always been. The rule, and why an empty list leaves the door open, is
+// in private-app.js.
+const APP_IS_PRIVATE = isPrivate(FRIENDLY_EMAILS);
+function mayComeIn(email) { return appAllows(FRIENDLY_EMAILS, email, DIAG_OWNER_EMAIL); }
+
+// Every signed-in route in this file already goes through requireAuth, so the gate
+// belongs here rather than in forty-odd call sites. Somebody still holding a
+// session from before the door closed is answered exactly like a signed-out
+// visitor — 401, and the same words — so the client shows its sign-in screen, and
+// their cookie goes with it. Signing back in is where they are told plainly why.
+function requireAuth(req, res, next) {
+  requireSession(req, res, () => {
+    if (!APP_IS_PRIVATE) return next();
+    const user = db.getUserById(req.userId);
+    if (mayComeIn(user && user.email)) return next();
+    res.clearCookie(COOKIE_NAME);
+    return res.status(401).json({ error: 'Not signed in.' });
+  });
+}
+
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+
+// A letter link is the SECOND way an account gets made in this app —
+// /api/auth/signup is the other one — so it needs the same door, checked the same
+// way: before the account exists, and before anything is written for it. Without
+// this the door would shut on the front entrance and leave the side one open,
+// which is the failure mode that is hardest to notice. It is mounted here, beside
+// the rest of the door, because middleware runs before the route it guards; the
+// route itself is registered far below. Deliberately after express.json, since it
+// has to read the email it is judging.
+app.use('/api/letter/:token/accept', doorMiddleware(mayComeIn));
 
 // HSTS: once a browser has seen this header it refuses to talk to the site over
 // plain HTTP for a year, which closes the window where a first request on a
@@ -164,13 +209,32 @@ app.use((req, res, next) => {
 
 app.use('/preview', requireAuth);
 
-// Cold marketing traffic lands here; the app itself lives at /app so a
-// returning signed-in user is sent straight there and never sees marketing
-// copy twice. Registered ahead of express.static below, since static would
-// otherwise auto-serve index.html at '/' by its own default-index behavior.
+// ─── THE PAGES ARE SHUT ──────────────────────────────────────────────────────
+// 13 Sep 2026 — the app went private first (private-app.js), then Jacques asked
+// for the same on the pages: "shut down the pages too." This is the one place
+// that decides, so no route lower down can be missed — the list of what stays
+// open, and why, is in private-app.js. Asked before every page route in this
+// file, and before express.static, so a page cannot slip out by being served as
+// a file instead of by a route.
+//
+// 410 (Gone), not 404 and not a redirect to the app: 410 is what tells a search
+// engine to drop a page rather than keep asking for it, and somebody following
+// an old link gets one plain sentence instead of a sign-in screen for an app
+// that is not theirs.
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  if (!isPagePath(req.path)) return next();
+  if (pageIsServed(req.path)) return next();
+  res.status(410).type('text/plain').send(PAGE_GONE);
+});
+
+// The marketing landing page went with the rest of them, so the root now sends
+// everybody to the app, where a signed-in person carries on and anybody else
+// meets the app's own closed door rather than a page selling them something.
+// Registered ahead of express.static below, since static would otherwise
+// auto-serve index.html at '/' by its own default-index behavior.
 app.get('/', (req, res) => {
-  if (isValidSession(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'landing.html'));
+  res.redirect('/app');
 });
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
@@ -196,6 +260,22 @@ app.get('/key', (req, res) => {
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'key.html'));
 });
+
+// ─── STUDIO ──────────────────────────────────────────────────────────────────
+// 13 Sep 2026 — "add studio to the app." The screen is served here rather than
+// by Studio's own server, which is gone; everything behind it is the same
+// router it always had, mounted at /api/studio. Requiring the app's session in
+// front of that router means a signed-out visitor gets the app's own 401 (so
+// the client shows a sign-in) and nothing in Studio is reachable without it.
+// /studio is in OPEN_PAGES so it reaches THIS route instead of the 410 the
+// pages-closed gate gives every other page.
+app.get('/studio', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'studio.html'));
+});
+// Same reason as /key.html above: express.static would hand the shell out to
+// anyone who guessed the file name.
+app.get('/studio.html', (req, res) => res.status(404).end());
+app.use('/api/studio', requireAuth, studio.router);
 
 
 // Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
@@ -315,64 +395,6 @@ app.get('/codependency', (req, res) => {
 
 app.get('/what-is-al-anon', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'what-is-al-anon.html'));
-});
-
-// Social proof / SEO target for "reviews" searches. Renders only real quotes
-// from data/reviews.json - deliberately never fabricated testimonials.
-app.get('/reviews', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'reviews.html'));
-});
-
-// ── Reviews members can actually leave ───────────────────────────────────────
-// The page used to read data/reviews.json, a file only Jacques could edit by
-// hand. So there was no path from "this helped me" to a published review, and
-// the page said "no reviews yet" indefinitely. These four routes are that path.
-// Reviews publish immediately (Jacques, 23 Aug 2026); the owner is emailed
-// approves it, which keeps the page's promise - every quote from a real person,
-// none invented - while making it possible for the quotes to exist at all.
-app.get('/api/reviews/public', (req, res) => {
-  res.json({ reviews: db.getPublishedReviews(50) });
-});
-app.get('/api/reviews/mine', requireAuth, (req, res) => {
-  res.json({ review: db.getMyReview(req.userId) });
-});
-app.post('/api/reviews', requireAuth, (req, res) => {
-  const body = String(req.body?.body || '').trim();
-  const name = String(req.body?.name || '').trim().slice(0, 40) || 'Anonymous';
-  const whenLabel = String(req.body?.when || '').trim().slice(0, 40) || null;
-  let stars = Number(req.body?.stars);
-  if (!Number.isFinite(stars) || stars < 1 || stars > 5) stars = 5;
-  if (body.length < 10) return res.status(400).json({ error: 'Tell us a little more than that.' });
-  if (body.length > 600) return res.status(400).json({ error: 'Keep it under 600 characters.' });
-  db.upsertReview(req.userId, name, whenLabel, body, Math.round(stars));
-  // Straight to the site (Jacques, 23 Aug 2026) - and straight to his inbox,
-  // so a bad one can be pulled from the admin page the same hour it lands.
-  if (DIAG_OWNER_EMAIL) {
-    emailer.sendEmail({
-      to: DIAG_OWNER_EMAIL,
-      subject: `New review on /reviews: ${stars}★ from ${name}`,
-      text: `${name}${whenLabel ? ' (' + whenLabel + ')' : ''} - ${stars} stars
-
-${body}
-
-It is already live at ${process.env.APP_URL || 'https://www.turnsomedayintodayone.com'}/reviews
-Hide it from the admin page if it doesn't belong.`,
-      force: true,
-    }).catch(() => {});
-  }
-  res.json({ ok: true, pending: false });
-});
-app.get('/api/reviews/queue', requireAuth, (req, res) => {
-  if (!isOwnerRequest(req)) return res.status(403).json({ error: 'Not available.' });
-  res.json({ queue: db.getReviewQueue() });
-});
-app.post('/api/reviews/action', requireAuth, (req, res) => {
-  if (!isOwnerRequest(req)) return res.status(403).json({ error: 'Not available.' });
-  const id = Number(req.body?.id);
-  const action = String(req.body?.action || '');
-  if (!id || !['published', 'rejected'].includes(action)) return res.status(400).json({ error: 'Unknown action.' });
-  db.setReviewStatus(id, action);
-  res.json({ ok: true });
 });
 
 // "Dry drunk" - about 11,700 searches a month across six phrasings, all at
@@ -676,6 +698,10 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
     return res.status(400).json({ error: 'Use a password of at least 8 characters, or a 4-6 digit PIN.' });
   }
   const normalizedEmail = email.trim().toLowerCase();
+  // The door, before anything else this route does — private-app.js explains why.
+  if (!mayComeIn(normalizedEmail)) {
+    return res.status(403).json({ error: TURNED_AWAY });
+  }
   if (db.getUserByEmail(normalizedEmail)) {
     return res.status(409).json({ error: 'An account with that email already exists.' });
   }
@@ -746,6 +772,12 @@ app.post('/api/auth/reset', (req, res) => {
 app.post('/api/auth/login', loginLimiter, (req, res) => {
   const { email, password } = req.body || {};
   const normalizedEmail = (email || '').trim().toLowerCase();
+  // Checked BEFORE the password, so somebody who is not on the list gets one
+  // answer whether or not that account exists — the same care /api/auth/forgot
+  // takes about never confirming who has an account with a recovery app.
+  if (!mayComeIn(normalizedEmail)) {
+    return res.status(403).json({ error: TURNED_AWAY });
+  }
   const user = db.getUserByEmail(normalizedEmail);
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });

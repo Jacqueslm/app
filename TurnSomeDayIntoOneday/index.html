@@ -4,6 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title id="page-title">Turn Someday Into Day One</title>
+<script>
+/* The sign-up screen used to carry one link out of the app: "Not sure yet? Take
+   the private 1-minute check-in", pointing at /quiz. That page was taken down on
+   13 Sep 2026 with the rest of them (it answers 410 now), so the link is gone
+   with it - a dead link on the way in is worse than no link at all.
+
+   It is removed from here rather than from the markup for one plain reason: the
+   line sits about 64KB into a 1MB file, and the editor that made this change
+   cannot reach past roughly the first 60KB of it. The script waits for
+   DOMContentLoaded, so the page is fully built by the time it looks. If a tool
+   that reaches the whole file ever edits this page, deleting that paragraph at
+   its source and this block together is the tidy thing to do. */
+document.addEventListener('DOMContentLoaded', function(){
+  var a = document.querySelector('a[href="/quiz"]');
+  if(a){ var p = a.closest('p'); (p || a).remove(); }
+});
+</script>
 <meta name="description" content="For anyone breaking a habit they've fought for years — drinking, porn, gambling, food and more — and for the person beside them. Free check-in, no signup.">
 <link rel="canonical" href="https://www.turnsomedayintodayone.com/">
 <meta property="og:type" content="website">
@@ -79,8 +96,8 @@ body{display:flex;justify-content:center}
    - like the meditation timer - is ever clipped off the top unreachably.
    !important because these overlays set justify-content inline. */
 #meditation-overlay,#breathe-overlay,#voiceguide-overlay,#urgesurf-overlay,
-#grounding54321-overlay,#welcome-overlay,#panic-overlay,#nova-disclaimer-flash,
-#review-modal{overflow-y:auto !important;justify-content:safe center !important}
+#grounding54321-overlay,#welcome-overlay,#panic-overlay,#nova-disclaimer-flash{
+  overflow-y:auto !important;justify-content:safe center !important}
 /* At 1.18x zoom the scroll container runs ~180px past the visible window, so
    the tail of every screen - including the lesson's "Mark as done" button -
    could never scroll into view. Extra bottom padding puts it back in reach. */
@@ -930,6 +947,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
   </div>
 
+  <!-- Studio, the same door as Zodiacs above: hidden in CSS by default, opened
+       only when /api/friendly/access says this account is on the list. -->
+  <div class="setting-row friendly-door" data-friendly="1" id="home-studio-row" onclick="location.href='/studio'" style="margin:8px 16px 0;border-radius:12px">
+    <i class="ti ti-movie" style="color:#6BC5C0"></i>
+    <div class="setting-row-txt"><p>Studio</p><span>Cut the clips, write the caption, schedule the post</span></div>
+    <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+  </div>
+
 
 
   <div class="row">
@@ -1729,11 +1754,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div id="diag-msg" style="font-size:.75rem;color:var(--green);margin-top:8px;display:none"></div>
         </div>
       </div>
-      <div class="setting-row" onclick="openReviewModal()">
-        <i class="ti ti-message-2"></i>
-        <div class="setting-row-txt"><p>Leave a review</p><span id="review-row-sub">A line for the reviews page</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
       <div class="setting-row" id="rate-app-row" style="display:none" onclick="goRateApp()">
         <i class="ti ti-star"></i>
         <div class="setting-row-txt"><p>Rate this app</p><span>Google Play, for the next person</span></div>
@@ -1842,6 +1862,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
          is here only for accounts the server has already said yes to. -->
     <div class="bn friendly-door" data-friendly="1" id="bn-key" onclick="location.href='/key'">
       <i class="ti ti-moon"></i><span>Zodiacs</span>
+    </div>
+    <!-- Studio: the video and posting app, now part of this one (13 Sep 2026).
+         Same door rule as Zodiacs - data-friendly, so it appears only for an
+         account the server has already said yes to. It is a page, not a screen
+         in here, because Studio is its own app served from /studio. -->
+    <div class="bn friendly-door" data-friendly="1" id="bn-studio" onclick="location.href='/studio'">
+      <i class="ti ti-movie"></i><span>Studio</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
@@ -2552,25 +2579,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- BREATHE OVERLAY -->
-<!-- The reviews page promised real quotes from real people, but there was no
-     way for a real person to leave one: it read a JSON file only Jacques could
-     edit by hand. This is the missing half. Nothing publishes itself - a review
-     waits for his approval, so the page keeps its promise AND can fill up. -->
-<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow:auto">
-    <div style="font-size:1.0625rem;font-weight:600;color:var(--tp);margin-bottom:6px">Say a line</div>
-    <div style="font-size:.78125rem;color:var(--tm);line-height:1.55;margin-bottom:14px">In your own words, whatever's true. It goes to Jacques first — nothing appears on the site until he's read it.</div>
-    <div style="font-size:.75rem;color:var(--ts);margin-bottom:6px">How honest was it, out of five?</div>
-    <div id="review-stars" style="font-size:1.875rem;letter-spacing:6px;margin-bottom:14px;cursor:pointer"></div>
-    <input id="review-name" class="ob-input" maxlength="40" placeholder="First name (or leave blank to stay anonymous)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
-    <input id="review-when" class="ob-input" maxlength="40" placeholder="Where you are — e.g. Day 47, or Supporting my husband" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);margin-top:8px">
-    <textarea id="review-body" maxlength="600" rows="5" oninput="updateReviewCount()" placeholder="What it actually did, or didn't do." style="width:100%;margin-top:8px;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;font-size:.875rem;color:var(--tp);font-family:var(--f);resize:vertical"></textarea>
-    <div id="review-count" style="font-size:.6875rem;color:var(--tm);text-align:right;margin-top:4px">0 / 600</div>
-    <div id="review-msg" style="font-size:.78125rem;color:var(--green);line-height:1.5;margin-top:8px;display:none"></div>
-    <button class="ob-btn" style="margin-top:12px" onclick="submitReview()" id="review-send">Put it on the site</button>
-    <button class="ob-btn outline" style="margin-top:8px" onclick="closeReviewModal()">Not now</button>
-  </div>
-</div>
 <div id="film-overlay" style="display:none;position:fixed;inset:0;background:#07060f;z-index:1002;overflow-y:auto;flex-direction:column;align-items:center;padding:18px 16px 34px">
   <div style="display:flex;width:100%;max-width:430px;align-items:center;justify-content:space-between">
     <div style="color:#fff;font-size:1.1875rem;font-weight:700">Your film</div>
@@ -2775,9 +2783,6 @@ function escapeHtml(s){
 // were 0 and 30: free got zero chats, which is what everyone had after the
 // paid tier went - the app said 'that is today's chats' on the first message.
 const CHAT_DAILY_LIMIT=0; // 0 = no limit
-// The reviews page's "Write one in the app" button lands here as ?review=1;
-// the modal opens once the user is signed in and past onboarding.
-let pendingReviewOpen=!!(new URLSearchParams(window.location.search).get('review')==='1');
 let S = {
   name:'',userGender:'',relationshipStatus:null,accountEmail:null,profilePhoto:'',
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',novaVoiceName:'',
@@ -4688,7 +4693,6 @@ function finishOnboard(){
   // leave a different screen (e.g. Profile) still marked active.
   switchTo('home');actBn('bn-home');
   initApp();
-  maybeOpenPendingReview();
 }
 
 // ─── APP TOUR (navigation walkthrough) ────────────────────────────────────────
@@ -4864,75 +4868,6 @@ function startMedSound(){
 }
 function stopMedSound(){
   if(medAudio){try{medAudio.pause();}catch(e){}medAudio=null;}
-}
-// ─── REVIEWS ─────────────────────────────────────────────────────────────────
-// A member writes one line; it goes to the owner as 'pending' and only appears
-// on /reviews the moment they save it (Jacques, 23 Aug 2026). Never invented.
-let reviewStars=5;
-function renderReviewStars(){
-  const el=document.getElementById('review-stars');
-  if(!el)return;
-  el.innerHTML=[1,2,3,4,5].map(n=>`<span onclick="reviewStars=${n};renderReviewStars()" style="color:${n<=reviewStars?'var(--green)':'var(--tm)'}">${n<=reviewStars?'★':'☆'}</span>`).join('');
-}
-function maybeOpenPendingReview(){
-  if(!pendingReviewOpen)return;
-  pendingReviewOpen=false;
-  // One-shot CTA: drop ?review=1 so a reload or back-gesture doesn't re-open
-  // the modal on every visit.
-  try{history.replaceState(null,'',window.location.pathname);}catch(e){}
-  setTimeout(function(){
-    if(S.startDate&&document.getElementById('main-app').style.display==='flex')openReviewModal();
-  },500);
-}
-async function openReviewModal(){
-  document.getElementById('review-modal').style.display='flex';
-  document.getElementById('review-msg').style.display='none';
-  renderReviewStars();
-  // If they already wrote one, show it back so this edits rather than duplicates.
-  try{
-    const r=await fetch('/api/reviews/mine');
-    if(r.ok){
-      const {review}=await r.json();
-      if(review){
-        document.getElementById('review-name').value=review.name==='Anonymous'?'':review.name;
-        document.getElementById('review-when').value=review.when_label||'';
-        document.getElementById('review-body').value=review.body||'';
-        reviewStars=review.stars||5;renderReviewStars();
-        const m=document.getElementById('review-msg');
-        m.textContent=review.status==='published'?'Your review is live on the site. Editing it updates it right away.'
-          :review.status==='pending'?'Your review is with Jacques, waiting to be read.':'';
-        m.style.display=m.textContent?'':'none';
-      }
-    }
-  }catch(e){}
-  updateReviewCount();
-}
-function closeReviewModal(){document.getElementById('review-modal').style.display='none';}
-function updateReviewCount(){
-  const t=document.getElementById('review-body');
-  const c=document.getElementById('review-count');
-  if(t&&c)c.textContent=`${t.value.length} / 600`;
-}
-async function submitReview(){
-  const body=document.getElementById('review-body').value.trim();
-  const msg=document.getElementById('review-msg');
-  if(body.length<10){msg.style.color='#E24B4A';msg.textContent='A little more than that — one real sentence.';msg.style.display='';return;}
-  const btn=document.getElementById('review-send');
-  btn.disabled=true;btn.textContent='Sending…';
-  try{
-    const r=await fetch('/api/reviews',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({body,name:document.getElementById('review-name').value.trim(),
-        when:document.getElementById('review-when').value.trim(),stars:reviewStars})});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.error||'That did not send.');
-    msg.style.color='var(--green)';
-    msg.textContent='It\'s live. Thank you — see it at turnsomedayintodayone.com/reviews.';
-    msg.style.display='';
-    setTimeout(closeReviewModal,2200);
-  }catch(e){
-    msg.style.color='#E24B4A';msg.textContent=e.message;msg.style.display='';
-  }
-  btn.disabled=false;btn.textContent='Send it to Jacques';
 }
 function openMeditation(){
   document.getElementById('meditation-overlay').style.display='flex';

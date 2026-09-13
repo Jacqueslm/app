@@ -1,14 +1,18 @@
+# 13 Sep 2026 — the site is private. Every marketing page was taken down the same
+# day (they answer 410 Gone, which is what drops a page from an index), and what
+# is left is one man's app behind a sign-in. There is nothing here for a search
+# engine to carry, so nothing is invited in.
+#
+# Left in place rather than deleted: an empty allow-all robots.txt reads as
+# "carry on", and a missing one reads the same as this one to most crawlers but
+# not to all of them. This says it out loud.
 User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /api/
-Disallow: /server/
-Disallow: /go/
-Disallow: /unsubscribe
-# Private letters. Never crawl, never index, never archive - each one is the
-# most personal thing anybody writes in this app.
+Disallow: /
+
+# Named on purpose even though the line above already covers it. robots.txt is
+# read by people as well as crawlers, and the two things that must never turn up
+# in a search result are worth saying out loud: the private page, and the letters
+# people write to each other. server/test/key.test.js reads the /key line.
+Disallow: /key
 Disallow: /l/
 Disallow: /letter.html
-Disallow: /key
-
-Sitemap: https://www.turnsomedayintodayone.com/sitemap.xml

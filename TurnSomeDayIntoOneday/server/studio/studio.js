@@ -224,7 +224,9 @@ function overDailyCap(userId, addUSD) {
   return null;
 }
 
-const MEDIA_DIR = path.join(__dirname, 'media');
+// Beside the app's own database (locations.js), not in the container: a deploy
+// must not be able to throw away the library.
+const { MEDIA_DIR } = require('./locations');
 fs.mkdirSync(MEDIA_DIR, { recursive: true });
 
 const EXT_BY_KIND = {
@@ -3006,12 +3008,19 @@ function failQueueItem(item, message) {
   try { db.logError('overnight-queue', `Queued scene "${(item.label || item.prompt || '').slice(0, 60)}" failed: ${message}`); } catch (_) {}
 }
 const QUEUE_TICK_MS = Number(process.env.STUDIO_QUEUE_TICK_MS || 4000);
-setInterval(() => { processQueueTick().catch(() => {}); }, QUEUE_TICK_MS);
+// unref, like the fal sweeper above: these tick for as long as the server is
+// up, and the server stays up because of its own listener, not because of
+// these. A refd interval here meant any process that merely REQUIRED this file
+// could never exit - which is what hung the test runner the day Studio moved
+// inside the app (13 Sep 2026).
+const queueTimer = setInterval(() => { processQueueTick().catch(() => {}); }, QUEUE_TICK_MS);
+if (queueTimer.unref) queueTimer.unref();
 
 // Flips scheduled posts to 'due' the moment their time hits, independent of
 // any browser being open - the web client just polls /schedule/due to raise
 // the banner once it's back.
-setInterval(() => { try { db.promoteDueSocialPosts(); } catch (_) {} }, 30000);
+const duePostsTimer = setInterval(() => { try { db.promoteDueSocialPosts(); } catch (_) {} }, 30000);
+if (duePostsTimer.unref) duePostsTimer.unref();
 
 router.post('/animate', async (req, res) => {
   if (!FAL_KEY) {
@@ -5692,6 +5701,17 @@ async function fetchLatestCommit() {
 }
 
 router.get('/update/check', async (req, res) => {
+  // Studio ships with Turn Someday Into Day One now, so there is nothing here
+  // to update in place: a push to the repo redeploys the app AND Studio with
+  // it, and the app's own updater (server/update.js) is the only one left. The
+  // GitHub machinery below is kept whole but deliberately unreachable - the
+  // in-place copy used to overlay Studio's folder into whatever folder it
+  // happened to be sitting in, which inside the app is the app itself.
+  return res.json({
+    hosted: true,
+    message: 'Studio updates with the app — nothing to do here.',
+  });
+  /* eslint-disable no-unreachable */
   let current = null;
   try { current = JSON.parse(fs.readFileSync(UPDATE_STATE_FILE, 'utf8')); } catch (_) {}
   try {
@@ -5743,6 +5763,10 @@ router.post('/settings/updatetoken', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
+  return res.status(400).json({
+    error: 'Studio updates with the app now. Push to the repo and the app redeploys with Studio inside it.',
+  });
+  /* eslint-disable no-unreachable */
   // Back up data.sqlite BEFORE the code overlay replaces the app - the one
   // snapshot that guards the files no update touches. Same rotating scheme as
   // the startup snapshot; never let it block an update.

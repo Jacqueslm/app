@@ -71,6 +71,17 @@ content/endcard-template.html
 *.sqlite-shm
 TurnSomeDayIntoOneday/server/backups/
 
+# Studio's own files for a home install. Hosted, they sit beside DB_PATH (the
+# volume) instead - see TurnSomeDayIntoOneday/server/studio/locations.js. Same
+# reason as the line above: data.sqlite is real accounts, media/ is real clips
+# and .env is real API keys. None of it belongs in git.
+TurnSomeDayIntoOneday/server/studio/data.sqlite
+TurnSomeDayIntoOneday/server/studio/media/
+TurnSomeDayIntoOneday/server/studio/backups/
+TurnSomeDayIntoOneday/server/studio/model-cache/
+TurnSomeDayIntoOneday/server/studio/.env
+TurnSomeDayIntoOneday/server/studio/update-state.json
+
 # the three.js source package the Mixamo workshop imports — fetched with npm pack, not kept in git
 TurnSomeDayIntoOneday/tools/mixamo/three/
 

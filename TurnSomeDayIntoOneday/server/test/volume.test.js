@@ -2,10 +2,9 @@
 //
 // Jacques attached a Railway volume and asked what else to do. The risk in the
 // answer is quiet and expensive: if the app does not find the volume, everything
-// still works, and everything is gone on the next deploy. So this checks both
-// halves — that Railway's own mount-path variable is honoured, and that the
-// app and Studio end up on the SAME volume rather than one of them beside the
-// code.
+// still works, and everything is gone on the next deploy. So this checks that
+// Railway's own mount-path variable is honoured, and that the app database
+// actually lands on the volume.
 //
 // Run:  cd TurnSomeDayIntoOneday/server && npm test
 const { test } = require('node:test');
@@ -56,7 +55,7 @@ test('DB_PATH still wins, so nothing already configured changes', () => {
 });
 
 // --- the wiring -------------------------------------------------------------
-// The rule above is only worth anything if the app and Studio actually ask it.
+// The rule above is only worth anything if the app actually asks it.
 
 test('with only a volume attached, the app database lands on it', () => {
   const volume = fs.mkdtempSync(path.join(os.tmpdir(), 'tsido-volume-'));
@@ -67,13 +66,4 @@ test('with only a volume attached, the app database lands on it', () => {
     fs.existsSync(path.join(volume, 'data.sqlite')),
     'the app database should be created on the volume, not in the container',
   );
-});
-
-test('with only a volume attached, Studio keeps its clips on it too', () => {
-  const volume = fs.mkdtempSync(path.join(os.tmpdir(), 'tsido-volume-'));
-  const dataDir = runNode(
-    "process.stdout.write(require('./studio/locations').DATA_DIR)",
-    { RAILWAY_VOLUME_MOUNT_PATH: volume },
-  );
-  assert.strictEqual(dataDir, path.join(volume, 'studio'));
 });

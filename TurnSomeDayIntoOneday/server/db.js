@@ -5,8 +5,7 @@ const { DatabaseSync } = require('node:sqlite');
 
 // Where the database lives: DB_PATH if somebody set it, otherwise the volume a
 // hosting platform reports it mounted (see volume.js), otherwise beside the code
-// as on a home install. The rule is shared with Studio so both land on the same
-// volume instead of one of them on the container's throwaway disk.
+// as on a home install.
 const { VOLUME_DIR } = require('./volume');
 const DB_PATH = process.env.DB_PATH
   || (VOLUME_DIR ? path.join(VOLUME_DIR, 'data.sqlite') : path.join(__dirname, 'data.sqlite'));
@@ -68,25 +67,6 @@ db.exec(`
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, usage_date)
   );
-  CREATE TABLE IF NOT EXISTS studio_characters (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    name TEXT NOT NULL,
-    lora_url TEXT,
-    trigger_word TEXT,
-    created_at TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS studio_assets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    kind TEXT NOT NULL,
-    label TEXT NOT NULL,
-    filename TEXT NOT NULL,
-    character_id INTEGER REFERENCES studio_characters(id),
-    meta TEXT,
-    created_at TEXT NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS idx_studio_assets_user ON studio_assets(user_id, kind);
   CREATE TABLE IF NOT EXISTS password_resets (
     token TEXT PRIMARY KEY,
     user_id INTEGER,
@@ -402,8 +382,6 @@ function snapshotTo(outPath) {
 function deleteUser(userId) {
   db.prepare('DELETE FROM password_resets WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM email_log WHERE user_id = ?').run(userId);
-  db.prepare('DELETE FROM studio_assets WHERE user_id = ?').run(userId);
-  db.prepare('DELETE FROM studio_characters WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM video_usage WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM image_usage WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM chat_usage WHERE user_id = ?').run(userId);
@@ -451,52 +429,6 @@ function incrementVideoCount(userId, usageDate) {
     `INSERT INTO video_usage (user_id, usage_date, count) VALUES (?, ?, 1)
      ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1`
   ).run(userId, usageDate);
-}
-
-function createCharacter(userId, name, loraUrl, triggerWord) {
-  const info = db
-    .prepare('INSERT INTO studio_characters (user_id, name, lora_url, trigger_word, created_at) VALUES (?, ?, ?, ?, ?)')
-    .run(userId, name, loraUrl || null, triggerWord || null, new Date().toISOString());
-  return Number(info.lastInsertRowid);
-}
-
-function getCharacters(userId) {
-  return db.prepare('SELECT * FROM studio_characters WHERE user_id = ? ORDER BY id DESC').all(userId);
-}
-
-function getCharacter(userId, id) {
-  return db.prepare('SELECT * FROM studio_characters WHERE user_id = ? AND id = ?').get(userId, id);
-}
-
-function updateCharacter(userId, id, fields) {
-  db.prepare('UPDATE studio_characters SET name = ?, lora_url = ?, trigger_word = ? WHERE user_id = ? AND id = ?')
-    .run(fields.name, fields.loraUrl || null, fields.triggerWord || null, userId, id);
-}
-
-function deleteCharacter(userId, id) {
-  db.prepare('UPDATE studio_assets SET character_id = NULL WHERE user_id = ? AND character_id = ?').run(userId, id);
-  db.prepare('DELETE FROM studio_characters WHERE user_id = ? AND id = ?').run(userId, id);
-}
-
-function createAsset(userId, kind, label, filename, characterId, meta) {
-  const info = db
-    .prepare('INSERT INTO studio_assets (user_id, kind, label, filename, character_id, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-    .run(userId, kind, label, filename, characterId || null, meta ? JSON.stringify(meta) : null, new Date().toISOString());
-  return Number(info.lastInsertRowid);
-}
-
-function getAssets(userId, kind) {
-  return kind
-    ? db.prepare('SELECT * FROM studio_assets WHERE user_id = ? AND kind = ? ORDER BY id DESC').all(userId, kind)
-    : db.prepare('SELECT * FROM studio_assets WHERE user_id = ? ORDER BY id DESC').all(userId);
-}
-
-function getAsset(userId, id) {
-  return db.prepare('SELECT * FROM studio_assets WHERE user_id = ? AND id = ?').get(userId, id);
-}
-
-function deleteAsset(userId, id) {
-  db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
 function createPasswordReset(token, userId, expiresAt) {
@@ -1116,15 +1048,6 @@ module.exports = {
   incrementImageCount,
   getVideoCount,
   incrementVideoCount,
-  createCharacter,
-  getCharacters,
-  getCharacter,
-  updateCharacter,
-  deleteCharacter,
-  createAsset,
-  getAssets,
-  getAsset,
-  deleteAsset,
   bumpSessionVersion,
   updatePassword,
   createPasswordReset,

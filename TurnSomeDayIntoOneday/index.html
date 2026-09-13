@@ -19,6 +19,27 @@
 document.addEventListener('DOMContentLoaded', function(){
   var a = document.querySelector('a[href="/quiz"]');
   if(a){ var p = a.closest('p'); (p || a).remove(); }
+
+  /* Studio is out of the app (13 Sep 2026). It was the video-and-posting
+     program that used to run on its own computer, briefly folded in here as a
+     page at /studio with its own API at /api/studio; it is not part of this
+     product and it is gone. Its route, its shell, its backend and its database
+     tables are deleted at their source. The two doors it put in this page (the
+     row on Today and the tab in the bottom bar) are removed from here for the
+     same reason as the /quiz link above - they sit past the first 60KB of a 1MB
+     file, where the editor that made this change cannot reach. */
+  ['home-studio-row','bn-studio'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.remove();
+  });
+
+  /* Two calls to maybeOpenPendingReview() sit in code past this editor's reach
+     (enterApp and the PIN-unlock path), but the function itself was never in
+     this file. Every single open threw an uncaught error that cut the rest of
+     startup short right after the screens were built - reported 13 Sep 2026 as
+     "the app is messed up". A quiet no-op keeps those calls legal; the real
+     rating ask (maybeAskForRating) is untouched. */
+  window.maybeOpenPendingReview = window.maybeOpenPendingReview || function(){};
 });
 </script>
 <meta name="description" content="For anyone breaking a habit they've fought for years — drinking, porn, gambling, food and more — and for the person beside them. Free check-in, no signup.">
@@ -947,13 +968,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
   </div>
 
-  <!-- Studio, the same door as Zodiacs above: hidden in CSS by default, opened
-       only when /api/friendly/access says this account is on the list. -->
-  <div class="setting-row friendly-door" data-friendly="1" id="home-studio-row" onclick="location.href='/studio'" style="margin:8px 16px 0;border-radius:12px">
-    <i class="ti ti-movie" style="color:#6BC5C0"></i>
-    <div class="setting-row-txt"><p>Studio</p><span>Cut the clips, write the caption, schedule the post</span></div>
-    <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-  </div>
+  <!-- Studio stood here. Removed at the source 13 Sep 2026. -->
 
 
 
@@ -1863,13 +1878,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="bn friendly-door" data-friendly="1" id="bn-key" onclick="location.href='/key'">
       <i class="ti ti-moon"></i><span>Zodiacs</span>
     </div>
-    <!-- Studio: the video and posting app, now part of this one (13 Sep 2026).
-         Same door rule as Zodiacs - data-friendly, so it appears only for an
-         account the server has already said yes to. It is a page, not a screen
-         in here, because Studio is its own app served from /studio. -->
-    <div class="bn friendly-door" data-friendly="1" id="bn-studio" onclick="location.href='/studio'">
-      <i class="ti ti-movie"></i><span>Studio</span>
-    </div>
+    <!-- Studio stood here. Removed at the source 13 Sep 2026. -->
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
 

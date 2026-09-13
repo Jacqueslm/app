@@ -1,6 +1,5 @@
-// One-click self-update from GitHub, shared design with Studio's updater:
-// download the branch zipball, overlay the new code onto the install folder,
-// refresh dependencies. User data survives by construction - .env, data.sqlite
+// One-click self-update from GitHub: download the branch zipball, overlay the
+// new code onto the install folder, refresh dependencies. User data survives by construction - .env, data.sqlite
 // and media/ are gitignored, so they are never inside the ZIP being copied.
 const fs = require('fs');
 const os = require('os');
@@ -53,9 +52,8 @@ const UPDATE_REF = UPDATE_BRANCH.split('/').map(encodeURIComponent).join('/');
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
   || `https://api.github.com/repos/${UPDATE_REPO}/tarball/${UPDATE_REF}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
-// Strict whitelist: an update only ever copies this app's own files. The repo
-// also contains Studio, and the two apps must stay fully separate on disk -
-// updating one never adds or touches the other's files. (Launchers are excluded
+// Strict whitelist: an update only ever copies this app's own files, so nothing
+// else in the repo can be pulled onto the install folder. (Launchers are excluded
 // too: Windows corrupts a batch file that changes underneath a running script.)
 const UPDATE_ONLY = new Set(['TurnSomeDayIntoOneday']);
 // When the app goes public, only this account may trigger a server update.

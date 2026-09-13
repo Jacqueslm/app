@@ -4,9 +4,8 @@
 // half. The other half was typing DB_PATH into Railway's Variables tab and
 // getting it identical to the volume's mount path — a typo, a trailing space or
 // a differently chosen path and the app boots happily, writes to the container's
-// throwaway disk, and throws away every day count, journal entry and Studio clip
-// on the next deploy. Silently, and only days later. That is the failure this
-// file removes.
+// throwaway disk, and throws away every day count and journal entry on the next
+// deploy. Silently, and only days later. That is the failure this file removes.
 //
 // Railway publishes the mount path it actually used as RAILWAY_VOLUME_MOUNT_PATH,
 // so the app reads that and names its own file inside it. Attaching the volume is

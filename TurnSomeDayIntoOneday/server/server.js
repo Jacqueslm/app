@@ -27,11 +27,6 @@ const {
   TURNED_AWAY, isPrivate, appAllows, doorMiddleware,
   PAGE_GONE, isPagePath, pageIsServed,
 } = require('./private-app');
-// Studio: the video and posting app that used to run on its own computer.
-// It is part of this one now, so it loads with it. Its own door is in
-// studio/auth.js - it asks this app who is signed in and hands Studio that
-// person's id, so there is one sign-in and one private list, not two.
-const studio = require('./studio/studio');
 
 const app = express();
 // Don't advertise the framework in every response header.
@@ -260,23 +255,6 @@ app.get('/key', (req, res) => {
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'key.html'));
 });
-
-// ─── STUDIO ──────────────────────────────────────────────────────────────────
-// 13 Sep 2026 — "add studio to the app." The screen is served here rather than
-// by Studio's own server, which is gone; everything behind it is the same
-// router it always had, mounted at /api/studio. Requiring the app's session in
-// front of that router means a signed-out visitor gets the app's own 401 (so
-// the client shows a sign-in) and nothing in Studio is reachable without it.
-// /studio is in OPEN_PAGES so it reaches THIS route instead of the 410 the
-// pages-closed gate gives every other page.
-app.get('/studio', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'studio.html'));
-});
-// Same reason as /key.html above: express.static would hand the shell out to
-// anyone who guessed the file name.
-app.get('/studio.html', (req, res) => res.status(404).end());
-app.use('/api/studio', requireAuth, studio.router);
-
 
 // Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
 // flyers, and video end cards, instead of the .html extension.

@@ -169,7 +169,7 @@ test('the marketing pages are gone', () => {
 test('the app, the store pages and every link that lands from an email stay open', () => {
   for (const p of ['/', '/app', '/key', '/admin/stats',
     '/privacy', '/privacy.html', '/delete-account', '/delete-account.html',
-    '/letter.html', '/l/abc123', '/unsubscribe', '/go/yt', '/play',
+    '/letter.html', '/game3d.html', '/l/abc123', '/unsubscribe', '/go/yt', '/play',
     '/api/state', '/api/auth/login']) {
     assert.strictEqual(pageIsServed(p), true, `${p} must stay open`);
   }
@@ -178,7 +178,8 @@ test('the app, the store pages and every link that lands from an email stay open
 test('assets are never judged — the app on the phone needs all of them', () => {
   for (const p of ['/sw.js', '/manifest.json', '/icons/icon-192.png',
     '/js/ring3d-three.js', '/audio/sos.mp3', '/robots.txt', '/sitemap.xml',
-    '/.well-known/assetlinks.json', '/index.css']) {    assert.strictEqual(isPagePath(p), false, `${p} is not a page`);
+    '/.well-known/assetlinks.json', '/index.css']) {
+    assert.strictEqual(isPagePath(p), false, `${p} is not a page`);
     assert.strictEqual(pageIsServed(p), true);
   }
 });

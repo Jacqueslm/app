@@ -145,3 +145,58 @@ test('the personal answers are answered back on the key screen', () => {
   assert.match(PAGE, /\['horrific','kids','status','raised_by','faith','give','helped','world'\]/,
     'the key screen must draw a response for the new answers');
 });
+
+// Jacques, 13 Sep 2026: "answered the questions turned the key nothing
+// happened." Three separate faults made the button come back with nothing, and
+// the shape of all three is in the head patch at the top of key.html - the
+// editor that wrote it could not reach past roughly the first 60KB of a 1.3MB
+// file, and the code it changes sits at the very bottom of it. Nothing else in
+// this suite can see that block by running the page, so it is held here, by the
+// things it has to keep doing:
+//
+//   1. the key counts the answers that are NOT sliders, or a person who answers
+//      the personal questions and no sliders gets the empty screen back;
+//   2. it says so on the line under the gauge instead of counting buttons as
+//      sliders;
+//   3. the put-off question has wording of its own like every other choice;
+//   4. a nameless sheet keeps what it has when a name is typed on to it, and the
+//      nameless copy is not left in storage behind a delete;
+//   5. the name error is written where the buttons are, not at the top of a card
+//      the person has already scrolled past.
+test('turning the key comes back with something even with no sliders answered', () => {
+  const patch = PAGE.slice(PAGE.indexOf('THE KEY: TURN IT AND SOMETHING ALWAYS COMES BACK'),
+                           PAGE.indexOf('</head>'));
+  assert.ok(patch.length > 500, 'the head patch is missing from key.html');
+
+  // (1) every answer counts, not just the twelve sliders.
+  assert.match(patch, /K\.answered\s*=\s*K\.sliders\s*\+\s*nonSliders\(A\)/,
+    'the key must count the buttons and the boxes as answers');
+  assert.match(patch, /var choices = BACK\.filter/, 'and count the answered choices');
+  assert.match(patch, /var typed = KEY_TEXTS\.filter/, 'and the boxes that were typed in');
+
+  // (2) the line under the gauge says sliders and more, not one number for both.
+  assert.match(patch, /of ' \+ K\.total \+ ' sliders'/, 'the count line must name the sliders');
+  assert.match(patch, /No sliders answered/, 'and have something to say with none of them');
+
+  // (3) the put-off question, answered back on the page like the others.
+  const BACK = ((patch.match(/var BACK = \[([^\]]*)\]/) || [])[1] || '')
+    .replace(/'/g, '').split(',').map((s) => s.trim()).filter(Boolean);
+  const later = (PAGE.match(/KEY_CHOICE\.later = \{([\s\S]*?)\n    \};/) || [])[1];
+  assert.ok(later, 'KEY_CHOICE.later is missing, so "what you put off" shows nothing');
+  const q = byId.get('later');
+  assert.ok(q && q.kind === 'choice', 'later must still be a choice question');
+  for (const [value] of q.opts) {
+    assert.ok(new RegExp(`\\b${value}:\\s*\\{t:`).test(later),
+      `later=${value} can be answered and has nothing written back for it`);
+  }
+  assert.ok(BACK.includes('later'), 'and the key screen has to draw it');
+
+  // (4) the nameless sheet, and the copy it left behind.
+  assert.match(patch, /from\.indexOf\('me\|'\) === 0 && to\.indexOf\('me\|'\) !== 0/,
+    'a nameless sheet must keep its answers when a name is typed on to it');
+  assert.match(patch, /delete all\[from\]/,
+    'and the nameless copy must not be left in storage behind Delete my answers');
+
+  // (5) the error where the eye is.
+  assert.match(patch, /insertBefore\(err, acts\)/, 'the name error must be written above the buttons');
+});

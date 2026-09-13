@@ -76,6 +76,14 @@ function doorMiddleware(allows) {
 // route in server.js is still there and still correct — this is simply asked
 // first, so reopening the site is deleting this block.
 //
+// 13 Sep 2026, the one the closed list caught out: /game3d.html. The app loads
+// the 3D roof fight in an iframe from that address, and it is served only at
+// its .html address (express.static; no clean-URL route exists for it) — so the
+// "files with extensions are never judged" rule never got the chance to apply.
+// The gate answered 410 and the Fight tab died with "This page is not here any
+// more" at the exact moment the bell rang. It belongs to the app, so it sits
+// on the list beside /app.
+//
 // The pages that have to stay open, and why. Each one is either the app, or
 // something Google Play already points at, or a link that lands in somebody's
 // phone from an email:
@@ -83,13 +91,13 @@ const OPEN_PAGES = [
   '/',                  // redirects to /app, so an old bookmark still works
   '/app',               // the app
   '/key',               // The Key — owner and list only, gated at its own route
-  '/studio',            // Studio — its own route, and behind the same sign-in
   '/admin/stats',       // owner only, gated at its own route
   '/privacy',           // Play requires the policy without signing in
   '/privacy.html',
   '/delete-account',    // Play requires the deletion page the same way
   '/delete-account.html',
   '/letter.html',       // the page a letter link opens
+  '/game3d.html',       // the 3D fight inside The Fight tab (added 13 Sep 2026)
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the

@@ -589,6 +589,167 @@ ol.steps li b{color:var(--gold); font-weight:600}
   });
 })();
 </script>
+
+<!-- ─── THE KEY: TURN IT AND SOMETHING ALWAYS COMES BACK ────────────────────
+     Jacques, 13 Sep 2026: "answered the questions turned the key nothing
+     happened." It was three separate faults, all real, and not one of them
+     showed an error you could see from where you were sitting.
+
+       1. THE KEY ONLY COUNTED THE SLIDERS. renderKey() below gives up with
+          "Answer the questions above and this fills in." unless at least one
+          of the twelve sliders has a number on it. So somebody who answered
+          the personal questions - who raised you, married or single, kids,
+          faith, how you are with people, what you put off - and pressed the
+          button got that empty line back, and not one of their answers
+          appeared anywhere on the page.
+       2. THE NAME. The button refuses without one, and the line it writes sat
+          at the top of the card, above the questions. Press it at the bottom
+          and the button looked dead.
+       3. THE NAME, AGAIN. Answers are filed under name + birthday. Typing the
+          name AFTER answering - which is exactly what the button has just
+          asked for - moved the filing slot and refilled the form blank. The
+          answers were still saved, under the nameless slot, but the screen
+          looked as though the whole questionnaire had been thrown away.
+
+     And folded in with those: "The things you put off getting done" was the
+     one personal question with no wording written back for it, so it was
+     answered, saved and sent to the AI, and then never mentioned on the page.
+     It has its own reading now, the same as every other answer.
+
+     Why this sits in the head rather than beside the code it changes: the
+     editor that wrote it cannot reach past roughly the first 60KB of a 1.3MB
+     file, and every one of these lives at the bottom of it. This block waits
+     for DOMContentLoaded, which fires after the page's own script (the one at
+     the end of the body) has run, so it can wrap and replace what is already
+     there. If this file is ever edited with a tool that reaches the bottom,
+     folding this back in beside that code is the tidy thing to do. -->
+<script>
+(function(){
+  'use strict';
+
+  /* The answers that are read back on the key screen as well as sent. One list,
+     used by both the count and the fold-in below, so a question added here
+     cannot end up half-wired. */
+  var BACK = ['horrific', 'kids', 'status', 'raised_by', 'faith', 'give', 'helped', 'world', 'later'];
+
+  /* Everything answered that is not one of the twelve sliders: the buttons
+     pressed, where there is wording to answer them back with, and the boxes
+     typed in. */
+  function nonSliders(A){
+    A = A || {};
+    var choices = BACK.filter(function(id){
+      return A[id] && KEY_CHOICE[id] && KEY_CHOICE[id][A[id]];
+    }).length;
+    var typed = KEY_TEXTS.filter(function(id){
+      return String(A[id] || '').trim();
+    }).length;
+    return choices + typed;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+
+    /* 1. The question that was asked and then never mentioned. Same shape as
+       every other one in KEY_CHOICE: a reading of the answer, not a verdict. */
+    KEY_CHOICE.later = {
+      now:  {t:'What you put off', b:'You get to things. That sounds like nothing worth saying, and it is the single most useful thing on this page — for you the gap between deciding and doing is short, and most of what people call putting things off is simply not in your way. The risk at this end is the opposite one: clearing the list so well that the thing with no first step never gets a slot at all.'},
+      some: {t:'What you put off', b:'Some things sit. That is ordinary, and the ones that sit are worth more attention than the habit itself — it is usually the job with no obvious first move, or the one where something unpleasant might be waiting. Take the oldest thing still on the pile and name its first move. Not the whole job. The first move.'},
+      all:  {t:'What you put off', b:'Everything goes on the pile. That is not laziness — people who put everything off are rarely avoiding the work, they are avoiding the moment of starting, and once started they are fine. The cost is that twenty things hide the one that matters, so the pile never gets smaller. Take one item for a week and let the rest of the pile look at you.'},
+      rare: {t:'What you put off', b:'Waiting is not your problem, which is rarer than people think, and it has a cost of its own: the work arrives on time and the week fills up, and the thing nobody is waiting for — the one you would only be doing for yourself — is the one that never gets a slot. Put it in a day, with a time, or it will not happen.'}
+    };
+
+    /* 2. The case the page had no words for. With no slider answered there is no
+       standing to report, and the page answered that by saying nothing at all
+       beyond "answer the questions above". It says this instead. */
+    KEY_STANDING.unanswered = function(){
+      return 'You answered the questions and left the sliders alone, so there is no where-you-are-standing to report yet — the twelve sliders are the part of this that says it, and a reading that invented those numbers would be worth nothing to you. Everything you did give it is below. Put a number on the sliders and turn it again, and the rest of the key builds around them.';
+    };
+
+    /* 3. The reading, and the count it carries. Wrapped rather than rewritten:
+       everything worked out on the phone stays exactly as it was, and the
+       answers that are not sliders are added to it. */
+    var keyReadWas = keyRead;
+    keyRead = function(P, A){
+      var K = keyReadWas(P, A);
+      /* The list of answers the key screen draws is written inside the function
+         above this one, out of reach from here, so the put-off answer is folded
+         in at the same place the others come from. */
+      if(A && A.later && KEY_CHOICE.later[A.later]){
+        K.chosen = K.chosen.concat([KEY_CHOICE.later[A.later]]);
+      }
+      K.sliders = K.answered;                  /* the twelve, counted as before */
+      K.answered = K.sliders + nonSliders(A);  /* everything they answered */
+      return K;
+    };
+
+    /* 4. The line under the gauge. Once the count includes the buttons and the
+       boxes, "9 of 12 answered" is a lie in the other direction: twelve are
+       sliders and the rest are questions. So it says both. This is the only
+       string this block edits instead of wrapping, and it is matched exactly as
+       renderKey builds it, from the same two numbers. */
+    var renderKeyWas = renderKey;
+    renderKey = function(P, A, log){
+      var html = renderKeyWas(P, A, log);
+      var K = keyReadWas(P, A);
+      var more = nonSliders(A);
+      var from = (K.answered + more) + ' of ' + K.total + ' answered';
+      var to = K.answered
+        ? K.answered + ' of ' + K.total + ' sliders' + (more ? ' &middot; ' + more + ' more from you' : '')
+        : (more ? 'No sliders answered &middot; ' + more + ' from the questions you did answer'
+                : 'Nothing answered yet');
+      return html.split(from).join(to);
+    };
+
+    /* 5. The name. Same element, same message, moved down to the buttons - the
+       top of the card is not where anybody is looking when they press it. */
+    var err = document.getElementById('k-err');
+    var acts = document.querySelector('#panel-key .actions');
+    if(err && acts && acts.parentNode) acts.parentNode.insertBefore(err, acts);
+
+    /* 6. Typing the name used to refill the form blank. The answers are filed
+       under name + birthday, so a nameless sheet becoming a named one moved the
+       filing slot and loaded the empty record at the other end - in the middle
+       of a questionnaire, at the exact moment the button had asked for the name.
+       A sheet that had no name on it keeps what it has when one is typed on to
+       it, and is filed under that name from then on. Anything else - a
+       different birthday, or a different name on a sheet that already had one -
+       still loads the sheet it points at, which is what that rule is for. */
+    var keyLoadWas = keyLoad;
+    keyLoad = function(){
+      var to = keySlot();
+      if(to === KSLOT) return false;
+      var from = KSLOT;
+      var keep = keyAnswered() &&
+                 !!from && from.indexOf('me|') === 0 && to.indexOf('me|') !== 0;
+      var held = KANS;
+      var rec = keyLoadWas();
+      if(keep && !rec){
+        KANS = held;              /* what they answered is still on the screen */
+        renderKeyForm();
+        keyStore();               /* and now it is filed under the name */
+        var all = keyAll();
+        delete all[from];         /* the nameless copy has done its job */
+        try{ localStorage.setItem(KKEY, JSON.stringify(all)); }catch(e){}
+      }
+      return rec;
+    };
+
+    /* 7. The name, the day and the month decide which sheet is loaded, and the
+       listeners on the name and day fields were attached to the keyLoad that
+       existed before this block ran - replacing keyLoad does not reach them.
+       The two fields are rebuilt so their listeners point at the one above.
+       Nothing else holds on to them: the rest of the page looks them up by id. */
+    ['k-name', 'k-day'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el || !el.parentNode) return;
+      var fresh = el.cloneNode(true);
+      fresh.value = el.value;
+      el.parentNode.replaceChild(fresh, el);
+      fresh.addEventListener('change', keyLoad);
+      if(id === 'k-name') fresh.addEventListener('blur', keyLoad);
+    });
+  });
+})();
+</script>
 </head>
 <body>
 <canvas id="stars"></canvas>

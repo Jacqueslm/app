@@ -3,9 +3,13 @@ const path = require('path');
 const crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 
-// On a hosting platform the database must live on the persistent volume
-// (DB_PATH env var); on a home install it sits next to the code as before.
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data.sqlite');
+// Where the database lives: DB_PATH if somebody set it, otherwise the volume a
+// hosting platform reports it mounted (see volume.js), otherwise beside the code
+// as on a home install. The rule is shared with Studio so both land on the same
+// volume instead of one of them on the container's throwaway disk.
+const { VOLUME_DIR } = require('./volume');
+const DB_PATH = process.env.DB_PATH
+  || (VOLUME_DIR ? path.join(VOLUME_DIR, 'data.sqlite') : path.join(__dirname, 'data.sqlite'));
 
 // A hosted redeploy starts the new container while the platform is still moving
 // the storage volume over from the old one, so for a second or two the database

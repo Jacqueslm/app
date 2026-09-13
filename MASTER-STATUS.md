@@ -33,9 +33,12 @@ with its own accounts; now:
 - **The code lives in `TurnSomeDayIntoOneday/server/studio/`** — Railway's root
   directory is `TurnSomeDayIntoOneday`, so `Studio/` was never in the build.
   `Studio/` keeps only content and tooling (guide PDFs, end cards, lessons).
-- **Data follows the volume:** `server/studio/locations.js` puts Studio's
-  sqlite, `media/` and `backups/` beside `DB_PATH`, so a deploy cannot throw
-  the library away. Home installs keep the old layout.
+- **Data follows the volume:** `server/volume.js` decides where persistent
+  files live — `DB_PATH` if set, else Railway's own `RAILWAY_VOLUME_MOUNT_PATH`,
+  else beside the code. `server/studio/locations.js` puts Studio's sqlite,
+  `media/` and `backups/` beside it, so a deploy cannot throw the library away.
+  Attaching the volume in Railway is the whole setup; there is no path to type
+  and nothing to keep in sync (see **13 Sep, volume** below).
 - **Studio's in-place updater is off** (`/update/check` answers `hosted:true`,
   `/update` refuses). It ships and updates with the app now.
 - **Two doors in the app**, both `data-friendly` so they appear only for an
@@ -60,6 +63,42 @@ that merely *required* Studio could never exit.
 app session **200** on config, assets, schedule, scripts, characters and the
 update check, with exactly one Studio row created. `/reviews` 410. **139 of 139
 server checks pass.** Not opened in a browser.
+
+---
+
+## 🛠 13 SEP 2026 — THE VOLUME FINDS ITSELF, SO THERE IS NO PATH TO TYPE
+
+Jacques: *"how to do railway volume"*, then *"how you do that"* with a screenshot
+showing **`app-volume` already attached** to the `app` service. Attaching it was
+the easy half. The other half was typing `DB_PATH` into Railway's Variables tab
+and matching the volume's mount path exactly — a typo, a trailing space or a
+path he chose differently and the app boots happily, writes to the container's
+throwaway disk, and throws away every day count, journal entry and Studio clip
+on the next deploy. Silently, days later.
+
+**`server/volume.js` (new) decides it once:** `DB_PATH` if it is set, otherwise
+Railway's own **`RAILWAY_VOLUME_MOUNT_PATH`**, otherwise beside the code as on a
+home install. `db.js` and `studio/locations.js` both read it, which is the point
+— before this, Studio took its answer from `DB_PATH` alone and would have split
+its clips onto the throwaway disk while the database went to the volume.
+**Attaching the volume is now the entire setup**, and any mount path works.
+
+Nothing already configured changes: `DB_PATH` still wins over the volume, which
+is what every test in `test/` sets and what any deployment predating the volume
+has. **145 of 145 server checks pass** (6 new in `test/volume.test.js`, two of
+which boot `db.js` and `studio/locations.js` in a child process with only the
+volume variable set and check the files actually land on it).
+
+**CHECK IN RAILWAY — the one way this can still be wrong:** the volume's mount
+path must not be the app's own folder. Railway's build puts the code in `/app`,
+so a volume mounted at `/app` hides the code and the service will not boot at
+all. `/data` is right. To see the path: click the **`app-volume`** box on the
+project canvas.
+
+**Still owed:** the app has not been opened in a browser from here, and the
+volume has not been watched filling up. Rebuilding from an empty volume means
+signing up again once — the allowed-email list is in Railway's variables, not in
+the file, so that cannot lock him out.
 
 ---
 

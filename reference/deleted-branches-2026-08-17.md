@@ -80,8 +80,20 @@ Restore any of them with `git push origin <sha>:refs/heads/<branch>`.
 Also removed at the same time: `.claude/agents/trade-checker.md` on `main` — it
 graded trades against `Trading/PLAYBOOK.md`, which no longer exists anywhere.
 
-**Still holding a copy:** five tags from 6 Sep 2026 — `characters`, `crowd`,
-`fightermoves`, `suzie`, `trainers` — point at game/3D handoff commits whose
-trees include `Trading/` and `TradeDesk/`. They are not branches, and they pin
-that day's fighter files (their `fighter.glb` differs from the one on `main`),
-so they were left alone pending Jacques's call.
+**Tags:** five tags from 6 Sep 2026 — `characters`, `crowd`, `fightermoves`,
+`suzie`, `trainers` — pointed at game/3D handoff commits whose trees included
+`Trading/` and `TradeDesk/`. Jacques wanted the fighters kept, so the tags were
+kept and the trading folders taken out of them: each tag now points at the same
+snapshot minus `Trading/`, `TradeDesk/`, `trading-bot/` and
+`.claude/agents/trade-checker.md`, and every fighter file is untouched (69 and
+77 files in `img/fight` on the two snapshots, unchanged).
+
+They were replaced by deleting each tag and pushing a new one — a force update
+is refused for this credential, a delete and a create are not. Old tag commits,
+for recovery: `characters` `fightermoves` `suzie` `a88d7e7a4392186d8b2e76d10efb59a43220525d`,
+`crowd` `trainers` `77a02d067104c3a56c9f7b16ffbc4750d213f963`.
+
+Note that only the *tips* were cleaned. The trading folders still sit in those
+snapshots' parent commits, and on GitHub unreachable commits survive until
+support purges them, so this is "gone from everything you can open", not
+"gone from the server's disk".

@@ -175,6 +175,33 @@ test('the app, the store pages and every link that lands from an email stay open
   }
 });
 
+test('the trading practice game is behind the door, not out on its own', () => {
+  // It went up on 14 Sep as a plain page on the app's address, which meant
+  // anybody holding the link could open it. Jacques: "lock it behind sign in."
+  // The page is a FILE at a .html address, so unlike /key there is a real file
+  // for express.static to hand out: the gated route has to be registered first
+  // or it is never reached and the page stays open to whoever guesses the name.
+  const route = SRC.match(/app\.get\('\/market-maker\.html', \(req, res\) => \{[\s\S]*?\n\}\);/);
+  assert.ok(route, 'the /market-maker.html route must still be findable in server.js');
+  assert.match(route[0], /isValidSession\(req\)/, 'signed out gets nothing');
+  assert.match(route[0], /isFriendlyRequest\(req\)/, 'off the list gets nothing');
+  assert.match(route[0], /res\.redirect\('\/app'\)/, 'a page visit is sent to the app, not handed JSON');
+  assert.ok(
+    SRC.indexOf("app.get('/market-maker.html'") < SRC.indexOf('app.use(express.static('),
+    'the gated route has to sit above static, which would otherwise serve the file itself',
+  );
+});
+
+test('the worker never caches the private trading page', () => {
+  // The service worker's offline fallback answers a failed navigation from the
+  // shell cache, with no check of any kind. A cached copy of a page that is
+  // served only to somebody signed in would outlive that check — the same
+  // reason /key never enters the worker either.
+  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
+  assert.match(SW, /url\.pathname === '\/market-maker\.html'\) return;/,
+    'the worker must skip /market-maker.html, as it skips /key');
+});
+
 test('assets are never judged — the app on the phone needs all of them', () => {
   for (const p of ['/sw.js', '/manifest.json', '/icons/icon-192.png',
     '/js/ring3d-three.js', '/audio/sos.mp3', '/robots.txt', '/sitemap.xml',

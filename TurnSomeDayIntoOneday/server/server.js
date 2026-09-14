@@ -245,6 +245,24 @@ app.use('/server', (req, res) => res.status(404).end());
 app.get('/admin-stats.html', (req, res) => res.status(404).end());
 // Same reason as the line above: static would hand this out to anyone.
 app.get('/key.html', (req, res) => res.status(404).end());
+
+// The trading practice game — private, and the same door as The Key.
+//
+// 14 Sep 2026. Jacques: "lock it behind sign in." It arrived yesterday as a plain
+// page on the app's address, which meant anybody holding the link could open it.
+// Signed in AND on the allowlist, or you go to /app without learning the page is
+// there — the identical rule, in the identical way, as the /key route below.
+//
+// This has to sit ABOVE express.static, not beside /key: static serves the file
+// at its own .html address by default, so a route registered after it would never
+// be reached and the page would stay open to whoever guessed the name. /key needs
+// no such care because there is no key.html file to serve — this one is a file.
+app.get('/market-maker.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'market-maker.html'));
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 // The Key — private. Signed in AND on the allowlist, or you go to /app without

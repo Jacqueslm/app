@@ -9,7 +9,7 @@
 // gone. Anyone who chose Deep had the one voice that goes silent offline.
 // Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
 // cannot drift apart unnoticed again.
-const CACHE_NAME = 'tsid-shell-v5.2';
+const CACHE_NAME = 'tsid-shell-v5.3';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -110,7 +110,12 @@ self.addEventListener('fetch', (event) => {
   // back to /app. Caching a 200 response for /key would put the page in the
   // shell cache, and the offline fallback below would then hand it out with no
   // check at all. Like /play, it never enters the worker.
+  //
+  // /market-maker.html is the same kind of page now, for the same reason: it is
+  // served only to somebody signed in and on the list, and a cached copy would
+  // outlive that check.
   if (url.pathname === '/key' || url.pathname === '/key.html') return;
+  if (url.pathname === '/market-maker.html') return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

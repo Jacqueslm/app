@@ -476,7 +476,7 @@ h2.big{font-family:"Bungee",cursive;font-size:clamp(24px,5.4vw,38px);margin:6px 
       <div id="splash"></div>
     </div>
     <div id="gate" class="hide">
-      <div class="step" id="gStep">STEP ONE — ASK</div>
+      <div class="step" id="gStep">STEP ONE — ASK (x)</div>
       <div class="gq" id="gQ"></div>
       <div id="gOpts"></div>
       <div id="gWhy"></div>
@@ -1319,6 +1319,19 @@ function botClose(r){
 var Gm=null, timer=null;
 var STOPS={tight:{k:0.55,n:"Tight"},swing:{k:1,n:"Swing"},wide:{k:1.5,n:"Wide"}};
 var pickStop="swing", pickTgt=2, pickSize=1;
+// The ruler: hover the chart and it reports the price under the cursor. With a
+// price scale down the side, that is how any chart a person actually trades
+// from behaves - and without it every price here had to be taken on trust.
+var curY=null;
+(function(){
+  var cv=$("cv"); if(!cv) return;
+  var toY=function(e){
+    var r=cv.getBoundingClientRect();
+    return (e.clientY-r.top)*(cv.height/r.height);
+  };
+  cv.addEventListener("pointermove",function(e){ curY=toY(e); if(Gm&&!Gm.over) drawChart() });
+  cv.addEventListener("pointerleave",function(){ curY=null; if(Gm&&!Gm.over) drawChart() });
+})();
 // Size is the lesson the rest of the game could not teach. Every other dial
 // changes where a round lands; this one changes how much one round costs.
 // A 4x loss is four hits of armour at once — the sixteen-lot with no stop.
@@ -1611,15 +1624,51 @@ function drawChart(){
   var ahead=Gm.xrayOn?5:0;
   var seen=Gm.bars.slice(start,Gm.i+1+ahead);
   if(!seen.length) return;
+
+  // The bracket, priced BEFORE the shot instead of after it. Every platform
+  // shows you where the stop and the target sit while you are still deciding;
+  // here the only way to learn them was to fire and read the message.
+  var pv=null;
+  if(firing() && !Gm.pos && !Gm.over){
+    var px=Gm.bars[Gm.i].c;
+    var look=Gm.bars.slice(Math.max(0,Gm.i-14),Gm.i+1);
+    var low14=Math.min.apply(null,look.map(function(b){return b.l}));
+    var high14=Math.max.apply(null,look.map(function(b){return b.h}));
+    var kk=STOPS[pickStop].k;
+    var lr=Math.abs(px-low14)*kk, sr=Math.abs(high14-px)*kk;
+    pv={};
+    if(lr>=0.4) pv.long={sl:px-lr, tp:px+lr*pickTgt};
+    if(sr>=0.4) pv.short={sl:px+sr, tp:px-sr*pickTgt};
+    if(!pv.long && !pv.short) pv=null;
+  }
+
   var hi=-1e9, lo=1e9;
   seen.forEach(function(b){ if(b.h>hi)hi=b.h; if(b.l<lo)lo=b.l });
   if(Gm.pos){ hi=Math.max(hi,Gm.pos.tp,Gm.pos.sl); lo=Math.min(lo,Gm.pos.tp,Gm.pos.sl) }
+  // Anything the screen asks the player to judge has to be inside the frame. A
+  // level the question is about, or a stop being priced, sitting outside the
+  // last seventy bars would be off-screen - and that is a guess again.
+  if(Gm.gate && Gm.gate.state==="ask" && Gm.gate.q && Gm.gate.q.prices)
+    Gm.gate.q.prices.forEach(function(p){ if(p>hi)hi=p; if(p<lo)lo=p });
+  if(pv) ["long","short"].forEach(function(sd){
+    if(!pv[sd]) return;
+    ["sl","tp"].forEach(function(f){ var v=pv[sd][f]; if(v>hi)hi=v; if(v<lo)lo=v })
+  });
   var pad=(hi-lo)*0.12||1; hi+=pad; lo-=pad;
   var Y=function(p){ return H-30-((p-lo)/(hi-lo))*(H-60) };
   var cw=(W-70)/span;
 
+  // A price scale, labelled. Without one, every number on this screen had to be
+  // taken on trust: you could see the shape of the tape and not read a single
+  // price off it, which is not a chart anybody actually trades from.
   x.strokeStyle="#1B2140"; x.lineWidth=1;
-  for(var g=0;g<=4;g++){ var gy=30+g*(H-60)/4; x.beginPath(); x.moveTo(0,gy); x.lineTo(W-62,gy); x.stroke() }
+  x.font="600 10px JetBrains Mono, monospace"; x.textAlign="right";
+  for(var g=0;g<=4;g++){
+    var gy=30+g*(H-60)/4;
+    x.beginPath(); x.moveTo(0,gy); x.lineTo(W-62,gy); x.stroke();
+    x.fillStyle="#4E5878";
+    x.fillText((hi-(hi-lo)*(g/4)).toFixed(1),W-66,gy-4);
+  }
 
   var nowIdx=Gm.i-start;
   seen.forEach(function(b,k){
@@ -1658,9 +1707,52 @@ function drawChart(){
     line(Gm.pos.entry,"#4CC9F0","IN",[4,4]);
   }
   line(last,"#FFC53D",last.toFixed(1));
-  // step one is bare: nothing is marked until the answer is in
+
+  // The bracket you are about to fire, drawn on the tape with its price on it.
+  function pLine(p,col,txt,frac){
+    var py=Y(p);
+    x.strokeStyle=col; x.lineWidth=1.1; x.setLineDash([5,4]);
+    x.beginPath(); x.moveTo(0,py); x.lineTo(W-70,py); x.stroke(); x.setLineDash([]);
+    x.fillStyle=col; x.font="700 9.5px JetBrains Mono, monospace"; x.textAlign="center";
+    x.fillText(txt,W*frac,Math.max(11,py-4));
+  }
+  if(pv){
+    if(pv.long) pLine(pv.long.tp,"rgba(46,230,160,.6)","LONG TARGET "+pv.long.tp.toFixed(1)+"  +"+pickTgt+"R",0.30);
+    if(pv.long) pLine(pv.long.sl,"rgba(255,92,108,.6)","LONG STOP "+pv.long.sl.toFixed(1)+"  -1R",0.30);
+    if(pv.short) pLine(pv.short.tp,"rgba(46,230,160,.6)","SHORT TARGET "+pv.short.tp.toFixed(1)+"  +"+pickTgt+"R",0.68);
+    if(pv.short) pLine(pv.short.sl,"rgba(255,92,108,.6)","SHORT STOP "+pv.short.sl.toFixed(1)+"  -1R",0.68);
+  }
+
+  // STEP ONE asks about prices, so the prices in the question are on the tape.
+  // Three numbers in a box and one price in the corner is a coin toss: there
+  // was nothing on the chart to compare them against. Option 1 is line 1, and
+  // the answer is which line is the untaken low - that is a read, not a guess.
+  if(Gm.gate && Gm.gate.state==="ask" && Gm.gate.q && Gm.gate.q.prices){
+    Gm.gate.q.prices.forEach(function(p,k){
+      var py=Y(p); if(py<26||py>H-26) return;
+      x.strokeStyle="rgba(124,108,255,.5)"; x.lineWidth=1.2; x.setLineDash([3,4]);
+      x.beginPath(); x.moveTo(0,py); x.lineTo(W-70,py); x.stroke(); x.setLineDash([]);
+      x.fillStyle="rgba(124,108,255,.95)";
+      x.beginPath(); x.arc(W-72,py,8,0,7); x.fill();
+      x.fillStyle="#0B0F1E"; x.font="700 11px JetBrains Mono, monospace"; x.textAlign="center";
+      x.fillText(String(k+1),W-72,py+4);
+    });
+  }
+  // step one hides the structure, not the prices
   if(Gm.gate && Gm.gate.state!=="ask") drawStruct(x,W,H,Y,start,cw);
   draw4h();
+
+  // The ruler. Any platform tells you the price under the cursor; without one
+  // the only price anywhere on the screen was the current one in the corner.
+  if(curY!=null){
+    var cy=Math.max(30,Math.min(H-30,curY));
+    var cp=lo+((H-30)-cy)/(H-60)*(hi-lo);
+    x.strokeStyle="rgba(226,232,255,.32)"; x.lineWidth=1; x.setLineDash([2,3]);
+    x.beginPath(); x.moveTo(0,cy); x.lineTo(W-70,cy); x.stroke(); x.setLineDash([]);
+    x.fillStyle="rgba(226,232,255,.9)"; x.fillRect(W-62,cy-9,62,18);
+    x.fillStyle="#08101E"; x.font="700 11px JetBrains Mono, monospace"; x.textAlign="center";
+    x.fillText(cp.toFixed(1),W-31,cy+4);
+  }
 }
 
 // The bridge. Your method reads the higher time frame for bias and executes on
@@ -1685,8 +1777,15 @@ function draw4h(){
   var pad=(hi-lo)*0.10||1; hi+=pad; lo-=pad;
   var Y=function(p){ return H-14-((p-lo)/(hi-lo))*(H-28) };
   var cw=(W-70)/span;
-  x.strokeStyle="#161C33"; x.lineWidth=1;
-  for(var q=0;q<=2;q++){ var gy=14+q*(H-28)/2; x.beginPath(); x.moveTo(0,gy); x.lineTo(W-62,gy); x.stroke() }
+  // the bridge reads a bias, so it needs the prices on it as well
+  x.lineWidth=1; x.font="600 9.5px JetBrains Mono, monospace"; x.textAlign="right";
+  for(var q=0;q<=2;q++){
+    var gy=14+q*(H-28)/2;
+    x.strokeStyle="#161C33";
+    x.beginPath(); x.moveTo(0,gy); x.lineTo(W-62,gy); x.stroke();
+    x.fillStyle="#4E5878";
+    x.fillText((hi-(hi-lo)*(q/2)).toFixed(1),W-66,gy+3);
+  }
   seen.forEach(function(b,k){
     var cx=10+k*cw+cw/2, up=b.c>=b.o, live=(k===seen.length-1);
     x.strokeStyle=x.fillStyle=up?"#2EE6A0":"#FF5C6C";
@@ -1861,12 +1960,15 @@ function buildQ(){
   var lowSide = st.legDir<0;
   var tru = lowSide ? st.lastL.p : st.lastH.p;
   var spread=Math.max(Math.abs(st.lastH.p-st.lastL.p),1);
-  var o=[tru, tru+spread*0.38, tru-spread*0.31].map(function(v){return +v.toFixed(1)});
+  var cand=[tru, tru+spread*0.38, tru-spread*0.31].map(function(v){return +v.toFixed(1)});
   var order=[0,1,2].sort(function(){return Math.random()-0.5});
   return {kind:"level", a:order.indexOf(0),
-    q:"Price is heading "+(lowSide?"down":"up")+". Which price is the resting "+(lowSide?"low":"high")+
+    q:"Price is heading "+(lowSide?"down":"up")+". Three prices are drawn on the chart. Which one is the resting "+(lowSide?"low":"high")+
       " it has not taken yet — the one the stops are sitting "+(lowSide?"under":"above")+"?",
-    o:order.map(function(k){return o[k].toFixed(1)}),
+    // the three prices, in option order: the chart draws them so the question
+    // can be answered off the tape instead of guessed at
+    prices: order.map(function(k){return cand[k]}),
+    o:order.map(function(k){return cand[k].toFixed(1)}),
     w:"Untaken highs and lows are not targets because they are pretty. They are targets because that is where the orders are. Everything between here and there is just the approach."};
 }
 
@@ -1911,7 +2013,7 @@ function paintGate(){
     return;
   }
   el.classList.remove("hide");
-  $("gStep").textContent = g.state==="ask" ? "STEP ONE — ASK   ·   clock stopped, nothing marked on the chart"
+  $("gStep").textContent = g.state==="ask" ? "STEP ONE — ASK   ·   clock stopped, structure not marked - read the prices off the tape"
                                            : "STEP TWO — OBSERVE   ·   now look at what was actually there";
   $("gQ").textContent=g.q.q;
   var box=$("gOpts"); box.innerHTML="";
@@ -2212,12 +2314,16 @@ document.querySelectorAll("[data-stop]").forEach(function(b){
   b.onclick=function(){
     document.querySelectorAll("[data-stop]").forEach(function(o){ o.setAttribute("aria-pressed","false") });
     b.setAttribute("aria-pressed","true"); pickStop=b.dataset.stop;
+    // the stop you just picked is on the tape straight away, so you can see how
+    // far it sits from the swing before you fire
+    if(Gm&&!Gm.over) drawChart();
   };
 });
 document.querySelectorAll("[data-tgt]").forEach(function(b){
   b.onclick=function(){
     document.querySelectorAll("[data-tgt]").forEach(function(o){ o.setAttribute("aria-pressed","false") });
     b.setAttribute("aria-pressed","true"); pickTgt=+b.dataset.tgt;
+    if(Gm&&!Gm.over) drawChart();
   };
 });
 document.querySelectorAll("[data-size]").forEach(function(b){

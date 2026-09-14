@@ -20,6 +20,12 @@ third. You answer a question about the inside of the current leg on a bare
 chart, then it draws what was actually there, and only then do the fire buttons
 unlock.
 
+What stays hidden is the structure, never the prices. The chart carries a
+labelled price scale and a cursor ruler, and when the read asks about a price
+the prices in the question are drawn on the tape — otherwise picking one was a
+coin toss, not a read. The stop and the target for both sides are drawn on the
+chart, priced and in R, before you fire instead of after.
+
 `Market-Maker-Warfare-Manual.pdf` explains all of it.
 
 ## Where it lives

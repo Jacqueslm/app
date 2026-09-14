@@ -98,6 +98,7 @@ const OPEN_PAGES = [
   '/delete-account.html',
   '/letter.html',       // the page a letter link opens
   '/game3d.html',       // the 3D fight inside The Fight tab (added 13 Sep 2026)
+  '/market-maker.html', // the trading practice game, owner's own tool (added 14 Sep 2026)
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the

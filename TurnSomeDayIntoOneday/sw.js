@@ -9,10 +9,16 @@
 // gone. Anyone who chose Deep had the one voice that goes silent offline.
 // Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
 // cannot drift apart unnoticed again.
-const CACHE_NAME = 'tsid-shell-v5.3';
+const CACHE_NAME = 'tsid-shell-v5.4';
 const SHELL_FILES = [
   '/',
   '/app',
+  // The roof fight. It is the only app page loaded in an iframe, and the only
+  // one whose address carries a query string (?boss=…&fighter=…&floor=…). The
+  // page fallback below ends at '/app', so with this line missing and no
+  // signal, the fight frame came up as the app's home screen — the ring went
+  // missing at the bell. Precached, ignoreSearch finds it offline.
+  '/game3d.html',
   '/manifest.json',
   '/manifest-discrete.json',
   '/audio/sos-talk-warm.mp3',

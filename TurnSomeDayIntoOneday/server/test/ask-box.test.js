@@ -94,7 +94,7 @@ async function loadPage(file) {
 // caution about medical claims does not govern it. Its safety lines do.
 for (const [label, file, must] of [
   ['herb library', 'herbs.html', /WHAT STILL HOLDS/],
-  ['tax centre', 'tax.html', /RULES OF THIS HOUSE/],
+  ['tax centre', 'tax.html', /THE ONE THING THAT HOLDS/],
 ]) {
   test(`${label}: the ask box is wired to the app's own AI`, async () => {
     const p = await loadPage(file);
@@ -171,10 +171,11 @@ test('the tax centre: the tab they are on rides along, and no figure is recalled
   assert.match(p.sandbox.askCtx(), /Mileage/);
   p.sandbox.TAB = 'ded';
   assert.match(p.sandbox.askCtx(), /Deductions/);
-  // The page's whole value is that every number on it came from the IRS. The
-  // box must send them to the page rather than recite one from memory.
-  assert.match(p.sandbox.ASK_SYS, /Never invent a number/);
-  assert.match(p.sandbox.ASK_SYS, /not their tax preparer/);
+  // The page's whole value is that every number on it came from the IRS, so
+  // inventing one is the only mistake that costs money here. That rule stays.
+  assert.match(p.sandbox.ASK_SYS, /never invent a number/i);
+  // The preparer disclaimers do not: this is his own page, for his own use.
+  assert.doesNotMatch(p.sandbox.ASK_SYS, /not their tax preparer/);
   const html = fs.readFileSync(path.join(ROOT, 'tax.html'), 'utf8');
   assert.equal((html.match(/id="ask"/g) || []).length, 1);
   assert.ok(html.indexOf('id="ask"') < html.indexOf('class="tabs"'), 'the box sits above the tabs');

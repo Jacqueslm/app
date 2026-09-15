@@ -202,6 +202,96 @@ test('the worker never caches the private trading page', () => {
     'the worker must skip /market-maker.html, as it skips /key');
 });
 
+test('the herb library and the tax centre are behind the door too', () => {
+  // Added 15 Sep 2026, on Jacques asking for both "apart of my recovery app but
+  // made private". Same door as The Key and the trading game.
+  //
+  // The part that matters is that EACH ONE IS A REAL FILE with a .html address,
+  // so express.static would hand it out by name if the gated route were not
+  // registered above it. Four routes, and every one of them has to be gated.
+  for (const [url, file] of [
+    ['/herbs', 'herbs.html'], ['/herbs.html', 'herbs.html'],
+    ['/tax', 'tax.html'], ['/tax.html', 'tax.html'],
+  ]) {
+    assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
+    assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
+    const at = SRC.indexOf("app.get('" + url + "'");
+    assert.ok(at > -1, `the ${url} route must still be findable in server.js`);
+    const block = SRC.slice(at, at + 320);
+    assert.match(block, /isValidSession\(req\)/, `${url}: signed out gets nothing`);
+    assert.match(block, /isFriendlyRequest\(req\)/, `${url}: off the list gets nothing`);
+    assert.match(block, /res\.redirect\('\/app'\)/, `${url}: a page visit goes to the app, not JSON`);
+    assert.ok(
+      SRC.indexOf("app.get('" + url + "'") < SRC.indexOf('app.use(express.static('),
+      `${url} must be registered above static, which would serve the file itself`,
+    );
+  }
+  for (const p of ['/herbs', '/herbs.html', '/tax', '/tax.html']) {
+    assert.strictEqual(pageIsServed(p), true, `${p} must be reachable`);
+  }
+});
+
+test('the worker never caches the herb library or the tax centre', () => {
+  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
+  assert.match(SW, /\['\/herbs', '\/herbs\.html', '\/tax', '\/tax\.html'\]\.includes\(url\.pathname\)\) return;/,
+    'both pages, and both addresses, must be skipped by the worker');
+});
+
+test('a signed-out request for a private reference page never gets the file', async () => {
+  // The two tests above read the source. This one makes the request, because the
+  // failure they cannot see is the one that matters here: if express.static ever
+  // got to answer /herbs.html first, the page would be served cold to anybody who
+  // typed the name, and every assertion above would still pass.
+  //
+  // So: the real express.static over the real app folder, with a gated route
+  // registered in front of it exactly as server.js registers it, and an actual
+  // fetch. Two things are asserted — the redirect, and that no part of the page
+  // comes back with it.
+  const express = require('express');
+  const ROOT = path.join(__dirname, '..', '..');
+  const app = express();
+  const gate = (file) => (req, res) => {
+    if (req.get('x-signed-in') !== 'yes') return res.redirect('/app');
+    res.sendFile(path.join(ROOT, file));
+  };
+  for (const [url, file] of [
+    ['/herbs', 'herbs.html'], ['/herbs.html', 'herbs.html'],
+    ['/tax', 'tax.html'], ['/tax.html', 'tax.html'],
+  ]) app.get(url, gate(file));
+  app.use(express.static(ROOT));
+  app.get('/app', (req, res) => res.type('text/plain').send('the app'));
+
+  const server = app.listen(0);
+  await new Promise((done) => server.once('listening', done));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const get = (p, signedIn) => fetch(base + p, {
+    redirect: 'manual',
+    headers: signedIn ? { 'x-signed-in': 'yes' } : {},
+  }).then(async (r) => ({ status: r.status, location: r.headers.get('location'), body: await r.text() }));
+  try {
+    for (const [url, file] of [
+      ['/herbs', 'herbs.html'], ['/herbs.html', 'herbs.html'],
+      ['/tax', 'tax.html'], ['/tax.html', 'tax.html'],
+    ]) {
+      const cold = await get(url);
+      assert.strictEqual(cold.status, 302, `${url}: signed out must be redirected, not served`);
+      assert.strictEqual(cold.location, '/app', `${url}: and sent to the app`);
+      assert.ok(!cold.body.includes('Herb Library') && !cold.body.includes('Tax Centre'),
+        `${url}: no part of the page may come back with the redirect`);
+
+      // And the file it points at is a real file, so the check above is not
+      // passing because the page is missing.
+      assert.ok(fs.existsSync(path.join(ROOT, file)), `${file} must exist, or this test proves nothing`);
+
+      const warm = await get(url, true);
+      assert.strictEqual(warm.status, 200, `${url}: signed in and on the list gets the page`);
+      assert.ok(warm.body.length > 2000, `${url}: and it is the page, not a stub`);
+    }
+  } finally {
+    server.close();
+  }
+});
+
 test('assets are never judged — the app on the phone needs all of them', () => {
   for (const p of ['/sw.js', '/manifest.json', '/icons/icon-192.png',
     '/js/ring3d-three.js', '/audio/sos.mp3', '/robots.txt', '/sitemap.xml',

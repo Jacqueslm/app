@@ -1578,6 +1578,24 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Their side of the app</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
+      <!-- 15 Sep 2026. Two pages of his own, added on asking for them "apart of my
+           recovery app but made private". They are separate gated pages rather
+           than screens in here: the herb list is long, the tax list is long, and
+           neither belongs in a file this size. Both sit behind the same door as
+           The Key, and the worker never caches them. location.href rather than
+           switchTo, because they are real pages and not screens. -->
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Your own reference</div></div>
+      <div class="setting-row" onclick="location.href='/herbs'">
+        <i class="ti ti-seedling"></i>
+        <div class="setting-row-txt"><p>Herb Library</p><span>What people have long used, and for what</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="location.href='/tax'">
+        <i class="ti ti-coin"></i>
+        <div class="setting-row-txt"><p>Tax Centre</p><span>2026 figures, what's due, every deduction</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
     </div>
 
     <!-- CUSTOM LESSON PACKS (Pro) -->
@@ -12440,7 +12458,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.5';
+const APP_VERSION='5.6';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';

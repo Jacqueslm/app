@@ -1,0 +1,451 @@
+<!-- tax centre:private -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="cache-control" content="no-cache, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Tax Centre — private</title>
+<meta name="theme-color" content="#0f0c29">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0c29'/%3E%3Ctext x='32' y='43' font-size='30' text-anchor='middle' fill='%237ee8a2' font-family='sans-serif'%3E%24%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.18);
+  --acc:#534AB7;--acc-t:#3C3489;--acc-b:#EEEDFE;
+  --ok:#E1F5EE;--ok-t:#085041;
+  --warn:#FAEEDA;--warn-t:#633806;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,.09);--bdr2:rgba(255,255,255,.18);
+  --acc:#AFA9EC;--acc-t:#AFA9EC;--acc-b:#26215C;
+  --ok:#04342C;--ok-t:#5DCAA5;
+  --warn:#2e1f05;--warn-t:#EFA527;
+}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0f0c29;font-family:var(--f)}
+body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:460px;background:var(--s0);min-height:100dvh;color:var(--tp);padding-bottom:60px}
+.hdr{position:sticky;top:0;z-index:20;background:var(--s0);border-bottom:1px solid var(--bdr);padding:12px 16px 10px;display:flex;align-items:center;gap:10px}
+.hdr h1{font-size:1.0625rem;font-weight:600;line-height:1.2}
+.hdr p{font-size:.75rem;color:var(--tm);margin-top:2px}
+.back{font-size:1.375rem;color:var(--tm);cursor:pointer;text-decoration:none;padding:2px 4px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;font-size:.8125rem;padding:7px 13px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s2);color:var(--ts);cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--acc-b);border-color:var(--acc-b);color:var(--acc-t);font-weight:600}
+.sec{padding:0 16px}
+.sec-hd{font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);font-weight:600;padding:16px 0 8px}
+.card{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px}
+.big{padding:14px;border-radius:14px;font-size:.875rem;line-height:1.55;margin-bottom:10px;border:1px solid transparent}
+.big b{display:block;margin-bottom:5px;font-size:.9375rem}
+.warnbox{background:var(--warn);color:var(--warn-t)}
+.okbox{background:var(--ok);color:var(--ok-t)}
+.p{font-size:.875rem;line-height:1.6;color:var(--ts)}
+.p b{color:var(--tp)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:.875rem}
+.kv:last-child{border-bottom:none}
+.kv span{color:var(--ts)}
+.kv b{font-weight:600;text-align:right;flex:0 0 auto}
+.due{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--bdr)}
+.due:last-child{border-bottom:none}
+.due .d{flex:0 0 74px;font-weight:600;font-size:.8125rem}
+.due .t{flex:1;font-size:.8125rem;color:var(--ts);line-height:1.5}
+.due.now .d{color:#B4441F}
+.chk{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--bdr);cursor:pointer}
+.chk:last-child{border-bottom:none}
+.box{flex:0 0 auto;width:21px;height:21px;border-radius:6px;border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:transparent;margin-top:1px}
+.chk.on .box{background:var(--acc);border-color:var(--acc);color:#fff}
+.chk .txt{flex:1;font-size:.875rem;line-height:1.5;color:var(--ts)}
+.chk .txt b{display:block;color:var(--tp);font-weight:600;margin-bottom:2px}
+.chk.on .txt b{text-decoration:line-through;text-decoration-color:var(--tm);color:var(--tm)}
+.num{width:100%;font:inherit;font-size:1rem;padding:11px 12px;border-radius:11px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
+.lbl{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin:12px 0 5px}
+.lbl:first-child{margin-top:0}
+.btn{display:inline-block;font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-t);background:var(--acc-b);border:none;border-radius:10px;padding:10px 15px;cursor:pointer;margin-top:12px}
+.out{margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)}
+.ft{padding:26px 16px 40px;text-align:center;font-size:.6875rem;color:var(--tm);line-height:1.7}
+.src{font-size:.6875rem;color:var(--tm);margin-top:6px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <a class="back" href="/app" title="Back to the app">&#8592;</a>
+    <div>
+      <h1>Tax Centre</h1>
+      <p>Self-employed, one page, 2026 figures</p>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-t="due">What's due</div>
+    <div class="tab" data-t="num">2026 numbers</div>
+    <div class="tab" data-t="ded">Deductions</div>
+    <div class="tab" data-t="mil">Mileage</div>
+    <div class="tab" data-t="set">Set aside</div>
+    <div class="tab" data-t="rec">Records</div>
+  </div>
+
+  <div id="view"></div>
+
+  <div class="ft">
+    Tax Centre — private. Built for Jacques, from
+    <i>475 Tax Deductions</i> (Bernard B. Kamoroff, CPA), with the 2026 figures checked<br>
+    against the IRS, the SSA and IRS Notice 2025-67. Not tax advice.<br>
+    Every number here was published by the IRS &mdash; none of them are guesses.
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Two rules for this page, both learned the hard way elsewhere in this app.
+
+   1. Every figure carries where it came from. A tax page that invents a number
+      is worse than no page at all, because the number gets used.
+   2. It tells him what the rule is, never what to do about it. Anything that
+      depends on his situation gets an "ask your CPA" line, not an opinion.
+--------------------------------------------------------------------------- */
+
+var TAB='due';
+var KEY='tsid_tax_v1';
+var store={};
+try{ store=JSON.parse(localStorage.getItem(KEY)||'{}')||{} }catch(e){ store={} }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(store)) }catch(e){} }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}) }
+function money(n){ return '$'+Math.round(n).toLocaleString('en-US') }
+
+/* --- the dates ------------------------------------------------------------
+   The four quarterly dates are the same every year. September 15 is the one
+   that bites, because it lands in a busy month and there is no form in the
+   post to remind anybody. */
+var DUE=[
+ {d:'15 April', t:'First quarter 2026 estimated tax', now:0, s:'Also the filing deadline for the 2025 return, or an extension to 15 October.'},
+ {d:'15 June', t:'Second quarter 2026 estimated tax', now:0},
+ {d:'15 Sep', t:'Third quarter 2026 estimated tax', now:1, s:'Today, if today is 15 September. The one people miss.'},
+ {d:'15 Jan 2027', t:'Fourth quarter 2026 estimated tax', now:0, s:'And the deadline for the 2026 return\u2019s last chance to be funded.'}
+];
+
+/* --- the figures ----------------------------------------------------------
+   Each row: what it is, the number, and where the number came from. */
+var NUMS=[
+ {s:'Getting the car paid for', rows:[
+   ['Business miles, 1 Jan \u2013 30 Jun 2026','72.5\u00a2 a mile','IRS IR-2025-128'],
+   ['Business miles, 1 Jul \u2013 31 Dec 2026','76\u00a2 a mile','IRS IR-2026-29 \u2014 raised mid-year'],
+   ['Medical miles','20.5\u00a2 then 23.5\u00a2','IRS'],
+   ['Charity miles','14\u00a2','Set by law, never changed']
+ ]},
+ {s:'Tax you pay on your profit', rows:[
+   ['Self-employment tax','15.3%','12.4% Social Security + 2.9% Medicare'],
+   ['Charged on','92.35% of net profit','The standard calculation'],
+   ['Social Security part only applies to the first','$184,500','SSA, 2026 wage base'],
+   ['Medicare above that','2.9%, then 0.9% extra over $200,000 single / $250,000 joint','IRS'],
+   ['Half of the self-employment tax','Deducted','Above the line, before the standard deduction']
+ ]},
+ {s:'What you can put away', rows:[
+   ['Total you and the business can put into a 401(k) or Solo 401(k)','$72,000','IRS Notice 2025-67'],
+   ['What you can defer from your own pay','$24,500','IRS Notice 2025-67'],
+   ['Extra if you are 50 or over','$8,000 \u2014 $32,500 in total','IRS'],
+   ['Extra if you turn 60, 61, 62 or 63','$11,250 instead of $8,000','IRS, SECURE 2.0'],
+   ['SEP \u2014 how much of your profit','Up to 25%, capped at $72,000','IRS'],
+   ['IRA','$7,500','IRS'],
+   ['IRA extra if you are 50 or over','$1,100','IRS'],
+   ['SIMPLE','$17,000','IRS'],
+   ['Health Savings Account, single / family','$4,400 / $8,750','IRS, 2026']
+ ]},
+ {s:'Buying equipment', rows:[
+   ['Section 179 \u2014 you can write off equipment up to','$2,560,000 in 2026','IRS, 2026 limit'],
+   ['It starts fading out above','$4,090,000 of equipment','IRS'],
+   ['Bonus depreciation for 2026','100%','Restored permanently by the 2025 law'],
+   ['Start-up costs in your first year','Up to $5,000','The rest goes over 15 years, ask your CPA'],
+   ['A business gift to one person, per year','$25','IRS']
+ ]},
+ {s:'Your own return', rows:[
+   ['Standard deduction, single or married filing separately 2026','$16,100','IRS, tax year 2026'],
+   ['Standard deduction, married filing jointly 2026','$32,200','IRS'],
+   ['Standard deduction, head of household 2026','$24,150','IRS'],
+   ['Qualified business income deduction','20% of business income','Made permanent by the 2025 law'],
+   ['Business meals','50%','The 100% restaurant rate ended in 2022']
+ ]},
+ {s:'Paperwork that changed in 2026', rows:[
+   ['Form 1099-K \u2014 payment apps only report above','$20,000 and 200 payments','IRS \u2014 the old threshold came back'],
+   ['Form 1099-NEC / 1099-MISC you have to send, per person','$2,000','Raised from $600, starting 2026']
+ ]}
+];
+
+/* --- the deduction list ---------------------------------------------------
+   Kamoroff's book is an A-to-Z of these. This is the working half of it,
+   grouped by where the money goes, so it can be walked down in January with
+   the bank statement open. Ticking one keeps it ticked. */
+var DED=[
+ {g:'The admin nobody remembers', items:[
+  ['Business bank account fees','Monthly account fee, transfers, cash handling.'],
+  ['Business card interest and annual fee','Interest on a card used only for the business.'],
+  ['Payment processing cuts','What Stripe, PayPal, Square or the app store keep. It is a real cost and it is deductible.'],
+  ['Business licence and permits','Whatever the city and the state charge you to trade.'],
+  ['LLC or company filing fees','Including the annual report fee.'],
+  ['Registered agent','If you use one.'],
+  ['Business insurance','Liability, property, tools, professional cover.'],
+  ['Trade association dues','And union dues.'],
+  ['Legal and professional fees','A contract, a dispute, a trademark.'],
+  ['CPA and tax preparation fees','Including this year\u2019s bill for doing last year\u2019s return.'],
+  ['Bookkeeping software','And the accountant\u2019s software if you pay for it.'],
+  ['Business loan interest','Not the repayment \u2014 just the interest.'],
+  ['Software you run the business on','Hosting, invoicing, scheduling, subscriptions.'],
+  ['Domain names and web hosting','Including the SSL and the email service.']
+ ]},
+ {g:'Somewhere to work', items:[
+  ['Home office \u2014 simplified','$5 a square foot up to 300 square feet, so a maximum of $1,500. No receipts needed.'],
+  ['Home office \u2014 actual costs','If you would beat $1,500: your share of rent or mortgage interest, utilities, internet. More paperwork, more to defend.'],
+  ['A workspace you rent','Studio, office, desk, storage unit for stock.'],
+  ['Utilities at the workspace','Power, water, heat, rubbish.'],
+  ['Internet','The business share, if you work from home.'],
+  ['Cleaning and upkeep of the workspace','Including the cleaner, if you have one.'],
+  ['Security','A safe, a lock, a camera, an alarm.']
+ ]},
+ {g:'Getting there and back', items:[
+  ['Business mileage','72.5\u00a2 to 30 June, 76\u00a2 from 1 July 2026. See the Mileage tab.'],
+  ['Parking and tolls','On top of the mileage, not instead of it.'],
+  ['Plane, train, bus for work','To a client, a supplier, a conference.'],
+  ['Hotel on an overnight business trip','The room is fully deductible.'],
+  ['Meals away on business','50%, and the reason has to be written down.'],
+  ['Taxi and rideshare for work','To a meeting, to the airport.'],
+  ['The car, done the hard way','If you do not use mileage: the business share of fuel, insurance, repairs, tyres, registration.']
+ ]},
+ {g:'Phone, desk and kit', items:[
+  ['A second phone line or number','The business one. Even a second SIM.'],
+  ['The phone bill','The business share. Reckon it honestly and write the sum down.'],
+  ['Computer, laptop, tablet','Usually written off in one go under Section 179 rather than over years.'],
+  ['Monitor, keyboard, mouse','And the cable that always goes missing.'],
+  ['Desk, chair, lamp, shelves','The chair is usually the biggest one.'],
+  ['Printer, ink, paper','And the shredder.'],
+  ['Camera, microphone, lights','If you record anything for the business.'],
+  ['Storage, hard drives, memory cards',''],
+  ['Repairs to business equipment','Fixing it is deductible.'],
+  ['Cloud storage and backup','Where the work actually lives.']
+ ]},
+ {g:'People who work for you', items:[
+  ['Contract labour','The editor, the designer, the driver. Over $2,000 to one person in 2026 and you have to send them a 1099-NEC.'],
+  ['Wages and payroll taxes','If you have employees, plus your half of their Social Security and Medicare.'],
+  ['Bonuses and commissions','To staff.'],
+  ['Staff training and certification',''],
+  ['Payroll software or a payroll service','']
+ ]},
+ {g:'Telling people you exist', items:[
+  ['Advertising','Meta, Google, TikTok, the local paper.'],
+  ['Website and landing pages','Including the designer.'],
+  ['Email and newsletter service',''],
+  ['Design and branding','Logo, packaging, photography.'],
+  ['Printing','Flyers, cards, signage, stickers.'],
+  ['Promotional items and samples',''],
+  ['Sponsoring something','A team, an event, a podcast.'],
+  ['Reviews and press',''],
+  ['Market stall or event fees','The table you paid for.']
+ ]},
+ {g:'The things you sell', items:[
+  ['Stock and materials','Cost of goods \u2014 only once they are actually sold, unless you are small enough to use cash accounting.'],
+  ['Packaging and labels',''],
+  ['Postage and courier',''],
+  ['Shipping software and label printers',''],
+  ['Returns, refunds and chargebacks',''],
+  ['Stock that spoiled, broke or dated out',''],
+  ['Small tools under the write-off threshold','']
+ ]},
+ {g:'You, getting better at this', items:[
+  ['Courses and training','That keep or improve the skill you already sell. A new trade is not deductible, and it is worth asking your CPA where the line is.'],
+  ['Books and trade publications',''],
+  ['Conference tickets and travel',''],
+  ['Health insurance premiums','Self-employed health insurance \u2014 deducted before the standard deduction, and it is usually a big one.'],
+  ['Health Savings Account contributions',''],
+  ['Retirement contributions','Solo 401(k), SEP, IRA. See the 2026 numbers tab.'],
+  ['Half of the self-employment tax','Automatic, but you have to claim it.'],
+  ['The 20% business income deduction','Automatic on the right form, and it fades at higher income \u2014 around $201,750 single and $403,500 jointly in 2026 for a service business. Ask your CPA before you bank on it.']
+ ]},
+ {g:'When money went wrong', items:[
+  ['Bad debts','Money you genuinely cannot collect, and you tried.'],
+  ['Losses from theft or fraud',''],
+  ['Damage from a fire, storm or flood','The part the insurance did not cover.'],
+  ['Start-up costs','Up to $5,000 in your first year of trading.'],
+  ['Fees to a lawyer for a business dispute','']
+ ]}
+];
+
+var TOTAL_ITEMS=DED.reduce(function(a,g){ return a+g.items.length },0);
+
+function render(){
+  var v=document.getElementById('view'), out='';
+
+  if(TAB==='due'){
+    out='<div class="sec">'
+    +'<div class="big warnbox"><b>There is no form in the post for this</b>Nobody chases a self-employed person for a quarterly payment. The bill just grows quietly until January. Put the four dates in your phone now.</div>'
+    +'<div class="sec-hd">The four dates, every year</div><div class="card">';
+    DUE.forEach(function(x){
+      out+='<div class="due'+(x.now?' now':'')+'"><div class="d">'+esc(x.d)+'</div><div class="t"><b style="color:inherit">'+esc(x.t)+'</b>'+(x.s?'<br>'+esc(x.s):'')+'</div></div>';
+    });
+    out+='</div>'
+    +'<div class="sec-hd">How much to send</div><div class="card"><div class="p">'
+    +'One of these two, whichever is <b>less</b>:<br>&middot; <b>90%</b> of what you will owe for 2026, worked out as best you can, or<br>'
+    +'&middot; <b>100%</b> of what you owed for 2025.<br><br>'
+    +'If your income for 2025 was over <b>$150,000</b>, that second one becomes <b>110%</b> of last year. Paying the safe harbour is what stops the penalty \u2014 and the penalty is a charge on money you kept, not a fine for doing something wrong.'
+    +'</div><div class="src">Want a figure to pay: the Set aside tab works one out from your profit.</div></div>'
+    +'<div class="sec-hd">If you have employees</div><div class="card"><div class="p">Payroll is on a different clock \u2014 monthly or every two weeks, depending on what you owe. It is also the one area where the penalty is genuinely painful. Payroll software, or a payroll service for a few dollars a month, is cheaper than getting it wrong.</div></div>'
+    +'</div>';
+  }
+
+  if(TAB==='num'){
+    out='<div class="sec">';
+    out+='<div class="big okbox"><b>Every number here is the IRS\u2019s own</b>Published figures, with the source under each group. Where a figure changed during the year \u2014 and one did \u2014 both halves are listed.</div>';
+    NUMS.forEach(function(grp){
+      out+='<div class="sec-hd">'+esc(grp.s)+'</div><div class="card">';
+      grp.rows.forEach(function(r){
+        out+='<div class="kv"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>';
+      });
+      out+='</div>';
+    });
+    out+='</div>';
+  }
+
+  if(TAB==='ded'){
+    var on=store.ticks||{}, n=0;
+    DED.forEach(function(g){ g.items.forEach(function(it){ if(on[it[0]]) n++ }) });
+    out='<div class="sec">'
+    +'<div class="big okbox"><b>Walk down this in January</b>One pass with last year\u2019s bank statement open. Tick as you go \u2014 it stays ticked on this phone. '
+    +'<b id="tickcount" style="display:inline;margin:0">'+n+' of '+TOTAL_ITEMS+' ticked</b>'
+    +'<div style="margin-top:10px"><button class="btn" id="clr" style="margin-top:0">Start the list again</button></div>'
+    +'</div>';
+    DED.forEach(function(g){
+      out+='<div class="sec-hd">'+esc(g.g)+'</div><div class="card">';
+      g.items.forEach(function(it){
+        out+='<div class="chk'+(on[it[0]]?' on':'')+'" data-k="'+esc(it[0])+'"><div class="box">&#10003;</div>'
+        +'<div class="txt"><b>'+esc(it[0])+'</b>'+(it[1]?esc(it[1]):'')+'</div></div>';
+      });
+      out+='</div>';
+    });
+    out+='<div class="sec"><div class="big warnbox"><b>Two things people get wrong</b>'
+    +'You do not deduct what you pay yourself. A sole trader is not an employee \u2014 money you take out is a draw, not a wage, and there is nothing to write off.<br><br>'
+    +'And keep the business apart from the everyday. One account for the business, one card if you can. It is not about the tax, it is about the afternoon you spend in January trying to work out which shop was which.</div></div></div>';
+  }
+
+  if(TAB==='mil'){
+    var a=Number(store.m1||0), b=Number(store.m2||0);
+    var d1=a*0.725, d2=b*0.76;
+    out='<div class="sec">'
+    +'<div class="big warnbox"><b>The rate changed in the middle of 2026</b>This is the one figure that was revised during the year, so a single number for the whole year will be wrong. '
+    +'<b style="display:inline;margin:0">72.5\u00a2 a mile from 1 January, 76\u00a2 a mile from 1 July.</b></div>'
+    +'<div class="sec-hd">Miles, split at 30 June</div><div class="card">'
+    +'<label class="lbl">Miles \u2014 1 Jan to 30 Jun 2026 (at 72.5\u00a2)</label>'
+    +'<input class="num" id="m1" type="number" inputmode="numeric" min="0" step="1" value="'+(store.m1||'')+'" placeholder="0">'
+    +'<label class="lbl">Miles \u2014 1 Jul to 31 Dec 2026 (at 76\u00a2)</label>'
+    +'<input class="num" id="m2" type="number" inputmode="numeric" min="0" step="1" value="'+(store.m2||'')+'" placeholder="0">'
+    +'<div class="out">'
+    +'<div class="kv"><span>First half</span><b>'+esc(a.toLocaleString('en-US'))+' miles &middot; '+money(d1)+'</b></div>'
+    +'<div class="kv"><span>Second half</span><b>'+esc(b.toLocaleString('en-US'))+' miles &middot; '+money(d2)+'</b></div>'
+    +'<div class="kv"><span>Total deduction</span><b>'+money(d1+d2)+'</b></div>'
+    +'</div></div>'
+    +'<div class="sec-hd">Keeping the log that survives</div><div class="card"><div class="p">'
+    +'Write the miles down at the end of the trip, not the end of the month. What an auditor wants is: the date, <b>where you went and why</b>, and the miles. The app can hold the number, but it cannot remember the reason \u2014 that is the part people cannot reconstruct in April.<br><br>'
+    +'Mileage covers fuel, wear and tear, insurance and repairs. <b>Parking and tolls are separate</b> \u2014 claim them on top, never inside the 76\u00a2.<br><br>'
+    +'Once you use the standard rate for a car you bought outright, the tradition is that you keep using it for that car. Switching to actual costs later is a question for your CPA, not a decision to make in a hurry.'
+    +'</div></div></div>';
+  }
+
+  if(TAB==='set'){
+    var p=Number(store.profit||0);
+    var se=Math.max(0,p)*0.9235;
+    var ss=Math.min(se,184500)*0.124, med=se*0.029;
+    var setax=ss+med;
+    var lo=setax+Math.max(0,p)*0.10, hi=setax+Math.max(0,p)*0.25;
+    out='<div class="sec">'
+    +'<div class="big okbox"><b>What to keep back out of every payment</b>Put your profit for the year in, and this works out the self-employment tax on it the way the IRS does \u2014 then adds the range most self-employed people hold back for income tax on top.</div>'
+    +'<div class="card"><label class="lbl">Your net profit for the year, before tax</label>'
+    +'<input class="num" id="pf" type="number" inputmode="decimal" min="0" step="100" value="'+(store.profit||'')+'" placeholder="0">'
+    +'<div class="out">'
+    +'<div class="kv"><span>Profit</span><b>'+money(Math.max(0,p))+'</b></div>'
+    +'<div class="kv"><span>Self-employment tax (15.3% on 92.35% of profit)</span><b>'+money(setax)+'</b></div>'
+    +'<div class="kv"><span>Half of that is deductible off your income</span><b>'+money(setax/2)+'</b></div>'
+    +'<div class="kv"><span>Hold back in total \u2014 low end, 10% for income tax</span><b>'+money(lo)+'</b></div>'
+    +'<div class="kv"><span>Hold back in total \u2014 high end, 25%</span><b>'+money(hi)+'</b></div>'
+    +'<div class="kv"><span>As a share of every payment that comes in</span><b>'+(p>0?Math.round(lo/p*100)+'\u2013'+Math.round(hi/p*100)+'%':'0%')+'</b></div>'
+    +'</div></div>'
+    +'<div class="sec-hd">How to hold it back</div><div class="card"><div class="p">'
+    +'A second account, and every time money lands, move the share straight out of it. The people who get caught are not the ones who owed the most \u2014 they are the ones who spent the whole year in one account and met the bill in April.<br><br>'
+    +'Above $184,500 of profit the Social Security part stops, so the percentage falls after that. This calculator already stops it there.<br><br>'
+    +'The 10\u201325% on top is a range, not a rule \u2014 your real rate depends on your other income, your state, and the deductions on the other tabs. Ask your CPA for <b>one number</b> and use it every month.'
+    +'</div></div></div>';
+  }
+
+  if(TAB==='rec'){
+    out='<div class="sec">'
+    +'<div class="sec-hd">Home office, both ways</div><div class="card"><div class="p">'
+    +'<b>The easy way.</b> $5 a square foot, up to 300 square feet. A maximum of $1,500, no receipts, one line on the form. Measure the room, count the part you actually use for work.<br><br>'
+    +'<b>The other way.</b> Your share of rent or mortgage interest, power, water, internet, insurance. It is worked out on the share of the house the office takes up. Bigger numbers, and you have to be able to show the working.<br><br>'
+    +'<b>Either way, it is the space and only the space</b> \u2014 used regularly and only for work. A kitchen table does not count, and a room that is also the spare bedroom is the classic thing an auditor asks about.'
+    +'</div></div>'
+    +'<div class="sec-hd">What to keep, and for how long</div><div class="card"><div class="p">'
+    +'<b>Bank and card statements</b> \u2014 the whole year, every account used for the business.<br>'
+    +'<b>Receipts and invoices</b> \u2014 photograph them as they happen. A shoebox in April is a bad afternoon.<br>'
+    +'<b>The mileage log</b> \u2014 date, where, why, miles. Written at the time.<br>'
+    +'<b>Contracts, agreements, 1099s you both sent and received</b>.<br>'
+    +'<b>Payroll records, if you have staff</b> \u2014 the longest of all.<br><br>'
+    +'<b>Three years</b> is the usual answer, and it is the wrong one to remember, because it runs from the date you filed, not the year the money was earned \u2014 and it stretches to <b>six</b> if income was understated, and longer than that if it was never filed. Keep <b>seven</b> and stop thinking about it. Everything digital, backed up somewhere that is not the same phone.'
+    +'</div></div>'
+    +'<div class="sec-hd">Five questions for your CPA</div><div class="card"><div class="p">'
+    +'1. What percentage should I hold back on every payment?<br>'
+    +'2. Should I be an S-corp yet \u2014 and what does the bookkeeping cost me if I am?<br>'
+    +'3. Which retirement plan suits what I actually earn \u2014 Solo 401(k) or SEP?<br>'
+    +'4. Am I deducting the home office the right way for my place?<br>'
+    +'5. What do you want from me in January, in what format, and by when?'
+    +'</div></div>'
+    +'<div class="sec"><div class="big warnbox"><b>This page is a checklist, not advice</b>It was built from the IRS\u2019s own published figures for 2026 and from Kamoroff\u2019s book, and every number was checked. It does not know your state, your other income, or what you actually did this year. Take it to a CPA \u2014 the whole point of the page is that you walk in knowing what to ask.</div></div>'
+    +'</div>';
+  }
+
+  v.innerHTML=out;
+  wire();
+}
+
+function wire(){
+  var c=document.getElementById('clr');
+  if(c)c.onclick=function(){ store.ticks={}; save(); render() };
+  var m1=document.getElementById('m1'), m2=document.getElementById('m2');
+  if(m1)m1.oninput=function(){ store.m1=m1.value; save(); soft() };
+  if(m2)m2.oninput=function(){ store.m2=m2.value; save(); soft() };
+  var pf=document.getElementById('pf');
+  if(pf)pf.oninput=function(){ store.profit=pf.value; save(); soft() };
+}
+/* Re-render without losing the cursor: the totals are the point of both tabs,
+   so they have to move while the number is being typed. */
+function soft(){
+  var active=document.activeElement, id=active&&active.id, pos=active&&active.selectionStart;
+  render();
+  if(id){ var el=document.getElementById(id); if(el){ el.focus(); try{ el.setSelectionRange(pos,pos) }catch(e){} } }
+}
+document.getElementById('view').addEventListener('click',function(e){
+  var row=e.target.closest('.chk'); if(!row) return;
+  var k=row.getAttribute('data-k');
+  store.ticks=store.ticks||{};
+  if(store.ticks[k]) delete store.ticks[k]; else store.ticks[k]=1;
+  save();
+  row.classList.toggle('on');
+  var on=store.ticks, n=0;
+  DED.forEach(function(g){ g.items.forEach(function(it){ if(on[it[0]]) n++ }) });
+  var count=document.getElementById('tickcount');
+  if(count) count.textContent=n+' of '+TOTAL_ITEMS+' ticked';
+});
+document.querySelectorAll('.tab').forEach(function(el){
+  el.onclick=function(){
+    TAB=el.getAttribute('data-t');
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on',x===el) });
+    render(); window.scrollTo(0,0);
+  };
+});
+render();
+</script>
+</body>
+</html>

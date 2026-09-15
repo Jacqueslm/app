@@ -316,6 +316,29 @@ app.get('/tax.html', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'tax.html'));
 });
 
+// The trading school — private, and the same door once more.
+//
+// 15 Sep 2026. Jacques: "a full beginners lesson all the way up the advanced
+// market maker levels ... separate from the game". The game is the practice; this
+// is the teaching, so it is its own page rather than a screen inside either the
+// app or the game, and it sits behind exactly the rule everything private here
+// sits behind: signed in AND on the allowlist, or you go to /app without
+// learning the page is there.
+//
+// Both addresses, for the reason spelled out above the herb routes — this page is
+// a real file as well as a clean URL, and express.static below would serve the
+// file name unguarded if the route were not registered first.
+app.get('/school', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trading-school.html'));
+});
+app.get('/school.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trading-school.html'));
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 // The Key — private. Signed in AND on the allowlist, or you go to /app without

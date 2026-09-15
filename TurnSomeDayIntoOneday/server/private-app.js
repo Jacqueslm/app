@@ -108,6 +108,10 @@ const OPEN_PAGES = [
   // a clean URL, and static would otherwise serve the file name unguarded.
   '/herbs', '/herbs.html',
   '/tax', '/tax.html',
+  // The trading school (15 Sep 2026) — the same shape again: private, and
+  // listed here only so the request reaches the route that judges it. Both
+  // addresses, because the page is a real FILE as well as a clean URL.
+  '/school', '/school.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the

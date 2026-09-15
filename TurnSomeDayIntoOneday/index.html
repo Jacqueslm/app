@@ -1596,6 +1596,15 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Tax Centre</p><span>2026 figures, what's due, every deduction</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
+      <!-- 15 Sep 2026. Jacques: "a full beginners lesson all the way up the
+           advanced market maker levels ... separate from the game". The game is
+           the practice; this is the teaching, so it is its own gated page like the
+           two above it rather than a screen in here or in the game. -->
+      <div class="setting-row" onclick="location.href='/school'">
+        <i class="ti ti-chart-candle"></i>
+        <div class="setting-row-txt"><p>Trading School</p><span>38 lessons, beginner to market maker, with drills</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
     </div>
 
     <!-- CUSTOM LESSON PACKS (Pro) -->
@@ -12463,7 +12472,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.3';
+const APP_VERSION='6.4';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';

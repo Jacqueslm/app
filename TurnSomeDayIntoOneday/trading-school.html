@@ -1,0 +1,1537 @@
+<!-- trading school:private -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="cache-control" content="no-cache, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Trading School — private</title>
+<meta name="theme-color" content="#0f0c29">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0c29'/%3E%3Cpath d='M14 44l10-14 8 8 18-24' stroke='%237ee8a2' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.18);
+  --acc:#534AB7;--acc-t:#3C3489;--acc-b:#EEEDFE;
+  --ok:#E1F5EE;--ok-t:#085041;
+  --warn:#FAEEDA;--warn-t:#633806;
+  --red:#FCEBEB;--red-t:#7A1F1F;
+  --up:#1F8A5B;--down:#C0392B;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,.09);--bdr2:rgba(255,255,255,.18);
+  --acc:#AFA9EC;--acc-t:#AFA9EC;--acc-b:#26215C;
+  --ok:#04342C;--ok-t:#5DCAA5;
+  --warn:#2e1f05;--warn-t:#EFA527;
+  --red:#3a1616;--red-t:#f0a8a8;
+  --up:#4ADEA5;--down:#FF6B7A;
+}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0f0c29;font-family:var(--f)}
+body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:460px;background:var(--s0);min-height:100dvh;color:var(--tp);padding-bottom:60px}
+.hdr{position:sticky;top:0;z-index:20;background:var(--s0);border-bottom:1px solid var(--bdr);padding:12px 16px 10px;display:flex;align-items:center;gap:10px}
+.hdr h1{font-size:1.0625rem;font-weight:600;line-height:1.2}
+.hdr p{font-size:.75rem;color:var(--tm);margin-top:2px;line-height:1.35}
+.back{font-size:1.375rem;color:var(--tm);cursor:pointer;text-decoration:none;padding:2px 4px}
+.strip{position:sticky;top:57px;z-index:19;background:var(--s0);border-bottom:1px solid var(--bdr);padding:9px 16px;display:flex;align-items:center;gap:10px}
+.rank{font-size:.75rem;font-weight:700;color:var(--acc-t);background:var(--acc-b);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pbar{flex:1;height:6px;border-radius:999px;background:var(--s1);overflow:hidden;border:1px solid var(--bdr)}
+.pbar i{display:block;height:100%;background:var(--acc);width:0;transition:width .25s}
+.xp{font-size:.6875rem;color:var(--tm);white-space:nowrap}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 16px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;font-size:.8125rem;padding:7px 13px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s2);color:var(--ts);cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--acc-b);border-color:var(--acc-b);color:var(--acc-t);font-weight:600}
+.sec{padding:2px 16px 6px}
+.sec-hd{font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);font-weight:600;padding:14px 0 8px}
+.card{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin-bottom:9px;overflow:hidden}
+.row{padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px}
+.row-txt{flex:1;min-width:0}
+.row-txt b{font-size:.9375rem;font-weight:600;display:block}
+.row-txt span{font-size:.8125rem;color:var(--tm);display:block;margin-top:3px;line-height:1.45}
+.chev{color:var(--tm);font-size:1rem;flex:0 0 auto;padding-top:2px;transition:transform .18s}
+.done{color:var(--up);font-size:.9375rem;font-weight:700;flex:0 0 auto;padding-top:1px}
+.num{flex:0 0 auto;width:26px;height:26px;border-radius:999px;background:var(--s1);color:var(--ts);font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.num.on{background:var(--acc);color:var(--s0)}
+.body{display:none;padding:0 14px 14px;border-top:1px solid var(--bdr)}
+.card.open .body{display:block}
+.card.open .chev{transform:rotate(90deg)}
+.lbl{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);font-weight:600;margin:14px 0 6px}
+.body p{font-size:.875rem;line-height:1.6;color:var(--ts);margin-bottom:9px}
+.body p:last-child{margin-bottom:0}
+.k{list-style:none;margin-top:10px}
+.k li{position:relative;padding-left:16px;font-size:.8125rem;line-height:1.5;color:var(--tp);margin-bottom:6px}
+.k li:before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:999px;background:var(--acc)}
+.q{margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)}
+.q-txt{font-size:.8125rem;font-weight:600;line-height:1.45;margin-bottom:9px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{font:inherit;font-size:.8125rem;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer;line-height:1.4}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--up);color:var(--ok-t);background:var(--ok);font-weight:600}
+.opt.wrong{border-color:var(--down);color:var(--red-t);background:var(--red);font-weight:600}
+.why{font-size:.8125rem;line-height:1.55;color:var(--ts);margin-top:9px;display:none}
+.why.on{display:block}
+.why b{color:var(--tp)}
+.txtbtn{display:inline-block;font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-t);background:var(--acc-b);border:none;border-radius:10px;padding:10px 15px;cursor:pointer;margin-top:12px;text-decoration:none}
+.txtbtn[disabled]{opacity:.5}
+.ghost{color:var(--ts);background:var(--s1);border:1px solid var(--bdr2)}
+.big{padding:14px;border-radius:14px;font-size:.875rem;line-height:1.55;margin-bottom:10px;border:1px solid transparent}
+.warnbox{background:var(--warn);color:var(--warn-t)}
+.redbox{background:var(--red);color:var(--red-t)}
+.okbox{background:var(--ok);color:var(--ok-t)}
+.big b{display:block;margin-bottom:5px;font-size:.9375rem}
+.empty{padding:30px 20px;text-align:center;color:var(--tm);font-size:.875rem;line-height:1.6}
+.chartbox{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:10px 10px 12px;margin-bottom:10px}
+canvas{width:100%;display:block;border-radius:8px;touch-action:manipulation}
+.cap{font-size:.6875rem;color:var(--tm);line-height:1.6;margin-top:8px}
+.qbar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.qbar button{font:inherit;font-size:.8125rem;font-weight:600;padding:9px 13px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.qbar button.long{border-color:var(--up);color:var(--ok-t)}
+.qbar button.short{border-color:var(--down);color:var(--red-t)}
+.qbar button.on{background:var(--acc);border-color:var(--acc);color:var(--s0)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.kv div{background:var(--s2);border:1px solid var(--bdr);border-radius:12px;padding:10px 12px}
+.kv b{display:block;font-size:1.0625rem;font-weight:700}
+.kv span{font-size:.6875rem;color:var(--tm);display:block;margin-top:2px;line-height:1.4}
+.ft{padding:26px 16px 40px;text-align:center;font-size:.6875rem;color:var(--tm);line-height:1.7}
+.hidden{display:none}
+/* ── ASK ──────────────────────────────────────────────────────────────────────
+   The app's own AI, sitting on the school where the questions come up. Same
+   server route the Friendly tab uses, so the same daily brake covers it. */
+.ask{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin:12px 16px 0;overflow:hidden}
+.ask-hd{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer}
+.ask-hd b{font-size:.9375rem;font-weight:600}
+.ask-hd .sub{font-size:.75rem;color:var(--tm);flex:1;min-width:0;line-height:1.35}
+.ask-badge{width:22px;height:22px;border-radius:999px;background:var(--acc-b);color:var(--acc-t);display:flex;align-items:center;justify-content:center;font-size:.8125rem;font-weight:700;flex:0 0 auto}
+.ask-chev{color:var(--tm);font-size:1rem;flex:0 0 auto;transition:transform .18s}
+.ask.on .ask-chev{transform:rotate(90deg)}
+.ask-body{display:none;padding:0 14px 14px;border-top:1px solid var(--bdr)}
+.ask.on .ask-body{display:block}
+.ask textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp);min-height:58px;resize:vertical;margin-top:12px}
+.ask textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+.ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.chip{font-size:.75rem;padding:6px 11px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.chip:active{background:var(--acc-b);color:var(--acc-t)}
+.ask-go{font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-b);background:var(--acc);border:none;border-radius:10px;padding:10px 16px;cursor:pointer;margin-top:10px}
+.ask-go[disabled]{opacity:.5}
+.ask-a{display:none;font-size:.875rem;line-height:1.6;color:var(--ts);margin-top:12px}
+.ask-a.on{display:block}
+.ask-who{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin-bottom:5px}
+.ask-fine{font-size:.6875rem;color:var(--tm);margin-top:10px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <a class="back" href="/app" title="Back to the app">&#8592;</a>
+    <div>
+      <h1>Trading School</h1>
+      <p>Beginner to market maker, in order</p>
+    </div>
+  </div>
+
+  <div class="strip">
+    <span class="rank" id="rank">Learner</span>
+    <span class="pbar"><i id="pbar"></i></span>
+    <span class="xp" id="xp">0 XP</span>
+  </div>
+
+  <div class="ask" id="ask">
+    <div class="ask-hd" id="askHd">
+      <span class="ask-badge">?</span>
+      <b>Ask</b>
+      <span class="sub">Anything on this page &mdash; a lesson, a setup, a chart</span>
+      <span class="ask-chev">&#8250;</span>
+    </div>
+    <div class="ask-body">
+      <textarea id="askQ" placeholder="Why did my stop get hit and then price go my way?"></textarea>
+      <div class="ask-chips">
+        <span class="chip" data-q="Explain the lesson I have open, in your own words, and give me one thing to watch for.">Explain what I'm reading</span>
+        <span class="chip" data-q="Where do retail stops usually sit on a chart, and what happens to them?">Where stops sit</span>
+        <span class="chip" data-q="I lost four trades in a row. How do I tell whether my rules are wrong or I am?">Four losses in a row</span>
+        <span class="chip" data-q="Walk me through a market maker's day: what are they actually doing minute to minute?">A market maker's day</span>
+      </div>
+      <button class="ask-go" id="askGo">Ask</button>
+      <div class="ask-a" id="askA"></div>
+      <p class="ask-fine">Yours, and private. It will never promise you money, never invent a figure, and never tell you that you cannot learn this.</p>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-t="lessons">Lessons</div>
+    <div class="tab" data-t="tests">Tests</div>
+    <div class="tab" data-t="drills">Drills</div>
+    <div class="tab" data-t="backtest">Backtest</div>
+    <div class="tab" data-t="progress">Progress</div>
+  </div>
+
+  <div id="view"></div>
+
+  <div class="ft">
+    Trading School &mdash; private.<br>
+    Built for Jacques. Every candle on this page is made up by the page: practice, not a feed.
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   THE TRADING SCHOOL — the curriculum.
+
+   Six levels, beginner to market maker. Each level holds its lessons, and each
+   lesson is: what it is, the few things to remember, then a short check.
+
+   Written for one reader. No hedging, no pep talk, no promises — the mechanics
+   and the arithmetic, in the order that makes them stick.
+
+   15 Sep 2026, Jacques: "a full beginners lesson all the way up the advanced
+   market maker levels ... separate from the game". So this is its own page,
+   gated the same way the herb library is, and the game stays the game.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+var SW_META = [
+  {id:"L1", n:1, t:"The ground floor", s:"What a market is, what a candle is, and what the trade costs you"},
+  {id:"L2", n:2, t:"Reading the chart", s:"Structure, the candles that mean something, breakouts and ranges"},
+  {id:"L3", n:3, t:"The toolbox", s:"Averages, RSI, MACD, ATR, VWAP — and how they lie to you"},
+  {id:"L4", n:4, t:"Building a plan", s:"Setups, triggers, stops, targets, expectancy, the journal"},
+  {id:"L5", n:5, t:"Staying alive", s:"Sizing, drawdown, streaks, tilt, backtesting honestly"},
+  {id:"L6", n:6, t:"Market maker", s:"The other side of your trade, the book, liquidity, order flow"}
+];
+
+var SW_L1 = [
+{id:"1.1", t:"What you are actually buying", b:[
+ "A market is an auction. Somebody wants to buy, somebody wants to sell, and the price you see is only the last number the two of them agreed on. That is all a chart is — a record of agreements, laid out in time.",
+ "So when you trade a chart you are not buying a company or an idea. You are buying a piece of a disagreement. If you buy, the person selling to you believes the price is going down, and one of you is wrong and the market decides which. Hold that thought: every green candle you are happy about was somebody else's decision too."],
+ k:["Price is the last agreed number, nothing more","Every fill has somebody on the other side who disagrees","You get paid for being right about the next price, not about the story"],
+ q:[
+ {q:"What actually decides whether a buy made money?",o:["How good the company is","Whether the price is higher after you bought","How long you held it"],a:1,w:"Only the next prices matter, whoever is behind them."},
+ {q:"Who is on the other side of your buy?",o:["Nobody — orders fill from a pool","Somebody selling who thinks it is going down","The exchange itself"],a:1,w:"A fill is always two people disagreeing."}]},
+
+{id:"1.2", t:"One candle, four prices", b:[
+ "A candle covers one slice of time — a minute, an hour, a day. It holds four numbers: the open where the slice started, the close where it ended, the high and the low. The thick part is the body, open to close. The thin line above and below is the wick: ground that was touched and then given back.",
+ "Two of those four matter more than the others. The close, because it is the only price everybody agreed to keep. And where the close sits inside the bar — a bar that closes near its high says buyers held control to the bell, and a bar that ran up and closed back near its low says somebody took it off them."],
+ k:["Body = open to close. Wick = the ground given back","The close is the only price nobody could undo","A long wick is a story about somebody failing"],
+ q:[
+ {q:"A candle opens at 10, runs to 20, and closes at 11. What does the long upper wick say?",o:["Buyers kept control","Sellers took the move back before the close","Nothing — wicks are noise"],a:1,w:"Price was pushed up and handed back: sellers won that bar."},
+ {q:"Which of the four prices can nobody take away from you?",o:["The close of the bar","The high","The open"],a:0,w:"Highs and lows are touched and gone; the close is held."}]},
+
+{id:"1.3", t:"Timeframes", b:[
+ "The same market is a different animal on a one-minute chart and a daily chart. On the small one you are mostly looking at noise and the spread. On the big one you are looking at a trend that took weeks to build. Both are true at once — which is exactly why traders get confused.",
+ "The working arrangement: take the direction from the big timeframe, and the timing from the small one. A daily chart in an uptrend with a four-hour chart pulling back to a level is a plan. A one-minute chart on its own, with no bigger picture behind it, is a coin toss with animation."],
+ k:["Direction from the big timeframe, timing from the small one","Small timeframes are mostly spread and noise","Never take a small-timeframe signal against a big-timeframe trend"],
+ q:[
+ {q:"Where does the direction of your trade come from?",o:["The fastest chart you have open","The slower, bigger timeframe","Whichever one has a clearer pattern"],a:1,w:"Big timeframe sets the direction; the small one only times it."},
+ {q:"What is mostly on a one-minute chart?",o:["The long-term trend","Noise and the spread","Institutional positioning"],a:1,w:"Small timeframes are dominated by noise and dealing costs."}]},
+
+{id:"1.4", t:"Support and resistance", b:[
+ "Support is a price where buyers have turned up more than once. Resistance is a price where sellers have. They are not thin lines, they are zones — a band a few ticks wide where the same decision has been made several times.",
+ "Their value is not that they predict a bounce. It is that they tell you where you are wrong, cheaply. Buy above a zone that has held twice and the zone itself is your exit: if price goes back under it, the idea failed, and you know within a few ticks instead of a few hundred."],
+ k:["Zones, not lines — draw the band where the decision happened","The point of a level is where it puts your stop","A level that breaks on the third try is weaker than on the first"],
+ q:[
+ {q:"What is a level actually useful for?",o:["Predicting the bounce","Telling you cheaply where the idea is wrong","Showing where the market will close"],a:1,w:"Levels are places to be wrong, not places to be right."},
+ {q:"Price has bounced off the same zone twice and approaches a third time. What is true?",o:["It is more likely to hold again","It is weaker — the orders there have partly been used up","It is exactly as strong"],a:1,w:"Each test consumes the resting orders that made it hold."}]},
+
+{id:"1.5", t:"Trend", b:[
+ "An uptrend is higher highs and higher lows. A downtrend is lower highs and lower lows. That is the whole definition, and it is more reliable than any line drawn at an angle, because it is a fact about the sequence rather than an opinion about the slope.",
+ "The most useful moment in a trend is the pullback. Price steps back toward the last higher low and either holds or does not. That is where entries are cheapest and stops are tightest — and it is where most good trades actually start."],
+ k:["Higher highs and higher lows — the sequence is the trend","The pullback is the trade, not the breakout","When the last higher low breaks, the trend has changed"],
+ q:[
+ {q:"An uptrend makes a lower low. What has happened?",o:["Nothing, trends wobble","The sequence that defined the uptrend has broken","It is a buying opportunity for certain"],a:1,w:"The definition of the uptrend is the sequence of higher lows."},
+ {q:"Where is a trend entry usually cheapest?",o:["On the breakout of the high","On the pullback into the last higher low","In the middle of the range"],a:1,w:"Pullbacks give a tight stop and a clear level."}]},
+
+{id:"1.6", t:"What a trade costs before it earns", b:[
+ "Every trade pays a toll first. The spread — the gap between what a buyer pays and a seller receives. Commission. And slippage, when the price you get is worse than the price you asked for. On a fast market these add up to most of a small move.",
+ "This is why a strategy that looks like it wins 55% of the time on paper can lose money in an account. Know your round-trip cost on the instrument you trade, and do not take a trade whose target is not several times bigger than that cost."],
+ k:["Spread, commission and slippage are paid every single time","A small target is mostly toll","Measure your cost round-trip before you judge a strategy"],
+ q:[
+ {q:"You take a trade with a target barely bigger than the spread. What is the problem?",o:["None, a win is a win","Most of the move goes to costs, so you need a very high hit rate","The spread does not apply to small targets"],a:1,w:"Thin targets are eaten by the toll you pay to get in and out."},
+ {q:"Which is not a trading cost?",o:["The spread","Slippage","The time you spent"],a:2,w:"Time is not a toll; the other two leave your account."}]}
+];
+
+var SW_L2 = [
+{id:"2.1", t:"Structure: swings, breaks and changes", b:[
+ "Mark the swing highs and swing lows — the points where price turned and went the other way with conviction. In an uptrend those swings step up. When price breaks the most recent swing high, that is a continuation: a break of structure. When it breaks the most recent swing low against the trend, that is a change of character, and it is the earliest honest sign the trend is done.",
+ "Keep it mechanical. A swing point is only a swing point once price has moved away from it and failed to come back. Marking structure badly — swinging a few bars either way — is the single most common way people talk themselves into a trade."],
+ k:["Break of structure = the trend continuing","Change of character = the first break against the trend","A swing is only a swing after price leaves it"],
+ q:[
+ {q:"Price in an uptrend breaks the last swing low. What is it?",o:["A break of structure","A change of character","A range"],a:1,w:"The first break against the trend is the change of character."},
+ {q:"When is a swing high confirmed?",o:["As soon as it forms","Once price moves away and does not take it out","When an indicator agrees"],a:1,w:"Structure is confirmed by price leaving, not by prediction."}]},
+
+{id:"2.2", t:"The candles that carry meaning", b:[
+ "Four shapes are worth knowing. The engulfing: a body that swallows the previous one, showing the other side took over. The pin or hammer: a long wick with the body at the end, showing a rejection. The inside bar: a small bar inside the previous range, a pause before the next push. And the cluster: several small bars together, which is a squeeze building energy.",
+ "None of them mean anything on their own. A hammer in the middle of nowhere is a coin flip. The same hammer at the edge of a zone, in line with the trend, at the end of a pullback, is a trade. The pattern is the trigger, the context is the trade."],
+ k:["Pattern without context is a coin toss","A pin bar means rejection happened, not that reversal will","Clusters of small bars precede expansion"],
+ q:[
+ {q:"A bull engulfing candle in the middle of a range means what?",o:["A strong buy signal","Little on its own — no level, no trend, no context","A guaranteed reversal"],a:1,w:"Context is what turns a shape into a setup."},
+ {q:"What does a long lower wick actually record?",o:["That price was rejected at the lows","That buyers are in control for the day","That the trend has changed"],a:0,w:"It records a rejection, nothing more."}]},
+
+{id:"2.3", t:"Breakouts and the fakeout", b:[
+ "A breakout is price leaving a range or a level with force. The ugly truth is that most first attempts fail, because just beyond every obvious high sit the stop orders of everybody who sold there — free liquidity for whoever can push through and fill against it.",
+ "That failure is why the retest is usually the better trade. Let the first push happen, let it fail or hold, and then trade the return to the level. If the level now holds as support, you have both the direction and a place to put your stop within a few ticks."],
+ k:["Most first breaks fail — the orders beyond the level get eaten","The retest is the honest trade","A break that cannot hold the level is information, not a loss"],
+ q:[
+ {q:"Why do first breakouts fail so often?",o:["Because markets are random","Because resting stop orders just beyond the level get filled","Because the news is wrong"],a:1,w:"Stops cluster beyond obvious levels — pushing through them fills real orders."},
+ {q:"What is the retest?",o:["The second attempt to break","Price returning to the broken level, which now acts the other way","A news event"],a:1,w:"Old resistance should hold as support — that is the trade."}]},
+
+{id:"2.4", t:"Ranges, and the middle of nowhere", b:[
+ "Between a clear high and a clear low, price is in a range. Ranges are where the money goes missing: the middle of a range has no information, no edge and no cheap place to be wrong. Trades taken there are paying the spread for a walk.",
+ "Two things to do with a range. Trade its edges, with a stop just outside, aiming back toward the middle or the far side. Or leave it alone and wait for the break and the retest — which is what most of the day usually is."],
+ k:["The middle of a range is where accounts die","Edges give you cheap stops","Doing nothing is a position and often the right one"],
+ q:[
+ {q:"What is usually the worst place to enter a range?",o:["The edge","The middle","After the break"],a:1,w:"No level, no edge, no cheap stop."},
+ {q:"A range is holding. What are the two reasonable plays?",o:["Trade the edges, or wait for the break and retest","Buy and hold for the breakout","Add to a position in the middle"],a:0,w:"Edge trades or patience — the middle is not a plan."}]},
+
+{id:"2.5", t:"Zones, not lines, and when they expire", b:[
+ "Draw your zones from the base of a move — the tight cluster of bars where price paused before it launched or reversed — not from the tip of a wick. The base is where real orders sat. Wicks are the noise after the fact.",
+ "Zones also have a shelf life. The first return to a fresh zone is the strongest. Later visits are weaker, because the orders that made the zone react have largely been filled. And once price has traded straight through a zone, that zone is gone: it is not a level any more, it is history."],
+ k:["Draw from the base of the move, not the wick","Fresh zones react best; they weaken with each test","A zone price has traded through is finished"],
+ q:[
+ {q:"Where should a supply or demand zone be drawn from?",o:["The tip of the biggest wick","The base of the move, where price paused","The mid-point of the candle"],a:1,w:"The base is where real orders were placed."},
+ {q:"Price has already run straight through a zone. What is it now?",o:["A stronger zone","Finished — not a level any more","A target"],a:1,w:"A zone that has been traded through has no unfilled orders left."}]},
+
+{id:"2.6", t:"Confluence", b:[
+ "A trade worth taking usually has three things agreeing: structure (the trend or the break), a level (a zone price has respected), and a trigger (the candle or the reclaim that says it is happening now). Two out of three is a maybe. One is a mood.",
+ "The discipline is to say the three out loud before you click. If you cannot say them in one sentence, you do not have a trade, you have an opinion — and an opinion pays the spread just as happily as a good setup does."],
+ k:["Structure, level, trigger — say all three out loud","Two of three is a maybe; one is a mood","If it does not fit in a sentence, it is not a trade"],
+ q:[
+ {q:"Which three things should agree before you take a trade?",o:["Structure, level, trigger","Three indicators","The news, the chart and your gut"],a:0,w:"Price structure, a level, and a trigger."},
+ {q:"You have a level and a nice candle, but no idea what the bigger chart is doing. What is that?",o:["A full setup","Two of three — a maybe","A guaranteed edge"],a:1,w:"Structure is what makes the candle matter."}]}
+];
+
+var SW_L3 = [
+{id:"3.1", t:"Moving averages", b:[
+ "A moving average is the mean of the last N closes, redrawn at every bar. It is a summary of the past. Because the newest bar is only one of N, the line moves slowly — that slowness is the point, and it is also the flaw. By the time a price crosses its average, the move is already old.",
+ "Use them for two jobs only. As a trend filter — above the line, look for longs; below it, look for shorts. And as a dynamic level — a rising average often acts as the support a pullback settles into. Do not use a cross as a signal. That is not what the line is."],
+ k:["It is an average of the past; it cannot lead","Use as trend filter or dynamic level, not as a signal","Longer period = slower and more reliable, but later"],
+ q:[
+ {q:"What does a price crossing above its 200-period average tell you?",o:["Buy now","The average of the last 200 closes is now below price — that is all","The trend will continue"],a:1,w:"It is a statement about the past, not a forecast."},
+ {q:"What is a rising average most useful as?",o:["A buy signal","A dynamic level a pullback can lean on","A volatility measure"],a:1,w:"It behaves like a moving support level."}]},
+
+{id:"3.2", t:"RSI", b:[
+ "RSI compares the size of recent up moves with recent down moves, on a scale of 0 to 100. Above 70 is called overbought and below 30 oversold, and both names do real damage. In a strong uptrend RSI sits above 70 for a long time — that is strength, not a sell signal. Selling every overbought reading is how people lose money in the one market that is actually trending.",
+ "The genuinely useful reading is divergence: price makes a higher high and RSI makes a lower one. That tells you the up moves are getting smaller. It says momentum has faded, not that price is about to reverse — and it can stay that way for weeks."],
+ k:["Overbought is strength in a trend, not a sell order","Divergence means momentum is fading, not that the turn has come","Never take an RSI reading against the trend on its own"],
+ q:[
+ {q:"RSI has been above 70 for days in an uptrend. What does that mean?",o:["Sell — it is overbought","The trend is strong; overbought can persist","Nothing at all"],a:1,w:"In trends, momentum stays stretched."},
+ {q:"Price higher high, RSI lower high. What is it?",o:["Divergence — momentum is fading","A confirmed reversal","A breakout"],a:0,w:"Fading momentum, not a guaranteed turn."}]},
+
+{id:"3.3", t:"MACD", b:[
+ "MACD is the gap between two moving averages, plus a smoothed average of that gap. It is lag applied to lag, then smoothed again. That makes it a good description of regime — is the market trending or chopping — and a bad tool for timing an entry.",
+ "Where it earns its place is the histogram turning while price is at a level: it tells you the push that took price there is losing force. Where it costs people money is the crossover signal in a range, which is a machine for buying the top and selling the bottom of chop."],
+ k:["Two lags smoothed — it describes, it does not predict","Good for regime, poor for timing","Crossovers in a range are noise"],
+ q:[
+ {q:"Why is MACD poor at timing entries?",o:["It is lag applied to lag","It uses too much memory","It only works on daily charts"],a:0,w:"It is built from averages, so it is always behind price."},
+ {q:"What does the histogram losing force at a level tell you?",o:["The push there is weakening","The trend is confirmed","A reversal is certain"],a:0,w:"Momentum at that level is fading — that is all it says."}]},
+
+{id:"3.4", t:"ATR", b:[
+ "ATR is the average true range: how far price travels in a bar, averaged over N bars. It answers one question — how much does this thing move — and it is the most practically useful number in this level, because it sizes things.",
+ "Use it to set a stop that the ordinary noise will not hit: if a bar usually moves 1 ATR, a stop half an ATR away is inside the noise and will be taken out by nothing at all. And use it to compare instruments honestly: the same 20-point stop is loose on one market and impossible on another."],
+ k:["ATR measures how far price travels, not direction","A stop inside one ATR is inside the noise","Use it to compare markets and to size positions"],
+ q:[
+ {q:"A market moves about 1 ATR per bar. Where does a stop half an ATR away sit?",o:["Safely out of the way","Inside ordinary noise — it will be hit by chance","Exactly right"],a:1,w:"Stops need to sit beyond normal travel."},
+ {q:"What does ATR tell you?",o:["Direction","How far price moves","Where the trend ends"],a:1,w:"It is a size, not a signal."}]},
+
+{id:"3.5", t:"VWAP", b:[
+ "VWAP is the volume-weighted average price for the session — every trade that happened today, weighted by how much was traded there. It is where the day average actually did its business, and it is the level many desks are measured against.",
+ "Two behaviours follow from that. In a balanced, chopping session, price tends to be pulled back toward VWAP. In a trend day, price stays on one side of VWAP and VWAP acts as support or resistance for pullbacks. VWAP resets each session, so read it as the day's fair price, not a permanent level."],
+ k:["Volume-weighted, session-anchored fair price","Trend day: price holds one side of it","Balanced day: price is drawn back to it"],
+ q:[
+ {q:"On a strong trend day, what does VWAP usually do?",o:["Attract price back to it constantly","Act as support under pullbacks","Nothing"],a:1,w:"Price stays one side and VWAP becomes the pullback level."},
+ {q:"What happens to VWAP at the start of a new session?",o:["It carries over","It resets","It doubles in weight"],a:1,w:"It is anchored to the session and starts again."}]},
+
+{id:"3.6", t:"Indicators that lie", b:[
+ "Every indicator is arithmetic done on prices you already have. None of them knows the future, none of them sees anything the chart does not, and the more of them you stack the worse the argument gets — three indicators saying buy is not three reasons, it is one number averaged three ways.",
+ "The two traps worth naming. Lag: by the time a smoothed line turns, the move is made. And curve-fitting: a setting that worked beautifully on the last three months is usually a setting fitted to those three months. If you cannot explain why a tool should work, you are trusting a coincidence."],
+ k:["Indicators are arithmetic on the past","Stacking them is not confluence, it is repetition","A setting that fits the past usually fails forward"],
+ q:[
+ {q:"Five indicators all say buy. How many independent reasons do you have?",o:["Five","Roughly one — they are all computed from the same prices","It depends on the settings"],a:1,w:"They read the same input, so they agree by construction."},
+ {q:"What is curve-fitting?",o:["Fitting a strategy to noise in one sample of the past","Drawing trend lines badly","Using too few indicators"],a:0,w:"It looks like skill and is usually coincidence."}]}
+];
+
+var SW_L4 = [
+{id:"4.1", t:"A setup is one sentence", b:[
+ "If you cannot say your setup in a single sentence, it is not a setup — it is a pile of reasons you collected to justify clicking. A setup sounds like this: in an uptrend, I buy the first pullback that holds the last higher low, stop under it, and I only take it in the first two hours of the session.",
+ "Notice what the sentence contains: the direction, the condition, the entry, the stop, and the filter. Five parts, all decidable by looking. Anything you cannot check by looking is not part of your setup — it is part of your mood."],
+ k:["One sentence: direction, condition, entry, stop, filter","If it cannot be checked by looking, it is not a rule","A setup you cannot describe you cannot repeat"],
+ q:[
+ {q:"Which of these is a setup?",o:["Fennel looks bullish","In an uptrend I buy the first pullback that holds the last higher low, stop under it","I have a feeling about today"],a:1,w:"Direction, condition, entry and stop — decidable by looking."},
+ {q:"What is a sign that you are collecting reasons?",o:["Your plan fits in one sentence","The list of reasons keeps growing after you have decided","You wrote the rule down last week"],a:1,w:"Reasons that arrive after the decision are decoration."}]},
+
+{id:"4.2", t:"Entries: the trigger, not the idea", b:[
+ "An idea is being right about direction. A trigger is the moment you are allowed in. Most losing streaks are ideas taken without triggers — you were going to be right eventually, so you entered early, and then sat through the part where you were wrong.",
+ "Triggers are small and boring on purpose. A close back above the level. A reclaim of the zone after a sweep. A first higher low on the smaller timeframe. What matters is that it happens, not that you predicted it."],
+ k:["The trigger converts an idea into a trade","Small and boring beats clever","Entering early is choosing to sit through being wrong"],
+ q:[
+ {q:"What is a trigger?",o:["The moment your idea becomes a trade you may take","Any reason to click","The profit target"],a:0,w:"It is the event that permits the entry."},
+ {q:"You are sure price will go up but nothing has happened yet. What do you do?",o:["Enter early to get a better price","Wait for the trigger","Halve your size and enter"],a:1,w:"Without the trigger you are paying to be wrong in advance."}]},
+
+{id:"4.3", t:"Stops: where you are wrong", b:[
+ "There are two different stops people mix up. The structural stop is where price going would prove the idea wrong — just beyond the level you traded. The money stop is the most you are willing to lose on the trade. The first is about the market; the second is about your account.",
+ "Correct order: place the structural stop first, then work out the position size that makes it cost what your money stop allows. If the structural stop is so far away that a correct size is trivial, the honest answer is not a bigger bet — it is a smaller timeframe or no trade."],
+ k:["Structural stop: where the idea dies. Money stop: what you can afford","Set the structural stop, then size to fit","If correct size is too small to be worth it, skip the trade"],
+ q:[
+ {q:"Where does a structural stop go?",o:["At a round number of points","Just beyond the level that would prove the idea wrong","At 1% of the account"],a:1,w:"Structure decides the stop; the account decides the size."},
+ {q:"Your structural stop is very wide. What is the right response?",o:["Take a bigger position to make it worth it","Size down to fit, or wait for a better entry","Move the stop closer to the entry"],a:1,w:"Never widen risk to make a trade feel worthwhile."}]},
+
+{id:"4.4", t:"Targets, and R", b:[
+ "R is your risk on a single trade — the distance from entry to stop, counted as 1. Everything else is measured in it: a target twice the stop distance is 2R, a loss is -1R. This is the only unit that travels between instruments, account sizes and years, so it is the only one worth thinking in.",
+ "Deciding the target before you enter is what makes the trade decidable. If the nearest resistance is 1R away and your stop is 1R away, you are risking a pound to win a pound on a coin toss — leave it. If the next level is 3R away and structure is with you, that is worth the same risk."],
+ k:["R is entry-to-stop. Everything is measured in it","Set the target before entry, against the next real level","Risking 1R to make 1R is a coin toss you pay the spread on"],
+ q:[
+ {q:"You risk 50 to make 150. What is the trade?",o:["0.3R","3R","1.5R"],a:1,w:"Reward divided by risk: 150/50."},
+ {q:"Where should the target be set?",o:["A nice round number of points","At the next real level, decided before entry","Wherever it feels right on the day"],a:1,w:"Targets come from structure, and they are chosen in advance."}]},
+
+{id:"4.5", t:"Expectancy: the only maths that matters", b:[
+ "Expectancy is what one trade is worth on average: (win rate x average win in R) minus (loss rate x average loss in R). A system winning 40% of the time at 3R has an expectancy of +0.6R per trade and beats one winning 70% of the time at 0.5R, which is +0.05R. Win rate alone tells you nothing.",
+ "The related number worth memorising: the break-even win rate for a given R is 1 / (1 + R). At 2R you need 34% to break even. At 1R you need 50% before costs, which means more than 50% after them. This is why chasing a high win rate by cutting targets is the slowest way to lose."],
+ k:["Expectancy = (win% x avg win R) - (loss% x avg loss R)","Break-even win rate = 1 / (1 + R)","A high win rate with a small R still loses"],
+ q:[
+ {q:"Which is better: 70% wins at 0.5R, or 40% wins at 3R?",o:["70% at 0.5R","40% at 3R","They are the same"],a:1,w:"+0.6R per trade against +0.05R."},
+ {q:"What win rate breaks even at 2R?",o:["50%","About 34%","About 66%"],a:1,w:"1 / (1 + 2) = 33%."}]},
+
+{id:"4.6", t:"The plan, and the journal", b:[
+ "A trading plan is not a document about the market. It is a set of limits on you: which instruments, which session, which setup, how many trades a day, how much you may lose in a day, and what makes you stop. Everything in it should be checkable by somebody watching over your shoulder.",
+ "The journal is the half that people skip, and it is the half that changes behaviour. Three columns matter most: what the setup was, whether it followed the plan, and the R result. After thirty trades you can sort by that middle column and see whether the losses came from the market or from you. Almost always it is both, and the split is the point."],
+ k:["A plan limits you, not the market","Number of trades and daily loss cap are part of it","Journal: setup, followed the plan?, R result"],
+ q:[
+ {q:"What belongs in a trading plan?",o:["A market forecast","Which setup, how many trades, and what makes you stop","A list of indicators"],a:1,w:"A plan constrains you, not the market."},
+ {q:"Which journal column is the most useful?",o:["Whether you followed the plan","How you felt at the close","What the news said"],a:0,w:"It separates market losses from self-inflicted ones."}]}
+];
+
+var SW_L5 = [
+{id:"5.1", t:"Position sizing", b:[
+ "Size comes from risk, not from conviction. Decide what a losing trade may cost — most people use 1% of the account or less — then divide by the distance to your stop. Risk 100 with a stop 20 ticks away and the size is whatever 20 ticks of that instrument costs times five.",
+ "Say it the other way round, because this is where accounts die: the size does not change because you feel sure. Feelings widen stops and shrink judgement, and a size chosen by feeling is the only part of a trade that can end the account."],
+ k:["Size = risk / stop distance","The stop is set by structure, then the size follows","Conviction is not a position-sizing input"],
+ q:[
+ {q:"You may risk 100 and the stop is 25 away. What is the size?",o:["Whatever 25 equals, times four","Four times the unit risk","Twenty-five units"],a:1,w:"100 / 25 = 4 units of that stop distance."},
+ {q:"What should get bigger when you feel very confident?",o:["The position","Nothing — confidence is not a sizing input","The number of trades"],a:1,w:"Sizing by feeling is how one trade ends an account."}]},
+
+{id:"5.2", t:"Drawdown maths", b:[
+ "Losses and gains are not symmetrical. Lose 50% and you need 100% to get back to where you started. Lose 20% and you need 25%. The arithmetic is the reason the risk limit exists at all: it is not there to protect the money you have, it is there to protect your ability to recover.",
+ "That is also why the daily stop matters. A bad day taken to the end of the session can turn a 3% month into a 20% one, and the difference between those two months is not the market — it is the rule about walking away."],
+ k:["-50% needs +100% to recover","Recovery cost grows faster than the loss","The daily stop protects the recovery, not the balance"],
+ q:[
+ {q:"You lose 50% of the account. What gain returns you to the start?",o:["50%","100%","75%"],a:1,w:"Half of 100 needs a double to get back."},
+ {q:"Why have a daily loss cap?",o:["It makes the balance look better","It stops one bad day becoming a drawdown you cannot trade out of","The broker requires it"],a:1,w:"The compounding cost of a deep hole is severe."}]},
+
+{id:"5.3", t:"Losing streaks are normal", b:[
+ "A strategy that wins 40% of the time will, over a few hundred trades, produce runs of six, seven, eight losses in a row. That is not the strategy breaking — that is what 40% looks like in a sequence. The trap is deciding, in the middle of such a run, that you have learned something new about the market.",
+ "Practically: measure your strategy over at least 100 trades before judging it, and decide in advance what a streak means. If the answer is nothing — the rules still hold, keep taking them — write that down before the streak arrives, because you will not be able to think clearly when it does."],
+ k:["Long losing runs are built into any win rate below 100%","100 trades minimum before judging a system","Decide what a streak means before you are in one"],
+ q:[
+ {q:"Your system wins 40% of the time. Is a run of seven losses a sign it is broken?",o:["Yes, stop trading it","No — it is within what 40% produces","Only if the market changed"],a:1,w:"Streaks of that length are normal in sequences with that win rate."},
+ {q:"How many trades before judging whether a system works?",o:["Ten","Around a hundred or more","Three good ones"],a:1,w:"Small samples tell you almost nothing."}]},
+
+{id:"5.4", t:"Tilt", b:[
+ "Tilt is trading to change how you feel rather than to take an edge. It arrives in three costumes. Revenge: getting it back from the market that just took it. FOMO: entering late because it is moving without you. Boredom: taking a trade because the screen is on and nothing is happening.",
+ "Rage against tilt does not work. Mechanical rules do: two losses in a row and you stop for an hour; a daily loss cap and the platform closes; no new entries in the last fifteen minutes of a session. Rules you can break are rules you will break. Rules that remove the decision cannot be broken in the moment, because there is no moment."],
+ k:["Revenge, FOMO, boredom — the three costumes","Beat it with rules that remove the decision","A rule you can argue with is not a rule"],
+ q:[
+ {q:"You lost twice and double your size to win it back. What is that?",o:["Confidence","Revenge trading","Scaling in"],a:1,w:"Trading to fix a feeling."},
+ {q:"What actually stops tilt?",o:["Willpower","A mechanical rule that ends the session","Watching the chart more closely"],a:1,w:"Removing the decision beats resisting it."}]},
+
+{id:"5.5", t:"Backtesting honestly", b:[
+ "A backtest is a way of asking whether your rules would have survived a real market. Four things make one honest: enough trades (a hundred at least), a sample you did not tune on, costs included — spread, commission, slippage — and an outcome recorded in R rather than money.",
+ "What ruins one: changing a rule every time it loses, testing on the same data you designed the rule on, and skipping the boring months. And remember what it can never tell you: whether you personally will follow it when the fourth loss lands on a Thursday afternoon."],
+ k:["100+ trades, costs included, results in R","Never tune and test on the same data","It cannot test your discipline — only the rule"],
+ q:[
+ {q:"What must a backtest include to be worth anything?",o:["Spread, commission and slippage","Your best months","Only the trades you would have taken"],a:0,w:"Without costs the result is fiction."},
+ {q:"You keep changing the rule after each losing trade. What is happening?",o:["Refinement","Curve-fitting to noise","Proper testing"],a:1,w:"You are fitting the rule to the sample, not testing it."}]},
+
+{id:"5.6", t:"The review that changes behaviour", b:[
+ "Once a week, add up the numbers instead of reliving the feelings: how many trades, how many followed the plan, average R, biggest loss, the two trades you would take again and the two you would not. One page. Ten minutes.",
+ "Then change exactly one thing, and only if the numbers point at it. Changing three things after a bad week is how people spend a year learning nothing — you cannot tell which change worked, so nothing is learned at all."],
+ k:["Weekly: counts, plan-followed, average R, worst trade","One change at a time, or you learn nothing","Review the numbers, not the feelings"],
+ q:[
+ {q:"After a losing week you want to change your stop, your target and your session. What should you do?",o:["Change all three","Change one thing the numbers point at","Change nothing for a month"],a:1,w:"Three changes tell you nothing about any of them."},
+ {q:"What is the most useful weekly number?",o:["Money made","How many trades followed the plan and the average R","Screen time"],a:1,w:"Discipline and expectancy are the controllable parts."}]}
+];
+
+var SW_L6 = [
+{id:"6.1", t:"Who is actually on the other side", b:[
+ "Four kinds of participant share your chart. Retail, small and unhedged. Funds, slow and directional. Hedgers, who trade because they have real exposure elsewhere. And market makers — firms whose business is to stand in the middle, quote both a bid and an ask, and earn the difference on volume.",
+ "A market maker is not a hunter with your name on a list. They are an inventory manager: buy when the flow is selling, sell when it is buying, and get flat again as fast as they can. But their job does mean two things for you. They need volume, so they are comfortable pushing price toward where the orders are. And they profit from the spread, so they prefer a market that moves enough to attract flow, not one that runs away."],
+ k:["Market makers are inventory managers, not predators with names","They need volume and pay attention to where orders sit","They prefer balance; everybody else brings the direction"],
+ q:[
+ {q:"What is a market maker's business?",o:["Predicting direction","Standing in the middle and earning the spread on flow","Following trends with size"],a:1,w:"They quote both sides and manage inventory."},
+ {q:"Why does a market maker care where clusters of orders sit?",o:["They need volume, and resting orders are volume","They want to hurt retail","To set the daily close"],a:0,w:"Order clusters are where the business is."}]},
+
+{id:"6.2", t:"The order book", b:[
+ "The book is the list of resting orders: bids below the price, asks above, and the size at each level. A market buy lifts the cheapest ask and moves price up; a limit buy joins the queue and waits. That distinction is the whole of it — your order either takes liquidity and pays the spread, or provides liquidity and waits to be paid.",
+ "Depth tells you how much size it takes to move price. Thin depth means a small order moves the market a long way, and it also means the move can be undone just as fast. What looks like a wall of size is often not a wall at all — someone who wanted to be seen put it there."],
+ k:["Market orders take and pay; limit orders wait and are paid","Depth = how much size moves price","Displayed size is not committed size"],
+ q:[
+ {q:"What does a limit buy order do?",o:["Pays the spread and fills immediately","Joins the queue and waits at that price","Cancels the market"],a:1,w:"It provides liquidity and waits."},
+ {q:"Thin depth on the book means what?",o:["Price is hard to move","A small order moves price a long way","Nothing for a trader"],a:1,w:"Less resting size means bigger moves per order."}]},
+
+{id:"6.3", t:"The spread, and who earns it", b:[
+ "The spread is the market maker's rent. They buy at the bid, sell at the ask, and repeat; each round trip is theirs if they can stay flat. Wider spreads mean they are charging more for risk — thin book, news, the open, the close, a fast market. That is why costs balloon exactly when you feel most like trading.",
+ "The practical consequences are simple. Trade when the spread is tight and the flow is real. Never chase into a widening spread. And understand that a fast move made of market orders is expensive for you and profitable for whoever is filling them, which is one reason moves that look explosive tend to settle back toward where they started."],
+ k:["Spread is the market maker's income for taking risk","Widening spread = higher risk, higher your cost","Chasing a fast market pays their rent handsomely"],
+ q:[
+ {q:"Why does the spread widen at the open and on news?",o:["Market makers need more for the extra risk","The exchange sets it randomly","Interest rates change"],a:0,w:"Wider spread is compensation for uncertainty."},
+ {q:"A fast move made of aggressive market orders is expensive mainly for whom?",o:["The market maker","The taker paying the spread","Nobody"],a:1,w:"Takers pay; providers earn."}]},
+
+{id:"6.4", t:"Liquidity, and the sweep", b:[
+ "Every stop order is a resting order in the book, and stops hide in predictable places: just above the equal highs, just below the equal lows, beyond yesterday's range. That collection of orders is liquidity, and it is visible in advance to anyone who knows where retail stops go — which is everybody.",
+ "So price sometimes runs through an obvious level, fills those orders, and comes straight back. The tell is the return: a genuine break holds the level and goes on, a sweep reclaims it within a few bars. That reclaim is one of the few genuinely repeatable setups in this level — the sweep is the setup, the reclaim is the trigger, and the stop goes beyond the sweep extreme."],
+ k:["Stops at obvious levels are liquidity, and it is predictable","A sweep takes the level and returns; a break holds it","Trade the reclaim, stop beyond the sweep extreme"],
+ q:[
+ {q:"What distinguishes a sweep from a genuine break?",o:["The size of the candle","Whether price reclaims the level or holds beyond it","The time of day"],a:1,w:"Reclaim means orders were taken, not conviction."},
+ {q:"Where do the stops usually sit?",o:["At random prices","Just beyond equal highs and lows and the prior range","At round numbers only"],a:1,w:"Below/above obvious swing levels."}]},
+
+{id:"6.5", t:"Order flow: delta and absorption", b:[
+ "Delta is the difference between market buys and market sells over a period. If price is rising on positive delta, buyers are lifting offers — that is demand. If price is rising while delta is negative, sellers are hitting bids and price is still going up, which means a limit buyer is eating everything thrown at them. That is absorption.",
+ "Absorption is the interesting one, because it shows size defending a price. Big volume with no movement means somebody with real size is absorbing; when that defensive wall is finally pulled, price usually travels a long way fast. Footprint charts and time and sales are how you see it: watch for stacked buying on the offer that cannot push price through."],
+ k:["Delta = market buys minus market sells","Absorption: heavy flow, no movement — real size defending","When the absorber leaves, the move is often violent"],
+ q:[
+ {q:"Price is flat but volume is heavy and aggressive sellers keep hitting the bid. What is likely happening?",o:["A limit buyer absorbing the selling","Sellers winning","Nothing meaningful"],a:0,w:"Somebody with size is defending that price."},
+ {q:"Delta is negative but price is rising. What does that suggest?",o:["Sellers are being absorbed by passive buyers","The data is wrong","A downtrend"],a:0,w:"Passive demand is outweighing the selling."}]},
+
+{id:"6.6", t:"Games in the book", b:[
+ "Spoofing is size displayed with no intention to trade it — a wall of offers placed to make you sell, pulled the instant price gets near. Icebergs are the opposite: small displayed size hiding a large true order, refilling as it fills. Icebergs you can use; spoofs are only information if you notice the wall vanish.",
+ "The general rule for all of it: judge by what happened, not by what was displayed. A wall that holds is real size, whatever the intention behind it; a wall that disappears as price arrives was never a wall. This is the same lesson as the sweep, applied one level deeper."],
+ k:["Spoof = displayed size that is not real","Iceberg = real size that is not displayed","Judge by what held, not by what was shown"],
+ q:[
+ {q:"What is an iceberg order?",o:["A large order showing only a small size that refills","A fake wall of offers","A cancelled order"],a:0,w:"Hidden size that keeps refilling as it fills."},
+ {q:"How do you judge displayed size?",o:["By its size","By whether it holds when price arrives","By who placed it"],a:1,w:"Only the behaviour is informative."}]},
+
+{id:"6.7", t:"Auction theory: value and price", b:[
+ "A market is a continuous auction, and its job is to find a price where the most trade can happen — value. The volume profile shows where that was: the point of control is the price with the most volume, and the value area is the band containing most of the session's trade. Price outside value is either an opportunity being auctioned or a rejection.",
+ "Three shapes are worth knowing. Balance: price inside the value area, rotating back to the point of control, so fade the edges. Trend: price leaving value and building new value higher or lower, so sell the pullbacks into the old edge. And failed auction: price pushes outside value, fails to hold, and returns inside — which is one of the most reliable continuations back to the other side."],
+ k:["Point of control = the price of most trade; value area = most of the volume","Balance: fade the edges back to value","Failed auction outside value often runs to the other side"],
+ q:[
+ {q:"Price pushes outside the value area and is immediately rejected back inside. What is it?",o:["A failed auction","A trend day","A breakout to hold"],a:0,w:"The auction tried and failed outside value."},
+ {q:"In a balanced market, where is the trade?",o:["Buying the middle","Fading the edges back toward the point of control","Chasing every push"],a:1,w:"Balance rotates: edges in, control out."}]},
+
+{id:"6.8", t:"Inventory, hedging and the calendar", b:[
+ "A market maker who has bought too much is short volatility and long risk, so they hedge — and hedging moves other markets. That is why an equity weakness can appear in currency or bond futures seconds before it shows in the index. What you trade is rarely isolated.",
+ "There is also a calendar element. Around expiry, large open interest at strikes pulls price toward them, because whoever is short those options wants the underlying to finish where it maximises what they keep. And in perpetual futures, funding and basis tell you which side is crowded and who is paying to stay in the trade. None of this is a signal by itself; all of it tells you where other people have to act."],
+ k:["Hedging links markets — moves appear elsewhere first","Expiry and open interest can pin price to strikes","Funding tells you which side is paying to hold"],
+ q:[
+ {q:"Why can a move appear in another market before yours?",o:["Because somebody is hedging exposure there","Because prices are lagged by the exchange","By coincidence"],a:0,w:"Hedging flows link related markets."},
+ {q:"What does strong positive funding on a perpetual future tell you?",o:["Longs are paying shorts — the long side is crowded","Nothing","The market is closed"],a:0,w:"Crowded positioning pays to stay in."}]}
+];
+
+/* ── Level tests ─────────────────────────────────────────────────────────────
+   Six per level, one page, scored out of six. They are drawn from the level's
+   own material and are deliberately not the same questions as the lesson
+   checks, so passing a test means the level went in rather than the checks
+   being memorised. */
+var SW_TESTS = {
+ L1:[
+ {q:"What is a price?",o:["An opinion held by the exchange","The last number a buyer and a seller agreed on","The average of the day"],a:1,w:"Price is an agreement, nothing more."},
+ {q:"A bar opens at 100, trades to 130, closes at 105. What does that say?",o:["Buyers held control","The move up was taken back before the close","Nothing"],a:1,w:"A long upper wick records rejection."},
+ {q:"Which pair of timeframes is the working arrangement?",o:["Direction from the bigger, timing from the smaller","Timing from the bigger, direction from the smaller","Only one timeframe, always"],a:0,w:"Big frame for direction, small for the trigger."},
+ {q:"What is a level for?",o:["Predicting bounces","Giving you a cheap place to be wrong","Marking the daily close"],a:1,w:"Levels are where an idea is disproved."},
+ {q:"An uptrend makes a lower low. What is true?",o:["The sequence defining the uptrend has broken","It is a certain buy","Nothing — noise"],a:0,w:"Higher lows are the uptrend."},
+ {q:"Which is a real trading cost?",o:["The spread and slippage","Screen time","Your opinion"],a:0,w:"Costs that leave the account are spread, fees, slippage."}
+ ],
+ L2:[
+ {q:"What is a change of character?",o:["The first break against the trend","A continuation break","A wide-range bar"],a:0,w:"Structure broken in the other direction."},
+ {q:"A bull engulfing candle in the middle of a range is:",o:["A strong long signal","Weak on its own — no level, no trend","A short signal"],a:1,w:"Context turns a shape into a setup."},
+ {q:"Why do first breakouts usually fail?",o:["Resting stop orders just beyond the level get filled","Because spreads widen","Because the news is late"],a:0,w:"Liquidity sits just beyond obvious levels."},
+ {q:"The middle of a range is:",o:["The best entry","Where there is no level and no cheap stop","Where the trend starts"],a:1,w:"No information, no edge."},
+ {q:"Where do you draw a zone?",o:["From the base of the move","From the tip of the wick","From the mid-point of the bar"],a:0,w:"The base is where orders were placed."},
+ {q:"You have a level and a trigger but no read on structure. That is:",o:["A full setup","Two of three — a maybe","A guaranteed trade"],a:1,w:"Structure is what gives the trigger meaning."}
+ ],
+ L3:[
+ {q:"A price crossing above its 200-period average means:",o:["Buy now","The average of the last 200 closes is below price — a statement about the past","A confirmed trend change"],a:1,w:"Averages summarise the past."},
+ {q:"RSI above 70 for days in an uptrend means:",o:["Sell","The trend is strong — overbought can persist","The trend is about to end"],a:1,w:"Momentum stays stretched in trends."},
+ {q:"Divergence between price and RSI shows:",o:["Momentum has faded, not that the turn has arrived","A certain reversal","A breakout"],a:0,w:"It is a warning, not a trigger."},
+ {q:"A market moves about 1 ATR a bar. A stop half an ATR away is:",o:["Safe","Inside ordinary noise","Exact"],a:1,w:"Stops must clear normal travel."},
+ {q:"On a trend day VWAP usually acts as:",o:["A magnet pulling price back","Support under pullbacks","Nothing"],a:1,w:"Price holds one side of it."},
+ {q:"Five indicators derived from the same prices all agree. That gives you:",o:["Five reasons","Essentially one","A certainty"],a:1,w:"They agree because they share an input."}
+ ],
+ L4:[
+ {q:"Which is a setup rather than an opinion?",o:["This looks strong today","In an uptrend, buy the first pullback that holds the last higher low, stop under it","It has been going up a lot"],a:1,w:"Direction, condition, entry, stop — decidable by looking."},
+ {q:"What does a trigger do?",o:["Converts an idea into a trade you may take","Tells you the target","Sizes the position"],a:0,w:"It is the event that permits entry."},
+ {q:"Where does the structural stop go?",o:["Just beyond the level that would prove you wrong","At a round number of points","At a fixed 1%"],a:0,w:"Structure first, size from that."},
+ {q:"You risk 40 to make 120. That is:",o:["1R","3R","0.3R"],a:1,w:"120/40 = 3."},
+ {q:"What win rate breaks even at 1R?",o:["50% before costs","34%","25%"],a:0,w:"1/(1+1) = 50%, and costs push it higher."},
+ {q:"Which journal column matters most?",o:["Whether the trade followed the plan","How you felt","The news"],a:0,w:"It separates market losses from self-inflicted ones."}
+ ],
+ L5:[
+ {q:"You may risk 200 and the stop is 40 away. The size is:",o:["Whatever 40 costs, times five","Forty units","Two units"],a:0,w:"Risk divided by stop distance."},
+ {q:"Losing 25% of the account needs what to recover?",o:["25%","About 33%","50%"],a:1,w:"The recovery is always larger than the loss."},
+ {q:"A 40% win-rate system produces seven losses in a row. That means:",o:["The system has broken","A normal streak for that win rate","The market changed"],a:1,w:"Long losing runs are built in."},
+ {q:"You just lost twice and double up to win it back. That is:",o:["Scaling","Revenge trading","Confidence"],a:1,w:"A feeling driving the size."},
+ {q:"Which is not part of an honest backtest?",o:["Costs included","Results in R","Changing the rules after each loss"],a:2,w:"That is curve-fitting, not testing."},
+ {q:"After a bad week you want three changes. What is right?",o:["Make all three","Make one the numbers point at","Make none ever"],a:1,w:"One change is the only one you can learn from."}
+ ],
+ L6:[
+ {q:"A market maker's business is:",o:["Predicting direction","Quoting both sides and earning the spread on flow","Running a trend strategy"],a:1,w:"Inventory management and spread."},
+ {q:"A market buy order:",o:["Takes liquidity and pays the spread","Provides liquidity and waits","Costs nothing"],a:0,w:"Takers pay."},
+ {q:"Sweep or genuine break — what tells them apart?",o:["The size of the candle","Whether price holds beyond the level or reclaims it","The time of day"],a:1,w:"Reclaim means liquidity was taken."},
+ {q:"Flat price, heavy aggressive selling. Likely:",o:["A limit buyer absorbing the flow","Sellers winning","A data error"],a:0,w:"Real size is defending."},
+ {q:"A wall of offers vanishes as price arrives. It was:",o:["Absorption","A spoof — displayed size that was never real","An iceberg"],a:1,w:"Judge by what held."},
+ {q:"Price pushes outside the value area and is rejected straight back in. It is:",o:["A failed auction","A trend day","A holding breakout"],a:0,w:"The auction failed outside value."}
+ ]
+};
+
+var SCHOOL = SW_META.map(function(m){
+  return {id:m.id, n:m.n, t:m.t, s:m.s, lessons:(m.id === "L1" ? SW_L1 : m.id === "L2" ? SW_L2 : m.id === "L3" ? SW_L3 : m.id === "L4" ? SW_L4 : m.id === "L5" ? SW_L5 : SW_L6)};
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   THE TRADING SCHOOL — the working half.
+
+   Three things worth stating plainly before the code.
+
+   1. Every candle drawn on this page is made up by this page. There is no feed,
+      no broker, no instrument, and no record of any real market or day. The
+      generator is seeded, so the same seed draws the same chart every time —
+      which is what makes a drill markable at all. It is practice, and the page
+      says so where a person will read it.
+
+   2. A drill grades the DECISION, not the outcome. Two scenarios can be the
+      same structure and end differently; the answer is marked on what the chart
+      said at the moment of the decision, and the result is shown afterwards as
+      the thing a stop exists for. Anything else would be teaching hindsight.
+
+   3. Progress is kept on this device, in this browser, and goes nowhere.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+var KEY = "tsid-school-v1";
+
+function blank(){
+  return {v:1, lessons:{}, q:{}, t:{}, d:{}, dn:0, seen:0,
+          bt:{runs:0, trades:0, wins:0, r:0, best:0, worst:0, dd:0}};
+}
+var S = blank();
+try{
+  var savedRaw = localStorage.getItem(KEY);
+  if(savedRaw){
+    var parsed = JSON.parse(savedRaw);
+    if(parsed && typeof parsed === "object"){
+      var base = blank();
+      for(var kk in base) if(!(kk in parsed)) parsed[kk] = base[kk];
+      for(var bk in base.bt) if(!(bk in parsed.bt)) parsed.bt[bk] = base.bt[bk];
+      S = parsed;
+    }
+  }
+}catch(e){ S = blank() }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
+
+function allLessons(){
+  var out = [];
+  for(var i=0;i<SCHOOL.length;i++)
+    for(var j=0;j<SCHOOL[i].lessons.length;j++) out.push(SCHOOL[i].lessons[j]);
+  return out;
+}
+function lessonById(id){
+  var all = allLessons();
+  for(var i=0;i<all.length;i++) if(all[i].id===id) return all[i];
+  return null;
+}
+function levelOf(id){ return String(id).split(".")[0] }
+
+/* ── XP and rank ─────────────────────────────────────────────────────────────
+   Kept as one arithmetic function of the stored progress rather than a counter
+   that gets incremented in eight places, so it can never drift out of step with
+   what was actually done. */
+var RANKS = [[0,"Learner"],[120,"Apprentice"],[350,"Chart reader"],[600,"Technician"],
+             [850,"Risk manager"],[1100,"Trader"],[1400,"Market maker"]];
+function schoolRank(xp){
+  var name = RANKS[0][1];
+  for(var i=0;i<RANKS.length;i++) if(xp >= RANKS[i][0]) name = RANKS[i][1];
+  return name;
+}
+function schoolStats(s){
+  s = s || S;
+  var total = allLessons().length;
+  var done = Object.keys(s.lessons || {}).length;
+  var quiz = Object.keys(s.q || {}).length;
+  var testCorrect = 0;
+  for(var k in (s.t || {})) testCorrect += (s.t[k] && s.t[k].best) || 0;
+  var drillCorrect = Object.keys(s.d || {}).length;
+  var xp = done*10 + quiz*5 + testCorrect*10 + drillCorrect*5 + (s.dn||0)*15;
+  return {total:total, done:done, quiz:quiz, testCorrect:testCorrect,
+          drillCorrect:drillCorrect, drills:s.dn||0, xp:xp, rank:schoolRank(xp)};
+}
+
+/* ══ THE PRACTICE MARKET ═════════════════════════════════════════════════════
+   Xorshift32. Small, seeded, and identical everywhere it runs, so a drill
+   marked on this device can be re-drawn on another one. */
+function rng(seed){
+  /* The multiply and the warm-up are not decoration. A plain xorshift started
+     from a small seed returns tiny numbers for its first several draws — seed 1
+     gave 0.00006 — so every scenario came out as the same shape and the four
+     later ones never appeared. Mixed first, then warmed through a few rounds,
+     the first draw is already spread across the range. */
+  var s = (Math.imul((seed >>> 0) || 1, 2654435769) >>> 0) || 1;
+  function step(){
+    s ^= s << 13; s >>>= 0;
+    s ^= s >>> 17;
+    s ^= s << 5;  s >>>= 0;
+    return s / 4294967296;
+  }
+  for(var w=0; w<4; w++) step();
+  return step;
+}
+
+/* The five ways a chart can be read, and the three answers a decision can have.
+   A scenario stores which of these it is, and the drill is marked against that —
+   never against whether the generated path happened to go the user's way. */
+var READS = [
+  "Uptrend, pulling back into support",
+  "Downtrend, rallying into resistance",
+  "Range — price in the middle, no edge",
+  "Lows swept — stops taken, then reclaimed",
+  "Breakout above the range, back to test it"
+];
+var DECISIONS = ["long","short","wait"];
+
+/* Build one drill scenario: the bars, where the decision bar is, what the chart
+   was saying, and the outcome that follows. Six shapes; two of them are the
+   same read with opposite outcomes, on purpose. */
+function makeScenario(seed){
+  var r = rng(seed), bars = [], t = 0, base = 100, i;
+  function push(n, drift, vol){
+    for(i=0;i<n;i++){
+      var o = base, mv = drift + (r()-0.5)*2*vol, c = o + mv;
+      bars.push({t:t++, o:o, c:c,
+                 h:Math.max(o,c) + r()*vol*0.6,
+                 l:Math.min(o,c) - r()*vol*0.6});
+      base = c;
+    }
+  }
+  function lows(a,b){ var m=1e9; for(var x=a;x<b;x++) m=Math.min(m,bars[x].l); return m }
+  function highs(a,b){ var m=-1e9; for(var x=a;x<b;x++) m=Math.max(m,bars[x].h); return m }
+
+  var shape = Math.floor(r()*6), read, exp, stopPrice, note, mark = {};
+  /* Where the chart stops and the decision is made. Captured here rather than
+     read off bars.length at the end: the outcome bars are appended below, and
+     taking the last bar of the finished path as the decision bar drew the future
+     on the screen and let it into the stop suggestion. */
+  var decisionAt = 0;
+
+  if(shape===0 || shape===1){
+    push(16, 0.50, 0.85);                 // the impulse
+    var impEnd = bars.length;
+    push(10, -0.42, 0.75);                // the pullback
+    var pullStart = impEnd, sup = lows(pullStart, bars.length);
+    read = 0; exp = "long"; stopPrice = sup;
+    mark = {sup:sup, res:highs(0, impEnd)};
+    decisionAt = bars.length - 1;
+    if(shape===0){ push(16, 0.52, 0.85);
+      note = "It held and continued, exactly as the structure suggested. That does not make the read clever — it makes it ordinary.";
+    } else { push(16, -0.55, 0.95); base = bars[bars.length-1].c;
+      note = "It failed. The same read, the same entry, the same stop, a different week — and this is the whole reason the stop is not optional.";
+    }
+  } else if(shape===2){
+    push(16, -0.50, 0.85);
+    var dnEnd = bars.length;
+    push(10, 0.42, 0.75);
+    var rallyStart = dnEnd, res = highs(rallyStart, bars.length);
+    read = 1; exp = "short"; stopPrice = res;
+    mark = {res:res, sup:lows(0, dnEnd)};
+    decisionAt = bars.length - 1;
+    push(16, -0.50, 0.9);
+    note = "It rolled over from the level. Shorting strength in a downtrend is the same trade as buying weakness in an uptrend, mirrored.";
+  } else if(shape===3){
+    push(12, 0.30, 0.8);
+    push(14, -0.28, 0.8);
+    var bandHi = highs(0, bars.length), bandLo = lows(0, bars.length);
+    push(10, 0.26, 0.7);
+    read = 2; exp = "wait"; stopPrice = bandLo;
+    mark = {sup:bandLo, res:bandHi};
+    decisionAt = bars.length - 1;
+    push(14, -0.05, 0.85);
+    base = bars[bars.length-1].c;
+    push(10, 0.15, 0.7);
+    note = "It wandered. Nothing was decided here, which is what the middle of a range always looks like. Paying the spread for a wander is the most expensive habit there is.";
+  } else if(shape===4){
+    push(14, -0.48, 0.85);
+    var priorLo = lows(6, 14);
+    push(6, -0.30, 0.6);                  // the equal lows forming
+    push(3, -1.60, 0.5);                  // the sweep below them
+    var sweepLow = lows(bars.length-3, bars.length);
+    push(5, 1.10, 0.7);                   // the reclaim
+    read = 3; exp = "long"; stopPrice = sweepLow;
+    mark = {sup:sweepLow, res:highs(0, 12)};
+    decisionAt = bars.length - 1;
+    push(18, 0.55, 0.9);
+    note = "The stops under the lows were taken and price came straight back. That is a sweep, not a break — the return is the tell.";
+  } else {
+    push(20, 0.10, 0.8);                  // a range
+    var rHi = highs(4, bars.length);
+    push(4, 0.85, 0.6);                   // the break out
+    var broke = bars.length;
+    push(8, -0.55, 0.7);                  // the retest
+    read = 4; exp = "long"; stopPrice = Math.min(lows(broke, bars.length), rHi - 0.4);
+    mark = {sup:rHi, res:highs(0, broke)};
+    decisionAt = bars.length - 1;
+    push(16, 0.55, 0.85);
+    note = "Old resistance held as support on the way back, which is what makes the retest the better trade than the break itself.";
+  }
+
+  /* ATR over the bars the decision is made on, not over the outcome. Same
+     discipline as the decision bar itself. */
+  var atrNow = atrAt(bars, decisionAt);
+  var entry = bars[decisionAt].c;
+
+  return {seed:seed, shape:shape, bars:bars, decision:decisionAt,
+          read:read, exp:exp, stopPrice:stopPrice, level:mark,
+          atr:atrNow, note:note,
+          stopOptions:stopOptionsFor(exp, stopPrice, entry, atrNow)};
+}
+
+function money(v){ return (Math.round(v*100)/100).toFixed(2) }
+
+function stopOptionsFor(exp, stopPrice, entry, atr){
+  var structural = exp === "short" ? stopPrice + atr*0.15 : stopPrice - atr*0.15;
+  var tight = exp === "short" ? entry - atr*0.2 : entry + atr*0.2;
+  var flat = exp === "short" ? entry - atr*3 : entry + atr*3;
+  return [
+    {txt:"Just beyond the level that would prove the idea wrong (" + money(structural) + ")", ok:true},
+    {txt:"Close in at " + money(tight) + ", to lose less when it wobbles", ok:false},
+    {txt:"A flat " + money(flat) + ", whatever the chart is doing", ok:false}
+  ];
+}
+
+/* A longer path for the backtest: trends, pullbacks and chop chained together,
+   so there is something to trade and something to sit out. */
+function makeLongSeries(seed){
+  var r = rng(seed), bars = [], t = 0, base = 100, i;
+  function push(n, drift, vol){
+    for(i=0;i<n;i++){
+      var o = base, mv = drift + (r()-0.5)*2*vol, c = o + mv;
+      bars.push({t:t++, o:o, c:c,
+                 h:Math.max(o,c) + r()*vol*0.6,
+                 l:Math.min(o,c) - r()*vol*0.6});
+      base = c;
+    }
+  }
+  while(bars.length < 260){
+    var k = r();
+    if(k < 0.28)      push(20, 0.46, 0.85);
+    else if(k < 0.52) push(20, -0.46, 0.85);
+    else if(k < 0.72) push(14, -0.30, 0.70);
+    else if(k < 0.88) push(14, 0.30, 0.70);
+    else              push(18, 0.0, 1.05);
+  }
+  return bars.slice(0, 260);
+}
+
+/* Defined here rather than lower down because makeScenario uses it; a function
+   declaration is hoisted either way, but keeping it above its first caller is
+   kinder to the next person reading the file. */
+function atrAt(bars, i, n){
+  n = n || 14;
+  var start = Math.max(0, i - n + 1), sum = 0, c = 0;
+  for(var x=start; x<=i; x++){ sum += (bars[x].h - bars[x].l); c++ }
+  return c ? Math.max(0.2, sum/c) : 1;
+}
+
+/* ══ THE CHART ═══════════════════════════════════════════════════════════════ */
+function cssv(name, fallback){
+  try{
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+    return (v || "").trim() || fallback;
+  }catch(e){ return fallback }
+}
+function ctxOf(cv){
+  try{ return cv && cv.getContext ? cv.getContext("2d") : null }catch(e){ return null }
+}
+function sizeCanvas(cv){
+  var dpr = (typeof window !== "undefined" && window.devicePixelRatio) || 1;
+  var w = cv.clientWidth || 340;
+  var h = parseInt(cv.getAttribute("data-h") || "200", 10);
+  cv.width = Math.round(w * dpr);
+  cv.height = Math.round(h * dpr);
+}
+
+/* bars: the candles to draw. opts.lines: [{p, colour, label}] price lines.
+   opts.marks: [{i, p, colour}] small markers. Never called in a test DOM with no
+   canvas — it simply returns. */
+function drawChart(cv, bars, opts){
+  if(!cv) return;
+  var c = ctxOf(cv);
+  if(!c) return;
+  opts = opts || {};
+  sizeCanvas(cv);
+  var W = cv.width, H = cv.height;
+  var bg = cssv("--s2", "#272724"), up = cssv("--up", "#4ADEA5"), down = cssv("--down", "#FF6B7A");
+  var dim = cssv("--tm", "#888780");
+  c.fillStyle = bg; c.fillRect(0,0,W,H);
+  if(!bars || !bars.length) return;
+
+  var n = bars.length, hi = -1e9, lo = 1e9, i;
+  for(i=0;i<n;i++){ hi = Math.max(hi, bars[i].h); lo = Math.min(lo, bars[i].l) }
+  var lines = opts.lines || [];
+  for(i=0;i<lines.length;i++){ hi = Math.max(hi, lines[i].p); lo = Math.min(lo, lines[i].p) }
+  var pad = (hi - lo) * 0.08 || 1;
+  hi += pad; lo -= pad;
+  var padT = H*0.10, padB = H*0.10;
+  function yOf(p){ return padT + (hi - p) / (hi - lo) * (H - padT - padB) }
+  var bw = W / n;
+  var body = Math.max(1, Math.min(bw*0.62, 14));
+
+  for(i=0;i<n;i++){
+    var b = bars[i];
+    var col = b.c >= b.o ? up : down;
+    var x = i*bw + bw/2;
+    c.strokeStyle = col; c.fillStyle = col;
+    c.lineWidth = Math.max(1, Math.min(2, bw*0.16));
+    c.beginPath(); c.moveTo(x, yOf(b.h)); c.lineTo(x, yOf(b.l)); c.stroke();
+    var y1 = yOf(Math.max(b.o,b.c)), y2 = yOf(Math.min(b.o,b.c));
+    c.fillRect(x - body/2, y1, body, Math.max(1.5, y2 - y1));
+  }
+
+  for(i=0;i<lines.length;i++){
+    var L = lines[i];
+    var y = yOf(L.p);
+    c.save();
+    c.strokeStyle = L.colour || dim;
+    c.setLineDash(L.dash || [5,4]);
+    c.lineWidth = Math.max(1, W/460);
+    c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke();
+    c.restore();
+    if(L.label){
+      c.fillStyle = L.colour || dim;
+      c.font = Math.round(H*0.062) + "px -apple-system,Segoe UI,Roboto,sans-serif";
+      var tw = c.measureText(L.label).width;
+      c.fillText(L.label, W - tw - 6, y - 4 > 10 ? y - 4 : y + H*0.075);
+    }
+  }
+}
+
+/* ══ UI STATE ════════════════════════════════════════════════════════════════ */
+var UI = {tab:"lessons", level:null, lesson:null, test:null, drill:null, q:0, ans:null, bt:null, btSeed:1};
+
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+/* ══ LESSONS ════════════════════════════════════════════════════════════════ */
+function viewLessons(){
+  if(UI.lesson){
+    var l = lessonById(UI.lesson);
+    if(!l) { UI.lesson = null; return viewLessons() }
+    var h = '<div class="sec">'
+      + '<button class="txtbtn ghost" data-a="toLevel" data-id="' + levelOf(l.id) + '">&larr; Level ' + levelOf(l.id) + '</button>'
+      + '<div class="sec-hd">Lesson ' + esc(l.id) + '</div>'
+      + '<div class="card open"><div class="body" style="display:block;border-top:none;padding-top:0">'
+      + '<p style="font-size:1rem;font-weight:600;color:var(--tp);margin-bottom:10px">' + esc(l.t) + '</p>';
+    for(var p=0;p<l.b.length;p++) h += '<p>' + esc(l.b[p]) + '</p>';
+    h += '<div class="lbl">Keep these</div><ul class="k">';
+    for(var kk2=0; kk2<l.k.length; kk2++) h += '<li>' + esc(l.k[kk2]) + '</li>';
+    h += '</ul>';
+    h += lessonQuizHtml(l);
+    h += '</div></div>';
+    h += '<div class="sec" style="padding-top:6px">'
+      + (S.lessons[l.id] ? '<div class="big okbox"><b>Done</b>Marked off. You can re-read it any time.</div>'
+                         : '<button class="txtbtn" data-a="done" data-id="' + l.id + '">Mark this lesson done</button>')
+      + '</div>';
+    h += nextLessonHtml(l);
+    return h;
+  }
+  if(UI.level){
+    var L = null;
+    for(var i=0;i<SCHOOL.length;i++) if(SCHOOL[i].id===UI.level) L = SCHOOL[i];
+    if(!L){ UI.level = null; return viewLessons() }
+    var h2 = '<div class="sec">'
+      + '<button class="txtbtn ghost" data-a="toLevels">&larr; All levels</button>'
+      + '<div class="sec-hd">Level ' + L.n + ' &middot; ' + esc(L.t) + '</div>';
+    for(var j=0;j<L.lessons.length;j++){
+      var les = L.lessons[j], done = !!S.lessons[les.id];
+      var got = 0, tot = les.q.length;
+      for(var qi=0; qi<tot; qi++) if(S.q[les.id + ":" + qi]) got++;
+      h2 += '<div class="card"><div class="row" data-a="lesson" data-id="' + les.id + '">'
+         + '<span class="num' + (done ? " on" : "") + '">' + (done ? "&#10003;" : j+1) + '</span>'
+         + '<div class="row-txt"><b>' + esc(les.t) + '</b><span>' + esc(les.b[0].slice(0, 92)) + '&hellip;</span>'
+         + '<span style="margin-top:5px;color:' + (got===tot ? "var(--up)" : "var(--tm)") + '">'
+         + (got===tot ? "Checked: both right" : got + " of " + tot + " checks right") + '</span></div>'
+         + '<span class="chev">&#8250;</span></div></div>';
+    }
+    h2 += '<div class="sec" style="padding:0"><button class="txtbtn" data-a="test" data-id="' + L.id + '">Take the Level ' + L.n + ' test</button></div>';
+    return h2;
+  }
+  var st = schoolStats(S);
+  var h3 = '<div class="sec"><div class="big"><b>Start at the ground floor</b>'
+    + 'Six levels, in order. Nothing is locked — you can jump at any point — but the later levels assume the earlier arithmetic.</div></div>';
+  for(var m=0;m<SCHOOL.length;m++){
+    var lv = SCHOOL[m], dn = 0;
+    for(var q2=0;q2<lv.lessons.length;q2++) if(S.lessons[lv.lessons[q2].id]) dn++;
+    h3 += '<div class="card"><div class="row" data-a="level" data-id="' + lv.id + '">'
+       + '<span class="num' + (dn===lv.lessons.length ? " on" : "") + '">' + lv.n + '</span>'
+       + '<div class="row-txt"><b>' + esc(lv.t) + '</b><span>' + esc(lv.s) + '</span>'
+       + '<span style="margin-top:5px;color:' + (dn===lv.lessons.length ? "var(--up)" : "var(--tm)") + '">'
+       + dn + ' of ' + lv.lessons.length + ' lessons'
+       + (S.t[lv.id] ? ' &middot; test ' + S.t[lv.id].best + '/6' : '') + '</span></div>'
+       + '<span class="chev">&#8250;</span></div></div>';
+  }
+  h3 += '<div class="sec"><div class="cap">' + st.done + ' of ' + st.total + ' lessons done. Progress is kept on this device only.</div></div>';
+  return h3;
+}
+
+function lessonQuizHtml(l){
+  var h = '<div class="lbl">Check</div>';
+  for(var i=0;i<l.q.length;i++){
+    var q = l.q[i], key = l.id + ":" + i;
+    var answered = !!S.q[key] || UI.ans === key;
+    h += '<div class="q" data-q="' + key + '"><div class="q-txt">' + esc(q.q) + '</div><div class="opts">';
+    for(var o=0;o<q.o.length;o++){
+      var cls = "opt";
+      if(answered){
+        if(o === q.a) cls += " right";
+        else if(UI.ans === key && UI.pick === o) cls += " wrong";
+      }
+      h += '<button class="' + cls + '" data-a="q" data-key="' + key + '" data-o="' + o + '"'
+         + (answered ? ' disabled' : '') + '>' + esc(q.o[o]) + '</button>';
+    }
+    h += '</div><div class="why' + (answered ? ' on' : '') + '"><b>Why:</b> ' + esc(q.w)
+      + (UI.ans === key && UI.pick !== q.a ? '<br><b>Your answer was:</b> the one marked red — worth reading again until the reason is obvious.' : '')
+      + '</div></div>';
+  }
+  return h;
+}
+
+function nextLessonHtml(l){
+  var all = allLessons(), at = -1;
+  for(var i=0;i<all.length;i++) if(all[i].id === l.id) at = i;
+  if(at < 0 || at+1 >= all.length) return '';
+  var nx = all[at+1];
+  return '<div class="sec" style="padding-top:0"><button class="txtbtn" data-a="lesson" data-id="'
+    + nx.id + '">Next: ' + esc(nx.t) + ' &rarr;</button></div>';
+}
+
+/* ══ TESTS ══════════════════════════════════════════════════════════════════ */
+function viewTests(){
+  if(UI.test){
+    var id = UI.test, bank = SW_TESTS[id];
+    if(!bank){ UI.test = null; return viewTests() }
+    var L = null;
+    for(var i=0;i<SCHOOL.length;i++) if(SCHOOL[i].id===id) L = SCHOOL[i];
+    var rec = S.t[id] || {best:0, taken:0};
+    var h = '<div class="sec"><button class="txtbtn ghost" data-a="tests">&larr; All tests</button>'
+      + '<div class="sec-hd">Level ' + L.n + ' test</div>'
+      + '<div class="cap" style="margin-bottom:10px">Six questions on Level ' + L.n + '. Best so far: '
+      + rec.best + '/6, sat ' + (rec.taken||0) + (rec.taken===1?' time':' times') + '.</div>';
+    var answered = 0;
+    for(var j=0;j<bank.length;j++){
+      var key = id + "#" + j;
+      var done = !!S.t[id] && S.t[id].last && typeof S.t[id].last[key] !== "undefined";
+      var pick = done ? S.t[id].last[key] : null;
+      var shown = done;
+      if(shown) answered++;
+      h += '<div class="card"><div class="body" style="display:block;border-top:none;padding-top:14px">'
+        + '<div class="q" style="margin-top:0;padding-top:0;border-top:none"><div class="q-txt">' + (j+1) + '. ' + esc(bank[j].q) + '</div><div class="opts">';
+      for(var o=0;o<bank[j].o.length;o++){
+        var cls = "opt";
+        if(shown){ if(o===bank[j].a) cls += " right"; else if(pick===o) cls += " wrong"; }
+        h += '<button class="' + cls + '" data-a="tq" data-key="' + key + '" data-o="' + o + '"'
+          + (shown ? ' disabled' : '') + '>' + esc(bank[j].o[o]) + '</button>';
+      }
+      if(shown) h += '</div><div class="why on"><b>Why:</b> ' + esc(bank[j].w) + '</div></div>';
+      h += '</div></div></div>';
+    }
+    if(answered === bank.length) h += '<div class="sec" style="padding:0">'
+      + '<button class="txtbtn" data-a="testretake" data-id="' + id + '">Sit it again fresh</button></div>';
+    return h;
+  }
+  var h2 = '<div class="sec"><div class="big"><b>Six tests</b>One per level, six questions each. Sit one whenever you like — it is a check on the level, not a gate.</div></div>';
+  for(var m=0;m<SCHOOL.length;m++){
+    var lv = SCHOOL[m], rec = S.t[lv.id] || {best:0, taken:0};
+    h2 += '<div class="card"><div class="row" data-a="test" data-id="' + lv.id + '">'
+      + '<span class="num' + (rec.best >= 5 ? " on" : "") + '">' + lv.n + '</span>'
+      + '<div class="row-txt"><b>' + esc(lv.t) + '</b><span>' + rec.best + ' of 6 best'
+      + (rec.taken ? ' &middot; sat ' + rec.taken + (rec.taken===1?' time':' times') : ' &middot; not sat yet')
+      + '</span></div><span class="chev">&#8250;</span></div></div>';
+  }
+  return h2;
+}
+
+/* ══ DRILLS ═════════════════════════════════════════════════════════════════ */
+function newDrill(seed){
+  UI.drill = makeScenario(seed);
+  UI.q = 0; UI.pick = null;
+  UI.ans = null;
+  UI.drillRead = {};
+  UI.revealed = false;
+}
+
+function viewDrills(){
+  if(!UI.drill) newDrill(1);
+  var d = UI.drill;
+
+  /* Three questions, asked from the chart as it stood at the decision bar. The
+     read and the decision are marked against the structure the generator built,
+     never against how the path turned out. */
+  var questions = [
+    {t:"What is this chart doing?",
+     opts: READS.map(function(x, ix){ return {txt:x, ok:ix === d.read} })},
+    {t:"So what do you do at the last bar?",
+     opts: DECISIONS.map(function(x, ix){ return {txt:x.charAt(0).toUpperCase()+x.slice(1), ok:x === d.exp} })},
+    {t:"Where does the stop belong?", opts: d.stopOptions}
+  ];
+
+  var h = '<div class="sec">'
+    + '<div class="cap" style="margin-bottom:8px">A practice chart, made up by this page from seed '
+    + d.seed + '. Read it, answer, then see what the market did.</div>'
+    + '<div class="chartbox"><canvas id="cv" data-h="210"></canvas>'
+    + '<div class="cap">' + (UI.revealed ? 'Now showing the bars that followed.' : 'Bars up to the decision. Nothing after it is drawn yet.') + '</div></div>';
+
+  for(var i=0;i<questions.length;i++){
+    var answered = UI.ans && UI.ans.q === i;
+    if(i > UI.q && !(UI.ans && UI.ans.q > i)) continue;
+    h += '<div class="card"><div class="body" style="display:block;border-top:none;padding-top:14px">'
+      + '<div class="q" style="margin-top:0;padding-top:0;border-top:none"><div class="q-txt">'
+      + (i+1) + '. ' + esc(questions[i].t) + '</div><div class="opts">';
+    for(var o=0;o<questions[i].opts.length;o++){
+      var op = questions[i].opts[o], cls = "opt";
+      if(answered){
+        if(op.ok) cls += " right";
+        else if(UI.ans.pick === o) cls += " wrong";
+      }
+      h += '<button class="' + cls + '" data-a="dans" data-q="' + i + '" data-o="' + o + '"'
+        + (answered ? ' disabled' : '') + '>' + esc(op.txt) + '</button>';
+    }
+    if(answered) h += '</div><div class="why on">'
+      + (UI.drillRead[i] ? UI.drillRead[i] + '<br>' : '') + '</div></div>';
+    h += '</div></div></div>';
+  }
+
+  if(UI.revealed){
+    h += '<div class="big"><b>What the market did</b>' + esc(d.note) + '</div>'
+      + '<div class="sec" style="padding:0"><button class="txtbtn" data-a="newdrill">Another chart</button></div>';
+  } else {
+    h += '<div class="sec" style="padding:0"><div class="cap">'
+      + 'You are marked on the decision, not on the result. Two charts can be the same read and end differently — that is what the stop is for.'
+      + '</div></div>';
+  }
+  h += '<div class="sec"><div class="cap">Drills done: ' + (S.dn||0) + ' &middot; answers right: ' + Object.keys(S.d||{}).length + '</div></div>';
+  return h;
+}
+
+function drillAnswer(qi, oi){
+  var d = UI.drill;
+  if(!d) return;
+  /* Marked against the structure the generator built. The generated path never
+     decides whether the answer was right — see the note at the top of the file. */
+  var right;
+  if(qi === 0) right = oi === d.read;
+  else if(qi === 1) right = DECISIONS[oi] === d.exp;
+  else right = !!d.stopOptions[oi].ok;
+
+  UI.ans = {q:qi, pick:oi};
+  UI.drillRead = UI.drillRead || {};
+  var why = "";
+  if(qi === 0) why = right ? "Right — that is the structure." : "The read was: " + READS[d.read] + ".";
+  if(qi === 1) why = right ? "The structure said " + d.exp + "." : "The structure said " + d.exp + ", not whatever you picked. With-trend at the level, or nothing at all in a range.";
+  if(qi === 2) why = right ? "Stop beyond the level, because that is where the idea is disproved." : "The stop belongs beyond the level that would prove the idea wrong — " + money(d.exp === "short" ? d.stopPrice + d.atr*0.15 : d.stopPrice - d.atr*0.15) + ". Close-in stops get taken out by the noise that the trade was supposed to survive, and a flat distance ignores the chart.";
+  UI.drillRead[qi] = "<b>" + (right ? "Right." : "Not quite.") + "</b> " + why;
+
+  var key = "s" + d.seed + ":" + qi;
+  if(right && !S.d[key]){ S.d[key] = 1; save() }
+  if(qi === 2){
+    S.dn = (S.dn||0) + 1;
+    UI.revealed = true;
+    save();
+  }
+  UI.q = qi + 1;
+  paint();
+}
+
+/* ══ BACKTEST ═══════════════════════════════════════════════════════════════ */
+function btNew(seed){
+  var bars = makeLongSeries(seed);
+  UI.btSeed = seed;
+  UI.bt = {bars:bars, i:35, pos:null, stopAtr:1.5, targetR:2, trades:[], equity:0, peak:0, dd:0, atrMult:1.5, rr:2};
+  UI.revealed = false;
+}
+function btAtr(){ return atrAt(UI.bt.bars, UI.bt.i) }
+function btClose(result){
+  var b = UI.bt;
+  b.trades.push(result);
+  b.equity += result;
+  b.peak = Math.max(b.peak, b.equity);
+  b.dd = Math.max(b.dd, b.peak - b.equity);
+  b.pos = null;
+  var rec = S.bt;
+  rec.trades += 1;
+  if(result > 0) rec.wins += 1;
+  rec.r = Math.round((rec.r + result) * 100) / 100;
+  rec.best = Math.max(rec.best, result);
+  rec.worst = Math.min(rec.worst, result);
+  rec.dd = Math.max(rec.dd, b.dd);
+  rec.runs = (rec.runs||0) + 1;
+  save();
+}
+function btStep(){
+  var b = UI.bt;
+  if(!b || b.i >= b.bars.length - 1) return;
+  b.i++;
+  var bar = b.bars[b.i];
+  if(b.pos){
+    var p = b.pos;
+    /* If a bar touches both the stop and the target, the stop is taken first.
+       The backtest is deliberately pessimistic there: the bar does not say which
+       came first, and assuming the good one is how a test lies to you. */
+    if(p.dir > 0){
+      if(bar.l <= p.stop) btClose(-1);
+      else if(bar.h >= p.target) btClose(p.rr);
+    } else {
+      if(bar.h >= p.stop) btClose(-1);
+      else if(bar.l <= p.target) btClose(p.rr);
+    }
+  }
+}
+function btOpen(dir){
+  var b = UI.bt;
+  if(!b || b.pos) return;
+  var price = b.bars[b.i].c, a = btAtr();
+  var dist = a * b.atrMult;
+  b.pos = dir > 0
+    ? {dir:1, entry:price, stop:price - dist, target:price + dist*b.rr, rr:b.rr}
+    : {dir:-1, entry:price, stop:price + dist, target:price - dist*b.rr, rr:b.rr};
+}
+
+function viewBacktest(){
+  if(!UI.bt) btNew(1);
+  var b = UI.bt;
+  var from = Math.max(0, b.i - 70);
+  var vis = b.bars.slice(from, b.i + 1);
+  var lines = [];
+  if(b.pos){
+    lines.push({p:b.pos.entry, colour:cssv("--acc","#AFA9EC"), label:"entry", dash:[]});
+    lines.push({p:b.pos.stop, colour:cssv("--down","#FF6B7A"), label:"stop -1R"});
+    lines.push({p:b.pos.target, colour:cssv("--up","#4ADEA5"), label:"target " + b.pos.rr + "R"});
+  }
+  var wins = 0;
+  for(var i=0;i<b.trades.length;i++) if(b.trades[i] > 0) wins++;
+  var avg = b.trades.length ? b.equity / b.trades.length : 0;
+
+  var h = '<div class="sec">'
+    + '<div class="cap" style="margin-bottom:8px">The market here is generated by this page from seed '
+    + UI.btSeed + ' — practice, not a feed and not a real instrument. Step the candles yourself and trade it.</div>'
+    + '<div class="chartbox"><canvas id="cv" data-h="230"></canvas>'
+    + '<div class="cap">Bar ' + (b.i+1) + ' of ' + b.bars.length
+    + (b.pos ? ' &middot; in a ' + (b.pos.dir>0?'long':'short') + ' from ' + money(b.pos.entry) : ' &middot; flat')
+    + '</div></div>';
+
+  h += '<div class="lbl">Risk on the next trade</div><div class="qbar">';
+  var mults = [1, 1.5, 2, 3];
+  for(var m=0;m<mults.length;m++)
+    h += '<button class="' + (b.atrMult===mults[m] ? "on" : "") + '" data-a="btr" data-v="' + mults[m] + '">stop ' + mults[m] + '&times;ATR</button>';
+  h += '</div><div class="qbar">';
+  var rrs = [1, 1.5, 2, 3];
+  for(var t=0;t<rrs.length;t++)
+    h += '<button class="' + (b.rr===rrs[t] ? "on" : "") + '" data-a="btt" data-v="' + rrs[t] + '">target ' + rrs[t] + 'R</button>';
+  h += '</div>';
+
+  h += '<div class="qbar">';
+  if(b.pos){
+    h += '<button data-a="btclose">Close here</button>';
+  } else {
+    h += '<button class="long" data-a="btlong">Long</button>'
+      +  '<button class="short" data-a="btshort">Short</button>';
+  }
+  h += '<button data-a="btstep">Next candle</button>'
+    +  '<button data-a="btstep5">Next 5</button>'
+    +  '</div>';
+
+  h += '<div class="kv">'
+    + '<div><b>' + b.trades.length + '</b><span>trades this run</span></div>'
+    + '<div><b>' + (b.trades.length ? Math.round(wins/b.trades.length*100) + '%' : '&mdash;') + '</b><span>hit rate</span></div>'
+    + '<div><b>' + (b.equity >= 0 ? "+" : "") + (Math.round(b.equity*100)/100) + 'R</b><span>net result</span></div>'
+    + '<div><b>' + (b.trades.length ? (avg>=0?"+":"") + (Math.round(avg*100)/100) : '0') + 'R</b><span>per trade</span></div>'
+    + '<div><b>' + (Math.round(b.dd*100)/100) + 'R</b><span>worst drawdown</span></div>'
+    + '<div><b>' + (S.bt.trades||0) + '</b><span>trades all time</span></div>'
+    + '</div>';
+
+  h += '<div class="sec" style="padding:16px 0 0">'
+    + '<button class="txtbtn ghost" data-a="btnew">A different market</button></div>';
+  h += '<div class="cap" style="margin-top:12px">A bar that touches both your stop and your target counts as the stop. That keeps the number honest.</div>';
+  h += '</div>';
+  return h;
+}
+
+/* ══ PROGRESS ═══════════════════════════════════════════════════════════════ */
+function viewProgress(){
+  var st = schoolStats(S);
+  var rec = S.bt;
+  var hit = rec.trades ? Math.round(rec.wins / rec.trades * 100) : null;
+  var h = '<div class="sec">'
+    + '<div class="big"><b>' + esc(st.rank) + ' &mdash; ' + st.xp + ' XP</b>'
+    + st.done + ' of ' + st.total + ' lessons, ' + st.quiz + ' lesson checks right, '
+    + st.testCorrect + ' test answers right, ' + (S.dn||0) + ' drills done.</div>'
+    + '<div class="kv">'
+    + '<div><b>' + st.done + '/' + st.total + '</b><span>lessons done</span></div>'
+    + '<div><b>' + st.quiz + '</b><span>checks right</span></div>'
+    + '<div><b>' + st.testCorrect + '/36</b><span>test answers</span></div>'
+    + '<div><b>' + (S.dn||0) + '</b><span>drills done</span></div>'
+    + '<div><b>' + (rec.trades||0) + '</b><span>backtest trades</span></div>'
+    + '<div><b>' + (hit === null ? '&mdash;' : hit + '%') + '</b><span>backtest hit rate</span></div>'
+    + '<div><b>' + (rec.r >= 0 ? '+' : '') + (rec.r||0) + 'R</b><span>backtest net</span></div>'
+    + '<div><b>' + (rec.dd||0) + 'R</b><span>worst drawdown</span></div>'
+    + '</div>';
+
+  h += '<div class="lbl">Level by level</div>';
+  for(var m=0;m<SCHOOL.length;m++){
+    var lv = SCHOOL[m], dn = 0;
+    for(var j=0;j<lv.lessons.length;j++) if(S.lessons[lv.lessons[j].id]) dn++;
+    var t = S.t[lv.id];
+    h += '<div class="card"><div class="row" data-a="level" data-id="' + lv.id + '">'
+      + '<span class="num' + (dn===lv.lessons.length ? " on" : "") + '">' + lv.n + '</span>'
+      + '<div class="row-txt"><b>' + esc(lv.t) + '</b><span>' + dn + ' of ' + lv.lessons.length
+      + ' lessons &middot; ' + (t ? 'test ' + t.best + '/6' : 'test not sat') + '</span></div>'
+      + '<span class="chev">&#8250;</span></div></div>';
+  }
+  h += '<div class="big warnbox" style="margin-top:14px"><b>Read this once</b>'
+    + 'Nothing on this page can tell you whether you will make money. It teaches the mechanics — structure, risk, sizing, order flow — and the arithmetic behind them. '
+    + 'The ranking here measures how much of the school you have worked through. It is not a record of trading, and it is not a promise about one.</div>';
+  h += '<div class="sec" style="padding:6px 0 0"><button class="txtbtn ghost" data-a="reset">Clear all progress on this device</button></div>';
+  h += '</div>';
+  return h;
+}
+
+/* ══ PAINT ══════════════════════════════════════════════════════════════════ */
+function paint(){
+  if(!VIEW) return;
+  var st = schoolStats(S);
+  var rankEl = document.getElementById("rank"), xpEl = document.getElementById("xp"), barEl = document.getElementById("pbar");
+  if(rankEl) rankEl.textContent = st.rank;
+  if(xpEl) xpEl.textContent = st.xp + " XP";
+  if(barEl){
+    var span = 1400;
+    barEl.style.width = Math.max(2, Math.min(100, Math.round(st.xp / span * 100))) + "%";
+  }
+  var html;
+  if(UI.tab === "tests") html = viewTests();
+  else if(UI.tab === "drills") html = viewDrills();
+  else if(UI.tab === "backtest") html = viewBacktest();
+  else if(UI.tab === "progress") html = viewProgress();
+  else html = viewLessons();
+  VIEW.innerHTML = html;
+  var cv = document.getElementById("cv");
+  if(cv){
+    if(UI.tab === "drills"){
+      var d = UI.drill;
+      if(d){
+        var vis = d.bars.slice(0, UI.revealed ? d.bars.length : d.decision + 1);
+        var lines = [];
+        if(UI.revealed && d.level){
+          if(d.level.sup) lines.push({p:d.level.sup, colour:cssv("--tm","#888780"), label:"level"});
+          if(d.level.res) lines.push({p:d.level.res, colour:cssv("--tm","#888780"), label:"level"});
+        }
+        drawChart(cv, vis, {lines:lines});
+      }
+    } else if(UI.tab === "backtest" && UI.bt){
+      var b = UI.bt, lines2 = [];
+      if(b.pos){
+        lines2.push({p:b.pos.entry, colour:cssv("--acc","#AFA9EC"), label:"entry", dash:[]});
+        lines2.push({p:b.pos.stop, colour:cssv("--down","#FF6B7A"), label:"stop -1R"});
+        lines2.push({p:b.pos.target, colour:cssv("--up","#4ADEA5"), label:"target " + b.pos.rr + "R"});
+      }
+      drawChart(cv, b.bars.slice(Math.max(0, b.i - 70), b.i + 1), {lines:lines2});
+    }
+  }
+}
+
+function toTab(t){
+  UI.tab = t; UI.level = null; UI.lesson = null; UI.test = null;
+  /* The drill's own state is deliberately NOT reset here. Leaving the tab and
+     coming back used to clear the reveal while keeping the answers, which left a
+     drill showing three answered questions with no outcome and no way to start
+     another one. A drill is only ever replaced by asking for a new chart. */
+  var tabs = document.querySelectorAll("#tabs .tab");
+  for(var i=0;i<tabs.length;i++){
+    var on = tabs[i].getAttribute("data-t") === t;
+    tabs[i].className = on ? "tab on" : "tab";
+  }
+  paint();
+}
+
+/* ══ EVENTS ═════════════════════════════════════════════════════════════════ */
+var VIEW = document.getElementById("view");
+
+if(VIEW){
+  VIEW.addEventListener("click", function(e){
+    var el = e.target && e.target.closest ? e.target.closest("[data-a]") : null;
+    if(!el) return;
+    var a = el.getAttribute("data-a"), id = el.getAttribute("data-id");
+    if(a === "level"){ UI.level = id; UI.lesson = null; paint() }
+    else if(a === "toLevels"){ UI.level = null; UI.lesson = null; paint() }
+    else if(a === "toLevel"){ UI.level = id; UI.lesson = null; paint() }
+    else if(a === "lesson"){ UI.lesson = id; UI.ans = null; UI.pick = null; paint(); window.scrollTo(0,0) }
+    else if(a === "done"){ S.lessons[id] = 1; save(); paint() }
+    else if(a === "q"){
+      var key = el.getAttribute("data-key"), o = parseInt(el.getAttribute("data-o"), 10);
+      var les = lessonById(key.split(":")[0]);
+      var qi = parseInt(key.split(":")[1], 10);
+      var right = les && les.q[qi] && les.q[qi].a === o;
+      UI.ans = key; UI.pick = o;
+      if(right && !S.q[key]){ S.q[key] = 1; save() }
+      paint();
+    }
+    else if(a === "test"){ UI.test = id; paint(); window.scrollTo(0,0) }
+    else if(a === "tests"){ UI.test = null; paint() }
+    else if(a === "testretake"){
+      var cur = S.t[id] || {best:0, taken:0};
+      S.t[id] = {best:cur.best, taken:(cur.taken||0)+1, last:{}};
+      save(); paint();
+    }
+    else if(a === "tq"){
+      var tk = el.getAttribute("data-key"), to2 = parseInt(el.getAttribute("data-o"), 10);
+      var lid = tk.split("#")[0], tq = parseInt(tk.split("#")[1], 10);
+      var rec = S.t[lid] || (S.t[lid] = {best:0, taken:0, last:{}});
+      rec.last = rec.last || {};
+      if(!rec.taken) rec.taken = 1;
+      if(typeof rec.last[tk] === "undefined"){
+        rec.last[tk] = to2;
+        if(SW_TESTS[lid][tq].a === to2){
+          var nowRight = 0;
+          for(var i2=0;i2<SW_TESTS[lid].length;i2++) if(rec.last[lid + "#" + i2] === SW_TESTS[lid][i2].a) nowRight++;
+          if(nowRight > (rec.best||0)) rec.best = nowRight;
+          save();
+        } else {
+          save();
+        }
+      }
+      paint();
+    }
+    else if(a === "dans"){ drillAnswer(parseInt(el.getAttribute("data-q"),10), parseInt(el.getAttribute("data-o"),10)) }
+    else if(a === "newdrill"){ newDrill((UI.drill ? UI.drill.seed : 0) + 1); paint() }
+    else if(a === "btr"){ UI.bt.atrMult = parseFloat(el.getAttribute("data-v")); paint() }
+    else if(a === "btt"){ UI.bt.rr = parseFloat(el.getAttribute("data-v")); paint() }
+    else if(a === "btlong"){ btOpen(1); paint() }
+    else if(a === "btshort"){ btOpen(-1); paint() }
+    else if(a === "btstep"){ btStep(); paint() }
+    else if(a === "btstep5"){ for(var s2=0;s2<5;s2++) btStep(); paint() }
+    else if(a === "btclose"){ btClose(0); paint() }
+    else if(a === "btnew"){ btNew(UI.btSeed + 7); paint() }
+    else if(a === "reset"){
+      S = blank(); save(); UI.level = null; UI.lesson = null; UI.test = null;
+      UI.drill = null; UI.bt = null; btNew(1); paint();
+    }
+  });
+
+  var tabWrap = document.getElementById("tabs");
+  if(tabWrap) tabWrap.addEventListener("click", function(e){
+    var t = e.target && e.target.closest ? e.target.closest("[data-t]") : null;
+    if(t) toTab(t.getAttribute("data-t"));
+  });
+}
+
+/* ══ ASK ════════════════════════════════════════════════════════════════════
+   The app's own AI, pointed at this page. Same route as the Friendly tab, so the
+   same daily allowance covers it and there is nothing new to configure.
+
+   The instructions are the house's, in the school's terms: teach the mechanism,
+   never promise money, never invent a figure, never tell him he cannot learn
+   this — and never suggest sizing up to recover a loss. */
+var ASK_SYS=[
+"You are the teacher inside a private trading school. It belongs to one man, for his own use, and nothing you say is public.",
+"",
+"You teach the mechanics of markets and the arithmetic of risk: market structure, levels, triggers, stops, R multiples, expectancy, position sizing, drawdown, order flow, liquidity, and how a market maker actually earns.",
+"",
+"WHAT YOU NEVER DO:",
+"1. Never promise or imply a profit, and never predict a price. You can explain why a setup has an edge in general terms, what its break-even win rate is, and what would prove it wrong. You cannot tell him what the market will do.",
+"2. Never invent a figure, a statistic, a study, a backtest result or a market level. If you were not given a number, do not produce one. If you do not know, say you do not know.",
+"3. Never name an instrument, ticker or coin to buy or sell now, and never issue a signal.",
+"4. Never suggest risking more, sizing up, using leverage, or doubling down to recover a loss. If he is talking about winning money back, name that plainly and talk about the rule instead.",
+"5. Never tell him he cannot learn this, that he is too late, or that he is finished. The mistakes he is making are the ordinary ones and they are learnable.",
+"6. Never mention money, pricing, subscriptions or the business behind anything.",
+"",
+"HOW YOU ANSWER",
+"- Short and concrete. Four to eight sentences, or a short list. No headings, no emoji.",
+"- Teach the mechanism: what is happening, who is on the other side of the trade, and what would have to happen for the idea to be wrong.",
+"- When he asks whether a trade was right, separate the decision from the result: was the process sound with what was visible at the time.",
+"- If a lesson is open on his screen, its text is attached to the question. Stay inside it, and say so if he asks about something it does not cover.",
+"- In English, always."
+].join("\n");
+
+var ASK_HEAD='<span class="ask-who">Teacher</span>';
+var ASK_BUSY=false;
+var ASK_EL=document.getElementById("ask");
+
+function askCtx(){
+  var s='';
+  if(UI.tab==='lessons' && UI.lesson){
+    var l=lessonById(UI.lesson);
+    if(l){
+      s+='He has this lesson open. Stay inside it:\n';
+      s+='Lesson '+l.id+': '+l.t+'\n';
+      for(var i=0;i<l.b.length;i++) s+=l.b[i]+'\n';
+      s+='Points the lesson makes: '+l.k.join(' | ')+'\n\n';
+    }
+  }
+  if(UI.tab==='drills' && UI.drill){
+    s+='He is on a practice chart with no real market behind it. The chart is generated by the page; do not read it as a real instrument or a real day.\n\n';
+  }
+  if(UI.tab==='backtest'){
+    s+='He is in the backtest tab. The candles there are generated by the page, not a real market.\n\n';
+  }
+  return s;
+}
+function askOpen(force){
+  if(!ASK_EL) return;
+  if(force) ASK_EL.classList.add("on"); else ASK_EL.classList.toggle("on");
+  if(ASK_EL.classList.contains("on")){
+    var t=document.getElementById("askQ");
+    if(t&&!t.value&&!ASK_BUSY) t.focus();
+  }
+}
+async function ask(prefill){
+  var qEl=document.getElementById("askQ"), aEl=document.getElementById("askA"), go=document.getElementById("askGo");
+  if(!qEl||!aEl) return;
+  var question=(prefill||qEl.value||"").trim();
+  if(!question||ASK_BUSY) return;
+  qEl.value=question;
+  askOpen(true);
+  ASK_BUSY=true; if(go) go.disabled=true;
+  aEl.className="ask-a on";
+  aEl.innerHTML=ASK_HEAD+"Thinking…";
+  try{
+    var r=await fetch("/api/chat",{
+      method:"POST",
+      credentials:"same-origin",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        system:[{type:"text",text:ASK_SYS}],
+        messages:[{role:"user",content:askCtx()+question}]
+      })
+    });
+    if(r.status===429){ aEl.innerHTML=ASK_HEAD+"That is today's lot of answers here. It comes back tomorrow."; return }
+    if(r.status===401){ aEl.innerHTML=ASK_HEAD+"Sign in again and this will answer."; return }
+    if(r.status===403){ aEl.innerHTML=ASK_HEAD+"Not switched on for this account."; return }
+    if(!r.ok) throw new Error("http "+r.status);
+    var d=await r.json();
+    var txt=((d.content&&d.content[0]&&d.content[0].text)||"").trim();
+    if(!txt) throw new Error("empty");
+    aEl.innerHTML=ASK_HEAD+esc(txt).replace(/\n{2,}/g,"<br><br>").replace(/\n/g,"<br>");
+  }catch(e){
+    aEl.innerHTML=ASK_HEAD+"No answer came back. Try again in a moment.";
+  }finally{
+    ASK_BUSY=false; if(go) go.disabled=false;
+  }
+}
+if(ASK_EL){
+  var askHd=document.getElementById("askHd"), askGo=document.getElementById("askGo"), askQ=document.getElementById("askQ");
+  if(askHd) askHd.onclick=function(){ askOpen() };
+  if(askGo) askGo.onclick=function(){ ask() };
+  if(askQ) askQ.addEventListener("keydown",function(e){
+    if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); ask() }
+  });
+  var chips=document.querySelectorAll(".chip[data-q]");
+  for(var ci=0;ci<chips.length;ci++){
+    chips[ci].onclick=(function(c){ return function(){ ask(c.getAttribute("data-q")) } })(chips[ci]);
+  }
+}
+
+if(VIEW){ btNew(1); paint(); }
+
+</script>
+</body>
+</html>

@@ -94,12 +94,25 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 60 is chosen to be invisible to a person and lethal to a loop. A crisis
 // conversation is the heaviest real use this app has, and the longest one seen
 // here ran to about thirty replies; /api/chat's own 20-per-5-minutes limiter
-// means a loop reaches 60 inside a quarter of an hour and stops. Two accounts
-// can therefore spend at most 120 in a day, which is the number to keep under
-// whatever the Google key's own requests-per-day allows (see chatDay, which
-// counts the day on Google's clock so the two cannot drift apart). Raising it
-// is an environment variable, not a deploy.
+// means a loop reaches 60 inside a quarter of an hour and stops. With the
+// reference pages' budget below, one person can therefore spend at most 90 in a
+// day (60 here + 30 there) - and two accounts 180 - which is the number to keep
+// under whatever the Google key's own requests-per-day allows (see chatDay,
+// which counts the day on Google's clock so the two cannot drift apart).
+// Raising the ceiling is an environment variable, not a deploy.
 const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 60);
+
+// The reference pages (the herb library and the tax centre) ask their questions
+// through this same route, so they get their own ceiling rather than a share of
+// Friendly's. 15 Sep 2026.
+//
+// A shared budget put a long afternoon of herb questions in front of the 3am
+// conversation - which is the one thing this app has always refused to do:
+// stand a wall in front of somebody at their worst hour and make them pay for
+// something they did earlier in the day. Two budgets make that impossible. 60 a
+// day for the conversation, 30 a day for the reference pages, and neither can
+// eat the other. 0 in either turns that one off.
+const REF_CHAT_LIMIT = Number(process.env.REF_CHAT_LIMIT || 30);
 const FRIENDLY_EMAILS = String(process.env.FRIENDLY_EMAILS || '')
   .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 function isFriendlyAllowed(user) {
@@ -743,6 +756,22 @@ function chatDay() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
 }
 
+// Which budget a request draws on, and the row it is counted in.
+//
+// The two surfaces share the chat_usage table and differ only by a suffix on the
+// day, so nothing about the schema or the deploy has to change. The surface is
+// read from the request body (writing) or the query (reading), and anything not
+// exactly 'reference' is the conversation - the safe default, because the
+// conversation is the budget that must never be quietly spent by another page.
+function chatBudget(surface) {
+  const reference = surface === 'reference';
+  return {
+    reference,
+    limit: reference ? REF_CHAT_LIMIT : CHAT_LIMIT,
+    key: reference ? chatDay() + ':ref' : chatDay(),
+  };
+}
+
 // A credential is either a real password (8+ chars) or a 4-6 digit PIN.
 function validCredential(cred) {
   return typeof cred === 'string' && (cred.length >= 8 || /^\d{4,6}$/.test(cred));
@@ -1381,12 +1410,13 @@ app.post('/api/push/test', requireAuth, async (req, res) => {
 // the same server-side number the cap is enforced against, so it never drifts.
 app.get('/api/chat/usage', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
-  const used = db.getChatCount(req.userId, chatDay());
+  const budget = chatBudget(req.query && req.query.surface);
+  const used = db.getChatCount(req.userId, budget.key);
   res.json({
     allowed: isFriendlyAllowed(user),
     used,
-    limit: CHAT_LIMIT,                       // 0 = no cap
-    remaining: CHAT_LIMIT > 0 ? Math.max(0, CHAT_LIMIT - used) : null,
+    limit: budget.limit,                     // 0 = no cap
+    remaining: budget.limit > 0 ? Math.max(0, budget.limit - used) : null,
   });
 });
 
@@ -1442,9 +1472,10 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   if (!isFriendlyAllowed(user)) {
     return res.status(403).json({ error: 'Not available on this account.' });
   }
-  const used = db.getChatCount(req.userId, chatDay());
-  if (CHAT_LIMIT > 0 && used >= CHAT_LIMIT) {
-    return res.status(429).json({ error: `That is today's ${CHAT_LIMIT} chats. It resets tomorrow.` });
+  const budget = chatBudget(req.body && req.body.surface);
+  const used = db.getChatCount(req.userId, budget.key);
+  if (budget.limit > 0 && used >= budget.limit) {
+    return res.status(429).json({ error: `That is today's ${budget.limit} chats. It resets tomorrow.` });
   }
 
   try {
@@ -1565,7 +1596,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
       return res.status(502).json(data);
     }
     if (res2.ok) {
-      db.incrementChatCount(req.userId, chatDay());
+      db.incrementChatCount(req.userId, budget.key);
     } else {
       // A failing key/model here degrades every chat into the client's canned
       // fallback with no visible symptom except repetitive replies - put the

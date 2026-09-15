@@ -104,6 +104,8 @@ for (const [label, file] of [['herb library', 'herbs.html'], ['tax centre', 'tax
       'the house rules must travel with every single question');
     assert.equal(sent.messages.length, 1, 'no client-side history to drift out of the rules');
     assert.equal(sent.messages[0].role, 'user');
+    assert.equal(sent.surface, 'reference',
+      'the pages must declare their own daily budget, or an afternoon of questions here could spend the 3am conversation');
     assert.match(sent.messages[0].content, /blood pressure/);
     assert.match(p.els.get('askA').innerHTML, /Ask a pharmacist/);
     assert.match(p.els.get('askA').innerHTML, /<br>/, 'newlines become line breaks');

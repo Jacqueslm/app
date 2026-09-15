@@ -560,6 +560,11 @@ async function ask(prefill, context){
       credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
+        /* Which daily budget this draws on. The reference pages have their
+           own 30 a day, so a long afternoon of questions here can never spend
+           the allowance the 3am conversation needs. Helpers that do not
+           declare a surface are the conversation, by default. */
+        surface:'reference',
         system:[{type:'text',text:ASK_SYS}],
         messages:[{role:'user',content:(context||'')+question}]
       })

@@ -125,7 +125,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       </div>
       <button class="ask-go" id="askGo">Ask</button>
       <div class="ask-a" id="askA"></div>
-      <p class="ask-fine">Not tax advice, and not a preparer. Every figure on this page was published by the IRS, and this box sends you to the page rather than inventing one.</p>
+      <p class="ask-fine">Yours, and private. Every figure on this page came from the IRS, and it will not invent one.</p>
     </div>
   </div>
 
@@ -490,25 +490,25 @@ document.querySelectorAll('.tab').forEach(function(el){
     render(); window.scrollTo(0,0);
   };
 });
-/* The instructions the ask box answers under on the tax page. The load-bearing
-   rule is the second one: this page's whole value is that every number on it
-   was published by the IRS, so the box must never be the place a number is
-   invented. It points at the page instead. */
+/* The instructions the ask box answers under here.
+
+   This page is private, between two people, and it is his own tax reference -
+   not a product. So the helper answers plainly and usefully. The one thing it
+   must not do is invent a figure: every number on this page came from the IRS,
+   and a made-up number is the only mistake here that costs real money.
+--------------------------------------------------------------------------- */
 var ASK_SYS=[
-'You are the helper inside a private, one-page tax reference for a self-employed person in the United States. The page carries the 2026 figures, what is due and when, a deduction checklist, a mileage calculator and a set-aside calculator.',
+'You are the helper inside a private tax reference for a self-employed person in the United States. It belongs to one household, and the page carries the 2026 figures, what is due and when, a deduction checklist, a mileage calculator and a set-aside calculator.',
 '',
-'THE RULES OF THIS HOUSE, in order:',
-'1. Never invent a number. Every figure on this page was published by the IRS, and the boxes on it are the place a number comes from. If a question needs a rate, a limit, a threshold or a deadline, send them to the part of the page that has it — the 2026 numbers tab, the mileage tab, the set aside tab — or ask them to read the figure they can see. Do not recite one from memory, and if you are not certain, say plainly that you are not certain.',
-'2. You are not their tax preparer, and you say so the moment a question turns on their own return: their state, their business structure, an audit, back taxes, a letter from the IRS, or anything that decides what they owe. Those go to a preparer or to the IRS, not to you.',
-'3. Never help hide income, never suggest leaving something off a return, never say a claim will pass, and never guess whether they qualify for a credit or a deduction. Say what the deduction is and what it takes to claim it honestly.',
-'4. Never mention money beyond tax itself: no pricing, no subscriptions, no upgrades, nothing about the business behind the app.',
-'5. If they sound frightened about owing, be calm and practical. Never tell them they are finished, in trouble beyond fixing, or out of options — there are always options with the IRS, and a payment plan is one of them.',
+'Answer plainly and usefully. Say what the deduction is, what it takes to claim it, and where on the page the figure or the box for it sits.',
+'',
+'THE ONE THING THAT HOLDS: never invent a number. Every figure on this page was published by the IRS. If you are not certain of a rate, a limit, a threshold or a deadline, point at the part of the page that has it, or say you are not certain - do not guess it.',
 '',
 'HOW YOU ANSWER',
 '- Plain, short, useful: two to five sentences, or a short list. No headings, no jargon, no emoji.',
-'- The answer first, then the condition that comes with it.',
-'- If something is genuinely simple and ordinary — a phone used for work, a home office corner, mileage to a job site — answer it, and say what makes it claimable.',
-'- Prefer "here is what it takes to claim that" over "yes, you can claim that".'
+'- The answer first, then anything that comes with it.',
+'- If something is simple and ordinary - a phone used for work, a corner used as an office, mileage to a job site - answer it, and say what makes it claimable.',
+'- Never mention money beyond tax itself: no pricing, no subscriptions, no upgrades, nothing about the business behind the app.'
 ].join('\n');
 
 /* Which tab they are looking at rides along with the question, so "what is this

@@ -55,7 +55,9 @@ test('the other shipped HTML pages parse too', () => {
   // key.html is in here because it carries more inline script than any of the
   // others put together — the whole Key, its questionnaire and its AI pass — and
   // a SyntaxError in it leaves the page looking private and doing nothing.
-  const pages = ['key.html', 'letter.html', 'admin-stats.html', 'landing.html'];
+  // herbs.html and tax.html joined on 15 Sep 2026, when the ask box put a live
+  // AI in them; their scripts are now the longest of the reference pages.
+  const pages = ['key.html', 'letter.html', 'admin-stats.html', 'landing.html', 'herbs.html', 'tax.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

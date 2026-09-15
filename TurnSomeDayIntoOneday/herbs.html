@@ -78,6 +78,29 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .mine-note{font-size:.8125rem;color:var(--tm);white-space:pre-wrap;margin-top:6px;line-height:1.5}
 .ft{padding:26px 16px 40px;text-align:center;font-size:.6875rem;color:var(--tm);line-height:1.7}
 .hidden{display:none}
+/* ── ASK ──────────────────────────────────────────────────────────────────────
+   The app's own AI, sitting on the page where the questions actually come up.
+   Same server route the Friendly tab uses (/api/chat), same daily brake. */
+.ask{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin:12px 16px 0;overflow:hidden}
+.ask-hd{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer}
+.ask-hd b{font-size:.9375rem;font-weight:600}
+.ask-hd .sub{font-size:.75rem;color:var(--tm);flex:1;min-width:0;line-height:1.35}
+.ask-badge{width:22px;height:22px;border-radius:999px;background:var(--acc-b);color:var(--acc-t);display:flex;align-items:center;justify-content:center;font-size:.8125rem;font-weight:700;flex:0 0 auto}
+.ask-chev{color:var(--tm);font-size:1rem;flex:0 0 auto;transition:transform .18s}
+.ask.on .ask-chev{transform:rotate(90deg)}
+.ask-body{display:none;padding:0 14px 14px;border-top:1px solid var(--bdr)}
+.ask.on .ask-body{display:block}
+.ask textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp);min-height:58px;resize:vertical;margin-top:12px}
+.ask textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+.ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.chip{font-size:.75rem;padding:6px 11px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.chip:active{background:var(--acc-b);color:var(--acc-t)}
+.ask-go{font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-b);background:var(--acc);border:none;border-radius:10px;padding:10px 16px;cursor:pointer;margin-top:10px}
+.ask-go[disabled]{opacity:.5}
+.ask-a{display:none;font-size:.875rem;line-height:1.6;color:var(--ts);margin-top:12px}
+.ask-a.on{display:block}
+.ask-who{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin-bottom:5px}
+.ask-fine{font-size:.6875rem;color:var(--tm);margin-top:10px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -91,6 +114,27 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
   </div>
 
   <div class="srch"><input id="q" type="search" placeholder="Search a herb, or what it's used for" autocomplete="off"></div>
+
+  <div class="ask" id="ask">
+    <div class="ask-hd" id="askHd">
+      <span class="ask-badge">?</span>
+      <b>Ask</b>
+      <span class="sub">About anything here &mdash; it answers on this page</span>
+      <span class="ask-chev">&#8250;</span>
+    </div>
+    <div class="ask-body">
+      <textarea id="askQ" placeholder="Can I take fennel with blood pressure pills?"></textarea>
+      <div class="ask-chips">
+        <span class="chip" data-q="Which of these should I not take with my medication?">With my medication?</span>
+        <span class="chip" data-q="Which of these are not safe in pregnancy?">In pregnancy?</span>
+        <span class="chip" data-q="What do people here use for sleep?">For sleep</span>
+        <span class="chip" data-q="What do people here use for a nervous stomach?">Nervous stomach</span>
+      </div>
+      <button class="ask-go" id="askGo">Ask</button>
+      <div class="ask-a" id="askA"></div>
+      <p class="ask-fine">Tradition, not treatment. It will not diagnose anything, it never claims a plant works, and it will send you to a doctor or a pharmacist when that is the answer.</p>
+    </div>
+  </div>
 
   <div class="tabs" id="tabs">
     <div class="tab on" data-t="az">A&#8211;Z</div>
@@ -608,6 +652,8 @@ function card(h){
   +(h.d?'<div class="lbl">What people have used it for</div><p>'+esc(h.d)+'</p>':'')
   +(h.h?'<div class="lbl">How it is traditionally taken</div><p>'+esc(h.h)+'</p>':'')
   +(h.c?'<div class="lbl">Caution</div><p>'+esc(h.c)+'</p>':'')
+  +'<div class="lbl">Ask about this one</div>'
+  +'<button class="ask-go" data-ask="'+esc(h.n)+'">Ask about '+esc(h.n)+'</button>'
   +'<div class="lbl">What your book says</div>'
   +'<div class="note"><textarea data-note="'+esc(h.id)+'" placeholder="As you read, put it here — the page and the words.">'+esc(noteOf(h.id))+'</textarea><div class="saved">Saved on this phone as you type. Nothing is sent anywhere.</div></div>'
   +'</div></div>';
@@ -638,6 +684,133 @@ document.querySelectorAll('.tab').forEach(function(el){
     render();
   };
 });
+/* The instructions the ask box answers under on this page. They are the house
+   rules, written out in full, because this is the one place in the library
+   where a live answer can be given — and a live answer is the easiest place in
+   the world to let a claim slip in. Six lines of this were rewritten rather
+   than loosened when the library's own claim-check was run over it. */
+var ASK_SYS=[
+'You are the helper inside a private herb reference kept by one household. It lists what people have long used plants for: the tradition, how each is taken, and the caution that travels with it.',
+'',
+'THE RULES OF THIS HOUSE, in order:',
+'1. Never claim a herb works. Nothing here treats, cures, heals, prevents or reverses anything. Never say "research shows", never explain what a plant does inside the body, and never call tradition proof. Say what people have long used something for, and be honest that this is history and practice.',
+'2. A doctor beats a herb, and you say so first. An infection, a fever that will not come down, a wound going red or hot, a chest that rattles, anything yellow or green coming up, a tooth gone bad, chest pain, trouble breathing, confusion, or bleeding that will not stop: that is a doctor today, not a tea.',
+'3. Coming off alcohol, benzodiazepines or opioids is a doctor or a hospital, never a herb, and it can be dangerous to do alone. Say that plainly. In the US the crisis line is 988.',
+'4. Never tell anybody they are finished, hopeless, out of time, or beyond help. That is never true.',
+'5. Anything that mixes with medication belongs with a pharmacist, not with you: St John\u2019s wort, licorice, hibiscus, ginkgo, ginger, garlic, turmeric, white willow. One question at any pharmacy is free.',
+'6. Pregnancy, breastfeeding, babies and children: most of this list is not for them. Say so, and leave the decision to a midwife or doctor.',
+'7. If you are not sure, say you are not sure. Never invent a dose, a study, a number, or a plant that is not in this library.',
+'8. A few of these are genuinely dangerous, and you say so flatly when they come up: comfrey taken internally, coltsfoot, pennyroyal oil, wormwood, lobelia, sassafras, epazote oil, yohimbe, kava on a tired liver, goldenseal for a baby.',
+'9. Never mention money, pricing, subscriptions, upgrades, or the business behind the app.',
+'',
+'HOW YOU ANSWER',
+'- Warm, plain, short. Four to eight sentences, or a short list. No headings, no jargon, no emoji.',
+'- The answer first, then the caution that has to travel with it.',
+'- Name the plant they asked about. If it is not in this library, say it is not in it, and invent nothing about it.',
+'- You are a reference, not a consultation. Speak like somebody who knows the tradition well and will not oversell it.',
+'- Never diagnose, and never tell them to stop, skip or change a prescribed medicine.'
+].join('\n');
+
+/* Whatever herb is open on the screen rides along with the question, so the
+   answer stays inside what this library actually says — and the instructions
+   say not to add to it. */
+function askCtx(){
+  if(!openId) return '';
+  var h=null;
+  allHerbs().forEach(function(x){ if(x.id===openId) h=x });
+  if(!h) return '';
+  var s='The entry they have open on the screen right now. Use only what is in it, and do not add to it:\n';
+  s+='Herb: '+h.n+'\n';
+  if(h.a) s+='Also called: '+h.a+'\n';
+  if(h.u) s+='What people use it for: '+h.u+'\n';
+  if(h.d) s+='The tradition: '+h.d+'\n';
+  if(h.h) s+='How it is traditionally taken: '+h.h+'\n';
+  if(h.c) s+='Caution on the entry: '+h.c+'\n';
+  return s;
+}
+
+/* The button inside an open herb. One tap, and the question is asked with that
+   herb's own entry attached, so it answers about the plant they are looking at
+   instead of plants in general. */
+document.getElementById('view').addEventListener('click',function(e){
+  var b=e.target.closest('[data-ask]');
+  if(!b) return;
+  var n=b.getAttribute('data-ask');
+  ask('Tell me about '+n+' — what people have used it for, and what I should be careful of.', askCtx());
+});
+
+/* ── ASK ──────────────────────────────────────────────────────────────────────
+   The app's own AI, pointed at this page instead of the Friendly tab.
+
+   It answers under the rules in ASK_SYS, which are the house rules: what people
+   have long used these plants for, never a claim that one works, never an
+   explanation of what happens in the body, and a doctor or a pharmacist the
+   moment that is the real answer. Its words are its own — nothing it says is
+   written into this page's own entries.
+
+   Same route the Friendly tab calls, so the same daily brake covers it and the
+   same key answers; there is nothing new to configure.
+--------------------------------------------------------------------------- */
+var ASK_HEAD='<span class="ask-who">Friendly</span>';
+var ASK_BUSY=false;
+var ASK_EL=document.getElementById('ask');
+function askOpen(force){
+  if(!ASK_EL) return;
+  if(force) ASK_EL.classList.add('on'); else ASK_EL.classList.toggle('on');
+  if(ASK_EL.classList.contains('on')){
+    var t=document.getElementById('askQ');
+    if(t&&!t.value&&!ASK_BUSY) t.focus();
+  }
+}
+async function ask(prefill, context){
+  var qEl=document.getElementById('askQ');
+  var aEl=document.getElementById('askA');
+  var go=document.getElementById('askGo');
+  if(!qEl||!aEl) return;
+  var question=(prefill||qEl.value||'').trim();
+  if(!question||ASK_BUSY) return;
+  qEl.value=question;
+  askOpen(true);
+  ASK_BUSY=true; if(go) go.disabled=true;
+  aEl.className='ask-a on';
+  aEl.innerHTML=ASK_HEAD+'Thinking…';
+  try{
+    var r=await fetch('/api/chat',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system:[{type:'text',text:ASK_SYS}],
+        messages:[{role:'user',content:(context||'')+question}]
+      })
+    });
+    if(r.status===429){ aEl.innerHTML=ASK_HEAD+"That is today's lot of answers here. It comes back tomorrow."; return }
+    if(r.status===401){ aEl.innerHTML=ASK_HEAD+'Sign in again and this will answer.'; return }
+    if(r.status===403){ aEl.innerHTML=ASK_HEAD+'Not switched on for this account.'; return }
+    if(!r.ok) throw new Error('http '+r.status);
+    var d=await r.json();
+    var t=((d.content&&d.content[0]&&d.content[0].text)||'').trim();
+    if(!t) throw new Error('empty');
+    aEl.innerHTML=ASK_HEAD+esc(t).replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
+  }catch(e){
+    /* Offline, or the answer never arrived. Nothing invented in its place. */
+    aEl.innerHTML=ASK_HEAD+'No answer came back. Try again in a moment.';
+  }finally{
+    ASK_BUSY=false; if(go) go.disabled=false;
+  }
+}
+if(ASK_EL){
+  document.getElementById('askHd').onclick=function(){ askOpen() };
+  document.getElementById('askGo').onclick=function(){ ask() };
+  document.getElementById('askQ').addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask() }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.chip[data-q]'),function(c){
+    c.onclick=function(){ ask(c.getAttribute('data-q'), askCtx()) };
+  });
+}
+
+
 render();
 </script>
 </body>

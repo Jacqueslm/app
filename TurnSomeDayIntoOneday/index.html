@@ -11638,11 +11638,12 @@ Address the interactions of their unique blueprint and assign structured daily r
     save();showTyping(false);addBubble('nova',reply);
   }catch(e){
     setNovaMode(false);
-    // The credit was spent up front, but a network failure means no real
-    // session happened - only a canned local reply. Refund it so three flaky
-    // attempts at 2am don't burn the day's free chats without a single answer.
+    // A network failure means no real session happened - only a canned local
+    // reply. Nothing was spent: the server counts a chat only when the provider
+    // actually answered, so a flaky 2am attempt costs nothing. Re-read the
+    // number instead of adding one here; the server owns it and counts it DOWN.
     // (A 429 real-limit hit returns earlier and never reaches here.)
-    S.chatsLeft++;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();
+    updateChatMeter();
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
@@ -11811,9 +11812,15 @@ function applySupporterFaq(){
   SUPPORTER_FAQ.forEach(f=>{if(!GUIDE_FAQ.some(g=>g.q===f.q))GUIDE_FAQ.unshift(f);});
   supporterFaqApplied=true;
 }
-// Pull today's Pro chat count from the server and show it in the meter bar.
-// Only Pro uses this - Free is counted on the client. If the fetch fails
-// (offline), the bar just shows the daily cap rather than a wrong number.
+// Pull today's answer count from the server and show it in the meter bar.
+// The daily AI ceiling is a brake, not a ration - so this meter stays out of
+// the way until it is nearly spent. It used to print "60 of 60 chats left
+// today" from the very first message, on the screen somebody opens at 3am,
+// which reads as a limit on being answered rather than a guard against a loop.
+// Only a real ceiling with a handful of answers left is worth their attention.
+// The server owns the day and counts it on PACIFIC midnight - Google's own
+// quota reset, so the brake and the key refill together. Never the device clock.
+const LOW_METER_LEFT=10;
 async function updateChatMeter(){
   const barTxt=document.getElementById('limitBarText');
   if(!barTxt)return;
@@ -11821,13 +11828,10 @@ async function updateChatMeter(){
     const r=await fetch('/api/chat/usage');
     if(!r.ok)throw new Error();
     const d=await r.json();
-    if(d.remaining===null||d.limit===0){barTxt.textContent='';return;}
-    const left=Math.max(0,d.remaining);
-    // The server owns the daily quota - it resets at UTC midnight, not on the
-    // device clock - so the meter follows the server, never local time.
-    S.chatsLeft=left;S.chatDate=new Date().toDateString();
+    const left=(d.remaining===null||!d.limit)?null:Math.max(0,d.remaining);
+    if(left!==null){S.chatsLeft=left;S.chatDate=new Date().toDateString();save();}
+    if(left===null||left>LOW_METER_LEFT){barTxt.textContent='';return;}
     const el=document.getElementById('chatsLeft');if(el)el.textContent=left;
-    save();
     barTxt.innerHTML='<strong>'+left+'</strong> of '+d.limit+' chats left today';
   }catch(e){
     barTxt.textContent='';
@@ -12458,7 +12462,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.0';
+const APP_VERSION='6.1';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';

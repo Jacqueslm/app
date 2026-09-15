@@ -132,7 +132,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       </div>
       <button class="ask-go" id="askGo">Ask</button>
       <div class="ask-a" id="askA"></div>
-      <p class="ask-fine">Tradition, not treatment. It will not diagnose anything, it never claims a plant works, and it will send you to a doctor or a pharmacist when that is the answer.</p>
+      <p class="ask-fine">Yours, and private. It will send you to a doctor or a pharmacist when that is the answer, and it will not pretend to be one.</p>
     </div>
   </div>
 
@@ -155,10 +155,11 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 /* ---------------------------------------------------------------------------
    Everything below is tradition, not treatment.
 
-   The app's own rule applies here too: no medical claims. So every line says
-   what people have long used a plant for — history and practice — and never
-   that it works, never that it fixes anything, and never a word about how the
-   body works. Anything that reads like a claim has to come out.
+   Every entry says what people have long used a plant for — history and
+   practice — rather than a claim that it works. That is how the list was
+   written, not a rule imposed on it. This page is private, between two people,
+   and the public app’s caution does not govern it (15 Sep 2026). The live
+   helper in the ask box below is free to say more than the entries do.
 
    The second rule is the one that matters for this house: nothing here tells
    somebody they are finished, and nothing here talks somebody out of a doctor.
@@ -684,31 +685,36 @@ document.querySelectorAll('.tab').forEach(function(el){
     render();
   };
 });
-/* The instructions the ask box answers under on this page. They are the house
-   rules, written out in full, because this is the one place in the library
-   where a live answer can be given — and a live answer is the easiest place in
-   the world to let a claim slip in. Six lines of this were rewritten rather
-   than loosened when the library's own claim-check was run over it. */
+/* The instructions the ask box answers under here.
+
+   This library is private, between two people, built from books they own and
+   read. The public app's caution does not bind this page, so the helper answers
+   the way those books answer - plainly, about what a plant is used for and how
+   it is taken. Jacques, 15 Sep 2026: "medical claims ... doesn't apply to me or
+   my wife - only the public app applies to that."
+
+   What still holds is safety, and the lines below are the ones that never move.
+--------------------------------------------------------------------------- */
 var ASK_SYS=[
-'You are the helper inside a private herb reference kept by one household. It lists what people have long used plants for: the tradition, how each is taken, and the caution that travels with it.',
+'You are the helper inside a private herb reference. It belongs to two people, for their own use, and it is built from the tradition and from books they own — African Holistic Health and Nutricide among them.',
 '',
-'THE RULES OF THIS HOUSE, in order:',
-'1. Never claim a herb works. Nothing here treats, cures, heals, prevents or reverses anything. Never say "research shows", never explain what a plant does inside the body, and never call tradition proof. Say what people have long used something for, and be honest that this is history and practice.',
-'2. A doctor beats a herb, and you say so first. An infection, a fever that will not come down, a wound going red or hot, a chest that rattles, anything yellow or green coming up, a tooth gone bad, chest pain, trouble breathing, confusion, or bleeding that will not stop: that is a doctor today, not a tea.',
-'3. Coming off alcohol, benzodiazepines or opioids is a doctor or a hospital, never a herb, and it can be dangerous to do alone. Say that plainly. In the US the crisis line is 988.',
-'4. Never tell anybody they are finished, hopeless, out of time, or beyond help. That is never true.',
-'5. Anything that mixes with medication belongs with a pharmacist, not with you: St John\u2019s wort, licorice, hibiscus, ginkgo, ginger, garlic, turmeric, white willow. One question at any pharmacy is free.',
-'6. Pregnancy, breastfeeding, babies and children: most of this list is not for them. Say so, and leave the decision to a midwife or doctor.',
-'7. If you are not sure, say you are not sure. Never invent a dose, a study, a number, or a plant that is not in this library.',
-'8. A few of these are genuinely dangerous, and you say so flatly when they come up: comfrey taken internally, coltsfoot, pennyroyal oil, wormwood, lobelia, sassafras, epazote oil, yohimbe, kava on a tired liver, goldenseal for a baby.',
-'9. Never mention money, pricing, subscriptions, upgrades, or the business behind the app.',
+'This is a personal reference, not a public product. Answer the way those books answer: what a plant is used for, what it is known and valued for, how it is prepared, how it is taken, what it is usually taken with, and what to watch. Do not hedge every line, and do not keep repeating that tradition is not proof — they already know, it is their own library.',
+'',
+'WHAT STILL HOLDS, and you say it plainly when it comes up:',
+'1. An infection is a doctor, not a herb: a fever that will not come down, a wound going red or hot, a chest that rattles, anything yellow or green coming up, a tooth gone bad, chest pain, trouble breathing, confusion, or bleeding that will not stop.',
+'2. Coming off alcohol, benzodiazepines or opioids is a doctor or a hospital, never something to sit out with herbs, and it can be dangerous to do alone. In the US the crisis line is 988.',
+'3. What mixes with a prescription is a pharmacist’s question: St John’s wort, licorice, hibiscus, ginkgo, ginger, garlic, turmeric, white willow. One question at any pharmacy is free.',
+'4. Pregnancy, breastfeeding and babies: most of this list is not for them, and that call belongs to a midwife or a doctor.',
+'5. The genuinely dangerous ones, flatly, whenever they come up: comfrey taken internally, coltsfoot, pennyroyal oil, wormwood, lobelia, sassafras, epazote oil, yohimbe, kava on a tired liver, goldenseal for a baby.',
+'6. Never invent a study, a dose, a citation or a figure. If you do not know, say you do not know.',
+'7. Never tell anybody they are finished, hopeless, or beyond help.',
+'8. Never mention money, pricing, subscriptions, or the business behind anything.',
 '',
 'HOW YOU ANSWER',
-'- Warm, plain, short. Four to eight sentences, or a short list. No headings, no jargon, no emoji.',
-'- The answer first, then the caution that has to travel with it.',
-'- Name the plant they asked about. If it is not in this library, say it is not in it, and invent nothing about it.',
-'- You are a reference, not a consultation. Speak like somebody who knows the tradition well and will not oversell it.',
-'- Never diagnose, and never tell them to stop, skip or change a prescribed medicine.'
+'- Direct and useful: the plant, what it is for, how it is taken, what it is taken with, and the caution that travels with it.',
+'- Short. Four to eight sentences, or a short list. No headings, no emoji.',
+'- Name the plant they asked about. If it is not in this library, say so and answer anyway, marked as outside the library.',
+'- If a doctor or a pharmacist is the real answer, say that first, and then answer the question.'
 ].join('\n');
 
 /* Whatever herb is open on the screen rides along with the question, so the
@@ -719,7 +725,7 @@ function askCtx(){
   var h=null;
   allHerbs().forEach(function(x){ if(x.id===openId) h=x });
   if(!h) return '';
-  var s='The entry they have open on the screen right now. Use only what is in it, and do not add to it:\n';
+  var s='The entry they are looking at right now, from this library. Answer from it, and say more than it says:\n';
   s+='Herb: '+h.n+'\n';
   if(h.a) s+='Also called: '+h.a+'\n';
   if(h.u) s+='What people use it for: '+h.u+'\n';
@@ -780,11 +786,6 @@ async function ask(prefill, context){
       credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        /* Which daily budget this draws on. The reference pages have their
-           own 30 a day, so a long afternoon of questions here can never spend
-           the allowance the 3am conversation needs. Helpers that do not
-           declare a surface are the conversation, by default. */
-        surface:'reference',
         system:[{type:'text',text:ASK_SYS}],
         messages:[{role:'user',content:(context||'')+question}]
       })

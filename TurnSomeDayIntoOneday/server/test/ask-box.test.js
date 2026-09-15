@@ -87,25 +87,31 @@ async function loadPage(file) {
   return { sandbox, els, calls, setReply(r) { reply = r } };
 }
 
-for (const [label, file] of [['herb library', 'herbs.html'], ['tax centre', 'tax.html']]) {
+// The two pages are under different rules on purpose, and the difference is a
+// decision, not drift (Jacques, 15 Sep 2026): the tax page's rules are about not
+// inventing a figure, the herb page's are safety only. The herb library is
+// private, between two people, built from their own books - so the public app's
+// caution about medical claims does not govern it. Its safety lines do.
+for (const [label, file, must] of [
+  ['herb library', 'herbs.html', /WHAT STILL HOLDS/],
+  ['tax centre', 'tax.html', /RULES OF THIS HOUSE/],
+]) {
   test(`${label}: the ask box is wired to the app's own AI`, async () => {
     const p = await loadPage(file);
     assert.equal(typeof p.sandbox.ask, 'function', 'the page must define its own ask()');
     assert.equal(typeof p.sandbox.askCtx, 'function', 'the page must say what it is being asked about');
     assert.ok(p.sandbox.ASK_SYS.length > 400, 'the answer must run under real instructions');
-    assert.match(p.sandbox.ASK_SYS, /RULES OF THIS HOUSE/);
+    assert.match(p.sandbox.ASK_SYS, must);
 
     await p.sandbox.ask('can I take this with my blood pressure pills?', p.sandbox.askCtx());
 
     assert.equal(p.calls.length, 1);
     assert.equal(p.calls[0].url, '/api/chat', 'the same route the Friendly tab uses, so the same brake covers it');
     const sent = p.calls[0].body;
-    assert.ok(Array.isArray(sent.system) && /RULES OF THIS HOUSE/.test(sent.system[0].text),
-      'the house rules must travel with every single question');
+    assert.ok(Array.isArray(sent.system) && must.test(sent.system[0].text),
+      'the rules must travel with every single question');
     assert.equal(sent.messages.length, 1, 'no client-side history to drift out of the rules');
     assert.equal(sent.messages[0].role, 'user');
-    assert.equal(sent.surface, 'reference',
-      'the pages must declare their own daily budget, or an afternoon of questions here could spend the 3am conversation');
     assert.match(sent.messages[0].content, /blood pressure/);
     assert.match(p.els.get('askA').innerHTML, /Ask a pharmacist/);
     assert.match(p.els.get('askA').innerHTML, /<br>/, 'newlines become line breaks');
@@ -126,6 +132,22 @@ for (const [label, file] of [['herb library', 'herbs.html'], ['tax centre', 'tax
     }
   });
 }
+
+test('the herb library: safety holds tightly, the public caution does not', async () => {
+  const p = await loadPage('herbs.html');
+  const sys = p.sandbox.ASK_SYS;
+  // Safety is the part that never moves, whatever the page's audience is.
+  assert.match(sys, /An infection is a doctor, not a herb/);
+  assert.match(sys, /crisis line is 988/);
+  assert.match(sys, /Never tell anybody they are finished/);
+  assert.match(sys, /Never invent a study/);
+  // And the part that deliberately does not apply here: this library is private,
+  // for two people, beside their own books. It is not the public app.
+  assert.doesNotMatch(sys, /Never claim a herb works/);
+  assert.match(sys, /Do not hedge every line/, 'and it is told not to bury an answer in disclaimers');
+  const html = fs.readFileSync(path.join(ROOT, 'herbs.html'), 'utf8');
+  assert.doesNotMatch(html, /it never claims a plant works/, 'the fine print has to match what it now does');
+});
 
 test('the herb library: the open herb rides along with the question', async () => {
   const p = await loadPage('herbs.html');

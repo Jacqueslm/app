@@ -1,0 +1,439 @@
+<!-- herb library:private -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="cache-control" content="no-cache, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Herb Library — private</title>
+<meta name="theme-color" content="#0f0c29">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0c29'/%3E%3Cpath d='M32 14c10 6 12 18 0 30C20 32 22 20 32 14z' fill='%237ee8a2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.18);
+  --acc:#534AB7;--acc-t:#3C3489;--acc-b:#EEEDFE;
+  --ok:#E1F5EE;--ok-t:#085041;
+  --warn:#FAEEDA;--warn-t:#633806;
+  --red:#FCEBEB;--red-t:#7A1F1F;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,.09);--bdr2:rgba(255,255,255,.18);
+  --acc:#AFA9EC;--acc-t:#AFA9EC;--acc-b:#26215C;
+  --ok:#04342C;--ok-t:#5DCAA5;
+  --warn:#2e1f05;--warn-t:#EFA527;
+  --red:#3a1616;--red-t:#f0a8a8;
+}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0f0c29;font-family:var(--f)}
+body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:460px;background:var(--s0);min-height:100dvh;color:var(--tp);padding-bottom:60px}
+.hdr{position:sticky;top:0;z-index:20;background:var(--s0);border-bottom:1px solid var(--bdr);padding:12px 16px 10px;display:flex;align-items:center;gap:10px}
+.hdr h1{font-size:1.0625rem;font-weight:600;line-height:1.2}
+.hdr p{font-size:.75rem;color:var(--tm);margin-top:2px}
+.back{font-size:1.375rem;color:var(--tm);cursor:pointer;text-decoration:none;padding:2px 4px}
+.srch{padding:12px 16px 0}
+.srch input{width:100%;font:inherit;font-size:.9375rem;padding:12px 14px;border-radius:12px;border:1px solid var(--bdr2);background:var(--s2);color:var(--tp)}
+.srch input:focus{outline:2px solid var(--acc);outline-offset:1px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 16px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;font-size:.8125rem;padding:7px 13px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s2);color:var(--ts);cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--acc-b);border-color:var(--acc-b);color:var(--acc-t);font-weight:600}
+.sec{padding:2px 16px 6px}
+.sec-hd{font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);font-weight:600;padding:14px 0 8px}
+.card{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin-bottom:9px;overflow:hidden}
+.row{padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px}
+.row-txt{flex:1;min-width:0}
+.row-txt b{font-size:.9375rem;font-weight:600;display:block}
+.row-txt span{font-size:.8125rem;color:var(--tm);display:block;margin-top:3px;line-height:1.45}
+.chev{color:var(--tm);font-size:1rem;flex:0 0 auto;padding-top:2px;transition:transform .18s}
+.card.open .chev{transform:rotate(90deg)}
+.body{display:none;padding:0 14px 14px;border-top:1px solid var(--bdr)}
+.card.open .body{display:block}
+.lbl{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);font-weight:600;margin:12px 0 4px}
+.body p{font-size:.875rem;line-height:1.55;color:var(--ts)}
+.body p b{color:var(--tp)}
+.note{margin-top:12px}
+.note textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp);min-height:64px;resize:vertical}
+.note .saved{font-size:.6875rem;color:var(--tm);margin-top:4px}
+.pill{display:inline-block;font-size:.6875rem;padding:3px 9px;border-radius:999px;background:var(--s1);color:var(--ts);border:1px solid var(--bdr);margin:0 4px 4px 0;cursor:pointer}
+.calm{background:var(--ok);color:var(--ok-t);border-color:transparent}
+.big{padding:14px;border-radius:14px;font-size:.875rem;line-height:1.55;margin-bottom:10px;border:1px solid transparent}
+.warnbox{background:var(--warn);color:var(--warn-t)}
+.redbox{background:var(--red);color:var(--red-t)}
+.okbox{background:var(--ok);color:var(--ok-t)}
+.big b{display:block;margin-bottom:5px;font-size:.9375rem}
+.txtbtn{display:inline-block;font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-t);background:var(--acc-b);border:none;border-radius:10px;padding:9px 14px;cursor:pointer;margin-top:10px}
+.empty{padding:34px 20px;text-align:center;color:var(--tm);font-size:.875rem;line-height:1.6}
+.addf{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px}
+.addf label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin:10px 0 4px}
+.addf label:first-child{margin-top:0}
+.addf input,.addf textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
+.mine-note{font-size:.8125rem;color:var(--tm);white-space:pre-wrap;margin-top:6px;line-height:1.5}
+.ft{padding:26px 16px 40px;text-align:center;font-size:.6875rem;color:var(--tm);line-height:1.7}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <a class="back" href="/app" title="Back to the app">&#8592;</a>
+    <div>
+      <h1>Herb Library</h1>
+      <p>What people have long used these plants for</p>
+    </div>
+  </div>
+
+  <div class="srch"><input id="q" type="search" placeholder="Search a herb, or what it's used for" autocomplete="off"></div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-t="az">A&#8211;Z</div>
+    <div class="tab" data-t="need">By need</div>
+    <div class="tab" data-t="safety">Read this first</div>
+    <div class="tab" data-t="mine">My notes</div>
+  </div>
+
+  <div id="view"></div>
+
+  <div class="ft">
+    Herb Library — private. Built for Jacques.<br>
+    Kept beside <i>African Holistic Health</i> and <i>Nutricide</i> (Llaila O. Afrika).
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Everything below is tradition, not treatment.
+
+   The app's own rule applies here too: no medical claims. So every line says
+   what people have long used a plant for — history and practice — and never
+   that it works, never that it fixes anything, and never a word about how the
+   body works. Anything that reads like a claim has to come out.
+
+   The second rule is the one that matters for this house: nothing here tells
+   somebody they are finished, and nothing here talks somebody out of a doctor.
+   Infections are the line in the sand — an infection needs a doctor, and the
+   page says so in the middle of the herb list, not in small print.
+--------------------------------------------------------------------------- */
+
+/* n name · a also called · u what people use it for · d the tradition
+   h how it is traditionally taken · c the caution that has to travel with it
+   t needs it belongs to (used by "By need") */
+var HERBS = [
+/* ---- sleep, nerves, mood ---- */
+{n:'Ashwagandha',a:'winter cherry, Indian ginseng',u:'Stress, poor sleep, low stamina',t:['sleep','mood'],
+ d:'Long used in India as a root powder in warm milk at night, for a body worn down by a long stretch of strain. It is a slow herb in that tradition — taken for weeks, not for one bad night.',
+ h:'Root powder, warm milk or tea, evening.',c:'Not with thyroid medicine, and not in pregnancy. Ask a pharmacist if you take anything for blood pressure.'},
+{n:'Chamomile',a:'German chamomile',u:'Sleep, a nervous stomach, winding down',t:['sleep','digestion'],
+ d:'The oldest kitchen remedy there is for a restless night and a churning stomach. One of the few herbs gentle enough that people give it to children in the old books.',
+ h:'Dried flowers, tea, 10 minutes covered.',c:'Rare in people allergic to ragweed and daisies. Safe for most.'},
+{n:'Lavender',a:'English lavender',u:'Calm, sleep, a tight headache',t:['sleep','mood','skin'],
+ d:'Used three ways over the centuries: the flowers in a pillow, a few drops of oil rubbed into the wrists and temples, and the oil in a carrier for the skin. The smell is most of the medicine in the tradition.',
+ h:'Tea, or a few drops of oil diluted in a carrier oil.',c:'Never swallow the neat essential oil. Dilute it, always.'},
+{n:'Lemon balm',a:'melissa',u:'Calm, sleep, cold sores',t:['sleep','mood','skin'],
+ d:'A garden mint, used as a nightly tea for a restless mind, and the crushed leaf or a strong brew dabbed on a cold sore as it first tingles.',
+ h:'Fresh or dried leaf tea; cooled strong tea on the lip.',c:'Mild. Ask first if you take thyroid medicine.'},
+{n:'Passionflower',a:'maypop',u:'A racing mind at bedtime',t:['sleep'],
+ d:'Used in the Americas as a tea for a mind that will not stop, often mixed with chamomile or lemon balm rather than taken alone.',
+ h:'Dried leaf and flower, tea, evening.',c:'Not with sedatives or alcohol. Not in pregnancy.'},
+{n:'St John\u2019s wort',a:'hypericum',u:'Low mood, low spirits',t:['mood'],
+ d:'A yellow-flowering plant used across Europe for a heavy mood. It is also the herb that taught everybody to check interactions — it changes how the liver handles a long list of medicines.',
+ h:'Flowering tops, tea or tincture.',c:'Read this one twice. It clashes with antidepressants, birth control, blood thinners, HIV medicine and more. Never mix it with a prescription without asking a pharmacist first.'},
+{n:'Valerian',a:'all-heal, garden heliotrope',u:'Getting to sleep',t:['sleep'],
+ d:'The root people reach for when the trouble is falling asleep rather than staying asleep. It smells of old socks and works, in the tradition, after a week or two of nightly use rather than one cup.',
+ h:'Root, tea or tincture, 30 minutes before bed.',c:'Do not drive after a big dose. Not with alcohol, sedatives or sleeping tablets.'},
+{n:'Ginseng',a:'Asian ginseng, Korean ginseng',u:'Energy, stamina, a run-down stretch',t:['energy'],
+ d:'A prized root in China and Korea, chewed or brewed for tiredness and for a long convalescence. It is warming, and the old books say not to take it late in the day.',
+ h:'Sliced root, tea, or a small piece chewed.',c:'Not with blood thinners or diabetes medicine, and not with high blood pressure. Not if you are already wired.'},
+{n:'Ginkgo',a:'maidenhair tree',u:'Memory, cold hands and feet',t:['energy','heart'],
+ d:'The seed is the old Chinese remedy; the leaf is the modern one, used for memory in older age and for circulation to the fingers and toes.',
+ h:'Leaf, tea or standardised extract.',c:'Thins the blood — stop before surgery and do not take with blood thinners.'},
+
+/* ---- digestion ---- */
+{n:'Ginger',a:'root ginger',u:'Nausea, travel sickness, a heavy stomach',t:['digestion','cold','women'],
+ d:'The single most useful kitchen root in the tradition: a slice chewed or brewed for a queasy stomach, for sickness on a boat, and for the cramping of a monthly cycle.',
+ h:'Fresh slice in hot water, or chewed.',c:'Gentle. Large amounts can thin the blood and burn the stomach.'},
+{n:'Peppermint',a:'brandy mint',u:'Gas, bloating, a tension headache',t:['digestion','cold'],
+ d:'A tea after a heavy meal, and the oil — well away from the eyes — rubbed on the temples for a headache that sits across the brow.',
+ h:'Leaf tea; oil diluted on the temples.',c:'Worsens heartburn for some people. Keep the oil out of the eyes and off the face of a baby.'},
+{n:'Fennel seed',a:'sweet fennel',u:'Gas, cramps, bad breath',t:['digestion'],
+ d:'A bowl of the seeds on the table after dinner was the ordinary European answer to wind and cramping. Chewed, or brewed as a tea.',
+ h:'Seeds chewed, or crushed and brewed.',c:'Gentle. Not the concentrated oil in pregnancy.'},
+{n:'Dandelion',a:'lion\u2019s tooth',u:'Water retention, a sluggish digestion, a spring clean',t:['liver','digestion'],
+ d:'Every part is used: the young leaf in salad as a bitter tonic, the root roasted as a coffee substitute, and both brewed as the classic spring "cleanse" of the old herbals.',
+ h:'Leaf tea, or roasted root as a drink.',c:'Not with a blocked bile duct or gallstones. It is a strong diuretic.'},
+{n:'Burdock root',a:'gobo, burr root',u:'Skin, a spring clean',t:['liver','skin'],
+ d:'A long taproot eaten as a vegetable in Japan and brewed in the West as one half of the old blood-cleansing pair with dandelion.',
+ h:'Root, tea or in soup.',c:'Fine as food. It is a diuretic — drink water.'},
+{n:'Milk thistle',a:'St Mary\u2019s thistle',u:'Looking after the liver',t:['liver'],
+ d:'The seed is the part used, crushed and brewed, and it is the herb most often named when people talk about settling a liver that has had a hard time of it.',
+ h:'Crushed seed, tea or extract.',c:'Do not let this stand in for medical care. A liver that is struggling needs a doctor, not a tea.'},
+{n:'Slippery elm',a:'red elm',u:'A sore throat, an acid stomach',t:['digestion','cold'],
+ d:'The inner bark, mixed with warm water into a gruel. It coats as it goes down, which is why it turns up for a raw throat and for an acid stomach in the old books.',
+ h:'Powder mixed to a paste in warm water.',c:'Take it two hours away from any medicine — it slows how the medicine is taken up.'},
+{n:'Senna',a:'Alexandrian senna',u:'Constipation',t:['digestion'],
+ d:'A strong laxative leaf and pod, used for a week at most. The old herbals pair it with ginger or fennel to stop the griping.',
+ h:'Leaf or pod tea, short term only.',c:'Not for more than a week, not in pregnancy, not for a child, not with a bowel condition. It is a medicine, not a morning drink.'},
+
+/* ---- colds, throat, chest ---- */
+{n:'Elderberry',a:'elder, sambucus',u:'Colds and flu, at the first sign',t:['cold'],
+ d:'The cooked berry — syrup in autumn, tea through winter — is the European standby for the first day of a cold. The flowers go into a sweat tea for a fever.',
+ h:'Cooked berries as syrup; flowers as tea.',c:'Never eat the raw berries, bark or stems — they are poisonous. Cooked berry only.'},
+{n:'Echinacea',a:'purple coneflower',u:'A cold coming on',t:['cold'],
+ d:'A North American prairie plant. The Plains nations used the root, and it entered the books as the thing to take at the very first tickle of a cold.',
+ h:'Root or leaf, tea or tincture, at the first sign.',c:'Avoid with autoimmune conditions. Not long term.'},
+{n:'Mullein',a:'verbascum, flannel leaf',u:'A cough, a chesty cold, earache',t:['cold'],
+ d:'The soft leaf brewed for a cough that will not clear, the flowers steeped in olive oil for an earache, and the yellow flower spikes smoked for the lungs in the old mountain tradition.',
+ h:'Leaf tea; flower oil, warmed, into the ear.',c:'Never put anything in an ear if it is leaking or you think the drum is torn. See a doctor.'},
+{n:'Thyme',a:'garden thyme',u:'A cough, a sore throat, a mouth rinse',t:['cold','mouth'],
+ d:'A kitchen herb used as medicine too: a strong brew to gargle with for a raw throat, and a steam for a chest that is tight.',
+ h:'Brew strong, gargle, or breathe the steam.',c:'Gentle. Do not swallow the neat oil.'},
+{n:'Licorice root',a:'sweet root',u:'A raw throat, a cough, an acid stomach',t:['cold','digestion'],
+ d:'Chewed as a stick or brewed for a throat that feels scraped, and for a stomach that burns. Both uses are old and both are real in the tradition.',
+ h:'Root, chewed or brewed.',c:'Raises blood pressure and drops potassium. Not with blood pressure medicine, not in pregnancy, not long term.'},
+{n:'Marshmallow root',a:'marsh mallow',u:'A raw throat, an irritated stomach',t:['cold','digestion'],
+ d:'The root soaked in cold water overnight, until the water goes slippery. Cold infusion, not hot — the old books are firm about that.',
+ h:'Cold water infusion, sipped.',c:'Gentle. Take it away from other medicine.'},
+{n:'Eucalyptus',a:'blue gum',u:'A blocked chest and head',t:['cold'],
+ d:'The leaves of an Australian tree, put in a bowl of hot water with a towel over the head. It is the steam that does the work in the tradition.',
+ h:'A few drops in hot water, breathed as steam; or in a rub.',c:'Never swallow the oil. Not on the face or chest of a baby or small child.'},
+{n:'Sage',a:'garden sage, Dalmatian sage',u:'A sore throat, night sweats, a fuzzy head',t:['cold','mouth','women'],
+ d:'A strong brew to gargle with for a throat, and the tea taken when sweats come at night. Also the classic tea for drying up milk at weaning.',
+ h:'Brew strong, gargle; or tea.',c:'Not in pregnancy or while breastfeeding if you want to keep the milk. Thujone — do not take it in large amounts.'},
+{n:'Yarrow',a:'milfoil, soldier\u2019s woundwort',u:'Fever, a cut that bleeds',t:['cold','skin'],
+ d:'Named for Achilles. The leaf on a cut to stop the bleeding, and the flowers as a sweat tea with elder and peppermint for a fever — the three together are an old European standard.',
+ h:'Leaf poultice on a cut; flowers as tea.',c:'Not in pregnancy. Not with blood thinners. Ragweed allergy.'},
+{n:'Rose hips',a:'rose haw',u:'Vitamin C through winter',t:['cold','energy'],
+ d:'Gathered after the first frost and brewed. In the old books it is food as much as medicine — the winter source of what kept gums and joints well.',
+ h:'Dried hips, tea. Do not boil hard.',c:'The itchy hairs inside must be strained out.'},
+{n:'Hibiscus',a:'roselle, sorrel in the Caribbean',u:'A cooling drink, blood pressure',t:['heart'],
+ d:'A deep red drink across Africa and the Caribbean, taken iced on a hot day and drunk regularly by people keeping an eye on their blood pressure.',
+ h:'Dried calyces, brewed strong, hot or iced.',c:'Lowers blood pressure — do not take it alongside blood pressure tablets without asking.'},
+{n:'Garlic',a:'allium',u:'Colds, the heart and blood',t:['cold','heart'],
+ d:'Few plants have been written about more. Eaten raw in the old books for a cold coming on, and eaten daily for the heart and the blood.',
+ h:'Raw, crushed and rested 10 minutes; or cooked.',c:'Thins the blood. Stop before surgery. Onions and garlic are not for a dog.'},
+
+/* ---- skin, wounds, joints ---- */
+{n:'Aloe vera',a:'aloe',u:'Burns, a rash, dry or cracked skin',t:['skin'],
+ d:'The clear gel from the split leaf, on a burn or a rash. It is the most widespread first-aid plant there is and grows on a windowsill almost anywhere.',
+ h:'Split a leaf, spread the gel on clean skin.',c:'Do not use on a deep or open wound. The yellow latex just under the skin is a strong laxative — rinse it off.'},
+{n:'Calendula',a:'pot marigold',u:'Rashes, grazes, chapped skin',t:['skin'],
+ d:'The petals steeped in oil or made into a salve, for skin that is red, cracked or healing over. Not the French marigold of the seed packets.',
+ h:'Petal oil or salve, on clean skin.',c:'Ragweed family. Do not put it on a wound that is infected.'},
+{n:'Comfrey',a:'knitbone, boneset',u:'Bruises, sprains, a sore joint',t:['joints','skin'],
+ d:'Old name knitbone, and used that way — a poultice of the leaf or a root salve on a bruise or a sprain. Externally only.',
+ h:'Leaf poultice, or root in oil, on unbroken skin.',c:'Never take comfrey internally. It is damaging to the liver. Not on broken skin.'},
+{n:'Turmeric',a:'haldi, Indian saffron',u:'Stiff joints, a puffy ache',t:['joints','liver'],
+ d:'A kitchen root that is also the great joint herb of South Asia and the Caribbean. Usually taken with black pepper and a fat, and cooked into food rather than brewed alone.',
+ h:'Fresh or powdered root with pepper, in food, or as a golden milk.',c:'Thins the blood. Not with gallstones. Large doses upset the stomach.'},
+{n:'White willow',a:'willow bark',u:'Aches, pains, a fever',t:['joints'],
+ d:'Willow bark was chewed for pain for thousands of years, and it is where aspirin came from. The old books use it for an aching back and for a fever.',
+ h:'Bark, brewed as a bitter tea.',c:'Treat it as aspirin: not for a child or teenager with a fever, not in pregnancy, not with a stomach ulcer, not with blood thinners.'},
+{n:'Cayenne',a:'red pepper, chilli',u:'Warmth for cold hands and feet, a sore muscle',t:['heart','joints'],
+ d:'A pinch in food to warm the body through, and an oil or salve rubbed into a stiff muscle until it goes hot.',
+ h:'Small amounts in food; oil rubbed into the skin.',c:'Never near the eyes, never on broken skin. Wash your hands after. Not on a child.'},
+{n:'Neem',a:'Indian lilac, nimtree',u:'Skin problems, scalp, worms',t:['skin','hair'],
+ d:'Every part of the tree is used in India — the leaf paste on the skin, the oil on the scalp, and the leaf eaten in the old tradition against intestinal worms in children.',
+ h:'Leaf paste or oil on the skin; oil on the scalp.',c:'Not internally in pregnancy or when trying to conceive. Do not swallow neem oil.'},
+{n:'Nettle',a:'stinging nettle',u:'Poor blood, stiff joints, hay fever',t:['joints','energy'],
+ d:'Gathered with gloves in spring and eaten as greens, or brewed. The old books use it as a strengthening food for someone run down and pale.',
+ h:'Young leaf, cooked as greens; or brew the dried leaf.',c:'A diuretic — drink water. Not with blood pressure or diabetes medicine without asking.'},
+
+/* ---- women's, men's, whole-body ---- */
+{n:'Raspberry leaf',a:'red raspberry',u:'Monthly cycles, the last weeks of pregnancy',t:['women'],
+ d:'The leaf, brewed. It is the one herb the old books give to women in the last weeks before a birth, and for a heavy or cramping cycle.',
+ h:'Dried leaf, tea.',c:'Ask a midwife before taking it in pregnancy — this is not one to decide on your own.'},
+{n:'Black seed',a:'nigella, black cumin',u:'A bit of everything, colds included',t:['cold','energy'],
+ d:'The seed, eaten by the spoonful with honey across the Middle East and Africa, and written about in the old medicine there as good for nearly everything — a claim worth holding loosely.',
+ h:'Whole or ground seed, often with honey.',c:'Gentle. Not the neat oil in pregnancy.'},
+{n:'Moringa',a:'drumstick tree, miracle tree',u:'Food when food is thin, tiredness',t:['energy'],
+ d:'The leaf of a tree eaten as a green vegetable across South Asia and West Africa, used to build somebody back up when they have been ill or eating badly.',
+ h:'Dried leaf powder in food or drink.',c:'Fine as food. The root and bark are not for eating.'},
+{n:'Parsley',a:'garden parsley',u:'Water retention, breath, a spring tonic',t:['liver','mouth'],
+ d:'The leaf eaten by the handful and the root brewed, as the old kitchen answer to a puffy body and a spring clean of the system.',
+ h:'Fresh leaf in quantity, or root tea.',c:'Not the oil, and not large amounts in pregnancy.'},
+{n:'Clove',a:'cloves',u:'Toothache, the mouth',t:['mouth'],
+ d:'The dried flower bud, held against a tooth that is aching, and the whole clove chewed for the breath. The oil is the strongest thing in the kitchen cupboard.',
+ h:'Whole clove held on the tooth; oil on a cotton bud.',c:'Never swallow the oil neat and never give it to a child. A toothache that lasts needs a dentist — clove only holds the pain back.'},
+{n:'Goldenseal',a:'yellow root',u:'Traditionally for infection and inflammation',t:['cold','skin'],
+ d:'A North American root, over-picked and now rare, used in the old books for inflamed tissue and for what they called infections. It is one of the herbs this page will not hand you.',
+ h:'Root, or tea.',c:'Not in pregnancy. Not for a newborn — it causes lasting harm to a baby. And it is not a treatment for an infection; see the note above the list.'},
+{n:'Oregano oil',a:'wild marjoram',u:'Traditionally for infection',t:['cold'],
+ d:'The oil of a kitchen herb, taken in drops under the tongue or in a capsule in the old tradition against what was called an infection.',
+ h:'Diluted oil, or capsule.',c:'Burns neat. Not internally in pregnancy, not for children. It is not a substitute for an antibiotic when one is needed.'}
+];
+
+/* "By need" — the shelves. Keeping a herb on more than one shelf is deliberate:
+   people look for the problem, not the plant. */
+var NEEDS = [
+ {k:'sleep', t:'Sleep and a racing mind', s:'The evening shelf'},
+ {k:'mood', t:'Low mood and strain', s:'Taken slowly, over weeks'},
+ {k:'digestion', t:'Stomach, wind and bowels', s:''},
+ {k:'cold', t:'Colds, throat and chest', s:''},
+ {k:'skin', t:'Skin, burns and grazes', s:''},
+ {k:'joints', t:'Joints, bruises and aches', s:''},
+ {k:'liver', t:'Liver and a spring clean', s:''},
+ {k:'heart', t:'Heart, blood and circulation', s:''},
+ {k:'women', t:"Women's cycles and after", s:''},
+ {k:'mouth', t:'Mouth and teeth', s:''},
+ {k:'energy', t:'Energy and building back up', s:''},
+ {k:'hair', t:'Hair and scalp', s:''}
+];
+
+var KEY='tsid_herb_notes_v1';
+var store={};
+try{ store=JSON.parse(localStorage.getItem(KEY)||'{}')||{} }catch(e){ store={} }
+var tab='az', openId=null, q='';
+
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)) }catch(e){} }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}) }
+function mineList(){ return Object.keys(store).filter(function(k){ return k.indexOf('herb:')===0 }) }
+function noteOf(id){ var v=store['herb:'+id]; return v&&v.note?String(v.note):'' }
+function ownOf(id){ var v=store['herb:'+id]; return v&&v.own?String(v.own):'' }
+
+/* A herb the person added from the book joins the same list, so search finds it
+   the same way. Marked so the page never pretends it came from here. */
+function allHerbs(){
+  var own=Object.keys(store).filter(function(k){ return k.indexOf('own:')===0 }).map(function(k){
+    var o=store[k];
+    return {n:o.n,a:'added by you',u:o.u||'',d:o.d||'',h:o.h||'',c:o.c||'',t:[],own:1,id:k};
+  });
+  return HERBS.map(function(h,i){ h=Object.assign({},h); h.id='h'+i; return h; }).concat(own);
+}
+
+function render(){
+  var v=document.getElementById('view'), out='';
+  var list=allHerbs();
+
+  if(tab==='az' || tab==='need'){
+    var shown=[];
+    if(tab==='az'){
+      shown=list.slice().sort(function(a,b){ return a.n.localeCompare(b.n) });
+    }else{
+      NEEDS.forEach(function(nd){
+        var group=list.filter(function(h){ return (h.t||[]).indexOf(nd.k)>-1 });
+        if(!group.length) return;
+        out+='<div class="sec"><div class="sec-hd">'+esc(nd.t)+(nd.s?' &middot; '+esc(nd.s):'')+'</div>';
+        group.sort(function(a,b){ return a.n.localeCompare(b.n) });
+        out+=group.map(card).join('')+'</div>';
+      });
+      shown=null;
+    }
+    if(shown){
+      out='<div class="sec">';
+      out+=shown.map(card).join('');
+      out+='</div>';
+    }
+    if(q){
+      out='<div class="sec">';
+      var hits=list.filter(match);
+      out+= hits.length ? '<div class="sec-hd">'+hits.length+' found</div>'+hits.map(card).join('')
+        : '<div class="empty">Nothing here matches that.<br>Try a plant name, or a word like <b>sleep</b>, <b>stomach</b>, <b>throat</b>.</div>';
+      out+='</div>';
+    }
+    if(!q && !out) out='<div class="empty">Nothing on this shelf yet.</div>';
+  }
+
+  if(tab==='safety'){
+    out=
+    '<div class="sec">'
+    +'<div class="big redbox"><b>An infection is a doctor, not a tea</b>Nothing in this library treats an infection. Not oregano oil, not goldenseal, not garlic. A fever that will not come down, a wound going red and hot, a chest that rattles, a tooth gone bad, anything yellow or green coming up — that is a doctor today, not a herb.</div>'
+    +'<div class="big warnbox"><b>Coming off alcohol or a drug</b>Alcohol withdrawal can kill. It is not something to sit out with chamomile and valerian. If you have been drinking heavily and stop, that is a doctor or a hospital, and the timeline page in the app says the same thing. Herbs do not belong in that week.</div>'
+    +'<div class="big warnbox"><b>If you take any medication</b>St John\u2019s wort alone interferes with antidepressants, birth control, blood thinners and HIV medicine. Licorice and hibiscus move blood pressure. Ginger, ginkgo, turmeric, garlic and white willow all thin the blood. Ask a pharmacist before you add a herb to what you already take — one question, free, in any chemist.</div>'
+    +'<div class="big warnbox"><b>Kratom is not in this library</b>It is sold as a herb. It acts on the same receptors as opioids and it is addictive — people come off it with withdrawal like any opioid. It has no place here.</div>'
+    +'<div class="big warnbox"><b>Pregnancy and children</b>Most of this list is not for pregnancy. Raspberry leaf is the one people talk about, and even that is a midwife\u2019s call. Children are not small adults for dosing — a few of these are genuinely dangerous for a baby, goldenseal and comfrey root especially.</div>'
+    +'<div class="big warnbox"><b>Liver</b>Comfrey is never taken internally. Kava and several cleanse brews put strain on a liver that is already tired. If you have been hard on your body and you want to clean it up, food and water and time do that. A tea does not.</div>'
+    +'<div class="big okbox"><b>What this page is</b>It is what people have long used these plants for. That is history and practice, not proof, and not a prescription. Nothing here says it works. If something is wrong and it is not getting better, get seen.</div>'
+    +'</div>';
+  }
+
+  if(tab==='mine'){
+    var withNotes=list.filter(function(h){ return noteOf(h.id) });
+    var owns=Object.keys(store).filter(function(k){ return k.indexOf('own:')===0 });
+    out='<div class="sec">'
+      +'<div class="sec-hd">Add a herb from the book</div>'
+      +'<div class="addf">'
+      +'<label>Herb</label><input id="an" placeholder="Name as the book has it">'
+      +'<label>What people use it for</label><input id="au" placeholder="One line">'
+      +'<label>What the book says</label><textarea id="ad" placeholder="Type it as you read — page, and the words"></textarea>'
+      +'<label>Caution, if the book gives one</label><input id="ac">'
+      +'<button class="txtbtn" id="aadd">Save it</button>'
+      +'</div>'
+      +'<div class="sec-hd">Your notes'+(withNotes.length?' ('+withNotes.length+')':'')+'</div>';
+    if(!withNotes.length) out+='<div class="empty">No notes yet. Open any herb and write what the book says about it, or what happened when you used it. It stays on this phone.</div>';
+    withNotes.forEach(function(h){
+      out+='<div class="card"><div class="row" data-h="'+esc(h.id)+'"><div class="row-txt"><b>'+esc(h.n)+'</b><span>'+esc(h.u)+'</span>'
+        +(noteOf(h.id)?'<div class="mine-note">'+esc(noteOf(h.id))+'</div>':'')
+        +'</div></div></div>';
+    });
+    out+='</div>';
+  }
+
+  v.innerHTML=out;
+  if(tab==='mine'){
+    var b=document.getElementById('aadd');
+    if(b)b.onclick=function(){
+      var n=document.getElementById('an').value.trim();
+      if(!n) return;
+      var id='own:'+Date.now();
+      store[id]={n:n,u:document.getElementById('au').value.trim(),d:document.getElementById('ad').value.trim(),c:document.getElementById('ac').value.trim(),own:1};
+      save(); render();
+    };
+  }
+}
+
+function match(h){
+  var hay=[h.n,h.a,h.u,h.d,h.h,h.c].join(' ').toLowerCase();
+  return hay.indexOf(q)>-1;
+}
+
+function card(h){
+  var open=openId===h.id;
+  return '<div class="card'+(open?' open':'')+'" data-h="'+esc(h.id)+'">'
+  +'<div class="row"><div class="row-txt"><b>'+esc(h.n)+'</b><span>'+esc(h.u)
+  +(h.a&&h.a!=='added by you'?' &middot; '+esc(h.a):'')+(h.own?' <span class="pill">yours</span>':'')
+  +'</span></div><div class="chev">&#8250;</div></div>'
+  +'<div class="body">'
+  +(h.d?'<div class="lbl">What people have used it for</div><p>'+esc(h.d)+'</p>':'')
+  +(h.h?'<div class="lbl">How it is traditionally taken</div><p>'+esc(h.h)+'</p>':'')
+  +(h.c?'<div class="lbl">Caution</div><p>'+esc(h.c)+'</p>':'')
+  +'<div class="lbl">What your book says</div>'
+  +'<div class="note"><textarea data-note="'+esc(h.id)+'" placeholder="As you read, put it here — the page and the words.">'+esc(noteOf(h.id))+'</textarea><div class="saved">Saved on this phone as you type. Nothing is sent anywhere.</div></div>'
+  +'</div></div>';
+}
+
+document.getElementById('view').addEventListener('click',function(e){
+  var row=e.target.closest('.row'); if(!row) return;
+  var cardEl=row.closest('.card'); if(!cardEl) return;
+  var id=cardEl.getAttribute('data-h');
+  openId = openId===id ? null : id;
+  render();
+});
+document.getElementById('view').addEventListener('input',function(e){
+  var id=e.target.getAttribute && e.target.getAttribute('data-note');
+  if(!id) return;
+  var v=store['herb:'+id]||{};
+  v.note=e.target.value; store['herb:'+id]=v; save();
+});
+document.getElementById('q').addEventListener('input',function(e){
+  q=e.target.value.trim().toLowerCase();
+  if(q && tab!=='az'){ tab='az'; document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on',x.getAttribute('data-t')==='az') }) }
+  render();
+});
+document.querySelectorAll('.tab').forEach(function(el){
+  el.onclick=function(){
+    tab=el.getAttribute('data-t'); openId=null;
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on',x===el) });
+    render();
+  };
+});
+render();
+</script>
+</body>
+</html>

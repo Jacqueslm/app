@@ -9,7 +9,7 @@
 // gone. Anyone who chose Deep had the one voice that goes silent offline.
 // Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
 // cannot drift apart unnoticed again.
-const CACHE_NAME = 'tsid-shell-v5.5';
+const CACHE_NAME = 'tsid-shell-v5.6';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -122,6 +122,12 @@ self.addEventListener('fetch', (event) => {
   // outlive that check.
   if (url.pathname === '/key' || url.pathname === '/key.html') return;
   if (url.pathname === '/market-maker.html') return;
+
+  // The herb library and the tax centre (15 Sep 2026) are the same kind of page
+  // again: served only to somebody signed in and on the list. A cached copy would
+  // outlive that check, and the offline fallback would hand it out unguarded.
+  // All four addresses, because both the clean URL and the file name reach them.
+  if (['/herbs', '/herbs.html', '/tax', '/tax.html'].includes(url.pathname)) return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

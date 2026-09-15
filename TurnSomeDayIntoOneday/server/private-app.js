@@ -102,6 +102,12 @@ const OPEN_PAGES = [
   '/game3d.html',       // the 3D fight inside The Fight tab (added 13 Sep 2026)
   '/market-maker.html', // the trading practice game — signed in and on the list,
                         // gated at its own route in server.js (shut 14 Sep 2026)
+  // The herb library and the tax centre (15 Sep 2026), the same shape as the
+  // trading game: private, listed here only so the request can reach the route
+  // that judges it. Both addresses each, because each is a real FILE as well as
+  // a clean URL, and static would otherwise serve the file name unguarded.
+  '/herbs', '/herbs.html',
+  '/tax', '/tax.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the

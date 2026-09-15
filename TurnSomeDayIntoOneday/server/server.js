@@ -263,6 +263,47 @@ app.get('/market-maker.html', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'market-maker.html'));
 });
 
+// The two reference pages — private, and the same door as The Key.
+//
+// 15 Sep 2026. Jacques asked for the herb library and the tax centre "apart of my
+// recovery app but made private". Same rule as /key and the trading game: signed
+// in AND on the allowlist, or you go to /app without learning the page is there.
+//
+// BOTH ADDRESSES ARE REGISTERED ON PURPOSE, and this is the part worth keeping.
+// Gating only the clean URL /herbs would lock the front door and leave the side
+// one open: express.static below serves herbs.html at its own .html address, so
+// anybody who typed the file name would walk straight past the check. It is the
+// same hole /game3d.html fell through in September, from the other direction.
+// Anything private that is also a real file has to be named twice here.
+//
+// Above express.static for the same reason /market-maker.html is: a route
+// registered after it is never reached.
+//
+// Four routes rather than one loop, and the gate written out in each, for the
+// same reason the trading game route is written out: the door has to be readable
+// in the file. A test asserts signed-in, on-the-list and redirect-to-/app inside
+// every one of them, and it cannot read a rule that lives in a shared helper.
+app.get('/herbs', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'herbs.html'));
+});
+app.get('/herbs.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'herbs.html'));
+});
+app.get('/tax', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'tax.html'));
+});
+app.get('/tax.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'tax.html'));
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 // The Key — private. Signed in AND on the allowlist, or you go to /app without

@@ -85,9 +85,21 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // private one: an allowlist of emails, checked here rather than in the client so
 // nobody reaches /api/chat by calling it directly. Adding somebody is an edit to
 // FRIENDLY_EMAILS in the environment, not a deploy.
-// 0 means no cap. Friendly is a handful of accounts now, not a paid tier, so
-// the daily limit exists only as a runaway-cost brake if it is ever needed.
-const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 0);
+// The daily answer ceiling, per person. 0 turns it off.
+//
+// This was 0 (no ceiling at all) until 15 Sep 2026, which meant nothing stood
+// between the AI and a runaway: one retry loop, or one session left open on a
+// shared phone, and the day's whole AI allowance is gone before anybody sees it.
+//
+// 60 is chosen to be invisible to a person and lethal to a loop. A crisis
+// conversation is the heaviest real use this app has, and the longest one seen
+// here ran to about thirty replies; /api/chat's own 20-per-5-minutes limiter
+// means a loop reaches 60 inside a quarter of an hour and stops. Two accounts
+// can therefore spend at most 120 in a day, which is the number to keep under
+// whatever the Google key's own requests-per-day allows (see chatDay, which
+// counts the day on Google's clock so the two cannot drift apart). Raising it
+// is an environment variable, not a deploy.
+const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 60);
 const FRIENDLY_EMAILS = String(process.env.FRIENDLY_EMAILS || '')
   .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 function isFriendlyAllowed(user) {
@@ -717,8 +729,18 @@ function setSessionCookie(req, res, userId, sessionVersion) {
   });
 }
 
-function todayUTC() {
-  return new Date().toISOString().slice(0, 10);
+// The day the AI answers are counted against.
+//
+// Midnight PACIFIC, not UTC (15 Sep 2026). Google's requests-per-day quota
+// resets at midnight Pacific and is counted per project, not per key - so an app
+// day that began at UTC midnight would fit two of its days inside one of
+// Google's, and the brake above would hand out the whole allowance twice as fast
+// as Google refills it. Fixing the day to Google's clock is what makes 60 a
+// number that means something. (UTC midnight is 4pm or 5pm the previous day in
+// California, so this is also the friendlier boundary: nobody's late night is
+// split in half by it.)
+function chatDay() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
 }
 
 // A credential is either a real password (8+ chars) or a 4-6 digit PIN.
@@ -1359,7 +1381,7 @@ app.post('/api/push/test', requireAuth, async (req, res) => {
 // the same server-side number the cap is enforced against, so it never drifts.
 app.get('/api/chat/usage', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
-  const used = db.getChatCount(req.userId, todayUTC());
+  const used = db.getChatCount(req.userId, chatDay());
   res.json({
     allowed: isFriendlyAllowed(user),
     used,
@@ -1420,7 +1442,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   if (!isFriendlyAllowed(user)) {
     return res.status(403).json({ error: 'Not available on this account.' });
   }
-  const used = db.getChatCount(req.userId, todayUTC());
+  const used = db.getChatCount(req.userId, chatDay());
   if (CHAT_LIMIT > 0 && used >= CHAT_LIMIT) {
     return res.status(429).json({ error: `That is today's ${CHAT_LIMIT} chats. It resets tomorrow.` });
   }
@@ -1543,7 +1565,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
       return res.status(502).json(data);
     }
     if (res2.ok) {
-      db.incrementChatCount(req.userId, todayUTC());
+      db.incrementChatCount(req.userId, chatDay());
     } else {
       // A failing key/model here degrades every chat into the client's canned
       // fallback with no visible symptom except repetitive replies - put the

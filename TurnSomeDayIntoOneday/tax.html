@@ -72,6 +72,29 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .out{margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)}
 .ft{padding:26px 16px 40px;text-align:center;font-size:.6875rem;color:var(--tm);line-height:1.7}
 .src{font-size:.6875rem;color:var(--tm);margin-top:6px;line-height:1.5}
+/* ── ASK ──────────────────────────────────────────────────────────────────────
+   The app's own AI, sitting on the page where the questions actually come up.
+   Same server route the Friendly tab uses (/api/chat), same daily brake. */
+.ask{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin:12px 16px 0;overflow:hidden}
+.ask-hd{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer}
+.ask-hd b{font-size:.9375rem;font-weight:600}
+.ask-hd .sub{font-size:.75rem;color:var(--tm);flex:1;min-width:0;line-height:1.35}
+.ask-badge{width:22px;height:22px;border-radius:999px;background:var(--acc-b);color:var(--acc-t);display:flex;align-items:center;justify-content:center;font-size:.8125rem;font-weight:700;flex:0 0 auto}
+.ask-chev{color:var(--tm);font-size:1rem;flex:0 0 auto;transition:transform .18s}
+.ask.on .ask-chev{transform:rotate(90deg)}
+.ask-body{display:none;padding:0 14px 14px;border-top:1px solid var(--bdr)}
+.ask.on .ask-body{display:block}
+.ask textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp);min-height:58px;resize:vertical;margin-top:12px}
+.ask textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+.ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.chip{font-size:.75rem;padding:6px 11px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.chip:active{background:var(--acc-b);color:var(--acc-t)}
+.ask-go{font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-b);background:var(--acc);border:none;border-radius:10px;padding:10px 16px;cursor:pointer;margin-top:10px}
+.ask-go[disabled]{opacity:.5}
+.ask-a{display:none;font-size:.875rem;line-height:1.6;color:var(--ts);margin-top:12px}
+.ask-a.on{display:block}
+.ask-who{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin-bottom:5px}
+.ask-fine{font-size:.6875rem;color:var(--tm);margin-top:10px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -81,6 +104,28 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div>
       <h1>Tax Centre</h1>
       <p>Self-employed, one page, 2026 figures</p>
+    </div>
+  </div>
+
+
+  <div class="ask" id="ask">
+    <div class="ask-hd" id="askHd">
+      <span class="ask-badge">?</span>
+      <b>Ask</b>
+      <span class="sub">About anything here &mdash; it answers on this page</span>
+      <span class="ask-chev">&#8250;</span>
+    </div>
+    <div class="ask-body">
+      <textarea id="askQ" placeholder="Is my phone deductible?"></textarea>
+      <div class="ask-chips">
+        <span class="chip" data-q="Is my phone deductible if I use it for work?">My phone</span>
+        <span class="chip" data-q="Do I owe quarterly tax, and where does this page explain it?">Quarterly tax</span>
+        <span class="chip" data-q="What does it take to claim a home office honestly?">Home office</span>
+        <span class="chip" data-q="I got a 1099. What do I do with it?">A 1099</span>
+      </div>
+      <button class="ask-go" id="askGo">Ask</button>
+      <div class="ask-a" id="askA"></div>
+      <p class="ask-fine">Not tax advice, and not a preparer. Every figure on this page was published by the IRS, and this box sends you to the page rather than inventing one.</p>
     </div>
   </div>
 
@@ -445,6 +490,107 @@ document.querySelectorAll('.tab').forEach(function(el){
     render(); window.scrollTo(0,0);
   };
 });
+/* The instructions the ask box answers under on the tax page. The load-bearing
+   rule is the second one: this page's whole value is that every number on it
+   was published by the IRS, so the box must never be the place a number is
+   invented. It points at the page instead. */
+var ASK_SYS=[
+'You are the helper inside a private, one-page tax reference for a self-employed person in the United States. The page carries the 2026 figures, what is due and when, a deduction checklist, a mileage calculator and a set-aside calculator.',
+'',
+'THE RULES OF THIS HOUSE, in order:',
+'1. Never invent a number. Every figure on this page was published by the IRS, and the boxes on it are the place a number comes from. If a question needs a rate, a limit, a threshold or a deadline, send them to the part of the page that has it — the 2026 numbers tab, the mileage tab, the set aside tab — or ask them to read the figure they can see. Do not recite one from memory, and if you are not certain, say plainly that you are not certain.',
+'2. You are not their tax preparer, and you say so the moment a question turns on their own return: their state, their business structure, an audit, back taxes, a letter from the IRS, or anything that decides what they owe. Those go to a preparer or to the IRS, not to you.',
+'3. Never help hide income, never suggest leaving something off a return, never say a claim will pass, and never guess whether they qualify for a credit or a deduction. Say what the deduction is and what it takes to claim it honestly.',
+'4. Never mention money beyond tax itself: no pricing, no subscriptions, no upgrades, nothing about the business behind the app.',
+'5. If they sound frightened about owing, be calm and practical. Never tell them they are finished, in trouble beyond fixing, or out of options — there are always options with the IRS, and a payment plan is one of them.',
+'',
+'HOW YOU ANSWER',
+'- Plain, short, useful: two to five sentences, or a short list. No headings, no jargon, no emoji.',
+'- The answer first, then the condition that comes with it.',
+'- If something is genuinely simple and ordinary — a phone used for work, a home office corner, mileage to a job site — answer it, and say what makes it claimable.',
+'- Prefer "here is what it takes to claim that" over "yes, you can claim that".'
+].join('\n');
+
+/* Which tab they are looking at rides along with the question, so "what is this
+   rate?" lands on the right part of the page instead of being guessed at. */
+function askCtx(){
+  var names={due:"What is due",num:'2026 numbers',ded:'Deductions',mil:'Mileage',set:'Set aside',rec:'Records'};
+  if(typeof TAB==='undefined'||!TAB) return '';
+  return 'They are looking at the "'+(names[TAB]||TAB)+'" tab of this page right now.\n';
+}
+
+/* ── ASK ──────────────────────────────────────────────────────────────────────
+   The app's own AI, pointed at this page instead of the Friendly tab.
+
+   It answers under the rules in ASK_SYS, which are the house rules: what people
+   have long used these plants for, never a claim that one works, never an
+   explanation of what happens in the body, and a doctor or a pharmacist the
+   moment that is the real answer. Its words are its own — nothing it says is
+   written into this page's own entries.
+
+   Same route the Friendly tab calls, so the same daily brake covers it and the
+   same key answers; there is nothing new to configure.
+--------------------------------------------------------------------------- */
+var ASK_HEAD='<span class="ask-who">Friendly</span>';
+var ASK_BUSY=false;
+var ASK_EL=document.getElementById('ask');
+function askOpen(force){
+  if(!ASK_EL) return;
+  if(force) ASK_EL.classList.add('on'); else ASK_EL.classList.toggle('on');
+  if(ASK_EL.classList.contains('on')){
+    var t=document.getElementById('askQ');
+    if(t&&!t.value&&!ASK_BUSY) t.focus();
+  }
+}
+async function ask(prefill, context){
+  var qEl=document.getElementById('askQ');
+  var aEl=document.getElementById('askA');
+  var go=document.getElementById('askGo');
+  if(!qEl||!aEl) return;
+  var question=(prefill||qEl.value||'').trim();
+  if(!question||ASK_BUSY) return;
+  qEl.value=question;
+  askOpen(true);
+  ASK_BUSY=true; if(go) go.disabled=true;
+  aEl.className='ask-a on';
+  aEl.innerHTML=ASK_HEAD+'Thinking…';
+  try{
+    var r=await fetch('/api/chat',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system:[{type:'text',text:ASK_SYS}],
+        messages:[{role:'user',content:(context||'')+question}]
+      })
+    });
+    if(r.status===429){ aEl.innerHTML=ASK_HEAD+"That is today's lot of answers here. It comes back tomorrow."; return }
+    if(r.status===401){ aEl.innerHTML=ASK_HEAD+'Sign in again and this will answer.'; return }
+    if(r.status===403){ aEl.innerHTML=ASK_HEAD+'Not switched on for this account.'; return }
+    if(!r.ok) throw new Error('http '+r.status);
+    var d=await r.json();
+    var t=((d.content&&d.content[0]&&d.content[0].text)||'').trim();
+    if(!t) throw new Error('empty');
+    aEl.innerHTML=ASK_HEAD+esc(t).replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
+  }catch(e){
+    /* Offline, or the answer never arrived. Nothing invented in its place. */
+    aEl.innerHTML=ASK_HEAD+'No answer came back. Try again in a moment.';
+  }finally{
+    ASK_BUSY=false; if(go) go.disabled=false;
+  }
+}
+if(ASK_EL){
+  document.getElementById('askHd').onclick=function(){ askOpen() };
+  document.getElementById('askGo').onclick=function(){ ask() };
+  document.getElementById('askQ').addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask() }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.chip[data-q]'),function(c){
+    c.onclick=function(){ ask(c.getAttribute('data-q'), askCtx()) };
+  });
+}
+
+
 render();
 </script>
 </body>

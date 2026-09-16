@@ -435,13 +435,47 @@ let refLock=0;
 // opposite direction. There is no bearing to be had from where he is standing, so
 // he keeps the one he already has.
 function refFace(target){const dx=target.x-ref.position.x,dz=target.z-ref.position.z;if(dx*dx+dz*dz<0.0625)return;ref.rotation.y=Math.atan2(dx,dz);}
-// Where he stands to count: a stride off the downed body, on the side away from
-// the middle of the ring, so he is never on top of it and the camera can see them
-// both. Fixed marks put him on top of a body that went down near one.
-function refSpot(F){const p=F.root.position;let d=new T.Vector3(-p.x,0,-p.z);
+// Where the knockdown lens stands: off the body, on the house side. The referee's
+// mark is read off this same point, so the two can never disagree about which way
+// is behind him.
+function downCamAt(p){return new T.Vector3(Math.max(-2.2,Math.min(2.2,p.x-1.15)),1.15,Math.max(1.2,Math.min(3.2,p.z+2.0)));}
+// Where he stands to count: a stride off the body, set down one flank or the other
+// and a step behind it, away from the lens.
+//
+// He used to be put on the ring-centre side of the body, which sounds reasonable
+// and is not. Whenever the man went down on the half of the ring away from the
+// house - which is exactly where the addiction's own mark is - towards the middle
+// of the ring is also towards the camera, so he stood between the lens and the body
+// he was counting, with his back to us, pointing at somebody out of frame. That is
+// the shot that reads as the referee standing in the opposite direction, and it is
+// also why a count over a man on the canvas looked like a count over a man on his
+// feet: what filled the frame was the referee, standing.
+//
+// Beside the body and slightly behind it, he is in profile in that shot and never
+// in front of it.
+function refSpot(F){
+  const p=F.root.position;
+  const d=downCamAt(p).setY(0).sub(p);d.y=0;          // from the body towards the lens
   if(d.lengthSq()<0.04)d.set(0,0,1);
   d.normalize();const side=new T.Vector3(-d.z,0,d.x);
-  return p.clone().addScaledVector(d,1.0).addScaledVector(side,0.45).setY(0);}
+  // One flank is the good one most of the time, but a body down in a corner has one
+  // flank outside the ropes - and pulling a mark back inside from there puts the
+  // referee on top of the man he is counting, which is the fault this mark exists to
+  // avoid. So a few marks are offered and the best one that fits is taken: always
+  // behind the body, never level with it or in front, well off him, and inside the
+  // ropes if anywhere inside them will do.
+  const spots=[[-0.42,1.08],[-0.42,-1.08],[-1.0,0.4],[-1.0,-0.4],[-0.9,-0.9]];
+  let best=null,score=-1e9;
+  for(const [behind,across] of spots){
+    const q=p.clone().addScaledVector(d,behind).addScaledVector(side,across).setY(0);
+    const to=q.clone().sub(p).setY(0);
+    if(to.dot(d)>-0.3)continue;                        // level with him, or in front of him
+    const over=Math.max(Math.abs(q.x)-2.25,Math.abs(q.z)-2.25,0);
+    const sc=(over?0:10)+to.length()-over;
+    if(sc>score){score=sc;best=q;}
+  }
+  return best||p.clone().setY(0);
+}
 // her walk clip covers 1.69 m a second at full speed; she walks at 1.35, so the clip runs at 0.8 and the floor moves under her feet at the same rate
 function refWalk(to){return new Promise(res=>{refFace(to);const from=ref.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/1.35*1000);refLock=performance.now()+ms+400;refPlay('walking',{loop:true,fade:.15,speed:.8});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);ref.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{refIdle();res();}})();});}
 // her count clip, measured: she bends by 0.5 s, points for one at 2.4 s and every 0.87 s after, ten at 10.2 s, straight again by 13 s
@@ -512,7 +546,9 @@ async function refStops(who){
   if(tkoGuard||fightOver)return;tkoGuard=true;
   running=false;busy=true;downState=true;
   slam('THE REF STEPS IN');snd('down');koLights(who==='you'?YOU:BOSS,true);shot('low',600);slowMo(1400);
-  await refWalk(refSpot(who==='you'?YOU:BOSS));
+  downWho=who==='you'?YOU:BOSS;      // the lens watches the fight that was stopped
+  await refWalk(refSpot(downWho));
+  refFace(downWho.root.position);    // walked to the body, so he has to turn and look at it
   refPlay('talking',{loop:true,fade:.2});
   say('That is enough. It is over.','Referee');await wait(1800);
   refIdle();koLights(who==='you'?YOU:BOSS,false);refWalk(ref.userData.home);
@@ -568,12 +604,17 @@ function groundFeet(F){
     for(const b of bones){b.getWorldPosition(v);if(v.y<lo)lo=v.y;}
   }
   F.root.position.y=y0;
+  // the height this body stands at, taken from the idle itself. A count reads it to
+  // tell a body on the canvas from a body on its feet, so it has to be known before
+  // the first knockdown rather than during it - if the fall itself ever fails, the
+  // referee still must not count a man who is up.
+  if(!F.standH)F.standH=hipsY(F);
   if(!isFinite(lo)||Math.abs(lo)<0.012){F.grounded=true;return;}
   // lo is a world distance and the shift goes on children inside the root, so it
   // has to be taken back through the root's own scale or it lands 100x out
   const rs=F.root.scale.y||1;
   for(const c of F.root.children)c.position.y-=lo/rs;
-  F.root.updateMatrixWorld(true);F.grounded=true;
+  F.root.updateMatrixWorld(true);if(!F.standH)F.standH=hipsY(F);F.grounded=true;
 }
 function skinned(root,tex,clips,gloveColor,noGloves){const gloves=[];
   // every fighter stands the same height in the ring, whatever size they were drawn
@@ -587,6 +628,16 @@ function skinned(root,tex,clips,gloveColor,noGloves){const gloves=[];
   const F={root,mixer,acts,cur:null,gloves};
   F.play=(n,opts2={})=>{const a=acts[n];if(!a)return;const prev=F.cur;a.reset();a.setLoop(opts2.loop?T.LoopRepeat:T.LoopOnce,Infinity);a.clampWhenFinished=!opts2.loop;a.timeScale=opts2.speed||1;if(prev&&prev!==a){prev.crossFadeTo(a,opts2.fade??.15,false);}a.play();F.cur=a;return a;};
   F.idle=()=>F.play('idle',{loop:true,fade:.25});return F;}
+// Whatever is walking never ends up inside the other one. A walk aims straight at
+// its mark from wherever the body happens to be, so two of them crossing took each
+// other through the ribs to get there. A destination that is already clear is left
+// exactly alone - this only ever pulls a body back out to the edge of CLEAR.
+function clearOf(to,F){const other=F===YOU?BOSS:YOU;
+  if(!other||!other.root)return to;
+  const o=other.root.position;if(to.distanceTo(o)>=CLEAR)return to;
+  const d=to.clone().sub(o);d.y=0;
+  if(d.lengthSq()<1e-6){d.set(F.root.position.x-o.x,0,F.root.position.z-o.z);if(d.lengthSq()<1e-6)d.set(0,0,1);}
+  return o.clone().addScaledVector(d.normalize(),CLEAR).setY(to.y);}
 // walking at her stride, facing where she goes, then standing
 function castWalk(F,to,mps){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);
   if(walking&&walkSkip){const y0=root.position.y;root.position.copy(to);root.position.y=y0;F.idle();return res();}F.play('walking',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);const y=root.position.y;root.position.lerpVectors(from,to,t);root.position.y=y;if(t<1)requestAnimationFrame(step);else{F.idle();res();}})();});}
@@ -611,7 +662,7 @@ function seatCrowd(cb){let left=0;for(const k in CROWD_SIDE)for(const key of CRO
     if(--left===0)cb();},undefined,e=>console.error(e));}}
 // the walk for a fighter: the ref's walking clip renamed onto its bones (plain names on the shadow, marked names on a skinned body)
 function giveWalk(F,marked){if(!F||!REFCLIPS||F.acts.walk)return;const w=REFCLIPS.find(c=>c.name==='walking');if(!w)return;let clip;if(marked)clip=retarget([w],F.root)[0];else{let hips='';F.root.traverse(o=>{if(o.isBone&&/Hips$/.test(o.name)&&!hips)hips=o.name;});const prefix=hips.replace(/Hips$/,'');const names=new Set();F.root.traverse(o=>{if(o.isBone)names.add(o.name);});clip=new T.AnimationClip('walk',w.duration,w.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i).replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix),prop=t.name.slice(i+1);return names.has(bone)?new t.constructor(bone+'.'+prop,t.times,t.values):null;}).filter(Boolean));}if(F.ownSkin)clip=inPlace([clip],F.root,REF_HIPS)[0];clip.name='walk';F.acts.walk=F.mixer.clipAction(clip);}
-function fighterWalk(F,to,mps,faceAfter,clip){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(250,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);
+function fighterWalk(F,to,mps,faceAfter,clip){to=clearOf(to,F);return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(250,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);
   if(walking&&walkSkip){root.position.copy(to);if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();return res();}
   // a named clip rides the walk instead of the walk cycle: the climb through the ropes
   if(clip&&F.acts[clip])F.play(clip,{fade:.2,speed:Math.max(.5,(F.acts[clip].getClip().duration*1000)/ms)});else if(F.acts.walk)F.play('walk',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();res();}})();});}
@@ -755,7 +806,7 @@ function stepIn(F,dist,ms){const root=F.root,from=root.position.clone(),dir=new 
       away.normalize().multiplyScalar(CLEAR-gap);to.copy(from).add(away);}
     else if(to.distanceTo(o)<CLEAR){to.copy(from).addScaledVector(dir,Math.max(0,gap-CLEAR));}}
   const t0=performance.now();F.home=F.home||from.clone();F.stepping=true;(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,1-Math.pow(1-t,2));if(t<1&&F.stepping)requestAnimationFrame(step);})();}
-function stepBack(F,ms){F.stepping=false;if(!F.home)return;const root=F.root,from=root.position.clone(),to=F.home.clone(),t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);})();}
+function stepBack(F,ms){F.stepping=false;if(!F.home)return;const root=F.root,from=root.position.clone(),to=clearOf(F.home.clone(),F),t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);})();}
 const SND=(()=>{const o={},n=['bell','cheer','winner','boss-down','down','getup','crowd','boss-hit-1','boss-hit-2','boss-hit-3','boss-hit-4','you-m-hit-1','you-m-hit-2','you-m-hit-3'];for(const k of n)o[k]=AUDIO+k+'.mp3';for(let i=1;i<=6;i++)o['round-'+i]=AUDIO+'round-'+i+'.mp3';return o;})();
 let AC=null;function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();primeSpeech();return AC;}
 let spoken=false;
@@ -1184,7 +1235,7 @@ async function decision(how){running=false;fightOver=true;result=how;downState=f
   say(line,'Announcer');announce([line],you);
   if(you&&floorN===0){await wait(2600);await jumpOut();}
   tellParent({type:'fight-over',result:how==='stopped'?'lost':(you?'won':(draw?'draw':'lost')),how,round,youHP:Math.round(youHP),cards});
-  if(you||draw){snd('cheer');if(you&&how!=='ko')BOSS.play('defeat',{fade:.4});else BOSS.idle();await refWalk(new T.Vector3(-.72,0,.3));ref.rotation.y=Math.PI;cam.position.set(-0.25,1.5,-1.9);look.set(-0.45,1.35,0.3);YOU.play('victory',{loop:true,fade:.4});
+  if(you||draw){snd('cheer');if(you&&how!=='ko')BOSS.play('defeat',{fade:.4});else if(how!=='ko')BOSS.idle();await refWalk(new T.Vector3(-.72,0,.3));ref.rotation.y=Math.PI;cam.position.set(-0.25,1.5,-1.9);look.set(-0.45,1.35,0.3);YOU.play('victory',{loop:true,fade:.4});
     if(you)snd('winner');const raise=refPlay('hand_raising',{fade:.2});await wait(1700);if(raise)raise.paused=true;await wait(3000);if(raise)raise.paused=false;await wait(1200);refIdle();}
   else{BOSS.idle();YOU.idle();await wait(2500);}
   $('go').textContent='Again';showControls(false);}
@@ -1300,21 +1351,15 @@ let sx=null;canvas.addEventListener('pointerup',e=>{if(sx==null)return;const dx=
 // Down on the canvas. It used to sit at one fixed corner looking at the middle of
 // the ring, so whoever was still standing came between it and the person on the
 // floor - a screen full of the addiction's back while the referee counted. It
-// stands off the one who is down now, on the side away from the other, far enough
-// back to hold them both.
+// stands off the one who is down now, on the house side, and the referee's mark is
+// read off the same point (downCamAt, above), so he cannot get between them.
 let downWho=null;
 function downLowPos(){
   if(!downWho)return new T.Vector3(-1.7,0.5,1.9);
-  const d=downWho.root.position;
   // Off the house side, always. It used to stand away from whichever fighter was
   // still up - and once that fighter was sent to a neutral corner it dragged the
   // camera out through the ropes into the dark, looking at nothing.
-  // and off to the left, because the referee always counts from the right - this
-  // way the body is between the two of them rather than behind him
-  return new T.Vector3(
-    Math.max(-2.2,Math.min(2.2, d.x-1.15)),
-    1.15,
-    Math.max(1.2,Math.min(3.2, d.z+2.0)));
+  return downCamAt(downWho.root.position);
 }
 function tvPos(a,b,mid,d){
   const toYou=a.clone().sub(b);toYou.y=0;

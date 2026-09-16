@@ -57,11 +57,14 @@ test('the other shipped HTML pages parse too', () => {
   // a SyntaxError in it leaves the page looking private and doing nothing.
   // herbs.html and tax.html joined on 15 Sep 2026, when the ask box put a live
   // AI in them; their scripts are now the longest of the reference pages.
-  // trading-school.html joined the same day. It is the longest inline script in
+  // game3d.html joined on 16 Sep 2026. It is the ring - the fighters, the
+  // referee, the round clock and the whole fight - and it was the one shipped page
+  // this check did not look at, which is how three faults reached a real fight.
+  // trading-school.html joined on 15 Sep. It is the longest inline script in
   // the repo outside index.html and key.html — the whole curriculum, the chart
   // drawing, the drills and the backtester — so a SyntaxError in it would leave
   // a page that looks complete and answers nothing.
-  const pages = ['key.html', 'letter.html', 'admin-stats.html', 'landing.html', 'herbs.html', 'tax.html', 'trading-school.html'];
+  const pages = ['key.html', 'letter.html', 'admin-stats.html', 'landing.html', 'herbs.html', 'tax.html', 'trading-school.html', 'game3d.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

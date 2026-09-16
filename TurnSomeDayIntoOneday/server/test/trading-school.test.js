@@ -138,7 +138,7 @@ test('six levels, beginner to market maker, with every lesson whole', () => {
       }
     }
   }
-  assert.strictEqual(lessons, 38);
+  assert.strictEqual(lessons, 45);
 });
 
 test('each level test is six whole questions, and the answers line up', () => {

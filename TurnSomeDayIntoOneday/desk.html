@@ -89,6 +89,17 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .ask-a.on{display:block}
 .ask-who{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin-bottom:5px}
 .ask-fine{font-size:.6875rem;color:var(--tm);margin:0 14px 14px;line-height:1.6}
+.picrow{margin:9px 14px 0;padding:10px;border-radius:12px;border:1px dashed var(--bdr2);background:var(--s1)}
+.picrow.has{border-style:solid}
+.picbtn{font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-t);background:var(--acc-b);border:none;border-radius:10px;padding:9px 13px;cursor:pointer}
+.picnote{font-size:.75rem;color:var(--tm);margin-top:8px;line-height:1.5}
+.picnote.err{color:var(--red-t)}
+.pichold{display:flex;align-items:center;gap:10px}
+.pichold img{width:66px;height:66px;object-fit:cover;border-radius:9px;border:1px solid var(--bdr);flex:0 0 auto;background:var(--s2)}
+.pichold .pictxt{flex:1;min-width:0}
+.pichold .pictxt b{display:block;font-size:.8125rem;font-weight:600;color:var(--tp)}
+.pichold .pictxt span{display:block;font-size:.6875rem;color:var(--tm);margin-top:3px;line-height:1.45}
+.picfine{font-size:.6875rem;color:var(--tm);margin:8px 0 0;line-height:1.6}
 /* ── THE FEED ────────────────────────────────────────────────────────────────
    The candles. One row per timeframe: last close, and the low-to-high of what
    came back, which is a fact about the bars and not an opinion about them. */
@@ -216,6 +227,19 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <span class="chip" data-q="Read the structure off the bars: is this a run of higher highs and higher lows pushing into the old high without taking it, with the last bars losing size, and what would end it?">Is this extended?</span>
       <span class="chip" data-q="Read me the candles you have: what are the four timeframes doing, and what do they agree on?">What does the feed say?</span>
       <span class="chip" data-q="Read my own trade log back to me. What do my numbers show, and what is the one thing to change?" data-sys="trade">What does my log say?</span>
+    </div>
+    <div class="picrow" id="picRow">
+      <input type="file" id="picIn" accept="image/*" style="display:none">
+      <button class="picbtn" id="picAdd" type="button">+ Add a chart picture</button>
+      <div class="pichold" id="picHeld" style="display:none">
+        <img id="picImg" alt="The chart you added">
+        <div class="pictxt">
+          <b>Your chart</b>
+          <span id="picMeta"></span>
+        </div>
+        <button class="del" id="picDel" type="button">Remove</button>
+      </div>
+      <p class="picfine" id="picFine">A picture you add is sent to Google with your question &mdash; that chart only, nothing else from your phone. Take it off and it stops being sent.</p>
     </div>
     <button class="ask-go" id="askGo">Ask</button>
     <div class="ask-a" id="askA"></div>
@@ -840,7 +864,7 @@ var DESK_SYS=[
 '- You may never say a reversal, a pullback or a continuation is coming, and never put a probability on one. Nothing on this page predicts. The only thing that turns a read into a trade is his own 5m trigger, and where he is wrong comes first as always.',
 '',
 'WHAT YOU NEVER DO',
-'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, and the ones he typed himself. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
+'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, the ones he typed himself, and a price you can actually read in a picture he attached himself - and a number off a picture is always said to be off his screenshot, never passed off as a feed number. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
 '2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down. Never say a reversal, a pullback or a continuation is coming, and never put a probability on one — that is a forecast and this page does not make them.',
 '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
 '4. Never size a position and never turn risk into money. Risk is the distance to his stop, in R or in points — never in what it could make.',
@@ -849,6 +873,7 @@ var DESK_SYS=[
 '7. Never tell him he is finished, hopeless, or no good at this. A bad read is a bad read, not a verdict on him.',
 '8. He already knows you are not his broker and not a licensed adviser, so do not open with a disclaimer or repeat one. Give him the honest read instead.',
 '9. The structure block and the session block are the only basis you have for structure and for timing. If either says it was not computed, say you cannot read structure or the session rather than describing one from nowhere.',
+'10. A picture he sends is his own chart, and it is not a forecast. You may read shapes, levels and swings off it, and you may say what is too small, cut off or unlabelled to read. You may never quote a price off a picture as though it were a feed number, and never claim it is on a timeframe it does not label. When no picture is attached, say you cannot see his chart rather than describing one.',
 '',
 'HOW YOU ANSWER',
 '- First line: the answer. Which of his setups this is, by the name he gave it, or that it is not one of them.',
@@ -862,8 +887,12 @@ var DESK_SYS=[
 '- Keep it his desk: refer to his setups by the names he gave them, never yours.'
 ].join('\n');
 
+function picText(){
+  if(!PIC) return 'NO CHART PICTURE IS ATTACHED. You cannot see his chart, so do not describe one and do not answer as though you had.';
+  return 'A CHART PICTURE IS ATTACHED: a screenshot of his own broker chart, sent with this question. Read it as the chart in front of him, and let it outrank the CANDLES block - when the two disagree, his chart is what he is actually looking at. Say plainly when something in it is too small, blurry or cut off to read instead of guessing at it. Anything you read off it is read off a picture: say so, and do not pass it off as a feed number.';
+}
 function askSystem(extra){
-  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+'\n'+sessionText()+'\n\n'+tradesText()+'\n'+nowText();
+  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+'\n'+sessionText()+'\n\n'+tradesText()+'\n'+nowText()+'\n\n'+picText();
 }
 
 /* ---------- the setups list --------------------------------------------- */
@@ -925,6 +954,88 @@ function closeForm(){
   document.getElementById('form').style.display='none';
 }
 
+/* ---------- the chart picture -------------------------------------------
+   Jacques, 17 Sep 2026, asked and answered: yes, a chart screenshot goes to the
+   AI. It is the only picture that leaves this page. Three things are deliberate:
+   it is shrunk on the phone before it is sent (a 12 megapixel photo of a screen
+   costs money and reads worse than a screenshot), it goes only with a question
+   he asks while it is attached, and the page says out loud where it goes. */
+var PIC=null, PIC_MAX_EDGE=1200, PIC_MAX_BYTES=900000;
+
+function picNote(msg, bad){
+  var el=document.getElementById('picFine');
+  if(!el) return;
+  if(!msg){ el.innerHTML='A picture you add is sent to Google with your question &mdash; that chart only, nothing else from your phone. Take it off and it stops being sent.'; return; }
+  el.textContent=msg;
+  el.style.color=bad?'var(--red-t)':'var(--tm)';
+}
+
+/* Shrunk here, not on the server: a phone screenshot is often 12 megapixels,
+   and the model reads a 1200px chart better than it reads the full one. */
+function shrinkPic(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), im=new Image();
+    im.onload=function(){
+      try{
+        var w=im.naturalWidth||0, h=im.naturalHeight||0;
+        if(!w||!h) throw new Error('no size');
+        var s=Math.min(1, PIC_MAX_EDGE/Math.max(w,h));
+        var c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(w*s)); c.height=Math.max(1,Math.round(h*s));
+        c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        var out=c.toDataURL('image/jpeg',0.75);
+        res({data:out.split(',')[1],media:'image/jpeg',url:out,w:c.width,h:c.height});
+      }catch(e){ URL.revokeObjectURL(url); rej(e); }
+    };
+    im.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('not an image')); };
+    im.src=url;
+  });
+}
+
+function paintPic(){
+  var row=document.getElementById('picRow'), add=document.getElementById('picAdd'),
+      held=document.getElementById('picHeld'), img=document.getElementById('picImg'),
+      meta=document.getElementById('picMeta'), sub=document.getElementById('askSub');
+  if(!row) return;
+  var on=!!PIC;
+  row.className='picrow'+(on?' has':'');
+  if(add) add.style.display=on?'none':'inline-block';
+  if(held) held.style.display=on?'flex':'none';
+  if(on){
+    if(img) img.src=PIC.url;
+    if(meta) meta.textContent=PIC.w+' by '+PIC.h+' - read off your screenshot, not from the feed';
+    if(sub) sub.textContent='Reads your setups, the chart above, and the picture you added';
+    picNote('');
+  }else{
+    if(sub) sub.textContent='Reads your setups and the chart above';
+  }
+}
+
+(function(){
+  var inp=document.getElementById('picIn'), add=document.getElementById('picAdd'),
+      del=document.getElementById('picDel');
+  if(add&&inp) add.addEventListener('click',function(){ inp.click(); });
+  if(inp) inp.addEventListener('change',async function(){
+    var f=inp.files&&inp.files[0];
+    if(!f) return;
+    picNote('Reading that picture...');
+    try{
+      var p=await shrinkPic(f);
+      if(p.data.length*0.75>PIC_MAX_BYTES){
+        picNote('That one is too big even shrunk. A screenshot works better than a photo of a screen.', true);
+      }else{
+        PIC=p; paintPic();
+      }
+    }catch(e){
+      picNote('That file could not be read as a picture. A screenshot works.', true);
+    }
+    inp.value='';
+  });
+  if(del) del.addEventListener('click',function(){ PIC=null; paintPic(); picNote(''); });
+})();
+paintPic();
+
 /* ---------- the ask box -------------------------------------------------- */
 var BUSY=false, HEAD='<span class="ask-who">Trading assistant</span>';
 async function ask(prefill, systemText){
@@ -937,21 +1048,33 @@ async function ask(prefill, systemText){
   aEl.className='ask-a on';
   aEl.innerHTML=HEAD+'Working it through…';
   try{
-    /* The setups and the chart ride along with every question, so a follow-up
-       is answered against the same rules as the first one. */
+    /* The setups, the chart and the picture he added ride along with every
+       question, so a follow-up is answered against the same rules as the first
+       one - and the picture is sent only while it is attached. */
+    var content=[{type:'text',text:q}];
+    if(PIC) content.push({type:'image',media_type:PIC.media,data:PIC.data});
     var r=await fetch('/api/chat',{
       method:'POST',
       credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         system:[{type:'text',text:systemText||askSystem()}],
-        messages:[{role:'user',content:q}]
+        messages:[{role:'user',content:content}]
       })
     });
     if(r.status===429){ aEl.innerHTML=HEAD+"That is today's lot of answers. It comes back tomorrow."; return }
     if(r.status===401){ aEl.innerHTML=HEAD+'Sign in again and this will answer.'; return }
     if(r.status===403){ aEl.innerHTML=HEAD+'Not switched on for this account.'; return }
-    if(!r.ok) throw new Error('http '+r.status);
+    if(!r.ok){
+      /* When the server says why - a picture too big, or the wrong kind - that
+         sentence is the useful thing on screen, and it is shown as written. It
+         is never replaced with something invented. */
+      var why='';
+      try{ why=((await r.json())||{}).error||''; }catch(e){}
+      if(!why) why=r.status===413?'That picture is too big. Send a smaller one.':'No answer came back. Try again in a moment.';
+      aEl.innerHTML=HEAD+esc(why);
+      return;
+    }
     var d=await r.json();
     var t=((d.content&&d.content[0]&&d.content[0].text)||'').trim();
     if(!t) throw new Error('empty');

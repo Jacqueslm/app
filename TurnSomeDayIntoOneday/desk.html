@@ -168,6 +168,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <span class="chip" data-q="What am I missing on the 4h, 1h, 15m and 5m here?">What am I missing?</span>
       <span class="chip" data-q="Talk me out of this trade, honestly.">Talk me out of it</span>
       <span class="chip" data-q="Read me the candles you have: what are the four timeframes doing, and what do they agree on?">What does the feed say?</span>
+      <span class="chip" data-q="Read my own trade log back to me. What do my numbers show, and what is the one thing to change?" data-sys="trade">What does my log say?</span>
     </div>
     <button class="ask-go" id="askGo">Ask</button>
     <div class="ask-a" id="askA"></div>
@@ -213,7 +214,48 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
   </div>
 
   <div class="ft">
-    Trading Desk — private. Built for Jacques.<br>
+    Trading Desk — private.  <!-- MY TRADES.
+       What he actually did, one entry per trade, and the review that marks the
+       decision rather than the money. Everything on this page is his own
+       arithmetic: points from entry to stop, and R. No win rate is printed
+       here on purpose — a handful of trades cannot produce one, and a
+       percentage would be an invented figure wearing a measurement's clothes. -->
+  <div class="sec">
+    <div class="sec-hd">My trades</div>
+    <div id="tlist"></div>
+    <div id="tnone" class="empty">
+      Nothing logged yet. Write a trade down after it is closed — or while it is
+      open, and add the exit when it comes. The review marks the decision, not
+      whether it paid.
+    </div>
+    <button class="txtbtn" id="addT">+ Log a trade</button>
+    <div class="f" id="tform" style="display:none">
+      <label for="tMk">Market</label>
+      <input id="tMk" placeholder="e.g. NQ" autocomplete="off">
+      <label for="tSu">Which setup was it</label>
+      <input id="tSu" placeholder="the name you gave it" autocomplete="off">
+      <div class="saved" id="tSuHint" style="font-size:.6875rem;color:var(--tm);margin-top:6px"></div>
+      <label for="tDir">Direction</label>
+      <select id="tDir">
+        <option value="long">Long</option>
+        <option value="short">Short</option>
+      </select>
+      <label for="tEn">Entry</label>
+      <input id="tEn" inputmode="decimal" placeholder="e.g. 21480.25" autocomplete="off">
+      <label for="tSt">Stop</label>
+      <input id="tSt" inputmode="decimal" placeholder="where you were wrong" autocomplete="off">
+      <label for="tTg">Target</label>
+      <input id="tTg" inputmode="decimal" placeholder="optional" autocomplete="off">
+      <label for="tEx">Exit</label>
+      <input id="tEx" inputmode="decimal" placeholder="leave empty while it is open" autocomplete="off">
+      <label for="tNote">What you saw, and why you took it</label>
+      <textarea id="tNote" placeholder="The read you acted on. This is the part the review works from."></textarea>
+      <button class="txtbtn" id="saveT">Save the trade</button>
+      <button class="txtbtn" id="cancelT" style="background:var(--s1);color:var(--ts)">Cancel</button>
+    </div>
+  </div>
+
+ Built for Jacques.<br>
     Progress and notes stay on this device.<br>
     It is a set of rules and a reader, not a signal service. Every trade is yours.
   </div>
@@ -463,8 +505,8 @@ var DESK_SYS=[
 '- Keep it his desk: refer to his setups by the names he gave them, never yours.'
 ].join('\n');
 
-function askSystem(){
-  return DESK_SYS+'\n\n'+setupsText()+'\n'+feedText()+'\n'+nowText();
+function askSystem(extra){
+  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+'\n'+tradesText()+'\n'+nowText();
 }
 
 /* ---------- the setups list --------------------------------------------- */
@@ -528,7 +570,7 @@ function closeForm(){
 
 /* ---------- the ask box -------------------------------------------------- */
 var BUSY=false, HEAD='<span class="ask-who">Trading assistant</span>';
-async function ask(prefill){
+async function ask(prefill, systemText){
   var qEl=document.getElementById('askQ'), aEl=document.getElementById('askA'), go=document.getElementById('askGo');
   if(!qEl||!aEl) return;
   var q=(prefill||qEl.value||'').trim();
@@ -545,7 +587,7 @@ async function ask(prefill){
       credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        system:[{type:'text',text:askSystem()}],
+        system:[{type:'text',text:systemText||askSystem()}],
         messages:[{role:'user',content:q}]
       })
     });
@@ -565,7 +607,275 @@ async function ask(prefill){
   }
 }
 
-/* ---------- wiring ------------------------------------------------------- */
+/* ---------- wiring ------------------------------------------------------- *//* ---------- the trade log -------------------------------------------------
+   Jacques: "an analyzer ... where I load my actual trades and it analyzes them
+   for me, where I went wrong and what I can improve".
+
+   So this is the record and the review. Two things it does NOT do, on purpose:
+
+     1. It never grades the RESULT. A trade that paid can still have been a bad
+        decision and a loss can be a good one; grading the money teaches
+        hindsight, which is the most expensive lesson there is. The review is
+        told to mark the decision with what was visible at the time.
+     2. It never invents a number, and it never turns his record into a
+        statistic. The only arithmetic on this page is his own: the distance
+        from his entry to his stop, in points, and how far the trade went in R.
+        No win rate, no expectancy, no average, no "edge" — a handful of trades
+        cannot produce one, and printing a percentage would be dressing an
+        invented figure up as a measurement.
+
+   And nothing here knows his account, his size or his money, and nothing ever
+   will. Risk is points and R, never pounds in his pocket. */
+var K_TRADES='tsid.desk.trades';
+var TRADES=load(K_TRADES, []);
+if(!Array.isArray(TRADES)) TRADES=[];
+
+function two(v){ return (Math.round(v*100)/100).toFixed(2) }
+function numOf(v){
+  if(v===null||v===undefined) return null;
+  var s=String(v).replace(/[,\s]/g,'');
+  if(!s) return null;
+  var n=parseFloat(s);
+  return isFinite(n)?n:null;
+}
+/* The risk, in points: the distance from his entry to his stop. Nothing here
+   knows what a point is worth to him and it is never asked. */
+function riskPoints(t){
+  if(!t||t.en===null||t.st===null) return null;
+  var d=Math.abs(t.en-t.st);
+  return d>0?d:null;
+}
+/* R, from his own numbers: how far it went his way, divided by what he was
+   risking. Null when there is no exit, no stop, or the stop sits on the entry —
+   never a made-up number, and never a division by zero. */
+function rOf(t){
+  if(!t||t.ex===null) return null;
+  var risk=riskPoints(t);
+  if(!risk) return null;
+  return (t.dir==='short' ? (t.en-t.ex) : (t.ex-t.en))/risk;
+}
+function closedTrades(){
+  return TRADES.filter(function(t){ return rOf(t)!==null });
+}
+function rText(t){
+  var r=rOf(t);
+  if(r===null) return t&&t.ex===null ? 'open — no exit written down' : 'no result: needs an entry and a stop';
+  return (r>=0?'+':'')+two(r)+'R';
+}
+
+/* One line per trade, for the assistant. His words and his numbers only. */
+function tradeLine(t){
+  var bits=[t.mk||'market not said', t.dir];
+  if(t.su) bits.push('setup he calls "'+t.su+'"');
+  bits.push('entry '+(t.en===null?'not said':two(t.en)));
+  bits.push('stop '+(t.st===null?'not said':two(t.st)));
+  if(t.tg!==null&&t.tg!==undefined) bits.push('target '+two(t.tg));
+  bits.push('exit '+(t.ex===null?'not recorded':two(t.ex)));
+  bits.push('result '+rText(t));
+  return bits.join(', ')+(t.note?('. What he saw: '+t.note):'');
+}
+
+/* The whole record, in the assistant's instructions on every question. Compact
+   on purpose: the log is context, not the subject, unless he asks about it. */
+function tradesText(){
+  var out=['HIS OWN TRADE LOG — trades he has written down on this page, and nothing else. It is a record of what he did. It is not a backtest, not a sample and not a statistic, and you never dress it up as one.'];
+  out.push('');
+  if(!TRADES.length){
+    out.push('NOTHING LOGGED YET. He has not written a single trade down. If he asks you to review one, or what his trades say, say plainly that the log is empty and ask him to write the trade down first. Do not invent a trade, a result or a pattern to review.');
+    out.push('');
+    return out.join('\n');
+  }
+  var cl=closedTrades(), missing=TRADES.length-cl.length;
+  out.push(TRADES.length+' written down, '+cl.length+' with a result, '+missing+' still open or missing a price (those are counted nowhere).');
+  for(var i=0;i<TRADES.length;i++) out.push('  '+i+': '+tradeLine(TRADES[i]));
+  out.push('');
+  out.push('Everything above came from him, including the risk in points and the R. Work out nothing else from it — no average, no expectancy, no win rate, no "edge". '+TRADES.length+(TRADES.length===1?' trade is':' trades are')+' not enough to mean anything, and you say so if he asks what it proves.');
+  out.push('');
+  return out.join('\n');
+}
+
+/* One trade in full, for the review. The page hands over what he typed and says
+   out loud which parts are missing, so the review can say what it cannot judge
+   instead of filling the gap in. */
+function tradeText(t){
+  var risk=riskPoints(t), r=rOf(t);
+  return [
+    'THE TRADE BEING REVIEWED. Every line below came from him; nothing else about this trade is known.',
+    '',
+    'Market: '+(t.mk||'not said'),
+    'Direction: '+t.dir,
+    'Setup he says it was: '+(t.su||'he did not name one'),
+    'Entry: '+(t.en===null?'not said':two(t.en)),
+    'Stop: '+(t.st===null?'not said':two(t.st)),
+    'Target: '+(t.tg===null||t.tg===undefined?'not given':two(t.tg)),
+    'Exit: '+(t.ex===null?'not recorded — it is still open, or he has not written it down':two(t.ex)),
+    'Risk, in points: '+(risk===null?'cannot be worked out: entry or stop is missing':two(risk)),
+    'Result, in R: '+(r===null?'cannot be worked out yet':(r>=0?'+':'')+two(r)+'R'),
+    'What he saw, in his words: '+(t.note||'not written down'),
+    '',
+    'The risk and the R are arithmetic on his own numbers, nothing more. If a field the review needs is missing, name it and review what is there.',
+    ''
+  ].join('\n');
+}
+
+/* What the review is and is not allowed to do. Same house rules as the rest of
+   the desk, plus the one that matters here: grade the decision, never the
+   result. */
+var TRADE_SYS=[
+  'HE IS ASKING YOU TO REVIEW ONE OF HIS OWN TRADES.',
+  '',
+  'MARK THE DECISION, NOT THE RESULT. Judge it on what was visible at the time he took it. A trade that paid can still have been a bad decision and a loss can be a good one — when that is the case, say so plainly, because that is the lesson.',
+  '',
+  'CHECK THESE, IN THIS ORDER, AND SAY EACH ONE:',
+  '1. Was it one of his setups as he wrote it? Name it, or say it was not one of them.',
+  '2. Was the entry at his own trigger, or did he get in early on the idea?',
+  '3. Was the stop where his setup says the stop goes, and did he hold the risk he planned?',
+  'Then the arithmetic he handed you — the risk in points and the R — as his numbers, not yours.',
+  '',
+  'WHAT YOU NEVER DO:',
+  '1. Never invent a price, a level, a statistic, a study or a backtest. Never compute an average, an expectancy or a win rate from his log: there are far too few trades for that to mean anything, and if he asks what his record proves you say exactly that.',
+  '2. Never size a position and never turn risk into money. Points and R only.',
+  '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If it reads like chasing — entering before the trigger, widening a stop, adding after a loss — name that first and plainly, then answer the rest.',
+  '4. Never tell him he is finished, hopeless or no good at this. The mistakes that show up in a trade are the ordinary ones and they are learnable.',
+  '5. Never promise an outcome, and never put a probability on the next trade.',
+  '',
+  'HOW YOU ANSWER:',
+  '- Short lines, each with its label: Setup, Entry, Stop, Risk, Result, and then the change.',
+  '- End with ONE thing to do differently next time — the single change with the most behind it, not a list of five, and something he can actually do on the next trade.',
+  '- If the record is missing something you need, say which field is missing and review the rest. Do not guess the missing number.',
+  '- Plain English, always.'
+].join('\n');
+
+/* ---------- the list ----------------------------------------------------- */
+var editingT=null;
+function renderTrades(){
+  var list=document.getElementById('tlist'), none=document.getElementById('tnone');
+  if(!list) return;
+  if(!TRADES.length){
+    list.innerHTML='';
+    if(none) none.style.display='block';
+    return;
+  }
+  if(none) none.style.display='none';
+  var h='';
+  /* Newest first: the trade he has just taken is the one he wants to see. */
+  for(var i=TRADES.length-1;i>=0;i--){
+    var t=TRADES[i];
+    h+='<div class="card"><div class="row-txt" style="padding:13px 14px 0">'
+      +'<b>'+esc(t.mk||'Trade')+(t.dir==='short'?' short':' long')+'</b>'
+      +'<span>'+esc(t.su||'no setup named')+(t.d?' &middot; '+esc(t.d):'')+'</span></div>'
+      +'<div class="body" style="display:block;border-top:none;padding-top:10px">'
+      +'<div class="lbl">Result</div><p><b>'+esc(rText(t))+'</b></p>';
+    var risk=riskPoints(t);
+    if(risk!==null) h+='<div class="lbl">Risk</div><p>'+esc(two(risk))+' points from entry to stop</p>';
+    if(t.en!==null||t.st!==null||t.tg!==null||t.ex!==null){
+      h+='<div class="lbl">The numbers you gave</div><p>'
+        +'entry '+esc(t.en===null?'—':two(t.en))
+        +' &middot; stop '+esc(t.st===null?'—':two(t.st))
+        +' &middot; target '+esc(t.tg===null||t.tg===undefined?'—':two(t.tg))
+        +' &middot; exit '+esc(t.ex===null?'—':two(t.ex))+'</p>';
+    }
+    if(t.note) h+='<div class="lbl">What you saw</div><p>'+esc(t.note)+'</p>';
+    h+='<button class="txtbtn" data-rev="'+i+'">Review this trade</button><br>'
+      +'<button class="del" data-tdel="'+i+'">Delete</button>'
+      +'</div></div>';
+  }
+  h+=logSummaryHtml();
+  list.innerHTML=h;
+}
+
+/* The record, added up — his own numbers and nothing else. The one figure it
+   refuses to print is a win rate. */
+function logSummaryHtml(){
+  if(!TRADES.length) return '';
+  var cl=closedTrades(), missing=TRADES.length-cl.length;
+  var total=0, by={}, i;
+  for(i=0;i<cl.length;i++){
+    var r=rOf(cl[i]);
+    total+=r;
+    var k=cl[i].su||'no setup named';
+    by[k]=(by[k]||0)+r;
+  }
+  var h='<div class="big"><b>Your own record</b>'
+    + TRADES.length+(TRADES.length===1?' trade':' trades')+' written down. '
+    + cl.length+' with a result'+(missing?(', '+missing+' still open or missing a price — counted nowhere'):'')+'. '
+    + (cl.length ? ('Added up: '+(total>=0?'+':'')+two(total)+'R across those.') : 'Nothing to add up yet.')
+    + '<span style="display:block;margin-top:6px">This is your own arithmetic on the trades you wrote down. It is not a backtest and there is no win rate here on purpose — a handful of trades proves nothing either way.</span>'
+    + '</div>';
+  var keys=Object.keys(by);
+  if(keys.length){
+    var rows='';
+    for(i=0;i<keys.length;i++) rows+=esc(keys[i])+': '+(by[keys[i]]>=0?'+':'')+two(by[keys[i]])+'R<br>';
+    h+='<div class="big"><b>By setup</b>'+rows+'</div>';
+  }
+  return h;
+}
+
+/* ---------- the form ----------------------------------------------------- */
+function openTrade(){
+  /* It opens either way. Logging the trade he has just taken matters more than
+     the setup list being tidy, and the hint tells him which state he is in —
+     the review will say "he did not name one of his setups" rather than
+     pretending the trade matched something he never wrote. */
+  var hint=document.getElementById('tSuHint');
+  if(hint) hint.textContent = SETUPS.length
+    ? 'Yours: '+SETUPS.map(function(s){ return s.n||'Untitled' }).join(', ')
+    : 'You have not written any setups yet — name this one in your own words for now.';
+  ['tMk','tSu','tEn','tSt','tTg','tEx','tNote'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var d=document.getElementById('tDir'); if(d) d.value='long';
+  var f=document.getElementById('tform');
+  if(f){ f.style.display='block'; f.scrollIntoView({behavior:'smooth',block:'center'}) }
+}
+function closeTrade(){
+  var f=document.getElementById('tform');
+  if(f) f.style.display='none';
+}
+function readNum(id){
+  var el=document.getElementById(id);
+  return numOf(el?el.value:'');
+}
+function readStr(id){
+  var el=document.getElementById(id);
+  return el?String(el.value||'').trim():'';
+}
+function saveTrade(){
+  var dirEl=document.getElementById('tDir');
+  var t={
+    d:new Date().toISOString().slice(0,10),
+    mk:readStr('tMk'),
+    su:readStr('tSu'),
+    dir:(dirEl&&dirEl.value==='short')?'short':'long',
+    en:readNum('tEn'),
+    st:readNum('tSt'),
+    tg:readNum('tTg'),
+    ex:readNum('tEx'),
+    note:readStr('tNote')
+  };
+  /* A trade with no entry at all is not a trade he can review, and the page
+     says so instead of storing a row of blanks. */
+  if(t.en===null){
+    var e=document.getElementById('tEn'); if(e) e.focus();
+    return;
+  }
+  TRADES.push(t);
+  save(K_TRADES, TRADES);
+  closeTrade();
+  renderTrades();
+}
+
+/* ---------- the review --------------------------------------------------- */
+/* Returns the ask's promise so the answer can be waited on — the review is not
+   finished when the request goes out. */
+function reviewTrade(i){
+  var t=TRADES[i];
+  if(!t) return Promise.resolve();
+  return ask('Review this trade. Where was the decision wrong, and what is the one thing to do differently next time?',
+             askSystem(TRADE_SYS+'\n\n'+tradeText(t)));
+}
+
+
 document.addEventListener('click',function(e){
   var t=e.target;
   var op=t.closest?t.closest('[data-open]'):null;
@@ -582,14 +892,31 @@ document.addEventListener('click',function(e){
     }
     return;
   }
-  var tf=t.closest?t.closest('#sTf .tf'):null;
+  var tf=t.closest?t.closest('#sTf .tf'):null;  var rv=t.closest?t.closest('[data-rev]'):null;
+  if(rv){ reviewTrade(parseInt(rv.getAttribute('data-rev'),10)); return }
+  var td=t.closest?t.closest('[data-tdel]'):null;
+  if(td){
+    var ti=parseInt(td.getAttribute('data-tdel'),10);
+    var tr=TRADES[ti];
+    if(tr&&window.confirm('Delete this trade from the log? The review will not have it any more.')){
+      TRADES.splice(ti,1); save(K_TRADES,TRADES); renderTrades();
+    }
+    return;
+  }
+
   if(tf){
     var v=tf.getAttribute('data-tf'), at=picked.indexOf(v);
     if(at>=0) picked.splice(at,1); else picked.push(v);
     paintTf(); return;
   }
   var ch=t.closest?t.closest('.chip[data-q]'):null;
-  if(ch){ ask(ch.getAttribute('data-q')); return }
+  if(ch){
+    /* The log chip answers under the review rules: they are the only place
+       the trade record is allowed to be read from. */
+    var withTrades = ch.getAttribute('data-sys')==='trade';
+    ask(ch.getAttribute('data-q'), withTrades ? askSystem(TRADE_SYS) : undefined);
+    return;
+  }
 });
 
 document.getElementById('addS').onclick=function(){ openForm() };
@@ -607,6 +934,9 @@ document.getElementById('askGo').onclick=function(){ ask() };
 document.getElementById('askQ').addEventListener('keydown',function(e){
   if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask() }
 });
+document.getElementById('addT').onclick=function(){ openTrade() };
+document.getElementById('cancelT').onclick=function(){ closeTrade() };
+document.getElementById('saveT').onclick=function(){ saveTrade() };
 
 /* The feed: the button, Enter in the symbol field, and one load on open so the
    page is never sitting there looking like it has candles when it does not. */
@@ -632,6 +962,7 @@ var NOW=load(K_NOW,{});
 });
 
 render();
+renderTrades();
 </script>
 </body>
 </html>

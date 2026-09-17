@@ -339,6 +339,35 @@ app.get('/school.html', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'trading-school.html'));
 });
 
+// The Trading Desk — private, and the same door once more.
+//
+// 17 Sep 2026. Jacques: "something that helps me make better trading decisions
+// that knows all my set ups and can back test for me and an indicator that
+// aligns with it ... using 4hr 1hr 15mon and 5 min." This is the first piece:
+// his setups written down, and the assistant that reads them. The multi-
+// timeframe indicator and the backtest are the steps after it, and both read
+// what he writes on this page — which is why it comes first.
+//
+// Its own page rather than a screen inside the app or the trading game, for the
+// same reason the school is: the game is the practice, the school is the
+// teaching, and this is the desk. It sits behind exactly the rule everything
+// private here sits behind — signed in AND on the allowlist, or you go to /app
+// without learning the page is there.
+//
+// Both addresses, for the reason spelled out above the herb routes: this page is
+// a real file as well as a clean URL, and express.static below would serve the
+// file name unguarded if the route were not registered first.
+app.get('/desk', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'desk.html'));
+});
+app.get('/desk.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'desk.html'));
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 // The Key — private. Signed in AND on the allowlist, or you go to /app without

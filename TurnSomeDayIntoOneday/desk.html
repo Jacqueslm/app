@@ -1,0 +1,474 @@
+<!-- trading desk:private -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="cache-control" content="no-cache, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Trading Desk — private</title>
+<meta name="theme-color" content="#0f0c29">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0c29'/%3E%3Cpath d='M16 40h32M16 24h32M22 44V20M42 44V20' stroke='%237ee8a2' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.18);
+  --acc:#534AB7;--acc-t:#3C3489;--acc-b:#EEEDFE;
+  --ok:#E1F5EE;--ok-t:#085041;
+  --warn:#FAEEDA;--warn-t:#633806;
+  --red:#FCEBEB;--red-t:#7A1F1F;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,.09);--bdr2:rgba(255,255,255,.18);
+  --acc:#AFA9EC;--acc-t:#AFA9EC;--acc-b:#26215C;
+  --ok:#04342C;--ok-t:#5DCAA5;
+  --warn:#2e1f05;--warn-t:#EFA527;
+  --red:#3a1616;--red-t:#f0a8a8;
+}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0f0c29;font-family:var(--f)}
+body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:460px;background:var(--s0);min-height:100dvh;color:var(--tp);padding-bottom:60px}
+.hdr{position:sticky;top:0;z-index:20;background:var(--s0);border-bottom:1px solid var(--bdr);padding:12px 16px 10px;display:flex;align-items:center;gap:10px}
+.hdr h1{font-size:1.0625rem;font-weight:600;line-height:1.2}
+.hdr p{font-size:.75rem;color:var(--tm);margin-top:2px}
+.back{font-size:1.375rem;color:var(--tm);cursor:pointer;text-decoration:none;padding:2px 4px}
+.sec{padding:2px 16px 6px}
+.sec-hd{font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);font-weight:600;padding:14px 0 8px}
+.card{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin-bottom:9px;overflow:hidden}
+.row{padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px}
+.row-txt{flex:1;min-width:0}
+.row-txt b{font-size:.9375rem;font-weight:600;display:block}
+.row-txt span{font-size:.8125rem;color:var(--tm);display:block;margin-top:3px;line-height:1.45}
+.chev{color:var(--tm);font-size:1rem;flex:0 0 auto;padding-top:2px;transition:transform .18s}
+.card.open .chev{transform:rotate(90deg)}
+.body{display:none;padding:0 14px 14px;border-top:1px solid var(--bdr)}
+.card.open .body{display:block}
+.lbl{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);font-weight:600;margin:12px 0 4px}
+.body p{font-size:.875rem;line-height:1.55;color:var(--ts)}
+.body p b{color:var(--tp)}
+.big{padding:14px;border-radius:14px;font-size:.875rem;line-height:1.55;margin-bottom:10px;border:1px solid transparent}
+.warnbox{background:var(--warn);color:var(--warn-t)}
+.okbox{background:var(--ok);color:var(--ok-t)}
+.big b{display:block;margin-bottom:5px;font-size:.9375rem}
+.txtbtn{display:inline-block;font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-t);background:var(--acc-b);border:none;border-radius:10px;padding:9px 14px;cursor:pointer;margin-top:10px}
+.empty{padding:30px 20px;text-align:center;color:var(--tm);font-size:.875rem;line-height:1.6}
+.f{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px}
+.f label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin:10px 0 4px}
+.f label:first-child{margin-top:0}
+.f input,.f textarea,.f select{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
+.f textarea{min-height:56px;resize:vertical}
+.f input:focus,.f textarea:focus,.f select:focus{outline:2px solid var(--acc);outline-offset:1px}
+.tfpick{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.tf{font-size:.8125rem;padding:7px 13px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.tf.on{background:var(--acc-b);border-color:var(--acc-b);color:var(--acc-t);font-weight:600}
+.pill{display:inline-block;font-size:.6875rem;padding:3px 9px;border-radius:999px;background:var(--s1);color:var(--ts);border:1px solid var(--bdr);margin:0 4px 4px 0}
+.del{font:inherit;font-size:.75rem;color:var(--red-t);background:none;border:none;cursor:pointer;padding:4px 0;margin-top:8px}
+.ft{padding:26px 16px 40px;text-align:center;font-size:.6875rem;color:var(--tm);line-height:1.7}
+/* ── ASK ──────────────────────────────────────────────────────────────────────
+   The app's own AI, pointed at this page instead of the Friendly tab.
+   Same server route (/api/chat), so the same daily brake covers it. */
+.ask{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin:12px 16px 0;overflow:hidden}
+.ask-hd{display:flex;align-items:center;gap:9px;padding:12px 14px}
+.ask-hd b{font-size:.9375rem;font-weight:600}
+.ask-hd .sub{font-size:.75rem;color:var(--tm);flex:1;min-width:0;line-height:1.35}
+.ask-badge{width:22px;height:22px;border-radius:999px;background:var(--acc-b);color:var(--acc-t);display:flex;align-items:center;justify-content:center;font-size:.8125rem;font-weight:700;flex:0 0 auto}
+.ask textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp);min-height:66px;resize:vertical;margin:12px 14px 0;width:calc(100% - 28px)}
+.ask textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+.ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin:9px 14px 0}
+.chip{font-size:.75rem;padding:6px 11px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.chip:active{background:var(--acc-b);color:var(--acc-t)}
+.ask-go{font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-b);background:var(--acc);border:none;border-radius:10px;padding:10px 16px;cursor:pointer;margin:10px 14px 14px}
+.ask-go[disabled]{opacity:.5}
+.ask-a{display:none;font-size:.875rem;line-height:1.6;color:var(--ts);margin:12px 14px 14px;padding-top:12px;border-top:1px solid var(--bdr)}
+.ask-a.on{display:block}
+.ask-who{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin-bottom:5px}
+.ask-fine{font-size:.6875rem;color:var(--tm);margin:0 14px 14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <a class="back" href="/app" title="Back to the app">&#8592;</a>
+    <div>
+      <h1>Trading Desk</h1>
+      <p>Your setups, and the assistant that reads them</p>
+    </div>
+  </div>
+
+  <!-- WHAT IS IN FRONT OF HIM RIGHT NOW.
+       Optional, and remembers itself, so it is filled once at the open of a
+       session and then rides along with every question asked in it. Without it
+       the assistant has nothing to read but his setups, and it is told to say
+       so rather than fill the gap in. -->
+  <div class="sec">
+    <div class="sec-hd">On the chart in front of you</div>
+    <div class="f">
+      <label for="dMk">Market and direction you are looking at</label>
+      <input id="dMk" placeholder="e.g. NQ, looking long" autocomplete="off">
+      <label for="dPx">Where price is right now</label>
+      <input id="dPx" placeholder="e.g. 21,480 — back at the range high it broke" autocomplete="off">
+      <label for="dRd">What you see (your read)</label>
+      <textarea id="dRd" placeholder="e.g. 4h took the overnight high, 1h has not closed back under it, 15m is compressing under it"></textarea>
+      <label for="dIn">Where you would be wrong</label>
+      <input id="dIn" placeholder="e.g. 1h close back inside the range" autocomplete="off">
+      <div class="saved" id="dSaved" style="font-size:.6875rem;color:var(--tm);margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- THE ASSISTANT -->
+  <div class="ask" id="ask">
+    <div class="ask-hd">
+      <span class="ask-badge">?</span>
+      <b>Trading assistant</b>
+      <span class="sub" id="askSub">Reads your setups and the chart above</span>
+    </div>
+    <textarea id="askQ" placeholder="Should I take this one?"></textarea>
+    <div class="ask-chips">
+      <span class="chip" data-q="Is this one of my setups? Which one, and what is missing?">Which setup is this?</span>
+      <span class="chip" data-q="Where does my stop go, and what makes this wrong?">Stop and invalidation</span>
+      <span class="chip" data-q="Is this a hold or a scalp, and why?">Hold or scalp</span>
+      <span class="chip" data-q="What am I missing on the 4h, 1h, 15m and 5m here?">What am I missing?</span>
+      <span class="chip" data-q="Talk me out of this trade, honestly.">Talk me out of it</span>
+    </div>
+    <button class="ask-go" id="askGo">Ask</button>
+    <div class="ask-a" id="askA"></div>
+    <p class="ask-fine">Its words are its own, kept between you and this page. It never invents a price, a level, a statistic or a backtest it has not run, and it has not run any.</p>
+  </div>
+
+  <!-- MY SETUPS -->
+  <div class="sec">
+    <div class="sec-hd">My setups</div>
+    <div id="list"></div>
+    <div id="none" class="empty">
+      Nothing written yet. Write your first setup below — the assistant works from
+      these by name, and it will tell you plainly when a chart is not one of them.
+    </div>
+    <button class="txtbtn" id="addS" style="margin-bottom:14px">+ Add a setup</button>
+    <div class="f" id="form" style="display:none">
+      <label for="sN">Name it the way you say it out loud</label>
+      <input id="sN" placeholder="e.g. London sweep and reclaim" autocomplete="off">
+      <label>Timeframes it lives on</label>
+      <div class="tfpick" id="sTf">
+        <span class="tf" data-tf="4h">4h</span>
+        <span class="tf" data-tf="1h">1h</span>
+        <span class="tf" data-tf="15m">15m</span>
+        <span class="tf" data-tf="5m">5m</span>
+      </div>
+      <label for="sR">What has to be true before you look for it</label>
+      <textarea id="sR" placeholder="The read. Where price has to be, what the higher timeframe has to be doing, what you refuse to take it without."></textarea>
+      <label for="sE">Where you enter</label>
+      <input id="sE" placeholder="e.g. first 5m close back above the swept level" autocomplete="off">
+      <label for="sS">Where you are wrong</label>
+      <input id="sS" placeholder="e.g. 15m close back under the level, or beyond the sweep wick" autocomplete="off">
+      <label for="sT">Where you take it</label>
+      <input id="sT" placeholder="e.g. the far side of the range; runner if 1h keeps it" autocomplete="off">
+      <label for="sH">Hold or scalp</label>
+      <select id="sH">
+        <option value="hold">Hold the move</option>
+        <option value="scalp">Scalp it</option>
+        <option value="either">Either — depends on the 1h</option>
+      </select>
+      <button class="txtbtn" id="saveS">Save the setup</button>
+      <button class="txtbtn" id="cancelS" style="background:var(--s1);color:var(--ts)">Cancel</button>
+    </div>
+  </div>
+
+  <div class="ft">
+    Trading Desk — private. Built for Jacques.<br>
+    Progress and notes stay on this device.<br>
+    It is a set of rules and a reader, not a signal service. Every trade is yours.
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   THE DESK — 17 Sep 2026.
+
+   Jacques: "something that helps me make better trading decisions that knows
+   all my set ups and can back test for me and an indicator that aligns with it,
+   letting me know high probability swings and zones and the best time to hold a
+   move or scalp using 4hr 1hr 15mon and 5 min."
+
+   This is the first piece of that, and the one everything else reads from: the
+   setups, written down once, in his own words. The assistant answers from them
+   by name. The indicator (next) will flag what he writes here, and the backtest
+   (after that) will run these setups over candles — which is why the setups are
+   written as rules rather than as notes.
+
+   The page holds no price feed and no candles. Nothing here invents a number.
+
+   Three things this page refuses to do, on purpose:
+     1. It will not invent a setup he did not write. If nothing he wrote matches
+        the chart, the assistant says so and stops.
+     2. It will not let a target come before an invalidation. Where he is wrong
+        is asked for before where he is right.
+     3. It will not let the assistant imply it checked anything. There is no
+        backtest yet, and it is told to say that rather than produce one.
+--------------------------------------------------------------------------- */
+
+/* ---------- storage: the setups, and today's chart ---------------------- */
+var K_SETUPS='tsid.desk.setups', K_NOW='tsid.desk.now';
+function load(key, fallback){
+  try{ var v=localStorage.getItem(key); return v?JSON.parse(v):fallback }catch(e){ return fallback }
+}
+function save(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)) }catch(e){}
+}
+var SETUPS=load(K_SETUPS, []);
+if(!Array.isArray(SETUPS)) SETUPS=[];
+
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function tfText(list){
+  if(!list||!list.length) return 'no timeframe set';
+  return list.map(function(t){ return t==='5m'?'5 min':t==='15m'?'15 min':t }).join(' and ');
+}
+var HOLD={hold:'Hold the move',scalp:'Scalp it',either:'Either, depends on the 1h'};
+
+/* ---------- the setups, as the assistant reads them ---------------------- */
+/* Written out plainly rather than as JSON, because it goes into instructions
+   and a model reads a labelled paragraph better than a brace of keys. Nothing
+   is added to what he wrote — no interpretation, no invented level. */
+function setupsText(){
+  if(!SETUPS.length) return 'HE HAS NOT WRITTEN ANY SETUPS YET. Say so in the first line and answer nothing else as if one of his setups matched.';
+  var out=['HIS SETUPS, in his own words. These are the only ones that count. Do not rename them, do not merge two of them, and do not invent a new one.',''];
+  for(var i=0;i<SETUPS.length;i++){
+    var s=SETUPS[i];
+    out.push((i+1)+'. '+s.n);
+    out.push('   Timeframes: '+tfText(s.tf));
+    if(s.r) out.push('   Has to be true first: '+s.r);
+    if(s.e) out.push('   Entry: '+s.e);
+    if(s.s) out.push('   Wrong if: '+s.s);
+    if(s.t) out.push('   Target: '+s.t);
+    out.push('   Hold or scalp: '+(HOLD[s.h]||HOLD.hold));
+    out.push('');
+  }
+  return out.join('\n');
+}
+
+/* ---------- the chart in front of him, as the assistant reads it --------- */
+function nowText(){
+  var m=val('dMk'), p=val('dPx'), r=val('dRd'), inv=val('dIn');
+  var out=['THE CHART HE IS LOOKING AT RIGHT NOW, in his own words.', ''];
+  out.push('Market: '+(m||'NOT SAID'));
+  out.push('Where price is: '+(p||'NOT SAID'));
+  out.push('What he sees: '+(r||'NOT SAID'));
+  out.push('Where he would be wrong: '+(inv||'NOT SAID'));
+  out.push('');
+  if(!m||!r) out.push('He has not filled this in properly. ASK him for the missing line before you answer, and give no levels in that first reply.');
+  return out.join('\n');
+}
+function val(id){ var el=document.getElementById(id); return el?(el.value||'').trim():'' }
+
+/* ---------- what the assistant is instructed to be ---------------------- */
+/* The house rules for a trading page. It is not the recovery app's voice and
+   it does not carry the recovery app's safety lines, which do not apply to a
+   chart — but three things carry over exactly: never invent a number, never
+   tell him he is finished, and never promise an outcome. */
+var DESK_SYS=[
+'You are the trading assistant on a private desk page belonging to one trader. He is experienced and needs nothing explained from the beginning. He uses this to make better decisions on his own trades. He places every trade himself.',
+'',
+'THE FOUR TIMEFRAMES. He reads four and only four: 4 hours, 1 hour, 15 minutes, 5 minutes. Always work from the big one down.',
+'- 4h is the tide. If it disagrees with everything below it, that is the answer, and you say so.',
+'- 1h is the structure inside the tide: the last leg, the last level that broke, the range being worked.',
+'- 15m is where the setup is confirmed or destroyed. This is the timeframe his invalidation usually lives on.',
+'- 5m is only the trigger. It never decides direction, and a 5m signal against the 4h is noise — say that when it happens.',
+'If the four disagree, say which one wins and why. Do not average them into a mush.',
+'',
+'HOLD OR SCALP. Answer this every time, from the alignment, not from how he feels:',
+'- All four lined up, with the 1h making higher lows into the 4h trend: that is a hold, and the trade is only in trouble if the 1h structure breaks, not the 5m.',
+'- 4h and 1h lined up but the 15m exhausted, or price already extended from its average: scalp the first push, bank it, and make the runner earn its place.',
+'- 4h against him: it is a scalp at most, small, into a level, and he should say what he is scalping to before he takes it.',
+'',
+'WHAT YOU NEVER DO',
+'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. If he did not tell you the number, you do not know it. There is no price feed on this page and no backtest has been run — never imply you checked one.',
+'2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down.',
+'3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
+'4. Never size a position and never turn risk into money. Risk is the distance to his stop, in R or in points — never in what it could make.',
+'5. Invalidation comes first, every time. Before any target, say where he is wrong. If he has not said where he is wrong, ask for it.',
+'6. If he has not told you what price is doing, ask one short question rather than answering round it. One question, not a list.',
+'7. Never tell him he is finished, hopeless, or no good at this. A bad read is a bad read, not a verdict on him.',
+'8. He already knows you are not his broker and not a licensed adviser, so do not open with a disclaimer or repeat one. Give him the honest read instead.',
+'',
+'HOW YOU ANSWER',
+'- First line: the answer. Which of his setups this is, by the name he gave it, or that it is not one of them.',
+'- Then short lines, each starting with its label: 4h, 1h, 15m, 5m (only the ones that matter), Entry, Wrong if, Target, Hold or scalp, Before you take it.',
+'- Six to twelve short lines in total. No headings, no markdown, no tables, no emoji, no bolding.',
+'- Say what you do not know rather than filling it in. "I cannot see your chart" is a complete answer.',
+'- When he asks something you have no basis for, say that plainly and then answer the part you can.',
+'- Plain English, always. Never answer in another language and never borrow a word from one.',
+'- Keep it his desk: refer to his setups by the names he gave them, never yours.'
+].join('\n');
+
+function askSystem(){
+  return DESK_SYS+'\n\n'+setupsText()+'\n'+nowText();
+}
+
+/* ---------- the setups list --------------------------------------------- */
+var editing=null;
+function render(){
+  var list=document.getElementById('list');
+  var none=document.getElementById('none');
+  if(!list) return;
+  if(!SETUPS.length){
+    list.innerHTML='';
+    if(none) none.style.display='block';
+    return;
+  }
+  if(none) none.style.display='none';
+  var h='';
+  for(var i=0;i<SETUPS.length;i++){
+    var s=SETUPS[i], open=(editing===i);
+    h+='<div class="card'+(open?' open':'')+'">'
+      +'<div class="row" data-open="'+i+'">'
+      +'<div class="row-txt"><b>'+esc(s.n||'Untitled')+'</b>'
+      +'<span>'+esc(tfText(s.tf))+' &middot; '+esc(HOLD[s.h]||HOLD.hold)+'</span></div>'
+      +'<span class="chev">&#8250;</span></div>'
+      +'<div class="body">';
+    if(s.r) h+='<div class="lbl">Has to be true</div><p>'+esc(s.r)+'</p>';
+    if(s.e) h+='<div class="lbl">Entry</div><p>'+esc(s.e)+'</p>';
+    if(s.s) h+='<div class="lbl">Wrong if</div><p>'+esc(s.s)+'</p>';
+    if(s.t) h+='<div class="lbl">Target</div><p>'+esc(s.t)+'</p>';
+    h+='<button class="txtbtn" data-edit="'+i+'">Edit this setup</button><br>'
+      +'<button class="del" data-del="'+i+'">Delete</button>'
+      +'</div></div>';
+  }
+  list.innerHTML=h;
+}
+
+var picked=[];
+function paintTf(){
+  var els=document.querySelectorAll('#sTf .tf');
+  for(var i=0;i<els.length;i++){
+    var on=picked.indexOf(els[i].getAttribute('data-tf'))>=0;
+    els[i].className='tf'+(on?' on':'');
+  }
+}
+function openForm(i){
+  editing=(typeof i==='number')?i:null;
+  var s=editing===null?{tf:['1h','15m','5m']}:SETUPS[editing];
+  document.getElementById('sN').value=s.n||'';
+  document.getElementById('sR').value=s.r||'';
+  document.getElementById('sE').value=s.e||'';
+  document.getElementById('sS').value=s.s||'';
+  document.getElementById('sT').value=s.t||'';
+  document.getElementById('sH').value=s.h||'hold';
+  picked=(s.tf||[]).slice();
+  paintTf();
+  document.getElementById('form').style.display='block';
+  document.getElementById('form').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function closeForm(){
+  editing=null;
+  document.getElementById('form').style.display='none';
+}
+
+/* ---------- the ask box -------------------------------------------------- */
+var BUSY=false, HEAD='<span class="ask-who">Trading assistant</span>';
+async function ask(prefill){
+  var qEl=document.getElementById('askQ'), aEl=document.getElementById('askA'), go=document.getElementById('askGo');
+  if(!qEl||!aEl) return;
+  var q=(prefill||qEl.value||'').trim();
+  if(!q||BUSY) return;
+  qEl.value=q;
+  BUSY=true; if(go) go.disabled=true;
+  aEl.className='ask-a on';
+  aEl.innerHTML=HEAD+'Working it through…';
+  try{
+    /* The setups and the chart ride along with every question, so a follow-up
+       is answered against the same rules as the first one. */
+    var r=await fetch('/api/chat',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system:[{type:'text',text:askSystem()}],
+        messages:[{role:'user',content:q}]
+      })
+    });
+    if(r.status===429){ aEl.innerHTML=HEAD+"That is today's lot of answers. It comes back tomorrow."; return }
+    if(r.status===401){ aEl.innerHTML=HEAD+'Sign in again and this will answer.'; return }
+    if(r.status===403){ aEl.innerHTML=HEAD+'Not switched on for this account.'; return }
+    if(!r.ok) throw new Error('http '+r.status);
+    var d=await r.json();
+    var t=((d.content&&d.content[0]&&d.content[0].text)||'').trim();
+    if(!t) throw new Error('empty');
+    aEl.innerHTML=HEAD+esc(t).replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
+  }catch(e){
+    /* Offline, or no answer came back. Nothing invented in its place. */
+    aEl.innerHTML=HEAD+'No answer came back. Try again in a moment.';
+  }finally{
+    BUSY=false; if(go) go.disabled=false;
+  }
+}
+
+/* ---------- wiring ------------------------------------------------------- */
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var op=t.closest?t.closest('[data-open]'):null;
+  if(op){ var i=parseInt(op.getAttribute('data-open'),10);
+    editing=(editing===i)?null:i; render(); return }
+  var ed=t.closest?t.closest('[data-edit]'):null;
+  if(ed){ openForm(parseInt(ed.getAttribute('data-edit'),10)); return }
+  var dl=t.closest?t.closest('[data-del]'):null;
+  if(dl){
+    var k=parseInt(dl.getAttribute('data-del'),10);
+    var s=SETUPS[k];
+    if(s&&window.confirm('Delete "'+(s.n||'this setup')+'"? The assistant will stop reading it.')){
+      SETUPS.splice(k,1); editing=null; save(K_SETUPS,SETUPS); render();
+    }
+    return;
+  }
+  var tf=t.closest?t.closest('#sTf .tf'):null;
+  if(tf){
+    var v=tf.getAttribute('data-tf'), at=picked.indexOf(v);
+    if(at>=0) picked.splice(at,1); else picked.push(v);
+    paintTf(); return;
+  }
+  var ch=t.closest?t.closest('.chip[data-q]'):null;
+  if(ch){ ask(ch.getAttribute('data-q')); return }
+});
+
+document.getElementById('addS').onclick=function(){ openForm() };
+document.getElementById('cancelS').onclick=function(){ closeForm() };
+document.getElementById('saveS').onclick=function(){
+  var n=val('sN');
+  if(!n){ document.getElementById('sN').focus(); return }
+  var rec={n:n, tf:picked.slice(), r:val('sR'), e:val('sE'), s:val('sS'), t:val('sT'),
+           h:document.getElementById('sH').value||'hold'};
+  if(editing===null) SETUPS.push(rec); else SETUPS[editing]=rec;
+  save(K_SETUPS,SETUPS);
+  closeForm(); render();
+};
+document.getElementById('askGo').onclick=function(){ ask() };
+document.getElementById('askQ').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask() }
+});
+
+/* The chart block remembers itself, so it is filled once per session. */
+var NOW=load(K_NOW,{});
+['dMk','dPx','dRd','dIn'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(!el) return;
+  if(NOW[id]) el.value=NOW[id];
+  el.addEventListener('input',function(){
+    NOW[id]=el.value;
+    save(K_NOW,NOW);
+    var s=document.getElementById('dSaved');
+    if(s) s.textContent='Kept on this device.';
+  });
+});
+
+render();
+</script>
+</body>
+</html>

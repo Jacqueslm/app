@@ -80,12 +80,24 @@ function stubDom() {
 }
 
 // Runs the page for real and hands back its globals, the stub elements, a log of
-// everything sent to /api/chat, and what the page wrote to the device.
-async function loadPage() {
+// everything the page asked its own server for, and what it wrote to the device.
+//
+// The feed answer defaults to a broken one on purpose: every test below then
+// starts from the state that matters most — a desk with no candles, where the
+// only thing that must not happen is a price appearing from nowhere. The feed
+// tests set a real answer with setCandles().
+async function loadPage(opts) {
   const { doc, els } = stubDom();
   const calls = [];
+  const chats = [];
   const stored = {};
   let reply = { status: 200, body: { content: [{ type: 'text', text: '4h: up.\nEntry: the reclaim.\nWrong if: a close back inside.' }] } };
+  // `feed` is the /api/candles body the page will be handed, as a 200 — the
+  // shape most tests want. setCandles() takes the whole status+body when a test
+  // needs to change the answer partway through.
+  let candles = opts && opts.feed
+    ? { status: 200, body: opts.feed }
+    : { status: 502, body: { ok: false, error: 'NQ: the feed could not be reached.' } };
   const sandbox = {
     document: doc, console,
     setTimeout, clearTimeout, setInterval, clearInterval,
@@ -97,8 +109,16 @@ async function loadPage() {
     },
     window: null,
     fetch: async (url, opts) => {
-      calls.push({ url, body: JSON.parse(opts.body) });
-      return { status: reply.status, ok: reply.status === 200, json: async () => reply.body };
+      const isChat = String(url).indexOf('/api/chat') === 0;
+      const rec = {
+        url,
+        method: (opts && opts.method) || 'GET',
+        body: opts && opts.body ? JSON.parse(opts.body) : null,
+      };
+      calls.push(rec);
+      if (isChat) chats.push(rec);
+      const r = isChat ? reply : candles;
+      return { status: r.status, ok: r.status === 200, json: async () => r.body };
     },
     scrollTo() {}, matchMedia: () => ({ matches: false, addEventListener() {} }),
     navigator: { userAgent: 'node' },
@@ -108,7 +128,34 @@ async function loadPage() {
   sandbox.confirm = () => false;
   vm.createContext(sandbox);
   vm.runInContext(inlineScript(PAGE), sandbox, { filename: 'desk.html' });
-  return { sandbox, els, calls, stored, setReply(r) { reply = r } };
+  // The page loads its candles on open. Let that one request settle before the
+  // test touches anything, so nothing it does can race with the open.
+  await new Promise((done) => setImmediate(done));
+  return {
+    sandbox, els, calls, chats, stored,
+    setReply(r) { reply = r },
+    setCandles(r) { candles = r },
+  };
+}
+
+// A feed answer in the shape /api/candles returns, with bars whose numbers are
+// known, so a test can say exactly which ones the assistant was handed.
+function candleSet(overrides) {
+  const base = Date.parse('2026-09-17T00:00:00Z');
+  const mk = (n, step, from) => Array.from({ length: n }, (_, i) => ({
+    t: base + i * step,
+    o: from + i, h: from + i + 4, l: from + i - 4, c: from + i + 1,
+    v: 100 + i,
+  }));
+  return Object.assign({
+    ok: true, symbol: 'NQ=F', name: 'Nasdaq 100', partial: null, error: null,
+    timeframes: {
+      '5m': { ok: true, symbol: 'NQ=F', tf: '5m', asOf: '2026-09-17T00:10:00.000Z', bars: 3, candles: mk(3, 5 * 60000, 21000) },
+      '15m': { ok: true, symbol: 'NQ=F', tf: '15m', asOf: '2026-09-17T00:30:00.000Z', bars: 3, candles: mk(3, 15 * 60000, 20000) },
+      '1h': { ok: true, symbol: 'NQ=F', tf: '1h', asOf: '2026-09-17T02:00:00.000Z', bars: 3, candles: mk(3, 60 * 60000, 19000) },
+      '4h': { ok: true, symbol: 'NQ=F', tf: '4h', asOf: '2026-09-17T04:00:00.000Z', bars: 3, candles: mk(3, 4 * 60 * 60000, 18000) },
+    },
+  }, overrides || {});
 }
 
 // Writes a setup the way the form does, through the page's own open/save
@@ -179,18 +226,18 @@ test('his setups travel with every question, by the names he gave them', async (
   p.els.get('askQ').value = 'Should I take this one?';
   await p.sandbox.ask();
 
-  assert.strictEqual(p.calls.length, 1);
-  assert.strictEqual(p.calls[0].url, '/api/chat', 'the same route the Friendly tab uses, so the same brake covers it');
-  const system = p.calls[0].body.system[0].text;
+  assert.strictEqual(p.chats.length, 1);
+  assert.strictEqual(p.chats[0].url, '/api/chat', 'the same route the Friendly tab uses, so the same brake covers it');
+  const system = p.chats[0].body.system[0].text;
   assert.match(system, /London sweep and reclaim/, 'the setup goes with the question');
   assert.match(system, /Has to be true first: 4h is in an uptrend/);
   assert.match(system, /Wrong if: 15 min close back under the level/);
   assert.match(system, /4 hours, 1 hour, 15 minutes, 5 minutes/, 'the timeframes it lives on are spelled out');
   assert.match(system, /NQ, long/, 'and so does the chart in front of him');
   assert.match(system, /1h close back inside/);
-  assert.strictEqual(p.calls[0].body.messages.length, 1, 'one question, no history to drift out of the rules');
-  assert.strictEqual(p.calls[0].body.messages[0].role, 'user');
-  assert.match(p.calls[0].body.messages[0].content, /Should I take this one\?/);
+  assert.strictEqual(p.chats[0].body.messages.length, 1, 'one question, no history to drift out of the rules');
+  assert.strictEqual(p.chats[0].body.messages[0].role, 'user');
+  assert.match(p.chats[0].body.messages[0].content, /Should I take this one\?/);
   assert.match(p.els.get('askA').innerHTML, /Wrong if/, 'and the answer lands on the page');
 });
 
@@ -210,8 +257,13 @@ test('the rules it answers under: no invented numbers, wrong-first, and the four
   // No data on the page, so the one thing that must not happen is invention —
   // and honesty about the backtest that does not exist yet.
   assert.match(sys, /Never invent a number/, 'no invented prices, levels or statistics');
-  assert.match(sys, /There is no price feed on this page and no backtest has been run/);
-  assert.match(sys, /never imply you checked one/);
+  // There IS a feed now. What matters is that the only numbers it may quote are
+  // the ones that came back from it, and that the backtest still does not exist.
+  assert.match(sys, /The ONLY numbers you may quote are the ones in the CANDLES block/);
+  assert.match(sys, /There is still no backtest on this page/);
+  assert.match(sys, /never imply you ran one and never quote a result/);
+  assert.match(sys, /If his own price disagrees with it, his chart wins/, 'the feed never overrules his own chart');
+  assert.match(sys, /name the timeframe it came from/);
   // Wrong before right.
   assert.match(sys, /Invalidation comes first, every time/);
   // The four timeframes, each with its job, in his words.
@@ -242,15 +294,95 @@ test('a failure says so, and an answer cannot put markup on the page', async () 
 
 // ── it looks at nothing else ────────────────────────────────────────────────
 
-test('the desk reads no feed and loads nothing from outside', () => {
+test('the desk asks this app\'s server and nobody else', () => {
+  // The feed arrived 17 Sep 2026 and the rule did NOT change with it: the page
+  // still holds no address of anybody else's. It asks /api/candles, which is
+  // this app's server, and the server is where the feed is — so no key is ever
+  // in this file and no data vendor ever learns who is reading it.
   const html = fs.readFileSync(PAGE, 'utf8');
-  const fetches = html.match(/fetch\(/g) || [];
-  assert.strictEqual(fetches.length, 1, 'the only thing this page ever calls is the app\'s own AI');
-  assert.match(html, /fetch\('\/api\/chat'/);
+  const calls = [...html.matchAll(/fetch\('([^']*)'/g)].map((m) => m[1]);
+  assert.deepEqual(calls.sort(), ['/api/candles?bars=120&symbol=', '/api/chat'],
+    'the page calls its own server twice and nowhere else');
+  for (const r of calls) assert.ok(r.startsWith('/api/'), `${r} must be this app's own route`);
   for (const banned of ['googletagmanager', 'gtag(', '<script src="http', 'facebook.net',
-    'binance', 'twelvedata', 'polygon.io', 'alphavantage', 'yahoo']) {
+    'binance', 'twelvedata', 'polygon.io', 'alphavantage', 'yahoo', 'query1.finance']) {
     assert.ok(!html.toLowerCase().includes(banned.toLowerCase()), `the desk must not reach for ${banned}`);
   }
+});
+
+// ── the feed ────────────────────────────────────────────────────────────────
+
+test('the candles that came back are the only numbers the assistant is handed', async () => {
+  const p = await loadPage({ feed: candleSet() });
+
+  assert.ok(p.sandbox.FEED && p.sandbox.FEED.ok, 'the feed answer is kept');
+  assert.strictEqual(p.sandbox.FEED.symbol, 'NQ=F');
+
+  const feed = p.sandbox.feedText();
+  assert.match(feed, /CANDLES FROM THE FEED/);
+  assert.doesNotMatch(feed, /NOT LOADED/);
+  // The numbers are the ones the feed sent, to the penny — and nothing on the
+  // page rounds, averages or otherwise creates a price of its own.
+  assert.match(feed, /o21001 h21005 l20997 c21002/, 'the 5m bars arrive as they came back');
+  assert.match(feed, /4h: 3 bars/, 'each timeframe is labelled with how many bars it has');
+  assert.match(feed, /not his broker's chart/);
+
+  const system = p.sandbox.askSystem();
+  assert.match(system, /21002/, 'the candles travel with the question');
+  assert.match(system, /Nasdaq 100/, 'and so does what the feed called it');
+  assert.match(p.els.get('fOut').innerHTML, /21,003\.00/, 'and the page shows the same last close it gave the assistant');
+  assert.match(p.els.get('fOut').innerHTML, /4h/, 'one row per timeframe, so a number can be read against its own timeframe');
+});
+
+test('a feed that did not answer leaves the assistant with no prices at all', async () => {
+  const p = await loadPage();
+  // loadPage() already ran one load against a failing feed, exactly as the page
+  // does on open.
+  assert.strictEqual(p.sandbox.FEED, null, 'nothing is kept from a failed fetch');
+  assert.match(p.sandbox.feedText(), /CANDLES FROM THE FEED: NOT LOADED/);
+  assert.match(p.sandbox.feedText(), /Do not describe a chart, do not name a level and do not price anything/);
+  assert.match(p.sandbox.askSystem(), /NOT LOADED/);
+  assert.strictEqual(p.els.get('fOut').innerHTML, '', 'and no row is drawn');
+  assert.match(p.els.get('fWhen').textContent, /NQ: the feed could not be reached/, 'the feed\'s own words, not a made-up price');
+});
+
+test('the candles are dropped the moment the feed stops answering', async () => {
+  // The failure that matters: good candles on screen from a minute ago, then a
+  // refresh that fails. Leaving them up would read as if the feed still said it.
+  const p = await loadPage({ feed: candleSet() });
+  assert.ok(p.sandbox.FEED, 'first load works');
+
+  p.setCandles({ status: 502, body: { ok: false, error: 'NQ=F 1h: the feed took too long to answer.' } });
+  await p.sandbox.loadFeed();
+  assert.strictEqual(p.sandbox.FEED, null, 'the old candles do not survive a failed refresh');
+  assert.strictEqual(p.els.get('fOut').innerHTML, '', 'and they come off the page');
+  assert.match(p.els.get('fWhen').textContent, /took too long/);
+});
+
+test('a price the page shows can only have come from the feed', async () => {
+  // No feed, no number: the page's own renderer is asked to paint a set that
+  // never arrived and must draw nothing rather than a placeholder.
+  const p = await loadPage();
+  p.sandbox.FEED = { ok: false, error: 'nope' };
+  p.sandbox.paintFeed();
+  assert.strictEqual(p.els.get('fOut').innerHTML, '', 'no bars, no rows');
+  p.sandbox.FEED = null;
+  p.sandbox.paintFeed();
+  assert.strictEqual(p.els.get('fOut').innerHTML, '');
+  assert.doesNotMatch(p.sandbox.feedText(), /\d{4,}/, 'and the assistant is handed no number to quote');
+});
+
+test('the feed asks the server for all four timeframes in one call, and remembers the symbol', async () => {
+  const p = await loadPage();
+  const get = p.calls.filter((c) => c.url.startsWith('/api/candles'));
+  assert.ok(get.length >= 1, 'the page loads candles on open rather than waiting to be asked');
+  assert.match(get[0].url, /bars=120/, 'one request, one answer, so the four timeframes are read together');
+  assert.match(get[0].url, /symbol=NQ/, 'and it opens on the symbol he last used');
+
+  p.setCandles({ status: 200, body: candleSet({ symbol: 'BTC-USD' }) });
+  p.els.get('fSym').value = 'BTC';
+  await p.sandbox.loadFeed();
+  assert.match(p.stored['tsid.desk.sym'], /BTC-USD/, 'the symbol he typed is the one it opens on next time');
 });
 
 // ── the door ────────────────────────────────────────────────────────────────

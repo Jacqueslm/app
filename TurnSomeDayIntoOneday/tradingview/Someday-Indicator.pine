@@ -1,14 +1,20 @@
 //@version=5
-// Someday Zones - the first half of the indicator.
+// Someday - the indicator, both halves.
 //
-// Supply and demand zones built from confirmed swings, read on the chart's own
-// timeframe and on four higher ones, with the retracement levels inside them.
+// Half one: supply and demand zones built from confirmed swings, read on the
+// chart's own timeframe and on four higher ones, with the retracement levels
+// inside them.
 //
-// Nothing here reads the future and nothing here predicts: a zone appears only
-// after its swing has confirmed, and the ranges come from the bars that are
-// already closed. The one drawing choice that is not a fact is how far back a
-// new zone is painted - that is the "reaches back" input, and it is yours.
-indicator("Someday Zones", shorttitle="Someday Zones", overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
+// Half two: the times he trades - the range of a chosen timeframe starting at a
+// chosen time on his own clock (8:00 and 14:00 Central, which is 9:00 and 15:00
+// on the exchange clock), shaded as a column, boxed, and kept only while price
+// has not taken it out.
+//
+// Nothing here reads the future and nothing here predicts. A zone appears only
+// after its swing has confirmed; a range only after its bars have closed. The
+// drawing choices that are not facts are the "reaches back" and "your clock"
+// inputs, and they are yours.
+indicator("Someday", shorttitle="Someday", overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
 
 // ----------------------------------------------------------------- structure
 showSwings = input.bool(true, "Swing points", group="Structure")
@@ -43,6 +49,31 @@ use15    = input.bool(true, "15 minutes", group="Timeframes")
 use60    = input.bool(true, "1 hour", group="Timeframes")
 use240   = input.bool(true, "4 hours", group="Timeframes")
 useD     = input.bool(false, "1 day", group="Timeframes")
+
+// -------------------------------------------------------------- time ranges
+showRanges  = input.bool(true, "Shade the ranges", group="Time ranges")
+tzName      = input.string("America/Chicago", "Your clock", group="Time ranges")
+markInsides = input.bool(false, "Mark inside bars", group="Time ranges")
+insChar     = input.string("*", "Marker", group="Time ranges")
+greyMark    = input.color(color.new(color.gray, 25), "Marker away from a range", group="Time ranges")
+mitPct      = input.float(0.0, "Taken out once price closes past the edge by (% of the range)", minval=0, maxval=500, group="Time ranges")
+keepRanges  = input.int(5, "Unmitigated ranges kept, per time", minval=1, maxval=25, group="Time ranges")
+rangeLife   = input.int(500, "Range life (bars)", minval=10, maxval=5000, group="Time ranges")
+extendRng   = input.bool(true, "Extend the range box", group="Time ranges")
+
+// Time 1 - the open, on his clock
+on1  = input.bool(true, "On", group="Time 1")
+hr1  = input.int(8, "Hour", minval=0, maxval=23, group="Time 1")
+mn1  = input.int(0, "Minute", minval=0, maxval=59, group="Time 1")
+tf1  = input.timeframe("60", "Range", group="Time 1")
+col1 = input.color(#2962ff, "Colour", group="Time 1")
+
+// Time 2 - the last hour of the cash session, on his clock
+on2  = input.bool(true, "On", group="Time 2")
+hr2  = input.int(14, "Hour", minval=0, maxval=23, group="Time 2")
+mn2  = input.int(0, "Minute", minval=0, maxval=59, group="Time 2")
+tf2  = input.timeframe("60", "Range", group="Time 2")
+col2 = input.color(#ff9800, "Colour", group="Time 2")
 
 // ------------------------------------------------------------------ a zone
 // A box, plus up to five levels inside it. The levels are counted from the
@@ -136,6 +167,26 @@ pruneZones(Zone[] arr, bool supply) =>
                 killZone(z)
                 array.remove(arr, i)
 
+// ---------------------------------------------------------- a range's upkeep
+// Kept while it lives and while price has not taken it out. "Taken out" means
+// a close past one of its edges by that share of the range's own height, so 0
+// is any close outside and 100 is a close a whole range beyond it.
+runBoxes(box[] arr) =>
+    if array.size(arr) > 0
+        for i = array.size(arr) - 1 to 0
+            box b = array.get(arr, i)
+            top = box.get_top(b)
+            bot = box.get_bottom(b)
+            span = top - bot
+            if extendRng
+                box.set_right(b, bar_index + 5)
+            past = mitPct / 100 * span
+            old = bar_index - box.get_left(b) > rangeLife
+            taken = close > top + past or close < bot - past
+            if old or taken
+                box.delete(b)
+                array.remove(arr, i)
+
 // ----------------------------------------------------------- the swings, named
 ph = ta.pivothigh(high, swingLen, swingLen)
 pl = ta.pivotlow(low, swingLen, swingLen)
@@ -215,8 +266,85 @@ if useD and not na(d1dpl) and d1dt != seen1dl
     seen1dl := d1dt
     addZone(false, d1dhi, d1dpl, bar_index - zoneBack)
 
+// ----------------------------------------------------- the ranges themselves
+// The range is the high and the low of the bars from the chosen time until the
+// chosen timeframe is up. On the exchange clock 8:00 Central is 9:00 and 14:00
+// Central is 15:00, which is what the time input is measured against - your
+// clock, as the device reports it, not an assumption.
+var int   start1 = na
+var float top1   = na
+var float bot1   = na
+var int   left1  = na
+var bool  open1  = false
+var box[] boxes1 = array.new_box()
+
+var int   start2 = na
+var float top2   = na
+var float bot2   = na
+var int   left2  = na
+var bool  open2  = false
+var box[] boxes2 = array.new_box()
+
+tf1ms = timeframe.in_seconds(tf1) * 1000
+tf2ms = timeframe.in_seconds(tf2) * 1000
+
+if on1 and hour(time, tzName) == hr1 and minute(time, tzName) == mn1
+    start1 := time
+    top1   := high
+    bot1   := low
+    left1  := bar_index
+    open1  := true
+
+if open1
+    here1 = not na(start1) and time >= start1 and time < start1 + tf1ms
+    if here1
+        top1 := math.max(top1, high)
+        bot1 := math.min(bot1, low)
+    else
+        open1 := false
+        if showRanges
+            array.push(boxes1, box.new(left1, top1, bar_index, bot1, border_color=color.new(col1, 40), border_width=1, bgcolor=color.new(col1, 88)))
+            while array.size(boxes1) > keepRanges
+                box.delete(array.shift(boxes1))
+
+if on2 and hour(time, tzName) == hr2 and minute(time, tzName) == mn2
+    start2 := time
+    top2   := high
+    bot2   := low
+    left2  := bar_index
+    open2  := true
+
+if open2
+    here2 = not na(start2) and time >= start2 and time < start2 + tf2ms
+    if here2
+        top2 := math.max(top2, high)
+        bot2 := math.min(bot2, low)
+    else
+        open2 := false
+        if showRanges
+            array.push(boxes2, box.new(left2, top2, bar_index, bot2, border_color=color.new(col2, 40), border_width=1, bgcolor=color.new(col2, 88)))
+            while array.size(boxes2) > keepRanges
+                box.delete(array.shift(boxes2))
+
+in1 = on1 and not na(start1) and time >= start1 and time < start1 + tf1ms
+in2 = on2 and not na(start2) and time >= start2 and time < start2 + tf2ms
+
+// Inside bars, marked where they sit: in the colour of the range it is inside,
+// grey when it is not inside one.
+inside = high < high[1] and low > low[1]
+
+if markInsides and inside
+    markCol = in1 ? col1 : in2 ? col2 : greyMark
+    label.new(bar_index, high, insChar, style=label.style_none, yloc=yloc.abovebar, textcolor=markCol, size=size.tiny)
+
 // ----------------------------------------------------------------- the upkeep
 // Zones run to the right while they live, and they come off when price takes
-// them out - unless "keep zones price has taken out" is ticked.
+// them out - unless "keep zones price has taken out" is ticked. The ranges
+// come off the same way, by their own width.
 pruneZones(supplyZones, true)
 pruneZones(demandZones, false)
+runBoxes(boxes1)
+runBoxes(boxes2)
+
+// The columns. One call only - TradingView allows a script one background.
+bgcolor(showRanges and (in1 or in2) ? (in1 ? color.new(col1, 88) : color.new(col2, 88)) : na, title="Time ranges")

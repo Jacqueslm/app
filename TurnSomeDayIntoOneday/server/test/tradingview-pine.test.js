@@ -13,7 +13,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 
-const PINE = path.join(__dirname, '..', '..', 'tradingview', 'Someday-Zones.pine');
+const PINE = path.join(__dirname, '..', '..', 'tradingview', 'Someday-Indicator.pine');
 
 function read() {
   return fs.readFileSync(PINE, 'utf8');

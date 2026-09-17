@@ -385,6 +385,179 @@ test('the feed asks the server for all four timeframes in one call, and remember
   assert.match(p.stored['tsid.desk.sym'], /BTC-USD/, 'the symbol he typed is the one it opens on next time');
 });
 
+// ── the trade log ───────────────────────────────────────────────────────────
+
+// Logs a trade the way the form does, through the page's own open/save buttons.
+function logTrade(p, fields) {
+  p.sandbox.openTrade();
+  const el = (id) => p.els.get(id);
+  const n = (v) => (v === null || v === undefined ? '' : String(v));
+  el('tMk').value = fields.mk || '';
+  el('tSu').value = fields.su || '';
+  el('tDir').value = fields.dir || 'long';
+  el('tEn').value = n(fields.en);
+  el('tSt').value = n(fields.st);
+  el('tTg').value = n(fields.tg);
+  el('tEx').value = n(fields.ex);
+  el('tNote').value = fields.note || '';
+  el('saveT').onclick();
+}
+
+test('a trade logged on the page is kept, and the R is arithmetic on his own numbers', async () => {
+  const p = await loadPage();
+  assert.strictEqual(p.sandbox.TRADES.length, 0, 'a fresh desk starts with nothing logged');
+  assert.strictEqual(p.els.get('tnone').style.display, 'block', 'and says so rather than showing a trade');
+
+  writeSetup(p, SWEEP);
+  logTrade(p, {
+    mk: 'NQ', su: SWEEP.n, dir: 'long',
+    en: 21480, st: 21470, tg: 21510, ex: 21500,
+    note: 'swept the overnight low and reclaimed it on the 5m',
+  });
+
+  assert.strictEqual(p.sandbox.TRADES.length, 1);
+  const t = p.sandbox.TRADES[0];
+  assert.strictEqual(t.en, 21480, 'his entry, as he typed it');
+  assert.strictEqual(p.sandbox.riskPoints(t), 10, 'the risk is the distance to his stop, in points');
+  assert.strictEqual(p.sandbox.rOf(t), 2, 'twenty points his way against ten at risk is 2R');
+  assert.ok(p.stored['tsid.desk.trades'], 'and it is kept on the device');
+  assert.match(p.stored['tsid.desk.trades'], /London sweep and reclaim/);
+  assert.match(p.els.get('tlist').innerHTML, /\+2\.00R/, 'the page shows the result it worked out');
+  assert.strictEqual(p.els.get('tnone').style.display, 'none');
+});
+
+test('a short trade works the same way, the other way up', async () => {
+  const p = await loadPage();
+  logTrade(p, { dir: 'short', mk: 'ES', en: 100, st: 101, ex: 98 });
+  const t = p.sandbox.TRADES[0];
+  assert.strictEqual(t.dir, 'short');
+  assert.strictEqual(p.sandbox.riskPoints(t), 1);
+  assert.strictEqual(p.sandbox.rOf(t), 2, 'two points his way against one at risk');
+});
+
+test('no exit, no stop, or a stop sitting on the entry is never given a made-up result', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'NQ', en: 100, st: 99 });
+  logTrade(p, { mk: 'NQ', en: 100, st: null, ex: 102 });
+  logTrade(p, { mk: 'NQ', en: 100, st: 100, ex: 102, note: 'stop on the entry' });
+  assert.strictEqual(p.sandbox.TRADES.length, 3);
+  for (const t of p.sandbox.TRADES) {
+    assert.strictEqual(p.sandbox.rOf(t), null, 'a result with no risk behind it is not a result');
+    assert.strictEqual(p.sandbox.riskPoints(t) === null || p.sandbox.riskPoints(t) > 0, true);
+  }
+  const html = p.els.get('tlist').innerHTML;
+  assert.ok(!/NaN|Infinity/.test(html), 'nothing divides by zero on the page');
+  assert.match(html, /open — no exit written down/);
+  assert.match(html, /no result: needs an entry and a stop/);
+  assert.match(html, /counted nowhere/, 'and the record says which ones it left out');
+});
+
+test('a trade with no entry is not stored as a row of blanks', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'NQ', en: null, st: 99, ex: 101 });
+  assert.strictEqual(p.sandbox.TRADES.length, 0, 'no entry, no trade');
+});
+
+test('the record adds up his own numbers and prints no percentage', async () => {
+  const p = await loadPage();
+  logTrade(p, { su: 'Sweep', en: 100, st: 99, ex: 102 });   // +2R
+  logTrade(p, { su: 'Sweep', en: 100, st: 99, ex: 99 });    // -1R
+  const sum = p.sandbox.logSummaryHtml();
+  assert.strictEqual(p.sandbox.closedTrades().length, 2);
+  assert.match(sum, /2 trades written down/, 'his own count');
+  assert.match(sum, /Added up: \+1\.00R across those/, 'his own arithmetic, added up');
+  assert.match(sum, /Sweep: \+1\.00R/, 'and grouped by the setup he named');
+  assert.ok(!/%/.test(sum), 'no percentage anywhere: a win rate from two trades is an invented figure');
+  assert.match(sum, /no win rate here on purpose/);
+  assert.match(sum, /a handful of trades proves nothing either way/);
+});
+
+test('his trade log travels with every question, and an empty log says so', async () => {
+  const p = await loadPage();
+  // Empty first: the instruction that matters is the one that stops a model
+  // reviewing a trade that does not exist.
+  assert.match(p.sandbox.tradesText(), /NOTHING LOGGED YET/);
+  assert.match(p.sandbox.tradesText(), /Do not invent a trade, a result or a pattern to review/);
+  assert.match(p.sandbox.askSystem(), /NOTHING LOGGED YET/, 'and it rides along with the question');
+
+  writeSetup(p, SWEEP);
+  logTrade(p, { mk: 'NQ', su: SWEEP.n, en: 100, st: 99, ex: 102 });
+  p.els.get('askQ').value = 'Should I take this one?';
+  await p.sandbox.ask();
+
+  const system = p.chats[0].body.system[0].text;
+  assert.match(system, /HIS OWN TRADE LOG/);
+  assert.match(system, /1 written down, 1 with a result, 0 still open/);
+  assert.match(system, /result \+2\.00R/, 'the trade goes with the question, with its own arithmetic');
+  assert.match(system, /no average, no expectancy, no win rate/, 'and the log is never turned into a statistic');
+  assert.match(system, /London sweep and reclaim/, 'the setups still travel with it, as before');
+});
+
+test('reviewing a trade sends the trade, his setups, and the rules that mark the decision', async () => {
+  const p = await loadPage();
+  writeSetup(p, SWEEP);
+  logTrade(p, {
+    mk: 'NQ', su: SWEEP.n, dir: 'long',
+    en: 100, st: 99, tg: 103, ex: 99.5,
+    note: 'swept the low and reclaimed it on the 5m',
+  });
+
+  await p.sandbox.reviewTrade(0);
+  assert.strictEqual(p.chats.length, 1);
+  const system = p.chats[0].body.system[0].text;
+  const question = p.chats[0].body.messages[0].content;
+
+  assert.match(system, /THE TRADE BEING REVIEWED/);
+  assert.match(system, /Setup he says it was: London sweep and reclaim/);
+  assert.match(system, /Entry: 100\.00/, 'the numbers he gave are handed over');
+  assert.match(system, /Risk, in points: 1\.00/);
+  assert.match(system, /Result, in R: -0\.50R/, 'a loser, and it is still reviewed on the decision');
+  assert.match(system, /What he saw, in his words: swept the low and reclaimed it on the 5m/);
+
+  // The rules that make this a review rather than a chat.
+  assert.match(system, /MARK THE DECISION, NOT THE RESULT/);
+  assert.match(system, /A trade that paid can still have been a bad decision and a loss can be a good one/);
+  assert.match(system, /Was the entry at his own trigger, or did he get in early on the idea\?/);
+  assert.match(system, /Was the stop where his setup says the stop goes/);
+  assert.match(system, /END WITH|ONE thing to do differently next time/);
+  assert.match(system, /far too few trades for that to mean anything/);
+  assert.match(system, /Never size a position and never turn risk into money/);
+  assert.match(system, /Never tell him he is finished/);
+  assert.match(question, /Where was the decision wrong/, 'it asks for a review, not a chat');
+  assert.match(p.els.get('askA').innerHTML, /Wrong if|4h|Entry/, 'and the answer lands on the page');
+});
+
+test('a review of a half-written trade says which field is missing instead of guessing it', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'NQ', en: 100, st: null, ex: 101 });
+  const text = p.sandbox.tradeText(p.sandbox.TRADES[0]);
+  assert.match(text, /Stop: not said/);
+  assert.match(text, /Setup he says it was: he did not name one/);
+  assert.match(text, /Risk, in points: cannot be worked out: entry or stop is missing/);
+  assert.match(text, /Result, in R: cannot be worked out yet/);
+  assert.match(text, /If a field the review needs is missing, name it and review what is there/);
+});
+
+test('markup in a trade cannot put markup on the page', async () => {
+  const p = await loadPage();
+  logTrade(p, {
+    mk: '<img src=x onerror=alert(1)>', su: '<b>bold</b>',
+    en: 100, st: 99, ex: 101, note: '<script>alert(1)</script>',
+  });
+  const html = p.els.get('tlist').innerHTML;
+  // <b> is this page's own markup; what must not appear is the tag a trade
+  // field carried in with it.
+  assert.ok(!/<img|<script/.test(html), 'a trade field was inserted as markup');
+  assert.match(html, /&lt;img/);
+  assert.match(html, /&lt;script/);
+});
+
+test('the log chip answers under the review rules, not the general ones', () => {
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.match(html, /data-sys="trade">What does my log say\?</, 'the chip has to say which rules it runs under');
+  assert.match(html, /withTrades \? askSystem\(TRADE_SYS\) : undefined/);
+});
+
 // ── the door ────────────────────────────────────────────────────────────────
 
 test('the desk is behind the door, at both of its addresses', () => {

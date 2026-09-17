@@ -624,3 +624,160 @@ test('a signed-out request for the desk never gets the file', async () => {
     server.close();
   }
 });
+
+// ── structure and the session ───────────────────────────────────────────────
+//
+// Jacques, 17 Sep 2026: "do you have a analyzer can it predict an earlier trend
+// or consolidation based on what happened before like hh hl hh hl hh is close to
+// the previous hh not really breaking structure with a lot of mommentum showing
+// earling sings of a reversal or pullback to catch scalp and i only trade new
+// york session im in central time zone saint louis missouri."
+//
+// Two things had to be built for that, and both of them are places a tool like
+// this goes wrong:
+//   1. Structure read as a forecast. The swings, the distance to the old high
+//      and whether the bars are shrinking are arithmetic on closed bars. They
+//      are useful, and they are not a prediction — the page never calls a turn
+//      and the assistant is told it may not either.
+//   2. A session asserted rather than read. His window is on HIS clock, the
+//      page names the zone it actually read, and bars outside it are context.
+
+// Bars built to his own description: an up run of higher highs and higher lows,
+// price stalling just under the old high, with the last bars smaller than the
+// ones before them. Handed over as a feed answer, so the whole read is driven
+// the way the page drives it.
+function stallingFeed() {
+  const t0 = Date.parse('2026-09-17T14:00:00Z');
+  const HL = [
+    [100.5, 98], [101.5, 99], [103, 100], [102, 100.5], [100.5, 99.5], [99.5, 98.5],
+    [100.5, 99.5], [102, 101], [104.5, 102.5], [107, 104], [105.5, 103.5], [103.5, 102],
+    [102.5, 101.5], [104, 102.5], [106, 104], [109, 106.5], [112, 108], [110, 107.5],
+    [108, 106], [107, 105.5], [109.5, 107], [111, 109], [111.5, 110], [111.8, 110.8], [111.6, 111],
+  ];
+  const candles = HL.map(([h, l], i) => ({
+    t: t0 + i * 300000,
+    o: i ? (HL[i - 1][0] + HL[i - 1][1]) / 2 : 99,
+    h, l, c: (h + l) / 2, v: 10,
+  }));
+  return {
+    ok: true, symbol: 'NQ=F', name: 'Nasdaq 100', partial: null, error: null,
+    timeframes: {
+      '5m': { ok: true, symbol: 'NQ=F', tf: '5m', asOf: '2026-09-17T16:00:00.000Z', bars: candles.length, candles },
+    },
+  };
+}
+const read5m = (p) => p.sandbox.readOf('5m', p.sandbox.FEED.timeframes['5m'].candles);
+
+test('the structure read names the pattern he asked about, and puts a number on it', async () => {
+  const p = await loadPage({ feed: stallingFeed() });
+  const r = read5m(p);
+  assert.ok(r, 'a read comes off the bars');
+  assert.deepEqual(r.labels, ['HH', 'HL', 'HH', 'HL'], 'the swings he says out loud');
+  assert.strictEqual(r.trend, 'up');
+  assert.strictEqual(r.lastH, 112, 'the old high');
+  assert.ok(Math.abs(r.gapHigh + 0.7) < 1e-9, 'price is under it, and has not taken it');
+  assert.ok(r.mom < 0.8, 'the last bars are smaller than the eight before them');
+  assert.ok(r.spanBars <= 3, 'and the last five are overlapping');
+
+  const line = p.sandbox.structureLine(r);
+  assert.match(line, /HH HL HH HL/);
+  assert.match(line, /0\.70 under the last swing high \(112\.00\)/);
+  assert.match(line, /the bars are getting smaller/);
+  assert.match(line, /compressed/);
+  assert.match(line, /105\.50/, 'the last higher low, which is where the run would end');
+
+  const text = p.sandbox.structureText();
+  assert.match(text, /THIS IS THE PICTURE HE DESCRIBED/);
+  assert.match(text, /not through it/);
+  assert.match(text, /105\.50/, 'and what would end it travels with the read');
+  assert.match(text, /not "a reversal is coming"/, 'with the rule that it may not be turned into a call');
+});
+
+test('no candles means no structure, and not one number to quote', async () => {
+  const p = await loadPage();
+  const text = p.sandbox.structureText();
+  assert.match(text, /NOT COMPUTED/);
+  assert.match(text, /cannot read structure without candles/);
+  assert.doesNotMatch(text, /\d{4,}/, 'not even a price hiding among the yardsticks');
+  assert.strictEqual(p.els.get('stOut').innerHTML, '', 'and nothing is drawn');
+  assert.match(p.els.get('stWhen').textContent, /No candles loaded/);
+  assert.match(p.sandbox.askSystem(), /NOT COMPUTED/, 'the assistant is told it cannot read structure');
+});
+
+test('three bars are not structure, so none is claimed from them', async () => {
+  const p = await loadPage({ feed: candleSet() });
+  assert.strictEqual(p.sandbox.readOf('5m', p.sandbox.FEED.timeframes['5m'].candles), null);
+  assert.match(p.sandbox.structureText(), /not enough bars came back to read a swing off/);
+  assert.doesNotMatch(p.els.get('stOut').innerHTML, /HH|HL|LL/, 'no label is invented from three bars');
+  assert.match(p.els.get('stOut').innerHTML, /not enough bars came back/);
+});
+
+test('the page shows the same structure it hands to the assistant', async () => {
+  const p = await loadPage({ feed: stallingFeed() });
+  const drawn = p.els.get('stOut').innerHTML;
+  assert.match(drawn, /HH HL HH HL/);
+  assert.match(drawn, /112\.00/);
+  assert.match(drawn, /Run into the old high, not through it/);
+  assert.match(p.els.get('stWhen').textContent, /it does not predict/);
+  assert.match(p.sandbox.askSystem(), /HH HL HH HL/, 'and the same read travels with the question');
+  assert.ok(!/NaN|Infinity/.test(drawn + p.sandbox.structureText()), 'nothing divides by zero');
+});
+
+test('the session is the New York one, on his own clock, and it is his to move', async () => {
+  const p = await loadPage();
+  assert.deepEqual(p.sandbox.SESS, { a: '08:30', b: '15:00' }, 'the US cash session, in his time');
+
+  // The start counts, the end does not, and a window may run past midnight.
+  assert.strictEqual(p.sandbox.inWindow(510, { a: '08:30', b: '15:00' }), true);
+  assert.strictEqual(p.sandbox.inWindow(899, { a: '08:30', b: '15:00' }), true);
+  assert.strictEqual(p.sandbox.inWindow(900, { a: '08:30', b: '15:00' }), false);
+  assert.strictEqual(p.sandbox.inWindow(480, { a: '08:30', b: '15:00' }), false);
+  assert.strictEqual(p.sandbox.inWindow(60, { a: '22:00', b: '02:00' }), true);
+  assert.strictEqual(p.sandbox.inWindow(600, { a: '10:00', b: '10:00' }), null, 'no minutes is not a window');
+
+  const text = p.sandbox.sessionText();
+  assert.match(text, /New York session and nothing else/);
+  assert.match(text, /08:30-15:00/);
+  assert.match(text, /his own clock/);
+  assert.match(text, /(IN his session|OUTSIDE his session)/);
+  assert.match(text, /context, never a trigger/);
+  assert.match(p.sandbox.askSystem(), /HIS SESSION/, 'and it rides along with every question');
+
+  p.els.get('sA').value = '07:30';
+  p.els.get('sB').value = '13:00';
+  p.sandbox.saveSession();
+  assert.deepEqual(p.sandbox.SESS, { a: '07:30', b: '13:00' }, 'the window is his, not ours');
+  assert.match(p.stored['tsid.desk.session'], /07:30/, 'and it is kept on the device');
+
+  p.els.get('sA').value = 'nonsense';
+  p.sandbox.saveSession();
+  assert.deepEqual(p.sandbox.SESS, { a: '07:30', b: '13:00' }, 'an unusable window is not saved over a real one');
+});
+
+test('the assistant is told what structure is for, and that it may not call a turn', async () => {
+  const p = await loadPage();
+  const sys = p.sandbox.DESK_SYS;
+  assert.match(sys, /STRUCTURE, NOT A FORECAST/);
+  assert.match(sys, /bars that have already closed/);
+  assert.match(sys, /Never say a reversal, a pullback or a continuation is coming/);
+  assert.match(sys, /The only thing that turns a read into a trade is his own 5m trigger/);
+  assert.match(sys, /Bars outside that window are context and never a trigger/);
+  assert.match(sys, /the only basis you have for structure and for timing/);
+
+  // The never-do list is still in order — rule 9 landed above rule 8 once.
+  assert.ok(sys.indexOf('7. Never tell him he is finished') < sys.indexOf('8. He already knows'));
+  assert.ok(sys.indexOf('8. He already knows') < sys.indexOf('9. The structure block'));
+
+  // And the blocks arrive in the order they are read: candles, then the read
+  // off them, then the clock he trades them on.
+  const sent = p.sandbox.askSystem();
+  assert.ok(sent.indexOf('CANDLES FROM THE FEED') < sent.indexOf('STRUCTURE OFF THE BARS'));
+  assert.ok(sent.indexOf('STRUCTURE OFF THE BARS') < sent.indexOf('Right now that clock reads'));
+});
+
+test('the desk has a chip for the question he actually asked', () => {
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.match(html, /is this a run of higher highs and higher lows pushing into the old high without taking it/);
+  assert.match(html, /id="sA"/, 'and somewhere to put his own session window');
+  assert.match(html, /id="stOut"/, 'and somewhere for the structure read to land');
+});

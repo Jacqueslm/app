@@ -1618,7 +1618,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
            them. Same gated page as the four above it. -->
       <div class="setting-row" onclick="location.href='/desk'">
         <i class="ti ti-target-arrow"></i>
-        <div class="setting-row-txt"><p>Trading Desk</p><span>Your setups, live candles, a trade log it reviews, and the assistant that reads all of it</span></div>
+        <div class="setting-row-txt"><p>Trading Desk</p><span>Your setups, live candles, structure, your session, a trade log it reviews</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
     </div>
@@ -12488,7 +12488,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.1';
+const APP_VERSION='7.2';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';

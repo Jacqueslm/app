@@ -102,6 +102,17 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .feedwhen{font-size:.75rem;color:var(--tm);margin-top:10px;line-height:1.5}
 .feedwhen.err{color:var(--red-t);background:var(--red);border-radius:10px;padding:9px 11px;font-size:.8125rem}
 .feedwhy{font-size:.6875rem;color:var(--tm);margin-top:9px;line-height:1.6}
+.srow{display:flex;align-items:baseline;gap:9px;padding:6px 0 2px;font-size:.8125rem;color:var(--ts)}
+.srow b{font-weight:600;color:var(--tp);width:30px;flex:0 0 auto}
+.srow span{font-variant-numeric:tabular-nums;color:var(--acc-t);font-weight:600;letter-spacing:.02em}
+.sdet{font-size:.75rem;color:var(--tm);line-height:1.6;padding:0 0 8px;border-bottom:1px solid var(--bdr)}
+.sdet:last-child{border-bottom:none;padding-bottom:0}
+.sessrow{display:flex;align-items:center;gap:8px;margin-top:2px}
+.sessrow input{width:auto;font:inherit;font-size:.875rem;padding:8px 10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
+.sessmid{font-size:.8125rem;color:var(--tm)}
+.sessnow{font-size:.8125rem;color:var(--ts);margin-top:10px;line-height:1.55}
+.sessnow.on{color:var(--ok-t);background:var(--ok);border-radius:10px;padding:9px 11px}
+.sessnow.off{color:var(--warn-t);background:var(--warn);border-radius:10px;padding:9px 11px}
 </style>
 </head>
 <body>
@@ -130,6 +141,41 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <div class="feedout" id="fOut"></div>
       <div class="feedwhen" id="fWhen">No candles loaded. The assistant is told it has no prices, and gives you none.</div>
       <div class="feedwhy">4h is built from the 1h bars by arithmetic, not asked for. Times are UTC and are the bar's own time, never the time of the request — a stale bar cannot read as a live one.</div>
+    </div>
+  </div>
+
+  <!-- WHICH SESSION.
+       He said it in one line: he trades the New York session and he is in
+       Central time (St. Louis). So the window is kept in HIS clock — the device
+       this page is open on — and it is editable, because the exact minutes of a
+       session are a trader's own call. The page names the zone it read and never
+       claims to know what another timezone is doing. -->
+  <div class="sec">
+    <div class="sec-hd">Your session</div>
+    <div class="f">
+      <label>New York session, on your own clock</label>
+      <div class="sessrow">
+        <input id="sA" type="time" step="60" aria-label="session start">
+        <span class="sessmid">to</span>
+        <input id="sB" type="time" step="60" aria-label="session end">
+      </div>
+      <div class="sessnow" id="sNow"></div>
+      <div class="feedwhy">Kept on this device and read from your own clock. Nothing converts to exchange time, and the assistant is told that bars outside your window are context and never a trigger. It opens on the US cash session (8:30–15:00 Central) — change it to whatever you trade.</div>
+    </div>
+  </div>
+
+  <!-- STRUCTURE.
+       What the bars have already done: the swings, labelled his way (HH, HL,
+       LH, LL), how far price sits from the last swing high and low, whether the
+       last bars are getting smaller, and whether they are compressed. It is
+       arithmetic on closed bars. It describes, and the page says where; it does
+       not call a turn and the assistant is told it may not either. -->
+  <div class="sec">
+    <div class="sec-hd">Structure, off the candles</div>
+    <div class="f">
+      <div id="stOut"></div>
+      <div class="feedwhen" id="stWhen">No candles loaded, so there is nothing to read yet.</div>
+      <div class="feedwhy">A swing is a bar higher (or lower) than the two bars either side of it. HH higher high, HL higher low, LH lower high, LL lower low — each against the last swing of the same kind. Compressed means the last five bars span under three average bars. This is what has already happened; it says nothing about what comes next.</div>
     </div>
   </div>
 
@@ -167,6 +213,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <span class="chip" data-q="Is this a hold or a scalp, and why?">Hold or scalp</span>
       <span class="chip" data-q="What am I missing on the 4h, 1h, 15m and 5m here?">What am I missing?</span>
       <span class="chip" data-q="Talk me out of this trade, honestly.">Talk me out of it</span>
+      <span class="chip" data-q="Read the structure off the bars: is this a run of higher highs and higher lows pushing into the old high without taking it, with the last bars losing size, and what would end it?">Is this extended?</span>
       <span class="chip" data-q="Read me the candles you have: what are the four timeframes doing, and what do they agree on?">What does the feed say?</span>
       <span class="chip" data-q="Read my own trade log back to me. What do my numbers show, and what is the one thing to change?" data-sys="trade">What does my log say?</span>
     </div>
@@ -276,7 +323,8 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
    (after that) will run these setups over candles — which is why the setups are
    written as rules rather than as notes.
 
-   The page holds no price feed and no candles. Nothing here invents a number.
+   The page holds candles now, and works the structure out of them itself. Nothing
+   here invents a number.
 
    Three things this page refuses to do, on purpose:
      1. It will not invent a setup he did not write. If nothing he wrote matches
@@ -285,6 +333,10 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
         is asked for before where he is right.
      3. It will not let the assistant imply it checked anything. There is no
         backtest yet, and it is told to say that rather than produce one.
+     4. It will not turn structure into a forecast. The swings, the distance to
+        the last high and low, whether the bars are getting smaller — all of it
+        is arithmetic on bars that have closed, and the assistant is told it may
+        not call a turn. The turn is only ever his own 5m trigger.
 --------------------------------------------------------------------------- */
 
 /* ---------- storage: the setups, and today's chart ---------------------- */
@@ -408,6 +460,7 @@ function setWhen(text, isErr){
   el.className='feedwhen'+(isErr?' err':'');
 }
 function paintFeed(){
+  paintStructure();
   var out=document.getElementById('fOut');
   if(!out) return;
   if(!FEED||!FEED.ok||!FEED.timeframes){ out.innerHTML=''; return }
@@ -463,6 +516,303 @@ async function loadFeed(){
   }
 }
 
+/* ---------- his session: New York only, on his own clock ------------------ */
+/* He said the two things that decide timing in one line: the New York session
+   is the only one he trades, and he is in Central time (St. Louis). So the
+   window is kept in HIS clock — the clock on the device this page is open on —
+   and the page names the zone it read rather than asserting one. Editable,
+   because the exact minutes of a session are a trader's own call.
+
+   Nothing here converts to exchange time and nothing claims to know what an
+   exchange is doing: a page that announced "9:30 in New York" would be guessing
+   about a clock it cannot see. It says what his own clock says, and the
+   assistant is told that is what it is. */
+var K_SESS='tsid.desk.session', SESS_DEFAULT={a:'08:30',b:'15:00'};
+var SESS=load(K_SESS, null);
+if(!SESS||typeof SESS!=='object'||hhmm(SESS.a)===null||hhmm(SESS.b)===null) SESS={a:SESS_DEFAULT.a,b:SESS_DEFAULT.b};
+
+function hhmm(v){
+  var m=/^(\d{1,2}):(\d{2})$/.exec(String(v==null?'':v).trim());
+  if(!m) return null;
+  var h=parseInt(m[1],10), mi=parseInt(m[2],10);
+  if(h>23||mi>59) return null;
+  return h*60+mi;
+}
+function hhmmText(mins){
+  var h=Math.floor(mins/60), m=mins%60;
+  return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+}
+function clockLabel(mins){
+  var h=Math.floor(mins/60), m=mins%60, ap=h<12?'AM':'PM', h12=h%12; if(h12===0) h12=12;
+  return h12+':'+(m<10?'0':'')+m+' '+ap;
+}
+/* Is this minute inside the window? The start counts and the end does not. A
+   window that runs past midnight is allowed — a session that opens at 6pm is
+   not a mistake. An unusable window is not a window: null, never a guess. */
+function inWindow(mins, win){
+  var a=hhmm(win&&win.a), b=hhmm(win&&win.b);
+  if(a===null||b===null||a===b) return null;
+  return a<b ? (mins>=a&&mins<b) : (mins>=a||mins<b);
+}
+function localMins(ms){
+  var d=new Date(ms==null?Date.now():ms);
+  return d.getHours()*60+d.getMinutes();
+}
+function zoneName(){
+  try{ return (Intl&&Intl.DateTimeFormat&&Intl.DateTimeFormat().resolvedOptions().timeZone)||'this device' }catch(e){ return 'this device' }
+}
+function sessState(ms){
+  var mins=localMins(ms), a=hhmm(SESS.a), b=hhmm(SESS.b), on=inWindow(mins,SESS);
+  var left=null, toOpen=null;
+  if(a!==null&&b!==null&&a!==b){
+    if(on) left = (b>a) ? (b-mins) : (mins>=a ? (24*60-mins+b) : (b-mins));
+    else toOpen = (mins<a) ? (a-mins) : (24*60-mins+a);
+  }
+  return {mins:mins, on:on, a:a, b:b, left:left, toOpen:toOpen, label:clockLabel(mins),
+          window:hhmmText(a===null?0:a)+'-'+hhmmText(b===null?0:b), zone:zoneName()};
+}
+function fmtMins(n){
+  if(n===null||n===undefined) return '';
+  var h=Math.floor(n/60), m=n%60;
+  return (h?h+'h ':'')+m+'m';
+}
+/* The block the assistant reads on every question. It is his clock, his window,
+   and the one rule that matters: bars outside it are context, not triggers. */
+function sessionText(ms){
+  var s=sessState(ms);
+  return [
+    'HIS SESSION. He trades the New York session and nothing else. His window is '+s.window+' on his own clock ('+s.zone+') — the clock on the device this page is open on.',
+    'Right now that clock reads '+s.label+', so he is '+(s.on?'IN his session':'OUTSIDE his session')+'.',
+    'Bars outside that window are context, never a trigger: if the pattern he is asking about formed outside it, say that first and plainly. It is his own clock, never an exchange clock — do not tell him what time it is on an exchange.',
+    ''
+  ].join('\n');
+}
+function paintSession(ms){
+  var el=document.getElementById('sNow');
+  if(!el) return;
+  var s=sessState(ms);
+  el.className='sessnow '+(s.on?'on':'off');
+  el.textContent=(s.on
+    ? 'In your session — your clock reads '+s.label+'.'+(s.left!==null?' '+fmtMins(s.left)+' left of it.':'')
+    : 'Outside your session — your clock reads '+s.label+'.'+(s.toOpen!==null?' It opens in '+fmtMins(s.toOpen)+'.':''))
+    +' Window '+s.window+' ('+s.zone+').';
+}
+function saveSession(){
+  var a=document.getElementById('sA'), b=document.getElementById('sB');
+  var av=hhmm(a?a.value:null), bv=hhmm(b?b.value:null);
+  if(av===null||bv===null||av===bv){ paintSession(); return }
+  SESS={a:hhmmText(av), b:hhmmText(bv)};
+  save(K_SESS, SESS);
+  paintSession();
+}
+
+/* ---------- structure: what the bars have already done ------------------- */
+/* He asked for this one by name: "hh hl hh hl hh ... close to the previous hh
+   not really breaking structure with a lot of momentum" — an unbroken run of
+   higher highs and higher lows into the old high, price not through it, the
+   last bars smaller than the ones before them. So the swings are worked out
+   here, from his candles, and labelled the way he says them out loud.
+
+   Arithmetic on bars that have already closed, and nothing else. It can say
+   what the bars did, how far price is from them, and the level that would end
+   the run — the last higher low, which is a number rather than a guess. It
+   cannot say what comes next and it is never allowed to pretend to: the page
+   never calls a turn, and neither does the assistant. */
+var WING=2, MOM_EASE=0.8, MOM_EXPAND=1.25, COMPRESS_SPAN=3;
+
+function avgRange(list){
+  if(!list||!list.length) return null;
+  var t=0, i;
+  for(i=0;i<list.length;i++) t+=(list[i].h-list[i].l);
+  return t/list.length;
+}
+/* A swing high is a bar whose high is above every high in the WING bars either
+   side of it; a swing low is the same on the other side. Runs of the same kind
+   fold to the most extreme one, so the sequence alternates the way he means it
+   to. Strictly greater, so a flat top is not called a swing. */
+function swings(candles, wing){
+  var w=(wing==null?WING:wing);
+  if(!candles||candles.length<w*2+1) return [];
+  var piv=[], i, j;
+  for(i=w;i<candles.length-w;i++){
+    var hi=true, lo=true;
+    for(j=i-w;j<=i+w;j++){
+      if(j===i) continue;
+      if(candles[j].h>=candles[i].h) hi=false;
+      if(candles[j].l<=candles[i].l) lo=false;
+    }
+    if(hi) piv.push({kind:'H',p:candles[i].h,t:candles[i].t});
+    else if(lo) piv.push({kind:'L',p:candles[i].l,t:candles[i].t});
+  }
+  var seq=[];
+  for(i=0;i<piv.length;i++){
+    var last=seq[seq.length-1];
+    if(last&&last.kind===piv[i].kind){
+      if(piv[i].kind==='H' ? (piv[i].p>=last.p) : (piv[i].p<=last.p)) seq[seq.length-1]=piv[i];
+    } else seq.push(piv[i]);
+  }
+  return seq;
+}
+/* The labels, against the last swing of the same kind: HH higher high, HL
+   higher low, LH lower high, LL lower low. The letter after the H or the L is
+   always about direction — a low that is higher than the last low is HL, never
+   LH, because LH already means something else.
+   The first swing has nothing before it, so it keeps its bare letter rather
+   than a label it has not earned. */
+function structure(candles, wing){
+  var s=swings(candles, wing), labels=[], i, j;
+  for(i=0;i<s.length;i++){
+    var prev=null;
+    for(j=i-1;j>=0;j--){ if(s[j].kind===s[i].kind){ prev=s[j]; break } }
+    if(!prev){ labels.push(s[i].kind); continue }
+    var higher=(s[i].p>prev.p);
+    labels.push(s[i].kind==='H' ? (higher?'HH':'LH') : (higher?'HL':'LL'));
+  }
+  return {swings:s, labels:labels};
+}
+/* One timeframe, read. Everything in here is a measurement of the bars: where
+   the last close sits against the last swing high and low, how big the last ten
+   bars are, whether the last three are smaller than the eight before them, and
+   whether the last five are overlapping. Six bars is the fewest that can carry
+   one swing and a comparison, so fewer than that is nothing rather than a
+   guess. */
+function readOf(tf, candles){
+  if(!candles||candles.length<6) return null;
+  var st=structure(candles, WING), sw=st.swings, lab=st.labels;
+  var last=candles[candles.length-1];
+  var lastH=null, lastL=null, hiLab=null, loLab=null, i;
+  for(i=sw.length-1;i>=0;i--){
+    if(sw[i].kind==='H'&&!lastH){ lastH=sw[i]; hiLab=lab[i] }
+    if(sw[i].kind==='L'&&!lastL){ lastL=sw[i]; loLab=lab[i] }
+  }
+  var shown=lab.slice(-6).filter(function(l){ return l.length>1 });
+  var rNow=avgRange(candles.slice(-3)), rBefore=avgRange(candles.slice(-11,-3));
+  var mom=(rNow&&rBefore)?(rNow/rBefore):null;
+  var l5=candles.slice(-5), span=null;
+  if(l5.length===5){
+    var lo=Infinity, hi=-Infinity;
+    for(i=0;i<5;i++){ if(l5[i].l<lo) lo=l5[i].l; if(l5[i].h>hi) hi=l5[i].h }
+    span=hi-lo;
+  }
+  var bar=avgRange(candles.slice(-10));
+  return {
+    tf:tf, labels:shown, trend:(hiLab==='HH'&&loLab==='HL')?'up':((hiLab==='LH'&&loLab==='LL')?'down':'mixed'),
+    close:last.c, bar:bar,
+    lastH:lastH?lastH.p:null, lastL:lastL?lastL.p:null,
+    gapHigh:lastH?(last.c-lastH.p):null, gapLow:lastL?(last.c-lastL.p):null,
+    mom:mom, span:span, spanBars:(span!==null&&bar)?(span/bar):null
+  };
+}
+/* The picture he described, and only as a question about the bars: is price
+   within an average bar and a half of the last swing high, in an up run, and
+   not through it? When it is, the run is into the old high and the last bars
+   are either losing size or they are not — both are stated, because a small
+   bar count with the same size is a different chart. */
+function extended(r){
+  if(!r||r.trend!=='up') return null;
+  if(r.gapHigh===null||r.gapHigh>0) return null;
+  if(!r.bar||Math.abs(r.gapHigh)>r.bar*1.5) return null;
+  return {easing:(r.mom!==null&&r.mom<MOM_EASE), compressed:(r.spanBars!==null&&r.spanBars<=COMPRESS_SPAN),
+          small:(r.mom!==null&&r.mom>MOM_EXPAND)};
+}
+/* One timeframe, in a sentence. Used for the page and for the assistant, so the
+   two can never say different things about the same bars. */
+function structureLine(r){
+  if(!r) return null;
+  var out=[r.tf+': '];
+  out.push(r.labels.length ? ('swings '+r.labels.join(' ')) : 'no clean swings in the bars that came back');
+  out.push(r.trend==='up' ? ' — the run so far is higher highs and higher lows.'
+    : r.trend==='down' ? ' — lower highs and lower lows so far.'
+    : ' — the swings are not making a clean run either way.');
+  if(r.gapHigh!==null){
+    out.push(r.gapHigh<0
+      ? (' Price '+money(Math.abs(r.gapHigh))+' under the last swing high ('+money(r.lastH)+'), '+(r.bar?('about '+two(Math.abs(r.gapHigh)/r.bar)+' average bars'):'distance in points only')+'.')
+      : (' Price is '+money(r.gapHigh)+' above the last swing high ('+money(r.lastH)+') — that high has been taken.'));
+  }
+  if(r.lastL!==null) out.push(' Last higher-or-lower low: '+money(r.lastL)+'.');
+  if(r.mom!==null) out.push(' Last three bars average '+two(r.mom)+'× the eight before them — '
+    +(r.mom<MOM_EASE?'the bars are getting smaller':(r.mom>MOM_EXPAND?'the bars are getting bigger':'about the same size'))+'.');
+  if(r.spanBars!==null) out.push(' Last five bars span '+money(r.span)+' — '+two(r.spanBars)+' average bars, '+(r.spanBars<=COMPRESS_SPAN?'compressed':'not compressed')+'.');
+  return out.join('');
+}
+/* The block the assistant reads. Yardsticks are spelled out so a word on the
+   page can be checked against the arithmetic behind it, and so nothing reads as
+   a judgement from nowhere. */
+function structureText(){
+  var head=['STRUCTURE OFF THE BARS — worked out on this page from the candle block below, and from nothing else. Every number in it is arithmetic on bars that have already closed.','',
+    'Yardsticks, so a word can be checked: a swing is a bar higher (or lower) than the '+WING+' bars either side of it; HH higher high, HL higher low, LH lower high, LL lower low, each against the last swing of the same kind; "average bars" is the mean size of the last ten bars on that timeframe; the bars are called smaller when the last three average under '+MOM_EASE+'× the eight before them; compressed is the last five bars spanning under '+COMPRESS_SPAN+' average bars.',''];
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    head.push('NOT COMPUTED — no candles came back, so there are no swings, no highs, no lows and no measurements at all. Say you cannot read structure without candles. Do not describe a pattern, do not name a level, and do not guess where the last higher low is.','');
+    return head.join('\n');
+  }
+  var tfs=['4h','1h','15m','5m'], any=false, i;
+  for(i=0;i<tfs.length;i++){
+    var d=FEED.timeframes[tfs[i]];
+    var r=(d&&d.candles)?readOf(tfs[i], d.candles):null;
+    if(!r){
+      head.push(tfs[i]+': not enough bars came back to read a swing off — say so if the read needs it, and never fill it in from another timeframe.');
+      head.push('');
+      continue;
+    }
+    any=true;
+    head.push(structureLine(r));
+    var ext=extended(r);
+    if(ext){
+      head.push('   THIS IS THE PICTURE HE DESCRIBED, if it matches what he is asking about: a run of '+r.labels.join(' ')+' into the old high at '+money(r.lastH)+', price '+money(Math.abs(r.gapHigh))+' short of it and not through it'
+        +(ext.easing?', with the last three bars smaller than the eight before them':'')
+        +(ext.compressed?', and the last five bars compressed':'')+'. That is a read of what has already happened.');
+      head.push('   What would end it: his own rule is that a run of higher lows ends when the last one goes — '+money(r.lastL)+' on this timeframe. Give him that as the level to watch, name the timeframe it came from, and put it before anything to the upside.');
+    } else if(r.trend==='up'){
+      head.push('   The run is up, but price is not up against the last swing high — so this is not the extended-into-the-old-high picture. Say that plainly rather than reaching for it.');
+    }
+    head.push('');
+  }
+  if(!any) head.push('No timeframe had enough bars to read a swing off.');
+  head.push('WHAT THIS IS AND IS NOT: it is what the bars did. Quote it as the bars\' own arithmetic, with the timeframe named, and use it as the only basis for calling a chart extended, easing or compressed. It never becomes a call — not "a reversal is coming", not "this is about to pull back", not "high probability". A turn is only ever his own 5m trigger, and where he is wrong comes first as always.');
+  head.push('');
+  return head.join('\n');
+}
+/* The same read, on the page, so he can see what the assistant was handed. It
+   is painted from the same candles and by the same code, which is the only way
+   the two can be trusted to agree. */
+function paintStructure(){
+  var out=document.getElementById('stOut'), when=document.getElementById('stWhen');
+  if(!out) return;
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    out.innerHTML='';
+    if(when) when.textContent='No candles loaded, so there is nothing to read yet.';
+    return;
+  }
+  var tfs=['4h','1h','15m','5m'], h='', any=false, i;
+  for(i=0;i<tfs.length;i++){
+    var d=FEED.timeframes[tfs[i]];
+    var r=(d&&d.candles)?readOf(tfs[i], d.candles):null;
+    if(!r){
+      h+='<div class="srow"><b>'+tfs[i]+'</b><span>not enough bars came back</span></div>';
+      continue;
+    }
+    any=true;
+    h+='<div class="srow"><b>'+tfs[i]+'</b><span>'+esc(r.labels.length?r.labels.join(' '):'no clean swings')+'</span></div>'
+      +'<div class="sdet">'+esc(structureLine(r))
+      +(extended(r)?' <b style="color:var(--acc-t)">Run into the old high, not through it.</b>':'')+'</div>';
+  }
+  out.innerHTML=h;
+  if(when) when.textContent=any
+    ? 'Worked out from the bars that came back, and handed to the assistant with every question. It describes what has already happened; it does not predict.'
+    : 'Not enough bars came back to read a swing off.';
+}
+
+/* The session window, kept on this device. Two fields and nothing else: the
+   minutes of a session are his call, and the page says which clock it read. */
+(function(){
+  var a=document.getElementById('sA'), b=document.getElementById('sB');
+  if(a) a.value=SESS.a;
+  if(b) b.value=SESS.b;
+  if(a) a.addEventListener('change', saveSession);
+  if(b) b.addEventListener('change', saveSession);
+})();
+paintSession();
+
 /* ---------- what the assistant is instructed to be ---------------------- */
 /* The house rules for a trading page. It is not the recovery app's voice and
    it does not carry the recovery app's safety lines, which do not apply to a
@@ -483,15 +833,22 @@ var DESK_SYS=[
 '- 4h and 1h lined up but the 15m exhausted, or price already extended from its average: scalp the first push, bank it, and make the runner earn its place.',
 '- 4h against him: it is a scalp at most, small, into a level, and he should say what he is scalping to before he takes it.',
 '',
+'HIS SESSION. He trades the New York session and nothing else, and his clock is the one in the session block below, with his window and whether he is in it right now. Bars outside that window are context and never a trigger — when the pattern he is asking about formed outside his session, say that first and plainly. It is his own clock, not an exchange clock, so never tell him what time it is on an exchange.',
+'',
+'STRUCTURE, NOT A FORECAST. The structure block below is worked out on this page from the candles: the swings he names himself (HH, HL, LH, LL), how far price is from the last swing high and low, whether the last bars are getting smaller, and whether they are compressed. It is arithmetic on bars that have already closed, and it is the only basis you have for calling a chart extended, easing or compressed — always with the timeframe named.',
+'- He is looking for one thing in particular and it is in that block by name: a run of higher highs and higher lows pushing into the old high without taking it, with the last bars smaller than the ones before them. Say the bars match that picture when they do, and say what would end it — the last higher low is a number in the block, and a run of higher lows ends when that one goes.',
+'- You may never say a reversal, a pullback or a continuation is coming, and never put a probability on one. Nothing on this page predicts. The only thing that turns a read into a trade is his own 5m trigger, and where he is wrong comes first as always.',
+'',
 'WHAT YOU NEVER DO',
 '1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, and the ones he typed himself. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
-'2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down.',
+'2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down. Never say a reversal, a pullback or a continuation is coming, and never put a probability on one — that is a forecast and this page does not make them.',
 '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
 '4. Never size a position and never turn risk into money. Risk is the distance to his stop, in R or in points — never in what it could make.',
 '5. Invalidation comes first, every time. Before any target, say where he is wrong. If he has not said where he is wrong, ask for it.',
 '6. If he has not told you what price is doing, ask one short question rather than answering round it. One question, not a list.',
 '7. Never tell him he is finished, hopeless, or no good at this. A bad read is a bad read, not a verdict on him.',
 '8. He already knows you are not his broker and not a licensed adviser, so do not open with a disclaimer or repeat one. Give him the honest read instead.',
+'9. The structure block and the session block are the only basis you have for structure and for timing. If either says it was not computed, say you cannot read structure or the session rather than describing one from nowhere.',
 '',
 'HOW YOU ANSWER',
 '- First line: the answer. Which of his setups this is, by the name he gave it, or that it is not one of them.',
@@ -506,7 +863,7 @@ var DESK_SYS=[
 ].join('\n');
 
 function askSystem(extra){
-  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+'\n'+tradesText()+'\n'+nowText();
+  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+'\n'+sessionText()+'\n\n'+tradesText()+'\n'+nowText();
 }
 
 /* ---------- the setups list --------------------------------------------- */
@@ -877,6 +1234,7 @@ function reviewTrade(i){
 
 
 document.addEventListener('click',function(e){
+  paintSession();
   var t=e.target;
   var op=t.closest?t.closest('[data-open]'):null;
   if(op){ var i=parseInt(op.getAttribute('data-open'),10);

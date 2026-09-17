@@ -138,7 +138,7 @@ test('six levels, beginner to market maker, with every lesson whole', () => {
       }
     }
   }
-  assert.strictEqual(lessons, 45);
+  assert.strictEqual(lessons, 46);
 });
 
 test('each level test is six whole questions, and the answers line up', () => {
@@ -360,6 +360,119 @@ test('leaving the drills tab and coming back does not wedge the drill', () => {
   assert.match(view, /So what do you do at the last bar\?/, 'the next question should still be waiting');
   assert.match(view, /class="opt right"/, 'and the answer already given should still be marked');
   assert.match(view, /Drills done: 2/);
+});
+
+// ── the two-chart drill: the wick on the big chart, the entry on the small ──
+// Jacques: "how can I time my entrance to be right and exact — example, coming
+// in on a high timeframe wick candle while executing on a low timeframe."
+// The rule it has to hold is that the 4h gives the PLACE and the 5m gives the
+// MOMENT, so the checks are about the two charts agreeing on the picture at the
+// decision bar, and about the marking following the small chart rather than how
+// the path turned out.
+
+test('the two-chart drill: a 4h wick, a 5m trigger, and nothing drawn after the decision', () => {
+  const seen = new Set();
+  for (let seed = 1; seed <= 40; seed++) {
+    const d = S.makeTimingScenario(seed);
+    seen.add(d.turns ? 'turn' : 'fails');
+
+    assert.strictEqual(d.questions.length, 3, `seed ${seed}: three questions`);
+    for (const q of d.questions) {
+      assert.strictEqual(q.opts.filter((o) => o.ok).length, 1,
+        `seed ${seed}: a question with ${q.opts.filter((o) => o.ok).length} right answers`);
+      assert.ok(q.say && q.say.yes.length > 20 && q.say.no.length > 20,
+        `seed ${seed}: a question with no reason given`);
+    }
+
+    const sup = d.level.sup;
+    const wick = d.htf[d.htfDecision];
+    assert.ok(wick.l < sup, `seed ${seed}: the 4h bar never pierces the level`);
+    assert.ok(wick.c > sup, `seed ${seed}: the 4h bar never closes back above the level`);
+
+    // Both charts carry bars after the decision, so the reveal has something to
+    // show — and, more importantly, so the drawing has something to hold back.
+    assert.ok(d.htf.length > d.htfDecision + 1, `seed ${seed}: no 4h outcome`);
+    assert.ok(d.ltf.length > d.decision + 1, `seed ${seed}: no 5m outcome`);
+
+    // The 4h wick is the extreme: the small chart never went through it before
+    // the decision, or the stop the drill asks for would not have held.
+    for (let i = 0; i <= d.decision; i++) {
+      assert.ok(d.ltf[i].l > d.wickLow - 1e-9, `seed ${seed}: the 5m took the wick low out before the decision`);
+    }
+
+    const last = d.ltf[d.decision], prev = d.ltf[d.decision - 1];
+    if (d.turns) {
+      assert.ok(last.c > sup, `seed ${seed}: the trigger bar did not close back above the level`);
+      assert.ok(last.h > prev.h, `seed ${seed}: the trigger bar took out no high, so nothing turned`);
+      assert.ok(last.l > prev.l, `seed ${seed}: the trigger bar made a lower low, so it is not the reclaim`);
+      assert.strictEqual(d.exp, 'long', `seed ${seed}: the turn is the long`);
+    } else {
+      assert.ok(last.c < sup, `seed ${seed}: it closed back above the level, so it did turn`);
+      assert.ok(last.h < prev.h && last.l < prev.l, `seed ${seed}: not still making lower highs and lower lows`);
+      assert.strictEqual(d.exp, 'wait', `seed ${seed}: without the trigger there is no trade`);
+    }
+
+    for (const b of d.htf.concat(d.ltf)) {
+      assert.ok([b.o, b.h, b.l, b.c].every(Number.isFinite), `seed ${seed}: a broken candle`);
+      assert.ok(b.h >= Math.max(b.o, b.c) - 1e-9 && b.l <= Math.min(b.o, b.c) + 1e-9,
+        `seed ${seed}: high or low inside the body`);
+    }
+  }
+  assert.strictEqual(seen.size, 2, 'both shapes should appear: the turn and the one that never turns');
+});
+
+test('the two-chart drill marks the timing: the same 4h read ends both ways', () => {
+  const turned = S.makeTimingScenario(1), never = S.makeTimingScenario(5);
+  assert.strictEqual(turned.questions[0].t, never.questions[0].t, 'the 4h question is the same either way');
+  assert.notStrictEqual(turned.questions[1].t, never.questions[1].t, 'the small chart is what changes');
+  assert.strictEqual(turned.exp, 'long');
+  assert.strictEqual(never.exp, 'wait');
+
+  click(S, 'tabs', { 'data-t': 'drills' });
+  S.newTimingDrill(5);
+  S.paint();
+  const view = page.els.get('view');
+  assert.match(view.innerHTML, /id="cv"/, 'the 4h chart should be on screen');
+  assert.match(view.innerHTML, /id="cv2"/, 'and the 5m chart under it');
+  assert.match(view.innerHTML, /current bar has wicked through the level/, 'the 4h question first');
+  assert.ok(!/stopped making lower highs/.test(view.innerHTML), 'one question at a time');
+  assert.ok(!/What the market did/.test(view.innerHTML), 'the outcome waits for the last answer');
+
+  // The small chart question arrives only once the big one is answered.
+  click(S, 'view', { 'data-a': 'dans', 'data-q': 0, 'data-o': never.questions[0].opts.findIndex((o) => o.ok) });
+  assert.match(page.els.get('view').innerHTML, /making lower highs/, 'then the small chart question');
+
+  // On the one that never turned, buying the wick is wrong, and it says why.
+  const longOpt = never.questions[1].opts.findIndex((o) => /^Long now/.test(o.txt));
+  assert.ok(longOpt >= 0, 'the early-entry option should exist');
+  click(S, 'view', { 'data-a': 'dans', 'data-q': 1, 'data-o': longOpt });
+  assert.match(page.els.get('view').innerHTML, /Not quite/, 'entering without the trigger is wrong');
+  assert.match(page.els.get('view').innerHTML, /where, not when/, 'and the reason should be the lesson');
+
+  // And the trigger itself still marks right, on the one that turned.
+  S.newTimingDrill(1);
+  S.paint();
+  click(S, 'view', { 'data-a': 'dans', 'data-q': 1, 'data-o': turned.questions[1].opts.findIndex((o) => o.ok) });
+  assert.match(page.els.get('view').innerHTML, /Right\./, 'the trigger is the right answer');
+});
+
+test('every stop option in the drill is a real stop, on the losing side of the entry', () => {
+  // They were not: both wrong options sat on the same side as the profit, which
+  // offered a "close in" stop that would have triggered on the entry bar.
+  for (let seed = 1; seed <= 60; seed++) {
+    const d = S.makeScenario(seed);
+    const price = d.bars[d.decision].c;
+    const structural = d.exp === 'short' ? d.stopPrice + d.atr * 0.15 : d.stopPrice - d.atr * 0.15;
+    const nums = d.stopOptions.map((o) => Number(o.txt.match(/([0-9]+\.[0-9]+)/)[1]));
+    assert.ok(nums.every(Number.isFinite), `seed ${seed}: a stop with no price in it`);
+    for (const n of nums) {
+      if (d.exp === 'long') assert.ok(n < price, `seed ${seed}: a long stop above the entry (${n} vs ${price})`);
+      if (d.exp === 'short') assert.ok(n > price, `seed ${seed}: a short stop below the entry (${n} vs ${price})`);
+    }
+    assert.ok(Math.abs(nums[0] - structural) < 0.02, `seed ${seed}: the right option is not the structural stop`);
+    assert.ok(nums[0] !== nums[1] && nums[1] !== nums[2] && nums[0] !== nums[2],
+      `seed ${seed}: two stop options at the same price`);
+  }
 });
 
 test('the backtest opens a trade, steps the candles, and closes at the stop or the target', () => {

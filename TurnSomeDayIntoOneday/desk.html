@@ -128,6 +128,18 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .srow span{font-variant-numeric:tabular-nums;color:var(--acc-t);font-weight:600;letter-spacing:.02em}
 .sdet{font-size:.75rem;color:var(--tm);line-height:1.6;padding:0 0 8px;border-bottom:1px solid var(--bdr)}
 .sdet:last-child{border-bottom:none;padding-bottom:0}
+.stcard{padding:8px 0 9px;border-bottom:1px solid var(--bdr)}
+.stcard:last-child{border-bottom:none;padding-bottom:0}
+.sthd{display:flex;align-items:baseline;gap:9px}
+.sthd b{font-weight:600;color:var(--tp);font-size:.9375rem;width:30px;flex:0 0 auto}
+.sttrend{font-size:.875rem;font-weight:600;color:var(--acc-t)}
+.stsw{font-size:.6875rem;color:var(--tm);font-variant-numeric:tabular-nums;letter-spacing:.03em;padding:3px 0 5px}
+.stline{display:flex;gap:9px;align-items:baseline;padding:2px 0;font-size:.8125rem;line-height:1.5}
+.stk{flex:0 0 72px;color:var(--tm);font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em}
+.stv{flex:1;min-width:0;color:var(--ts)}
+.stx{color:var(--tm);font-size:.75rem}
+.stflag{margin-top:6px;font-size:.8125rem;font-weight:600;color:var(--acc-t)}
+.pvline{margin-top:11px;padding-top:10px;border-top:1px solid var(--bdr);font-size:.75rem;color:var(--ts);line-height:1.55}
 .sessrow{display:flex;align-items:center;gap:8px;margin-top:2px}
 .sessrow input{width:auto;font:inherit;font-size:.875rem;padding:8px 10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
 .sessmid{font-size:.8125rem;color:var(--tm)}
@@ -348,6 +360,9 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <input id="tTg" inputmode="decimal" placeholder="optional" autocomplete="off">
       <label for="tEx">Exit</label>
       <input id="tEx" inputmode="decimal" placeholder="leave empty while it is open" autocomplete="off">
+      <label for="tPv">What one point is worth ($)</label>
+      <input id="tPv" inputmode="decimal" placeholder="e.g. 2 for MNQ, 10 for MGC" autocomplete="off">
+      <div class="saved" id="tPvHint" style="font-size:.6875rem;color:var(--tm);margin-top:6px"></div>
       <label for="tNote">What you saw, and why you took it</label>
       <textarea id="tNote" placeholder="The read you acted on. This is the part the review works from."></textarea>
       <button class="txtbtn" id="saveT">Save the trade</button>
@@ -465,6 +480,45 @@ function money(n){
   if(typeof n!=='number'||!isFinite(n)) return '—';
   return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
+/* WHAT ONE POINT IS WORTH, PER CONTRACT.
+   He is right that the log had no idea: it was points and R only, and it said
+   so. These are the published contract sizes — what a one-point move pays on
+   one contract — for the micros he actually trades and their full-size
+   versions. Nothing is guessed: a symbol that is not in this table gets no
+   number at all, and the row says so rather than inventing one.
+
+   The figure that counts is the one ON THE TRADE, not this table: he can
+   overrule it per trade, because his broker's size and his fill are his. */
+var POINT_VALUE={
+  MNQ:2, MES:5, MYM:0.5, M2K:5,
+  NQ:20, ES:50, YM:5, RTY:50,
+  MGC:10, GC:100, SIL:1000, SI:5000,
+  MCL:100, CL:1000, MNG:1000, NG:10000,
+  MHG:2500, HG:25000,
+  MBT:0.1, MET:0.1,
+  M6E:12500, '6E':125000
+};
+/* The feed answers with NQ=F, GC=F, MNQ=F, BTC-USD; he types MNQ or /MNQ. All
+   of them come down to the contract code. */
+function baseSym(sym){
+  var s=String(sym===null||sym===undefined?'':sym).toUpperCase().replace(/^[\/^]/,'');
+  s=s.replace(/=F$/,'').replace(/-USD$/,'').replace(/[^A-Z0-9]/g,'');
+  return s;
+}
+function pointValueOf(sym){
+  var k=baseSym(sym);
+  return Object.prototype.hasOwnProperty.call(POINT_VALUE,k)?POINT_VALUE[k]:null;
+}
+/* Money, always with its own symbol, so a figure can never be read as points. */
+function dollars(n){
+  if(typeof n!=='number'||!isFinite(n)) return '\u2014';
+  return (n<0?'-':'')+'\$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function pvText(sym){
+  var pv=pointValueOf(sym), k=baseSym(sym);
+  if(pv===null) return 'No published contract size for '+(k||'this symbol')+'. Put what one point is worth on the trade itself and the money is worked out from that.';
+  return '<b>'+esc(k)+'</b> — one point is <b>'+esc(dollars(pv))+'</b> on one contract. That is the published size; overrule it on any trade if your broker or your size differs.';
+}
 function utcStamp(ms){
   var d=new Date(ms);
   if(isNaN(d.getTime())) return 'time unknown';
@@ -484,6 +538,10 @@ function feedText(){
   }
   var out=['CANDLES FROM THE FEED — real bars from the feed, and the only numbers you may quote. Nothing else has been checked and nothing else is known.',''];
   out.push('Symbol: '+FEED.symbol+(FEED.name?' ('+FEED.name+')':''));
+  var pv=pointValueOf(FEED.symbol);
+  out.push(pv===null
+    ? ('One point on '+baseSym(FEED.symbol)+' is NOT known to this page, so there is no money figure for it. Say that rather than working one out.')
+    : ('One point on '+baseSym(FEED.symbol)+' is '+dollars(pv)+' per contract — the published contract size. You may use it ONLY to repeat the money line in the JOURNAL block below. You never size a position from it, never turn a stop into money of your own, and never say what a trade could make.'));
   if(FEED.partial&&FEED.partial.length) out.push('Timeframes that did not come back: '+FEED.partial.join(' '));
   out.push('');
   var tfs=['4h','1h','15m','5m'];
@@ -533,6 +591,7 @@ function paintFeed(){
       +'<span class="last">'+esc(money(last.c))+'</span>'
       +'<span class="rng">'+esc(money(lo))+' – '+esc(money(hi))+'</span></div>';
   }
+  h+='<div class="pvline">'+pvText(FEED.symbol)+'</div>';
   out.innerHTML=h;
 }
 
@@ -827,7 +886,40 @@ function structureText(){
 }
 /* The same read, on the page, so he can see what the assistant was handed. It
    is painted from the same candles and by the same code, which is the only way
-   the two can be trusted to agree. */
+   the two can be trusted to agree.
+
+   Laid out as a labelled line per fact rather than as one paragraph of numbers
+   — he asked for exactly that, and nothing in the arithmetic changed. */
+function stRow(k,v){
+  if(!v) return '';
+  return '<div class="stline"><span class="stk">'+esc(k)+'</span><span class="stv">'+v+'</span></div>';
+}
+function trendWords(r){
+  return r.trend==='up' ? 'Higher highs, higher lows'
+    : r.trend==='down' ? 'Lower highs, lower lows'
+    : 'Not running either way';
+}
+function priceWords(r){
+  if(r.gapHigh===null) return null;
+  return r.gapHigh<0
+    ? ('<b>'+esc(money(Math.abs(r.gapHigh)))+'</b> under the last high ('+esc(money(r.lastH))+')')
+    : ('<b>'+esc(money(r.gapHigh))+'</b> above the last high ('+esc(money(r.lastH))+') — that high is gone');
+}
+function barsRow(r){
+  if(r.mom===null) return '';
+  var w=r.mom<MOM_EASE ? 'Getting smaller' : (r.mom>MOM_EXPAND ? 'Getting bigger' : 'About the same size');
+  return stRow('Bars', esc(w)+' <span class="stx">'+esc(two(r.mom))+'× the eight before</span>');
+}
+function rangeRow(r){
+  if(r.spanBars===null) return '';
+  return stRow('Range', esc(money(r.span))+' over the last five'
+    +(r.spanBars<=COMPRESS_SPAN ? ' — <b>squeezed</b>' : '')
+    +' <span class="stx">'+esc(two(r.spanBars))+'× a normal bar</span>');
+}
+function watchRow(r){
+  if(r.lastL===null) return '';
+  return stRow('Watch', '<b>'+esc(money(r.lastL))+'</b> — the last higher-or-lower low. The run ends if that goes.');
+}
 function paintStructure(){
   var out=document.getElementById('stOut'), when=document.getElementById('stWhen');
   if(!out) return;
@@ -841,13 +933,20 @@ function paintStructure(){
     var d=FEED.timeframes[tfs[i]];
     var r=(d&&d.candles)?readOf(tfs[i], d.candles):null;
     if(!r){
-      h+='<div class="srow"><b>'+tfs[i]+'</b><span>not enough bars came back</span></div>';
+      h+='<div class="stcard"><div class="sthd"><b>'+tfs[i]+'</b><span class="sttrend">No read</span></div>'
+        +stRow('Bars','not enough bars came back to read a swing off')+'</div>';
       continue;
     }
     any=true;
-    h+='<div class="srow"><b>'+tfs[i]+'</b><span>'+esc(r.labels.length?r.labels.join(' '):'no clean swings')+'</span></div>'
-      +'<div class="sdet">'+esc(structureLine(r))
-      +(extended(r)?' <b style="color:var(--acc-t)">Run into the old high, not through it.</b>':'')+'</div>';
+    h+='<div class="stcard">'
+      +'<div class="sthd"><b>'+tfs[i]+'</b><span class="sttrend">'+esc(trendWords(r))+'</span></div>'
+      +'<div class="stsw">Swings: '+esc(r.labels.length?r.labels.join(' '):'none')+'</div>'
+      +stRow('Price', priceWords(r))
+      +barsRow(r)
+      +rangeRow(r)
+      +watchRow(r)
+      +(extended(r)?'<div class="stflag">Run into the old high, not through it.</div>':'')
+      +'</div>';
   }
   out.innerHTML=h;
   if(when) when.textContent=any
@@ -896,7 +995,7 @@ var DESK_SYS=[
 '1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, the ones he typed himself, the counts and sums the JOURNAL block below already worked out, and a price you can actually read in a picture he attached himself - and a number off a picture is always said to be off his screenshot, never passed off as a feed number. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
 '2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down. Never say a reversal, a pullback or a continuation is coming, and never put a probability on one — that is a forecast and this page does not make them.',
 '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
-'4. Never size a position and never turn risk into money. Risk is the distance to his stop, in R or in points — never in what it could make.',
+'4. Never size a position and never invent a money figure. Risk is the distance to his stop, in R or in points. He trades the micros — MNQ, MES, MGC and the rest — and the point value of one contract is in the CANDLES block and on the trades he wrote. Use it ONLY to repeat the money line in the JOURNAL block: never a balance, never an account size, never how many contracts to trade, and never what a trade could make.',
 '5. Invalidation comes first, every time. Before any target, say where he is wrong. If he has not said where he is wrong, ask for it.',
 '6. If he has not told you what price is doing, ask one short question rather than answering round it. One question, not a list.',
 '7. Never tell him he is finished, hopeless, or no good at this. A bad read is a bad read, not a verdict on him.',
@@ -1166,6 +1265,29 @@ function rOf(t){
 function closedTrades(){
   return TRADES.filter(function(t){ return rOf(t)!==null });
 }
+/* The points the trade moved, in his direction: a short that went his way is
+   profit, not a negative number. */
+function pointsOf(t){
+  if(!t||t.en===null||t.ex===null) return null;
+  return t.dir==='short' ? (t.en-t.ex) : (t.ex-t.en);
+}
+/* The point value that counts is the one on the trade. No point value means no
+   money figure at all — never a default, and never a guess from the symbol. */
+function pvOf(t){
+  if(!t) return null;
+  var pv=numOf(t.pv);
+  return (pv!==null&&pv>0)?pv:null;
+}
+function moneyOf(t){
+  var pts=pointsOf(t), pv=pvOf(t);
+  if(pts===null||pv===null) return null;
+  return pts*pv;
+}
+function riskMoney(t){
+  var risk=riskPoints(t), pv=pvOf(t);
+  if(risk===null||pv===null) return null;
+  return risk*pv;
+}
 function rText(t){
   var r=rOf(t);
   if(r===null) return t&&t.ex===null ? 'open — no exit written down' : 'no result: needs an entry and a stop';
@@ -1181,6 +1303,7 @@ function tradeLine(t){
   if(t.tg!==null&&t.tg!==undefined) bits.push('target '+two(t.tg));
   bits.push('exit '+(t.ex===null?'not recorded':two(t.ex)));
   bits.push('result '+rText(t));
+  if(pvOf(t)!==null) bits.push('point value '+pvOf(t)+' (one point is '+dollars(pvOf(t))+')');
   return bits.join(', ')+(t.note?('. What he saw: '+t.note):'');
 }
 
@@ -1218,8 +1341,10 @@ function tradeText(t){
     'Stop: '+(t.st===null?'not said':two(t.st)),
     'Target: '+(t.tg===null||t.tg===undefined?'not given':two(t.tg)),
     'Exit: '+(t.ex===null?'not recorded — it is still open, or he has not written it down':two(t.ex)),
-    'Risk, in points: '+(risk===null?'cannot be worked out: entry or stop is missing':two(risk)),
-    'Result, in R: '+(r===null?'cannot be worked out yet':(r>=0?'+':'')+two(r)+'R'),
+    'Risk, in points: '+(risk===null?'cannot be worked out: entry or stop is missing':(two(risk)
+      +(riskMoney(t)!==null?(' ('+dollars(riskMoney(t))+' on the point value he put on this trade)'):' (no point value on this trade, so no money)'))),
+    'Result, in R: '+(r===null?'cannot be worked out yet':((r>=0?'+':'')+two(r)+'R'
+      +(moneyOf(t)!==null?(' ('+dollars(moneyOf(t))+' on the point value he put on this trade)'):''))),
     'What he saw, in his words: '+(t.note||'not written down'),
     '',
     'The risk and the R are arithmetic on his own numbers, nothing more. If a field the review needs is missing, name it and review what is there.',
@@ -1243,7 +1368,7 @@ var TRADE_SYS=[
   '',
   'WHAT YOU NEVER DO:',
   '1. Never invent a price, a level, a statistic, a study or a backtest. Never compute an average, an expectancy or a win rate from his log: there are far too few trades for that to mean anything, and if he asks what his record proves you say exactly that.',
-  '2. Never size a position and never turn risk into money. Points and R only.',
+  '2. Never size a position and never invent a money figure. The only money in this review is what the trade block already worked out from the point value he put on the trade: never a balance, never an account, never what it could have made.',
   '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If it reads like chasing — entering before the trigger, widening a stop, adding after a loss — name that first and plainly, then answer the rest.',
   '4. Never tell him he is finished, hopeless or no good at this. The mistakes that show up in a trade are the ordinary ones and they are learnable.',
   '5. Never promise an outcome, and never put a probability on the next trade.',
@@ -1289,9 +1414,11 @@ function renderTrades(){
       +'<b>'+esc(t.mk||'Trade')+(t.dir==='short'?' short':' long')+'</b>'
       +'<span>'+esc(t.su||'no setup named')+(t.d?' &middot; '+esc(t.d):'')+'</span></div>'
       +'<div class="body" style="display:block;border-top:none;padding-top:10px">'
-      +'<div class="lbl">Result</div><p><b>'+esc(rText(t))+'</b></p>';
+      +'<div class="lbl">Result</div><p><b>'+esc(rText(t))+'</b>'
+      +(moneyOf(t)!==null?(' &middot; '+esc(dollars(moneyOf(t)))):'')+'</p>';
     var risk=riskPoints(t);
-    if(risk!==null) h+='<div class="lbl">Risk</div><p>'+esc(two(risk))+' points from entry to stop</p>';
+    if(risk!==null) h+='<div class="lbl">Risk</div><p>'+esc(two(risk))+' points from entry to stop'
+      +(riskMoney(t)!==null?(' &middot; '+esc(dollars(riskMoney(t)))):'')+'</p>';
     if(t.en!==null||t.st!==null||t.tg!==null||t.ex!==null){
       h+='<div class="lbl">The numbers you gave</div><p>'
         +'entry '+esc(t.en===null?'—':two(t.en))
@@ -1328,12 +1455,18 @@ function journalStats(){
     written:TRADES.length, closed:closed.length, missing:TRADES.length-closed.length,
     won:0, lost:0, flat:0,
     netR:0, grossWin:0, grossLoss:0, netPts:0,
+    netMoney:0, moneyN:0, moneyMissing:0,
     bestR:null, worstR:null, avgWin:null, avgLoss:null, winRate:null, by:{}
   };
   for(var i=0;i<closed.length;i++){
     var t=closed[i], r=rOf(t);
-    var pts=(t.dir==='short' ? (t.en-t.ex) : (t.ex-t.en));
+    var pts=pointsOf(t);
     s.netR+=r; s.netPts+=pts;
+    /* Money only where he put a point value on the trade. One without it goes
+       into no total, and the count of those is printed with the figure — a
+       total that quietly covers three of five trades is a lie by omission. */
+    var m=moneyOf(t);
+    if(m===null) s.moneyMissing++; else { s.moneyN++; s.netMoney+=m; }
     if(r>0){ s.won++; s.grossWin+=r; }
     else if(r<0){ s.lost++; s.grossLoss+=r; }
     else { s.flat++; }
@@ -1365,6 +1498,15 @@ function journalFine(s){
         : 'Nothing is closed yet, so there is no win rate and no profit or loss to show. That is a blank, not a zero.');
 }
 
+/* The money line, or the honest absence of one. No point value on any closed
+   trade means no money figure — not zero, and not a figure taken from the
+   symbol's published size behind his back. */
+function moneyRow(s){
+  if(!TRADES.length) return '';
+  if(!s.moneyN) return '<span style="color:var(--tm)">no point value on any closed trade yet, so there is no money figure</span>';
+  return '<b>'+esc(dollars(s.netMoney))+'</b> from '+s.moneyN+' of '+s.closed+' closed'
+    +(s.moneyMissing?(' &middot; '+s.moneyMissing+' left out, no point value on it'):'');
+}
 function journalHtml(){
   if(!TRADES.length) return '';
   var s=journalStats();
@@ -1379,9 +1521,10 @@ function journalHtml(){
       + 'Win rate: <b>'+Math.round(s.winRate)+'%</b> — '+s.won+' won of '+s.closed+' closed'
       + (s.lost?(', '+s.lost+' lost'):'')
       + (s.flat?(', '+s.flat+' at break-even'):'')+'.'
-      + '<br>Profit and loss: <b>'+sgn(s.netR,'R')+'</b>'
-      + ' &middot; won '+sgn(s.grossWin,'R')+' against '+sgn(s.grossLoss,'R')+' lost'
-      + '<br>In points: <b>'+sgn(s.netPts)+'</b></span>';
+      + '</span>';
+    h+=stRow('Points','<b>'+sgn(s.netPts)+'</b>');
+    h+=stRow('Money', moneyRow(s));
+    h+=stRow('Reward vs risk','<b>'+sgn(s.netR,'R')+'</b> net &middot; won '+sgn(s.grossWin,'R')+' against '+sgn(s.grossLoss,'R')+' lost');
   }
   if(s.closed){
     var rw=[];
@@ -1437,11 +1580,14 @@ function journalText(){
   out.push('Win rate: '+Math.round(s.winRate)+'% — '+s.won+' won, '+s.lost+' lost'
     + (s.flat?(', '+s.flat+' at break-even'):'')+'.');
   out.push('Net: '+sgn(s.netR,'R')+' (won '+sgn(s.grossWin,'R')+', lost '+sgn(s.grossLoss,'R')+'), net '+sgn(s.netPts)+' points.');
+  out.push('Money: '+(s.moneyN
+    ? (dollars(s.netMoney)+' across '+s.moneyN+' of '+s.closed+' closed trades'+(s.moneyMissing?(', with '+s.moneyMissing+' left out because no point value is on it'):''))
+    : 'none — no closed trade has a point value on it, so there is no money figure. Say that instead of working one out.'));
   if(s.won) out.push("Winners averaged "+sgn(s.avgWin,'R')+' each.');
   if(s.lost) out.push('Losers averaged '+two(s.avgLoss)+'R each.');
   out.push('Best '+sgn(s.bestR,'R')+', worst '+sgn(s.worstR,'R')+'.');
   out.push('');
-  out.push('These numbers describe trades he has already taken. They are not a prediction, not an edge, and not evidence about the next one. Never turn them into a forecast: never say he is "due", never tell him to size up because he is winning, and never tell him to win it back because he is losing. When he asks what the journal says, report it as written above WITH the count, and then say the one thing the record actually shows him — or that it shows nothing yet.');
+  out.push('These numbers describe trades he has already taken. They are not a prediction, not an edge, and not evidence about the next one. Never turn them into a forecast: never say he is "due", never tell him to size up because he is winning, and never tell him to win it back because he is losing. When he asks what the journal says, report it as written above WITH the count, and then say the one thing the record actually shows him — or that it shows nothing yet. The only money you may ever say is the money line above: his own points multiplied by the point value he put on each trade. Never a figure you worked out, never a balance, never an account size, and never what a trade could have made.');
   out.push('');
   return out.join('\n');
 }
@@ -1456,9 +1602,10 @@ function openTrade(){
   if(hint) hint.textContent = SETUPS.length
     ? 'Yours: '+SETUPS.map(function(s){ return s.n||'Untitled' }).join(', ')
     : 'You have not written any setups yet — name this one in your own words for now.';
-  ['tMk','tSu','tEn','tSt','tTg','tEx','tNote'].forEach(function(id){
+  ['tMk','tSu','tEn','tSt','tTg','tEx','tPv','tNote'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.value='';
   });
+  fillPointValue();
   var d=document.getElementById('tDir'); if(d) d.value='long';
   var f=document.getElementById('tform');
   if(f){ f.style.display='block'; f.scrollIntoView({behavior:'smooth',block:'center'}) }
@@ -1486,6 +1633,7 @@ function saveTrade(){
     st:readNum('tSt'),
     tg:readNum('tTg'),
     ex:readNum('tEx'),
+    pv:readNum('tPv'),
     note:readStr('tNote')
   };
   /* A trade with no entry at all is not a trade he can review, and the page
@@ -1573,6 +1721,23 @@ document.getElementById('askQ').addEventListener('keydown',function(e){
 document.getElementById('addT').onclick=function(){ openTrade() };
 document.getElementById('cancelT').onclick=function(){ closeTrade() };
 document.getElementById('saveT').onclick=function(){ saveTrade() };
+
+/* Type the market and the point value fills itself in from the published
+   contract size — one field less to fill on a phone — and he can overrule it
+   before saving, because his size and his fill are his and not ours. */
+function fillPointValue(){
+  var mk=document.getElementById('tMk'), pvEl=document.getElementById('tPv'), hint=document.getElementById('tPvHint');
+  if(!mk) return;
+  var k=baseSym(mk.value), pv=pointValueOf(k);
+  if(pv!==null&&pvEl&&!pvEl.value) pvEl.value=String(pv);
+  if(hint) hint.textContent = !k
+    ? 'Fills itself in from the contract when you type the market, and you can change it.'
+    : (pv!==null
+      ? (k+' — one point is '+dollars(pv)+' on one contract. Change it if your size or your broker differs.')
+      : ('No published contract size for '+k+'. Put your own figure here or the log stays in points and R.')); 
+}
+var tMkEl=document.getElementById('tMk');
+if(tMkEl&&tMkEl.addEventListener) tMkEl.addEventListener('input',fillPointValue);
 
 /* The feed: the button, Enter in the symbol field, and one load on open so the
    page is never sitting there looking like it has candles when it does not. */

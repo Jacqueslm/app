@@ -1610,6 +1610,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Trading School</p><span>45 lessons, beginner to market maker, with drills</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
+      <!-- 17 Sep 2026. Jacques: "something that helps me make better trading
+           decisions that knows all my set ups and can back test for me and an
+           indicator that aligns with it ... using 4hr 1hr 15mon and 5 min."
+           The desk is where those setups are written down; the assistant on it
+           reads them, and the indicator and the backtest will both be built on
+           them. Same gated page as the four above it. -->
+      <div class="setting-row" onclick="location.href='/desk'">
+        <i class="ti ti-target-arrow"></i>
+        <div class="setting-row-txt"><p>Trading Desk</p><span>Your setups, and the assistant that reads them</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
     </div>
 
     <!-- CUSTOM LESSON PACKS (Pro) -->
@@ -12477,7 +12488,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.7';
+const APP_VERSION='6.8';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';

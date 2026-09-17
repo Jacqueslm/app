@@ -64,7 +64,10 @@ test('the other shipped HTML pages parse too', () => {
   // the repo outside index.html and key.html — the whole curriculum, the chart
   // drawing, the drills and the backtester — so a SyntaxError in it would leave
   // a page that looks complete and answers nothing.
-  const pages = ['key.html', 'letter.html', 'admin-stats.html', 'landing.html', 'herbs.html', 'tax.html', 'trading-school.html', 'game3d.html'];
+  // desk.html joined on 17 Sep 2026 — its inline script holds his setups, the
+  // prompt every answer is sent under, and the ask box. A SyntaxError in it
+  // would leave a page that looks like a desk and reads nothing.
+  const pages = ['key.html', 'letter.html', 'admin-stats.html', 'landing.html', 'herbs.html', 'tax.html', 'trading-school.html', 'game3d.html', 'desk.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

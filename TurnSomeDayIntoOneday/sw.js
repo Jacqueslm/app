@@ -9,7 +9,7 @@
 // gone. Anyone who chose Deep had the one voice that goes silent offline.
 // Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
 // cannot drift apart unnoticed again.
-const CACHE_NAME = 'tsid-shell-v6.7';
+const CACHE_NAME = 'tsid-shell-v6.8';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -134,6 +134,12 @@ self.addEventListener('fetch', (event) => {
   // that check and the offline fallback would hand it out unguarded. Both
   // addresses again, because the clean URL and the file name both reach it.
   if (['/school', '/school.html'].includes(url.pathname)) return;
+
+  // The Trading Desk (17 Sep 2026) is the same page shape a fourth time: served
+  // only to somebody signed in and on the list, so a cached copy would outlive
+  // that check and the offline fallback would hand it out unguarded. Both
+  // addresses again, because the clean URL and the file name both reach it.
+  if (['/desk', '/desk.html'].includes(url.pathname)) return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

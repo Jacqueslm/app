@@ -112,6 +112,10 @@ const OPEN_PAGES = [
   // listed here only so the request reaches the route that judges it. Both
   // addresses, because the page is a real FILE as well as a clean URL.
   '/school', '/school.html',
+  // The Trading Desk (17 Sep 2026) — the same shape a fourth time: private,
+  // and listed here only so the request can reach the route that judges it.
+  // Both addresses, because it is a real FILE as well as a clean URL.
+  '/desk', '/desk.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the

@@ -374,6 +374,136 @@ if markInsides and inside
     markCol = in1 ? col1 : in2 ? col2 : greyMark
     label.new(bar_index, high, insChar, style=label.style_none, yloc=yloc.abovebar, textcolor=markCol, size=size.tiny)
 
+// ------------------------------------------------------------------- the read
+// The four states, the level, and the checklist - his rules as numbers.
+//
+// The frame is read off CLOSED 4h candles only. A poke above the level with no
+// 4h close above it is the grab, and it changes nothing. This section is
+// self-contained: it reads nothing from the halves above it and can sit at the
+// very end of the file.
+frameLen = input.int(2, "4h swing length", minval=2, maxval=20, group="The read")
+smallTf  = input.timeframe("15", "Small chart", group="The read")
+smallLen = input.int(3, "Small chart swing length", minval=2, maxval=20, group="The read")
+showRead = input.bool(true, "Show the read", group="The read")
+lvlCol   = input.color(#ffeb3b, "Level line", group="The read")
+lowCol   = input.color(color.new(color.gray, 15), "4h low line", group="The read")
+readSize = input.string("tiny", "Table text", options=["tiny", "small", "normal"], group="The read")
+
+readText = readSize == "tiny" ? size.tiny : readSize == "small" ? size.small : size.normal
+
+[f4hPh, f4hPl, f4hClose, f4hTok] = request.security(syminfo.tickerid, "240", [ta.pivothigh(high, frameLen, frameLen), ta.pivotlow(low, frameLen, frameLen), close[1], time[frameLen]], lookahead=barmerge.lookahead_off)
+
+var float fHigh      = na
+var float fPrevHigh  = na
+var float fLow       = na
+var float fPrevLow   = na
+var float theLevel   = na
+var float frameLow   = na
+var int   seenFrameH = na
+var int   seenFrameL = na
+
+if not na(f4hPh) and f4hTok != seenFrameH
+    seenFrameH := f4hTok
+    fPrevHigh := fHigh
+    fHigh := f4hPh
+
+if not na(f4hPl) and f4hTok != seenFrameL
+    seenFrameL := f4hTok
+    fPrevLow := fLow
+    fLow := f4hPl
+    lowerLow = not na(fPrevLow) and f4hPl < fPrevLow
+    if lowerLow
+        frameLow := f4hPl
+        if not na(fHigh)
+            theLevel := fHigh
+
+c4 = f4hClose
+haveFrame = not na(theLevel) and not na(frameLow)
+changed   = haveFrame and c4 > theLevel
+underLow  = haveFrame and c4 < frameLow
+atLevel   = haveFrame and not changed and high >= theLevel
+retracing = haveFrame and not changed and not underLow and not atLevel and close < theLevel
+
+stateName = not haveFrame ? "no frame yet" : changed ? "frame changed" : underLow ? "under the low" : atLevel ? "level in play" : "retracing"
+
+// The small chart: higher highs, and the last higher low still holding - a
+// close under it ends the hold, a wick does not.
+[fSPh, fSPl, sClose, fSTok] = request.security(syminfo.tickerid, smallTf, [ta.pivothigh(high, smallLen, smallLen), ta.pivotlow(low, smallLen, smallLen), close, time[smallLen]], lookahead=barmerge.lookahead_off)
+
+var float sHigh      = na
+var float sPrevHigh  = na
+var float sLow       = na
+var float sPrevLow   = na
+var float sHold      = na
+var int   seenSmallH = na
+var int   seenSmallL = na
+
+if not na(fSPh) and fSTok != seenSmallH
+    seenSmallH := fSTok
+    sPrevHigh := sHigh
+    sHigh := fSPh
+
+if not na(fSPl) and fSTok != seenSmallL
+    seenSmallL := fSTok
+    sPrevLow := sLow
+    sLow := fSPl
+    if not na(sPrevLow) and fSPl > sPrevLow
+        sHold := fSPl
+
+ltfUp = not na(sPrevHigh) and sHigh > sPrevHigh and not na(sHold) and sClose > sHold
+
+longOk  = haveFrame and not changed and not underLow and retracing and ltfUp
+shortOk = haveFrame and not changed and atLevel
+verdict = changed ? "wait - the frame changed" : shortOk ? "short" : longOk ? "long scalp" : "wait"
+
+// The level and the 4h low, drawn so the thing he is watching is visible.
+var line[] lvlLines = array.new_line()
+var line[] lowLines = array.new_line()
+
+lvChanged = not na(theLevel) and (na(theLevel[1]) or theLevel != theLevel[1])
+if lvChanged
+    array.push(lvlLines, line.new(bar_index, theLevel, bar_index + 20, theLevel, color=lvlCol, width=1))
+    while array.size(lvlLines) > 3
+        line.delete(array.shift(lvlLines))
+
+loChanged = not na(frameLow) and (na(frameLow[1]) or frameLow != frameLow[1])
+if loChanged
+    array.push(lowLines, line.new(bar_index, frameLow, bar_index + 20, frameLow, color=lowCol, width=1))
+    while array.size(lowLines) > 3
+        line.delete(array.shift(lowLines))
+
+if array.size(lvlLines) > 0
+    for i = 0 to array.size(lvlLines) - 1
+        line.set_x2(array.get(lvlLines, i), bar_index + 20)
+
+if array.size(lowLines) > 0
+    for i = 0 to array.size(lowLines) - 1
+        line.set_x2(array.get(lowLines, i), bar_index + 20)
+
+var table dash = table.new(position.top_right, 2, 8, border_width=1, frame_width=1, bgcolor=color.new(color.black, 25))
+
+if showRead and barstate.islast
+    table.cell(dash, 0, 0, "State", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 0, stateName, text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 1, "The level", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 1, na(theLevel) ? "none yet" : str.tostring(theLevel, format.mintick), text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 2, "The 4h low", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 2, na(frameLow) ? "none yet" : str.tostring(frameLow, format.mintick), text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 3, "4h lower low made", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 3, haveFrame ? "yes" : "no", text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 4, "At the level or working back", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 4, (atLevel or retracing) ? "yes" : "no", text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 5, "Small chart higher highs, higher low held", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 5, ltfUp ? "yes" : "no", text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 6, "4h closed above the level", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 6, changed ? "yes" : "no", text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 7, "Verdict", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 7, verdict, text_size=readText, text_color=shortOk ? color.red : longOk ? color.teal : color.new(color.white, 35))
+
+alertcondition(longOk and not longOk[1], title="Long scalp", message="The small chart turned up while the 4h frame is down and the level has not been closed above - long scalp into the level")
+alertcondition(shortOk and not shortOk[1], title="Short - price at the level", message="Price is at the 4h lower high and the 4h has not closed above it")
+alertcondition(changed and not changed[1], title="Frame changed", message="The 4h closed above the level - the down frame is off")
+
 // ----------------------------------------------------------------- the upkeep
 // Zones run to the right while they live, and they come off when price takes
 // them out - unless "keep zones price has taken out" is ticked. The ranges

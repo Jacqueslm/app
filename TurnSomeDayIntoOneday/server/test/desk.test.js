@@ -434,6 +434,7 @@ function logTrade(p, fields) {
   el('tSt').value = n(fields.st);
   el('tTg').value = n(fields.tg);
   el('tEx').value = n(fields.ex);
+  el('tPv').value = n(fields.pv);
   el('tNote').value = fields.note || '';
   el('saveT').onclick();
 }
@@ -563,7 +564,8 @@ test('reviewing a trade sends the trade, his setups, and the rules that mark the
   assert.match(system, /Was the stop where his setup says the stop goes/);
   assert.match(system, /END WITH|ONE thing to do differently next time/);
   assert.match(system, /far too few trades for that to mean anything/);
-  assert.match(system, /Never size a position and never turn risk into money/);
+  assert.match(system, /Never size a position and never invent a money figure/);
+  assert.match(system, /never how many contracts to trade/, 'and it never sizes the trade for him');
   assert.match(system, /Never tell him he is finished/);
   assert.match(question, /Where was the decision wrong/, 'it asks for a review, not a chat');
   assert.match(p.els.get('askA').innerHTML, /Wrong if|4h|Entry/, 'and the answer lands on the page');
@@ -918,4 +920,164 @@ test('the desk has a chip for the question he actually asked', () => {
   assert.match(html, /is this a run of higher highs and higher lows pushing into the old high without taking it/);
   assert.match(html, /id="sA"/, 'and somewhere to put his own session window');
   assert.match(html, /id="stOut"/, 'and somewhere for the structure read to land');
+});
+
+// ── readable numbers, and what a point is worth ─────────────────────────────
+//
+// Jacques, 17 Sep 2026, with the desk open and the structure block in front of
+// him: "i dont understand the numbers here kind of difficult to read simplify
+// this and you pulled the charts you dont know how much a point is worth and
+// actually right now i trading macros mnq mgc mes etcc.. look it up".
+//
+// Two things had to be true after that:
+//   1. Every figure on the structure read sits behind a word. The arithmetic is
+//      untouched — the same numbers — but no fact is a paragraph any more.
+//   2. He trades micros, so the page knows what one point pays on a contract and
+//      his own points can finally be money. A symbol the page does not know gets
+//      NO figure rather than a guessed one, and the point value that counts is
+//      the one on the trade, which he can overrule.
+
+test('the structure read is one fact per line, with the word in front of the number', async () => {
+  const p = await loadPage({ feed: stallingFeed() });
+  const drawn = p.els.get('stOut').innerHTML;
+  assert.match(drawn, /class="sttrend">Higher highs, higher lows</, 'the run, in words');
+  assert.match(drawn, /class="stk">Price<\/span>/, 'a label on the distance to the old high');
+  assert.match(drawn, /class="stk">Bars<\/span>/, 'and on the size of the bars');
+  assert.match(drawn, /class="stk">Range<\/span>/);
+  assert.match(drawn, /class="stk">Watch<\/span>/, 'and on the level that would end the run');
+  assert.match(drawn, /Getting smaller/, 'the size of the bars as a word, not a ratio on its own');
+  assert.match(drawn, /squeezed/);
+  assert.match(drawn, /0\.70<\/b> under the last high \(112\.00\)/, 'the numbers he acts on are still there');
+  assert.match(drawn, /105\.50/, 'and so is the last higher low');
+  assert.match(drawn, /class="stflag">Run into the old high, not through it\./, 'the flag stays');
+  assert.ok(!/class="sdet"/.test(drawn), 'no paragraph of numbers left on the page');
+  assert.ok(!/NaN|Infinity/.test(drawn), 'nothing divides by zero');
+});
+
+test('the page knows what one point pays on the contracts he actually trades', async () => {
+  const p = await loadPage();
+  const pv = (s) => p.sandbox.pointValueOf(s);
+  assert.strictEqual(pv('MNQ'), 2, 'micro Nasdaq');
+  assert.strictEqual(pv('MNQ=F'), 2, 'the feed answers MNQ=F — the same contract');
+  assert.strictEqual(pv('/MES'), 5, 'micro S&P');
+  assert.strictEqual(pv('mgc'), 10, 'micro gold, whatever case he types it in');
+  assert.strictEqual(pv('MCL'), 100, 'micro crude');
+  assert.strictEqual(pv('GC=F'), 100, 'and the full-size ones are not mixed up with the micros');
+  assert.strictEqual(pv('NQ'), 20);
+  assert.strictEqual(pv('BTC-USD'), null, 'a symbol with no published size gets no figure at all');
+  assert.strictEqual(pv('SPY'), null);
+  assert.strictEqual(pv(''), null);
+});
+
+test('the feed card says what a point is worth on the symbol it loaded', async () => {
+  const p = await loadPage({ feed: candleSet({ symbol: 'MNQ=F' }) });
+  assert.match(p.els.get('fOut').innerHTML, /one point is <b>\$2\.00<\/b>/, 'the contract size is on the card');
+  assert.match(p.sandbox.askSystem(), /One point on MNQ is \$2\.00 per contract/,
+    'and it goes to the assistant with the candles');
+  assert.match(p.sandbox.askSystem(), /ONLY to repeat the money line in the JOURNAL block/,
+    'told what it may do with it, and what it may not');
+
+  // A symbol the page cannot price says so instead of quietly having none.
+  const q = await loadPage({ feed: candleSet({ symbol: 'BTC-USD' }) });
+  assert.match(q.els.get('fOut').innerHTML, /No published contract size for BTC/);
+  assert.match(q.sandbox.askSystem(), /is NOT known to this page, so there is no money figure/);
+});
+
+test('points become money only from the point value he put on the trade', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'MNQ', su: SWEEP.n, en: 21000, st: 20990, ex: 21020, pv: 2 });  // +20 pts, 2R, +$40
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(s.moneyN, 1, 'the trade is priced');
+  assert.strictEqual(s.netMoney, 40, 'twenty points at two dollars');
+  assert.match(p.sandbox.journalHtml(), /\$40\.00/);
+  assert.match(p.sandbox.journalText(), /Money: \$40\.00 across 1 of 1 closed trades/);
+});
+
+test('a trade with no point value is in no money total, and the page says which', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'MNQ', su: SWEEP.n, en: 100, st: 99, ex: 102, pv: 2 });   // +$2.00
+  logTrade(p, { mk: 'SPY', su: SWEEP.n, en: 500, st: 499, ex: 503 });          // no point value
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(s.closed, 2);
+  assert.strictEqual(s.moneyN, 1);
+  assert.strictEqual(s.moneyMissing, 1);
+  assert.strictEqual(s.netMoney, 4, 'only the priced trade is in the total');
+  const html = p.sandbox.journalHtml();
+  assert.match(html, /\$4\.00/, 'the money is shown');
+  assert.match(html, /1 left out, no point value on it/, 'with the count of what it does not cover');
+  assert.match(p.sandbox.journalText(), /with 1 left out because no point value is on it/);
+});
+
+test('no point value anywhere means no money figure — not zero', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'SPY', su: SWEEP.n, en: 500, st: 499, ex: 503 });
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(s.moneyN, 0);
+  assert.ok(!/\$/.test(p.sandbox.journalHtml()), 'no dollar sign from nowhere');
+  assert.match(p.sandbox.journalHtml(), /no point value on any closed trade yet/);
+  assert.match(p.sandbox.journalText(), /there is no money figure\. Say that instead of working one out/);
+  assert.match(p.sandbox.moneyRow(s), /no point value on any closed trade yet/);
+});
+
+test('the point value fills itself in from the market, and he can overrule it', async () => {
+  const p = await loadPage();
+  p.sandbox.openTrade();
+  p.els.get('tMk').value = 'MNQ';
+  p.sandbox.fillPointValue();
+  assert.strictEqual(p.els.get('tPv').value, '2', 'filled in from the contract size');
+  assert.match(p.els.get('tPvHint').textContent, /one point is \$2\.00/);
+
+  // His own figure is never overwritten by the table.
+  p.els.get('tPv').value = '3';
+  p.els.get('tMk').value = 'MGC';
+  p.sandbox.fillPointValue();
+  assert.strictEqual(p.els.get('tPv').value, '3', 'what he typed wins');
+
+  p.els.get('tEn').value = '4000';
+  p.els.get('tSt').value = '3990';
+  p.els.get('tEx').value = '4005';
+  p.els.get('saveT').onclick();
+  assert.strictEqual(p.sandbox.TRADES[0].pv, 3, 'and it saves with the trade');
+  assert.strictEqual(p.sandbox.moneyOf(p.sandbox.TRADES[0]), 15, 'five points at his three dollars');
+
+  // An unknown market gets no figure and the hint says why.
+  const q = await loadPage();
+  q.sandbox.openTrade();
+  q.els.get('tMk').value = 'SPY';
+  q.sandbox.fillPointValue();
+  assert.strictEqual(q.els.get('tPv').value, '', 'nothing invented for a symbol it does not know');
+  assert.match(q.els.get('tPvHint').textContent, /No published contract size for SPY/);
+});
+
+test('the money is turned off in the log when the point value could not be worked out', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'MNQ', su: SWEEP.n, en: 100, st: null, ex: 102, pv: 2 });
+  const t = p.sandbox.TRADES[0];
+  assert.strictEqual(p.sandbox.riskMoney(t), null, 'no stop, no risk in money');
+  assert.strictEqual(p.sandbox.moneyOf(t), 4, 'but the result is priced');
+  const text = p.sandbox.tradeText(t);
+  assert.match(text, /Risk, in points: cannot be worked out: entry or stop is missing/);
+  assert.match(text, /Result, in R: cannot be worked out yet/, 'no stop means no R, and the review is told that');
+});
+
+test('the assistant may repeat the journal money and never size a trade', async () => {
+  const p = await loadPage();
+  const desk = String(p.sandbox.DESK_SYS);
+  assert.match(desk, /never invent a money figure/);
+  assert.match(desk, /Use it ONLY to repeat the money line in the JOURNAL block/);
+  assert.match(desk, /never a balance, never an account size, never how many contracts to trade/);
+  const trade = String(p.sandbox.TRADE_SYS);
+  assert.match(trade, /The only money in this review is what the trade block already worked out/);
+  assert.match(trade, /never what it could have made/);
+});
+
+test('markup in a point value cannot put markup on the page', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'MNQ', su: SWEEP.n, en: 100, st: 99, ex: 102, pv: '<b>2</b>' });
+  const t = p.sandbox.TRADES[0];
+  assert.strictEqual(t.pv, null, 'a point value that is not a number is dropped at the form');
+  assert.strictEqual(p.sandbox.pvOf(t), null, 'a point value that is not a number is no point value');
+  assert.strictEqual(p.sandbox.moneyOf(t), null, 'and it buys no money figure');
+  assert.match(p.sandbox.journalHtml(), /no point value on any closed trade yet/,
+    'so the page says there is none rather than rendering his markup');
 });

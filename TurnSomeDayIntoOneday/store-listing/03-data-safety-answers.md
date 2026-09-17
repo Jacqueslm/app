@@ -163,13 +163,20 @@ list, read from the code:
 | Processor | What it receives | Where |
 |---|---|---|
 | **Google (Gemini)** | Friendly messages, and every room post for moderation | `server/server.js`, `server/rooms.js` |
-| **Anthropic** | Friendly messages — only if no Gemini key is set | `server/server.js` (fallback path) |
 | **Stripe** | Card details and email, web purchases only | `server/billing.js` |
 | **Google Play** | Android purchases | `server/store-billing.js` |
 | **Resend** | Email address and message body | `server/email.js` |
 | **Plausible** | Page URL, plus IP and user agent so a visit counts once | `server/analytics.js` |
 
 Push notifications use self-issued VAPID keys and no third party.
+
+**Updated 17 Sep 2026 — the Anthropic row is gone.** Jacques had Claude unwired
+from the app outright ("unwire claude not going to use it and use the gemini
+key"), so `server/server.js` now reaches Google and nothing else. There is no
+fallback provider, and `ANTHROPIC_API_KEY` is read nowhere in the codebase. Two
+written sentences moved with it: the in-app policy in `index.html` named
+Anthropic (and promised "two outside services" while listing one), and
+`privacy.html` carried a conditional line about the fallback. Both corrected.
 
 **Plausible is the one that changes an answer.** It is cookieless and does not
 track across sites, but it is analytics and it receives an IP address, so do

@@ -36,14 +36,13 @@ app.disable('x-powered-by');
 // forwarded headers so secure cookies and per-IP rate limits work correctly.
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const ANTHROPIC_VERSION = '2023-06-01';
-const ANTHROPIC_MODEL = 'claude-sonnet-5';
-const ANTHROPIC_MAX_TOKENS = 1000;
-// Friendly can also run on Gemini - far cheaper at volume and with a free
-// tier for light use. Whichever key is present wins; if both are set, Gemini
-// wins only when GEMINI_FIRST is set, otherwise Anthropic stays the default
-// because it is the better recovery companion.
+// Gemini is the ONLY provider (Jacques, 17 Sep 2026: "unwire claude not going
+// to use it and use the gemini key"). The Anthropic path was removed outright
+// rather than left as a fallback, so there is exactly one place a chat can go
+// and exactly one key that can break it. Nothing here reads ANTHROPIC_API_KEY
+// any more - if the Gemini key is missing the app says so plainly instead of
+// quietly answering from somewhere else, because a silent second provider is
+// how a break hides (see the gemini-2.5-flash retirement note below).
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 // gemini-2.5-flash was retired to new callers: Google answered every single
 // chat with HTTP 404 "no longer available to new users ... use
@@ -51,8 +50,8 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 // by env so the next retirement is a Railway variable, not a redeploy.
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 // Gemini counts thinking against the output budget, so it needs its own number
-// rather than borrowing Anthropic's. Friendly's replies are short; the room is
-// headroom, not length.
+// rather than borrowing another provider's. Friendly's replies are short; the
+// room is headroom, not length.
 const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
 // MINIMAL | LOW | MEDIUM | HIGH. LOW is the fastest setting a 3.x model will
 // actually accept - MINIMAL additionally requires thought signatures and 400s
@@ -1456,12 +1455,12 @@ app.get('/api/friendly/access', requireAuth, (req, res) => {
 // replies and the diagnostics panel 403s. Signed-in only; open it in a phone
 // browser to see in one line which of the two it is.
 app.get('/api/ai-status', requireAuth, (req, res) => {
-  const provider = GEMINI_API_KEY ? 'gemini' : (ANTHROPIC_API_KEY ? 'anthropic' : 'none');
+  const provider = GEMINI_API_KEY ? 'gemini' : 'none';
   const user = db.getUserById(req.userId);
   res.json({
     provider,
-    keyConfigured: !!(GEMINI_API_KEY || ANTHROPIC_API_KEY),
-    model: provider === 'gemini' ? GEMINI_MODEL : (provider === 'anthropic' ? ANTHROPIC_MODEL : null),
+    keyConfigured: !!GEMINI_API_KEY,
+    model: GEMINI_API_KEY ? GEMINI_MODEL : null,
     ownerEmailConfigured: !!DIAG_OWNER_EMAIL,
     youAreOwner: !!(DIAG_OWNER_EMAIL && user && user.email === DIAG_OWNER_EMAIL),
   });
@@ -1506,13 +1505,13 @@ app.get('/api/candles', candleLimiter, requireAuth, async (req, res) => {
 });
 
 app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
-  if (!ANTHROPIC_API_KEY && !GEMINI_API_KEY) {
+  if (!GEMINI_API_KEY) {
     // No key on the server. This used to return a bare 503 and nothing else,
     // which is the one AI failure the app could not show anybody: the client
     // silently drops to canned replies, the chat counter never moves, and
     // because nothing was logged, Profile > Diagnostics stayed empty too. Log
     // it, and tell the owner in the chat itself.
-    const why = 'No AI key on the server (GEMINI_API_KEY / ANTHROPIC_API_KEY are both unset).';
+    const why = 'No AI key on the server (GEMINI_API_KEY is unset).';
     try { db.logError('ai-chat', why); } catch (_) {}
     const body = { error: 'AI chat is not available on this server right now.' };
     try {
@@ -1622,23 +1621,6 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
         data = gd;
       }
       res2 = gemRes;
-    } else {
-      const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': ANTHROPIC_VERSION,
-        },
-        body: JSON.stringify({
-          model: ANTHROPIC_MODEL,
-          max_tokens: ANTHROPIC_MAX_TOKENS,
-          system,
-          messages,
-        }),
-      });
-      data = await anthropicRes.json();
-      res2 = anthropicRes;
     }
     // Only spend the user's daily quota on a response that actually succeeded - a bad server
     // config or a transient provider outage shouldn't cost them one of their free chats.

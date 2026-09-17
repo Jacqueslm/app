@@ -1,0 +1,222 @@
+//@version=5
+// Someday Zones - the first half of the indicator.
+//
+// Supply and demand zones built from confirmed swings, read on the chart's own
+// timeframe and on four higher ones, with the retracement levels inside them.
+//
+// Nothing here reads the future and nothing here predicts: a zone appears only
+// after its swing has confirmed, and the ranges come from the bars that are
+// already closed. The one drawing choice that is not a fact is how far back a
+// new zone is painted - that is the "reaches back" input, and it is yours.
+indicator("Someday Zones", shorttitle="Someday Zones", overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
+
+// ----------------------------------------------------------------- structure
+showSwings = input.bool(true, "Swing points", group="Structure")
+swingLen   = input.int(10, "Structure length", minval=2, maxval=50, group="Structure")
+swingCol   = input.color(color.new(color.teal, 25), "Swing colour", group="Structure")
+nameSwings = input.bool(false, "Name the swings (HH HL LH LL)", group="Structure")
+
+// --------------------------------------------------------------------- zones
+showZones  = input.bool(true, "Display zones", group="Zones")
+zoneSide   = input.string("Both", "Zone display", options=["Both", "Bullish", "Bearish"], group="Zones")
+showLast   = input.int(1, "Show last, per side", minval=1, maxval=10, group="Zones")
+cleanBands = input.bool(true, "Clean up level overlap", group="Zones")
+zoneBack   = input.int(6, "A new zone reaches back (bars)", minval=1, maxval=60, group="Zones")
+zoneLive   = input.int(300, "Zone life (bars)", minval=10, maxval=2000, group="Zones")
+keepBroken = input.bool(false, "Keep zones price has taken out", group="Zones")
+bullCol    = input.color(color.new(#26a69a, 85), "Bullish zone", group="Zones")
+bearCol    = input.color(color.new(#ef5350, 85), "Bearish zone", group="Zones")
+edgeCol    = input.color(color.new(color.gray, 55), "Zone edge", group="Zones")
+
+// -------------------------------------------------------------- retracements
+fib0     = input.bool(false, "0", inline="fib", group="Retracements")
+fib3     = input.bool(true, "0.3", inline="fib", group="Retracements")
+fib5     = input.bool(true, "0.5", inline="fib", group="Retracements")
+fib7     = input.bool(true, "0.7", inline="fib", group="Retracements")
+fib1     = input.bool(false, "1", inline="fib", group="Retracements")
+fibStyle = input.string("Dotted", "Line style", options=["Solid", "Dashed", "Dotted"], group="Retracements")
+fibCol   = input.color(color.new(color.gray, 30), "Line colour", group="Retracements")
+
+// --------------------------------------------------------------- timeframes
+useChart = input.bool(true, "Chart timeframe", group="Timeframes")
+use15    = input.bool(true, "15 minutes", group="Timeframes")
+use60    = input.bool(true, "1 hour", group="Timeframes")
+use240   = input.bool(true, "4 hours", group="Timeframes")
+useD     = input.bool(false, "1 day", group="Timeframes")
+
+// ------------------------------------------------------------------ a zone
+// A box, plus up to five levels inside it. The levels are counted from the
+// swing itself: 0 sits on the swing, 1 sits at the far end of the leg.
+type Zone
+    box  b
+    line f0
+    line f3
+    line f5
+    line f7
+    line f1
+
+var Zone[] supplyZones = array.new<Zone>()
+var Zone[] demandZones = array.new<Zone>()
+
+lineStyle() =>
+    fibStyle == "Solid" ? line.style_solid : fibStyle == "Dashed" ? line.style_dashed : line.style_dotted
+
+makeZone(bool supply, float top, float bottom, int left) =>
+    right = bar_index + 20
+    z = Zone.new(box.new(left, top, right, bottom, border_color=edgeCol, border_width=1, bgcolor=supply ? bearCol : bullCol), na, na, na, na, na)
+    span = top - bottom
+    if span > 0
+        st = lineStyle()
+        if fib0
+            lv = supply ? top : bottom
+            z.f0 := line.new(left, lv, right, lv, color=fibCol, style=st)
+        if fib3
+            lv = supply ? top - span * 0.3 : bottom + span * 0.3
+            z.f3 := line.new(left, lv, right, lv, color=fibCol, style=st)
+        if fib5
+            lv = supply ? top - span * 0.5 : bottom + span * 0.5
+            z.f5 := line.new(left, lv, right, lv, color=fibCol, style=st)
+        if fib7
+            lv = supply ? top - span * 0.7 : bottom + span * 0.7
+            z.f7 := line.new(left, lv, right, lv, color=fibCol, style=st)
+        if fib1
+            lv = supply ? bottom : top
+            z.f1 := line.new(left, lv, right, lv, color=fibCol, style=st)
+    z
+
+killZone(Zone z) =>
+    box.delete(z.b)
+    if not na(z.f0)
+        line.delete(z.f0)
+    if not na(z.f3)
+        line.delete(z.f3)
+    if not na(z.f5)
+        line.delete(z.f5)
+    if not na(z.f7)
+        line.delete(z.f7)
+    if not na(z.f1)
+        line.delete(z.f1)
+
+addZone(bool supply, float top, float bottom, int left) =>
+    wanted = zoneSide == "Both" or (supply and zoneSide == "Bearish") or (not supply and zoneSide == "Bullish")
+    if showZones and wanted and not na(top) and not na(bottom) and top > bottom
+        Zone[] arr = supply ? supplyZones : demandZones
+        if cleanBands and array.size(arr) > 0
+            for i = array.size(arr) - 1 to 0
+                Zone old = array.get(arr, i)
+                if box.get_top(old.b) >= bottom and box.get_bottom(old.b) <= top
+                    killZone(old)
+                    array.remove(arr, i)
+        while array.size(arr) >= showLast
+            killZone(array.shift(arr))
+        array.push(arr, makeZone(supply, top, bottom, left))
+
+pruneZones(Zone[] arr, bool supply) =>
+    if array.size(arr) > 0
+        for i = array.size(arr) - 1 to 0
+            Zone z = array.get(arr, i)
+            top = box.get_top(z.b)
+            bot = box.get_bottom(z.b)
+            left = box.get_left(z.b)
+            box.set_right(z.b, bar_index + 20)
+            if not na(z.f0)
+                line.set_x2(z.f0, bar_index + 20)
+            if not na(z.f3)
+                line.set_x2(z.f3, bar_index + 20)
+            if not na(z.f5)
+                line.set_x2(z.f5, bar_index + 20)
+            if not na(z.f7)
+                line.set_x2(z.f7, bar_index + 20)
+            if not na(z.f1)
+                line.set_x2(z.f1, bar_index + 20)
+            dead = bar_index - left > zoneLive
+            if not keepBroken
+                dead := dead or (supply ? close > top : close < bot)
+            if dead
+                killZone(z)
+                array.remove(arr, i)
+
+// ----------------------------------------------------------- the swings, named
+ph = ta.pivothigh(high, swingLen, swingLen)
+pl = ta.pivotlow(low, swingLen, swingLen)
+
+var float lastHigh = na
+var float lastLow  = na
+
+if not na(ph)
+    what = na(lastHigh) ? "H" : ph > lastHigh ? "HH" : "LH"
+    lastHigh := ph
+    if showSwings
+        label.new(bar_index - swingLen, ph, nameSwings ? what : "", style=label.style_label_down, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
+
+if not na(pl)
+    what = na(lastLow) ? "L" : pl > lastLow ? "HL" : "LL"
+    lastLow := pl
+    if showSwings
+        label.new(bar_index - swingLen, pl, nameSwings ? what : "", style=label.style_label_up, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
+
+// --------------------------------------------------- zones, chart timeframe
+if useChart and not na(ph)
+    addZone(true, ph, ta.lowest(low, swingLen)[swingLen], bar_index - zoneBack)
+
+if useChart and not na(pl)
+    addZone(false, ta.highest(high, swingLen)[swingLen], pl, bar_index - zoneBack)
+
+// ------------------------------------------------ zones, higher timeframes
+// One call per timeframe, reading the swing and the leg that led into it. The
+// token is the time of the swing bar, so a swing that confirms is only drawn
+// once however many chart bars sit inside the confirming bar.
+var int seen15h = na
+var int seen15l = na
+var int seen60h = na
+var int seen60l = na
+var int seen4h  = na
+var int seen4l  = na
+var int seen1dh = na
+var int seen1dl = na
+
+[a15ph, a15pl, a15lo, a15hi, a15t] = request.security(syminfo.tickerid, "15", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+
+if use15 and not na(a15ph) and a15t != seen15h
+    seen15h := a15t
+    addZone(true, a15ph, a15lo, bar_index - zoneBack)
+
+if use15 and not na(a15pl) and a15t != seen15l
+    seen15l := a15t
+    addZone(false, a15hi, a15pl, bar_index - zoneBack)
+
+[b60ph, b60pl, b60lo, b60hi, b60t] = request.security(syminfo.tickerid, "60", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+
+if use60 and not na(b60ph) and b60t != seen60h
+    seen60h := b60t
+    addZone(true, b60ph, b60lo, bar_index - zoneBack)
+
+if use60 and not na(b60pl) and b60t != seen60l
+    seen60l := b60t
+    addZone(false, b60hi, b60pl, bar_index - zoneBack)
+
+[c4hph, c4hpl, c4hlo, c4hhi, c4ht] = request.security(syminfo.tickerid, "240", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+
+if use240 and not na(c4hph) and c4ht != seen4h
+    seen4h := c4ht
+    addZone(true, c4hph, c4hlo, bar_index - zoneBack)
+
+if use240 and not na(c4hpl) and c4ht != seen4l
+    seen4l := c4ht
+    addZone(false, c4hhi, c4hpl, bar_index - zoneBack)
+
+[d1dph, d1dpl, d1dlo, d1dhi, d1dt] = request.security(syminfo.tickerid, "1D", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+
+if useD and not na(d1dph) and d1dt != seen1dh
+    seen1dh := d1dt
+    addZone(true, d1dph, d1dlo, bar_index - zoneBack)
+
+if useD and not na(d1dpl) and d1dt != seen1dl
+    seen1dl := d1dt
+    addZone(false, d1dhi, d1dpl, bar_index - zoneBack)
+
+// ----------------------------------------------------------------- the upkeep
+// Zones run to the right while they live, and they come off when price takes
+// them out - unless "keep zones price has taken out" is ticked.
+pruneZones(supplyZones, true)
+pruneZones(demandZones, false)

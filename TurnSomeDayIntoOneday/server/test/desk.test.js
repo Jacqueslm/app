@@ -484,7 +484,8 @@ test('no exit, no stop, or a stop sitting on the entry is never given a made-up 
   assert.ok(!/NaN|Infinity/.test(html), 'nothing divides by zero on the page');
   assert.match(html, /open — no exit written down/);
   assert.match(html, /no result: needs an entry and a stop/);
-  assert.match(html, /counted nowhere/, 'and the record says which ones it left out');
+  assert.match(p.els.get('jsum').innerHTML, /counted nowhere/,
+    'and the journal says which ones it left out rather than quietly dropping them');
 });
 
 test('a trade with no entry is not stored as a row of blanks', async () => {
@@ -493,18 +494,20 @@ test('a trade with no entry is not stored as a row of blanks', async () => {
   assert.strictEqual(p.sandbox.TRADES.length, 0, 'no entry, no trade');
 });
 
-test('the record adds up his own numbers and prints no percentage', async () => {
+test('the journal adds up his own numbers, and the count rides with the percentage', async () => {
   const p = await loadPage();
   logTrade(p, { su: 'Sweep', en: 100, st: 99, ex: 102 });   // +2R
   logTrade(p, { su: 'Sweep', en: 100, st: 99, ex: 99 });    // -1R
-  const sum = p.sandbox.logSummaryHtml();
+  const sum = p.sandbox.journalHtml();
   assert.strictEqual(p.sandbox.closedTrades().length, 2);
   assert.match(sum, /2 trades written down/, 'his own count');
-  assert.match(sum, /Added up: \+1\.00R across those/, 'his own arithmetic, added up');
-  assert.match(sum, /Sweep: \+1\.00R/, 'and grouped by the setup he named');
-  assert.ok(!/%/.test(sum), 'no percentage anywhere: a win rate from two trades is an invented figure');
-  assert.match(sum, /no win rate here on purpose/);
-  assert.match(sum, /a handful of trades proves nothing either way/);
+  assert.match(sum, /2<\/b> closed|2 closed|1<\/b> closed/, 'and how many of them are closed');
+  assert.match(sum, /Win rate: <b>50%<\/b> — 1 won of 2 closed/,
+    'the count sits on the same line as the percentage, which is the whole condition on printing one');
+  assert.match(sum, /\+1\.00R/, 'his own arithmetic, added up');
+  assert.match(sum, /Sweep: 2 closed, 1 won, 1 lost/, 'and grouped by the setup he named');
+  assert.match(sum, /not a backtest, it is not a measurement of an edge/);
+  assert.ok(!/you are due|expect/i.test(sum), 'and nothing in it reads as a forecast');
 });
 
 test('his trade log travels with every question, and an empty log says so', async () => {
@@ -524,7 +527,10 @@ test('his trade log travels with every question, and an empty log says so', asyn
   assert.match(system, /HIS OWN TRADE LOG/);
   assert.match(system, /1 written down, 1 with a result, 0 still open/);
   assert.match(system, /result \+2\.00R/, 'the trade goes with the question, with its own arithmetic');
-  assert.match(system, /no average, no expectancy, no win rate/, 'and the log is never turned into a statistic');
+  assert.match(system, /do not work out an expectancy, an "edge"/,
+    'the log is never turned into an edge - only the journal numbers below it may be used');
+  assert.match(system, /HIS JOURNAL/, 'and the journal rides with the question too');
+  assert.match(system, /Win rate: 100% — 1 won, 0 lost/, 'with the real numbers, not sums done in its head');
   assert.match(system, /London sweep and reclaim/, 'the setups still travel with it, as before');
 });
 
@@ -588,9 +594,105 @@ test('markup in a trade cannot put markup on the page', async () => {
   assert.match(html, /&lt;script/);
 });
 
+// ── the journal ─────────────────────────────────────────────────────────────
+
+test('the journal counts wins, losses, break-evens, and leaves open trades out', async () => {
+  const p = await loadPage();
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102 });   // +2R won
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 101 });   // +1R won
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 103 });   // +3R won
+  logTrade(p, { su: 'Retest', dir: 'long', en: 100, st: 99, ex: 99 });   // -1R lost
+  logTrade(p, { su: 'Retest', dir: 'long', en: 100, st: 99, ex: 100 });  // 0R break-even
+  logTrade(p, { su: 'Retest', dir: 'long', en: 100, st: 99, ex: null }); // still open
+
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(s.written, 6, 'everything he wrote down is accounted for');
+  assert.strictEqual(s.closed, 5, 'the open one is not a result');
+  assert.strictEqual(s.missing, 1);
+  assert.strictEqual(s.won, 3);
+  assert.strictEqual(s.lost, 1);
+  assert.strictEqual(s.flat, 1);
+  assert.strictEqual(s.winRate, 60, '3 of 5 closed - the open trade is in neither half');
+  assert.strictEqual(Math.round(s.netR * 100) / 100, 5, '+2+1+3-1+0');
+  assert.strictEqual(Math.round(s.grossWin * 100) / 100, 6, 'what the winners paid');
+  assert.strictEqual(Math.round(s.grossLoss * 100) / 100, -1, 'what the losers cost');
+  assert.strictEqual(Math.round(s.avgWin * 100) / 100, 2, 'winners averaged +2R');
+  assert.strictEqual(Math.round(s.avgLoss * 100) / 100, -1, 'losers averaged -1R');
+  assert.strictEqual(s.bestR, 3);
+  assert.strictEqual(s.worstR, -1);
+
+  const html = p.sandbox.journalHtml();
+  assert.match(html, /Win rate: <b>60%<\/b> — 3 won of 5 closed/, 'the count is welded to the percentage');
+  assert.match(html, /1 lost/, 'and the losses are named, not folded into the rate');
+  assert.match(html, /1 at break-even/, 'a break-even trade is neither a win nor a loss');
+  assert.match(html, /\+5\.00R/, 'profit and loss, in R');
+  assert.match(html, /won \+6\.00R against -1\.00R lost/);
+  assert.match(html, /Your winners averaged \+2\.00R each; your losers averaged -1\.00R each/,
+    'this is the risk against reward he asked for');
+});
+
+test('nothing closed means no percentage at all, not zero per cent', async () => {
+  const p = await loadPage();
+  logTrade(p, { su: 'Sweep', en: 100, st: 99, ex: null });
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(s.closed, 0);
+  assert.strictEqual(s.winRate, null, 'null, so nothing downstream can print it as 0%');
+  assert.strictEqual(s.avgWin, null);
+  assert.strictEqual(s.avgLoss, null);
+  const html = p.sandbox.journalHtml();
+  assert.ok(!/%/.test(html), 'a 0% win rate would read as a losing record rather than an empty one');
+  assert.match(html, /Nothing closed yet: no win rate, no profit and loss\. Not zero — blank\./);
+  assert.match(html, /1 trade written down, <b>0<\/b> closed/, 'and it says how much is there');
+  assert.ok(!/NaN|Infinity|undefined/.test(html), 'no arithmetic leaks onto the page');
+});
+
+test('points follow the direction, so a short is not counted as a loss by accident', async () => {
+  const p = await loadPage();
+  logTrade(p, { su: 'Sweep', dir: 'short', en: 100, st: 101, ex: 95 });  // +5R on 1 point of risk, +5 points
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(s.won, 1);
+  assert.strictEqual(Math.round(s.netPts * 100) / 100, 5,
+    'a short that went his way is profit in points, not a negative number');
+  assert.strictEqual(Math.round(s.netR * 100) / 100, 5);
+});
+
+test('the journal is handed to the assistant, and told what it is not', async () => {
+  const p = await loadPage();
+
+  // Empty: the instruction that stops a model inventing a record.
+  const empty = p.sandbox.journalText();
+  assert.match(empty, /NOTHING IS CLOSED YET/);
+  assert.match(empty, /Do not report 0% and do not describe a record he does not have/);
+
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102 });
+  const one = p.sandbox.journalText();
+  assert.match(one, /Win rate: 100% — 1 won, 0 lost/);
+  assert.match(one, /Net: \+2\.00R \(won \+2\.00R, lost \+0\.00R\), net \+2\.00 points\./);
+  assert.match(one, /They are not a prediction, not an edge, and not evidence about the next one/);
+  assert.match(one, /never tell him to size up because he is winning, and never tell him to win it back because he is losing/,
+    'the two ways a record like this gets somebody hurt');
+  assert.match(p.sandbox.askSystem(), /HIS JOURNAL/, 'and it rides with every question');
+});
+
+test('the record is a dated list, newest first, with what he saw at the time', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'NQ', su: 'Sweep', en: 100, st: 99, ex: 102, note: 'swept the low and reclaimed it' });
+  logTrade(p, { mk: 'ES', su: 'Retest', dir: 'short', en: 200, st: 202, ex: 203, note: 'took it before the trigger' });
+
+  const rec = p.sandbox.journalRecordHtml();
+  const newest = rec.indexOf('ES short');
+  const oldest = rec.indexOf('NQ long');
+  assert.ok(newest !== -1 && oldest !== -1, 'both trades are in the record');
+  assert.ok(newest < oldest, 'newest first - the trade he has just taken is the one he wants to see');
+  assert.match(rec, /swept the low and reclaimed it/, 'his own words survive into the record');
+  assert.match(rec, /\+2\.00R/);
+  assert.match(rec, /-1\.50R/, 'a short stopped out is a negative R');
+  assert.match(rec, /class="jdate"/, 'every line is dated - that is what makes it a journal');
+});
+
 test('the log chip answers under the review rules, not the general ones', () => {
   const html = fs.readFileSync(PAGE, 'utf8');
-  assert.match(html, /data-sys="trade">What does my log say\?</, 'the chip has to say which rules it runs under');
+  assert.match(html, /data-sys="trade">Read me my journal</, 'the chip has to say which rules it runs under');
   assert.match(html, /withTrades \? askSystem\(TRADE_SYS\) : undefined/);
 });
 

@@ -100,6 +100,16 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .pichold .pictxt b{display:block;font-size:.8125rem;font-weight:600;color:var(--tp)}
 .pichold .pictxt span{display:block;font-size:.6875rem;color:var(--tm);margin-top:3px;line-height:1.45}
 .picfine{font-size:.6875rem;color:var(--tm);margin:8px 0 0;line-height:1.6}
+.jrow{display:flex;align-items:baseline;gap:9px;padding:9px 0 3px;border-bottom:1px solid var(--bdr);font-size:.8125rem}
+.jdate{font-size:.6875rem;color:var(--tm);font-variant-numeric:tabular-nums;flex:0 0 auto;width:74px}
+.jtxt{flex:1;min-width:0}
+.jtxt b{display:block;font-size:.875rem;font-weight:600;color:var(--tp)}
+.jtxt span{display:block;font-size:.75rem;color:var(--tm);margin-top:2px}
+.jr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ts);flex:0 0 auto}
+.jr.win{color:var(--ok-t)}
+.jr.loss{color:var(--red-t)}
+.jr.open{color:var(--tm);font-weight:400;font-size:.75rem}
+.jnote{font-size:.8125rem;color:var(--ts);line-height:1.55;padding:0 0 9px;border-bottom:1px solid var(--bdr)}
 /* ── THE FEED ────────────────────────────────────────────────────────────────
    The candles. One row per timeframe: last close, and the low-to-high of what
    came back, which is a fact about the bars and not an opinion about them. */
@@ -226,7 +236,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <span class="chip" data-q="Talk me out of this trade, honestly.">Talk me out of it</span>
       <span class="chip" data-q="Read the structure off the bars: is this a run of higher highs and higher lows pushing into the old high without taking it, with the last bars losing size, and what would end it?">Is this extended?</span>
       <span class="chip" data-q="Read me the candles you have: what are the four timeframes doing, and what do they agree on?">What does the feed say?</span>
-      <span class="chip" data-q="Read my own trade log back to me. What do my numbers show, and what is the one thing to change?" data-sys="trade">What does my log say?</span>
+      <span class="chip" data-q="Read my journal back to me: the win rate with the count, what my winners paid against what my losers cost, and the one thing the record says to change." data-sys="trade">Read me my journal</span>
     </div>
     <div class="picrow" id="picRow">
       <input type="file" id="picIn" accept="image/*" style="display:none">
@@ -284,13 +294,32 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     </div>
   </div>
 
+  <!-- THE JOURNAL.
+       What the trade log adds up to, and the dated record underneath it.
+       Jacques asked for this on 18 Sep 2026, having been told the page would
+       not print a win rate. It prints one now, with the count welded to it —
+       that is the difference between a description of what he did and a claim
+       about what happens next. Nothing here is estimated or projected. -->
+  <div class="sec">
+    <div class="sec-hd">The journal</div>
+    <div id="jsum"></div>
+    <div id="jrec"></div>
+    <div id="jnone" class="empty">
+      Nothing in the journal yet. Log a trade and close it — entry, stop and
+      exit — and the record starts here: what you won and lost, what your
+      winners paid against what your losers cost, and every trade you took,
+      dated, with what you saw at the time.
+    </div>
+  </div>
+
   <div class="ft">
     Trading Desk — private.  <!-- MY TRADES.
        What he actually did, one entry per trade, and the review that marks the
        decision rather than the money. Everything on this page is his own
-       arithmetic: points from entry to stop, and R. No win rate is printed
-       here on purpose — a handful of trades cannot produce one, and a
-       percentage would be an invented figure wearing a measurement's clothes. -->
+       arithmetic: points from entry to stop, and R. The adding up lives in THE
+       JOURNAL above the footer; the one rule kept from the version that
+       refused a win rate is that the count is printed beside the percentage,
+       never the percentage alone. -->
   <div class="sec">
     <div class="sec-hd">My trades</div>
     <div id="tlist"></div>
@@ -864,7 +893,7 @@ var DESK_SYS=[
 '- You may never say a reversal, a pullback or a continuation is coming, and never put a probability on one. Nothing on this page predicts. The only thing that turns a read into a trade is his own 5m trigger, and where he is wrong comes first as always.',
 '',
 'WHAT YOU NEVER DO',
-'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, the ones he typed himself, and a price you can actually read in a picture he attached himself - and a number off a picture is always said to be off his screenshot, never passed off as a feed number. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
+'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, the ones he typed himself, the counts and sums the JOURNAL block below already worked out, and a price you can actually read in a picture he attached himself - and a number off a picture is always said to be off his screenshot, never passed off as a feed number. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
 '2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down. Never say a reversal, a pullback or a continuation is coming, and never put a probability on one — that is a forecast and this page does not make them.',
 '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
 '4. Never size a position and never turn risk into money. Risk is the distance to his stop, in R or in points — never in what it could make.',
@@ -892,7 +921,7 @@ function picText(){
   return 'A CHART PICTURE IS ATTACHED: a screenshot of his own broker chart, sent with this question. Read it as the chart in front of him, and let it outrank the CANDLES block - when the two disagree, his chart is what he is actually looking at. Say plainly when something in it is too small, blurry or cut off to read instead of guessing at it. Anything you read off it is read off a picture: say so, and do not pass it off as a feed number.';
 }
 function askSystem(extra){
-  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+'\n'+sessionText()+'\n\n'+tradesText()+'\n'+nowText()+'\n\n'+picText();
+  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+'\n'+sessionText()+'\n\n'+tradesText()+'\n'+journalText()+nowText()+'\n\n'+picText();
 }
 
 /* ---------- the setups list --------------------------------------------- */
@@ -1169,7 +1198,7 @@ function tradesText(){
   out.push(TRADES.length+' written down, '+cl.length+' with a result, '+missing+' still open or missing a price (those are counted nowhere).');
   for(var i=0;i<TRADES.length;i++) out.push('  '+i+': '+tradeLine(TRADES[i]));
   out.push('');
-  out.push('Everything above came from him, including the risk in points and the R. Work out nothing else from it — no average, no expectancy, no win rate, no "edge". '+TRADES.length+(TRADES.length===1?' trade is':' trades are')+' not enough to mean anything, and you say so if he asks what it proves.');
+  out.push('Everything above came from him, including the risk in points and the R. The adding up is in the JOURNAL block below and it is the only summary of this log you may use — do not work out an expectancy, an "edge", or anything that is not in it, and never forecast from it.');
   out.push('');
   return out.join('\n');
 }
@@ -1228,9 +1257,24 @@ var TRADE_SYS=[
 
 /* ---------- the list ----------------------------------------------------- */
 var editingT=null;
+function renderJournal(){
+  var sum=document.getElementById('jsum'), rec=document.getElementById('jrec'), none=document.getElementById('jnone');
+  if(!sum&&!rec) return;
+  if(!TRADES.length){
+    if(sum) sum.innerHTML='';
+    if(rec) rec.innerHTML='';
+    if(none) none.style.display='block';
+    return;
+  }
+  if(none) none.style.display='none';
+  if(sum) sum.innerHTML=journalHtml();
+  if(rec) rec.innerHTML=journalRecordHtml();
+}
+
 function renderTrades(){
   var list=document.getElementById('tlist'), none=document.getElementById('tnone');
   if(!list) return;
+  renderJournal();
   if(!TRADES.length){
     list.innerHTML='';
     if(none) none.style.display='block';
@@ -1260,35 +1304,146 @@ function renderTrades(){
       +'<button class="del" data-tdel="'+i+'">Delete</button>'
       +'</div></div>';
   }
-  h+=logSummaryHtml();
   list.innerHTML=h;
 }
 
-/* The record, added up — his own numbers and nothing else. The one figure it
-   refuses to print is a win rate. */
-function logSummaryHtml(){
-  if(!TRADES.length) return '';
-  var cl=closedTrades(), missing=TRADES.length-cl.length;
-  var total=0, by={}, i;
-  for(i=0;i<cl.length;i++){
-    var r=rOf(cl[i]);
-    total+=r;
-    var k=cl[i].su||'no setup named';
-    by[k]=(by[k]||0)+r;
+/* ---------- the journal ---------------------------------------------------
+   Jacques, 18 Sep 2026: "add a journal to the assistant to keep track of
+   trades risk reward and win rate profit losses".
+
+   This page used to refuse a win rate outright, and the reason was written
+   into it: a percentage from a handful of trades reads like a measurement of
+   an edge and is not one. He has asked for it, so it is here — with one
+   condition kept, because it is what makes the number honest rather than
+   forbidden: THE COUNT TRAVELS ON THE SAME LINE AS THE PERCENTAGE. "75%, 3 of
+   4 closed trades" cannot be read as a claim about the next trade. "75%"
+   alone can, and that is the version that gets traders killed.
+
+   Everything below is arithmetic on what he typed in. Nothing is estimated,
+   nothing is projected, and a figure that cannot be worked out from his own
+   numbers is absent rather than filled with a guess. */
+function journalStats(){
+  var closed=closedTrades();
+  var s={
+    written:TRADES.length, closed:closed.length, missing:TRADES.length-closed.length,
+    won:0, lost:0, flat:0,
+    netR:0, grossWin:0, grossLoss:0, netPts:0,
+    bestR:null, worstR:null, avgWin:null, avgLoss:null, winRate:null, by:{}
+  };
+  for(var i=0;i<closed.length;i++){
+    var t=closed[i], r=rOf(t);
+    var pts=(t.dir==='short' ? (t.en-t.ex) : (t.ex-t.en));
+    s.netR+=r; s.netPts+=pts;
+    if(r>0){ s.won++; s.grossWin+=r; }
+    else if(r<0){ s.lost++; s.grossLoss+=r; }
+    else { s.flat++; }
+    if(s.bestR===null||r>s.bestR) s.bestR=r;
+    if(s.worstR===null||r<s.worstR) s.worstR=r;
+    var k=t.su||'no setup named';
+    if(!s.by[k]) s.by[k]={n:0,won:0,lost:0,r:0};
+    var b=s.by[k];
+    b.n++; b.r+=r;
+    if(r>0) b.won++; else if(r<0) b.lost++;
   }
+  /* No closed trades means no percentage at all — null, not zero. A 0% win
+     rate and "nothing closed yet" are different sentences and the page must
+     never print the first when it means the second. */
+  if(s.closed){ s.winRate=(s.won/s.closed)*100; }
+  if(s.won){ s.avgWin=s.grossWin/s.won; }
+  if(s.lost){ s.avgLoss=s.grossLoss/s.lost; }
+  return s;
+}
+
+function sgn(v,unit){ return (v>=0?'+':'')+two(v)+(unit||'') }
+
+/* What the journal does and does not mean. One sentence, printed with the
+   numbers rather than tucked under them. */
+function journalFine(s){
+  return 'This is your own arithmetic on the trades you typed in. It is not a backtest, it is not a measurement of an edge, and it says nothing about the next trade. '
+    + (s.closed
+        ? 'A win rate from '+s.closed+' closed trade'+(s.closed===1?'':'s')+' describes those '+s.closed+' and nothing else — the count sits on the same line as the percentage so it can never be read as a claim.'
+        : 'Nothing is closed yet, so there is no win rate and no profit or loss to show. That is a blank, not a zero.');
+}
+
+function journalHtml(){
+  if(!TRADES.length) return '';
+  var s=journalStats();
   var h='<div class="big"><b>Your own record</b>'
-    + TRADES.length+(TRADES.length===1?' trade':' trades')+' written down. '
-    + cl.length+' with a result'+(missing?(', '+missing+' still open or missing a price — counted nowhere'):'')+'. '
-    + (cl.length ? ('Added up: '+(total>=0?'+':'')+two(total)+'R across those.') : 'Nothing to add up yet.')
-    + '<span style="display:block;margin-top:6px">This is your own arithmetic on the trades you wrote down. It is not a backtest and there is no win rate here on purpose — a handful of trades proves nothing either way.</span>'
-    + '</div>';
-  var keys=Object.keys(by);
-  if(keys.length){
-    var rows='';
-    for(i=0;i<keys.length;i++) rows+=esc(keys[i])+': '+(by[keys[i]]>=0?'+':'')+two(by[keys[i]])+'R<br>';
-    h+='<div class="big"><b>By setup</b>'+rows+'</div>';
+    + s.written+(s.written===1?' trade':' trades')+' written down, '
+    + '<b>'+s.closed+'</b> closed'
+    + (s.missing?(', '+s.missing+' still open or missing a price — counted nowhere'):'')+'.';
+  if(!s.closed){
+    h+='<span style="display:block;margin-top:7px">Nothing closed yet: no win rate, no profit and loss. Not zero — blank.</span>';
+  }else{
+    h+='<span style="display:block;margin-top:7px">'
+      + 'Win rate: <b>'+Math.round(s.winRate)+'%</b> — '+s.won+' won of '+s.closed+' closed'
+      + (s.lost?(', '+s.lost+' lost'):'')
+      + (s.flat?(', '+s.flat+' at break-even'):'')+'.'
+      + '<br>Profit and loss: <b>'+sgn(s.netR,'R')+'</b>'
+      + ' &middot; won '+sgn(s.grossWin,'R')+' against '+sgn(s.grossLoss,'R')+' lost'
+      + '<br>In points: <b>'+sgn(s.netPts)+'</b></span>';
+  }
+  if(s.closed){
+    var rw=[];
+    rw.push(s.won ? ('Your winners averaged '+sgn(s.avgWin,'R')+' each') : 'No winner written down yet');
+    rw.push(s.lost ? ('your losers averaged '+two(s.avgLoss)+'R each') : 'no loser written down yet');
+    h+='<div class="lbl">Risk against reward</div><p>'+rw.join('; ')+'.</p>';
+    h+='<div class="lbl">Range</div><p>Best '+sgn(s.bestR,'R')+' &middot; worst '+sgn(s.worstR,'R')+'</p>';
+    var keys=Object.keys(s.by), rows='';
+    for(var i=0;i<keys.length;i++){
+      var b=s.by[keys[i]];
+      rows+=esc(keys[i])+': '+b.n+' closed, '+b.won+' won'
+        +(b.lost?(', '+b.lost+' lost'):'')+' &middot; '+sgn(b.r,'R')+'<br>';
+    }
+    h+='<div class="lbl">By setup</div><p>'+rows+'</p>';
+  }
+  h+='<p style="margin-top:9px">'+esc(journalFine(s))+'</p>';
+  h+='</div>';
+  return h;
+}
+
+/* The record itself, newest first: one line per trade, dated. This is the part
+   that makes it a journal rather than a scoreboard — the trade he took three
+   weeks ago is still here, with what he saw at the time. */
+function journalRecordHtml(){
+  if(!TRADES.length) return '';
+  var h='<div class="sec-hd">The record</div>';
+  for(var i=TRADES.length-1;i>=0;i--){
+    var t=TRADES[i], r=rOf(t);
+    h+='<div class="jrow">'
+      +'<span class="jdate">'+esc(t.d||'no date')+'</span>'
+      +'<span class="jtxt"><b>'+esc(t.mk||'Trade')+(t.dir==='short'?' short':' long')+'</b>'
+      +'<span>'+esc(t.su||'no setup named')+'</span></span>'
+      +'<span class="jr'+(r===null?' open':(r>0?' win':(r<0?' loss':'')))+'">'+esc(rText(t))+'</span>'
+      +'</div>';
+    if(t.note) h+='<div class="jnote">'+esc(t.note)+'</div>';
   }
   return h;
+}
+
+/* The journal, in the assistant's instructions on every question, so asking
+   about it gets the real numbers instead of a model doing sums in its head. */
+function journalText(){
+  var s=journalStats();
+  var out=['HIS JOURNAL — his own trade log added up. Every figure is arithmetic on trades he typed in, and the count is always attached to it.'];
+  out.push('');
+  if(!s.closed){
+    out.push('NOTHING IS CLOSED YET: '+s.written+' written down, none with a result. There is no win rate and no profit or loss. Say that. Do not report 0% and do not describe a record he does not have.');
+    out.push('');
+    return out.join('\n');
+  }
+  out.push('Closed: '+s.closed+' of '+s.written+' written down'
+    + (s.missing?(' ('+s.missing+' still open or missing a price, counted nowhere)'):'')+'.');
+  out.push('Win rate: '+Math.round(s.winRate)+'% — '+s.won+' won, '+s.lost+' lost'
+    + (s.flat?(', '+s.flat+' at break-even'):'')+'.');
+  out.push('Net: '+sgn(s.netR,'R')+' (won '+sgn(s.grossWin,'R')+', lost '+sgn(s.grossLoss,'R')+'), net '+sgn(s.netPts)+' points.');
+  if(s.won) out.push("Winners averaged "+sgn(s.avgWin,'R')+' each.');
+  if(s.lost) out.push('Losers averaged '+two(s.avgLoss)+'R each.');
+  out.push('Best '+sgn(s.bestR,'R')+', worst '+sgn(s.worstR,'R')+'.');
+  out.push('');
+  out.push('These numbers describe trades he has already taken. They are not a prediction, not an edge, and not evidence about the next one. Never turn them into a forecast: never say he is "due", never tell him to size up because he is winning, and never tell him to win it back because he is losing. When he asks what the journal says, report it as written above WITH the count, and then say the one thing the record actually shows him — or that it shows nothing yet.');
+  out.push('');
+  return out.join('\n');
 }
 
 /* ---------- the form ----------------------------------------------------- */

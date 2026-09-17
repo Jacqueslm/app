@@ -7,8 +7,8 @@
 //
 // Half two: the times he trades - the range of a chosen timeframe starting at a
 // chosen time on his own clock (8:00 and 14:00 Central, which is 9:00 and 15:00
-// on the exchange clock), shaded as a column, boxed, and kept only while price
-// has not taken it out.
+// on the exchange clock), shaded as a column, boxed, carrying the same levels
+// inside it, and kept only while price has not taken it out.
 //
 // Nothing here reads the future and nothing here predicts. A zone appears only
 // after its swing has confirmed; a range only after its bars have closed. The
@@ -35,6 +35,8 @@ bearCol    = input.color(color.new(#ef5350, 85), "Bearish zone", group="Zones")
 edgeCol    = input.color(color.new(color.gray, 55), "Zone edge", group="Zones")
 
 // -------------------------------------------------------------- retracements
+// Ticked here, drawn inside both: the supply and demand zones, and the boxes
+// around your two times.
 fib0     = input.bool(false, "0", inline="fib", group="Retracements")
 fib3     = input.bool(true, "0.3", inline="fib", group="Retracements")
 fib5     = input.bool(true, "0.5", inline="fib", group="Retracements")
@@ -167,24 +169,59 @@ pruneZones(Zone[] arr, bool supply) =>
                 killZone(z)
                 array.remove(arr, i)
 
+// ------------------------------------------------------ a range and its levels
+// A range is a box like a zone, so it carries the same levels: here they are
+// counted from the top of the range down, 0 on the high and 1 on the low, which
+// is how a range is measured rather than how a leg into a swing is.
+newRange(float top, float bottom, int left, color col) =>
+    z = Zone.new(box.new(left, top, bar_index, bottom, border_color=color.new(col, 40), border_width=1, bgcolor=color.new(col, 88)), na, na, na, na, na)
+    span = top - bottom
+    if span > 0
+        st = lineStyle()
+        if fib0
+            z.f0 := line.new(left, top, bar_index, top, color=fibCol, style=st)
+        if fib3
+            lv = top - span * 0.3
+            z.f3 := line.new(left, lv, bar_index, lv, color=fibCol, style=st)
+        if fib5
+            lv = top - span * 0.5
+            z.f5 := line.new(left, lv, bar_index, lv, color=fibCol, style=st)
+        if fib7
+            lv = top - span * 0.7
+            z.f7 := line.new(left, lv, bar_index, lv, color=fibCol, style=st)
+        if fib1
+            z.f1 := line.new(left, bottom, bar_index, bottom, color=fibCol, style=st)
+    z
+
 // ---------------------------------------------------------- a range's upkeep
 // Kept while it lives and while price has not taken it out. "Taken out" means
 // a close past one of its edges by that share of the range's own height, so 0
-// is any close outside and 100 is a close a whole range beyond it.
-runBoxes(box[] arr) =>
+// is any close outside and 100 is a close a whole range beyond it. The levels
+// inside it come and go with it.
+runRanges(Zone[] arr) =>
     if array.size(arr) > 0
         for i = array.size(arr) - 1 to 0
-            box b = array.get(arr, i)
-            top = box.get_top(b)
-            bot = box.get_bottom(b)
+            Zone z = array.get(arr, i)
+            top = box.get_top(z.b)
+            bot = box.get_bottom(z.b)
             span = top - bot
             if extendRng
-                box.set_right(b, bar_index + 5)
+                box.set_right(z.b, bar_index + 5)
+                if not na(z.f0)
+                    line.set_x2(z.f0, bar_index + 5)
+                if not na(z.f3)
+                    line.set_x2(z.f3, bar_index + 5)
+                if not na(z.f5)
+                    line.set_x2(z.f5, bar_index + 5)
+                if not na(z.f7)
+                    line.set_x2(z.f7, bar_index + 5)
+                if not na(z.f1)
+                    line.set_x2(z.f1, bar_index + 5)
             past = mitPct / 100 * span
-            old = bar_index - box.get_left(b) > rangeLife
+            old = bar_index - box.get_left(z.b) > rangeLife
             taken = close > top + past or close < bot - past
             if old or taken
-                box.delete(b)
+                killZone(z)
                 array.remove(arr, i)
 
 // ----------------------------------------------------------- the swings, named
@@ -276,14 +313,14 @@ var float top1   = na
 var float bot1   = na
 var int   left1  = na
 var bool  open1  = false
-var box[] boxes1 = array.new_box()
+var Zone[] boxes1 = array.new<Zone>()
 
 var int   start2 = na
 var float top2   = na
 var float bot2   = na
 var int   left2  = na
 var bool  open2  = false
-var box[] boxes2 = array.new_box()
+var Zone[] boxes2 = array.new<Zone>()
 
 tf1ms = timeframe.in_seconds(tf1) * 1000
 tf2ms = timeframe.in_seconds(tf2) * 1000
@@ -303,9 +340,9 @@ if open1
     else
         open1 := false
         if showRanges
-            array.push(boxes1, box.new(left1, top1, bar_index, bot1, border_color=color.new(col1, 40), border_width=1, bgcolor=color.new(col1, 88)))
+            array.push(boxes1, newRange(top1, bot1, left1, col1))
             while array.size(boxes1) > keepRanges
-                box.delete(array.shift(boxes1))
+                killZone(array.shift(boxes1))
 
 if on2 and hour(time, tzName) == hr2 and minute(time, tzName) == mn2
     start2 := time
@@ -322,9 +359,9 @@ if open2
     else
         open2 := false
         if showRanges
-            array.push(boxes2, box.new(left2, top2, bar_index, bot2, border_color=color.new(col2, 40), border_width=1, bgcolor=color.new(col2, 88)))
+            array.push(boxes2, newRange(top2, bot2, left2, col2))
             while array.size(boxes2) > keepRanges
-                box.delete(array.shift(boxes2))
+                killZone(array.shift(boxes2))
 
 in1 = on1 and not na(start1) and time >= start1 and time < start1 + tf1ms
 in2 = on2 and not na(start2) and time >= start2 and time < start2 + tf2ms
@@ -343,8 +380,8 @@ if markInsides and inside
 // come off the same way, by their own width.
 pruneZones(supplyZones, true)
 pruneZones(demandZones, false)
-runBoxes(boxes1)
-runBoxes(boxes2)
+runRanges(boxes1)
+runRanges(boxes2)
 
 // The columns. One call only - TradingView allows a script one background.
 bgcolor(showRanges and (in1 or in2) ? (in1 ? color.new(col1, 88) : color.new(col2, 88)) : na, title="Time ranges")

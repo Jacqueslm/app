@@ -494,7 +494,7 @@ entitlement changes.
 | `PLAY_SERVICE_ACCOUNT_JSON` | Verifies and acknowledges Play purchases |
 | `COMP_PRO_EMAILS` | Free Pro for the Play review account and testers |
 | `APP_OWNER_EMAIL` | Gates `/admin/stats` |
-| `ANTHROPIC_API_KEY` | Friendly |
+| `GEMINI_API_KEY` | Friendly and The Key — the only AI provider |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Email |
 | `SESSION_SECRET`, `DB_PATH`, `APP_URL` | Core |
 

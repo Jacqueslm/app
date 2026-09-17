@@ -89,6 +89,19 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .ask-a.on{display:block}
 .ask-who{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin-bottom:5px}
 .ask-fine{font-size:.6875rem;color:var(--tm);margin:0 14px 14px;line-height:1.6}
+/* ── THE FEED ────────────────────────────────────────────────────────────────
+   The candles. One row per timeframe: last close, and the low-to-high of what
+   came back, which is a fact about the bars and not an opinion about them. */
+.feedout{margin-top:12px;border-top:1px solid var(--bdr);padding-top:9px}
+.feedout:empty{display:none;border-top:none;padding-top:0;margin-top:0}
+.frow{display:flex;align-items:baseline;gap:9px;padding:5px 0;font-size:.8125rem;color:var(--ts);border-bottom:1px solid var(--bdr)}
+.frow:last-child{border-bottom:none}
+.tfname{font-weight:600;color:var(--tp);width:30px;flex:0 0 auto}
+.last{font-variant-numeric:tabular-nums;color:var(--tp)}
+.rng{margin-left:auto;color:var(--tm);font-variant-numeric:tabular-nums;text-align:right}
+.feedwhen{font-size:.75rem;color:var(--tm);margin-top:10px;line-height:1.5}
+.feedwhen.err{color:var(--red-t);background:var(--red);border-radius:10px;padding:9px 11px;font-size:.8125rem}
+.feedwhy{font-size:.6875rem;color:var(--tm);margin-top:9px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -97,7 +110,26 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <a class="back" href="/app" title="Back to the app">&#8592;</a>
     <div>
       <h1>Trading Desk</h1>
-      <p>Your setups, and the assistant that reads them</p>
+      <p>Your setups, the candles, and the assistant that reads both</p>
+    </div>
+  </div>
+
+  <!-- THE FEED.
+       The candles the assistant reads and the page draws its numbers from.
+       The page asks THIS APP'S SERVER (/api/candles), never the feed itself:
+       the address, the shape and any key all live on the server, which is why
+       there is still no third-party address anywhere in this file and why the
+       data vendor never learns who is reading. Remembers the symbol, so it
+       opens on what he was last watching. -->
+  <div class="sec">
+    <div class="sec-hd">The feed</div>
+    <div class="f">
+      <label for="fSym">Symbol</label>
+      <input id="fSym" placeholder="NQ, ES, BTC, SPY" autocomplete="off" autocapitalize="characters">
+      <button class="txtbtn" id="fGo">Load candles</button>
+      <div class="feedout" id="fOut"></div>
+      <div class="feedwhen" id="fWhen">No candles loaded. The assistant is told it has no prices, and gives you none.</div>
+      <div class="feedwhy">4h is built from the 1h bars by arithmetic, not asked for. Times are UTC and are the bar's own time, never the time of the request — a stale bar cannot read as a live one.</div>
     </div>
   </div>
 
@@ -135,6 +167,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <span class="chip" data-q="Is this a hold or a scalp, and why?">Hold or scalp</span>
       <span class="chip" data-q="What am I missing on the 4h, 1h, 15m and 5m here?">What am I missing?</span>
       <span class="chip" data-q="Talk me out of this trade, honestly.">Talk me out of it</span>
+      <span class="chip" data-q="Read me the candles you have: what are the four timeframes doing, and what do they agree on?">What does the feed say?</span>
     </div>
     <button class="ask-go" id="askGo">Ask</button>
     <div class="ask-a" id="askA"></div>
@@ -269,6 +302,125 @@ function nowText(){
 }
 function val(id){ var el=document.getElementById(id); return el?(el.value||'').trim():'' }
 
+/* ---------- the feed: candles, from the app's own server ----------------- */
+/* The desk keeps no feed of its own and never asks one. It asks /api/candles,
+   which is this app's server, which is where the feed address lives. Two
+   reasons, and both matter: a key on a page is a key anybody can read, and a
+   page that asks a data vendor directly tells that vendor who is reading and
+   from where — on a phone, on a mobile network. Neither is this page's call.
+
+   FEED holds exactly what came back. When the feed fails, FEED stays null, the
+   page shows the sentence and nothing else, and the assistant is told it has no
+   prices. There is no branch here that fills the gap in with anything. */
+var K_SYM='tsid.desk.sym', FEED=null;
+
+function money(n){
+  if(typeof n!=='number'||!isFinite(n)) return '—';
+  return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function utcStamp(ms){
+  var d=new Date(ms);
+  if(isNaN(d.getTime())) return 'time unknown';
+  return d.toISOString().slice(0,16).replace('T',' ')+' UTC';
+}
+/* How much of each timeframe the assistant reads. Twelve 4h bars is two days of
+   structure; twenty-four 5m bars is the last two hours, which is the trigger and
+   nothing more. All of it at once would be noise, and noise is what it starts
+   inventing from. */
+var FEED_KEEP={'4h':12,'1h':16,'15m':20,'5m':24};
+
+function feedText(){
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    return ['CANDLES FROM THE FEED: NOT LOADED.','',
+      'No candles have been fetched, so you cannot see price, structure, highs, lows or levels. Do not describe a chart, do not name a level and do not price anything. Say the candles are not loaded, ask him to load them or to tell you what his own chart shows, and stop there.','',
+    ].join('\n');
+  }
+  var out=['CANDLES FROM THE FEED — real bars from the feed, and the only numbers you may quote. Nothing else has been checked and nothing else is known.',''];
+  out.push('Symbol: '+FEED.symbol+(FEED.name?' ('+FEED.name+')':''));
+  if(FEED.partial&&FEED.partial.length) out.push('Timeframes that did not come back: '+FEED.partial.join(' '));
+  out.push('');
+  var tfs=['4h','1h','15m','5m'];
+  for(var i=0;i<tfs.length;i++){
+    var t=tfs[i], d=FEED.timeframes[t];
+    if(!d||!d.candles||!d.candles.length){
+      out.push(t+': NO BARS CAME BACK for this timeframe. Say so if the read needs it; never fill it in from another timeframe.');
+      out.push('');
+      continue;
+    }
+    var bars=d.candles.slice(-(FEED_KEEP[t]||12));
+    out.push(t+': '+bars.length+' bars, oldest first. Last bar opens '+utcStamp(bars[bars.length-1].t)+'.');
+    out.push(bars.map(function(b){
+      return new Date(b.t).toISOString().slice(5,16)+' o'+b.o+' h'+b.h+' l'+b.l+' c'+b.c+(b.v?' v'+b.v:'');
+    }).join(' | '));
+    out.push('');
+  }
+  out.push('These are the feed\'s bars, not his broker\'s chart. They can be delayed; they can be a different contract from the one he has up. If his price disagrees with them, HIS chart wins.');
+  out.push('');
+  return out.join('\n');
+}
+
+function setWhen(text, isErr){
+  var el=document.getElementById('fWhen');
+  if(!el) return;
+  el.textContent=text;
+  el.className='feedwhen'+(isErr?' err':'');
+}
+function paintFeed(){
+  var out=document.getElementById('fOut');
+  if(!out) return;
+  if(!FEED||!FEED.ok||!FEED.timeframes){ out.innerHTML=''; return }
+  var tfs=['4h','1h','15m','5m'], h='';
+  for(var i=0;i<tfs.length;i++){
+    var t=tfs[i], d=FEED.timeframes[t];
+    if(!d||!d.candles||!d.candles.length){
+      h+='<div class="frow"><span class="tfname">'+t+'</span><span class="rng">no bars came back</span></div>';
+      continue;
+    }
+    var last=d.candles[d.candles.length-1], lo=Infinity, hi=-Infinity;
+    for(var j=0;j<d.candles.length;j++){
+      if(d.candles[j].l<lo) lo=d.candles[j].l;
+      if(d.candles[j].h>hi) hi=d.candles[j].h;
+    }
+    h+='<div class="frow"><span class="tfname">'+t+'</span>'
+      +'<span class="last">'+esc(money(last.c))+'</span>'
+      +'<span class="rng">'+esc(money(lo))+' – '+esc(money(hi))+'</span></div>';
+  }
+  out.innerHTML=h;
+}
+
+async function loadFeed(){
+  var symEl=document.getElementById('fSym'), go=document.getElementById('fGo');
+  var sym=((symEl&&symEl.value)||'').trim()||'NQ';
+  if(go) go.disabled=true;
+  setWhen('Loading '+sym.toUpperCase()+'…', false);
+  try{
+    var r=await fetch('/api/candles?bars=120&symbol='+encodeURIComponent(sym),{credentials:'same-origin'});
+    if(r.status===401){ setWhen('Sign in again and the feed will load.', true); return }
+    if(r.status===429){ setWhen('Too many feed requests at once. Give it a moment.', true); return }
+    var d=null;
+    try{ d=await r.json() }catch(e){ d=null }
+    if(!d||!d.ok){
+      /* The feed's own sentence about what went wrong, or none. Never a number
+         in its place, and the previous candles are dropped rather than left on
+         screen as though they were still what the feed was saying. */
+      FEED=null; paintFeed();
+      setWhen((d&&d.error)||'The feed did not answer.', true);
+      return;
+    }
+    FEED=d;
+    save(K_SYM,d.symbol||sym);
+    if(symEl) symEl.value=(d.symbol||sym).replace(/=F$/,'');
+    paintFeed();
+    var last=d.timeframes['5m']||d.timeframes['1h']||d.timeframes['15m']||d.timeframes['4h'];
+    setWhen((d.name?d.name+' — ':'')+(d.symbol||sym)+' loaded. Last bar '+((last&&last.asOf)?utcStamp(Date.parse(last.asOf)):'time unknown')+'.', false);
+  }catch(e){
+    FEED=null; paintFeed();
+    setWhen('The feed could not be reached. Nothing was invented in its place.', true);
+  }finally{
+    if(go) go.disabled=false;
+  }
+}
+
 /* ---------- what the assistant is instructed to be ---------------------- */
 /* The house rules for a trading page. It is not the recovery app's voice and
    it does not carry the recovery app's safety lines, which do not apply to a
@@ -290,7 +442,7 @@ var DESK_SYS=[
 '- 4h against him: it is a scalp at most, small, into a level, and he should say what he is scalping to before he takes it.',
 '',
 'WHAT YOU NEVER DO',
-'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. If he did not tell you the number, you do not know it. There is no price feed on this page and no backtest has been run — never imply you checked one.',
+'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no study, no backtest result. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, and the ones he typed himself. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
 '2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down.',
 '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
 '4. Never size a position and never turn risk into money. Risk is the distance to his stop, in R or in points — never in what it could make.',
@@ -305,12 +457,14 @@ var DESK_SYS=[
 '- Six to twelve short lines in total. No headings, no markdown, no tables, no emoji, no bolding.',
 '- Say what you do not know rather than filling it in. "I cannot see your chart" is a complete answer.',
 '- When he asks something you have no basis for, say that plainly and then answer the part you can.',
+'- When you use a feed number, name the timeframe it came from ("the 4h high is ..."), never just "the high is ...". A number with no timeframe on it is a number he cannot check.',
+'- The feed is not his broker. If his own price disagrees with it, his chart wins: say what the feed shows, ask which contract or chart he has up, and never correct him with a feed number.',
 '- Plain English, always. Never answer in another language and never borrow a word from one.',
 '- Keep it his desk: refer to his setups by the names he gave them, never yours.'
 ].join('\n');
 
 function askSystem(){
-  return DESK_SYS+'\n\n'+setupsText()+'\n'+nowText();
+  return DESK_SYS+'\n\n'+setupsText()+'\n'+feedText()+'\n'+nowText();
 }
 
 /* ---------- the setups list --------------------------------------------- */
@@ -453,6 +607,15 @@ document.getElementById('askGo').onclick=function(){ ask() };
 document.getElementById('askQ').addEventListener('keydown',function(e){
   if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask() }
 });
+
+/* The feed: the button, Enter in the symbol field, and one load on open so the
+   page is never sitting there looking like it has candles when it does not. */
+document.getElementById('fGo').onclick=function(){ loadFeed() };
+document.getElementById('fSym').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){ e.preventDefault(); loadFeed() }
+});
+document.getElementById('fSym').value=load(K_SYM,'NQ');
+loadFeed();
 
 /* The chart block remembers itself, so it is filled once per session. */
 var NOW=load(K_NOW,{});

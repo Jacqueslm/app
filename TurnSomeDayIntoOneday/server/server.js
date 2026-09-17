@@ -11,6 +11,7 @@ const emailer = require('./email');
 const push = require('./push');
 const backup = require('./backup');
 const analytics = require('./analytics');
+const marketData = require('./market-data');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -1464,6 +1465,44 @@ app.get('/api/ai-status', requireAuth, (req, res) => {
     ownerEmailConfigured: !!DIAG_OWNER_EMAIL,
     youAreOwner: !!(DIAG_OWNER_EMAIL && user && user.email === DIAG_OWNER_EMAIL),
   });
+});
+
+// The candle feed, for the Trading Desk (/desk) - 17 Sep 2026.
+//
+// Jacques: "Candles: Connect a market data feed." The desk had nothing but his
+// own words on it, and the assistant was told to say so rather than produce a
+// level. This is the route that gives it real bars.
+//
+// It goes through requireAuth like every other signed-in route in this file, and
+// requireAuth already carries the private door with it - so the feed answers him
+// and nobody else. That matters more here than elsewhere: the account has a
+// request budget, and it is his.
+//
+// The page never talks to the feed itself. It cannot: the address, the shape and
+// any future key all live on this side, which is why the desk page still
+// contains no third-party address at all.
+//
+// A feed that cannot be reached answers 502 with a sentence in `error` and no
+// bars whatsoever. It never answers with placeholder candles - a chart of
+// nothing drawn as if it were something is the one failure worse than no chart.
+const candleLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many feed requests at once - give it a moment.' },
+});
+
+app.get('/api/candles', candleLimiter, requireAuth, async (req, res) => {
+  const symbol = String(req.query.symbol || 'NQ').slice(0, 20);
+  const bars = Number(req.query.bars) > 0 ? Math.min(Number(req.query.bars), 500) : 120;
+  try {
+    const set = await marketData.fetchAll(symbol, { bars });
+    res.status(set.ok ? 200 : 502).json(set);
+  } catch (err) {
+    try { db.logError('candles', err.message, err.stack); } catch (_) {}
+    res.status(502).json({ ok: false, error: 'The feed could not be reached.' });
+  }
 });
 
 app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {

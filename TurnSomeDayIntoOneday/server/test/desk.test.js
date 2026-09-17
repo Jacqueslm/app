@@ -237,8 +237,43 @@ test('his setups travel with every question, by the names he gave them', async (
   assert.match(system, /1h close back inside/);
   assert.strictEqual(p.chats[0].body.messages.length, 1, 'one question, no history to drift out of the rules');
   assert.strictEqual(p.chats[0].body.messages[0].role, 'user');
-  assert.match(p.chats[0].body.messages[0].content, /Should I take this one\?/);
+  // The question travels as a content array now, so a picture can ride with
+  // it. With nothing attached it must be the text part and nothing else.
+  const asked = p.chats[0].body.messages[0].content;
+  assert.ok(Array.isArray(asked), 'the content is a block list');
+  assert.strictEqual(asked.length, 1, 'no picture attached means no image block');
+  assert.deepStrictEqual(asked[0], { type: 'text', text: 'Should I take this one?' });
   assert.match(p.els.get('askA').innerHTML, /Wrong if/, 'and the answer lands on the page');
+});
+
+test('a chart picture rides with the question, and the assistant is told it is there', async () => {
+  const p = await loadPage();
+  writeSetup(p, SWEEP);
+
+  // What the picker holds once a file has been shrunk and accepted. Set
+  // directly because the shrinking is a canvas operation and this harness has
+  // no canvas - chart-picture.test.js checks the shrink itself.
+  const PIC = { data: 'QUJD', media: 'image/jpeg', url: 'data:image/jpeg;base64,QUJD', w: 1200, h: 800 };
+  p.sandbox.PIC = PIC;
+  p.els.get('askQ').value = 'Is this one of my setups?';
+  await p.sandbox.ask();
+
+  const msg = p.chats[0].body.messages[0];
+  assert.strictEqual(msg.content.length, 2, 'the question and the picture, nothing else');
+  assert.strictEqual(msg.content[1].type, 'image');
+  assert.strictEqual(msg.content[1].media_type, 'image/jpeg');
+  assert.strictEqual(msg.content[1].data, 'QUJD', 'the bytes the picker holds are the bytes that are sent');
+  assert.match(p.chats[0].body.system[0].text, /A CHART PICTURE IS ATTACHED/,
+    'the rules for reading a picture are useless if the assistant is not told one is there');
+  assert.match(p.chats[0].body.system[0].text, /outrank the CANDLES block/,
+    'his own chart beats the feed - they can be different contracts and different days');
+
+  // Taken off, it stops being sent, and the assistant is told that instead.
+  p.sandbox.PIC = null;
+  await p.sandbox.ask();
+  const second = p.chats[1].body.messages[0];
+  assert.strictEqual(second.content.length, 1, 'removed means removed');
+  assert.match(p.chats[1].body.system[0].text, /NO CHART PICTURE IS ATTACHED/);
 });
 
 test('the assistant is told what it cannot know, and to ask instead of filling it in', async () => {
@@ -505,7 +540,8 @@ test('reviewing a trade sends the trade, his setups, and the rules that mark the
   await p.sandbox.reviewTrade(0);
   assert.strictEqual(p.chats.length, 1);
   const system = p.chats[0].body.system[0].text;
-  const question = p.chats[0].body.messages[0].content;
+  const question = p.chats[0].body.messages[0].content
+    .filter((b) => b && b.type === 'text').map((b) => b.text).join('');
 
   assert.match(system, /THE TRADE BEING REVIEWED/);
   assert.match(system, /Setup he says it was: London sweep and reclaim/);

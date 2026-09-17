@@ -865,7 +865,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Who else sees it</h3>
       <p style="margin-bottom:8px">Two outside services are used, and only for the specific job each does:</p>
-      <p style="margin-bottom:8px">• <b>Google</b> processes the messages you send to Friendly, using its Gemini model, in order to generate Friendly's replies. This only happens for the message itself — sent when you chat, nothing else is shared. Friendly is only available when the app operator has configured this connection.</p>
+      <p style="margin-bottom:8px">• <b>Google</b> processes the messages you send to Friendly, and the trading questions and chart screenshots you send from the trading desk, using its Gemini model, in order to generate the replies. Only the message itself, and a picture you attached yourself, are sent when you ask — nothing else is shared, and no picture ever leaves this app unless you attach one. Friendly is only available when the app operator has configured this connection.</p>
       <p style="margin-bottom:8px">• <b>Resend</b> delivers the emails the app sends you — your password reset, and any sequence you asked for. It receives your email address and the message itself.</p>
       <p style="margin-bottom:8px">Your journal, craving logs, and personal notes are never sent to either of these services unless you paste them into a message to Friendly yourself.</p>
       <p style="margin-bottom:8px">We do not sell data. There is no advertising network or analytics tracker collecting your activity in this app.</p>
@@ -12489,7 +12489,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.3';
+const APP_VERSION='7.4';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';

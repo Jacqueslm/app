@@ -12,6 +12,7 @@ const push = require('./push');
 const backup = require('./backup');
 const analytics = require('./analytics');
 const marketData = require('./market-data');
+const aiChatBody = require('./ai-chat-body');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -53,6 +54,8 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 // rather than borrowing another provider's. Friendly's replies are short; the
 // room is headroom, not length.
 const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
+// Friendly and The Key both read the model name from here; the request body
+// itself is built in ./ai-chat-body.js.
 // MINIMAL | LOW | MEDIUM | HIGH. LOW is the fastest setting a 3.x model will
 // actually accept - MINIMAL additionally requires thought signatures and 400s
 // without them. Overridable if Friendly ever needs to think harder.
@@ -1537,47 +1540,27 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     return res.status(429).json({ error: `That is today's ${CHAT_LIMIT} chats. It resets tomorrow.` });
   }
 
+  // The chart picture, if the desk attached one. Checked here rather than
+  // inside the provider call so a picture that cannot be sent is refused with
+  // a sentence instead of being quietly dropped - an answer about a chart the
+  // model never saw is the one thing this page must never produce.
+  const pics = aiChatBody.collectImages(messages);
+  if (!pics.ok) return res.status(400).json({ error: pics.error });
+
   try {
     let res2, data, geminiEmptyReason = '';
     if (GEMINI_API_KEY) {
-      const sysText = Array.isArray(system)
-        ? system.map((b) => (b && b.text) || '').join('\n\n')
-        : String(system || '');
       const gemUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
-      const gemBody = (withThinkingOff) => JSON.stringify({
-        systemInstruction: sysText ? { parts: [{ text: sysText }] } : undefined,
-        contents: (messages || []).map((m) => {
-          const c = Array.isArray(m.content)
-            ? m.content.map((b) => (b && b.text) || '').join('')
-            : String(m.content || '');
-          return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: c }] };
-        }),
-        generationConfig: Object.assign(
-          { maxOutputTokens: GEMINI_MAX_TOKENS },
-          // Gemini spends thinking tokens out of maxOutputTokens, so a model
-          // left thinking freely can use the whole budget and return no words
-          // at all. Turning it off is right for a short, warm reply - but the
-          // field's shape has changed between model generations, so if this
-          // model rejects it we drop it and ask again rather than letting a
-          // config detail take the whole chat down.
-          // How much the model thinks before it answers - and the knob is named
-          // differently per generation, so send the one this model understands.
-          //
-          //   2.x  thinkingBudget: 0     (thinking off entirely)
-          //   3.x  thinkingLevel: 'LOW'  (3.x cannot turn thinking off at all;
-          //                               left unset it defaults to MEDIUM,
-          //                               which means every reply is slower and
-          //                               costs more thinking tokens for a
-          //                               companion that should feel like
-          //                               texting a friend back)
-          //
-          // Sending 2.x's thinkingBudget to a 3.x model is a bare HTTP 400
-          // "Request contains an invalid argument" with nothing naming the
-          // field - that is what had Friendly canned on 18 Aug.
-          !withThinkingOff ? {}
-            : /^gemini-2\./.test(GEMINI_MODEL) ? { thinkingConfig: { thinkingBudget: 0 } }
-            : { thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL } }
-        ),
+      // The body itself lives in ./ai-chat-body.js - it decides what leaves the
+      // phone, including the picture, so it is the one piece of this route that
+      // has to be testable without a model to answer.
+      const gemBody = (withThinkingOff) => aiChatBody.buildBody({
+        model: GEMINI_MODEL,
+        system,
+        messages,
+        maxTokens: GEMINI_MAX_TOKENS,
+        thinkingLevel: GEMINI_THINKING_LEVEL,
+        withThinkingOff,
       });
       const gemHeaders = {
         // The key goes in x-goog-api-key. Without it Google answers every call

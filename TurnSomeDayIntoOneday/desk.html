@@ -146,6 +146,15 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .sessnow{font-size:.8125rem;color:var(--ts);margin-top:10px;line-height:1.55}
 .sessnow.on{color:var(--ok-t);background:var(--ok);border-radius:10px;padding:9px 11px}
 .sessnow.off{color:var(--warn-t);background:var(--warn);border-radius:10px;padding:9px 11px}
+/* ── THE CHART ───────────────────────────────────────────────────────────────
+   TradingView's own open-source engine on the same delayed bars as everything
+   else on this page. The flag sits ON the chart rather than under it: a delayed
+   candle that looks right is the one way this page could cost him money. */
+.chartwrap{position:relative;margin-top:10px}
+.chartflag{position:absolute;top:8px;left:8px;z-index:3;font-size:.625rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--warn);color:var(--warn-t);pointer-events:none}
+.chartbox{height:300px;border-radius:12px;overflow:hidden;background:var(--s1);border:1px solid var(--bdr)}
+.lw{width:100%;height:300px}
+.credit{font-size:.6875rem;color:var(--tm);margin-top:9px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -174,6 +183,43 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <div class="feedout" id="fOut"></div>
       <div class="feedwhen" id="fWhen">No candles loaded. The assistant is told it has no prices, and gives you none.</div>
       <div class="feedwhy">4h is built from the 1h bars by arithmetic, not asked for. Times are UTC and are the bar's own time, never the time of the request — a stale bar cannot read as a live one.</div>
+    </div>
+  </div>
+
+  <!-- THE CHART.
+       He asked for it in his own words: "can I make my own personal tradingview
+       for personal trading and get real live data for free". Half of that is
+       true and half is not, and this card says which half is which rather than
+       letting a chart imply the rest.
+
+       The ENGINE is free and is TradingView's own open-source one, kept on this
+       app's server in /vendor, so no third-party address is anywhere on this
+       page and nobody else learns who is reading it. The DATA is the half that
+       is not free: CME sells real-time futures, so every free feed is delayed.
+
+       Every bar drawn here is a bar that came back. No bars, no chart — the box
+       stays empty and says so.
+
+       The swings are marked with the page's own structure code, the same one the
+       block above uses, so the labels on the candles and the letters in the text
+       cannot disagree with each other. -->
+  <div class="sec">
+    <div class="sec-hd">The chart</div>
+    <div class="f">
+      <label>Timeframe</label>
+      <div class="tfpick" id="chTf">
+        <span class="tf" id="ctf-5m" data-ctf="5m">5m</span>
+        <span class="tf" id="ctf-15m" data-ctf="15m">15m</span>
+        <span class="tf" id="ctf-1h" data-ctf="1h">1h</span>
+        <span class="tf" id="ctf-4h" data-ctf="4h">4h</span>
+      </div>
+      <div class="chartwrap">
+        <span class="chartflag">Delayed &mdash; your broker's chart wins</span>
+        <div class="chartbox"><div class="lw" id="chArt"></div></div>
+      </div>
+      <div class="feedwhen" id="chWhen">Nothing drawn yet. Load candles on the feed above, and those bars are what gets drawn here.</div>
+      <div class="feedwhy">The swings are labelled the way you say them out loud — HH, HL, LH, LL — and the last swing high and low are drawn across as two levels. It is the same arithmetic the structure block above does, on the same bars.</div>
+      <p class="credit">Chart engine: TradingView Lightweight Charts v5.2.1, Apache 2.0 &mdash; a copy served from this app, not loaded from anybody else's server. The small TradingView mark in the corner of the chart is theirs, and is part of the licence.</p>
     </div>
   </div>
 
@@ -376,6 +422,11 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
   </div>
 </div>
 
+<!-- The chart engine. A copy this app serves itself, vendored in /vendor with
+     its licence beside it — never a script tag pointed at somebody else's
+     server. See vendor/lightweight-charts/README.md for why, and how to update
+     it. If this file ever fails to arrive the chart says so and draws nothing. -->
+<script src="/vendor/lightweight-charts/5.2.1/lightweight-charts.standalone.production.js"></script>
 <script>
 /* ---------------------------------------------------------------------------
    THE DESK — 17 Sep 2026.
@@ -572,6 +623,8 @@ function setWhen(text, isErr){
 }
 function paintFeed(){
   paintStructure();
+  paintChartTf();
+  drawChart();
   var out=document.getElementById('fOut');
   if(!out) return;
   if(!FEED||!FEED.ok||!FEED.timeframes){ out.innerHTML=''; return }
@@ -626,6 +679,137 @@ async function loadFeed(){
   }finally{
     if(go) go.disabled=false;
   }
+}
+
+/* ---------- the chart: the bars, drawn ----------------------------------- */
+/* He asked for this by name: "can I make my own personal tradingview for
+   personal trading and get real live data for free".
+
+   The engine is free. It is TradingView's own open-source chart library, copied
+   into /vendor and served by this app, so the page still contains no address
+   belonging to anybody else and no vendor learns who is reading it.
+
+   The DATA is not free and cannot be made so. CME sells real-time futures, so
+   every free feed of NQ, ES and gold is delayed — which is why the delay is
+   stated on the chart itself and not in a footnote under it. He scalps 1m and
+   5m; a delayed candle is the one thing on this page that can cost him money by
+   looking right.
+
+   Nothing is drawn that did not come back. No bars, no chart: the box stays
+   empty and says why. The swing labels come from the SAME structure code the
+   block above uses, so the letters on the candles and the letters in the text
+   can never disagree. */
+var K_CHTF='tsid.desk.charttf', CHTFS=['5m','15m','1h','4h'];
+var CHTF=(function(){ var v=load(K_CHTF,null); return CHTFS.indexOf(v)>=0?v:'4h' })();
+var CHART=null, CHSER=null, CHMARK=null, CHLINES=[], CHTRIED=false;
+
+function chartWhen(text, isErr){
+  var el=document.getElementById('chWhen');
+  if(!el) return;
+  el.textContent=text;
+  el.className='feedwhen'+(isErr?' err':'');
+}
+/* A colour off the page's own palette, so the chart is part of the desk and not
+   a white rectangle dropped into a dark page. If the page cannot be asked — a
+   test harness, an odd browser — the fallback is the light-theme value. */
+function cssVar(name, fallback){
+  try{
+    var v=getComputedStyle(document.body).getPropertyValue(name);
+    v=String(v===null||v===undefined?'':v).trim();
+    return v||fallback;
+  }catch(e){ return fallback }
+}
+function chartBars(){
+  if(!FEED||!FEED.ok||!FEED.timeframes) return [];
+  var d=FEED.timeframes[CHTF];
+  if(!d||!d.candles||!d.candles.length) return [];
+  return d.candles;
+}
+function paintChartTf(){
+  for(var i=0;i<CHTFS.length;i++){
+    var el=document.getElementById('ctf-'+CHTFS[i]);
+    if(!el||!el.classList) continue;
+    if(CHTFS[i]===CHTF) el.classList.add('on'); else el.classList.remove('on');
+  }
+}
+function setChartTf(tf){
+  if(CHTFS.indexOf(tf)<0) return;
+  CHTF=tf;
+  save(K_CHTF,tf);
+  paintChartTf();
+  drawChart();
+}
+/* The two levels: the last swing high and the last swing low in the bars on
+   screen. Taken from the same swing code as the labels, so a level can never be
+   a number this page has not shown him somewhere else. */
+function chartLines(bars){
+  var i;
+  for(i=0;i<CHLINES.length;i++){ try{ CHSER.removePriceLine(CHLINES[i]) }catch(e){} }
+  CHLINES=[];
+  var st=structure(bars, WING), hi=null, lo=null;
+  for(i=st.swings.length-1;i>=0;i--){
+    if(st.swings[i].kind==='H'&&hi===null) hi=st.swings[i].p;
+    if(st.swings[i].kind==='L'&&lo===null) lo=st.swings[i].p;
+  }
+  if(hi!==null) CHLINES.push(CHSER.createPriceLine({price:hi, color:cssVar('--ts','#4a4a46'), lineWidth:1, lineStyle:2, axisLabelVisible:true, title:'last high'}));
+  if(lo!==null) CHLINES.push(CHSER.createPriceLine({price:lo, color:cssVar('--ts','#4a4a46'), lineWidth:1, lineStyle:2, axisLabelVisible:true, title:'last low'}));
+}
+function drawChart(){
+  var host=document.getElementById('chArt');
+  if(typeof LightweightCharts==='undefined'){
+    chartWhen('The chart engine did not load, so nothing is drawn here. That is this page\'s own copy failing to arrive — the candles above are still the feed\'s and their numbers are still right.', true);
+    return;
+  }
+  if(!host) return;
+  var bars=chartBars();
+  try{
+    if(!CHART){
+      CHART=LightweightCharts.createChart(host,{
+        autoSize:true,
+        layout:{background:{type:LightweightCharts.ColorType.Solid, color:cssVar('--s1','#ededea')}, textColor:cssVar('--tm','#888780'), fontSize:11},
+        grid:{vertLines:{color:cssVar('--bdr','rgba(0,0,0,.10)')}, horzLines:{color:cssVar('--bdr','rgba(0,0,0,.10)')}},
+        rightPriceScale:{borderColor:cssVar('--bdr2','rgba(0,0,0,.18)')},
+        timeScale:{borderColor:cssVar('--bdr2','rgba(0,0,0,.18)'), timeVisible:true, secondsVisible:false},
+        crosshair:{mode:0}
+      });
+      CHSER=CHART.addSeries(LightweightCharts.CandlestickSeries,{
+        upColor:'#26a69a', downColor:'#ef5350', borderVisible:false,
+        wickUpColor:'#26a69a', wickDownColor:'#ef5350'
+      });
+      CHMARK=LightweightCharts.createSeriesMarkers(CHSER,[]);
+      CHTRIED=true;
+    }
+  }catch(e){
+    CHART=null; CHSER=null; CHMARK=null; CHLINES=[];
+    chartWhen('The chart engine is here but would not start, so nothing is drawn. Nothing was invented in its place — the candles above are still the feed\'s own bars.', true);
+    return;
+  }
+  if(!bars.length){
+    CHSER.setData([]);
+    CHMARK.setMarkers([]);
+    chartLines([]);
+    chartWhen('No '+CHTF+' bars came back, so there is nothing to draw. Load candles on the feed above — an empty box stays empty here rather than being filled in.', false);
+    return;
+  }
+  CHSER.setData(bars.map(function(b){
+    return {time:Math.round(b.t/1000), open:b.o, high:b.h, low:b.l, close:b.c};
+  }));
+  var st=structure(bars, WING), marks=[];
+  for(var i=0;i<st.swings.length;i++){
+    var s=st.swings[i], lab=st.labels[i];
+    var bare=(lab==='H'||lab==='L');
+    marks.push({
+      time:Math.round(s.t/1000),
+      position:(s.kind==='H'?'aboveBar':'belowBar'),
+      shape:(s.kind==='H'?'arrowDown':'arrowUp'),
+      color:(bare?cssVar('--tm','#888780'):((lab==='HH'||lab==='HL')?'#26a69a':'#ef5350')),
+      text:lab
+    });
+  }
+  CHMARK.setMarkers(marks);
+  chartLines(bars);
+  try{ CHART.timeScale().fitContent() }catch(e){}
+  chartWhen(bars.length+' '+CHTF+' '+(bars.length===1?'bar':'bars')+' drawn, oldest '+utcStamp(bars[0].t)+'. Free feed: delayed, and it can be a different contract from the one you have up.', false);
 }
 
 /* ---------- his session: New York only, on his own clock ------------------ */
@@ -1676,6 +1860,8 @@ document.addEventListener('click',function(e){
     }
     return;
   }
+  var ctf=t.closest?t.closest('#chTf .tf'):null;
+  if(ctf){ setChartTf(ctf.getAttribute('data-ctf')); return }
   var tf=t.closest?t.closest('#sTf .tf'):null;  var rv=t.closest?t.closest('[data-rev]'):null;
   if(rv){ reviewTrade(parseInt(rv.getAttribute('data-rev'),10)); return }
   var td=t.closest?t.closest('[data-tdel]'):null;
@@ -1747,6 +1933,8 @@ document.getElementById('fSym').addEventListener('keydown',function(e){
 });
 document.getElementById('fSym').value=load(K_SYM,'NQ');
 loadFeed();
+/* The chart's timeframe, remembered, so it opens on the one he was reading. */
+paintChartTf();
 
 /* The chart block remembers itself, so it is filled once per session. */
 var NOW=load(K_NOW,{});

@@ -175,6 +175,19 @@ test('every input is filed under a group', () => {
   });
 });
 
+test('the script is reachable as text he can copy, not as a download', () => {
+  // 18 Sep 2026. The script kept arriving half-pasted. Whatever the cause, the
+  // fix is that there is a link he can open and copy the whole thing from, and
+  // that link has to hand back plain text — a download is a file with no program
+  // on his machine to open it, which is how this failed in the first place.
+  const server = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+  const route = server.match(/app\.get\('\/someday\.pine'[\s\S]*?\}\);/);
+  assert.ok(route, '/someday.pine is served');
+  assert.match(route[0], /res\.type\('text\/plain'\)/, 'and as text, so the browser shows it instead of filing it away');
+  assert.match(route[0], /tradingview', 'Someday-Indicator\.pine'/, 'out of the one file these checks read');
+  assert.ok(server.indexOf("app.get('/someday.pine'") < server.indexOf('app.use(express.static'), 'and above express.static, so it is the route that answers and not the download');
+});
+
 test('the zones are built from confirmed swings and never from the future', () => {
   const text = read();
   assert.match(text, /lookahead=barmerge\.lookahead_off/, 'the higher timeframes must not be read ahead of the bar');

@@ -420,6 +420,207 @@ test('the feed asks the server for all four timeframes in one call, and remember
   assert.match(p.stored['tsid.desk.sym'], /BTC-USD/, 'the symbol he typed is the one it opens on next time');
 });
 
+// ── the chart ───────────────────────────────────────────────────────────────
+//
+// Jacques: "can I make my own personal tradingview for personal trading and get
+// real live data for free". Half of that is possible and half is not, and the
+// chart is where the half that is not could cost him money: the engine is free,
+// the data is delayed. So these check three things:
+//   1. The engine is this app's own copy — no third-party address on the page,
+//      and the licence it ships under sits beside it.
+//   2. Every function the page calls is one this build of the engine actually
+//      exports. A renamed API draws nothing, silently, on his phone.
+//   3. What is handed over is the feed's own bars and this page's own swings —
+//      and nothing at all when there is nothing to draw.
+const VENDOR = path.join(ROOT, 'vendor', 'lightweight-charts');
+// The version is part of the path on purpose: the service worker serves static
+// assets cache-first, so a new build under the old name would reach the page
+// after the code that calls it — a renamed API and a chart that draws nothing.
+const ENGINE_VERSION = '5.2.1';
+const ENGINE = path.join(VENDOR, ENGINE_VERSION, 'lightweight-charts.standalone.production.js');
+
+// Enough bars for a swing to exist at all: the page will not name one inside
+// four bars. A four-bar zig-zag gives a strict high and a strict low, so the
+// fixture has both kinds — a flat top or bottom is deliberately not a swing.
+function chartFeed() {
+  const base = Date.parse('2026-09-17T00:00:00Z');
+  const pat = [0, 6, 12, 6];
+  const mk = (n, step, from) => Array.from({ length: n }, (_, i) => {
+    const mid = from + pat[i % 4];
+    return { t: base + i * step, o: mid, h: mid + 3, l: mid - 3, c: mid + 1, v: 100 + i };
+  });
+  return {
+    ok: true, symbol: 'NQ=F', name: 'Nasdaq 100', partial: null, error: null,
+    timeframes: {
+      '5m': { ok: true, candles: mk(9, 5 * 60000, 21000) },
+      '15m': { ok: true, candles: mk(11, 15 * 60000, 20000) },
+      '1h': { ok: true, candles: mk(13, 60 * 60000, 19000) },
+      '4h': { ok: true, candles: mk(15, 4 * 60 * 60000, 18000) },
+    },
+  };
+}
+
+// A stand-in for the engine. The real one is 193KB of somebody else's canvas
+// code and cannot run under node — so what is checked here is every part that is
+// this page's own: the bars, the labels and the levels it hands over.
+function fakeEngine() {
+  const log = [];
+  const series = {
+    setData(data) { log.push({ call: 'setData', data }) },
+    createPriceLine(options) { log.push({ call: 'createPriceLine', options }); return { id: log.length } },
+    removePriceLine() { log.push({ call: 'removePriceLine' }) },
+  };
+  const chart = {
+    addSeries(definition, options) { log.push({ call: 'addSeries', definition, options }); return series },
+    timeScale() { return { fitContent() { log.push({ call: 'fitContent' }) } } },
+  };
+  const engine = {
+    createChart(host, options) { log.push({ call: 'createChart', options }); return chart },
+    createSeriesMarkers() { log.push({ call: 'createSeriesMarkers' }); return { setMarkers(m) { log.push({ call: 'setMarkers', markers: m }) } } },
+    CandlestickSeries: { type: 'Candlestick' },
+    ColorType: { Solid: 'solid' },
+  };
+  return { engine, log };
+}
+
+const lastOf = (log, call) => { const hits = log.filter((c) => c.call === call); return hits[hits.length - 1] };
+
+test('the chart engine is this app\'s own copy, with its licence, and the page names the version it ships', () => {
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.match(html, /<script src="\/vendor\/lightweight-charts\/5\.2\.1\/lightweight-charts\.standalone\.production\.js"><\/script>/,
+    'the engine is served by this app, not fetched from a CDN');
+
+  const bundle = fs.readFileSync(ENGINE, 'utf8');
+  const version = (bundle.slice(0, 400).match(/Lightweight Charts\u2122 v(\d+\.\d+\.\d+)/) || [])[1];
+  assert.ok(version, 'the vendored build says which version it is');
+  assert.strictEqual(version, ENGINE_VERSION, 'and it is where the test says it is, under that version in the path');
+  assert.match(html, new RegExp('Lightweight Charts v' + version.replace(/\./g, '\\.')),
+    'and the credit on the page names that same version');
+  assert.match(html, /Apache 2\.0/, 'with the licence it is under');
+  assert.match(fs.readFileSync(path.join(VENDOR, 'LICENSE'), 'utf8'), /Apache License[\s\S]*Version 2\.0/,
+    'and the licence text itself sits beside it, which is the condition of shipping it');
+  assert.match(bundle.slice(0, 200), /Copyright \(c\) \d{4} TradingView/, 'the build keeps its own copyright header');
+});
+
+test('every chart-engine function the page calls is one this build actually exports', () => {
+  // v4's addCandlestickSeries does not exist in v5 — an upgrade that renames an
+  // API draws nothing and throws nothing a user would ever see. This is the
+  // check that catches the rename before it reaches his phone.
+  const html = fs.readFileSync(PAGE, 'utf8');
+  const bundle = fs.readFileSync(ENGINE, 'utf8');
+  const names = [...new Set([...html.matchAll(/LightweightCharts\.([A-Za-z_][A-Za-z0-9_]*)/g)].map((m) => m[1]))];
+  assert.ok(names.length >= 3, 'the page calls the engine by name');
+  for (const n of names) {
+    const exported = new RegExp(`[,{]${n}:`).test(bundle) || new RegExp(`[,{]get ${n}\\(\\)`).test(bundle);
+    assert.ok(exported, `the page calls LightweightCharts.${n} and this build does not export it`);
+  }
+  for (const m of ['addSeries', 'setData', 'setMarkers', 'createPriceLine', 'removePriceLine', 'fitContent', 'timeScale']) {
+    assert.ok(bundle.includes(m), `the page calls .${m}() and this build has no such method`);
+  }
+});
+
+test('with no engine at all the chart says so and draws nothing', async () => {
+  const p = await loadPage({ feed: chartFeed() });
+  assert.strictEqual(p.sandbox.CHART, null, 'nothing was created');
+  assert.match(p.els.get('chWhen').textContent, /The chart engine did not load/,
+    'and the page says which of the two things failed');
+  assert.match(p.els.get('chWhen').textContent, /candles above are still the feed/,
+    'without pretending the candles are wrong as well');
+});
+
+test('the chart is handed the feed\'s bars, marked with the page\'s own swings', async () => {
+  const p = await loadPage({ feed: chartFeed() });
+  const { engine, log } = fakeEngine();
+  p.sandbox.LightweightCharts = engine;
+  p.sandbox.setChartTf('4h');
+
+  const bars = p.sandbox.FEED.timeframes['4h'].candles;
+  const drawn = lastOf(log, 'setData');
+  assert.ok(drawn, 'the chart was given data');
+  assert.strictEqual(drawn.data.length, bars.length, 'one candle per bar that came back');
+  // Field by field, not deepStrictEqual: the candle was built inside the page's
+  // own context, so its prototype is the page's Object and never this file's.
+  const first = drawn.data[0];
+  assert.strictEqual(first.time, Math.round(bars[0].t / 1000), 'the first candle is the first bar, in seconds');
+  assert.strictEqual(first.open, bars[0].o, 'and its open is the bar\'s open, to the penny');
+  assert.strictEqual(first.high, bars[0].h);
+  assert.strictEqual(first.low, bars[0].l);
+  assert.strictEqual(first.close, bars[0].c);
+
+  const st = p.sandbox.structure(bars, 2);
+  assert.ok(st.swings.length >= 2, 'the fixture has swings to find');
+  const marks = lastOf(log, 'setMarkers').markers;
+  assert.deepStrictEqual(marks.map((m) => m.text), st.labels,
+    'the letters on the candles are the same letters the structure block prints');
+  const times = new Set(drawn.data.map((d) => d.time));
+  for (const m of marks) assert.ok(times.has(m.time), 'a marker sits on a bar that is actually on the chart');
+
+  const lines = log.filter((c) => c.call === 'createPriceLine').map((c) => c.options);
+  assert.strictEqual(lines.length, 2, 'the last high and the last low are drawn across');
+  const highs = st.swings.filter((s) => s.kind === 'H');
+  const lows = st.swings.filter((s) => s.kind === 'L');
+  assert.ok(highs.length && lows.length, 'the fixture has both a swing high and a swing low');
+  assert.strictEqual(lines.find((l) => l.title === 'last high').price, highs[highs.length - 1].p);
+  assert.strictEqual(lines.find((l) => l.title === 'last low').price, lows[lows.length - 1].p);
+});
+
+test('the chart redraws on the timeframe he picks, and remembers it', async () => {
+  const p = await loadPage({ feed: chartFeed() });
+  const { engine, log } = fakeEngine();
+  p.sandbox.LightweightCharts = engine;
+  p.sandbox.setChartTf('4h');
+  assert.ok(lastOf(log, 'setData'), 'the 4h draw happened');
+
+  p.sandbox.setChartTf('15m');
+  const drawn = lastOf(log, 'setData');
+  assert.strictEqual(drawn.data.length, p.sandbox.FEED.timeframes['15m'].candles.length,
+    'the 15m bars are the ones drawn after he picks 15m');
+  assert.strictEqual(drawn.data[0].close, p.sandbox.FEED.timeframes['15m'].candles[0].c,
+    'and they are the 15m bars, not the 4h ones again');
+  assert.match(p.stored['tsid.desk.charttf'], /15m/, 'the choice is kept on the device');
+  assert.ok(log.some((c) => c.call === 'removePriceLine'),
+    'the old levels come off before new ones go on, instead of stacking up');
+  assert.strictEqual(log.filter((c) => c.call === 'createChart').length, 1,
+    'and the chart itself is made once, not rebuilt on every change');
+});
+
+test('a timeframe with no bars leaves the chart empty and says so', async () => {
+  const p = await loadPage({ feed: chartFeed() });
+  const { engine, log } = fakeEngine();
+  p.sandbox.LightweightCharts = engine;
+  p.sandbox.FEED.timeframes['4h'].candles = [];
+  p.sandbox.setChartTf('4h');
+  const drawn = lastOf(log, 'setData');
+  assert.strictEqual(drawn.data.length, 0, 'nothing is drawn for a timeframe that brought nothing back');
+  assert.match(p.els.get('chWhen').textContent, /No 4h bars came back/, 'the page says which timeframe is empty');
+  assert.doesNotMatch(p.els.get('chWhen').textContent, /\d{4,}/, 'and no price appears in the sentence');
+});
+
+test('an engine that will not start is reported, not worked around', async () => {
+  const p = await loadPage({ feed: chartFeed() });
+  const { engine } = fakeEngine();
+  engine.createChart = () => { throw new Error('no canvas here') };
+  p.sandbox.LightweightCharts = engine;
+  p.sandbox.drawChart();
+  assert.strictEqual(p.sandbox.CHART, null, 'nothing is left half-built');
+  assert.match(p.els.get('chWhen').textContent, /would not start/, 'and the page says so in its own words');
+  assert.match(p.els.get('chWhen').textContent, /Nothing was invented in its place/, 'the rule the whole page runs on');
+});
+
+test('the delay is stated on the chart itself, not in a footnote', async () => {
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.match(html, /Delayed &mdash; your broker's chart wins/, 'the flag sits over the candles');
+  assert.match(html, /class="chartflag"/, 'and is drawn on the chart box, not under it');
+  const p = await loadPage({ feed: chartFeed() });
+  const { engine } = fakeEngine();
+  p.sandbox.LightweightCharts = engine;
+  p.sandbox.setChartTf('4h');
+  assert.match(p.els.get('chWhen').textContent, /Free feed: delayed/,
+    'and the line under it says the same thing after a draw');
+  assert.match(p.els.get('chWhen').textContent, /different contract/,
+    'including the other thing that makes a free feed not his chart');
+});
+
 // ── the trade log ───────────────────────────────────────────────────────────
 
 // Logs a trade the way the form does, through the page's own open/save buttons.

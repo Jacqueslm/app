@@ -1828,6 +1828,16 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Terms of Service</p><span>The agreement for using this app</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
+      <!-- Save to my phone (18 Sep 2026). The same offer the Zodiacs page makes,
+           in Profile where the rest of the settings live. Chrome and Android hand
+           us a real install prompt; Safari has no such thing, so on an iPhone the
+           two taps are explained instead. The row retires itself once the app is
+           already open from the home screen — there is nothing left to offer. -->
+      <div class="setting-row" id="d1-install-row" onclick="dayOneInstall()">
+        <i class="ti ti-download"></i>
+        <div class="setting-row-txt"><p>Save to my phone</p><span>Its own icon, like a real app — no address bar</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
       <div class="setting-row" style="cursor:default">
         <i class="ti ti-info-circle"></i>
         <div class="setting-row-txt"><p>Turn Someday Into Day One</p><span>Version <span id="app-version-txt"></span></span></div>
@@ -12489,7 +12499,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.7';
+const APP_VERSION='7.8';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';
@@ -14338,6 +14348,54 @@ async function boot(){
   }
   showPreviewGate();
 }
+
+// ─── SAVE TO MY PHONE ─────────────────────────────────────────────────────────
+// The same offer the Zodiacs page makes (see key.html), in Profile. Where the
+// browser offers a real install prompt — Chrome, Android, Edge — that prompt is
+// what gets used. Safari has no install button at all, so on an iPhone the two
+// taps are explained instead. Nothing is downloaded and nothing is charged
+// either way: it is this same app, with its own icon and no address bar, and
+// the data stays on the account.
+let dayOneInstallEvent=null;
+function dayOneStandalone(){
+  try{ if(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)return true; }catch(e){}
+  return navigator.standalone===true;
+}
+function dayOneApple(){
+  if(/iphone|ipad|ipod/i.test(navigator.userAgent||''))return true;
+  // iPadOS 13+ reports itself as a Macintosh; a Mac with a touch screen is an iPad.
+  return /macintosh/i.test(navigator.userAgent||'')&&'ontouchend' in document;
+}
+function dayOneInstall(){
+  if(dayOneStandalone()){
+    appInfo('Already saved','This app is already on your home screen, and it opened from there.');
+    return;
+  }
+  if(dayOneInstallEvent){
+    try{ dayOneInstallEvent.prompt(); }catch(e){}
+    dayOneInstallEvent=null;
+    return;
+  }
+  if(dayOneApple()){
+    appInfo('Save it to your home screen',
+      'Tap the Share button in Safari — the square with the arrow coming out of the top — then scroll down the list and tap Add to Home Screen.\n\nIt sits next to your other apps with its own icon and no address bar. Nothing is downloaded and nothing is charged; it is this same app, and your days, journal and lessons stay on this account.');
+    return;
+  }
+  appInfo('Save it to your home screen',
+    'Open the browser menu — the three dots or the three lines in the corner — and choose Install app, or Add to Home screen.\n\nIt opens in its own window with no address bar. Nothing is downloaded and nothing is charged; it is this same app, and your days, journal and lessons stay on this account.');
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  dayOneInstallEvent=e;
+  dayOneInstallRow();
+});
+function dayOneInstallRow(){
+  const row=document.getElementById('d1-install-row');
+  if(!row)return;
+  // Opened from the home screen already: there is nothing to offer.
+  row.style.display=dayOneStandalone()?'none':'';
+}
+dayOneInstallRow();
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
 renderIcons();

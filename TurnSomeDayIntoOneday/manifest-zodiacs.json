@@ -1,0 +1,17 @@
+{
+  "name": "Life's Zodiacs",
+  "short_name": "Zodiacs",
+  "description": "Every birthday read in full — the day itself, the week it sits in, the life it points to, and what happens when two people meet.",
+  "start_url": "/key",
+  "scope": "/key",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07060d",
+  "theme_color": "#07060d",
+  "icons": [
+    { "src": "icons/zodiacs-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/zodiacs-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/zodiacs-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/zodiacs-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

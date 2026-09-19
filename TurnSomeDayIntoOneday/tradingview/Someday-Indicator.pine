@@ -14,6 +14,16 @@
 // after its swing has confirmed; a range only after its bars have closed. The
 // drawing choices that are not facts are the "reaches back" and "your clock"
 // inputs, and they are yours.
+//
+// 19 September 2026 - two faults found on a DAILY chart and fixed here:
+//
+// 1. A higher timeframe was being read once per chart bar. On a daily chart the
+//    4h series is only looked at when the day closes, but a swing is worth
+//    something on one bar only - the bar it confirms on - so most 4h swings were
+//    being missed, and the table said "no frame yet" while the chart plainly had
+//    a 4h lower low and a 4h lower high on it. Swings are now carried forward, so
+//    whatever moment the chart samples, it samples a swing that really happened.
+// 2. The table was left at its smallest text. It now opens readable.
 indicator("Someday", shorttitle="Someday", overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
 
 // ----------------------------------------------------------------- structure
@@ -93,6 +103,42 @@ var Zone[] demandZones = array.new<Zone>()
 
 lineStyle() =>
     fibStyle == "Solid" ? line.style_solid : fibStyle == "Dashed" ? line.style_dashed : line.style_dotted
+
+// ------------------------------------------------- a swing, carried forward
+// Why these exist: TradingView hands a higher-timeframe value to a chart bar at
+// the moment that bar closes. Ask a daily chart for a 4h swing and it looks once
+// a day, and a swing only reads non-empty on the single bar it confirms on - so
+// on a daily chart almost every 4h swing was invisible to this script.
+//
+// These carry the last confirmed swing forward. Nothing future is read: the
+// value is the most recent swing that had already confirmed, and it is the same
+// fact, just not thrown away between samples. The token is the time of the bar
+// the swing sits on, which is what stops the same swing being drawn twice.
+// Carried value and token are separate for highs and for lows, so a new low can
+// never make the script think a new high arrived.
+f_phVal(simple int len) =>
+    var float keep = na
+    float p = ta.pivothigh(high, len, len)
+    keep := na(p) ? keep : p
+    keep
+
+f_phTok(simple int len) =>
+    var int keep = na
+    if not na(ta.pivothigh(high, len, len))
+        keep := time[len]
+    keep
+
+f_plVal(simple int len) =>
+    var float keep = na
+    float p = ta.pivotlow(low, len, len)
+    keep := na(p) ? keep : p
+    keep
+
+f_plTok(simple int len) =>
+    var int keep = na
+    if not na(ta.pivotlow(low, len, len))
+        keep := time[len]
+    keep
 
 makeZone(bool supply, float top, float bottom, int left) =>
     right = bar_index + 20
@@ -263,44 +309,44 @@ var int seen4l  = na
 var int seen1dh = na
 var int seen1dl = na
 
-[a15ph, a15pl, a15lo, a15hi, a15t] = request.security(syminfo.tickerid, "15", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+[a15ph, a15phT, a15pl, a15plT, a15lo, a15hi] = request.security(syminfo.tickerid, "15", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
 
-if use15 and not na(a15ph) and a15t != seen15h
-    seen15h := a15t
+if use15 and not na(a15ph) and a15phT != seen15h
+    seen15h := a15phT
     addZone(true, a15ph, a15lo, bar_index - zoneBack)
 
-if use15 and not na(a15pl) and a15t != seen15l
-    seen15l := a15t
+if use15 and not na(a15pl) and a15plT != seen15l
+    seen15l := a15plT
     addZone(false, a15hi, a15pl, bar_index - zoneBack)
 
-[b60ph, b60pl, b60lo, b60hi, b60t] = request.security(syminfo.tickerid, "60", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+[b60ph, b60phT, b60pl, b60plT, b60lo, b60hi] = request.security(syminfo.tickerid, "60", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
 
-if use60 and not na(b60ph) and b60t != seen60h
-    seen60h := b60t
+if use60 and not na(b60ph) and b60phT != seen60h
+    seen60h := b60phT
     addZone(true, b60ph, b60lo, bar_index - zoneBack)
 
-if use60 and not na(b60pl) and b60t != seen60l
-    seen60l := b60t
+if use60 and not na(b60pl) and b60plT != seen60l
+    seen60l := b60plT
     addZone(false, b60hi, b60pl, bar_index - zoneBack)
 
-[c4hph, c4hpl, c4hlo, c4hhi, c4ht] = request.security(syminfo.tickerid, "240", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+[c4hph, c4hphT, c4hpl, c4hplT, c4hlo, c4hhi] = request.security(syminfo.tickerid, "240", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
 
-if use240 and not na(c4hph) and c4ht != seen4h
-    seen4h := c4ht
+if use240 and not na(c4hph) and c4hphT != seen4h
+    seen4h := c4hphT
     addZone(true, c4hph, c4hlo, bar_index - zoneBack)
 
-if use240 and not na(c4hpl) and c4ht != seen4l
-    seen4l := c4ht
+if use240 and not na(c4hpl) and c4hplT != seen4l
+    seen4l := c4hplT
     addZone(false, c4hhi, c4hpl, bar_index - zoneBack)
 
-[d1dph, d1dpl, d1dlo, d1dhi, d1dt] = request.security(syminfo.tickerid, "1D", [ta.pivothigh(high, swingLen, swingLen), ta.pivotlow(low, swingLen, swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen], time[swingLen]], lookahead=barmerge.lookahead_off)
+[d1dph, d1dphT, d1dpl, d1dplT, d1dlo, d1dhi] = request.security(syminfo.tickerid, "1D", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
 
-if useD and not na(d1dph) and d1dt != seen1dh
-    seen1dh := d1dt
+if useD and not na(d1dph) and d1dphT != seen1dh
+    seen1dh := d1dphT
     addZone(true, d1dph, d1dlo, bar_index - zoneBack)
 
-if useD and not na(d1dpl) and d1dt != seen1dl
-    seen1dl := d1dt
+if useD and not na(d1dpl) and d1dplT != seen1dl
+    seen1dl := d1dplT
     addZone(false, d1dhi, d1dpl, bar_index - zoneBack)
 
 // ----------------------------------------------------- the ranges themselves
@@ -387,11 +433,11 @@ smallLen = input.int(3, "Small chart swing length", minval=2, maxval=20, group="
 showRead = input.bool(true, "Show the read", group="The read")
 lvlCol   = input.color(#ffeb3b, "Level line", group="The read")
 lowCol   = input.color(color.new(color.gray, 15), "4h low line", group="The read")
-readSize = input.string("tiny", "Table text", options=["tiny", "small", "normal"], group="The read")
+readSize = input.string("normal", "Table text", options=["tiny", "small", "normal"], group="The read")
 
 readText = readSize == "tiny" ? size.tiny : readSize == "small" ? size.small : size.normal
 
-[f4hPh, f4hPl, f4hClose, f4hTok] = request.security(syminfo.tickerid, "240", [ta.pivothigh(high, frameLen, frameLen), ta.pivotlow(low, frameLen, frameLen), close[1], time[frameLen]], lookahead=barmerge.lookahead_off)
+[f4hPh, f4hPhT, f4hPl, f4hPlT, f4hClose] = request.security(syminfo.tickerid, "240", [f_phVal(frameLen), f_phTok(frameLen), f_plVal(frameLen), f_plTok(frameLen), close[1]], lookahead=barmerge.lookahead_off)
 
 var float fHigh      = na
 var float fPrevHigh  = na
@@ -401,14 +447,21 @@ var float theLevel   = na
 var float frameLow   = na
 var int   seenFrameH = na
 var int   seenFrameL = na
+// How many 4h swings the script has actually been given. This is the row that
+// says whether an empty table means "nothing has happened yet" or "the script
+// cannot see the swings at all" - two very different problems with the same face.
+var int   seenPh     = 0
+var int   seenPl     = 0
 
-if not na(f4hPh) and f4hTok != seenFrameH
-    seenFrameH := f4hTok
+if not na(f4hPh) and f4hPhT != seenFrameH
+    seenFrameH := f4hPhT
+    seenPh += 1
     fPrevHigh := fHigh
     fHigh := f4hPh
 
-if not na(f4hPl) and f4hTok != seenFrameL
-    seenFrameL := f4hTok
+if not na(f4hPl) and f4hPlT != seenFrameL
+    seenFrameL := f4hPlT
+    seenPl += 1
     fPrevLow := fLow
     fLow := f4hPl
     lowerLow = not na(fPrevLow) and f4hPl < fPrevLow
@@ -428,7 +481,7 @@ stateName = not haveFrame ? "no frame yet" : changed ? "frame changed" : underLo
 
 // The small chart: higher highs, and the last higher low still holding - a
 // close under it ends the hold, a wick does not.
-[fSPh, fSPl, sClose, fSTok] = request.security(syminfo.tickerid, smallTf, [ta.pivothigh(high, smallLen, smallLen), ta.pivotlow(low, smallLen, smallLen), close, time[smallLen]], lookahead=barmerge.lookahead_off)
+[fSPh, fSPhT, fSPl, fSPlT, sClose] = request.security(syminfo.tickerid, smallTf, [f_phVal(smallLen), f_phTok(smallLen), f_plVal(smallLen), f_plTok(smallLen), close], lookahead=barmerge.lookahead_off)
 
 var float sHigh      = na
 var float sPrevHigh  = na
@@ -438,13 +491,13 @@ var float sHold      = na
 var int   seenSmallH = na
 var int   seenSmallL = na
 
-if not na(fSPh) and fSTok != seenSmallH
-    seenSmallH := fSTok
+if not na(fSPh) and fSPhT != seenSmallH
+    seenSmallH := fSPhT
     sPrevHigh := sHigh
     sHigh := fSPh
 
-if not na(fSPl) and fSTok != seenSmallL
-    seenSmallL := fSTok
+if not na(fSPl) and fSPlT != seenSmallL
+    seenSmallL := fSPlT
     sPrevLow := sLow
     sLow := fSPl
     if not na(sPrevLow) and fSPl > sPrevLow
@@ -480,7 +533,7 @@ if array.size(lowLines) > 0
     for i = 0 to array.size(lowLines) - 1
         line.set_x2(array.get(lowLines, i), bar_index + 20)
 
-var table dash = table.new(position.top_right, 2, 8, border_width=1, frame_width=1, bgcolor=color.new(color.black, 25))
+var table dash = table.new(position.top_right, 2, 9, border_width=1, frame_width=1, bgcolor=color.new(color.black, 25))
 
 if showRead and barstate.islast
     table.cell(dash, 0, 0, "State", text_size=readText, text_color=color.new(color.white, 45))
@@ -497,8 +550,10 @@ if showRead and barstate.islast
     table.cell(dash, 1, 5, ltfUp ? "yes" : "no", text_size=readText, text_color=color.white)
     table.cell(dash, 0, 6, "4h closed above the level", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 6, changed ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 7, "Verdict", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 7, verdict, text_size=readText, text_color=shortOk ? color.red : longOk ? color.teal : color.new(color.white, 35))
+    table.cell(dash, 0, 7, "4h swings seen (high / low)", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 7, str.tostring(seenPh) + " / " + str.tostring(seenPl), text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 8, "Verdict", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 8, verdict, text_size=readText, text_color=shortOk ? color.red : longOk ? color.teal : color.new(color.white, 35))
 
 alertcondition(longOk and not longOk[1], title="Long scalp", message="The small chart turned up while the 4h frame is down and the level has not been closed above - long scalp into the level")
 alertcondition(shortOk and not shortOk[1], title="Short - price at the level", message="Price is at the 4h lower high and the 4h has not closed above it")

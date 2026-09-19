@@ -499,7 +499,21 @@ underLow  = haveFrame and c4 < frameLow
 atLevel   = haveFrame and not changed and high >= theLevel
 retracing = haveFrame and not changed and not underLow and not atLevel and close < theLevel
 
-stateName = not haveFrame ? "no frame yet" : changed ? "frame changed" : underLow ? "under the low" : atLevel ? "level in play" : "retracing"
+// 19 September 2026. A cancelled frame used to sit there showing its level and
+// its low as though they were still something to use - a price from hours earlier
+// sitting beside a live price, which reads as nonsense, and that was his
+// complaint. A cancelled frame is dropped now: the box says so for twenty bars,
+// then goes back to "no frame yet", and it shows no price at all until a fresh
+// lower low puts a new level up.
+var int frameEnded = na
+if changed
+    frameEnded := bar_index
+    theLevel := na
+    frameLow := na
+
+justEnded = not na(frameEnded) and bar_index - frameEnded <= 20
+
+stateName = justEnded ? "frame changed" : not haveFrame ? "no frame yet" : underLow ? "under the low" : atLevel ? "level in play" : "retracing"
 
 // The small chart: higher highs, and the last higher low still holding - a
 // close under it ends the hold, a wick does not.
@@ -574,8 +588,8 @@ if showRead and barstate.islast
     table.cell(dash, 1, 6, ltfUp ? "yes" : "no", text_size=readText, text_color=color.white)
     table.cell(dash, 0, 7, "Close above the level", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 7, changed ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 8, "Swings seen (H / L)", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 8, str.tostring(seenPh) + " / " + str.tostring(seenPl) + (na(f4hPh) ? "\nnothing given yet" : "\nlast " + str.tostring(f4hPh, format.mintick)), text_size=readText, text_color=color.white)
+    table.cell(dash, 0, 8, "Swings given (H / L)", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 1, 8, na(f4hPh) ? "nothing given yet" : str.tostring(seenPh) + " / " + str.tostring(seenPl), text_size=readText, text_color=color.white)
     table.cell(dash, 0, 9, "Verdict", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 9, verdict, text_size=readText, text_color=shortOk ? color.red : longOk ? color.teal : color.new(color.white, 35))
 

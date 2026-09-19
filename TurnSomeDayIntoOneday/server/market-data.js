@@ -53,12 +53,43 @@ const TF = {
   '4h':  { buildFrom: '1h', bucketMs: 4 * 60 * 60 * 1000,                 ttl: 5 * 60 * 1000 },
 };
 
-// What he actually types, and what the feed calls it. NQ is the Nasdaq future
-// because that is what he trades it as; the plain ticker is left alone so SPY is
-// the ETF and not something else entirely.
+// What he actually types, and what the feed calls it.
+//
+// TWO FAMILIES, AND BOTH ARE HIS: the micros he trades, and the full-size
+// contracts they are a fraction of. Every one of them has to be spelled out,
+// because on the feed the bare code is a DIFFERENT INSTRUMENT. On 19 Sep 2026 he
+// typed MGC and the desk answered with a Vanguard ETF at 281.72 — the letters
+// MGC belong to a US equity as well as to Micro Gold, so the page printed a
+// gold symbol over a stock's price and its name underneath it. MNQ came back as
+// "nothing usable" for the same reason. Both faults were this table missing the
+// micros: a code that is not in here goes to the feed as typed, and the feed has
+// no idea he means a contract.
+//
+// Verified against the live feed on 19 Sep 2026. Every symbol below answered
+// with real bars and meta.instrumentType = FUTURE (the cash and crypto ones with
+// their own type): MNQ, MES, MYM, M2K, MGC, MCL, SIL, MHG, MNG, MBT, MET, M6E,
+// M6A, M6B, NQ, ES, YM, RTY, NKD, GC, SI, HG, CL, NG, 6E, 6A, 6B, 6C, 6J, ZB,
+// ZN, ZT, ZF. Checked and NOT there: M6C, M6J, M6S, M6M, M6N and DX=F — which is
+// why the dollar index is read as DX-Y.NYB, and why the micros with no feed
+// entry are better off absent than guessed at.
 const SYMBOLS = {
+  // The micros he trades.
+  MNQ: 'MNQ=F', MES: 'MES=F', MYM: 'MYM=F', M2K: 'M2K=F',
+  MGC: 'MGC=F', MCL: 'MCL=F', SIL: 'SIL=F', MHG: 'MHG=F', MNG: 'MNG=F',
+  MBT: 'MBT=F', MET: 'MET=F', M6E: 'M6E=F', M6A: 'M6A=F', M6B: 'M6B=F',
+  // The full-size contracts they are fractions of. NQ is the Nasdaq future
+  // because that is what he trades it as.
   NQ: 'NQ=F', ES: 'ES=F', YM: 'YM=F', RTY: 'RTY=F', NKD: 'NKD=F',
-  CL: 'CL=F', GC: 'GC=F', SI: 'SI=F', NG: 'NG=F',
+  CL: 'CL=F', GC: 'GC=F', SI: 'SI=F', HG: 'HG=F', NG: 'NG=F',
+  '6E': '6E=F', '6A': '6A=F', '6B': '6B=F', '6C': '6C=F', '6J': '6J=F',
+  // The macro context a futures read is made against: the notes, the fear
+  // index, the yield the notes track, and the cash indices his futures are
+  // priced off. Verified the same day, all answering with bars and type INDEX.
+  // None of them is a contract, so none of them gets a published contract size.
+  ZB: 'ZB=F', ZN: 'ZN=F', ZT: 'ZT=F', ZF: 'ZF=F', VIX: '^VIX',
+  TNX: '^TNX', SPX: '^GSPC', NDX: '^NDX', COMP: '^IXIC', DJI: '^DJI', RUT: '^RUT',
+  // Cash, crypto and the pairs. A plain ticker is left alone, so SPY is the ETF
+  // and never something else entirely.
   BTC: 'BTC-USD', ETH: 'ETH-USD', SOL: 'SOL-USD',
   EURUSD: 'EURUSD=X', GBPUSD: 'GBPUSD=X', USDJPY: 'JPY=X', DXY: 'DX-Y.NYB',
 };
@@ -70,7 +101,10 @@ const PROVIDERS = { yahoo: true, twelvedata: true };
 const SYMBOL_OK = /^[A-Z0-9^.=\-/]{1,15}$/;
 
 function normalizeSymbol(input) {
-  const raw = String(input == null ? '' : input).trim().toUpperCase().replace(/\s+/g, '');
+  // A leading slash is how a broker terminal shows a future and how he types
+  // one — /MNQ. Stripped here rather than on the page, because every way in
+  // goes through this function; the caret is left alone, since ^VIX needs it.
+  const raw = String(input == null ? '' : input).trim().toUpperCase().replace(/\s+/g, '').replace(/^\//, '');
   if (!raw) return null;
   const mapped = SYMBOLS[raw] || raw;
   if (!SYMBOL_OK.test(mapped)) return null;
@@ -105,7 +139,26 @@ function parseYahooChart(json) {
     name: meta.shortName || meta.symbol || '',
     exchange: meta.fullExchangeName || meta.exchangeName || '',
     currency: meta.currency || '',
+    // What the feed says the thing actually IS: FUTURE, EQUITY, ETF, INDEX,
+    // CURRENCY, CRYPTOCURRENCY. It is the only way to tell a contract from a
+    // stock that happens to share its letters, so it is carried all the way out
+    // and checked below.
+    type: String(meta.instrumentType || '').toUpperCase(),
   };
+}
+
+/* A contract that comes back as something else is the wrong instrument, and a
+   wrong instrument carrying a right-looking number is worse than no number at
+   all — that is exactly what MGC did on 19 Sep 2026, and a gold chart showing
+   281.72 would have had him reading a stock as his market. Every contract the
+   desk knows about is mapped above, so this can only fire if the feed changes
+   under us; when it does, this refuses and says what came back instead. */
+function wrongInstrument(symbol, got) {
+  if (!/=F$/.test(symbol)) return null;
+  const t = String(got.type || '').toUpperCase();
+  if (!t || t === 'FUTURE') return null;
+  return `${symbol}: the feed answered with ${/^[AEIOU]/.test(t) ? 'an' : 'a'} ${t}`
+    + `${got.name ? ` called "${got.name}"` : ''} — that is not the contract.`;
 }
 
 // Many bars in, one bar per bucket out. Open is the first open in the bucket,
@@ -184,7 +237,7 @@ async function fetchYahoo(symbol, tf) {
   if (spec.buildFrom) bars = aggregate(bars, spec.bucketMs);
   return {
     bars, source: 'yahoo', symbol, name: parsed.name,
-    exchange: parsed.exchange, currency: parsed.currency,
+    exchange: parsed.exchange, currency: parsed.currency, type: parsed.type,
     built: spec.buildFrom ? `built from ${spec.buildFrom} bars` : '',
   };
 }
@@ -267,11 +320,14 @@ async function fetchCandles(input, tf, opts) {
     return { ok: false, error: `${symbol} ${timeframe}: ${why}.` };
   }
   if (got.error) return { ok: false, error: got.error };
+  const wrong = wrongInstrument(symbol, got);
+  if (wrong) return { ok: false, error: wrong };
 
   const candles = got.bars.slice(-want);
   const value = {
     ok: true, symbol, tf: timeframe, source: got.source, name: got.name || '',
-    exchange: got.exchange || '', currency: got.currency || '', built: got.built || '',
+    exchange: got.exchange || '', currency: got.currency || '', type: got.type || '',
+    built: got.built || '',
     asOf: candles.length ? new Date(candles[candles.length - 1].t).toISOString() : null,
     bars: candles.length, candles,
   };
@@ -294,6 +350,10 @@ async function fetchAll(input, opts) {
     ok: any,
     symbol: any ? out[Object.keys(out)[0]].symbol : normalizeSymbol(input),
     name: any ? out[Object.keys(out)[0]].name : '',
+    // What the feed says it answered with, so the page can say "this is an ETF,
+    // not the contract" instead of printing a point value over the top of it.
+    type: any ? out[Object.keys(out)[0]].type : '',
+    exchange: any ? out[Object.keys(out)[0]].exchange : '',
     timeframes: out,
     error: any ? null : (errors[0] || 'The feed sent nothing.'),
     partial: any && errors.length ? errors : null,
@@ -303,5 +363,5 @@ async function fetchAll(input, opts) {
 module.exports = {
   TIMEFRAMES, TF, SYMBOLS, PROVIDERS, TIMEOUT_MS,
   normalizeSymbol, parseYahooChart, aggregate, fetchCandles, fetchAll,
-  setTransport, clearCache,
+  wrongInstrument, setTransport, clearCache,
 };

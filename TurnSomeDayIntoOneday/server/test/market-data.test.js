@@ -142,6 +142,73 @@ test('NQ means the Nasdaq future, and a made-up symbol is refused before it is s
     assert.strictEqual(md.normalizeSymbol(junk), null, `${junk} must not be sent to the feed`);
   }
   assert.strictEqual(md.normalizeSymbol('N Q'), 'NQ=F', 'a stray space he typed is not a reason to refuse him');
+  assert.strictEqual(md.normalizeSymbol('/MNQ'), 'MNQ=F', 'and a leading slash is how a terminal shows a future');
+  assert.strictEqual(md.normalizeSymbol(' / mgc '), 'MGC=F');
+});
+
+test('the micros are asked for as their contracts, never as the bare code', () => {
+  // 19 Sep 2026, his own screenshot: he typed MGC — Micro Gold — and the desk
+  // answered "Vanguard Morningstar Mega Cap E" at 281.72, because the letters
+  // MGC also belong to a US equity and the bare code went to the feed as typed.
+  // MNQ, the same day, came back as "nothing usable". Both faults were one
+  // missing row in the table below, so every code he trades is pinned here.
+  const micros = {
+    MNQ: 'MNQ=F', MES: 'MES=F', MYM: 'MYM=F', M2K: 'M2K=F', MGC: 'MGC=F',
+    MCL: 'MCL=F', SIL: 'SIL=F', MHG: 'MHG=F', MNG: 'MNG=F', MBT: 'MBT=F',
+    MET: 'MET=F', M6E: 'M6E=F', M6A: 'M6A=F', M6B: 'M6B=F',
+  };
+  for (const [code, symbol] of Object.entries(micros)) {
+    assert.strictEqual(md.normalizeSymbol(code), symbol, `${code} must be asked for as the contract`);
+    assert.strictEqual(md.normalizeSymbol('/' + code.toLowerCase()), symbol, `${code}, however he types it`);
+  }
+
+  // The macros: the full-size contracts the micros are a fraction of, and the
+  // context a futures read is made against.
+  for (const code of ['NQ', 'ES', 'YM', 'RTY', 'NKD', 'GC', 'SI', 'HG', 'CL', 'NG',
+    '6E', '6A', '6B', '6C', 'ZB', 'ZN', 'ZT', 'ZF']) {
+    assert.match(String(md.normalizeSymbol(code)), /=F$/, `${code} is asked for as a contract`);
+  }
+  // The macro context, read as what it is: the feed has these as indices, not
+  // as contracts, and asking for the index is the point of them.
+  const macro = {
+    VIX: '^VIX', TNX: '^TNX', SPX: '^GSPC', NDX: '^NDX', COMP: '^IXIC', DJI: '^DJI', RUT: '^RUT',
+  };
+  for (const [code, symbol] of Object.entries(macro)) {
+    assert.strictEqual(md.normalizeSymbol(code), symbol, code);
+  }
+  assert.strictEqual(md.normalizeSymbol('DXY'), 'DX-Y.NYB', 'the dollar, which the feed only has as an index too');
+  assert.strictEqual(md.normalizeSymbol('M6C'), 'M6C', 'a micro the feed does not carry is left as typed, never guessed into a contract');
+});
+
+test('every code the desk prices is a code the feed asks for as that contract', () => {
+  // Two lists, one on each side: the page holds what a point pays, the server
+  // holds what to ask the feed for. They disagreed on MGC — the page had a
+  // price, the server had nothing — and the page printed gold's size over a
+  // Vanguard ETF. Held together here, so a code cannot be priced on one side
+  // and unresolvable on the other.
+  const block = PAGE.match(/var POINT_VALUE=\{([\s\S]*?)\};/);
+  assert.ok(block, 'the point-value table is still on the desk page');
+  const codes = [...block[1].matchAll(/(?:'([A-Z0-9]{2,4})'|([A-Z][A-Z0-9]{1,3}))\s*:/g)].map((m) => m[1] || m[2]);
+  assert.ok(codes.length >= 20, `the table parsed and it is the whole table: found ${codes.length}`);
+  for (const code of codes) {
+    const asked = md.normalizeSymbol(code);
+    assert.notStrictEqual(asked, code, `${code} has a size on the page but no contract on the server`);
+    assert.match(String(asked), /=F$/, `${code} is priced as a contract, so it has to be asked for as one`);
+  }
+  // And the other way round: a contract the server knows is not left unpriced
+  // by accident — the ones that are absent are absent on purpose (the yen, whose
+  // contract is quoted to six decimals, and VIX, which is an index here).
+  for (const code of Object.keys(md.SYMBOLS)) {
+    if (/^[A-Z]/.test(code) && code.length <= 4) {
+      const priced = new RegExp(`(?:^|[^A-Z0-9])'?${code}'?\s*:`).test(block[1]);
+      if (priced) continue;
+      // The yen is quoted to six decimals, so a per-point figure would read as
+      // twelve and a half million dollars. Everything else here is an index or a
+      // cash pair: there is no contract size to publish for it.
+      assert.ok(['6J', 'VIX', 'TNX', 'SPX', 'NDX', 'COMP', 'DJI', 'RUT', 'BTC', 'ETH', 'SOL', 'DXY'].includes(code),
+        `${code} resolves to something the desk prices, but has no published size on the page`);
+    }
+  }
 });
 
 // ── the four timeframes ─────────────────────────────────────────────────────
@@ -193,6 +260,45 @@ test('a feed that does not know the symbol says so, in its own words, with no ba
   assert.match(r.error, /does not know ZZZZ/);
   assert.match(r.error, /No data found/, 'the reason is the feed\'s, not a guess of ours');
   assert.strictEqual(r.candles, undefined, 'and there is nothing that could be drawn');
+});
+
+test('a contract answered with another instrument is refused, and it says what came back', async () => {
+  // The MGC answer, exactly as the live feed gave it on 19 Sep 2026: HTTP 200,
+  // real bars, and meta.instrumentType an ETF. Refused rather than returned,
+  // because a share price under a gold code is the one fault he cannot see.
+  const etf = yahooAnswer([hourlyBar(0, 280, 282, 279, 281.72, 10)], {
+    symbol: 'MGC', shortName: 'Vanguard Morningstar Mega Cap E',
+    fullExchangeName: 'NYSEArca', currency: 'USD', instrumentType: 'ETF',
+  });
+  md.setTransport(stubFetch(etf));
+  const r = await md.fetchCandles('MGC', '1h');
+  assert.strictEqual(r.ok, false, 'the ETF is not handed over as gold');
+  assert.strictEqual(r.candles, undefined, 'and there is nothing to draw');
+  assert.match(r.error, /MGC=F: the feed answered with an ETF/);
+  assert.match(r.error, /Vanguard Morningstar Mega Cap E/, 'named, so he can see what it actually is');
+  assert.match(r.error, /not the contract/);
+
+  // A plain ticker is never treated as a contract, whatever comes back for it:
+  // he may type SPY or AAPL deliberately and get the instrument he asked for.
+  const spy = await md.fetchCandles('SPY', '1h');
+  assert.strictEqual(spy.ok, true, 'SPY is not a contract, so nothing here refuses it');
+  assert.ok(!/not the contract/.test(spy.error || ''), 'and it is never accused of being the wrong instrument');
+  assert.strictEqual(md.wrongInstrument('SPY', { type: 'ETF', name: 'SPDR S&P 500' }), null);
+  assert.match(String(md.wrongInstrument('MGC=F', { type: 'ETF', name: 'Vanguard Morningstar Mega Cap E' })),
+    /MGC=F: the feed answered with an ETF/);
+});
+
+test('a contract that comes back as a contract is returned, with its type and exchange', async () => {
+  md.setTransport(stubFetch(yahooAnswer([hourlyBar(0, 4400, 4430, 4390, 4424.9, 10)], {
+    symbol: 'MGC=F', shortName: 'Micro Gold Futures,Dec-2026',
+    fullExchangeName: 'COMEX', currency: 'USD', instrumentType: 'FUTURE',
+  })));
+  const r = await md.fetchCandles('MGC', '1h', { bars: 5 });
+  assert.strictEqual(r.ok, true, 'the contract itself is not refused');
+  assert.strictEqual(r.symbol, 'MGC=F');
+  assert.strictEqual(r.type, 'FUTURE', 'what the feed says it is travels with the bars');
+  assert.strictEqual(r.exchange, 'COMEX');
+  assert.strictEqual(r.candles.length, 1);
 });
 
 test('a feed that cannot be reached says that, and never a made-up price', async () => {

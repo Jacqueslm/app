@@ -601,15 +601,27 @@ function money(n){
    number at all, and the row says so rather than inventing one.
 
    The figure that counts is the one ON THE TRADE, not this table: he can
-   overrule it per trade, because his broker's size and his fill are his. */
+   overrule it per trade, because his broker's size and his fill are his.
+
+   Every code in here is also in the server's symbol table, so a code he can
+   type and see a size for is a code the feed is asked for AS THE CONTRACT. On
+   19 Sep 2026 those two lists did not agree — MGC had a size here and nothing on
+   the server — and the feed answered a share price under a gold code. A test
+   holds the two lists together now.
+
+   Two things are deliberately absent. The yen is not here: its contract is
+   quoted to six decimals, so a "point" of 1.00 would read as twelve and a half
+   million dollars and be worse than no figure. And the fear index is not here,
+   because the feed only has the index, which has no contract size to publish. */
 var POINT_VALUE={
   MNQ:2, MES:5, MYM:0.5, M2K:5,
-  NQ:20, ES:50, YM:5, RTY:50,
+  NQ:20, ES:50, YM:5, RTY:50, NKD:5,
   MGC:10, GC:100, SIL:1000, SI:5000,
   MCL:100, CL:1000, MNG:1000, NG:10000,
   MHG:2500, HG:25000,
   MBT:0.1, MET:0.1,
-  M6E:12500, '6E':125000
+  M6E:12500, '6E':125000, M6A:10000, '6A':100000, M6B:6250, '6B':62500, '6C':100000,
+  ZT:2000, ZF:1000, ZN:1000, ZB:1000
 };
 /* The feed answers with NQ=F, GC=F, MNQ=F, BTC-USD; he types MNQ or /MNQ. All
    of them come down to the contract code. */
@@ -627,10 +639,25 @@ function dollars(n){
   if(typeof n!=='number'||!isFinite(n)) return '\u2014';
   return (n<0?'-':'')+'\$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
-function pvText(sym){
+/* The published size belongs to the CONTRACT. On 19 Sep 2026 the feed answered
+   the bare code MGC with a Vanguard ETF, and this line put gold's size over the
+   top of a share price: a money figure attached to the wrong market is the one
+   thing a trader cannot unsee. So when the feed says the thing it sent is not a
+   contract, the size is named as the contract's and the difference is said out
+   loud instead of being printed under a number as though it were gold. */
+/* A code this page publishes a size for is a code he means as a CONTRACT, and
+   that is the test for whether the feed's instrument type deserves a warning.
+   VIX and the dollar index are read as the index on purpose here — telling him
+   those are "not the contract" would be noise, while MGC arriving as an ETF is
+   exactly the fault worth shouting about. */
+function meansAContract(sym){ return pointValueOf(sym)!==null }
+function pvText(sym, type, name){
   var pv=pointValueOf(sym), k=baseSym(sym);
-  if(pv===null) return 'No published contract size for '+(k||'this symbol')+'. Put what one point is worth on the trade itself and the money is worked out from that.';
-  return '<b>'+esc(k)+'</b> — one point is <b>'+esc(dollars(pv))+'</b> on one contract. That is the published size; overrule it on any trade if your broker or your size differs.';
+  var notContract = (type && type!=='FUTURE' && pv!==null)
+    ? (' <b>What came back is '+esc(type)+(name?' ('+esc(name)+')':'')+'</b>, not the '+esc(k)+' contract — so the prices above are not its market either. Load the contract or put the market aside.')
+    : '';
+  if(pv===null) return 'No published contract size for '+(k||'this symbol')+'. Put what one point is worth on the trade itself and the money is worked out from that.'+notContract;
+  return '<b>'+esc(k)+'</b> — one point is <b>'+esc(dollars(pv))+'</b> on one contract. That is the published size; overrule it on any trade if your broker or your size differs.'+notContract;
 }
 function utcStamp(ms){
   var d=new Date(ms);
@@ -651,6 +678,11 @@ function feedText(){
   }
   var out=['CANDLES FROM THE FEED — real bars from the feed, and the only numbers you may quote. Nothing else has been checked and nothing else is known.',''];
   out.push('Symbol: '+FEED.symbol+(FEED.name?' ('+FEED.name+')':''));
+  if(FEED.type) out.push('The feed says this instrument is '+FEED.type+(FEED.exchange?' on '+FEED.exchange:'')+'.');
+  if(FEED.type&&FEED.type!=='FUTURE'&&meansAContract(FEED.symbol)){
+    out.push('That is NOT the contract his symbol names. The bars below belong to another market and the published contract size does not belong to them, so say that first and plainly: do not read these bars as '+baseSym(FEED.symbol)+', do not price a level off them, and ask him to load the contract instead.');
+    out.push('');
+  }
   var pv=pointValueOf(FEED.symbol);
   out.push(pv===null
     ? ('One point on '+baseSym(FEED.symbol)+' is NOT known to this page, so there is no money figure for it. Say that rather than working one out.')
@@ -707,7 +739,7 @@ function paintFeed(){
       +'<span class="last">'+esc(money(last.c))+'</span>'
       +'<span class="rng">'+esc(money(lo))+' – '+esc(money(hi))+'</span></div>';
   }
-  h+='<div class="pvline">'+pvText(FEED.symbol)+'</div>';
+  h+='<div class="pvline">'+pvText(FEED.symbol, FEED.type, FEED.name)+'</div>';
   out.innerHTML=h;
 }
 
@@ -735,7 +767,10 @@ async function loadFeed(){
     if(symEl) symEl.value=(d.symbol||sym).replace(/=F$/,'');
     paintFeed();
     var last=d.timeframes['5m']||d.timeframes['1h']||d.timeframes['15m']||d.timeframes['4h'];
-    setWhen((d.name?d.name+' — ':'')+(d.symbol||sym)+' loaded. Last bar '+((last&&last.asOf)?utcStamp(Date.parse(last.asOf)):'time unknown')+'.', false);
+    var notContract=(d.type&&d.type!=='FUTURE'&&meansAContract(d.symbol))
+      ? ' The feed says what came back is '+d.type+(d.exchange?', on '+d.exchange:'')+' — not a contract.'
+      : '';
+    setWhen((d.name?d.name+' — ':'')+(d.symbol||sym)+' loaded.'+notContract+' Last bar '+((last&&last.asOf)?utcStamp(Date.parse(last.asOf)):'time unknown')+'.', !!notContract);
   }catch(e){
     FEED=null; paintFeed();
     setWhen('The feed could not be reached. Nothing was invented in its place.', true);

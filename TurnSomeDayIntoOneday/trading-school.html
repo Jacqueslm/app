@@ -166,6 +166,7 @@ canvas{width:100%;display:block;border-radius:8px;touch-action:manipulation}
 
   <div class="tabs" id="tabs">
     <div class="tab on" data-t="lessons">Lessons</div>
+    <div class="tab" data-t="risk">Risk</div>
     <div class="tab" data-t="tests">Tests</div>
     <div class="tab" data-t="drills">Drills</div>
     <div class="tab" data-t="backtest">Backtest</div>
@@ -617,7 +618,7 @@ var SCHOOL = SW_META.map(function(m){
 var KEY = "tsid-school-v1";
 
 function blank(){
-  return {v:1, lessons:{}, q:{}, t:{}, d:{}, dn:0, seen:0,
+  return {v:1, lessons:{}, q:{}, t:{}, d:{}, dn:0, seen:0, rr:{done:0, one:0, right:0, won:0, lost:0, left:0},
           bt:{runs:0, trades:0, wins:0, r:0, best:0, worst:0, dd:0}};
 }
 var S = blank();
@@ -639,6 +640,10 @@ function allLessons(){
   var out = [];
   for(var i=0;i<SCHOOL.length;i++)
     for(var j=0;j<SCHOOL[i].lessons.length;j++) out.push(SCHOOL[i].lessons[j]);
+  /* The risk strand is not a level — it is a thread of its own, reachable from
+     its own tab — but its lessons count as lessons everywhere else: the progress
+     total, the checks, and the chain the "next" button walks. */
+  for(var k=0;k<SW_RISK.length;k++) out.push(SW_RISK[k]);
   return out;
 }
 function lessonById(id){
@@ -667,7 +672,7 @@ function schoolStats(s){
   var testCorrect = 0;
   for(var k in (s.t || {})) testCorrect += (s.t[k] && s.t[k].best) || 0;
   var drillCorrect = Object.keys(s.d || {}).length;
-  var xp = done*10 + quiz*5 + testCorrect*10 + drillCorrect*5 + (s.dn||0)*15;
+  var xp = done*10 + quiz*5 + testCorrect*10 + drillCorrect*5 + (s.dn||0)*15 + ((s.rr && s.rr.done)||0)*15;
   return {total:total, done:done, quiz:quiz, testCorrect:testCorrect,
           drillCorrect:drillCorrect, drills:s.dn||0, xp:xp, rank:schoolRank(xp)};
 }
@@ -1151,15 +1156,7 @@ function viewLessons(){
     if(!l) { UI.lesson = null; return viewLessons() }
     var h = '<div class="sec">'
       + '<button class="txtbtn ghost" data-a="toLevel" data-id="' + levelOf(l.id) + '">&larr; Level ' + levelOf(l.id) + '</button>'
-      + '<div class="sec-hd">Lesson ' + esc(l.id) + '</div>'
-      + '<div class="card open"><div class="body" style="display:block;border-top:none;padding-top:0">'
-      + '<p style="font-size:1rem;font-weight:600;color:var(--tp);margin-bottom:10px">' + esc(l.t) + '</p>';
-    for(var p=0;p<l.b.length;p++) h += '<p>' + esc(l.b[p]) + '</p>';
-    h += '<div class="lbl">Keep these</div><ul class="k">';
-    for(var kk2=0; kk2<l.k.length; kk2++) h += '<li>' + esc(l.k[kk2]) + '</li>';
-    h += '</ul>';
-    h += lessonQuizHtml(l);
-    h += '</div></div>';
+      + lessonCardHtml(l);
     h += '<div class="sec" style="padding-top:6px">'
       + (S.lessons[l.id] ? '<div class="big okbox"><b>Done</b>Marked off. You can re-read it any time.</div>'
                          : '<button class="txtbtn" data-a="done" data-id="' + l.id + '">Mark this lesson done</button>')
@@ -1350,6 +1347,7 @@ function viewDrills(){
       + '</div></div>';
   }
   h += timingButton();
+  h += riskButton();
   h += '<div class="sec"><div class="cap">Drills done: ' + (S.dn||0) + ' &middot; answers right: ' + Object.keys(S.d||{}).length + '</div></div>';
   return h;
 }
@@ -1544,6 +1542,442 @@ function viewProgress(){
   return h;
 }
 
+/* The body of a lesson — its title, the paragraphs, the keep-these list and its
+   checks — written once, because two places show lessons now: a level, and the
+   risk strand. Each supplies its own way back to where it was opened from. */
+function lessonCardHtml(l){
+  var h = '<div class="sec-hd">Lesson ' + esc(l.id) + '</div>'
+    + '<div class="card open"><div class="body" style="display:block;border-top:none;padding-top:0">'
+    + '<p style="font-size:1rem;font-weight:600;color:var(--tp);margin-bottom:10px">' + esc(l.t) + '</p>';
+  for(var p=0;p<l.b.length;p++) h += '<p>' + esc(l.b[p]) + '</p>';
+  h += '<div class="lbl">Keep these</div><ul class="k">';
+  for(var kk2=0; kk2<l.k.length; kk2++) h += '<li>' + esc(l.k[kk2]) + '</li>';
+  h += '</ul>';
+  h += lessonQuizHtml(l);
+  h += '</div></div>';
+  return h;
+}
+/* ══ THE RISK STRAND ════════════════════════════════════════════════════════
+   Jacques, 19 Sep 2026: "the biggest problem I have with trading is managing risk
+   — make that a big part of my training. I prefer to take 1:1: price enters a
+   zone or a swing, I trade it right out the leg or zone."
+
+   So his method is written down as a strand of its own, six lessons and a drill,
+   and the drill is the half that matters: reading about risk changes nothing, and
+   the thing he says he loses money on is the decision made in the moment. Four of
+   its five questions are about the plan rather than the market — where the stop
+   goes, what 1R is, whether the leg pays 1:1 from this entry at all, and whether
+   the trade exists — and the fifth is the one that costs money when it is
+   answered wrong: what to do when the stop is hit and price then goes your way.
+
+   Same two house rules as every other drill on this page: the candles are made up
+   by this page, and the answers are marked against the geometry of the setup the
+   generator built, never against how the path happened to turn out afterwards.
+
+   Why the geometry is built in absolute prices rather than by drifting: a stop, a
+   1:1 target and a leg have to be exact distances for the questions to have one
+   right answer, and a drift overshoots on some seeds. Every level is pushed to a
+   target, and the numbers the drill marks are read back off the bars it drew. */
+
+var SW_RISK = [
+{id:"R1", t:"One for one, and what it costs to need it", b:[
+ "This is the method written down as a rule, because a method you cannot state is a mood. Price comes back into a zone or a swing, you take it there, the stop goes beyond the far side of that zone, and the aim is the other end of the leg or the far side of the zone. One risked for one made. The whole thing rests on one idea: the entry is the only part of a trade you choose.",
+ "The arithmetic of 1:1 is thinner than it looks. At one for one you need better than half your trades right just to stand still, because the spread, the fee and the slippage are paid on every single one of them. Half right at 1:1 is exactly nothing before costs, and a slow loss after them. What rescues a one-for-one method is not a bigger target — it is a better entry, because the entry sets the risk and the risk is what everything else is measured against."],
+ k:["Entry into the zone or swing, stop beyond the far side, aim at the other end of the leg or zone",
+    "1:1 needs better than half right, and it pays the costs on every trade",
+    "The entry is the part you control — a few points better beats a wider target"],
+ q:[
+ {q:"You take 1:1 trades and you are right half the time. Before costs, where are you?",o:["Exactly where you started","Ahead, because the wins come in first","Behind, because the losses arrive sooner"],a:0,w:"Half of 1R won and half of 1R lost is nothing at all, and then the costs come out of it."},
+ {q:"What makes a one-for-one method workable rather than a slow bleed?",o:["A better entry, taken closer to the far side of the zone","A bigger target on the trades that go well","More trades, so the average has more to work with"],a:0,w:"The entry sets the risk, and in a one-for-one trade the risk is the whole equation."}]},
+
+{id:"R2", t:"The far side of the zone is where the idea dies", b:[
+ "A zone is a band, not a line. The near side is where price arrives; the far side is where the decision the zone represents has failed. On a demand zone the far side is the low of the base — the wick that was rejected and left behind. The stop goes just beyond that: not inside the band, and not at a round number.",
+ "A stop inside the zone sits in the exact noise the trade needs to survive, because the zone is where the fight is, and the fight is where the wicks are. A stop at a round number is a stop at the price everybody else picked. Both turn a right read into a loss of a size that was never planned. And the stop is chosen before the entry, from the chart — never after it, from what feels bearable at the time."],
+ k:["The far side of the zone is the invalidation; the near side is only where price arrived",
+    "A stop inside the zone sits in the fight, which is where the wicks are",
+    "Stop first, from the chart. Size second. Never the other way round"],
+ q:[
+ {q:"You buy into a demand zone. Where does the stop belong?",o:["Just beyond the far side of the zone","Halfway down inside the zone, to lose less","A flat distance that is the same on every trade"],a:0,w:"The far side is where the idea is proved wrong, and the trade is allowed to lose down to there and no further."},
+ {q:"Why is a stop inside the zone a bad stop?",o:["It is usually too far from the entry","It sits in the noise the trade has to survive","It is more expensive than a wider one"],a:1,w:"The zone is the fight. The stop belongs past it, not in it."}]},
+
+{id:"R3", t:"Size is the number you decide", b:[
+ "Almost everything in trading is decided by the market. The size is not — it is the one number you own, and it is the only one that can end the account. It comes out of two figures you already have: what one losing trade is allowed to cost, and the distance from your entry to your stop. Size is the first divided by the second.",
+ "In points and contracts that means: points of stop, multiplied by the value of one point on the contract, multiplied by the number of contracts — and the answer is not allowed to be more than the loss you allowed yourself. If the stop is wide enough that a single contract is already too much, the honest answer is no trade on that chart, or the same structure on a smaller timeframe where the stop is tighter. Widening the stop so that a size works is how a planned loss turns into an unplanned one."],
+ k:["Size is what a loss may cost, divided by the stop distance",
+    "If the smallest size is already too much, there is no trade here",
+    "The chart gives the stop, the stop gives the size — never reversed"],
+ q:[
+ {q:"You may lose 150 on a trade and the stop is 30 points from your entry. What is the size?",o:["One unit for every 30 points of value that the contract carries","Thirty units, one per point","Whatever the margin allows, since the stop is fixed"],a:0,w:"150 divided by 30 is five units of that stop distance, and the point value of the contract turns it into contracts."},
+ {q:"The stop on this chart is so wide that one contract breaks your loss limit. What is right?",o:["Take it smaller and accept the mismatch","There is no trade here — a tighter version of it or nothing","Move the stop closer to the entry so it fits"],a:1,w:"If the smallest size is already too much, the trade does not exist. Moving the stop is how the read gets broken to fit the size."}]},
+
+{id:"R4", t:"The leg has to pay you before you are in it", b:[
+ "One for one is not a target you choose, it is a check you run before the entry. Measure the leg: from where you would enter to the other end of it, how many points are there? Then measure the risk: from your entry back through the far side of the zone. If the leg is shorter than the risk, there is no one-for-one trade at that price, and the right move is to wait for price to come to the far side of the zone — which shrinks the risk — or to leave it alone.",
+ "This is the check that does the work, because it is the one that says no. Most expensive trades are not badly read; they are taken at an entry where the leg had already been spent. Measured before the entry it is arithmetic and it costs nothing. Measured afterwards it is an excuse."],
+ k:["Measure the leg to its far end against the risk to the far side of the zone",
+    "If the leg is shorter than the risk, there is no 1:1 at that entry",
+    "Waiting for the far side of the zone is the same trade with less risk in it"],
+ q:[
+ {q:"The risk is 20 points and the leg has 12 points left to its far end. What is the trade?",o:["Take it — 12 points is still twelve points","No trade at that entry","Take it with a wider stop so the ratio works"],a:1,w:"The leg does not pay one for one from there. Either the entry improves or the trade does not happen."},
+ {q:"Price is at the near side of the zone and the leg is short. What is usually the better entry?",o:["A larger size at the same place","Waiting for price to reach the far side of the zone","Adding to it if it goes against you"],a:1,w:"A deeper entry means a smaller risk, and the same leg then pays more than one for one."}]},
+
+{id:"R5", t:"Rules that remove the decision", b:[
+ "Managing risk is not a feeling to hold on to. It is a small number of rules that were decided in a calm minute and apply in a bad one: the most you may lose in a day, the most trades you may take, and what ends the session. Two stops in a row and you are out for an hour. The daily cap is reached and the platform closes. No new entries in the last minutes of the day.",
+ "The reason is arithmetic rather than character. Two losses in a row is an ordinary thing for any method, and the trade taken straight after them is usually the one that was not a setup at all. The rules exist so that the decision is already made when you are least able to make it. A rule you can argue with in the moment is not a rule — it is a preference with good intentions."],
+ k:["Daily loss cap, trade count and what ends the day, all written before the session",
+    "Two stops in a row and you are out for an hour",
+    "A rule you can argue with in the moment is not a rule"],
+ q:[
+ {q:"You have been stopped out twice and a setup appears five minutes later. What is the rule?",o:["Take it — the setup is there and the method still holds","Stop for an hour","Take it at half size"],a:1,w:"The rule was written for exactly this moment, which is the only kind of moment it is for."},
+ {q:"When do you decide what ends your trading day?",o:["In the moment, based on how it is going","Before the session, in writing","When it feels bad enough to stop"],a:1,w:"In the moment you are the least reliable judge of whether to carry on."}]},
+
+{id:"R6", t:"The record is in R, not in money", b:[
+ "A journal in money measures the account. A journal in R measures the decisions. Three columns do the work: what the setup was, whether the stop went where the plan said, and how many R the trade made or lost. After thirty trades those three columns are enough to separate a bad week from a bad method, which is a question money on its own can never answer.",
+ "And the same setup will win one week and lose the next with the same stop in the same place. That is not the method failing — that is what a one-for-one method looks like at small samples. Judge it over a hundred trades, change one thing at a time, and count the trades that followed the plan as the first number of the week rather than the last."],
+ k:["Setup, stop respected, R result — that is the journal",
+    "The same setup wins and loses; a handful of trades tells you almost nothing",
+    "Count plan-followed first, R second, money last"],
+ q:[
+ {q:"Which week tells you more?",o:["One that made money with three trades taken off plan","One that lost a little with every trade on plan","Whichever made the most"],a:1,w:"The plan-followed count is the part you control, and it is the part that compounds."},
+ {q:"The same setup won last week and lost this week. What does that mean?",o:["The method has stopped working","Nothing yet — one trade is not a sample","The setup needs another indicator on it"],a:1,w:"Single results are noise. A method is judged over many trades, not over the last one."}]}
+];
+
+/* ── the record this drill keeps ─────────────────────────────────────────────
+   Additive on the stored progress and merged like every other key, so an older
+   save on the device keeps working: blank() carries the shape, and the loader
+   fills in anything a previous version did not have. */
+function riskBlank(){ return {done:0, one:0, right:0, won:0, lost:0, left:0} }
+function riskRec(){ if(!S.rr) S.rr = riskBlank(); return S.rr }
+
+/* ── the risk drill ─────────────────────────────────────────────────────────
+   One chart, one zone, one decision. The generator decides the DIRECTION and
+   the GEOMETRY before anything is drawn, and the answers are read off that --
+   so a question here has exactly one right answer whatever the path does next.
+   The outcome is appended after the decision bar and never touches a mark. */
+function makeRiskScenario(seed){
+  var r = rng(seed), bars = [], t = 0, base = 100, i;
+  var sgn = r() < 0.5 ? 1 : -1;          /* 1 = long at a demand zone, -1 = short */
+  var pays    = r() < 0.5;               /* does the leg have a 1:1 in it at all? */
+  /* How far back into the zone price comes. A plan with no 1:1 in it has to be
+     one where the entry is deep and the leg is short — otherwise there is no
+     such plan to draw, and the leg would end up back inside the zone. */
+  var backIn  = pays ? 0.45 + r() * 0.35 : 0.7 + r() * 0.15;
+  var zOff    = 0.5 + r() * 2.5;         /* where the zone sits from the base     */
+  var zDepth  = 3.5 + r() * 11.5;        /* the zone's own depth -- this is the risk */
+  var vol     = 0.35 + r() * 0.35;       /* how ragged the made-up bars are       */
+
+  /* Every leg is pushed to a target rather than drifted, so the zone, the stop
+     and the leg's far end end up where the questions assume they are. */
+  function pushTo(target, n){
+    for(var k = 0; k < n; k++){
+      var o = base, step = (target - base) / (n - k);
+      var mv = step + (r() - 0.5) * 2 * vol, c = o + mv;
+      bars.push({t: t++, o: o, c: c,
+                 h: Math.max(o, c) + r() * vol * 0.5,
+                 l: Math.min(o, c) - r() * vol * 0.5});
+      base = c;
+    }
+  }
+
+  var origin = 100;
+  var zoneLo = origin + sgn * zOff;                  /* the far side, on the losing side */
+  var zoneHi = zoneLo + sgn * zDepth;                /* the near side, where price arrives */
+
+  /* Where the leg ends, and therefore whether a 1:1 was ever in the trade, is
+     decided here rather than left to the dice. Half the plans are given a far end
+     well past the 1:1 and half one well short of it, so "no 1:1 in it" is a real
+     answer rather than a rare accident — and it is measured off the bars that get
+     drawn, so what the drill says and what the chart shows cannot disagree. */
+  var entryAt = zoneLo + sgn * zDepth * backIn;      /* where the return arrives */
+  var riskIdeal = zDepth * backIn + 0.4;             /* the entry to the stop    */
+  var oneForOne = entryAt + sgn * riskIdeal;         /* where a 1:1 would pay    */
+  /* The leg runs away from the zone's near side, so the distance to the 1:1 is
+     taken from there and never from the far side: measured off the far side, a
+     supply zone's leg came out pointing the wrong way. */
+  var legFar = pays
+    ? oneForOne + sgn * (riskIdeal * 0.5 + 3)                    /* well past it */
+    : zoneHi + sgn * Math.abs(oneForOne - zoneHi) * 0.4;         /* clear of the zone, short of it */
+
+  /* The leg, away from the zone. The far end of it is measured off the bars that
+     were actually drawn rather than taken from legFar: the bar that lands on the
+     target carries a wick, and the wick is the end of the leg. */
+  pushTo(legFar, 16);
+  var farExtreme = sgn > 0 ? -1e9 : 1e9;
+  for(i = 0; i < bars.length; i++){
+    farExtreme = sgn > 0 ? Math.max(farExtreme, bars[i].h) : Math.min(farExtreme, bars[i].l);
+  }
+  var back = entryAt;                    /* into the middle of the zone */
+  pushTo(back, 9);                       /* the return into the zone */
+  var decision = bars.length - 1;
+  var entry = bars[decision].c;
+
+  /* The plan, in numbers, straight off the bars that were drawn. */
+  var stop = zoneLo - sgn * 0.4;                 /* just beyond the far side */
+  var risk = (entry - stop) / sgn;               /* positive points at risk  */
+  var target = entry + sgn * risk;               /* the 1:1, in points       */
+  var avail = (farExtreme - entry) / sgn;        /* to the far end of the leg */
+  var oneToOne = avail >= risk;
+
+  /* The stop and the inside-the-zone stop, both of which have to sit on the
+     losing side of the entry or they are not stops at all. */
+  var inside = zoneLo + sgn * zDepth * 0.3;
+  var flat = entry - sgn * risk * 2.6;
+  function px(v){ return money(v) }
+
+  /* What follows. Appended after the decision bar, so nothing below this line
+     can reach the question being asked. The losing branch sometimes comes back
+     and goes exactly where the read said, on purpose: that is the trade that
+     makes people widen a stop, and it is question five. */
+  var won = r() < 0.5, recovered = false;
+  if(won){
+    pushTo(entry + sgn * risk * 1.5, 10);
+  }else{
+    pushTo(stop - sgn * risk * 0.25, 7);
+    recovered = r() < 0.5;
+    if(recovered) pushTo(entry + sgn * risk * 1.2, 11);
+  }
+  var end = bars[bars.length - 1].c;
+
+  var q1 = {t:"Where does your stop belong?",
+    opts:[{txt:"Just beyond the far side of the zone, at " + px(stop) + " — where the idea is proved wrong", ok:true},
+          {txt:"Inside the zone at " + px(inside) + ", to lose less when it wobbles", ok:false},
+          {txt:"A flat distance out at " + px(flat) + ", the same on every trade", ok:false}],
+    say:{yes:"The far side of the zone is where the idea dies, and that distance is the whole risk — it is not something to shrink after the entry.",
+         no:"The stop belongs just beyond the far side of the zone, at " + px(stop) + ". Inside the zone it sits in the noise the trade has to survive, and a flat distance ignores the chart entirely."}};
+
+  var q2 = {t:"What is 1R on this trade, in points?",
+    opts:[{txt:px(risk) + " points — your entry back through the far side of the zone", ok:true},
+          {txt:px(risk * 0.5) + " points — stopping at the middle of the zone, so a loss costs less", ok:false},
+          {txt:px(risk * 2) + " points — out past the next zone, so ordinary noise cannot reach it", ok:false}],
+    say:{yes:"1R is the distance from the entry to the stop: " + px(entry) + " down to " + px(stop) + ", which is " + px(risk) + " points. Everything else on the ticket is measured against it.",
+         no:"1R is the entry to the stop — " + px(entry) + " to " + px(stop) + ", which is " + px(risk) + " points. Halving it means putting the stop inside the zone; doubling it means a loss twice the size of the one the plan allowed."}};
+
+  var q3 = {t:"Does this leg pay 1:1 from this entry?",
+    opts:[{txt:"Yes — there is " + px(avail) + " to the far end of the leg against a risk of " + px(risk), ok:oneToOne},
+          {txt:"No — the leg ends " + px(avail) + " from here, short of the " + px(risk) + " at risk", ok:!oneToOne},
+          {txt:"It does not matter — take it and manage it from there", ok:false}],
+    say:{yes:"There is " + px(avail) + " to the far end of the leg against " + px(risk) + " at risk, so a one-for-one is in the trade from this entry.",
+         no:"The far end of the leg is " + px(avail) + " away against " + px(risk) + " at risk. The leg does not pay one for one from here, which is arithmetic rather than opinion."}};
+
+  var q4 = {t:"So what do you do at this bar?",
+    opts:[{txt:"Take it, stop beyond the zone, the 1:1 as the plan, size from the stop distance", ok:oneToOne},
+          {txt:"Leave it — the leg does not pay 1:1 from this entry", ok:!oneToOne},
+          {txt:"Take it anyway at half size", ok:false}],
+    say:{yes:"Taken, with the stop past the zone and the 1:1 as the plan — and the size worked out from the stop distance before anything is clicked.",
+         no:"Left alone. The leg does not pay one for one from this entry, so there is nothing here to take. What would have to change is the entry, not the target."}};
+
+  var q5 = {t:"Suppose the stop is hit and price then goes exactly where you said. What is right?",
+    opts:[{txt:"Nothing changes — the loss was the size the plan allowed and the stop was where the idea died", ok:true},
+          {txt:"Widen the stop next time so that one is survivable", ok:false},
+          {txt:"Take it again now, larger, to get it back", ok:false}],
+    say:{yes:"The stop did its job. The loss was planned, the size was planned, and the next setup is a new trade rather than a debt.",
+         no:"Neither of the other two. Widening a stop after a loss turns a planned loss into an unplanned one, and taking it again at a bigger size is the trade that ends accounts."}};
+
+  var note;
+  if(oneToOne && won){
+    note = "It ran to the 1:1 and paid. Nothing clever happened: the leg had the distance in it before you were in the trade, which is the whole reason the leg is measured first.";
+  }else if(oneToOne && !won && recovered){
+    note = "The stop was hit and then price went exactly where the read said — the trade that makes people widen stops. The loss was " + px(risk) + " points, which is what the plan allowed it to be, and the setup that follows a stop is a new trade.";
+  }else if(oneToOne && !won){
+    note = "It stopped and carried on against the read. Same setup, same stop, same size, a different week — and this is the trade the daily cap and the two-loss rule exist for.";
+  }else if(won){
+    note = "It went without you. The leg ended " + px(avail) + " from the entry against a risk of " + px(risk) + ", so a one-for-one was never there to take at that price. Not taking it cost you nothing, which is the decision that costs nothing and feels as though it did.";
+  }else{
+    note = "No 1:1 in it and it stopped on the way down. The check kept you out of a trade where the arithmetic was never there, and that is what the check is for.";
+  }
+
+  return {seed:seed, dir:sgn > 0 ? "long" : "short", bars:bars, decision:decision,
+          zoneLo:zoneLo, zoneHi:zoneHi, entry:entry, stop:stop, risk:risk,
+          target:target, avail:avail, oneToOne:oneToOne, won:won, recovered:recovered,
+          end:end, takenRight:false, note:note,
+          questions:[q1, q2, q3, q4, q5]};
+}
+
+function newRiskDrill(seed){
+  UI.risk = makeRiskScenario(seed);
+  UI.rq = 0; UI.rans = null; UI.rread = {}; UI.rrevealed = false;
+}
+
+function riskLesson(id){
+  for(var i = 0; i < SW_RISK.length; i++) if(SW_RISK[i].id === id) return SW_RISK[i];
+  return null;
+}
+
+/* The risk drill, drawn. Only the zone is marked while the questions are open —
+   the stop, the entry and the 1:1 are three of the answers, and drawing them
+   early would hand them over. */
+function drawRisk(cv){
+  var d = UI.risk;
+  if(!cv || !d) return;
+  var vis = d.bars.slice(0, UI.rrevealed ? d.bars.length : d.decision + 1);
+  var dim = cssv("--tm", "#888780");
+  var lines = [{p:d.zoneHi, colour:dim, label:d.dir === "long" ? "zone top" : "zone bottom"},
+               {p:d.zoneLo, colour:dim, label:d.dir === "long" ? "zone bottom" : "zone top"}];
+  if(UI.rrevealed){
+    lines.push({p:d.entry, colour:cssv("--acc", "#AFA9EC"), label:"entry", dash:[]});
+    lines.push({p:d.stop, colour:cssv("--down", "#FF6B7A"), label:"stop -1R"});
+    lines.push({p:d.target, colour:cssv("--up", "#4ADEA5"), label:"target 1R"});
+  }
+  drawChart(cv, vis, {lines:lines});
+}
+
+/* The risk tab: the drill at the top, the strand under it. The drill is first
+   because the reading is the part he already has and the planning is the part
+   he does not. */
+function viewRisk(){
+  if(UI.lesson && riskLesson(UI.lesson)) return riskLessonView(riskLesson(UI.lesson));
+  if(!UI.risk) newRiskDrill(1);
+  var d = UI.risk;
+
+  var h = '<div class="sec"><div class="big"><b>The risk drill &mdash; your method, one for one</b>'
+    + 'A zone, an entry, a stop and a leg, and five questions that are about the plan rather than the market. '
+    + 'Nothing here asks which way price is going, because that is not the part you have been losing money on.</div></div>';
+
+  h += '<div class="sec" style="padding-top:0"><div class="cap" style="margin-bottom:8px">A practice chart, made up by this page from seed '
+    + d.seed + '. ' + (d.dir === "long" ? 'A demand zone: the leg went up, and price has come back into it.'
+                                        : 'A supply zone: the leg went down, and price has rallied back into it.') + '</div>'
+    + '<div class="chartbox"><canvas id="cv" data-h="230"></canvas>'
+    + '<div class="cap">' + (UI.rrevealed
+        ? 'Now showing the entry, the stop and the 1:1 target, and the bars that followed.'
+        : 'The zone is the only thing marked. The stop, the entry and the 1:1 are three of the answers.') + '</div></div>';
+
+  h += riskQuestionsHtml(d.questions);
+
+  if(UI.rrevealed){
+    h += '<div class="big"><b>What the market did</b>' + esc(d.note)
+      + '<br><span style="color:var(--tm)">The plan: entry ' + money(d.entry) + ' &middot; stop ' + money(d.stop)
+      + ' &middot; 1R = ' + money(d.risk) + ' points &middot; 1:1 at ' + money(d.target)
+      + ' &middot; the leg ended ' + money(d.avail) + ' points out</span>'
+      + '<br><span style="color:var(--tm)">' + (d.oneToOne
+          ? (d.won ? 'That trade, taken: +1R.' : 'That trade, taken: &minus;1R, which is what the stop is for.')
+          : 'That one had no 1:1 at the entry, so there was no trade in it.') + '</span></div>'
+      + '<div class="sec" style="padding-top:0"><button class="txtbtn" data-a="newrisk">Another plan</button>'
+      + '<button class="txtbtn ghost" data-a="newdrill" style="background:var(--s1);color:var(--ts)">A reading drill instead</button></div>';
+  }else{
+    h += '<div class="sec" style="padding-top:0"><div class="cap">'
+      + 'You are marked on the plan, not on how this one turned out. Two plans can be identical and end differently &mdash; that is what fixing the risk is for.'
+      + '</div></div>';
+  }
+
+  h += riskRecordHtml();
+  h += riskLessonsHtml();
+  return h;
+}
+
+function riskRecordHtml(){
+  var rec = S.rr;
+  if(!rec || !rec.done){
+    return '<div class="sec"><div class="cap">Every risk drill you finish is added up here: how many of them had a 1:1 in them at the entry, how many you took, and what the market did to those.</div></div>';
+  }
+  return '<div class="sec"><div class="big"><b>The record so far</b>'
+    + 'Planned: ' + rec.done + ' &middot; had a 1:1 at the entry: ' + rec.one
+    + ' &middot; no 1:1, left alone: ' + rec.left
+    + '<br>Of the ones with a 1:1: target reached ' + rec.won + ', stopped out ' + rec.lost + '.'
+    + '<br>Your take-or-leave call: right ' + rec.right + ' of ' + rec.done + '.'
+    + '<br><span style="color:var(--tm)">A record of this practice and nothing else. The candles are made up by '
+    + 'this page, and none of it is a record of trading.</span></div></div>';
+}
+
+/* The strand's six lessons, listed the way a level lists its own. */
+function riskLessonsHtml(){
+  var h = '<div class="sec"><div class="sec-hd">The risk strand &middot; six lessons</div>'
+    + '<div class="cap" style="margin-bottom:10px">His method, from the entry to the journal: one risked for one made, '
+    + 'the stop beyond the zone, the size from the stop, and the rules that decide when the day is over.</div>';
+  for(var i = 0; i < SW_RISK.length; i++){
+    var l = SW_RISK[i], done = !!S.lessons[l.id];
+    var got = 0, tot = l.q.length;
+    for(var qi = 0; qi < tot; qi++) if(S.q[l.id + ":" + qi]) got++;
+    h += '<div class="card"><div class="row" data-a="lesson" data-id="' + l.id + '">'
+      + '<span class="num' + (done ? " on" : "") + '">' + (done ? "&#10003;" : i + 1) + '</span>'
+      + '<div class="row-txt"><b>' + esc(l.t) + '</b><span>' + esc(l.b[0].slice(0, 92)) + '&hellip;</span>'
+      + '<span style="margin-top:5px;color:' + (got === tot ? "var(--up)" : "var(--tm)") + '">'
+      + (got === tot ? "Checked: both right" : got + " of " + tot + " checks right") + '</span></div>'
+      + '<span class="chev">&#8250;</span></div></div>';
+  }
+  h += '<div class="sec" style="padding:0"><button class="txtbtn" data-a="lesson" data-id="' + SW_RISK[0].id + '">Start at the first one</button></div>';
+  h += '</div>';
+  return h;
+}
+
+function riskLessonView(l){
+  var h = '<div class="sec">'
+    + '<button class="txtbtn ghost" data-a="toLevels">&larr; Risk</button>'
+    + lessonCardHtml(l)
+    + '<div class="sec" style="padding-top:6px">'
+    + (S.lessons[l.id] ? '<div class="big okbox"><b>Done</b>Marked off. You can re-read it any time.</div>'
+                       : '<button class="txtbtn" data-a="done" data-id="' + l.id + '">Mark this lesson done</button>')
+    + '</div>';
+  for(var i = 0; i < SW_RISK.length; i++){
+    if(SW_RISK[i].id === l.id && i + 1 < SW_RISK.length){
+      h += '<div class="sec" style="padding-top:0"><button class="txtbtn" data-a="lesson" data-id="'
+        + SW_RISK[i + 1].id + '">Next: ' + esc(SW_RISK[i + 1].t) + ' &rarr;</button></div>';
+    }
+  }
+  return h + '</div>';
+}
+
+/* The risk drill's own question list. Deliberately not the reading drill's
+   renderer: the risk strand keeps its own state, so opening a risk drill cannot
+   half-overwrite a reading drill that is part answered, and the whole strand
+   stays in one block that can be found, read and replaced in one piece. */
+function riskQuestionsHtml(questions){
+  var h = '';
+  for(var i = 0; i < questions.length; i++){
+    var answered = UI.rans && UI.rans.q === i;
+    if(i > UI.rq && !(UI.rans && UI.rans.q > i)) continue;
+    h += '<div class="card"><div class="body" style="display:block;border-top:none;padding-top:14px">'
+      + '<div class="q" style="margin-top:0;padding-top:0;border-top:none"><div class="q-txt">'
+      + (i + 1) + '. ' + esc(questions[i].t) + '</div><div class="opts">';
+    for(var o = 0; o < questions[i].opts.length; o++){
+      var op = questions[i].opts[o], cls = "opt";
+      if(answered){
+        if(op.ok) cls += " right";
+        else if(UI.rans.pick === o) cls += " wrong";
+      }
+      h += '<button class="' + cls + '" data-a="riskans" data-q="' + i + '" data-o="' + o + '"'
+        + (answered ? ' disabled' : '') + '>' + esc(op.txt) + '</button>';
+    }
+    if(answered) h += '</div><div class="why on">'
+      + (UI.rread[i] ? UI.rread[i] + '<br>' : '') + '</div></div>';
+    h += '</div></div></div>';
+  }
+  return h;
+}
+
+/* Marked against the geometry the generator built, exactly like the other two
+   drills. The path never decides whether an answer was right. */
+function riskAnswer(qi, oi){
+  var d = UI.risk;
+  if(!d || !d.questions[qi]) return;
+  var q = d.questions[qi], right = !!(q.opts[oi] && q.opts[oi].ok);
+
+  UI.rans = {q:qi, pick:oi};
+  UI.rread = UI.rread || {};
+  UI.rread[qi] = "<b>" + (right ? "Right." : "Not quite.") + "</b> " + (right ? q.say.yes : q.say.no);
+
+  if(qi === 3) d.takenRight = right;
+  var key = "r" + d.seed + ":" + qi;
+  if(right && !S.d[key]){ S.d[key] = 1; save() }
+
+  if(qi === d.questions.length - 1){
+    var rec = riskRec();
+    rec.done += 1;
+    if(d.oneToOne) rec.one += 1; else rec.left += 1;
+    if(d.takenRight) rec.right += 1;
+    if(d.oneToOne && d.won) rec.won += 1;
+    if(d.oneToOne && !d.won) rec.lost += 1;
+    UI.rrevealed = true;
+    save();
+  }
+  UI.rq = qi + 1;
+  paint();
+}
+
+/* The way in from the reading drills, so the strand is not a tab somebody has to
+   find. */
+function riskButton(){
+  return '<div class="sec" style="padding:0"><button class="txtbtn" data-a="gorisk">'
+    + 'The risk drill &mdash; your stop, your size, one for one</button></div>';
+}
 /* ══ PAINT ══════════════════════════════════════════════════════════════════ */
 function paint(){
   if(!VIEW) return;
@@ -1558,6 +1992,7 @@ function paint(){
   var html;
   if(UI.tab === "tests") html = viewTests();
   else if(UI.tab === "drills") html = viewDrills();
+  else if(UI.tab === "risk") html = viewRisk();
   else if(UI.tab === "backtest") html = viewBacktest();
   else if(UI.tab === "progress") html = viewProgress();
   else html = viewLessons();
@@ -1582,6 +2017,8 @@ function paint(){
         }
         drawChart(cv, vis, {lines:lines});
       }
+    } else if(UI.tab === "risk"){
+      drawRisk(cv);
     } else if(UI.tab === "backtest" && UI.bt){
       var b = UI.bt, lines2 = [];
       if(b.pos){
@@ -1659,6 +2096,9 @@ if(VIEW){
     else if(a === "dans"){ drillAnswer(parseInt(el.getAttribute("data-q"),10), parseInt(el.getAttribute("data-o"),10)) }
     else if(a === "newdrill"){ newDrill((UI.drill ? UI.drill.seed : 0) + 1); paint() }
     else if(a === "newtiming"){ newTimingDrill(((UI.drill && UI.drill.seed) || 0) + 3); paint() }
+    else if(a === "riskans"){ riskAnswer(parseInt(el.getAttribute("data-q"),10), parseInt(el.getAttribute("data-o"),10)) }
+    else if(a === "newrisk"){ newRiskDrill(((UI.risk && UI.risk.seed) || 0) + 5); paint() }
+    else if(a === "gorisk"){ toTab("risk"); window.scrollTo(0,0) }
     else if(a === "btr"){ UI.bt.atrMult = parseFloat(el.getAttribute("data-v")); paint() }
     else if(a === "btt"){ UI.bt.rr = parseFloat(el.getAttribute("data-v")); paint() }
     else if(a === "btlong"){ btOpen(1); paint() }
@@ -1699,6 +2139,10 @@ var ASK_SYS=[
 "4. Never suggest risking more, sizing up, using leverage, or doubling down to recover a loss. If he is talking about winning money back, name that plainly and talk about the rule instead.",
 "5. Never tell him he cannot learn this, that he is too late, or that he is finished. The mistakes he is making are the ordinary ones and they are learnable.",
 "6. Never mention money, pricing, subscriptions or the business behind anything.",
+"",
+"HIS METHOD, AND IT IS THE PART THAT COSTS HIM: one risked for one made. Price enters a zone or a swing, the stop goes beyond the far side of it — the far side is where the idea dies — the target is the same distance again from the entry, and the size comes off that stop distance and never off how confident the setup feels.",
+"When the leg in front of him is shorter than the risk he would be taking, that is arithmetic and you say it plainly: from that entry the trade does not pay one for one. Do not widen the target to make it fit and do not talk him into half size.",
+"A stop that was hit was a loss the plan already allowed. Never suggest moving a stop, taking it again larger, or getting it back — and when he is reviewing a trade, the stop goes where his setup says the stop goes, not where it would have survived.",
 "",
 "HOW YOU ANSWER",
 "- Short and concrete. Four to eight sentences, or a short list. No headings, no emoji.",

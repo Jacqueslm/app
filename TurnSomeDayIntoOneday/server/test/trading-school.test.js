@@ -546,6 +546,262 @@ test('an answer cannot put markup on the page', async () => {
   assert.match(shown, /&lt;img/);
 });
 
+// ── the risk strand ─────────────────────────────────────────────────────────
+// Jacques, 19 Sep 2026: "the biggest problem I have with trading is managing
+// risk — make that a big part of my training. I prefer to take 1:1: price enters
+// a zone or a swing, I trade it right out the leg or zone."
+//
+// So the strand is his method, and the drill is the half that has to work. What
+// is checked here is that the drill is DECIDABLE — every question marked against
+// the geometry the generator built, so the path can never mark it — and that its
+// numbers are read off the bars it drew rather than written by hand.
+
+test('the risk strand is six whole lessons, and every answer index lines up', () => {
+  assert.strictEqual(S.SW_RISK.length, 6);
+  assert.strictEqual(S.SW_RISK[0].id, 'R1');
+  for (const l of S.SW_RISK) {
+    assert.ok(/^R[1-6]$/.test(l.id), `unexpected id ${l.id}`);
+    assert.ok(l.t.length >= 3, `${l.id} has no title`);
+    assert.ok(l.b.length >= 2, `${l.id} needs more than one paragraph`);
+    assert.ok(l.k.length >= 3, `${l.id} needs at least three key points`);
+    assert.ok(l.q.length >= 2, `${l.id} needs at least two checks`);
+    for (const q of l.q) {
+      assert.ok(q.o.length >= 2, `${l.id}: a question with one option`);
+      assert.ok(Number.isInteger(q.a) && q.a >= 0 && q.a < q.o.length, `${l.id}: answer index outside the options`);
+      assert.strictEqual(new Set(q.o).size, q.o.length, `${l.id}: duplicate options`);
+      assert.ok(q.w.length > 10, `${l.id}: a question with no reason given`);
+    }
+  }
+
+  // The strand's lessons count as lessons everywhere else: the progress total,
+  // the checks, and the chain the "next" button walks.
+  const all = S.allLessons();
+  assert.strictEqual(all.length, 46 + 6, 'the six levels and the risk strand');
+  for (const l of S.SW_RISK) assert.ok(all.some((x) => x.id === l.id), `${l.id} is not in the lesson list`);
+  assert.strictEqual(S.schoolStats().total, 52);
+});
+
+test('the risk drill is decidable: every number in it comes off the bars it drew', () => {
+  const dirs = new Set(), answers = new Set();
+  let paid = 0;
+  for (let seed = 1; seed <= 80; seed++) {
+    const d = S.makeRiskScenario(seed);
+    dirs.add(d.dir);
+    answers.add(d.oneToOne ? 'yes' : 'no');
+    if (d.oneToOne) paid++;
+
+    assert.ok(d.bars.length > 30, `seed ${seed}: too few bars`);
+    assert.ok(d.decision > 20, `seed ${seed}: decides too early`);
+    assert.ok(d.decision < d.bars.length - 4, `seed ${seed}: the outcome is drawn on the same screen as the decision`);
+    for (const b of d.bars) {
+      assert.ok([b.o, b.h, b.l, b.c].every(Number.isFinite), `seed ${seed}: a broken candle`);
+      assert.ok(b.h >= Math.max(b.o, b.c) - 1e-9 && b.l <= Math.min(b.o, b.c) + 1e-9,
+        `seed ${seed}: high or low inside the body`);
+    }
+
+    // Five questions, one right answer each, and the trade-decision pair is the
+    // one that has to sit on the geometry: exactly one of take/leave is right.
+    assert.strictEqual(d.questions.length, 5, `seed ${seed}: five questions`);
+    for (const q of d.questions) {
+      assert.strictEqual(q.opts.filter((o) => o.ok).length, 1,
+        `seed ${seed}: a question with ${q.opts.filter((o) => o.ok).length} right answers`);
+      assert.ok(q.say && q.say.yes.length > 20 && q.say.no.length > 20,
+        `seed ${seed}: a question with no reason given`);
+    }
+    assert.ok(d.questions[3].opts[0].ok === d.oneToOne && d.questions[3].opts[1].ok === !d.oneToOne,
+      `seed ${seed}: the take-or-leave question does not follow the geometry`);
+
+    // The numbers. Risk is the entry to the stop, the stop is beyond the far side
+    // of the zone, and the 1:1 target is the risk measured the other way.
+    const risk = Math.abs(d.entry - d.stop);
+    assert.ok(Math.abs(risk - d.risk) < 0.02, `seed ${seed}: 1R is not the entry-to-stop distance`);
+    assert.ok(d.risk > 0, `seed ${seed}: no risk at all`);
+    assert.ok(Math.abs(d.target - (d.entry + (d.dir === 'long' ? d.risk : -d.risk))) < 0.02,
+      `seed ${seed}: the 1:1 is not one risk away from the entry`);
+    if (d.dir === 'long') assert.ok(d.stop < d.zoneLo - 1e-9, `seed ${seed}: the long stop is not beyond the far side of the zone`);
+    else assert.ok(d.stop > d.zoneHi + 1e-9, `seed ${seed}: the short stop is not beyond the far side of the zone`);
+    assert.ok(d.avail > 0, `seed ${seed}: the leg has no room in it`);
+    assert.strictEqual(d.oneToOne, d.avail >= d.risk - 1e-9,
+      `seed ${seed}: the 1:1 answer does not match the leg`);
+
+    // The picture has to be a picture. The leg ends outside the zone on the
+    // winning side in both cases — a leg that stops inside the zone is not a leg,
+    // and building the no-1:1 case off the entry rather than off the zone drew
+    // exactly that.
+    const legEnd = d.dir === 'long'
+      ? Math.max(...d.bars.slice(0, d.decision + 1).map((b) => b.h))
+      : Math.min(...d.bars.slice(0, d.decision + 1).map((b) => b.l));
+    if (d.dir === 'long') assert.ok(legEnd > d.zoneHi, `seed ${seed}: the leg never cleared the zone`);
+    else assert.ok(legEnd < d.zoneLo, `seed ${seed}: the leg never cleared the zone`);
+
+    // Every stop option sits on the losing side of the entry, exactly as the
+    // reading drill's do — a stop on the winning side is not a stop.
+    for (const n of d.questions[0].opts.map((o) => Number(o.txt.match(/([0-9]+\.[0-9]+)/)[1]))) {
+      if (d.dir === 'long') assert.ok(n < d.entry, `seed ${seed}: a long stop above the entry (${n} vs ${d.entry})`);
+      else assert.ok(n > d.entry, `seed ${seed}: a short stop below the entry (${n} vs ${d.entry})`);
+    }
+
+    // And the 1R options are the three distances, in the order the why explains.
+    const rOpts = d.questions[1].opts.map((o) => Number(o.txt.match(/([0-9]+\.[0-9]+)/)[1]));
+    assert.ok(Math.abs(rOpts[0] - d.risk) < 0.02, `seed ${seed}: the right 1R is not the risk`);
+    assert.ok(Math.abs(rOpts[1] - d.risk * 0.5) < 0.02, `seed ${seed}: the half-risk option is not half`);
+    assert.ok(Math.abs(rOpts[2] - d.risk * 2) < 0.02, `seed ${seed}: the double option is not double`);
+    assert.strictEqual(new Set(rOpts).size, 3, `seed ${seed}: two of the 1R options are the same number`);
+  }
+  assert.strictEqual(dirs.size, 2, 'the strand drills both sides: a demand zone and a supply zone');
+  assert.strictEqual(answers.size, 2, 'and both answers to the 1:1 question should appear');
+  // A real mix, not a one-in-fifty accident. Left to the dice, the leg almost
+  // always reached the 1:1 and "leave it" was a question he would never see
+  // twice — which made the drill teach taking every trade it showed him.
+  assert.ok(paid >= 15 && paid <= 65,
+    `a leg that pays one for one should be an ordinary answer, not ${paid} of 80`);
+});
+
+test('the same seed always draws the same risk chart, and the path never marks it', () => {
+  const a = S.makeRiskScenario(11), b = S.makeRiskScenario(11);
+  assert.deepStrictEqual(a.bars.map((x) => x.c), b.bars.map((x) => x.c));
+  assert.strictEqual(a.oneToOne, b.oneToOne, 'the geometry is decided before the bars are drawn');
+  // The questions are settled before the outcome exists, so asking the same seed
+  // twice cannot produce two different right answers.
+  assert.deepStrictEqual(a.questions.map((q) => q.opts.map((o) => o.ok)),
+    b.questions.map((q) => q.opts.map((o) => o.ok)));
+});
+
+test('the risk drill, driven: the plan marks right, then the market is revealed', () => {
+  click(S, 'tabs', { 'data-t': 'risk' });
+  const view = page.els.get('view');
+  assert.match(view.innerHTML, /The risk drill/, 'the strand should be on its own tab');
+  assert.match(view.innerHTML, /The risk strand &middot; six lessons/, 'with its lessons under it');
+  assert.match(view.innerHTML, /id="cv"/, 'and the chart');
+  assert.match(view.innerHTML, /The zone is the only thing marked/, 'with nothing but the zone drawn');
+  assert.ok(!/Where does your stop belong\?[\s\S]*What is 1R/.test(view.innerHTML),
+    'one question at a time — the 1R question waits for the stop question');
+
+  const d = S.UI.risk;
+  assert.ok(d && d.questions.length === 5, 'a drill should have been dealt');
+  // The page keeps its progress on one state object, so the record is read where
+  // the page writes it: S.S is that object, S is the whole page.
+  const rec0 = { ...S.S.rr };
+  for (let i = 0; i < 5; i++) {
+    const right = d.questions[i].opts.findIndex((o) => o.ok);
+    click(S, 'view', { 'data-a': 'riskans', 'data-q': i, 'data-o': right });
+  }
+  const html = page.els.get('view').innerHTML;
+  assert.match(html, /What the market did/, 'the outcome is revealed after the last answer');
+  assert.ok(html.includes(d.note.slice(0, 40)), 'with the note for that plan');
+  assert.match(html, /The plan: entry/, 'and the numbers the trade was made of');
+  assert.match(html, /had a 1:1 at the entry: /, 'and the record');
+  assert.match(page.els.get('view').innerHTML, /Right\./, 'the right answers were marked right');
+
+  assert.strictEqual(S.UI.rq, 5, 'and the drill moved on past every question');
+  const rec = S.S.rr;
+  assert.ok(rec, 'finishing a plan records it on the saved state');
+  assert.strictEqual(rec.done - rec0.done, 1, 'one plan recorded');
+  assert.strictEqual(rec.right - rec0.right, 1, 'the take-or-leave call recorded');
+  assert.strictEqual((rec.one - rec0.one) + (rec.left - rec0.left), 1, 'and whether it had a 1:1 in it');
+  assert.strictEqual((rec.won - rec0.won) + (rec.lost - rec0.lost), rec.one - rec0.one,
+    'the outcome counted only for the ones with a 1:1');
+
+  // Another plan, and a wrong answer on the take-or-leave question is marked
+  // wrong and explained rather than silently skipped.
+  click(S, 'view', { 'data-a': 'newrisk' });
+  const d2 = S.UI.risk;
+  assert.notStrictEqual(d2.seed, d.seed, 'a new plan should be a new chart');
+  assert.ok(!/What the market did/.test(page.els.get('view').innerHTML), 'and the reveal is put away');
+  click(S, 'view', { 'data-a': 'riskans', 'data-q': 0, 'data-o': 0 });
+  assert.match(page.els.get('view').innerHTML, /class="opt right"|class="opt wrong"/, 'answered');
+});
+
+test('a risk drill cannot half-overwrite a reading drill, or the other way round', () => {
+  // The two drills keep their own state on purpose. Sharing it left one tab's
+  // answers marked against the other tab's chart. A fresh reading drill is dealt
+  // here rather than borrowed from an earlier test, so this says what it means
+  // whatever ran before it.
+  click(S, 'tabs', { 'data-t': 'drills' });
+  click(S, 'view', { 'data-a': 'newdrill' });
+  const opened = S.UI.drill;
+  click(S, 'view', { 'data-a': 'dans', 'data-q': 0, 'data-o': opened.read });
+  const readAt = S.UI.q;
+  assert.strictEqual(readAt, 1, 'the reading drill is one question in');
+
+  click(S, 'tabs', { 'data-t': 'risk' });
+  const risk = S.UI.risk;
+  click(S, 'view', { 'data-a': 'riskans', 'data-q': 0, 'data-o': 2 });
+  assert.strictEqual(S.UI.rq, 1, 'the risk drill moved on by itself');
+
+  click(S, 'tabs', { 'data-t': 'drills' });
+  const back = page.els.get('view').innerHTML;
+  assert.match(back, /So what do you do at the last bar\?/, 'the reading drill is still where it was');
+  assert.match(back, /class="opt right"/, 'with its answer still marked');
+  assert.strictEqual(S.UI.drill.seed, opened.seed, 'and the same chart');
+  assert.strictEqual(S.UI.q, readAt, 'and the risk answer did not walk it on');
+
+  click(S, 'tabs', { 'data-t': 'risk' });
+  assert.strictEqual(S.UI.risk.seed, risk.seed, 'and the risk plan is still the one that was dealt');
+  assert.match(page.els.get('view').innerHTML, /class="opt (right|wrong)"/, 'with its own answer marked');
+});
+
+test('the risk lessons open, mark and count like every other lesson', () => {
+  click(S, 'tabs', { 'data-t': 'risk' });
+  click(S, 'view', { 'data-a': 'lesson', 'data-id': 'R1' });
+  const view = page.els.get('view');
+  assert.match(view.innerHTML, /Lesson R1/, 'the strand\'s own lesson');
+  assert.match(view.innerHTML, /Entry into the zone or swing, stop beyond the far side/, 'its key points');
+
+  const xpBefore = page.els.get('xp').textContent;
+  click(S, 'view', { 'data-a': 'q', 'data-key': 'R1:0', 'data-o': 0 });
+  assert.match(view.innerHTML, /class="opt right"/, 'a right answer is marked');
+  assert.notStrictEqual(page.els.get('xp').textContent, xpBefore, 'and earns XP like any other check');
+
+  const doneBefore = S.schoolStats().done;
+  click(S, 'view', { 'data-a': 'done', 'data-id': 'R1' });
+  assert.match(page.els.get('view').innerHTML, /Next: The far side of the zone/, 'the strand walks on to the next');
+  assert.strictEqual(S.schoolStats().done, doneBefore + 1, 'and the lesson is counted as done');
+
+  click(S, 'view', { 'data-a': 'toLevels' });
+  assert.match(page.els.get('view').innerHTML, /The risk strand/, 'back to the strand, not to the levels');
+});
+
+test('the teacher inside the school answers risk in his own method', () => {
+  // The strand teaches it and the drill marks it. If the ask box does not carry
+  // it too, the answer he gets back is generalities while the page is marking
+  // him on one risked for one made.
+  for (const rule of [
+    /one risked for one made/,
+    /the stop goes beyond the far side of it/,
+    /does not pay one for one/,
+    /Never suggest moving a stop/,
+  ]) assert.match(S.ASK_SYS, rule);
+});
+
+test('the risk strand promises nothing either', () => {
+  // The same rule the rest of the school is held to, over the strand's own
+  // teaching: its lessons, its questions and the why it gives, and the notes the
+  // drill writes about how a plan turned out.
+  const teaching = [];
+  for (const l of S.SW_RISK) {
+    teaching.push(l.t, ...l.b, ...l.k);
+    for (const q of l.q) teaching.push(q.q, q.w, ...q.o);
+  }
+  for (let seed = 1; seed <= 40; seed++) {
+    const d = S.makeRiskScenario(seed);
+    teaching.push(d.note);
+    for (const q of d.questions) {
+      teaching.push(q.t, q.say.yes, q.say.no);
+      for (const o of q.opts) teaching.push(o.txt);
+    }
+  }
+  const text = teaching.join('\n').toLowerCase();
+  for (const banned of ['risk-free', 'risk free', 'sure thing', 'surefire', 'will make you money',
+                        'always works', "can't lose", 'cannot lose', 'get rich', 'never loses',
+                        'no risk', 'easy money']) {
+    assert.ok(!text.includes(banned), `the risk strand says "${banned}"`);
+  }
+  for (const re of [/guarantee\w*\s+(a\s+)?(profit|return|win|income|money)/i, /guarantees?\s+(you|that you)/i]) {
+    assert.ok(!re.test(text), `the risk strand promises with: ${re}`);
+  }
+});
+
 // ── the door ────────────────────────────────────────────────────────────────
 
 test('the school is behind the door, at both of its addresses', () => {

@@ -423,16 +423,18 @@ if markInsides and inside
 // ------------------------------------------------------------------- the read
 // The four states, the level, and the checklist - his rules as numbers.
 //
-// The frame is read off CLOSED candles of whatever frame you set below - 1h, 4h,
-// a day - not off a timeframe this script chose for you. A poke above the level
-// with no close above it on that frame is the grab, and it changes nothing. This
-// section is self-contained: it reads nothing from the halves above it and can
-// sit at the very end of the file.
-f_tfCode(string tf) =>
-    tf == "15m" ? "15" : tf == "30m" ? "30" : tf == "1h" ? "60" : tf == "2h" ? "120" : tf == "4h" ? "240" : "1D"
-
-frameTf  = input.string("1h", "Frame (sets the level)", options=["15m", "30m", "1h", "2h", "4h", "1D"], group="The read")
-frameTfCode = f_tfCode(frameTf)
+// The frame is read off CLOSED candles of the frame set below - 1 hour by
+// default - not off a timeframe this script chose for you. A poke above the
+// level with no close above it on that frame is the grab, and it changes
+// nothing. This section is self-contained: it reads nothing from the halves
+// above it and can sit at the very end of the file.
+//
+// The frame must come from input.timeframe and never from a helper of our own:
+// request.security wants a simple string, and a function hands back a series, so
+// a mapped code makes the whole tuple line fail to compile with an error about
+// the left-hand side - a message that names the wrong end of the line.
+frameTf  = input.timeframe("60", "Frame (sets the level)", group="The read")
+frameTfName = frameTf == "15" ? "15m" : frameTf == "30" ? "30m" : frameTf == "60" ? "1h" : frameTf == "120" ? "2h" : frameTf == "240" ? "4h" : frameTf == "1D" ? "1D" : frameTf
 frameLen = input.int(2, "Frame swing length", minval=2, maxval=20, group="The read")
 smallTf  = input.timeframe("15", "Small chart", group="The read")
 smallLen = input.int(3, "Small chart swing length", minval=2, maxval=20, group="The read")
@@ -443,7 +445,7 @@ readSize = input.string("huge", "Table text", options=["tiny", "small", "normal"
 
 readText = readSize == "tiny" ? size.tiny : readSize == "small" ? size.small : readSize == "normal" ? size.normal : readSize == "large" ? size.large : size.huge
 
-[f4hPh, f4hPhT, f4hPl, f4hPlT, f4hClose] = request.security(syminfo.tickerid, frameTfCode, [f_phVal(frameLen), f_phTok(frameLen), f_plVal(frameLen), f_plTok(frameLen), close[1]], lookahead=barmerge.lookahead_off)
+[f4hPh, f4hPhT, f4hPl, f4hPlT, f4hClose] = request.security(syminfo.tickerid, frameTf, [f_phVal(frameLen), f_phTok(frameLen), f_plVal(frameLen), f_plTok(frameLen), close[1]], lookahead=barmerge.lookahead_off)
 
 var float fHigh      = na
 var float fPrevHigh  = na
@@ -543,7 +545,7 @@ var table dash = table.new(position.top_right, 2, 10, border_width=1, frame_widt
 
 if showRead and barstate.islast
     table.cell(dash, 0, 0, "Frame", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 0, frameTf, text_size=readText, text_color=color.white)
+    table.cell(dash, 1, 0, frameTfName, text_size=readText, text_color=color.white)
     table.cell(dash, 0, 1, "State", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 1, stateName, text_size=readText, text_color=color.white)
     table.cell(dash, 0, 2, "The level", text_size=readText, text_color=color.new(color.white, 45))

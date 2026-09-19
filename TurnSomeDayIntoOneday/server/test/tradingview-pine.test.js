@@ -166,6 +166,28 @@ test('a request.security tuple hands back as many values as the line claims', ()
   }
 });
 
+test('a request.security timeframe is simple, and never worked out by the script', () => {
+  // 19 Sep 2026. The script he pasted into the Pine editor would not compile,
+  // and TradingView pointed at the left-hand side of the line: "Cannot assign a
+  // variable to a tuple." The fault was on the right - the timeframe was the
+  // return of a small mapping function, and request.security wants a simple
+  // string while a function hands back a series. Only a literal or an
+  // input.timeframe will do, and he is the one who pays for getting it wrong.
+  const text = body().join('\n');
+  const fromInput = new Set();
+  for (const m of text.matchAll(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*input\.timeframe\(/gm)) fromInput.add(m[1]);
+  assert.ok(fromInput.size >= 2, 'found the timeframe inputs');
+  const calls = [...text.matchAll(/request\.security\(\s*syminfo\.tickerid\s*,\s*([^,]+),/g)];
+  assert.ok(calls.length >= 4, 'found the higher timeframes');
+  for (const call of calls) {
+    const tf = call[1].trim();
+    assert.ok(
+      tf === '""' || fromInput.has(tf),
+      `request.security is handed "${tf}" as its timeframe - that has to be a literal or an input.timeframe, or the line cannot compile`
+    );
+  }
+});
+
 test('every input is filed under a group', () => {
   // His settings panel is nine inputs deep already; an input with no group
   // lands in a nameless pile at the bottom.

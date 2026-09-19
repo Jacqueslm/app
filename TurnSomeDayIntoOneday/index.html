@@ -675,6 +675,40 @@ body.g2-fighting .app{overflow:visible}
 .g2-ride{font-size:4rem;text-align:center;line-height:1.1;margin:6px 0 2px}
 #gm-foot{max-width:448px;margin:10px auto 0;padding:0 16px;font-size:.66rem;letter-spacing:.06em;color:#8a93bd;text-align:center}
 @media (prefers-reduced-motion: reduce){.g2-spinner{transition-duration:.01s}.g2-photo.boss{animation:none}}
+
+/* MY SCHEDULE (19 Sep 2026) — his own times, a month calendar and an alarm that
+   rings. Its own section: reached from Tools, from the bell in the header, and
+   from Reminder Settings. .sch-* so nothing here can collide with the rest. */
+.sch-next{display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:12px}
+.sch-next .sch-time{font-size:1.0625rem}
+.sch-time{font-variant-numeric:tabular-nums;font-weight:650;color:var(--tp);font-size:.9375rem;min-width:76px}
+.sch-what{flex:1;min-width:0;font-size:.9375rem;color:var(--tp);line-height:1.35}
+.sch-what p{margin:0;font-weight:650;font-size:1rem;color:var(--tp)}
+.sch-what span{display:block;font-size:.75rem;color:var(--tm);margin-top:2px}
+.sch-meta{font-size:.75rem;color:var(--tm);margin-top:2px}
+.sch-row{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.sch-row.off{opacity:.55}
+.sch-row.done .sch-what{text-decoration:line-through}
+.sch-none{font-size:.8125rem;color:var(--tm);padding:6px 2px}
+.sch-btn{background:none;border:none;padding:6px;cursor:pointer;color:var(--tm);font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;min-width:38px;min-height:38px}
+.sch-btn:hover{color:var(--tp)}
+.sch-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.sch-wd{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:5px}
+.sch-wd span{text-align:center;font-size:.625rem;letter-spacing:.4px;text-transform:uppercase;color:var(--tm)}
+.sch-cd{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;font-size:.8125rem;color:var(--tp);background:var(--s1);border:1px solid transparent;cursor:pointer}
+.sch-cd.out{opacity:.3}
+.sch-cd.today{border-color:var(--accent)}
+.sch-cd.sel{background:var(--accent);color:#fff}
+.sch-cd .sch-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);margin-top:2px}
+.sch-cd.sel .sch-dot{background:#fff}
+.sch-dayhd{font-size:.8125rem;color:var(--tm);margin:10px 2px 6px}
+.sch-chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px}
+.sch-chip{font-size:.75rem;color:var(--tm);background:var(--s2);border:0.5px solid var(--bdr);border-radius:99px;padding:6px 11px;cursor:pointer}
+.sch-chip:hover{color:var(--tp);border-color:var(--accent)}
+.sch-note{font-size:.75rem;color:var(--ts);line-height:1.55;margin-top:8px}
+.sch-nav{display:flex;gap:2px}
+#sch-cal-hd{display:flex;align-items:center;justify-content:space-between}
+.sch-alarm{position:fixed;left:max(12px,calc(50% - 203px));right:max(12px,calc(50% - 203px));bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:640;background:var(--s1);border:1px solid var(--accent);border-radius:16px;padding:14px;box-shadow:0 10px 34px rgba(0,0,0,.5)}
  </style> <script>
 function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
 // First touch wins: someone who lands from TikTok, reads /for-her, then signs up
@@ -1405,6 +1439,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <!-- SMART REMINDER SETTINGS (Pro) -->
     <div id="s-reminder-settings" class="scr">
       <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Your own times</div>
+        <div class="setting-row" onclick="openSchedule()">
+          <i class="ti ti-calendar-week" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>My schedule</p><span>Set a time by clock and calendar, with an alarm at it — the reminders above are the app's own</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+      </div>
+      <div class="sec">
         <div class="sec-hd" style="margin-top:0">Smart reminder types</div>
         <div class="setting-row" onclick="toggleSmartReminderType('urgeWindow')">
           <i class="ti ti-clock" style="color:var(--accent)"></i>
@@ -1534,6 +1576,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0">Your time</div></div>
+      <div class="setting-row" onclick="openSchedule()">
+        <i class="ti ti-calendar-week"></i>
+        <div class="setting-row-txt"><p>My schedule</p><span>The times you set for yourself, with an alarm that rings at them</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">When you need it</div></div>
       <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-tools')">
         <i class="ti ti-hand-stop"></i>
@@ -1916,6 +1965,86 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
+    <!-- MY SCHEDULE (19 Sep 2026). Jacques: "can you put a scheduler with time
+         calendar and alarm in the recovery app its own section". His own times,
+         his own words, a month calendar, and an alarm that rings. Everything is
+         in S.schedule in the saved state, so it stays on the account. Nothing
+         here keeps score — see the note at the bottom of the screen. -->
+    <div id="s-schedule" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Next up</div>
+        <div class="sch-next">
+          <div class="sch-time" id="sch-next-time">—</div>
+          <div class="sch-what"><p id="sch-next-title">Nothing set yet</p><span id="sch-next-sub">Add a time below and this is where you will see it coming.</span></div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Today</div>
+        <div id="sch-today"></div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd" id="sch-cal-hd">This month</div>
+        <div class="sch-wd"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+        <div class="sch-cal" id="sch-cal"></div>
+        <div id="sch-day"></div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Set a time</div>
+        <div class="ob-label" style="text-align:left;color:var(--tm)">What is it?</div>
+        <input class="ob-input" id="sch-form-what" type="text" maxlength="60" placeholder="A meeting" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+        <div class="sch-chips">
+          <span class="sch-chip" onclick="schedulePreset('A meeting')">A meeting</span>
+          <span class="sch-chip" onclick="schedulePreset('Call someone')">Call someone</span>
+          <span class="sch-chip" onclick="schedulePreset('The lesson')">The lesson</span>
+          <span class="sch-chip" onclick="schedulePreset('Journal')">Journal</span>
+          <span class="sch-chip" onclick="schedulePreset('Wind down')">Wind down</span>
+          <span class="sch-chip" onclick="schedulePreset('Walk')">Walk</span>
+        </div>
+        <div class="ob-label" style="text-align:left;color:var(--tm)">What time</div>
+        <input class="ob-input" id="sch-form-time" type="time" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+        <div class="ob-label" style="text-align:left;color:var(--tm)">How often</div>
+        <select class="ob-input" id="sch-form-repeat" onchange="scheduleFormRepeat()" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+          <option value="daily">Every day</option>
+          <option value="weekdays">Weekdays, Monday to Friday</option>
+          <option value="weekly">One day a week</option>
+          <option value="once">One day only</option>
+        </select>
+        <div id="sch-form-day-wrap" style="display:none">
+          <div class="ob-label" style="text-align:left;color:var(--tm)">Which day</div>
+          <select class="ob-input" id="sch-form-day" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </div>
+        <div id="sch-form-date-wrap" style="display:none">
+          <div class="ob-label" style="text-align:left;color:var(--tm)">Which date</div>
+          <input class="ob-input" id="sch-form-date" type="date" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+        </div>
+        <div class="sch-note" id="sch-editing" style="display:none"></div>
+        <button class="ob-btn" id="sch-save-btn" onclick="scheduleSave()">Set this time</button>
+        <button class="ob-btn outline" style="color:var(--ts);border-color:var(--bdr);margin-top:8px" onclick="scheduleCancelEdit()">Never mind</button>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Everything you have set</div>
+        <div id="sch-list"></div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="setting-row" onclick="requestNotificationPermission()">
+          <i class="ti ti-bell" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Ringing while you are elsewhere</p><span id="sch-notif-sub">Tap to allow the phone's own notification sound</span></div>
+        </div>
+        <div class="sch-note">A phone with the app completely closed cannot be woken by a web page — no site is allowed to do that. While the app is open, or sitting in another tab, a time rings for real; the moment it is in the background the phone's own notification carries it instead.</div>
+        <div class="sch-note">Nothing here keeps score. A time that passes unmarked just passes.</div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <button class="ob-btn outline" style="color:var(--ts);border-color:var(--bdr)" onclick="switchTo('tools');actBn('bn-tools')">Back to Tools</button>
+      </div>
+    </div>
   </div><!-- /screens -->
 
   <!-- BOTTOM NAV -->
@@ -1943,6 +2072,19 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
        is playing. One tap pauses, one tap on the ✕ stops, tapping the card
        opens the big read-along player - the lesson never has to be found
        again to be controlled. -->
+  <!-- The alarm, outside every screen so it can ring over whatever is open. The
+       words on it are his own; in discretion mode they are replaced. Nothing on
+       it can end anything — it only says a time he set has arrived. -->
+  <div id="sch-alarm" class="sch-alarm" style="display:none">
+    <div style="font-size:.6875rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700">A time you set</div>
+    <div id="sch-alarm-time" style="font-size:1.5rem;font-weight:700;color:var(--tp);margin-top:4px">7:00 pm</div>
+    <div id="sch-alarm-what" style="font-size:.9375rem;color:var(--tm);margin-top:2px">A time you set</div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="ob-btn" style="margin:0;flex:1;padding:11px" onclick="scheduleRingDone()">Done</button>
+      <button class="ob-btn outline" style="margin:0;flex:1;padding:11px" onclick="scheduleRingSnooze()">10 more minutes</button>
+      <button class="ob-btn outline" style="margin:0;flex:1;padding:11px;color:var(--ts);border-color:var(--bdr)" onclick="scheduleRingLater()">Not now</button>
+    </div>
+  </div>
   <div id="mini-player" onclick="S.audioPillExplained=true;save();openLessonPlayer()" style="display:none;position:fixed;bottom:76px;left:max(12px,calc(50% - 203px));right:calc(max(12px,calc(50% - 203px)) + 56px);z-index:499;cursor:pointer;background:var(--s2);border:1px solid var(--bdr);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,0.35);overflow:hidden">
     <div style="display:flex;align-items:center;gap:10px;padding:8px 8px 9px 10px">
       <button id="mini-play" title="Pause / resume" onclick="event.stopPropagation();laTogglePause()" style="flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem"><i class="ti ti-player-pause"></i></button>
@@ -2877,6 +3019,9 @@ let S = {
     morningTime:'08:00',bedtimeTime:'21:00',tone:'gentle',frequency:'daily'
   },
   lastSmartReminderSent:{},
+  // The times he set for himself (My Schedule): one entry per time, and a short
+  // list of any snoozed ones. Both in the saved state, so they survive a reload.
+  schedule:[],scheduleSnooze:[],
   journals:[],
   cravings:[],
   currentJourMood:'🙂',currentJourMoodLabel:'Good',
@@ -5088,6 +5233,7 @@ function initApp(){
   maybeShowDailyLessonReminder();
   maybeShowMissedLessonReminder();
   startLessonReminderTimer();
+  startScheduleTimer();
   evaluateSmartReminders();
   maybeProactiveCheckin();
 }
@@ -11721,11 +11867,13 @@ const SCREEN_MAP={
   // while still stripping 'on' off every other one. The header said "Lesson
   // Library" over a completely blank page, with all 518 lessons built and
   // sitting in memory behind it.
-  'lesson-library':'s-lesson-library'
+  'lesson-library':'s-lesson-library',
+  schedule:'s-schedule'
 };
 const TITLES={
+  schedule:'My schedule',
   'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':"When it's hard",'weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
+const SCREEN_TO_BN={schedule:'bn-tools',home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -11751,7 +11899,8 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game',
+  schedule:'bn-tools'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Friendly is private. This is the gate that matters: the tour, the search
@@ -11811,6 +11960,7 @@ function switchTo(id,opts){
   if(id==='pack-lesson'){renderPackLesson();}
   if(id==='tools'||id==='progress'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
+  if(id==='schedule'){renderSchedule();scheduleFormDefaults();}
   if(id==='tower'){renderTower();}
   if(id==='home'&&typeof renderHomeClimb==='function')renderHomeClimb();
 }
@@ -12518,7 +12668,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.9';
+const APP_VERSION='7.10';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';
@@ -14367,6 +14517,522 @@ async function boot(){
   }
   showPreviewGate();
 }
+
+// ─── MY SCHEDULE — the times you set for yourself ─────────────────────────────
+// Jacques, 19 Sep 2026: "can you put a scheduler with time calendar and alarm in
+// the recovery app its own section".
+//
+// His own times, in his own words, on a calendar, with an alarm that rings when
+// they arrive. Everything lives in S.schedule inside the same state blob as the
+// journal and the day counter, so it stays on the account and survives a
+// reinstall like everything else.
+//
+// Three rules, because an alarm in a recovery app can do damage a calendar
+// alarm cannot:
+//   1. NOTHING HERE KEEPS SCORE. A time that passes unmarked just passes. There
+//      is no list of misses, no streak of kept times, and this screen never says
+//      missed, late, skipped or failed. Somebody who slept through 7am does not
+//      need the app to tell them about it.
+//   2. NOTHING RINGS THAT WAS NOT ASKED FOR. An entry that is off is off, a time
+//      rings once a day, and there is no "you have 4" badge anywhere.
+//   3. DISCRETION MODE HIDES THE WORDS. If the phone is handed to somebody, the
+//      card says "A time you set" instead of what it is for.
+//
+// WHAT IT HONESTLY CANNOT DO: wake a phone with the app fully closed. No web page
+// can do that on a timer - it needs a push from the server at the minute (see
+// server/push.js, which does exactly that hourly for the daily lesson). While the
+// app is open, or sitting in another tab, this rings for real, and the phone's own
+// notification carries it while the app is in the background. The screen says so
+// in as many words rather than implying otherwise.
+const SCHEDULE_RING_WINDOW_MIN=3;   // a time rings for three minutes past its minute
+const SCHEDULE_SNOOZE_MIN=10;       // "10 more minutes" is ten, not fifteen
+const SCHEDULE_DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const SCHEDULE_DAYS_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const SCHEDULE_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SCHEDULE_MONTHS_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// The things a person actually sets a time for. They are only words — a chip
+// fills the box in and can be typed over.
+const SCHEDULE_PRESETS=['A meeting','Call someone','The lesson','Journal','Wind down','Walk'];
+
+function scheduleAll(){
+  if(!Array.isArray(S.schedule))S.schedule=[];
+  return S.schedule;
+}
+function schPad2(n){ return n<10?('0'+n):String(n); }
+function scheduleEsc(t){
+  return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function scheduleDayKey(d){ return d.getFullYear()+'-'+schPad2(d.getMonth()+1)+'-'+schPad2(d.getDate()); }
+function scheduleMinuteOfDay(hhmm){
+  const m=/^([0-2]?\d):([0-5]\d)$/.exec(String(hhmm==null?'':hhmm));
+  if(!m)return null;
+  const h=Number(m[1]);
+  if(h>23)return null;
+  return h*60+Number(m[2]);
+}
+function scheduleTimeLabel(hhmm){
+  const t=scheduleMinuteOfDay(hhmm);
+  if(t===null)return String(hhmm==null?'':hhmm);
+  const h=Math.floor(t/60),m=t%60,ap=h<12?'am':'pm',h12=(h%12)||12;
+  return h12+':'+schPad2(m)+' '+ap;
+}
+function scheduleShortDate(key){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key==null?'':key));
+  if(!m)return String(key==null?'':key);
+  return SCHEDULE_MONTHS_SHORT[Number(m[2])-1]+' '+Number(m[3]);
+}
+// Words for the row and the repeat. Kept beside the matching rule so the two
+// cannot drift: every string here describes exactly what scheduleMatchesDay does.
+function scheduleRepeatText(e){
+  if(!e)return '';
+  if(e.repeat==='once')return e.date?('One day — '+scheduleShortDate(e.date)):'One day';
+  if(e.repeat==='weekdays')return 'Weekdays, Monday to Friday';
+  if(e.repeat==='weekly')return 'Every '+SCHEDULE_DAYS[Number(e.day)||0];
+  return 'Every day';
+}
+function scheduleOn(e){ return !!e&&e.on!==false; }
+// Which days an entry belongs to. `d` is a Date; only its calendar day is read.
+function scheduleMatchesDay(e,d){
+  if(!e)return false;
+  const key=scheduleDayKey(d);
+  if(e.repeat==='once')return String(e.date||'')===key;
+  if(e.repeat==='weekdays'){ const w=d.getDay(); return w>=1&&w<=5; }
+  if(e.repeat==='weekly')return Number(e.day)===d.getDay();
+  return true;   // daily, and anything unrecognised, is every day
+}
+// Due: its minute has arrived within the last few minutes and it has not already
+// rung today. Anything older than the window is simply behind you — it is not a
+// debt, and the app does not ring late to make a point.
+function scheduleDueAt(e,now){
+  if(!scheduleOn(e))return false;
+  const t=scheduleMinuteOfDay(e.time);
+  if(t===null)return false;
+  if(!scheduleMatchesDay(e,now))return false;
+  const mins=now.getHours()*60+now.getMinutes();
+  const late=mins-t;
+  if(late<0||late>SCHEDULE_RING_WINDOW_MIN)return false;
+  return e.lastFired!==scheduleDayKey(now);
+}
+// A snoozed time rings again on its own, even though it has already rung today.
+function scheduleSnoozedAt(e,now){
+  if(!scheduleOn(e))return false;
+  const list=Array.isArray(S.scheduleSnooze)?S.scheduleSnooze:[];
+  const s=list.find(x=>x&&x.id===e.id);
+  return !!(s&&now.getTime()>=Number(s.until||0));
+}
+function scheduleDue(now){
+  return scheduleAll().filter(e=>scheduleDueAt(e,now)||scheduleSnoozedAt(e,now));
+}
+function scheduleByTime(a,b){
+  return (scheduleMinuteOfDay(a&&a.time)||0)-(scheduleMinuteOfDay(b&&b.time)||0);
+}
+// The soonest time still coming, looking eight days out so a weekly entry is
+// always found. Today's already-rung times are skipped rather than counted as
+// still ahead.
+function scheduleNext(now){
+  let best=null;
+  scheduleAll().forEach(e=>{
+    if(!scheduleOn(e))return;
+    const t=scheduleMinuteOfDay(e.time);
+    if(t===null)return;
+    for(let d=0;d<8;d++){
+      const day=new Date(now.getFullYear(),now.getMonth(),now.getDate()+d);
+      if(!scheduleMatchesDay(e,day))continue;
+      if(d===0&&e.lastFired===scheduleDayKey(day))continue;
+      const at=new Date(day.getFullYear(),day.getMonth(),day.getDate(),0,t);
+      if(at.getTime()<=now.getTime())continue;
+      if(!best||at.getTime()<best.at.getTime())best={entry:e,at:at};
+      break;
+    }
+  });
+  return best;
+}
+function scheduleInText(ms){
+  const m=Math.round(Math.max(0,ms)/60000);
+  if(m<1)return 'any minute now';
+  if(m<60)return 'in '+m+' min';
+  const h=Math.floor(m/60),mm=m%60;
+  if(h<24)return 'in '+h+'h'+(mm?(' '+mm+'m'):'');
+  const d=Math.round(h/24);
+  return d===1?'in a day':('in '+d+' days');
+}
+function scheduleDayName(d,now){
+  now=now||new Date();
+  const key=scheduleDayKey(d);
+  if(key===scheduleDayKey(now))return 'Today';
+  const t=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+  if(key===scheduleDayKey(t))return 'Tomorrow';
+  return SCHEDULE_DAYS[d.getDay()];
+}
+// Discretion mode: the words are his, and what he is doing at 7pm is nobody
+// else's business if the phone is not in his hand.
+function scheduleLabelFor(e){
+  if(S.discretionMode)return 'A time you set';
+  const w=e&&e.what?String(e.what).trim():'';
+  return w||'A time you set';
+}
+
+/* ── the screen ──────────────────────────────────────────────────────────── */
+let schCalY=null, schCalM=null, schCalKey=null, schEditingId=null, schRinging=null;
+
+function openSchedule(){
+  renderSchedule();
+  switchTo('schedule');
+  actBn('bn-tools');
+}
+// Every row on this screen is built as markup after boot, and an <i class="ti">
+// created after renderIcons() has run draws NOTHING — the invisible-button bug
+// that hid the header back arrow. So anything drawn here is handed to
+// renderIcons on the way out, the same way the journal, the timeline and the
+// lesson player do it.
+function scheduleIcons(){
+  try{
+    ['sch-today','sch-list','sch-cal-hd','sch-day'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)renderIcons(el);
+    });
+  }catch(e){}
+}
+function renderSchedule(){
+  const now=new Date();
+  renderScheduleNext(now);
+  renderScheduleToday(now);
+  renderScheduleCalendar(now);
+  renderScheduleList(now);
+  updateScheduleNotifRow();
+  scheduleIcons();
+}
+function renderScheduleNext(now){
+  const timeEl=document.getElementById('sch-next-time');
+  const titleEl=document.getElementById('sch-next-title');
+  const subEl=document.getElementById('sch-next-sub');
+  if(!titleEl||!subEl)return;
+  const nx=scheduleNext(now);
+  if(!nx){
+    if(timeEl)timeEl.textContent='—';
+    titleEl.textContent='Nothing set yet';
+    subEl.textContent='Add a time below and this is where you will see it coming.';
+    return;
+  }
+  if(timeEl)timeEl.textContent=scheduleTimeLabel(nx.entry.time);
+  titleEl.textContent=scheduleLabelFor(nx.entry);
+  subEl.textContent=scheduleInText(nx.at.getTime()-now.getTime())+' · '+scheduleDayName(nx.at,now)+' · '+scheduleRepeatText(nx.entry);
+}
+function scheduleDayEntries(key){
+  const d=new Date(key+'T12:00:00');
+  return scheduleAll().filter(e=>scheduleMatchesDay(e,d)).sort(scheduleByTime);
+}
+function renderScheduleToday(now){
+  const box=document.getElementById('sch-today');
+  if(!box)return;
+  const key=scheduleDayKey(now);
+  const list=scheduleDayEntries(key);
+  if(!list.length){
+    box.innerHTML='<div class="sch-none">Nothing set for today.</div>';
+    return;
+  }
+  box.innerHTML=list.map(e=>{
+    const done=e.doneOn===key;
+    const meta=done?'Done for today':(scheduleOn(e)?scheduleRepeatText(e):'Turned off');
+    return '<div class="sch-row'+(scheduleOn(e)?'':' off')+(done?' done':'')+'">'
+      +'<div class="sch-time">'+scheduleEsc(scheduleTimeLabel(e.time))+'</div>'
+      +'<div class="sch-what">'+scheduleEsc(scheduleLabelFor(e))+'<div class="sch-meta">'+scheduleEsc(meta)+'</div></div>'
+      +'<button class="sch-btn" title="'+(done?'Not done after all':'Done')+'" onclick="scheduleMarkDone(\''+scheduleEsc(e.id)+'\')"><i class="ti ti-check"></i></button>'
+      +'<button class="sch-btn" title="Change this time" onclick="scheduleEdit(\''+scheduleEsc(e.id)+'\')"><i class="ti ti-pencil"></i></button>'
+      +'</div>';
+  }).join('');
+  scheduleIcons();
+}
+// A month, six weeks of cells so the grid never jumps in height. Every cell
+// knows its own calendar day, which is what the dots and the tap are read from.
+function scheduleMonthGrid(y,m){
+  const start=new Date(y,m,1).getDay();
+  const cells=[];
+  for(let i=0;i<42;i++){
+    const d=new Date(y,m,1-start+i);
+    cells.push({key:scheduleDayKey(d),day:d.getDate(),inMonth:d.getMonth()===m,weekday:d.getDay()});
+  }
+  return cells;
+}
+function renderScheduleCalendar(now){
+  now=now||new Date();
+  if(schCalY===null||schCalM===null){schCalY=now.getFullYear();schCalM=now.getMonth();}
+  const hd=document.getElementById('sch-cal-hd');
+  const box=document.getElementById('sch-cal');
+  if(hd)hd.innerHTML='<span>'+SCHEDULE_MONTHS[schCalM]+' '+schCalY+'</span>'
+    +'<span class="sch-nav">'
+    +'<button class="sch-btn" title="The month before" onclick="scheduleMonth(-1)"><i class="ti ti-arrow-left"></i></button>'
+    +'<button class="sch-btn" title="The month after" onclick="scheduleMonth(1)"><i class="ti ti-arrow-right"></i></button>'
+    +'</span>';
+  if(!box)return;
+  const todayKey=scheduleDayKey(now);
+  box.innerHTML=scheduleMonthGrid(schCalY,schCalM).map(c=>{
+    const n=scheduleDayEntries(c.key).filter(scheduleOn).length;
+    return '<div class="sch-cd'+(c.inMonth?'':' out')+(c.key===todayKey?' today':'')+(c.key===schCalKey?' sel':'')+'" onclick="schedulePickDay(\''+c.key+'\')">'
+      +'<span>'+c.day+'</span>'+(n?'<i class="sch-dot"></i>':'')+'</div>';
+  }).join('');
+  renderScheduleDay();
+}
+function renderScheduleDay(){
+  const box=document.getElementById('sch-day');
+  if(!box)return;
+  if(!schCalKey){box.innerHTML='';return;}
+  const list=scheduleDayEntries(schCalKey);
+  const title=scheduleShortDate(schCalKey)+' — '+(list.length?list.length+(list.length===1?' time':' times'):'nothing set');
+  box.innerHTML='<div class="sch-dayhd">'+scheduleEsc(title)+'</div>'
+    +(list.length?list.map(e=>'<div class="sch-row'+(scheduleOn(e)?'':' off')+'">'
+      +'<div class="sch-time">'+scheduleEsc(scheduleTimeLabel(e.time))+'</div>'
+      +'<div class="sch-what">'+scheduleEsc(scheduleLabelFor(e))+'<div class="sch-meta">'+scheduleEsc(scheduleOn(e)?scheduleRepeatText(e):'Turned off')+'</div></div>'
+      +'</div>').join(''):'');
+  scheduleIcons();
+}
+function scheduleMonth(step){
+  const now=new Date();
+  if(schCalY===null||schCalM===null){schCalY=now.getFullYear();schCalM=now.getMonth();}
+  let m=schCalM+Number(step||0),y=schCalY;
+  while(m<0){m+=12;y--;}
+  while(m>11){m-=12;y++;}
+  schCalY=y;schCalM=m;
+  renderScheduleCalendar(now);
+}
+function schedulePickDay(key){
+  schCalKey=(schCalKey===key)?null:key;
+  renderScheduleCalendar(new Date());
+}
+function renderScheduleList(now){
+  const box=document.getElementById('sch-list');
+  if(!box)return;
+  const list=scheduleAll().slice().sort(scheduleByTime);
+  if(!list.length){
+    box.innerHTML='<div class="sch-none">Nothing set yet.</div>';
+    return;
+  }
+  box.innerHTML=list.map(e=>'<div class="sch-row'+(scheduleOn(e)?'':' off')+'">'
+    +'<div class="sch-time">'+scheduleEsc(scheduleTimeLabel(e.time))+'</div>'
+    +'<div class="sch-what">'+scheduleEsc(scheduleLabelFor(e))+'<div class="sch-meta">'+scheduleEsc(scheduleRepeatText(e))+'</div></div>'
+    +'<div class="toggle-sw'+(scheduleOn(e)?' on':'')+'" title="Turn this time on or off" onclick="scheduleToggle(\''+scheduleEsc(e.id)+'\')"><div class="toggle-knob"></div></div>'
+    +'<button class="sch-btn" title="Change this time" onclick="scheduleEdit(\''+scheduleEsc(e.id)+'\')"><i class="ti ti-pencil"></i></button>'
+    +'<button class="sch-btn" title="Delete this time" onclick="scheduleDelete(\''+scheduleEsc(e.id)+'\')"><i class="ti ti-x"></i></button>'
+    +'</div>').join('');
+  scheduleIcons();
+}
+
+/* ── setting one ─────────────────────────────────────────────────────────── */
+function scheduleNextHour(now){
+  return schPad2((now.getHours()+1)%24)+':00';
+}
+function scheduleFormRepeat(){
+  const r=document.getElementById('sch-form-repeat');
+  if(!r)return;
+  const once=document.getElementById('sch-form-date-wrap');
+  const wk=document.getElementById('sch-form-day-wrap');
+  if(once)once.style.display=(r.value==='once')?'':'none';
+  if(wk)wk.style.display=(r.value==='weekly')?'':'none';
+  const d=document.getElementById('sch-form-date');
+  if(d&&!d.value)d.value=scheduleDayKey(new Date());
+}
+function schedulePreset(what){
+  const el=document.getElementById('sch-form-what');
+  if(el)el.value=what;
+}
+function scheduleFormDefaults(){
+  const t=document.getElementById('sch-form-time');
+  if(t&&!t.value)t.value=scheduleNextHour(new Date());
+  scheduleFormRepeat();
+}
+function scheduleSave(){
+  const whatEl=document.getElementById('sch-form-what');
+  const timeEl=document.getElementById('sch-form-time');
+  const repEl=document.getElementById('sch-form-repeat');
+  const dateEl=document.getElementById('sch-form-date');
+  const dayEl=document.getElementById('sch-form-day');
+  const time=(timeEl&&timeEl.value)||'';
+  if(scheduleMinuteOfDay(time)===null){
+    appInfo('A time needs a time','Pick the hour and the minute first — then it has somewhere to ring.');
+    return;
+  }
+  const what=(((whatEl&&whatEl.value)||'').trim().slice(0,60))||'A time you set';
+  const repeat=(repEl&&repEl.value)||'daily';
+  const entry={
+    id:schEditingId||('sch_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+    what:what,time:time,repeat:repeat,on:true
+  };
+  if(repeat==='once')entry.date=(dateEl&&dateEl.value)||scheduleDayKey(new Date());
+  if(repeat==='weekly')entry.day=Number((dayEl&&dayEl.value)||0);
+  const all=scheduleAll();
+  const at=schEditingId?all.findIndex(x=>x&&x.id===schEditingId):-1;
+  if(at>-1){
+    // A change to a time keeps whether it was on and where it had got to.
+    entry.on=scheduleOn(all[at]);
+    entry.doneOn=all[at].doneOn;
+    entry.lastFired=all[at].lastFired;
+    all[at]=entry;
+  }else{
+    all.push(entry);
+  }
+  schEditingId=null;
+  save();
+  scheduleCancelEdit();
+  renderSchedule();
+  scheduleAlarmCheck();
+}
+function scheduleCancelEdit(){
+  schEditingId=null;
+  const whatEl=document.getElementById('sch-form-what');
+  if(whatEl)whatEl.value='';
+  const timeEl=document.getElementById('sch-form-time');
+  if(timeEl)timeEl.value=scheduleNextHour(new Date());
+  const note=document.getElementById('sch-editing');
+  if(note){note.textContent='';note.style.display='none';}
+  const btn=document.getElementById('sch-save-btn');
+  if(btn)btn.textContent='Set this time';
+  scheduleFormRepeat();
+}
+function scheduleEdit(id){
+  const e=scheduleAll().find(x=>x&&x.id===id);
+  if(!e)return;
+  schEditingId=id;
+  const set=(elId,v)=>{const el=document.getElementById(elId);if(el)el.value=v;};
+  set('sch-form-what',scheduleLabelFor(e));
+  set('sch-form-time',e.time||'');
+  set('sch-form-repeat',e.repeat||'daily');
+  if(e.date)set('sch-form-date',e.date);
+  if(e.day!=null)set('sch-form-day',String(e.day));
+  const note=document.getElementById('sch-editing');
+  if(note){note.textContent='Changing the '+scheduleTimeLabel(e.time)+' one — save when it reads right.';note.style.display='';}
+  const btn=document.getElementById('sch-save-btn');
+  if(btn)btn.textContent='Save this change';
+  scheduleFormRepeat();
+}
+function scheduleToggle(id){
+  const e=scheduleAll().find(x=>x&&x.id===id);
+  if(!e)return;
+  e.on=!scheduleOn(e);
+  // Turning one off takes any snooze with it, so a time cannot ring after it
+  // was switched off.
+  if(!e.on&&Array.isArray(S.scheduleSnooze))S.scheduleSnooze=S.scheduleSnooze.filter(x=>x&&x.id!==id);
+  save();
+  renderSchedule();
+}
+function scheduleDelete(id){
+  const e=scheduleAll().find(x=>x&&x.id===id);
+  if(!e)return;
+  if(!confirm('Delete the '+scheduleTimeLabel(e.time)+' one?'))return;
+  S.schedule=scheduleAll().filter(x=>x&&x.id!==id);
+  if(Array.isArray(S.scheduleSnooze))S.scheduleSnooze=S.scheduleSnooze.filter(x=>x&&x.id!==id);
+  if(schEditingId===id)scheduleCancelEdit();
+  save();
+  renderSchedule();
+}
+function scheduleMarkDone(id){
+  const e=scheduleAll().find(x=>x&&x.id===id);
+  if(!e)return;
+  const key=scheduleDayKey(new Date());
+  e.doneOn=(e.doneOn===key)?null:key;
+  save();
+  renderScheduleToday(new Date());
+}
+
+/* ── the alarm ───────────────────────────────────────────────────────────── */
+// A soft two-note, made here rather than shipped as a file: nothing to download,
+// and it can never turn up late from the network. Fails silently on a browser
+// that will not give a page an audio context — the card still shows.
+function scheduleChime(){
+  try{
+    const Ctx=(typeof window!=='undefined'&&(window.AudioContext||window.webkitAudioContext))
+      ||(typeof AudioContext!=='undefined'?AudioContext:null);
+    if(!Ctx)return;
+    const ctx=new Ctx();
+    [0,0.34].forEach((off,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';
+      o.frequency.value=i?587.33:523.25;      // C5, then D5
+      const t=ctx.currentTime+off;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(i?0.16:0.2,t+0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.75);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(t);o.stop(t+0.8);
+    });
+    setTimeout(()=>{try{ctx.close();}catch(e){}},1600);
+  }catch(e){}
+}
+function scheduleAlarmCheck(){
+  if(schRinging)return;         // one card at a time; the next tick takes the rest
+  const now=new Date();
+  const due=scheduleDue(now);
+  if(!due.length)return;
+  scheduleRing(due.slice().sort(scheduleByTime)[0],now);
+}
+function scheduleRing(e,now){
+  now=now||new Date();
+  if(!e)return;
+  schRinging=e.id;
+  // Marked as rung before anything is drawn, so a second tick, a re-render or a
+  // reload cannot ring the same time twice.
+  e.lastFired=scheduleDayKey(now);
+  if(Array.isArray(S.scheduleSnooze))S.scheduleSnooze=S.scheduleSnooze.filter(x=>x&&x.id!==e.id);
+  save();
+  const card=document.getElementById('sch-alarm');
+  const timeEl=document.getElementById('sch-alarm-time');
+  const whatEl=document.getElementById('sch-alarm-what');
+  if(timeEl)timeEl.textContent=scheduleTimeLabel(e.time);
+  if(whatEl)whatEl.textContent=scheduleLabelFor(e);
+  if(card)card.style.display='block';
+  scheduleChime();
+  try{ if(navigator.vibrate)navigator.vibrate([90,120,90]); }catch(x){}
+  // The phone's own notification, for when the app is not the thing being looked
+  // at. With the app open there is already a card and a chime, and a second buzz
+  // on top of it would be noise.
+  if(document.hidden){
+    sendPhoneNotification(scheduleTimeLabel(e.time)+' — '+scheduleLabelFor(e),'You asked to be reminded at this time.');
+  }
+}
+function scheduleRingClose(){
+  schRinging=null;
+  const card=document.getElementById('sch-alarm');
+  if(card)card.style.display='none';
+}
+function scheduleRingDone(){
+  const e=scheduleAll().find(x=>x&&x.id===schRinging);
+  if(e){e.doneOn=scheduleDayKey(new Date());save();}
+  scheduleRingClose();
+  renderSchedule();
+}
+function scheduleRingSnooze(){
+  const id=schRinging;
+  if(id){
+    const list=Array.isArray(S.scheduleSnooze)?S.scheduleSnooze:[];
+    S.scheduleSnooze=list.filter(x=>x&&x.id!==id);
+    S.scheduleSnooze.push({id:id,until:Date.now()+SCHEDULE_SNOOZE_MIN*60000});
+    save();
+  }
+  scheduleRingClose();
+  renderSchedule();
+}
+function scheduleRingLater(){
+  scheduleRingClose();
+  renderSchedule();
+}
+function updateScheduleNotifRow(){
+  const sub=document.getElementById('sch-notif-sub');
+  if(!sub)return;
+  if(typeof Notification==='undefined'){sub.textContent='Not supported in this browser';return;}
+  if(Notification.permission==='granted')sub.textContent='On — the phone\'s own notification carries a time while you are in another app';
+  else if(Notification.permission==='denied')sub.textContent='Blocked — turn notifications back on for this app in your device settings';
+  else sub.textContent='Tap to allow the phone\'s notification sound';
+}
+// Every twenty seconds, and again the moment the app comes back to the front:
+// a backgrounded phone throttles timers hard, so the return is what closes the
+// gap after the screen has been off.
+let scheduleTimer=null;
+function startScheduleTimer(){
+  clearInterval(scheduleTimer);
+  scheduleTimer=setInterval(scheduleAlarmCheck,20000);
+  scheduleAlarmCheck();
+}
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden)scheduleAlarmCheck(); });
+// ─── END OF MY SCHEDULE ───────────────────────────────────────────────────────
 
 // ─── SAVE TO MY PHONE ─────────────────────────────────────────────────────────
 // The same offer the Zodiacs page makes (see key.html), in Profile. Where the

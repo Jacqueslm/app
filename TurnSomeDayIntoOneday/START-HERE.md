@@ -293,17 +293,40 @@ Three scripts in `twa/`, in the order they are used:
 
 Signing works. It produced `day-one-1.0.2-signed.aab`, 1.75 MB, verified.
 
-### Free hosting — asked twice, answered, CLOSED
+### Free hosting — REOPENED and researched 19 Sep 2026. Staying on Railway.
 
-He asked about free hosting twice. The honest answer: the only genuinely free
-option that runs this app unchanged is a self-administered VM (Oracle Always
-Free) or a home machine behind Cloudflare Tunnel; everything else either sleeps
-(killing the hourly email scheduler) or has no persistent disk (destroying the
-SQLite database). **He said "leave it alone." Staying on Railway. Do not raise
-it again.**
+He reopened it himself (*"lets get back to the discussion of free hosting"*),
+so the old "do not raise it again" no longer applies. Everything below was read
+that day off each provider's own pricing page or docs, not off blogs.
 
-The lasting good that came out of it: the database had no backup at all, and
-now has one (see the backup section above).
+Three things a host must do, and they are why most of these fail: **not sleep**
+(the hourly email scheduler needs it), **keep a disk** (the SQLite database
+lives there), and **carry real bandwidth** (the app ships 63MB of images and 3D
+models in `img/` and 37MB of audio in `audio/`; one meditation track is ~3MB).
+
+| Host | Verdict |
+|---|---|
+| **Google Cloud** | 1 e2-micro always free, 30GB disk, Oregon/Iowa/South Carolina — but only **1GB outbound per month**. `index.html` is **1,022,626 bytes** and nothing in `server/` compresses it, so that is roughly 300 meditation plays a month. **Dead for this app.** |
+| **Oracle Cloud** | The only free tier that meets all three: **10TB out per month**, 200GB disk, 2 cores/12GB. He tried to create one and got **"out of host capacity"** — Oracle's own doc answer is a different availability domain, the AMD micro shape instead of the ARM one, or upgrading to pay-as-you-go (always-free shapes stay free). He stopped there. |
+| **Render (free)** | Sleeps after 15 minutes idle, no disk on free, and their docs say not to use free for production. **Dead.** |
+| **Northflank Sandbox** | Genuinely always-on with no sleeping (rare), 2 services + 1 database — but their own billing doc says do not run production on it, a card is required before anything can be created, and storage is a paid extra. **Not for this.** |
+| **DigitalOcean** | $6/month for 1 core/1GB/25GB/1TB out. **Not cheaper than the $5 already being paid**, and no auto-deploy, so it loses on every count. |
+| **Koyeb / Fly.io** | No free tier any more. Fly needs a card. |
+| **HelioHost / alwaysdata** | Free with a real disk, but shared and small; HelioHost deletes an account after 30 days without a login. Not somewhere an unattended server belongs. |
+| **Cloudflare Tunnel** | Considered again and rejected by him: it needs a machine at home, and there is no phone version of the tunnel client (Cloudflare ships Linux/macOS/Windows/Docker only, checked). |
+
+**Decision, his words, 19 Sep 2026: "leave railway but periodically look for
+other options."** Staying on Railway at $5/month. Nothing was migrated and
+nothing in the app changed.
+
+**Standing instruction:** re-check roughly twice a year, and when he asks. The
+table above is the whole prior art — do not re-derive it. What would change the
+answer: Oracle's free ARM capacity actually becoming available, or a host
+appearing that gives an always-on process, a disk, and real bandwidth for
+nothing.
+
+The lasting good that came out of the first round: the database had no backup at
+all, and now has one (see the backup section above).
 
 ### A Play subscriber could not cancel (29 Aug) — app 7.3
 

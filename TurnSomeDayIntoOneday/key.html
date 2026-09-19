@@ -519,9 +519,10 @@ ol.steps li b{color:var(--gold); font-weight:600}
 (function(){
   'use strict';
 
-  /* The five tabs that had no bar. The birthday and The Key keep their own —
-     they came first, and their copies are written for a long read. */
-  const BARS = ['panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel'];
+  /* The tabs that had no bar of their own. The birthday and The Key keep
+     theirs — they came first, and their copies are written for a long read.
+     Today joined on 19 Sep 2026 and takes this bar like the rest. */
+  const BARS = ['panel-today', 'panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel'];
   const BAR =
     '<div class="tools">'
     + '<button class="btn ghost sm speak-btn" data-act="speak">Read it to me</button>'
@@ -539,6 +540,7 @@ ol.steps li b{color:var(--gold); font-weight:600}
      reading is the only screen with two versions of itself. */
   const ROOT = {
     'panel-key':    'k-result',
+    'panel-today':  'td-result',
     'panel-people': 'people-list',
     'panel-pair':   'pair-result',
     'panel-matrix': 'matrix-box',
@@ -764,6 +766,301 @@ ol.steps li b{color:var(--gold); font-weight:600}
   });
 })();
 </script>
+<!-- ─── TODAY — THE DAILY, OFF THE TABLES THIS PAGE ALREADY HAS ─────────────
+     Jacques, 19 Sep 2026, holding up another app's listing that sells a "free
+     daily horoscope, tarot, numerology, birth chart and love compatibility":
+     "can you add these to the horoscope app". Four of those five this app
+     already reads properly, and deeper than a daily card ever does. The fifth
+     was genuinely missing — a birthday reading says the same thing on a Tuesday
+     as it does in June, so there was nothing to open in the morning.
+
+     WHAT IT IS
+     Every line on it comes out of tables already in this file, read for TODAY
+     instead of for a birthday:
+       findPeriod(today)   the week the calendar is in, out of the 48;
+       reduceNum(day)      the number the day of the month gives, by the same
+                           rule the app uses on a birthday's day;
+       tarotIndex(day)     today's Major Arcana, by that same rule;
+       EL_REL / Q_REL      the element and quality tables the PAIR reading uses,
+                           pointed at the week the calendar is in;
+       profileOf(person)   the person's own reading — the real one.
+     Nothing was written for this feature, nothing is predicted, and it flatters
+     nobody. It also calls nothing: no AI, no account, no network, so it works
+     with the phone in a lift and costs nothing to run.
+
+     WHY A BLOCK IN THE HEAD
+     Same reason as the voice block above it. The editor that wrote this cannot
+     reach past roughly the first 60KB of this 1.3MB file, and the engine it
+     would sit beside is at the very bottom of it. A head script that waits for
+     DOMContentLoaded runs after the page's own script has finished, so
+     profileOf, findPeriod, TAROT, NUMBERS and the rest are all defined by the
+     time anything here calls them.
+
+     REGENERATING
+     key.html is generated in the Zodiac repo and copied into here, so this
+     lands on top of whatever that build writes: tools/apply-today.js puts it
+     back, and running it twice changes nothing. -->
+<script>
+/* ─── TODAY ENGINE ─────────────────────────────────────────────────────────
+   The tests slice this block out by these two markers and run it in a bare
+   sandbox, because the ways a daily goes wrong are arithmetic — a month off by
+   one, a birthday counted a day late, a weekday read off the wrong date — and
+   none of that needs a browser to catch. Nothing in here touches the DOM.
+   Everything it reads (PERIODS, TAROT, NUMBERS, EL_REL, Q_REL, profileOf) is
+   the page's own; the sandbox stubs them, so what is tested is the composition:
+   which date goes in, and which of the page's tables comes back out. */
+
+const TD_WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function todayWeekday(d){ return TD_WEEKDAYS[d.getDay()]; }
+
+/* Midnight of the day a Date sits in. Every count below is in whole days, and
+   subtracting a time from a time is how a count ends up a day out after noon. */
+function todayMidnight(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+
+/* Days until the next one of these. 0 is today. A 29 February asked for in a
+   common year lands on 1 March, because that is the day the calendar has. */
+function todayInDays(now, month, day){
+  const today = todayMidnight(now);
+  let next = new Date(today.getFullYear(), month - 1, day);
+  if(next.getTime() < today.getTime()) next = new Date(today.getFullYear() + 1, month - 1, day);
+  return Math.round((next.getTime() - today.getTime()) / 86400000);
+}
+
+/* Whole years, and the days since the last birthday. Null when no year was
+   given: the page never guesses a year anywhere else, so it does not here. */
+function todayAge(now, month, day, year){
+  if(!year) return null;
+  const today = todayMidnight(now);
+  let years = today.getFullYear() - year;
+  let last = new Date(today.getFullYear(), month - 1, day);
+  if(last.getTime() > today.getTime()){
+    years -= 1;
+    last = new Date(today.getFullYear() - 1, month - 1, day);
+  }
+  return { years: years, days: Math.round((today.getTime() - last.getTime()) / 86400000) };
+}
+
+/* The days somebody has been on the planet — the one number on this screen
+   that moves every single morning whether anything else does or not. */
+function todayAlive(now, month, day, year){
+  if(!year) return null;
+  return Math.round((todayMidnight(now).getTime() - new Date(year, month - 1, day).getTime()) / 86400000);
+}
+
+/* The reading itself, as data. person may be null, and that is deliberate: the
+   week the calendar is in, the number and the card belong to the date rather
+   than to anybody, so the morning works before a birthday has been put in. */
+function todayReading(now, person){
+  const m = now.getMonth() + 1, d = now.getDate();
+  const world = findPeriod(m, d);
+  const num = reduceNum(d), card = tarotIndex(d);
+  const R = {
+    m: m, d: d, y: now.getFullYear(),
+    weekday: todayWeekday(now),
+    label: MONTHS[m - 1] + ' ' + d + ', ' + now.getFullYear(),
+    world: { n: world.n, t: world.t, r: world.r,
+             el: SIGNS[world.signs[0]].e, q: SIGNS[world.signs[0]].q },
+    num: { n: num, planet: NUMBERS[num].planet, key: NUMBERS[num].key },
+    card: { n: card, tarot: TAROT[card] },
+    person: null
+  };
+  if(!person) return R;
+  const P = profileOf(person);
+  const mine = { n: P.per.n, t: P.per.t, el: P.elements[0], q: P.qualities[0],
+                 num: P.num, planet: P.planet, card: P.card, tarot: P.tarot };
+  R.person = person;
+  R.mine = mine;
+  R.elRel = EL_REL[relKey(mine.el, R.world.el)] || null;
+  R.qRel = Q_REL[relKey(mine.q, R.world.q)] || null;
+  R.inDays = todayInDays(now, person.month, person.day);
+  R.age = todayAge(now, person.month, person.day, person.year);
+  R.alive = todayAlive(now, person.month, person.day, person.year);
+  return R;
+}
+
+/* What the daily is made of, said on the page itself. This is the one place
+   somebody can find out that nothing here was written for this feature, and the
+   honest limit of it — that the number repeats on this date next year. */
+const TD_NOTE = 'Every line here is this app\u2019s own, read for today\u2019s date rather ' +
+  'than for a birthday: the week the calendar is in out of the 48, the number and the card the ' +
+  'day of the month gives under the same rules it uses for a birthday, and the element and ' +
+  'quality tables the pair reading uses. Nothing was written for this and nothing is guessed. ' +
+  'That is also why the number is the same on this date next year \u2014 what changes every ' +
+  'single morning is the date, and how far off your birthday is.';
+
+/* The page it draws. Built out of the app's own classes — .layer, .dp/.dt/.db,
+   the .pull epigram, the .disclaim — so it sits beside the birthday reading as
+   the same kind of object rather than as a screen bolted onto the side. */
+function todayHtml(R){
+  const box = (t, b) => b ? `<div class="dp"><div class="dt">${t}</div><div class="db">${b}</div></div>` : '';
+  const nm = (R.person && R.person.name) ? esc(firstName(R.person.name)) : '';
+  const asLine = t => esc(t.replace(/^The /, 'the '));
+
+  let lead = `The week the calendar is in is <b>${esc(R.world.n)}</b> &mdash; ${asLine(R.world.t)}.`;
+  if(R.mine){
+    lead += ` You came in under <b>${esc(R.mine.n)}</b> &mdash; ${asLine(R.mine.t)}.`;
+    if(R.elRel) lead += ` The app&rsquo;s own line for ${esc(R.world.el.toLowerCase())} and ` +
+      `${esc(R.mine.el.toLowerCase())}: &ldquo;${R.elRel.line}&rdquo;`;
+  }
+
+  let birthday = '';
+  if(R.person){
+    if(R.inDays === 0) birthday = R.age ? 'Today &mdash; ' + R.age.years + '.' : 'Today.';
+    else birthday = 'In ' + R.inDays + ' day' + (R.inDays === 1 ? '' : 's') +
+      (R.age ? ' &mdash; you turn ' + (R.age.years + 1) + '.' : '.');
+    if(R.alive != null) birthday += ' ' + R.alive.toLocaleString('en-US') + ' days so far.';
+  }
+
+  return `
+  <div class="layer day">
+    <h3>Today <small>${esc(R.weekday)}, ${esc(R.label)}</small></h3>
+    <div class="layer-body">
+      <h4 class="dayname">${esc(R.world.n)} &mdash; ${esc(R.world.t)}</h4>
+      <p class="dayline">The week the calendar is in, out of the 48 &middot; ${esc(R.world.r)} &middot;
+      ${esc(R.world.el)}, ${esc(R.world.q)}</p>
+      <p class="lead">${lead}</p>
+
+      ${R.mine ? `<h4>You, today${nm ? ' &mdash; ' + nm : ''}</h4>` : ''}
+      ${box('Your birthday', birthday)}
+      ${box('Your week', R.mine ? esc(R.mine.n) + ' &mdash; ' + esc(R.mine.t) : '')}
+      ${box('Today&rsquo;s number', R.num.n + ' &mdash; ' + esc(R.num.planet) + ', ' + esc(R.num.key))}
+      ${box('Your number', R.mine ? R.mine.num + ' &mdash; ' + esc(R.mine.planet) : '')}
+      ${box('The two gears', R.qRel ? R.qRel : '')}
+      ${box('Your card', R.mine ? esc(R.mine.tarot.r) + ' ' + esc(R.mine.tarot.n) : '')}
+      ${R.mine ? '' : `<p>Put a name and a birthday in above &mdash; it stays on this device
+        &mdash; and the rest of today&rsquo;s page fills in: your own week, your number, your card,
+        and how far off your birthday is.</p>`}
+
+      <h4>Today&rsquo;s card</h4>
+      <div class="pull epigram">${esc(R.card.tarot.r)} ${esc(R.card.tarot.n)} &mdash; ${R.card.tarot.line}</div>
+
+      <p class="disclaim">${esc(TD_NOTE)}</p>
+    </div>
+  </div>`;
+}
+/* ─── END TODAY ENGINE ─── */
+
+(function(){
+  'use strict';
+
+  /* The person the morning is about. Kept here rather than in the Read tab's
+     form because Today is the screen the page opens on, and it has to work
+     before anybody has read a single birthday. */
+  const TD_KEY = 'personology.today.v1';
+  const el = id => document.getElementById(id);
+
+  function storedPerson(){
+    try{ return JSON.parse(localStorage.getItem(TD_KEY) || 'null'); }catch(e){ return null; }
+  }
+  function remember(p){
+    try{
+      localStorage.setItem(TD_KEY, JSON.stringify({ name: p.name || '', month: p.month, day: p.day, year: p.year || null }));
+    }catch(e){ /* storage refused; the morning still draws */ }
+  }
+
+  /* The months, once. Filled from load() as well as from wire(), because the
+     page's own script calls load() from the bottom of the body — before
+     DOMContentLoaded, so before wire() would otherwise have put them in — and
+     an empty select on this screen means a birthday of 0/0, which is nobody. */
+  function fillOptions(){
+    const ms = el('td-month');
+    if(ms && !ms.options.length){
+      ms.innerHTML = MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
+    }
+  }
+
+  /* The day count moves with the month, exactly as it does on the Read tab. */
+  function daysFor(month, keep){
+    const ds = el('td-day');
+    if(!ds) return;
+    const max = DIM[month - 1];
+    const cur = keep != null ? keep : (+ds.value || 1);
+    ds.innerHTML = Array.from({ length: max }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
+    ds.value = Math.min(cur, max);
+  }
+  function fillFields(p){
+    el('td-name').value = (p && p.name) || '';
+    el('td-month').value = (p && p.month) || 1;
+    daysFor(+(el('td-month').value), p ? p.day : null);
+    el('td-year').value = (p && p.year) ? String(p.year) : '';
+  }
+
+  /* The Read tab's own rules and its own words, so the year field cannot behave
+     one way up there and another way down here. */
+  function personFromForm(){
+    const name = (el('td-name').value || '').trim();
+    const month = +el('td-month').value, day = +el('td-day').value;
+    const raw = (el('td-year').value || '').trim();
+    const year = raw ? parseInt(raw, 10) : null;
+    if(raw && (!/^\d{4}$/.test(raw) || year < 1000 || year > 3000)){
+      return { err: 'Year should be four digits, or left blank.' };
+    }
+    if(month === 2 && day === 29 && year && !isLeap(year)){
+      return { err: `${year} was not a leap year — there is no 29 February in it.` };
+    }
+    return { person: { name: name, month: month, day: day, year: year } };
+  }
+
+  function show(){
+    const err = el('td-err'), out = el('td-result');
+    if(!err || !out) return;
+    const r = personFromForm();
+    err.textContent = '';
+    if(r.err){ err.textContent = r.err; out.innerHTML = ''; return; }
+    const p = r.person;
+    /* An untouched form is not somebody: nobody gets a reading for 1 January
+       out of a page they have not filled in. The date lines come up anyway,
+       because they belong to today rather than to the person — and a date that
+       does not exist reads as the date lines too, rather than as a fault on a
+       screen somebody opened to look at their morning. */
+    const real = p.month >= 1 && p.month <= 12 && p.day >= 1 && p.day <= DIM[p.month - 1];
+    const mine = real && (p.name || p.year || p.month !== 1 || p.day !== 1) ? p : null;
+    if(mine) remember(mine);
+    out.innerHTML = todayHtml(todayReading(new Date(), mine));
+  }
+
+  function load(){
+    fillOptions();
+    const saved = storedPerson();
+    if(saved) fillFields(saved);
+    show();
+  }
+
+  function wire(){
+    const month = el('td-month');
+    if(!month) return;                       /* the panel is not on this page */
+    fillOptions();
+    month.addEventListener('change', () => { daysFor(+month.value); show(); });
+    ['td-day','td-year','td-name'].forEach(id => el(id).addEventListener('change', show));
+    el('td-show').addEventListener('click', show);
+    const tab = el('tab-today');
+    if(tab) tab.addEventListener('click', show);
+
+    /* Whoever was last read on the Read tab is who the morning is about — the
+       same person the app has just been asked to read. */
+    ['btn-read','btn-save'].forEach(id => {
+      const b = el(id);
+      if(!b) return;
+      b.addEventListener('click', () => {
+        const r = currentInput();
+        if(!r || !r.person) return;
+        fillFields(r.person);
+        show();
+      });
+    });
+
+    load();
+  }
+
+  document.addEventListener('DOMContentLoaded', wire);
+
+  /* The page's own script, at the bottom of the body, calls this when there is
+     no reading in the address bar: Today is the screen that opens. */
+  window.todayLoad = load;
+  window.todayShow = show;
+})();
+</script>
 </head>
 <body>
 <canvas id="stars"></canvas>
@@ -853,7 +1150,8 @@ ol.steps li b{color:var(--gold); font-weight:600}
 </div>
 
 <nav class="tabs" role="tablist">
-  <button role="tab" id="tab-read"   aria-selected="true"  data-panel="panel-read">Read a birthday</button>
+  <button role="tab" id="tab-today"  aria-selected="true"  data-panel="panel-today">Today</button>
+  <button role="tab" id="tab-read"   aria-selected="false" data-panel="panel-read">Read a birthday</button>
   <button role="tab" id="tab-people" aria-selected="false" data-panel="panel-people">People <span id="count"></span></button>
   <button role="tab" id="tab-pair"   aria-selected="false" data-panel="panel-pair">Pair</button>
   <button role="tab" id="tab-matrix" aria-selected="false" data-panel="panel-matrix">Matrix</button>
@@ -862,8 +1160,27 @@ ol.steps li b{color:var(--gold); font-weight:600}
   <button role="tab" id="tab-wheel"  aria-selected="false" data-panel="panel-wheel">The 48</button>
 </nav>
 
+<!-- TODAY — the daily. Its own name and birthday rather than the Read tab's, so
+     the morning works before anything has been saved. The read-aloud bar is put
+     on it by the voice block in the head, like every other tab. -->
+<section class="panel" id="panel-today" role="tabpanel">
+  <div class="card">
+    <div class="form-grid">
+      <div><label for="td-name">Name</label><input id="td-name" type="text" placeholder="Your name" autocomplete="off"></div>
+      <div><label for="td-month">Birth month</label><select id="td-month"></select></div>
+      <div><label for="td-day">Day</label><select id="td-day"></select></div>
+      <div><label for="td-year">Year <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="td-year" type="text" inputmode="numeric" placeholder="1990" maxlength="4" autocomplete="off"></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="td-show">Show today</button>
+    </div>
+    <div class="err" id="td-err"></div>
+  </div>
+  <div class="result" id="td-result"></div>
+</section>
+
 <!-- READ -->
-<section class="panel" id="panel-read" role="tabpanel">
+<section class="panel" id="panel-read" role="tabpanel" hidden>
   <div class="card">
     <div class="form-grid">
       <div><label for="f-name">Name</label><input id="f-name" type="text" placeholder="Who is this?" autocomplete="off"></div>
@@ -6055,7 +6372,7 @@ addEventListener('keydown', e=>{
 backPaint();
 
 updateCount(); fillPairSelects();
-if(!applyHash()) $('f-name').focus();
+if(!applyHash()) todayLoad();
 </script>
 <script>
 /* ============================================================

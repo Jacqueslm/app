@@ -433,9 +433,9 @@ smallLen = input.int(3, "Small chart swing length", minval=2, maxval=20, group="
 showRead = input.bool(true, "Show the read", group="The read")
 lvlCol   = input.color(#ffeb3b, "Level line", group="The read")
 lowCol   = input.color(color.new(color.gray, 15), "4h low line", group="The read")
-readSize = input.string("normal", "Table text", options=["tiny", "small", "normal"], group="The read")
+readSize = input.string("large", "Table text", options=["tiny", "small", "normal", "large", "huge"], group="The read")
 
-readText = readSize == "tiny" ? size.tiny : readSize == "small" ? size.small : size.normal
+readText = readSize == "tiny" ? size.tiny : readSize == "small" ? size.small : readSize == "normal" ? size.normal : readSize == "large" ? size.large : size.huge
 
 [f4hPh, f4hPhT, f4hPl, f4hPlT, f4hClose] = request.security(syminfo.tickerid, "240", [f_phVal(frameLen), f_phTok(frameLen), f_plVal(frameLen), f_plTok(frameLen), close[1]], lookahead=barmerge.lookahead_off)
 
@@ -544,13 +544,13 @@ if showRead and barstate.islast
     table.cell(dash, 1, 2, na(frameLow) ? "none yet" : str.tostring(frameLow, format.mintick), text_size=readText, text_color=color.white)
     table.cell(dash, 0, 3, "4h lower low made", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 3, haveFrame ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 4, "At the level or working back", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 0, 4, "At the level / working back", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 4, (atLevel or retracing) ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 5, "Small chart higher highs, higher low held", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 0, 5, "Small chart turned up", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 5, ltfUp ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 6, "4h closed above the level", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 0, 6, "4h close above the level", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 6, changed ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 7, "4h swings seen (high / low)", text_size=readText, text_color=color.new(color.white, 45))
+    table.cell(dash, 0, 7, "4h swings seen (H / L)", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 7, str.tostring(seenPh) + " / " + str.tostring(seenPl), text_size=readText, text_color=color.white)
     table.cell(dash, 0, 8, "Verdict", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 8, verdict, text_size=readText, text_color=shortOk ? color.red : longOk ? color.teal : color.new(color.white, 35))

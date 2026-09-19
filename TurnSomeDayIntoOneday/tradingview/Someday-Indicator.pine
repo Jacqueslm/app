@@ -513,7 +513,11 @@ if changed
 
 justEnded = not na(frameEnded) and bar_index - frameEnded <= 20
 
-stateName = justEnded ? "frame changed" : not haveFrame ? "no frame yet" : underLow ? "under the low" : atLevel ? "level in play" : "retracing"
+// The twenty-bar memory of the cancellation can only speak while no frame is up.
+// Without that guard it kept saying "frame changed" over a brand new frame that
+// had formed inside those twenty bars, so the box could read "frame changed" and
+// "long scalp" at the same time - two answers that cannot both be true.
+stateName = justEnded and not haveFrame ? "frame changed" : not haveFrame ? "no frame yet" : underLow ? "under the low" : atLevel ? "level in play" : "retracing"
 
 // The small chart: higher highs, and the last higher low still holding - a
 // close under it ends the hold, a wick does not.

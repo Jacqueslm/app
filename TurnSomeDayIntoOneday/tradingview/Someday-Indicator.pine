@@ -40,9 +40,17 @@ cleanBands = input.bool(true, "Clean up level overlap", group="Zones")
 zoneBack   = input.int(6, "A new zone reaches back (bars)", minval=1, maxval=60, group="Zones")
 zoneLive   = input.int(300, "Zone life (bars)", minval=10, maxval=2000, group="Zones")
 keepBroken = input.bool(false, "Keep zones price has taken out", group="Zones")
-bullCol    = input.color(color.new(#26a69a, 85), "Bullish zone", group="Zones")
-bearCol    = input.color(color.new(#ef5350, 85), "Bearish zone", group="Zones")
-edgeCol    = input.color(color.new(color.gray, 55), "Zone edge", group="Zones")
+// 19 September 2026 - redrawn to sit beside the zones he already trades off.
+// What changed and why: the box was a grey outline with a nearly invisible fill
+// and dotted levels inside it, so it read as clutter next to the other zone
+// indicator on his chart. A zone now wears its own side's colour as an edge, the
+// fill carries further, and the levels inside it are off unless he asks for
+// them. The levels are still one tick away in "Retracements".
+bullCol    = input.color(color.new(#26a69a, 78), "Bullish zone", group="Zones")
+bearCol    = input.color(color.new(#ef5350, 78), "Bearish zone", group="Zones")
+bullEdge   = input.color(#26a69a, "Bullish edge", inline="edge", group="Zones")
+bearEdge   = input.color(#ef5350, "Bearish edge", inline="edge", group="Zones")
+zoneFib    = input.bool(false, "Draw the levels inside zones", group="Zones")
 
 // -------------------------------------------------------------- retracements
 // Ticked here, drawn inside both: the supply and demand zones, and the boxes
@@ -142,23 +150,23 @@ f_plTok(simple int len) =>
 
 makeZone(bool supply, float top, float bottom, int left) =>
     right = bar_index + 20
-    z = Zone.new(box.new(left, top, right, bottom, border_color=edgeCol, border_width=1, bgcolor=supply ? bearCol : bullCol), na, na, na, na, na)
+    z = Zone.new(box.new(left, top, right, bottom, border_color=supply ? bearEdge : bullEdge, border_width=1, bgcolor=supply ? bearCol : bullCol), na, na, na, na, na)
     span = top - bottom
     if span > 0
         st = lineStyle()
-        if fib0
+        if zoneFib and fib0
             lv = supply ? top : bottom
             z.f0 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if fib3
+        if zoneFib and fib3
             lv = supply ? top - span * 0.3 : bottom + span * 0.3
             z.f3 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if fib5
+        if zoneFib and fib5
             lv = supply ? top - span * 0.5 : bottom + span * 0.5
             z.f5 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if fib7
+        if zoneFib and fib7
             lv = supply ? top - span * 0.7 : bottom + span * 0.7
             z.f7 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if fib1
+        if zoneFib and fib1
             lv = supply ? bottom : top
             z.f1 := line.new(left, lv, right, lv, color=fibCol, style=st)
     z

@@ -726,6 +726,28 @@ function makeScenario(seed){
   function lows(a,b){ var m=1e9; for(var x=a;x<b;x++) m=Math.min(m,bars[x].l); return m }
   function highs(a,b){ var m=-1e9; for(var x=a;x<b;x++) m=Math.max(m,bars[x].h); return m }
 
+  /* ── the turn off the level ───────────────────────────────────────────────
+     The pullback used to end ON the level, which left the entry and the
+     structural stop the same price: on some seeds the stop question offered
+     "just beyond the level (104.62)" against "close in at 104.60", two prices
+     nobody can tell apart — not by eye, not on the scale, not by reading the
+     number. His own words: "the number in the question answers and on the chart
+     are incompatible doesn't makes sense I'm still guessing."
+
+     It is also not the trade the lessons describe. Price comes into the level
+     and TURNS: that turn is the entry, and it is what puts distance between the
+     entry and the place the idea dies. So the bars are walked off the level
+     until the entry has cleared an ATR, and only then is the decision made. */
+  function turnOff(level, dir){
+    var guard = 0;
+    while(guard++ < 8){
+      var a = atrAt(bars, bars.length - 1);
+      var away = (base - level) * dir;          /* how far past the level, signed */
+      if(away >= a * 1.2) break;
+      push(1, dir * Math.max(a * 0.6, a * 1.3 - away), 0.5);
+    }
+  }
+
   var shape = Math.floor(r()*6), read, exp, stopPrice, note, mark = {};
   /* Where the chart stops and the decision is made. Captured here rather than
      read off bars.length at the end: the outcome bars are appended below, and
@@ -740,6 +762,7 @@ function makeScenario(seed){
     var pullStart = impEnd, sup = lows(pullStart, bars.length);
     read = 0; exp = "long"; stopPrice = sup;
     mark = {sup:sup, res:highs(0, impEnd)};
+    turnOff(stopPrice, exp === "short" ? -1 : 1);
     decisionAt = bars.length - 1;
     if(shape===0){ push(16, 0.52, 0.85);
       note = "It held and continued, exactly as the structure suggested. That does not make the read clever — it makes it ordinary.";
@@ -753,6 +776,7 @@ function makeScenario(seed){
     var rallyStart = dnEnd, res = highs(rallyStart, bars.length);
     read = 1; exp = "short"; stopPrice = res;
     mark = {res:res, sup:lows(0, dnEnd)};
+    turnOff(stopPrice, exp === "short" ? -1 : 1);
     decisionAt = bars.length - 1;
     push(16, -0.50, 0.9);
     note = "It rolled over from the level. Shorting strength in a downtrend is the same trade as buying weakness in an uptrend, mirrored.";
@@ -763,6 +787,7 @@ function makeScenario(seed){
     push(10, 0.26, 0.7);
     read = 2; exp = "wait"; stopPrice = bandLo;
     mark = {sup:bandLo, res:bandHi};
+    turnOff(bandLo, exp === "short" ? -1 : 1);
     decisionAt = bars.length - 1;
     push(14, -0.05, 0.85);
     base = bars[bars.length-1].c;
@@ -777,6 +802,7 @@ function makeScenario(seed){
     push(5, 1.10, 0.7);                   // the reclaim
     read = 3; exp = "long"; stopPrice = sweepLow;
     mark = {sup:sweepLow, res:highs(0, 12)};
+    turnOff(sweepLow, exp === "short" ? -1 : 1);
     decisionAt = bars.length - 1;
     push(18, 0.55, 0.9);
     note = "The stops under the lows were taken and price came straight back. That is a sweep, not a break — the return is the tell.";
@@ -788,6 +814,7 @@ function makeScenario(seed){
     push(8, -0.55, 0.7);                  // the retest
     read = 4; exp = "long"; stopPrice = Math.min(lows(broke, bars.length), rHi - 0.4);
     mark = {sup:rHi, res:highs(0, broke)};
+    turnOff(rHi, exp === "short" ? -1 : 1);
     decisionAt = bars.length - 1;
     push(16, 0.55, 0.85);
     note = "Old resistance held as support on the way back, which is what makes the retest the better trade than the break itself.";
@@ -812,11 +839,20 @@ function stopOptionsFor(exp, stopPrice, entry, atr){
      it for a long, above it for a short. These two were inverted, which offered
      a "close in" stop that would have triggered on the entry bar. */
   var tight = exp === "short" ? entry + atr*0.2 : entry - atr*0.2;
-  var flat = exp === "short" ? entry + atr*3 : entry - atr*3;
+  /* THE THIRD ONE IS TOO WIDE, NOT ARBITRARY, and the two distances are what
+     make this question answerable. Every version of it as a fixed number of
+     bars out collided with the right answer on some seed — the distance from
+     the entry to the level runs from about one average bar to five and a half
+     on this page, so no fixed number is ever clear of it. Two bars beyond where
+     the idea dies is clear of it by construction, and it is the mistake the
+     risk drill sets with its doubled stop: risking more than the setup asks.
+     Each option carries p, its price, so the chart can show a scale covering
+     all three. */
+  var wide = exp === "short" ? structural + atr*2 : structural - atr*2;
   return [
-    {txt:"Just beyond the level that would prove the idea wrong (" + money(structural) + ")", ok:true},
-    {txt:"Close in at " + money(tight) + ", to lose less when it wobbles", ok:false},
-    {txt:"A flat " + money(flat) + ", whatever the chart is doing", ok:false}
+    {txt:"Just beyond the level that would prove the idea wrong (" + money(structural) + ")", p:structural, ok:true},
+    {txt:"Close in at " + money(tight) + ", to lose less when it wobbles", p:tight, ok:false},
+    {txt:"Further out at " + money(wide) + ", so ordinary noise cannot reach it", p:wide, ok:false}
   ];
 }
 
@@ -950,9 +986,9 @@ function makeTimingScenario(seed){
   var q3 = {
     t: turns ? "Where does the stop belong on this one?" : "If the trigger comes later, where does the stop belong?",
     opts: [
-      {txt:"Beyond the 4h wick's low (" + money(wickLow) + ") — where the rejection is disproved", ok:true},
+      {txt:"Beyond the 4h wick's low (" + money(wickLow) + ") — where the rejection is disproved", p:wickLow, ok:true},
       {txt:"A few ticks under your own 5m entry, to lose less when it wobbles", ok:false},
-      {txt:"A flat " + money(wickLow - atr*3) + ", the same on every trade", ok:false}
+      {txt:"A flat " + money(wickLow - atr*3) + ", the same on every trade", p:wickLow - atr*3, ok:false}
     ],
     say:{
       yes:"Right. The small chart gives the entry; the big chart gives the invalidation. The read is dead when price takes out the wick's low, so that is where the stop lives.",
@@ -1104,12 +1140,34 @@ function drawChart(cv, bars, opts){
   for(i=0;i<n;i++){ hi = Math.max(hi, bars[i].h); lo = Math.min(lo, bars[i].l) }
   var lines = opts.lines || [];
   for(i=0;i<lines.length;i++){ hi = Math.max(hi, lines[i].p); lo = Math.min(lo, lines[i].p) }
+  /* Prices the question quotes that are not lines on the chart. They go into the
+     range and nothing is drawn for them, so every number he is asked to choose
+     between can be found on the picture — including the one that sits nowhere
+     near the price, which is the whole argument against it. Before this the
+     "flat distance" option sat 20 points above the top of the scale: a number he
+     could not see anywhere, on a question about picking between three numbers. */
+  var range = opts.range || [];
+  for(i=0;i<range.length;i++){ hi = Math.max(hi, range[i]); lo = Math.min(lo, range[i]) }
   var pad = (hi - lo) * 0.08 || 1;
   hi += pad; lo -= pad;
   var padT = H*0.10, padB = H*0.10;
   function yOf(p){ return padT + (hi - p) / (hi - lo) * (H - padT - padB) }
   var bw = W / n;
   var body = Math.max(1, Math.min(bw*0.62, 14));
+
+  /* THE PRICE SCALE. He said it in his own words: "the number in the question
+     answers and on the chart are incompatible ... I'm still guessing". Every
+     question in this school asks him to choose between prices — where the stop
+     belongs, what 1R comes to — and there was no number anywhere on the picture
+     to check one against. So the scale is drawn: four gridlines under the
+     candles, and the numbers over the top of everything when the drawing is
+     done, because a label the candles can cover is a label he cannot read. */
+  var AXIS_STEPS = 3;
+  for(i=0;i<=AXIS_STEPS;i++){
+    var yg = yOf(hi - (hi - lo) * i / AXIS_STEPS);
+    c.save(); c.globalAlpha = 0.16; c.strokeStyle = dim; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(0, yg); c.lineTo(W, yg); c.stroke(); c.restore();
+  }
 
   for(i=0;i<n;i++){
     var b = bars[i];
@@ -1133,11 +1191,26 @@ function drawChart(cv, bars, opts){
     c.restore();
     if(L.label){
       c.fillStyle = L.colour || dim;
-      c.font = Math.round(H*0.062) + "px -apple-system,Segoe UI,Roboto,sans-serif";
-      var tw = c.measureText(L.label).width;
-      c.fillText(L.label, W - tw - 6, y - 4 > 10 ? y - 4 : y + H*0.075);
+      c.font = Math.round(H*0.058) + "px -apple-system,Segoe UI,Roboto,sans-serif";
+      /* The line's own price, on the line. "zone top" tells him nothing he can
+         check an answer against; "zone top 100.80" is the number the questions
+         are about. */
+      var lab = L.label + ' ' + money(L.p);
+      var tw = c.measureText(lab).width;
+      c.fillText(lab, W - tw - 6, y - 4 > 10 ? y - 4 : y + H*0.075);
     }
   }
+
+
+  /* The scale's numbers, drawn last, over the candles and the lines both. */
+  c.textAlign = "right";
+  c.font = Math.round(H*0.052) + "px -apple-system,Segoe UI,Roboto,sans-serif";
+  c.fillStyle = dim;
+  for(i=0;i<=AXIS_STEPS;i++){
+    c.fillText(money(hi - (hi - lo) * i / AXIS_STEPS), W - 4,
+      Math.min(H - 3, Math.max(H*0.06, yOf(hi - (hi - lo) * i / AXIS_STEPS) - 3)));
+  }
+  c.textAlign = "start";
 }
 
 /* ══ UI STATE ════════════════════════════════════════════════════════════════ */
@@ -1786,6 +1859,12 @@ function makeRiskScenario(seed){
   }
 
   return {seed:seed, dir:sgn > 0 ? "long" : "short", bars:bars, decision:decision,
+          /* The three stops the first question offers, so the chart can show the
+             scale they have to be read on. He said it: "the number in the
+             question answers and on the chart are incompatible ... I'm still
+             guessing" — and one of these three used to sit 20 points above the
+             top of the scale, a number with nothing to look at. */
+          stopPrices:[stop, inside, flat],
           zoneLo:zoneLo, zoneHi:zoneHi, entry:entry, stop:stop, risk:risk,
           target:target, avail:avail, oneToOne:oneToOne, won:won, recovered:recovered,
           end:end, takenRight:false, note:note,
@@ -1817,7 +1896,9 @@ function drawRisk(cv){
     lines.push({p:d.stop, colour:cssv("--down", "#FF6B7A"), label:"stop -1R"});
     lines.push({p:d.target, colour:cssv("--up", "#4ADEA5"), label:"target 1R"});
   }
-  drawChart(cv, vis, {lines:lines});
+  /* stopPrices is not drawn — it only widens the range, so all three stops the
+     question offers can be found on the scale instead of two of them. */
+  drawChart(cv, vis, {lines:lines, range:d.stopPrices});
 }
 
 /* The risk tab: the drill at the top, the strand under it. The drill is first
@@ -2004,7 +2085,8 @@ function paint(){
       if(d && d.timing){
         var hl = [{p:d.level.sup, colour:cssv("--tm","#888780"), label:"level"}];
         if(UI.revealed && d.wickLow) hl.push({p:d.wickLow, colour:cssv("--down","#FF6B7A"), label:"wick low"});
-        drawChart(cv, d.htf.slice(0, UI.revealed ? d.htf.length : d.htfDecision + 1), {lines:hl});
+        drawChart(cv, d.htf.slice(0, UI.revealed ? d.htf.length : d.htfDecision + 1), {lines:hl,
+          range:d.questions[2].opts.map(function(o){ return o.p }).filter(function(x){ return typeof x === 'number' && isFinite(x) })});
         var cv2 = document.getElementById("cv2");
         if(cv2) drawChart(cv2, d.ltf.slice(0, UI.revealed ? d.ltf.length : d.decision + 1),
           {lines:[{p:d.level.sup, colour:cssv("--tm","#888780"), label:"level"}]});
@@ -2015,7 +2097,8 @@ function paint(){
           if(d.level.sup) lines.push({p:d.level.sup, colour:cssv("--tm","#888780"), label:"level"});
           if(d.level.res) lines.push({p:d.level.res, colour:cssv("--tm","#888780"), label:"level"});
         }
-        drawChart(cv, vis, {lines:lines});
+        drawChart(cv, vis, {lines:lines,
+          range:(d.stopOptions||[]).map(function(o){ return o.p }).filter(function(x){ return typeof x === 'number' && isFinite(x) })});
       }
     } else if(UI.tab === "risk"){
       drawRisk(cv);

@@ -37,6 +37,21 @@ function inlineScript(file) {
   return out;
 }
 
+// The recording 2d context: every fillText lands in the element's _texts, so a
+// test can read back the numbers on the chart.
+function fakeCtx(store) {
+  const noop = () => {};
+  return {
+    fillStyle: '', strokeStyle: '', lineWidth: 1, font: '', textAlign: 'start', globalAlpha: 1,
+    fillRect: noop, clearRect: noop, strokeRect: noop, arc: noop, rect: noop,
+    beginPath: noop, closePath: noop, moveTo: noop, lineTo: noop, stroke: noop, fill: noop,
+    save: noop, restore: noop, setLineDash: noop, translate: noop, scale: noop, clip: noop,
+    fillText: (t) => store.push(String(t)),
+    strokeText: (t) => store.push(String(t)),
+    measureText: (t) => ({ width: String(t).length * 6 }),
+  };
+}
+
 function stubDom() {
   const els = new Map();
   const mk = (id) => {
@@ -58,7 +73,14 @@ function stubDom() {
       removeAttribute(n) { delete this.attributes[n] },
       getAttribute(n) { return this.attributes[n] === undefined ? null : this.attributes[n] },
       focus() {}, closest() { return null }, querySelectorAll() { return [] },
-      appendChild() {}, remove() {}, getContext() { return null }, scrollIntoView() {},
+      appendChild() {}, remove() {}, scrollIntoView() {},
+      _texts: [],
+      // A canvas that records what is drawn on it. Without this drawChart
+      // returns at its first line and the thing he complained about — "the
+      // number in the question answers and on the chart are incompatible" —
+      // cannot be checked at all. Anything a 2d context does that this does not
+      // implement would throw here, which is the point: the drawing is real.
+      getContext() { return this.__ctx || (this.__ctx = fakeCtx(this._texts)) },
     };
     return el;
   };
@@ -760,6 +782,117 @@ test('the risk lessons open, mark and count like every other lesson', () => {
 
   click(S, 'view', { 'data-a': 'toLevels' });
   assert.match(page.els.get('view').innerHTML, /The risk strand/, 'back to the strand, not to the levels');
+});
+
+// ── what is on the picture ──────────────────────────────────────────────────
+// Jacques, 19 Sep 2026, after the risk strand shipped: "the number in the
+// question answers and on the chart are incompatible doesn't makes sense I'm
+// still guessing." He was reading the drills exactly right. drawChart drew
+// candles and lines and not one number anywhere on the page — no scale, and the
+// lines labelled "zone top", "entry", "stop" with no prices — while the
+// questions asked him to choose between 100.40 and 103.60.
+
+test('the chart carries a price scale, and the bars sit inside it', () => {
+  click(S, 'tabs', { 'data-t': 'risk' });
+  const d = S.UI.risk;
+  const cv = page.els.get('cv');
+  cv._texts.length = 0;
+  click(S, 'tabs', { 'data-t': 'risk' });
+  const texts = cv._texts.slice();
+  const nums = texts.map((t) => parseFloat(t)).filter((n) => isFinite(n));
+  assert.ok(nums.length >= 4, `a scale of four prices: ${JSON.stringify(texts)}`);
+  for (const n of nums) assert.ok(Number.isInteger(Math.round(n * 100)) , `"${n}" is not a price`);
+
+  const vis = d.bars.slice(0, d.decision + 1);
+  const hi = Math.max(...vis.map((b) => b.h)), lo = Math.min(...vis.map((b) => b.l));
+  assert.ok(Math.max(...nums) >= hi, 'the top of the scale is at or above the highest high');
+  assert.ok(Math.min(...nums) <= lo, 'and the bottom at or below the lowest low');
+});
+
+test('the questions ask about prices that are on the picture', () => {
+  click(S, 'tabs', { 'data-t': 'risk' });
+  const cv = page.els.get('cv');
+  cv._texts.length = 0;
+  click(S, 'tabs', { 'data-t': 'risk' });
+  const d = S.UI.risk;
+  const joined = cv._texts.join(' | ');
+
+  // The stop question is about the zone's two edges, so both are named with
+  // their prices while the questions are open. "zone top" on its own was the
+  // thing he could not check an answer against.
+  assert.ok(joined.includes(S.money(d.zoneHi)), `the near edge is on the chart: ${joined}`);
+  assert.ok(joined.includes(S.money(d.zoneLo)), `and the far edge, where the stop goes: ${joined}`);
+
+  // And every price the options offer him is inside the scale he is given, so he
+  // can find each one on the picture instead of guessing between three numbers.
+  const nums = cv._texts.map((t) => parseFloat(t)).filter((n) => isFinite(n));
+  const top = Math.max(...nums), bottom = Math.min(...nums);
+  const offered = d.questions[0].opts.map((o) => Number(o.txt.match(/([0-9]+\.[0-9]+)/)[1]));
+  assert.ok(offered.length === 3 && offered.every((n) => isFinite(n)), 'three prices offered');
+  for (const n of offered) {
+    assert.ok(n >= bottom && n <= top, `${n} is off the scale he is given (${bottom}..${top})`);
+  }
+
+  // Once it is revealed, the plan's own numbers are on it too.
+  for (let i = 0; i < 5; i++) {
+    const right = d.questions[i].opts.findIndex((o) => o.ok);
+    click(S, 'view', { 'data-a': 'riskans', 'data-q': i, 'data-o': right });
+  }
+  const after = cv._texts.join(' | ');
+  for (const p of [d.entry, d.stop, d.target]) {
+    assert.ok(after.includes(S.money(p)), `${S.money(p)} is not on the chart: ${after}`);
+  }
+});
+
+test('the stop question offers three prices that can be told apart', () => {
+  // 19 Sep 2026, the same complaint: he was still guessing, and on some seeds he
+  // was right to be. The pullback ended ON the level, so the entry and the place
+  // the idea dies were the same price and two of the three options came out two
+  // cents apart — "just beyond the level (104.62)" against "close in at 104.60".
+  for (let seed = 1; seed <= 60; seed++) {
+    const d = S.makeScenario(seed);
+    const ps = d.stopOptions.map((o) => Number(o.txt.match(/([0-9]+\.[0-9]+)/)[1]));
+    assert.strictEqual(ps.length, 3, `seed ${seed}: three stops are offered`);
+    const [structural, tight, wide] = ps;
+    const up = d.exp === 'short' ? -1 : 1;          // which way is safe
+    // The entry is the decision bar's close: the scenario does not carry it as
+    // its own field, and reading it from a field that does not exist made this
+    // test fail on nothing at all the first time it ran.
+    const entry = d.bars[d.decision].c;
+
+    assert.ok(Math.abs(structural - tight) > d.atr * 0.5,
+      `seed ${seed}: the two stops are the same price (${structural} vs ${tight})`);
+    assert.ok(Math.abs(wide - structural) > d.atr,
+      `seed ${seed}: the further-out one cannot be told from the right one (${structural} vs ${wide})`);
+    // And every one of them carries its own price, so the chart's scale can be
+    // told to cover the three numbers the question offers.
+    for (const o of d.stopOptions) assert.ok(isFinite(o.p), `seed ${seed}: an option with no price`);
+    const toEntry = (entry - tight) * up, toStruct = (entry - structural) * up;
+    assert.ok(toStruct > 0, `seed ${seed}: the right stop is on the winning side of the entry`);
+    assert.ok(toEntry > 0 && toEntry < toStruct,
+      `seed ${seed}: the close-in stop is not between the entry and the level`);
+    // And what puts that distance there: the entry has turned off the level.
+    assert.ok(toStruct >= d.atr, `seed ${seed}: the entry is still sitting on the level`);
+  }
+});
+
+test('every drill chart carries the scale, not only the risk one', () => {
+  const scaleOn = (id) => {
+    const cv = page.els.get(id);
+    cv._texts.length = 0;
+    click(S, 'tabs', { 'data-t': 'drills' });
+    return cv._texts.slice();
+  };
+  click(S, 'tabs', { 'data-t': 'drills' });
+  click(S, 'view', { 'data-a': 'newdrill' });
+  const one = scaleOn('cv');
+  assert.ok(one.filter((t) => isFinite(parseFloat(t))).length >= 4, `the reading drill: ${JSON.stringify(one)}`);
+
+  click(S, 'view', { 'data-a': 'newtiming' });
+  const big = scaleOn('cv'), small = scaleOn('cv2');
+  assert.ok(big.filter((t) => isFinite(parseFloat(t))).length >= 4, `the 4h chart: ${JSON.stringify(big)}`);
+  assert.ok(small.filter((t) => isFinite(parseFloat(t))).length >= 4, `the 5m chart: ${JSON.stringify(small)}`);
+  click(S, 'view', { 'data-a': 'newdrill' });
 });
 
 test('the teacher inside the school answers risk in his own method', () => {

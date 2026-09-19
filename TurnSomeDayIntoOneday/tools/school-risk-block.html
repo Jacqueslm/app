@@ -246,6 +246,12 @@ function makeRiskScenario(seed){
   }
 
   return {seed:seed, dir:sgn > 0 ? "long" : "short", bars:bars, decision:decision,
+          /* The three stops the first question offers, so the chart can show the
+             scale they have to be read on. He said it: "the number in the
+             question answers and on the chart are incompatible ... I'm still
+             guessing" — and one of these three used to sit 20 points above the
+             top of the scale, a number with nothing to look at. */
+          stopPrices:[stop, inside, flat],
           zoneLo:zoneLo, zoneHi:zoneHi, entry:entry, stop:stop, risk:risk,
           target:target, avail:avail, oneToOne:oneToOne, won:won, recovered:recovered,
           end:end, takenRight:false, note:note,
@@ -277,7 +283,9 @@ function drawRisk(cv){
     lines.push({p:d.stop, colour:cssv("--down", "#FF6B7A"), label:"stop -1R"});
     lines.push({p:d.target, colour:cssv("--up", "#4ADEA5"), label:"target 1R"});
   }
-  drawChart(cv, vis, {lines:lines});
+  /* stopPrices is not drawn — it only widens the range, so all three stops the
+     question offers can be found on the scale instead of two of them. */
+  drawChart(cv, vis, {lines:lines, range:d.stopPrices});
 }
 
 /* The risk tab: the drill at the top, the strand under it. The drill is first

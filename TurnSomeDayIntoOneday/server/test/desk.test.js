@@ -966,6 +966,186 @@ test('a signed-out request for the desk never gets the file', async () => {
   }
 });
 
+// ── the frame, read off the page's own bars ─────────────────────────────────
+//
+// Jacques, 19 Sep 2026: "build the desk reading its own chart". The script on
+// his TradingView chart (Someday) reads a frame — a lower low sets the level and
+// the frame low, only a CLOSE above the level cancels it, and the small chart is
+// read for higher highs with the last higher low still holding — and he had to
+// carry that read to the assistant by hand. The page works it out now, from its
+// own candles, so the two can be held against each other.
+//
+// What is checked here is the two things that would make this worse than no read
+// at all:
+//   1. A cancelled frame left standing. A level from hours ago next to a live
+//      price is exactly what he complained about on his own chart — so a
+//      cancelled frame must show NO price, and the assistant must be told not to
+//      supply one.
+//   2. A verdict read off nothing. "short" and "long scalp" may only come out of
+//      bars that actually came back, on the timeframe the page names.
+
+// The fixtures. Each value is a bar's MID; its high is mid+1 and its low is
+// mid-1, so every number below can be checked by eye: the swing high at mid 115
+// is the level 116, and the lower low at mid 85 is the frame low 84.
+const FRAME_DOWN = [100, 110, 120, 110, 100, 90, 95, 105, 115, 105, 95, 85, 90, 95, 100, 95, 90];
+const FRAME_AT = FRAME_DOWN.concat([115]);
+const FRAME_GONE = [100, 110, 120, 110, 100, 90, 95, 105, 115, 105, 95, 85, 120, 95, 100, 95, 90];
+const FRAME_NONE = [100, 110, 120, 110, 100, 110, 120, 110, 100, 110, 120];
+const SMALL_UP = [100, 110, 120, 110, 100, 90, 95, 105, 115, 105, 95, 92, 100, 110, 120, 115, 110, 115];
+
+function frameFeed(bars, small) {
+  const base = Date.parse('2026-09-18T00:00:00Z');
+  const mk = (vals, step) => vals.map((v, i) => ({ t: base + i * step, o: v, h: v + 1, l: v - 1, c: v, v: 100 + i }));
+  return {
+    ok: true, symbol: 'NQ=F', name: 'Nasdaq 100', partial: null, error: null,
+    timeframes: {
+      '5m': { ok: true, candles: mk(small || FRAME_NONE, 5 * 60000) },
+      '15m': { ok: true, candles: mk(small || FRAME_NONE, 15 * 60000) },
+      '1h': { ok: true, candles: mk(bars, 60 * 60000) },
+      '4h': { ok: true, candles: mk(bars, 4 * 60 * 60000) },
+    },
+  };
+}
+
+test('the desk reads the frame off its own bars, and names the numbers', async () => {
+  const p = await loadPage({ feed: frameFeed(FRAME_DOWN) });
+  const r = p.sandbox.frameRead();
+  assert.strictEqual(r.tf, '1h', 'it opens on the frame he reads');
+  assert.strictEqual(r.smallTf, '15m', 'and the small chart is the step below it');
+  assert.strictEqual(r.level, 116, 'the level is the swing high the drop came from');
+  assert.strictEqual(r.low, 84, 'and the frame low is the lower low');
+  assert.strictEqual(r.lowerLow, true);
+  assert.strictEqual(r.state, 'retracing', 'price is back under the level and above the low');
+  assert.strictEqual(r.atLevel, false, 'nothing reached the level in these bars');
+  assert.strictEqual(r.verdict, 'wait', 'so there is nothing to do — and wait is a complete answer');
+  assert.ok(r.highs >= 2 && r.lows >= 2, 'and it counts the swings the frame gave it');
+  assert.ok(!/NaN|Infinity/.test(p.sandbox.frameText()), 'nothing divides by zero');
+});
+
+test('a frame is only down while no bar has CLOSED above its level', async () => {
+  const p = await loadPage({ feed: frameFeed(FRAME_AT) });
+  const r = p.sandbox.frameRead();
+  assert.strictEqual(r.changed, false, 'a poke up to the level cancels nothing');
+  assert.strictEqual(r.level, 116, 'the level is still the level');
+  assert.strictEqual(r.atLevel, true, 'and price is at it');
+  assert.strictEqual(r.verdict, 'short', 'which is his own entry, by his own rules');
+});
+
+test('a close above the level cancels the frame, and no price is left standing', async () => {
+  const p = await loadPage({ feed: frameFeed(FRAME_GONE) });
+  const r = p.sandbox.frameRead();
+  assert.strictEqual(r.changed, true);
+  assert.strictEqual(r.state, 'frame changed');
+  assert.strictEqual(r.verdict, 'wait - the frame changed');
+  assert.strictEqual(r.cancelAgo, 4, 'and it says how long ago, in bars of that frame');
+  assert.strictEqual(r.level, null, 'the level is dropped rather than left up beside a live price');
+  assert.strictEqual(r.low, null, 'and so is the low');
+
+  const text = p.sandbox.frameText();
+  assert.match(text, /NO LEVEL IS SHOWN/);
+  assert.match(text, /Do not supply one/);
+  assert.doesNotMatch(text, /116/, 'and there is no number in the block for the assistant to repeat');
+  p.sandbox.paintFrame();
+  const shown = p.els.get('frOut').innerHTML;
+  assert.match(shown, /frame changed/);
+  assert.doesNotMatch(shown, /116\.00/, 'the card shows no level either');
+});
+
+test('no lower low means no frame, and the page says which of the two it is', async () => {
+  const p = await loadPage({ feed: frameFeed(FRAME_NONE) });
+  const r = p.sandbox.frameRead();
+  assert.strictEqual(r.ok, true, 'the bars came back and were read');
+  assert.strictEqual(r.lowerLow, false);
+  assert.strictEqual(r.level, null);
+  assert.strictEqual(r.state, 'no frame yet');
+  assert.strictEqual(r.verdict, 'wait');
+  assert.match(r.why, /no lower low on 1h/);
+  assert.match(p.sandbox.frameText(), /Swings the frame gave it: \d+ highs and \d+ lows/,
+    'and it still says what it was given, so an empty read explains itself');
+  p.sandbox.paintFrame();
+  assert.match(p.els.get('frWhen').textContent, /no lower low on 1h/);
+});
+
+test('the small chart has to turn up, and then the verdict is his long scalp', async () => {
+  const p = await loadPage({ feed: frameFeed(FRAME_DOWN, SMALL_UP) });
+  const s = p.sandbox.smallChart(p.sandbox.FEED.timeframes['15m'].candles);
+  assert.strictEqual(s.up, true, 'a higher high, and the last higher low still holding');
+  assert.strictEqual(s.hold, 91, 'the hold is a number and not a feeling');
+  const r = p.sandbox.frameRead();
+  assert.strictEqual(r.state, 'retracing');
+  assert.strictEqual(r.verdict, 'long scalp');
+
+  const closedUnder = SMALL_UP.slice(0, 17).concat([90]);
+  const p2 = await loadPage({ feed: frameFeed(FRAME_DOWN, closedUnder) });
+  const r2 = p2.sandbox.frameRead();
+  assert.strictEqual(r2.up, false, 'a close under that low ends the hold');
+  assert.strictEqual(r2.verdict, 'wait', 'so the scalp is off');
+});
+
+test('the frame is read on the timeframe he picks, and kept', async () => {
+  const p = await loadPage({ feed: frameFeed(FRAME_DOWN) });
+  assert.strictEqual(p.sandbox.frameRead().tf, '1h');
+  p.sandbox.setFrameTf('4h');
+  assert.strictEqual(p.sandbox.FRAMETF, '4h');
+  assert.match(p.stored['tsid.desk.frame'], /4h/, 'so it opens on the one he was reading');
+  assert.strictEqual(p.sandbox.frameRead().tf, '4h');
+  p.sandbox.setFrameTf('15m');
+  assert.strictEqual(p.sandbox.frameRead().smallTf, '5m',
+    'and the small chart steps below it, so the same bars are never read twice');
+  p.sandbox.setFrameTf('1D');
+  assert.strictEqual(p.sandbox.FRAMETF, '15m', 'a timeframe it has no bars for changes nothing');
+});
+
+test('the page and the assistant are handed the same frame, off the same bars', async () => {
+  const p = await loadPage({ feed: frameFeed(FRAME_DOWN, SMALL_UP) });
+  p.sandbox.paintFrame();
+  const shown = p.els.get('frOut').innerHTML;
+  const text = p.sandbox.frameText();
+  for (const bit of ['116.00', '84.00', 'long scalp']) {
+    assert.ok(shown.includes(bit), `${bit} is on the page`);
+    assert.ok(text.includes(bit), `${bit} is in what the assistant is handed`);
+  }
+  assert.ok(!/NaN|Infinity/.test(shown + text), 'nothing divides by zero');
+  assert.match(p.sandbox.askSystem(), /THE FRAME - his own rules/, 'and every question carries it');
+  assert.match(p.els.get('frWhen').textContent, /The same rules the script on your chart runs/);
+  assert.match(text, /never turn the verdict into a promise/i, 'with the rule about what it may not become');
+});
+
+test('no candles, no frame — and the assistant is told not to invent one', async () => {
+  const p = await loadPage();
+  assert.strictEqual(p.sandbox.frameRead().ok, false);
+  const text = p.sandbox.frameText();
+  assert.match(text, /NOT READ - no candles/);
+  assert.match(text, /do not name a level/);
+  p.sandbox.paintFrame();
+  assert.strictEqual(p.els.get('frOut').innerHTML, '', 'and no card is drawn');
+  assert.match(p.els.get('frWhen').textContent, /No candles loaded/);
+  assert.doesNotMatch(text, /\d{4,}/, 'and no number of any kind reaches the assistant');
+});
+
+test('three bars are not a frame, and none is claimed from them', async () => {
+  const p = await loadPage({ feed: candleSet() });
+  const r = p.sandbox.frameRead();
+  assert.strictEqual(r.ok, false);
+  assert.match(r.why, /not enough 1h bars/);
+  assert.strictEqual(r.level, null);
+  assert.strictEqual(r.verdict, 'wait');
+  assert.match(p.sandbox.frameText(), /not enough 1h bars came back to read a swing off/);
+  assert.match(p.sandbox.frameText(), /NO LEVEL IS SHOWN/);
+});
+
+test('the house rules name the frame block, and the verdict is not a promise', async () => {
+  const p = await loadPage();
+  const desk = String(p.sandbox.DESK_SYS);
+  assert.ok(desk.includes('THE FRAME BLOCK is the script on his chart run on this page'));
+  assert.ok(desk.includes('a verdict that is only ever wait, short or long scalp'));
+  assert.ok(desk.includes('Never turn that verdict into a promise, a probability or a target'));
+  assert.ok(desk.includes('the session block, the frame block and the STUDY block are the only basis'));
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.ok(html.includes("closest('#frTf .tf')"), 'and its timeframe is picked on the page');
+  assert.ok(html.includes('id="frOut"'), 'which has somewhere for the read to land');
+});
+
 // ── structure and the session ───────────────────────────────────────────────
 //
 // Jacques, 17 Sep 2026: "do you have a analyzer can it predict an earlier trend
@@ -1551,7 +1731,7 @@ test('the house rules name the study, and it is still not a backtest', async () 
   assert.ok(desk.includes('no backtest result, and no study of your own'),
     'so the assistant may not run one of its own either');
   assert.ok(desk.includes('There is still no backtest on this page — never imply you ran one and never quote a result'));
-  assert.ok(desk.includes('the session block and the STUDY block are the only basis you have for structure and for timing'));
+  assert.ok(desk.includes('the session block, the frame block and the STUDY block are the only basis you have for structure and for timing'));
 });
 
 test('the study chip answers under the study rules, not the desk ones', () => {

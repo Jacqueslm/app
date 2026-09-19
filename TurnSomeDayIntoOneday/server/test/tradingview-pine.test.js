@@ -237,6 +237,28 @@ test('the script is reachable as text he can copy, not as a download', () => {
   assert.ok(server.indexOf("app.get('/someday.pine'") < server.indexOf('app.use(express.static'), 'and above express.static, so it is the route that answers and not the download');
 });
 
+test('the swings are named, and the two levels are drawn, the way the app chart does it', () => {
+  // 19 Sep 2026, later the same day. He put this chart beside the app's own chart
+  // and asked why his did not look like it. It did not, because the script had
+  // never put a name on a swing. The letters and the two levels now come off the
+  // app's own definition of a swing - a bar higher (or lower) than the TWO either
+  // side of it - while the zones keep their longer reach, so nothing about the
+  // zones moved.
+  const text = read();
+  assert.match(text, /ta\.pivothigh\(high, labelLen, labelLen\)/, 'the letters come off the label swing length');
+  assert.match(text, /ta\.pivotlow\(low, labelLen, labelLen\)/);
+  assert.match(text, /labelLen\s+= input\.int\(2,/, 'and that length opens at 2, which is the app chart\'s own');
+  assert.match(text, /nameSwings = input\.bool\(true,/, 'the names are on by default - an unnamed swing was the complaint');
+  assert.match(text, /showLastHL = input\.bool\(true,/, 'so are the two levels');
+  assert.match(text, /plot\(showSwings and showLastHL \? lastHigh : na, "Last high"/);
+  assert.match(text, /plot\(showSwings and showLastHL \? lastLow : na, "Last low"/);
+  assert.match(text, /style=plot\.style_stepline/, 'a level that has not moved is a step, not a slope');
+  const onSwing = [...text.matchAll(/label\.new\(bar_index - (\w+),/g)].map((m) => m[1]);
+  assert.ok(onSwing.length >= 2, 'both the high and the low are labelled');
+  assert.ok(onSwing.every((v) => v === 'labelLen'), 'and each name sits on the swing it belongs to');
+  assert.match(text, /ta\.pivothigh\(high, swingLen, swingLen\)/, 'the zones are still built from their own, longer swing');
+});
+
 test('the zones are built from confirmed swings and never from the future', () => {
   const text = read();
   assert.match(text, /lookahead=barmerge\.lookahead_off/, 'the higher timeframes must not be read ahead of the bar');

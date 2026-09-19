@@ -24,13 +24,30 @@
 //    a 4h lower low and a 4h lower high on it. Swings are now carried forward, so
 //    whatever moment the chart samples, it samples a swing that really happened.
 // 2. The table was left at its smallest text. It now opens readable.
+//
+// 19 September 2026, later the same day - he compared this to the app's own
+// chart and asked why his did not look like it. It did not, because this script
+// had never drawn the thing the app's chart draws: a name on every swing. Now
+// it has - HH, HL, LH and LL on the swings, off the app's own definition of a
+// swing (a bar higher or lower than the two either side of it), plus the last
+// high and the last low carried across the chart as two level lines. The zones
+// keep their own, longer swing length, so nothing about them moved.
 indicator("Someday", shorttitle="Someday", overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
 
 // ----------------------------------------------------------------- structure
+// 19 September 2026 - two lengths, on purpose. He looked at the app's own chart
+// and asked why his chart did not look like it. The app labels a swing as a bar
+// higher (or lower) than the TWO either side of it, names every one of them
+// HH, HL, LH or LL, and draws the last high and the last low across as levels.
+// A zone wants a different thing - the leg that led into a swing, which is a
+// longer reach - so the zones keep their own length and the labels get theirs.
 showSwings = input.bool(true, "Swing points", group="Structure")
-swingLen   = input.int(10, "Structure length", minval=2, maxval=50, group="Structure")
+swingLen   = input.int(10, "Zone structure length", minval=2, maxval=50, group="Structure")
+labelLen   = input.int(2, "Label swing length (2 = the app's own chart)", minval=1, maxval=20, group="Structure")
+nameSwings = input.bool(true, "Name the swings (HH HL LH LL)", group="Structure")
+showLastHL = input.bool(true, "Last high / last low lines", group="Structure")
 swingCol   = input.color(color.new(color.teal, 25), "Swing colour", group="Structure")
-nameSwings = input.bool(false, "Name the swings (HH HL LH LL)", group="Structure")
+hlCol      = input.color(color.new(color.gray, 20), "Last high / low colour", group="Structure")
 
 // --------------------------------------------------------------------- zones
 showZones  = input.bool(true, "Display zones", group="Zones")
@@ -279,23 +296,36 @@ runRanges(Zone[] arr) =>
                 array.remove(arr, i)
 
 // ----------------------------------------------------------- the swings, named
+// ph and pl stay fed by swingLen: these are the swings the ZONES are built from
+// and nothing about the zones changed. The letters and the two levels come off
+// labelLen, which is the app's own definition of a swing.
 ph = ta.pivothigh(high, swingLen, swingLen)
 pl = ta.pivotlow(low, swingLen, swingLen)
+
+lph = ta.pivothigh(high, labelLen, labelLen)
+lpl = ta.pivotlow(low, labelLen, labelLen)
 
 var float lastHigh = na
 var float lastLow  = na
 
-if not na(ph)
-    what = na(lastHigh) ? "H" : ph > lastHigh ? "HH" : "LH"
-    lastHigh := ph
+if not na(lph)
+    what = na(lastHigh) ? "H" : lph > lastHigh ? "HH" : "LH"
+    lastHigh := lph
     if showSwings
-        label.new(bar_index - swingLen, ph, nameSwings ? what : "", style=label.style_label_down, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
+        label.new(bar_index - labelLen, lph, nameSwings ? what : "", style=label.style_label_down, color=color.new(color.black, 100), textcolor=swingCol, size=size.small)
 
-if not na(pl)
-    what = na(lastLow) ? "L" : pl > lastLow ? "HL" : "LL"
-    lastLow := pl
+if not na(lpl)
+    what = na(lastLow) ? "L" : lpl > lastLow ? "HL" : "LL"
+    lastLow := lpl
     if showSwings
-        label.new(bar_index - swingLen, pl, nameSwings ? what : "", style=label.style_label_up, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
+        label.new(bar_index - labelLen, lpl, nameSwings ? what : "", style=label.style_label_up, color=color.new(color.black, 100), textcolor=swingCol, size=size.small)
+
+// The two levels the app's chart draws across the whole chart: the last swing
+// high and the last swing low, each carried forward until the next one of its
+// kind confirms. A step line, because that is what a level that has not moved
+// looks like - it is not an average and it is not a forecast.
+plot(showSwings and showLastHL ? lastHigh : na, "Last high", color=hlCol, style=plot.style_stepline, linewidth=1)
+plot(showSwings and showLastHL ? lastLow : na, "Last low", color=hlCol, style=plot.style_stepline, linewidth=1)
 
 // --------------------------------------------------- zones, chart timeframe
 if useChart and not na(ph)

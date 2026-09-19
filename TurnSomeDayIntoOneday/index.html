@@ -928,7 +928,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- MAIN APP --> <div id="main-app" style="display:none;flex-direction:column;height:100dvh">
-<div class="hdr"> <div style="display:flex;align-items:center;gap:10px"> <i class="ti ti-arrow-left" id="hdr-back" onclick="goBackScreen()" style="font-size:1.375rem;color:#a0a8d0;cursor:pointer;display:none;padding:4px" title="Back"></i> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> </div> <div style="display:flex;gap:12px;align-items:center"> <i class="ti ti-bell" style="font-size:1.25rem;color:#a0a8d0;cursor:pointer" title="Reminder settings" onclick="switchTo('reminder-settings');actBn('bn-plans')"></i> </div> </div> <div class="screens" id="screens">
+<div class="hdr"> <div style="display:flex;align-items:center;gap:10px"> <i class="ti ti-arrow-left" id="hdr-back" onclick="goBackScreen()" style="font-size:1.5rem;color:#a0a8d0;cursor:pointer;display:none;padding:9px;margin-left:-9px" title="Back" aria-label="Back"></i> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> </div> <div style="display:flex;gap:12px;align-items:center"> <i class="ti ti-bell" style="font-size:1.25rem;color:#a0a8d0;cursor:pointer" title="Reminder settings" onclick="switchTo('reminder-settings');actBn('bn-plans')"></i> </div> </div> <div class="screens" id="screens">
 
 <!-- HOME -->
 <div id="s-home" class="scr on">
@@ -2990,6 +2990,25 @@ const ICON_PATHS={
 'ti-building':'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M15 10h4a1 1 0 0 1 1 1v10"/><path d="M2 21h20"/><path d="M8 8h3M8 12h3M8 16h3"/>',
 'ti-glove':'<path d="M7 12V7a3 3 0 0 1 6 0v1h1.5a2.5 2.5 0 0 1 0 5H13v5a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6z"/><path d="M7 14h6"/>',
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
+// The header's back button is an <i class="ti ti-arrow-left"> and there was no
+// ti-arrow-left in this map, so it rendered an EMPTY BOX - the app shipped
+// with a back button nobody could see or tap, which is the one control an
+// iPhone cannot do without. The ten below were missing the same way and were
+// drawing nothing: the film button, the Tools tabs, the Zodiacs / Key / Tools
+// rows, and the lesson player's back and forward buttons.
+// server/test/app-icons.test.js fails if any class used in the page is not in
+// this map, so the next one cannot ship invisible.
+'ti-arrow-left':'<line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 6 5 12 11 18"/>',
+'ti-movie':'<rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="4" x2="8" y2="20"/><line x1="16" y1="4" x2="16" y2="20"/><line x1="4" y1="9" x2="8" y2="9"/><line x1="4" y1="15" x2="8" y2="15"/><line x1="16" y1="9" x2="20" y2="9"/><line x1="16" y1="15" x2="20" y2="15"/>',
+'ti-chart-dots':'<path d="M3 4v16h18"/><circle cx="9" cy="10" r="1.3"/><circle cx="13" cy="14" r="1.3"/><circle cx="17" cy="8" r="1.3"/>',
+'ti-chart-candle':'<path d="M3 3v18h18"/><line x1="10" y1="4" x2="10" y2="7"/><rect x="8" y="7" width="4" height="7" rx="0.6"/><line x1="10" y1="14" x2="10" y2="18"/><line x1="16" y1="6" x2="16" y2="9"/><rect x="14" y="9" width="4" height="5" rx="0.6"/><line x1="16" y1="14" x2="16" y2="17"/>',
+'ti-chess-knight':'<path d="M9 21h9v-2h-2c1.5-1.7 2-4 2-6.5C18 8 15.5 5 12.5 5c-1 0-2 .3-2.8.8L11 3 9 2 7.8 5C6.5 6.2 6 7.9 6 9.5c0 1.4.5 2.6 1.3 3.5L5 17h4"/><line x1="7" y1="21" x2="18" y2="21"/>',
+'ti-compass':'<circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5"/>',
+'ti-key':'<circle cx="8" cy="8" r="3"/><line x1="10.2" y1="10.2" x2="20" y2="20"/><line x1="16.5" y1="16.5" x2="19" y2="14"/>',
+'ti-ripple':'<path d="M3 8c3-2.5 6-2.5 9 0s6 2.5 9 0"/><path d="M3 16c3-2.5 6-2.5 9 0s6 2.5 9 0"/>',
+'ti-target-arrow':'<circle cx="12" cy="12" r="1.2"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.1a9 9 0 1 0 7.9 7.9"/><path d="M12 12l7-7"/>',
+'ti-player-skip-back':'<path d="M20 5v14l-12-7z"/><line x1="4" y1="5" x2="4" y2="19"/>',
+'ti-player-skip-forward':'<path d="M4 5v14l12-7z"/><line x1="20" y1="5" x2="20" y2="19"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
 'ti-award':'<circle cx="12" cy="8" r="6"/><path d="M9 13l-2 9 5-3 5 3-2-9"/>',
 'ti-backspace':'<path d="M20 6H8l-6 6 6 6h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"/><line x1="12.5" y1="9.5" x2="17" y2="14.5"/><line x1="17" y1="9.5" x2="12.5" y2="14.5"/>',
@@ -12499,7 +12518,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.8';
+const APP_VERSION='7.9';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';

@@ -439,7 +439,7 @@ smallLen = input.int(3, "Small chart swing length", minval=2, maxval=20, group="
 showRead = input.bool(true, "Show the read", group="The read")
 lvlCol   = input.color(#ffeb3b, "Level line", group="The read")
 lowCol   = input.color(color.new(color.gray, 15), "Frame low line", group="The read")
-readSize = input.string("large", "Table text", options=["tiny", "small", "normal", "large", "huge"], group="The read")
+readSize = input.string("huge", "Table text", options=["tiny", "small", "normal", "large", "huge"], group="The read")
 
 readText = readSize == "tiny" ? size.tiny : readSize == "small" ? size.small : readSize == "normal" ? size.normal : readSize == "large" ? size.large : size.huge
 

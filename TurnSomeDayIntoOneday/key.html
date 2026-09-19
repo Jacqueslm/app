@@ -774,16 +774,45 @@ ol.steps li b{color:var(--gold); font-weight:600}
      was genuinely missing — a birthday reading says the same thing on a Tuesday
      as it does in June, so there was nothing to open in the morning.
 
+     Later the same day: "want more depth to the daily readings, look into what
+     the other horoscopes do in a daily." What they do, off their own pages: a
+     short personal text (Co-Star, astrology.com, horoscope.com), a score for
+     the day (horoscope.com's "Planetary Index: 3/5"), a card of the day
+     (horoscope.com), the sky today with times on it (astrology.com's "The Sky
+     Today"), love/career/money/health splits, a do-and-don't list (Co-Star), a
+     reflection prompt (The Pattern: "insights to help you reflect on the themes
+     ... of your day"), and a morning notification.
+
+     Two of those cannot be done honestly here. A score for the day is a
+     verdict handed to somebody on no evidence, and this app does not do those.
+     The sky today needs an ephemeris, which is real astronomy rather than this
+     app's tables, so it is not in here yet — it is a decision, not a gap.
+     The do-and-don't and the reflection prompt, though, this page already has
+     in its own material, so the depth went there: every part of the day itself
+     the app's tables can state, and one part of the person's OWN written page
+     each morning.
+
      WHAT IT IS
      Every line on it comes out of tables already in this file, read for TODAY
-     instead of for a birthday:
-       findPeriod(today)   the week the calendar is in, out of the 48;
+     rather than for a birthday:
+       findPeriod(today)   the week the calendar is in, out of the 48, how far
+                           into it today is, and the week it turns into;
        reduceNum(day)      the number the day of the month gives, by the same
                            rule the app uses on a birthday's day;
        tarotIndex(day)     today's Major Arcana, by that same rule;
        EL_REL / Q_REL      the element and quality tables the PAIR reading uses,
                            pointed at the week the calendar is in;
-       profileOf(person)   the person's own reading — the real one.
+       seasonOf / SEASONS / SIGN_BODY / BIRTHSTONE
+                           the season the week falls in and its arc, the colour
+                           and flowers of the sign the calendar is in, the
+                           month's stone;
+       the moon            the one line on the page that is not out of a table:
+                           how much of it is lit, and which night the next full
+                           (or new, or quarter) falls on. Real arithmetic on the
+                           real sky — see THE MOON below;
+       profileOf(person)   the person's own reading — the real one;
+       DAYS[their date]    one part of their own written page, a different part
+                           each morning, going round all eleven.
      Nothing was written for this feature, nothing is predicted, and it flatters
      nobody. It also calls nothing: no AI, no account, no network, so it works
      with the phone in a lift and costs nothing to run.
@@ -806,9 +835,10 @@ ol.steps li b{color:var(--gold); font-weight:600}
    sandbox, because the ways a daily goes wrong are arithmetic — a month off by
    one, a birthday counted a day late, a weekday read off the wrong date — and
    none of that needs a browser to catch. Nothing in here touches the DOM.
-   Everything it reads (PERIODS, TAROT, NUMBERS, EL_REL, Q_REL, profileOf) is
-   the page's own; the sandbox stubs them, so what is tested is the composition:
-   which date goes in, and which of the page's tables comes back out. */
+   Everything it reads (PERIODS, TAROT, NUMBERS, EL_REL, Q_REL, SEASONS,
+   SIGN_BODY, BIRTHSTONE, profileOf) is the page's own; the sandbox stubs what
+   it does not need, so what is tested is the composition: which date goes in,
+   and which of the page's tables comes back out. */
 
 const TD_WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -848,6 +878,124 @@ function todayAlive(now, month, day, year){
   return Math.round((todayMidnight(now).getTime() - new Date(year, month - 1, day).getTime()) / 86400000);
 }
 
+/* How far into one of the 48 weeks today is, and when it turns. The range can
+   wrap the new year — Capricorn I runs Dec 26 to Jan 2 — so the start is pulled
+   back a year whenever it sits ahead of today, and the end pushed forward
+   whenever it sits behind the start. A week today is NOT inside comes back with
+   day > len, which is how the page knows the difference. */
+function todaySpan(now, per){
+  const today = todayMidnight(now);
+  let start = new Date(today.getFullYear(), per.sm - 1, per.sd);
+  if(start.getTime() > today.getTime()) start = new Date(today.getFullYear() - 1, per.sm - 1, per.sd);
+  let end = new Date(start.getFullYear(), per.em - 1, per.ed);
+  if(end.getTime() < start.getTime()) end = new Date(start.getFullYear() + 1, per.em - 1, per.ed);
+  const day = Math.round((today.getTime() - start.getTime()) / 86400000) + 1;
+  const len = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+  const left = Math.round((end.getTime() - today.getTime()) / 86400000);
+  return { day: day, len: len, left: left, turns: left + 1 };
+}
+
+/* ─── THE MOON ────────────────────────────────────────────────────────────
+   Every other line on this page is read out of a table in this file. This one
+   is not: it is worked out, so it is the one line that has to be RIGHT, and it
+   is the one line a reader can check against an almanac in ten seconds.
+
+   What is drawn is the moon's angle away from the sun as seen from here — 0°
+   is new, 180° is full — and how much of the face that lights up. Meeus,
+   Astronomical Algorithms, the abridged series: every term over a tenth of a
+   degree is kept, and the answer is good to about a fifth of a degree. That is
+   half an hour of the moon's own travel across the sky and half a percent of
+   the lit face, which is why the page says 68% and never 68.4%.
+
+   server/test/key-daily.test.js checks this against the United States Naval
+   Observatory's table of the primary phases of the moon for 2026
+   (aa.usno.navy.mil, Universal Time). All forty-nine of them are found again
+   here within half an hour, the worst of them by twenty-three minutes, and the
+   face is lit to within a percent at new and at full and to within two percent
+   at the quarters. Not an ephemeris, and nothing here pretends to be one — but
+   not a guess either. */
+const RAD = Math.PI / 180;
+
+function norm360(x){ return ((x % 360) + 360) % 360; }
+
+/* The Julian Date of a moment. Straight off the clock's own milliseconds since
+   1970, which are UTC wherever the phone happens to be — so the sky below does
+   not move because somebody crossed a timezone. */
+function julianDate(d){ return d.getTime() / 86400000 + 2440587.5; }
+
+/* The angle between the moon and the sun, in degrees: 0 new, 180 full. */
+function moonAngle(jd){
+  const d = jd - 2451545.0;                    /* days from 1 Jan 2000, noon UT */
+  const Lp = 218.316 + 13.176396 * d;          /* the moon's mean longitude */
+  const M  = 134.963 + 13.064993 * d;          /* the moon's own anomaly */
+  const F  = 93.272  + 13.229350 * d;          /* how far it is from its node */
+  const D  = 297.850 + 12.190749 * d;          /* how far it is from the sun */
+  const Ms = 357.529 + 0.98560028 * d;         /* the sun's anomaly */
+  const moon = Lp
+    + 6.289 * Math.sin(M * RAD) + 1.274 * Math.sin((2 * D - M) * RAD)
+    + 0.658 * Math.sin(2 * D * RAD) + 0.214 * Math.sin(2 * M * RAD)
+    - 0.186 * Math.sin(Ms * RAD) - 0.114 * Math.sin(2 * F * RAD);
+  const sun = 280.459 + 0.98564736 * d
+    + 1.915 * Math.sin(Ms * RAD) + 0.020 * Math.sin(2 * Ms * RAD);
+  return norm360(moon - sun);
+}
+
+/* How much of the face is lit, as a percentage: 0 at new, 100 at full. */
+function moonLit(jd){ return (1 - Math.cos(moonAngle(jd) * RAD)) / 2 * 100; }
+
+/* The four moments that have names. The page only ever says the next one of
+   these, which is a fact with a date on it rather than a name for a mood. */
+const MOON_PHASES = [[0, 'new moon'], [90, 'first quarter'],
+                     [180, 'full moon'], [270, 'last quarter']];
+
+/* When the angle next reaches one of those, by Newton from the mean rate: the
+   moon gains about 12.19° a day on the sun, and six passes of that lands on the
+   minute from a standing start. jd may be the moment itself; what comes back is
+   the first arrival at or after it. */
+function nextMoonPhase(jd, target){
+  let at = jd + norm360(target - moonAngle(jd)) / 12.190749;
+  for(let i = 0; i < 6; i++){
+    const off = ((moonAngle(at) - target + 540) % 360) - 180;
+    at -= off / 12.190749;
+  }
+  return at;
+}
+
+/* The sky as the page uses it: how lit it is, which way it is going, and the
+   next named moment — the soonest of the four, whichever it is. */
+function moonTonight(now){
+  const jd = julianDate(now);
+  let next = null;
+  MOON_PHASES.forEach(function(p){
+    const at = nextMoonPhase(jd, p[0]);
+    if(!next || at < next.at) next = { at: at, n: p[1] };
+  });
+  next.when = new Date((next.at - 2440587.5) * 86400000);
+  next.inDays = wholeDaysBetween(now, next.when);
+  return { lit: Math.round(moonLit(jd)), waxing: moonAngle(jd) < 180, next: next };
+}
+
+/* Whole days between the two local dates a moment sits in. Counted off the
+   dates rather than the clock, so a phase at half past eleven at night is
+   tonight and not tomorrow. */
+function wholeDaysBetween(from, to){
+  const a = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const b = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+
+/* The eleven parts of a birthday's own page, in the order the page prints them.
+   One of them is read out each morning, so the whole page has been round in
+   eleven days and nothing new had to be written for any of it. */
+const TD_AREAS = [['lo','Love'],['mo','Money'],['fa','Family'],['em','Emotions'],
+                  ['fr','Friendships'],['mi','Mind'],['bo','Body'],['sp','Spirit'],
+                  ['wk','Work'],['ri','Risk'],['ou','Outlook']];
+function todayArea(now){
+  const today = todayMidnight(now);
+  const from = Math.round((today.getTime() - new Date(today.getFullYear(), 0, 1).getTime()) / 86400000);
+  return TD_AREAS[((from % TD_AREAS.length) + TD_AREAS.length) % TD_AREAS.length];
+}
+
 /* The reading itself, as data. person may be null, and that is deliberate: the
    week the calendar is in, the number and the card belong to the date rather
    than to anybody, so the morning works before a birthday has been put in. */
@@ -855,20 +1003,29 @@ function todayReading(now, person){
   const m = now.getMonth() + 1, d = now.getDate();
   const world = findPeriod(m, d);
   const num = reduceNum(d), card = tarotIndex(d);
+  const sign = world.signs[0];
   const R = {
     m: m, d: d, y: now.getFullYear(),
     weekday: todayWeekday(now),
     label: MONTHS[m - 1] + ' ' + d + ', ' + now.getFullYear(),
     world: { n: world.n, t: world.t, r: world.r,
-             el: SIGNS[world.signs[0]].e, q: SIGNS[world.signs[0]].q },
+             el: SIGNS[sign].e, q: SIGNS[sign].q, span: todaySpan(now, world) },
+    next: PERIODS[(PERIODS.indexOf(world) + 1) % PERIODS.length],
     num: { n: num, planet: NUMBERS[num].planet, key: NUMBERS[num].key },
     card: { n: card, tarot: TAROT[card] },
+    stone: BIRTHSTONE[m - 1],
+    days: DIM[m - 1],
+    moon: moonTonight(now),
+    season: seasonOf(sign),
+    place: SEASON_PLACE[SIGNS[sign].q],
+    sign: { n: sign, colour: SIGN_BODY[sign].colour, flower: SIGN_BODY[sign].flower },
     person: null
   };
   if(!person) return R;
   const P = profileOf(person);
   const mine = { n: P.per.n, t: P.per.t, el: P.elements[0], q: P.qualities[0],
-                 num: P.num, planet: P.planet, card: P.card, tarot: P.tarot };
+                 num: P.num, planet: P.planet, card: P.card, tarot: P.tarot,
+                 span: todaySpan(now, P.per) };
   R.person = person;
   R.mine = mine;
   R.elRel = EL_REL[relKey(mine.el, R.world.el)] || null;
@@ -876,41 +1033,62 @@ function todayReading(now, person){
   R.inDays = todayInDays(now, person.month, person.day);
   R.age = todayAge(now, person.month, person.day, person.year);
   R.alive = todayAlive(now, person.month, person.day, person.year);
+  const area = todayArea(now), page = DAYS[person.month + '-' + person.day];
+  R.area = (page && page[area[0]]) ? { label: area[1], text: page[area[0]] } : null;
   return R;
 }
 
 /* What the daily is made of, said on the page itself. This is the one place
    somebody can find out that nothing here was written for this feature, and the
-   honest limit of it — that the number repeats on this date next year. */
+   honest limit of it — that the number and the card repeat on this date next
+   year. */
 const TD_NOTE = 'Every line here is this app\u2019s own, read for today\u2019s date rather ' +
-  'than for a birthday: the week the calendar is in out of the 48, the number and the card the ' +
-  'day of the month gives under the same rules it uses for a birthday, and the element and ' +
-  'quality tables the pair reading uses. Nothing was written for this and nothing is guessed. ' +
-  'That is also why the number is the same on this date next year \u2014 what changes every ' +
-  'single morning is the date, and how far off your birthday is.';
+  'than for a birthday: the week the calendar is in out of the 48 and how far into it today ' +
+  'sits, the number and the card the day of the month gives under the same rules it uses for a ' +
+  'birthday, and its own tables for the season, the sign the calendar is in and the month. ' +
+  'The moon is the one line that is not out of a table \u2014 that one is worked out from the ' +
+  'date, the way an almanac works it out. Nothing was written for this and nothing is guessed. ' +
+  'That is also why the number and the card are the same on this date next year \u2014 what ' +
+  'changes every single morning is the date, the week turning, the moon, and how far off your ' +
+  'birthday is.';
 
 /* The page it draws. Built out of the app's own classes — .layer, .dp/.dt/.db,
-   the .pull epigram, the .disclaim — so it sits beside the birthday reading as
-   the same kind of object rather than as a screen bolted onto the side. */
+   the .pull epigram, the .note and .disclaim — so it sits beside the birthday
+   reading as the same kind of object rather than as a screen bolted on. */
 function todayHtml(R){
   const box = (t, b) => b ? `<div class="dp"><div class="dt">${t}</div><div class="db">${b}</div></div>` : '';
   const nm = (R.person && R.person.name) ? esc(firstName(R.person.name)) : '';
   const asLine = t => esc(t.replace(/^The /, 'the '));
+  const days = n => n + ' day' + (n === 1 ? '' : 's');
 
   let lead = `The week the calendar is in is <b>${esc(R.world.n)}</b> &mdash; ${asLine(R.world.t)}.`;
   if(R.mine){
     lead += ` You came in under <b>${esc(R.mine.n)}</b> &mdash; ${asLine(R.mine.t)}.`;
-    if(R.elRel) lead += ` The app&rsquo;s own line for ${esc(R.world.el.toLowerCase())} and ` +
-      `${esc(R.mine.el.toLowerCase())}: &ldquo;${R.elRel.line}&rdquo;`;
+    if(R.elRel){
+      const two = R.world.el === R.mine.el
+        ? 'two ' + R.world.el.toLowerCase() + 's'
+        : R.world.el.toLowerCase() + ' and ' + R.mine.el.toLowerCase();
+      lead += ` The app&rsquo;s own line for ${esc(two)}: &ldquo;${R.elRel.line}&rdquo;`;
+    }
   }
 
   let birthday = '';
   if(R.person){
     if(R.inDays === 0) birthday = R.age ? 'Today &mdash; ' + R.age.years + '.' : 'Today.';
-    else birthday = 'In ' + R.inDays + ' day' + (R.inDays === 1 ? '' : 's') +
-      (R.age ? ' &mdash; you turn ' + (R.age.years + 1) + '.' : '.');
+    else birthday = 'In ' + days(R.inDays) + (R.age ? ' &mdash; you turn ' + (R.age.years + 1) + '.' : '.');
     if(R.alive != null) birthday += ' ' + R.alive.toLocaleString('en-US') + ' days so far.';
   }
+  const ownWeek = R.mine
+    ? esc(R.mine.n) + ' &mdash; ' + esc(R.mine.t) +
+      (R.mine.span.day <= R.mine.span.len ? ' &middot; day ' + R.mine.span.day + ' of it, today' : '')
+    : '';
+  const turning = R.world.span.turns === 1
+    ? 'Today is its last day &mdash; it turns tomorrow into '
+    : 'It turns in ' + days(R.world.span.turns) + ', into ';
+  const moon = R.moon.next.inDays === 0 ? 'tonight'
+    : R.moon.next.inDays === 1 ? 'tomorrow'
+    : 'in ' + days(R.moon.next.inDays) + ', on ' + R.moon.next.when.getDate() + ' ' +
+      MONTHS[R.moon.next.when.getMonth()];
 
   return `
   <div class="layer day">
@@ -923,11 +1101,29 @@ function todayHtml(R){
 
       ${R.mine ? `<h4>You, today${nm ? ' &mdash; ' + nm : ''}</h4>` : ''}
       ${box('Your birthday', birthday)}
-      ${box('Your week', R.mine ? esc(R.mine.n) + ' &mdash; ' + esc(R.mine.t) : '')}
+      ${box('Your week', ownWeek)}
       ${box('Today&rsquo;s number', R.num.n + ' &mdash; ' + esc(R.num.planet) + ', ' + esc(R.num.key))}
       ${box('Your number', R.mine ? R.mine.num + ' &mdash; ' + esc(R.mine.planet) : '')}
       ${box('The two gears', R.qRel ? R.qRel : '')}
       ${box('Your card', R.mine ? esc(R.mine.tarot.r) + ' ' + esc(R.mine.tarot.n) : '')}
+
+      ${R.area ? `<h4>One part of your own reading, today</h4>
+      <p><b>${esc(R.area.label)}.</b> ${R.area.text}</p>
+      <p class="note">This is your own birthday page, taken a different part each morning &mdash;
+      there are eleven, so it has been round the whole page in eleven days. Nothing was written
+      for this feature and none of it has been reworded.</p>` : ''}
+
+      <h4>The day itself</h4>
+      ${box('Where today sits', 'Day ' + R.world.span.day + ' of ' + R.world.span.len + '. ' +
+        turning + esc(R.next.n) + ' &mdash; ' + esc(R.next.t) + '.')}
+      ${box('The month', esc(MONTHS[R.m - 1]) + '&rsquo;s stone is the ' + esc(R.stone) +
+        ' &middot; day ' + R.d + ' of ' + R.days + '.')}
+      ${box('The season', esc(R.season) + ' &mdash; ' + esc(SEASONS[R.season].arc) + '. ' +
+        esc(R.sign.n) + ' ' + esc(R.place) + '.')}
+      ${box('The sign the calendar is in', esc(R.sign.n) + ' &middot; colour ' + esc(R.sign.colour) +
+        ' &middot; flowers ' + esc(R.sign.flower) + '.')}
+      ${box('The moon', R.moon.lit + '% lit, ' + (R.moon.waxing ? 'waxing' : 'waning') +
+        ' &middot; next ' + esc(R.moon.next.n) + ' ' + moon + '.')}
       ${R.mine ? '' : `<p>Put a name and a birthday in above &mdash; it stays on this device
         &mdash; and the rest of today&rsquo;s page fills in: your own week, your number, your card,
         and how far off your birthday is.</p>`}

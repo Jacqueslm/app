@@ -74,10 +74,13 @@ function grabFn(re){
 }
 
 /* A pretend page: a real Date crate of one morning, the elements the wiring
-   asks for, and storage that answers. Everything the daily never reads (the
-   per-period prose profileOf reaches for) is empty on purpose — if the daily
-   ever starts drawing from one of them this fails loudly rather than rendering
-   an undefined. */
+   asks for, and storage that answers. The page's own tables are all loaded —
+   PERIODS, SIGNS, TAROT, SEASONS, SIGN_BODY, BIRTHSTONE, DAYS — because the
+   daily now reads the day itself out of them, and a stub would agree with
+   whatever mistake the engine had made. The lore it never reads (the long
+   prose profileOf and the reading page reach for) is empty on purpose: if the
+   daily ever starts drawing from one of those it fails loudly here rather than
+   rendering an undefined on somebody's phone. */
 const NOW = new Date(2026, 8, 19, 9, 30);          // Saturday morning, Central.
 const FixedDate = function(...args){ return args.length ? new Date(...args) : new Date(NOW.getTime()); };
 
@@ -118,10 +121,13 @@ function sandbox(){
   ctx.__els = els; ctx.__store = store; ctx.__ready = ready;
   vm.createContext(ctx);
 
-  vm.runInContext('var LORE={},PORTRAIT={},WELLBEING={},DESTINY={},PLANET_LORE={},SIGN_BODY={},BIRTHSTONE=[];', ctx);
-  ['PERIODS', 'SIGNS', 'NUMBERS', 'TAROT', 'EL_REL', 'Q_REL', 'MONTHS']
+  vm.runInContext('var LORE={},PORTRAIT={},WELLBEING={},DESTINY={},PLANET_LORE={};', ctx);
+  ['PERIODS', 'SIGNS', 'NUMBERS', 'TAROT', 'EL_REL', 'Q_REL', 'MONTHS',
+   'SEASONS', 'SEASON_PLACE', 'SIGN_BODY', 'BIRTHSTONE', 'DAYS']
     .forEach((n) => vm.runInContext(`var ${n} = ${grabConst(n)};`, ctx, { filename: n + '.js' }));
   [
+    /const SIGN_SEASON = \{\};\nObject\.entries\(SEASONS\)\.forEach[^\n]*/,
+    /function seasonOf\([^\n]*/,
     /const relKey = [^\n]*/,
     /const signsOf = [^\n]*/,
     /const esc = [^\n]*/,
@@ -205,6 +211,116 @@ test('the week is the page\'s own week for today, and the number and card are it
   // His own: 29 November reduces to 2, and the 29th draws XI (2+9), not II.
   assert.match(html, /2 &mdash; the Moon/, 'his number');
   assert.match(html, /XI Justice/, 'his card');
+});
+
+test('the week the calendar is in runs to the day, and the page knows when it turns', () => {
+  // 19 September 2026 is the first morning of Virgo–Libra Cusp, which runs
+  // Sep 19–24 out of the page's own table.
+  const span = read(run(`todaySpan(${SATURDAY}, findPeriod(9, 19))`));
+  assert.strictEqual(span.day, 1, 'today is the first day of it');
+  assert.strictEqual(span.len, 6, 'the week is six days long');
+  assert.strictEqual(span.turns, 6, 'and it turns six days from now, on the 25th');
+
+  const nxt = read(run('findPeriod(9, 25)'));
+  assert.strictEqual(run(`PERIODS[(PERIODS.indexOf(findPeriod(9, 19)) + 1) % PERIODS.length].n`), nxt.n,
+    'the week after this one in the list is the week that starts the day it ends');
+  assert.strictEqual(nxt.sm + '/' + nxt.sd, '9/25', 'which is the day after the 24th, in the table');
+
+  const html = daily(SATURDAY, JACQUES);
+  assert.match(html, /Day 1 of 6\./);
+  assert.match(html, /It turns in 6 days, into /);
+  assert.ok(html.includes(nxt.n) && html.includes(nxt.t), 'and the week it turns into is named');
+});
+
+test('the 48 weeks are in calendar order, so the next one really is the next one', () => {
+  // "The next week" is the next entry in PERIODS. That is only true while the
+  // list runs round the year in order, which nothing else checks.
+  const nums = run('PERIODS.map(p => p.sm * 100 + p.sd).join(",")').split(',').map(Number);
+  assert.strictEqual(nums.length, 48, 'all 48, cusps and sign weeks');
+  assert.strictEqual(nums.filter((n, i) => i && n < nums[i - 1]).length, 1,
+    'it runs round the year once — one wrap, and it is the new year');
+  assert.strictEqual(nums[0], 319, 'starting at 19 March');
+  assert.strictEqual(nums[nums.length - 1], 311, 'and ending at 11 March, whose next is the cusp');
+});
+
+test('a week that wraps the new year is counted into the new year, not off the end', () => {
+  // Capricorn I runs Dec 26 to Jan 2. On 1 January it is day 7 of 8, and it
+  // turns the day after tomorrow — which is the day the next week starts.
+  const span = read(run('todaySpan(new Date(2026, 0, 1), findPeriod(12, 26))'));
+  assert.strictEqual(span.day, 7);
+  assert.strictEqual(span.len, 8);
+  assert.strictEqual(span.turns, 2, 'Jan 3 is two days after Jan 1');
+  assert.strictEqual(run('findPeriod(1, 1).n'), 'Capricorn I', 'and 1 January is put in that week');
+  const html = daily('new Date(2026, 0, 1)', JACQUES);
+  assert.match(html, /Day 7 of 8\./);
+  assert.match(html, /It turns in 2 days, into Capricorn II/);
+});
+
+test('on the last day of a week it says so, rather than counting to zero', () => {
+  const span = read(run('todaySpan(new Date(2026, 8, 24), findPeriod(9, 19))'));
+  assert.strictEqual(span.day, 6);
+  assert.strictEqual(span.turns, 1);
+  assert.match(daily('new Date(2026, 8, 24)', JACQUES),
+    /Today is its last day &mdash; it turns tomorrow into Libra I/);
+});
+
+test('the day\'s own facts are the page\'s tables, not copies of them', () => {
+  const html = daily(SATURDAY, JACQUES);
+  const sign = run('findPeriod(9, 19).signs[0]');
+  const q = (s) => JSON.stringify(s);
+  assert.ok(html.includes(run(`SEASONS[seasonOf(${q(sign)})].arc`)), 'the season, in its own words');
+  assert.ok(html.includes(run(`SIGN_BODY[${q(sign)}].colour`)), 'the colour of the sign the calendar is in');
+  assert.ok(html.includes(run(`SIGN_BODY[${q(sign)}].flower`)), 'and its flowers');
+  assert.ok(html.includes(run('BIRTHSTONE[8]')), 'and September\'s stone out of the page\'s own list');
+  assert.match(html, /Summer &mdash; from the longest day to the first harvest\./);
+  assert.match(html, /Virgo breaks it up and hands over\./, 'where the sign stands in its season');
+  assert.match(html, /day 19 of 30\./, 'and how far into the month today is');
+});
+
+test('one part of his own page is read each morning, and the text is his, unchanged', () => {
+  const html = daily(SATURDAY, JACQUES);
+  const area = read(run(`todayArea(${SATURDAY})`));
+  const page = read(run("DAYS['11-29']"));
+  assert.ok(page[area[0]], 'the part today lands on is on his own page');
+  assert.ok(html.includes(page[area[0]]), 'and it is drawn word for word');
+  assert.ok(html.includes('<b>' + area[1] + '.</b>'), 'under its own heading');
+  assert.match(html, /One part of your own reading, today/);
+
+  // Only the one part: the other ten are not on the page this morning.
+  const others = Object.keys(page).filter((k) => k !== area[0]);
+  assert.ok(others.every((k) => !html.includes(page[k])), 'and it is the only part shown');
+});
+
+test('the eleven parts go round, so no morning is the same part twice in a row', () => {
+  const seen = [];
+  for (let i = 0; i < 11; i++) seen.push(read(run(`todayArea(new Date(2026, 8, ${19 + i}))`))[1]);
+  assert.strictEqual(new Set(seen).size, 11, 'eleven consecutive mornings, eleven different parts');
+  assert.strictEqual(read(run('todayArea(new Date(2026, 8, 30))'))[1], seen[0],
+    'and the twelfth morning is back to the first, so the whole page has been round');
+});
+
+test('every part the rotation asks for is on every day of the page', () => {
+  // The rotation picks a key out of a birthday's own page. A day written in
+  // later that was missing one would show an empty heading and nothing else.
+  const keys = run('TD_AREAS.map(a => a[0]).join(",")');
+  const gaps = run(`(function(){
+    const out = [];
+    Object.keys(DAYS).forEach(d => ${JSON.stringify(keys)}.split(',').forEach(k => {
+      if(!DAYS[d][k]) out.push(d + '.' + k);
+    }));
+    return out.slice(0, 12).join(', ');
+  })()`);
+  assert.strictEqual(gaps, '', 'all 366 days carry all eleven parts');
+  assert.strictEqual(run('TD_AREAS.length'), 11, 'and the rotation is eleven long');
+});
+
+test('the two gears are the pair tables, read for his two weeks', () => {
+  const html = daily(SATURDAY, JACQUES);
+  const mine = run('SIGNS[findPeriod(11, 29).signs[0]].q');
+  const world = run('SIGNS[findPeriod(9, 19).signs[0]].q');
+  const line = run(`Q_REL[relKey(${JSON.stringify(mine)}, ${JSON.stringify(world)})]`);
+  assert.ok(line && line.length > 10, 'the quality table answers for those two');
+  assert.ok(html.includes(line), 'and its own words are on the page');
 });
 
 test('his own week is read by the pair engine\'s tables, not by a copy of them', () => {
@@ -330,6 +446,100 @@ test('the month change moves the day count, so February cannot keep the 31st', (
   ctx.__els['td-month'].value = '4';
   ctx.__els['td-month'].fire('change');
   assert.strictEqual((ctx.__els['td-day'].innerHTML.match(/<option/g) || []).length, 30, 'April has 30');
+});
+
+/* --------------------------------------------------------------- the real sky */
+
+/* The United States Naval Observatory's table of the primary phases of the moon
+   for 2026, in Universal Time — aa.usno.navy.mil, read on 19 Sep 2026. The moon
+   is the only line on the daily that is worked out rather than read out of a
+   table, so it is the only line that can be simply wrong, and this is the one
+   thing on the page a reader can check against an almanac in ten seconds. */
+const USNO_2026 = [
+  [180, 'full moon', [[0, 3, 10, 3], [1, 1, 22, 9], [2, 3, 11, 38], [3, 2, 2, 12], [4, 1, 17, 23],
+                      [4, 31, 8, 45], [5, 29, 23, 56], [6, 29, 14, 36], [7, 28, 4, 18],
+                      [8, 26, 16, 49], [9, 26, 4, 12], [10, 24, 14, 53], [11, 24, 1, 28]]],
+  [0, 'new moon', [[0, 18, 19, 52], [1, 17, 12, 1], [2, 19, 1, 23], [3, 17, 11, 52], [4, 16, 20, 1],
+                   [5, 15, 2, 54], [6, 14, 9, 43], [7, 12, 17, 37], [8, 11, 3, 27],
+                   [9, 10, 15, 50], [10, 9, 7, 2], [11, 9, 0, 52]]],
+  [90, 'first quarter', [[0, 26, 4, 47], [1, 24, 12, 27], [2, 25, 19, 18], [3, 24, 2, 32], [4, 23, 11, 11],
+                         [5, 21, 21, 55], [6, 21, 11, 5], [7, 20, 2, 46], [8, 18, 20, 44],
+                         [9, 18, 16, 12], [10, 17, 11, 48], [11, 17, 5, 42]]],
+  [270, 'last quarter', [[0, 10, 15, 48], [1, 9, 12, 43], [2, 11, 9, 38], [3, 10, 4, 51], [4, 9, 21, 10],
+                         [5, 8, 10, 0], [6, 7, 19, 29], [7, 6, 2, 21], [8, 4, 7, 51],
+                         [9, 3, 13, 25], [10, 1, 20, 28], [11, 1, 6, 8]]],
+];
+const jdOf = (t) => Date.UTC(2026, t[0], t[1], t[2], t[3]) / 86400000 + 2440587.5;
+const minutesOff = (a, b) => Math.abs(a - b) * 1440;
+
+// The abridged series keeps every term over a tenth of a degree, which is about
+// half an hour of the moon's own travel. Measured against the almanac the worst
+// of the forty-nine is twenty-three minutes (1 May 2026, 17:23 UT), so half an
+// hour is the bound: a mistake in the arithmetic is hours or days out, never
+// minutes, and the day the phase falls on is right.
+const MOON_WITHIN_MINUTES = 30;
+
+test('the moon is where the almanac says it is, every time in 2026', () => {
+  // The moment of every phase, found from ten days before it — ten days back the
+  // next one of the same kind is the one being looked for, since the same kind
+  // comes round every 29.5 days.
+  let checked = 0;
+  for(const [angle, name, times] of USNO_2026){
+    for(const t of times){
+      const want = jdOf(t);
+      const got = run(`nextMoonPhase(${want - 10}, ${angle})`);
+      assert.ok(minutesOff(got, want) < MOON_WITHIN_MINUTES,
+        `${name} ${t.slice(0, 2).join('/')}: ${minutesOff(got, want).toFixed(0)} minutes from the almanac`);
+
+      // And the face: nothing at new, all of it at full, half at the quarters.
+      const lit = run(`moonLit(${want})`);
+      if(angle === 0) assert.ok(lit < 1, `new moon is ${lit.toFixed(2)}% lit`);
+      else if(angle === 180) assert.ok(lit > 99, `full moon is ${lit.toFixed(2)}% lit`);
+      else assert.ok(Math.abs(lit - 50) < 2, `the quarter is ${lit.toFixed(2)}% lit`);
+      checked += 1;
+    }
+  }
+  assert.strictEqual(checked, 49, 'every primary phase of 2026 is in the almanac table used here');
+});
+
+test('opening the page three days before a phase, it names that phase', () => {
+  // The whole year, from the almanac's own instants rather than from this code:
+  // three days before a named moment the next one is always that moment, so the
+  // page has to be announcing it, to the minute.
+  for(const [angle, name, times] of USNO_2026){
+    for(const t of times){
+      const want = jdOf(t);
+      const ms = (want - 3 - 2440587.5) * 86400000;
+      const next = read(run(`moonTonight(new Date(${ms})).next`));
+      assert.ok(minutesOff(next.at, want) < MOON_WITHIN_MINUTES,
+        `three days before the ${name}: the page says ${next.n}, ${minutesOff(next.at, want).toFixed(0)} minutes out`);
+      assert.strictEqual(next.n, name, `and it is called ${name}`);
+    }
+  }
+});
+
+test('the moon on the page is the moon over the chart that night', () => {
+  // 19 September 2026. The first quarter was the evening before, so the moon is
+  // waxing, and the next named moment is the full moon — the almanac's, on the
+  // 26th at 16:49 UT, which is that day or the next one depending on where the
+  // phone is, so the day is taken from the instant rather than written down.
+  const html = daily(SATURDAY, JACQUES);
+  const moon = read(run(`moonTonight(${SATURDAY})`));
+  assert.strictEqual(moon.next.n, 'full moon');
+  assert.strictEqual(moon.waxing, true);
+  assert.ok(moon.next.inDays === 7 || moon.next.inDays === 8,
+    `the full moon is ${moon.next.inDays} days off`);
+  assert.ok(moon.lit > 45 && moon.lit < 85, `between the quarter and the full: ${moon.lit}%`);
+  assert.match(html, new RegExp(moon.lit + '% lit, waxing'));
+  const when = new Date(moon.next.when);
+  assert.match(html, new RegExp('next full moon in ' + moon.next.inDays + ' days, on ' + when.getDate() +
+    ' ' + run(`MONTHS[${when.getMonth()}]`).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\.'));
+
+  // The day it lands, it says so in days rather than in days away.
+  assert.match(daily('new Date(2026, 8, 26)', JACQUES), /next full moon (tonight|tomorrow)\./);
+
+  // And with no birthday in, the sky is still the sky.
+  assert.match(daily(SATURDAY, 'null'), /next full moon/);
 });
 
 /* ------------------------------------------------------------- the page itself */

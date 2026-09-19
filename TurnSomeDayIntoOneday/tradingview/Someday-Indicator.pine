@@ -300,14 +300,20 @@ if useChart and not na(pl)
 // One call per timeframe, reading the swing and the leg that led into it. The
 // token is the time of the swing bar, so a swing that confirms is only drawn
 // once however many chart bars sit inside the confirming bar.
-var int seen15h = na
-var int seen15l = na
-var int seen60h = na
-var int seen60l = na
-var int seen4h  = na
-var int seen4l  = na
-var int seen1dh = na
-var int seen1dl = na
+// These hold the time of the swing last drawn, and they start at 0 rather than
+// na on purpose. In Pine a comparison against na is itself na, and an if whose
+// condition is na never runs - so a token that starts na can never stop being
+// na, the branch never fires once, and the script draws nothing at all while
+// looking perfectly healthy. A bar time is always positive, so 0 is a sentinel
+// that no real swing can match.
+var int seen15h = 0
+var int seen15l = 0
+var int seen60h = 0
+var int seen60l = 0
+var int seen4h  = 0
+var int seen4l  = 0
+var int seen1dh = 0
+var int seen1dl = 0
 
 [a15ph, a15phT, a15pl, a15plT, a15lo, a15hi] = request.security(syminfo.tickerid, "15", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
 
@@ -453,8 +459,8 @@ var float fLow       = na
 var float fPrevLow   = na
 var float theLevel   = na
 var float frameLow   = na
-var int   seenFrameH = na
-var int   seenFrameL = na
+var int   seenFrameH = 0
+var int   seenFrameL = 0
 // How many frame swings the script has actually been given. This is the row that
 // says whether an empty table means "nothing has happened yet" or "the script
 // cannot see the swings at all" - two very different problems with the same face.
@@ -496,8 +502,8 @@ var float sPrevHigh  = na
 var float sLow       = na
 var float sPrevLow   = na
 var float sHold      = na
-var int   seenSmallH = na
-var int   seenSmallL = na
+var int   seenSmallH = 0
+var int   seenSmallL = 0
 
 if not na(fSPh) and fSPhT != seenSmallH
     seenSmallH := fSPhT
@@ -561,7 +567,7 @@ if showRead and barstate.islast
     table.cell(dash, 0, 7, "Close above the level", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 7, changed ? "yes" : "no", text_size=readText, text_color=color.white)
     table.cell(dash, 0, 8, "Swings seen (H / L)", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 8, str.tostring(seenPh) + " / " + str.tostring(seenPl), text_size=readText, text_color=color.white)
+    table.cell(dash, 1, 8, str.tostring(seenPh) + " / " + str.tostring(seenPl) + (na(f4hPh) ? "\nnothing given yet" : "\nlast " + str.tostring(f4hPh, format.mintick)), text_size=readText, text_color=color.white)
     table.cell(dash, 0, 9, "Verdict", text_size=readText, text_color=color.new(color.white, 45))
     table.cell(dash, 1, 9, verdict, text_size=readText, text_color=shortOk ? color.red : longOk ? color.teal : color.new(color.white, 35))
 

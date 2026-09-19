@@ -166,6 +166,33 @@ test('a request.security tuple hands back as many values as the line claims', ()
   }
 });
 
+test('nothing that is compared with == or != is left as na', () => {
+  // 19 Sep 2026. The read box said 0 / 0 on his chart, on every bar, forever.
+  // Each counter is guarded by "the swing time is not the one I last drew", and
+  // those times were declared as na. In Pine a comparison against na is itself
+  // na, and an if whose condition is na never runs - so the guard could never be
+  // true once, on any bar, and the counters could not move. The same fault sat
+  // in the zones above it, which is why the script had never drawn anything and
+  // neither of us noticed: his chart already had another zone indicator on it.
+  const text = body().join('\n');
+  const naVars = new Set();
+  for (const m of text.matchAll(/^\s*(?:var\s+\S+\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*na\s*$/gm)) naVars.add(m[1]);
+  const lines = text.split('\n');
+  for (const line of lines) {
+    for (const m of line.matchAll(/([A-Za-z_][A-Za-z0-9_]*)\s*(?:!=|==)\s*([A-Za-z_][A-Za-z0-9_]*)?/g)) {
+      for (const name of [m[1], m[2]].filter(Boolean)) {
+      if (!naVars.has(name)) continue;
+      // Guarded on the same line is fine and is the only way to do it: the
+      // line has to ask whether the value is na before comparing it.
+      if (new RegExp(`na\\s*\\(\\s*${name}\\s*\\)`).test(line)) continue;
+      assert.fail(
+        `"${name}" starts as na and is compared with == or != without asking first - that comparison is na, and an if with an na condition never runs: ${line.trim()}`
+      );
+      }
+    }
+  }
+});
+
 test('a request.security timeframe is simple, and never worked out by the script', () => {
   // 19 Sep 2026. The script he pasted into the Pine editor would not compile,
   // and TradingView pointed at the left-hand side of the line: "Cannot assign a

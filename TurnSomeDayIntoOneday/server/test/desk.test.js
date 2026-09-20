@@ -301,15 +301,88 @@ test('the rules it answers under: no invented numbers, wrong-first, and the four
   assert.match(sys, /name the timeframe it came from/);
   // Wrong before right.
   assert.match(sys, /Invalidation comes first, every time/);
-  // The four timeframes, each with its job, in his words.
-  assert.match(sys, /4h is the tide/);
-  assert.match(sys, /5m is only the trigger/);
-  assert.match(sys, /HOLD OR SCALP/);
+  // The timeframe roles and the trade sequence, in his own method. This block
+  // replaced the old shorthand ("4h is the tide", "5m is only the trigger",
+  // "HOLD OR SCALP") on 20 Sep 2026, when he explained the method again: context
+  // and origin, a guide, a path, an execution refinement, and the gate.
+  assert.match(sys, /4h is context and origin, not an automatic direction/);
+  assert.match(sys, /1h is the guide/);
+  assert.match(sys, /1m and 5-second refine execution only/);
+  assert.match(sys, /to actually be tested/);
+  assert.match(sys, /previous confirmed high or low as the target/, 'the prior level is the target, not the newest extreme');
+  assert.match(sys, /PULLBACK OR TREND/);
+  assert.match(sys, /the 1:1 gate passes/, 'a countertrend scalp still has to clear the gate');
+  assert.match(sys, /never holds overnight/);
+  assert.match(sys, /If the reward is smaller than the risk, the answer is wait/);
+  assert.doesNotMatch(sys, /4h is the tide|5m is only the trigger|HOLD OR SCALP/, 'the old shorthand is gone, not resting beside the new rules');
   // And the lines that carry over from the rest of the app.
   assert.match(sys, /Never promise an outcome/);
   assert.match(sys, /Never tell him to make a loss back/);
   assert.match(sys, /Never tell him he is finished/);
   assert.match(sys, /Plain English, always/, 'and it answers in English');
+});
+
+// 20 Sep 2026. "I just need to get better at the 1:1 I look for because
+// sometimes it just don't add up. I risk more than I make." The page does that
+// one sum from his own three prices, and the gate blocks rather than guesses -
+// a missing price is never filled in with a level the page does not have.
+test('the 1:1 gate does the sum from his three prices, and blocks when one is missing', async () => {
+  const p = await loadPage();
+
+  // Nothing typed: blocked, no ratio, and told not to invent the missing price.
+  const empty = p.sandbox.riskGateText({ entry: null, stop: null, target: null }, 'NQ, short');
+  assert.match(empty, /1:1 GATE: BLOCKED/);
+  assert.match(empty, /Do not approve a trade or invent a missing price/);
+  assert.doesNotMatch(empty, /:1\./, 'no ratio is worked out from prices it does not have');
+
+  // 20 points risked to make 40: through.
+  const good = p.sandbox.riskGateText({ entry: 20000, stop: 20020, target: 19960 }, 'NQ, short');
+  assert.match(good, /1:1 GATE: PASSES/);
+  assert.match(good, /risk 20\.00 points; reward 40\.00 points; ratio 2\.00:1/);
+
+  // 20 points risked to make 10: the answer is wait, not a smaller stop.
+  const poor = p.sandbox.riskGateText({ entry: 20000, stop: 20020, target: 19990 }, 'NQ, short');
+  assert.match(poor, /1:1 GATE: BLOCKED/);
+  assert.match(poor, /risk 20\.00 points; reward 10\.00 points; ratio 0\.50:1/);
+
+  // A target on the wrong side of the entry is not a small reward, it is a
+  // different trade, and it is said that way.
+  const wrongSide = p.sandbox.riskGateText({ entry: 20000, stop: 20020, target: 20040 }, 'NQ, short');
+  assert.match(wrongSide, /the previous target is on the wrong side of the entry/);
+
+  // Long is the same arithmetic the other way round.
+  const long = p.sandbox.riskGateText({ entry: 20000, stop: 19980, target: 20040 }, 'NQ, long');
+  assert.match(long, /1:1 GATE: PASSES/);
+
+  // Without a direction there is nothing to measure the reward against.
+  const noDir = p.sandbox.riskGateText({ entry: 20000, stop: 19980, target: 20040 }, 'NQ, watching');
+  assert.match(noDir, /direction must say long or short/);
+});
+
+test('his plan and the gate travel with every question', async () => {
+  const p = await loadPage();
+  p.els.get('dMk').value = 'NQ, short';
+  p.els.get('dPx').value = '20,000';
+  p.els.get('dRd').value = '4h made the lower low, 5m is making HH HL';
+  p.els.get('dIn').value = 'a 15m close back over the 4h low';
+  p.els.get('dEn').value = '20000';
+  p.els.get('dSt').value = '20020';
+  p.els.get('dTg').value = '19960';
+
+  const now = p.sandbox.nowText();
+  assert.match(now, /Planned entry: 20000\.00/);
+  assert.match(now, /Planned invalidation \/ stop: 20020\.00/);
+  assert.match(now, /Previous confirmed target: 19960\.00/);
+  assert.match(now, /1:1 GATE: PASSES/);
+  assert.match(now, /METHOD FACTS: /, 'the method rides with the chart, not only in the system block');
+
+  p.els.get('askQ').value = 'Does this one add up?';
+  await p.sandbox.ask();
+  const system = p.chats[0].body.system[0].text;
+  assert.match(system, /METHOD OVERRIDE: /);
+  assert.match(system, /Previous confirmed target: 19960\.00/, 'the three prices are handed over with the question');
+  assert.match(system, /1:1 GATE: PASSES/);
+  assert.match(system, /Arithmetic only, not a signal/, 'the gate is his sum, not a prediction');
 });
 
 test('a failure says so, and an answer cannot put markup on the page', async () => {

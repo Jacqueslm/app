@@ -1,4 +1,5 @@
 <!-- trading desk:private -->
+<!-- Method note: Daily/4h context and origin; 1h bridge; 15m/5m path; 1m/5-second execution refinement. A 4h LL can permit a temporary 15m/5m HH-HL long back to the prior confirmed high or 4h lower-high area. Change back to short only after LH/LL confirms. The 1:1 gate compares entry-to-invalidation with entry-to-previous-target; if reward is smaller, wait. -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -335,6 +336,12 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <textarea id="dRd" placeholder="e.g. 4h took the overnight high, 1h has not closed back under it, 15m is compressing under it"></textarea>
       <label for="dIn">Where you would be wrong</label>
       <input id="dIn" placeholder="e.g. 1h close back inside the range" autocomplete="off">
+      <label for="dEn">Planned entry price</label>
+      <input id="dEn" inputmode="decimal" placeholder="required for the 1:1 check" autocomplete="off">
+      <label for="dSt">Planned invalidation / stop price</label>
+      <input id="dSt" inputmode="decimal" placeholder="where this idea is wrong" autocomplete="off">
+      <label for="dTg">Previous confirmed target price</label>
+      <input id="dTg" inputmode="decimal" placeholder="the prior high or low you actually trade to" autocomplete="off">
       <div class="saved" id="dSaved" style="font-size:.6875rem;color:var(--tm);margin-top:8px"></div>
     </div>
   </div>
@@ -570,10 +577,25 @@ function nowText(){
   out.push('Market: '+(m||'NOT SAID'));
   out.push('Where price is: '+(p||'NOT SAID'));
   out.push('What he sees: '+(r||'NOT SAID'));
+  var plan={entry:numOf(val('dEn')), stop:numOf(val('dSt')), target:numOf(val('dTg'))};
   out.push('Where he would be wrong: '+(inv||'NOT SAID'));
+  out.push('METHOD FACTS: '+METHOD_FACTS);
+  out.push('Planned entry: '+(plan.entry===null?'NOT GIVEN':two(plan.entry)));
+  out.push('Planned invalidation / stop: '+(plan.stop===null?'NOT GIVEN':two(plan.stop)));
+  out.push('Previous confirmed target: '+(plan.target===null?'NOT GIVEN':two(plan.target)));
+  out.push(riskGateText(plan,m));
   out.push('');
   if(!m||!r) out.push('He has not filled this in properly. ASK him for the missing line before you answer, and give no levels in that first reply.');
   return out.join('\n');
+}
+function riskGateText(plan, market){
+  var direction=/\bshort\b/i.test(market||'')?'short':(/\blong\b/i.test(market||'')?'long':null);
+  if(plan.entry===null||plan.stop===null||plan.target===null) return '1:1 GATE: BLOCKED - entry, invalidation and previous target are required. Do not approve a trade or invent a missing price.';
+  if(!direction) return '1:1 GATE: BLOCKED - direction must say long or short before reward can be checked.';
+  var risk=Math.abs(plan.entry-plan.stop), reward=direction==='short'?plan.entry-plan.target:plan.target-plan.entry;
+  if(!(risk>0)) return '1:1 GATE: BLOCKED - entry and invalidation are the same price.';
+  if(!(reward>0)) return '1:1 GATE: BLOCKED - the previous target is on the wrong side of the entry.';
+  return '1:1 GATE: '+(reward>=risk?'PASSES':'BLOCKED')+' - risk '+two(risk)+' points; reward '+two(reward)+' points; ratio '+two(reward/risk)+':1. Arithmetic only, not a signal.';
 }
 function val(id){ var el=document.getElementById(id); return el?(el.value||'').trim():'' }
 
@@ -588,6 +610,8 @@ function val(id){ var el=document.getElementById(id); return el?(el.value||'').t
    page shows the sentence and nothing else, and the assistant is told it has no
    prices. There is no branch here that fills the gap in with anything. */
 var K_SYM='tsid.desk.sym', FEED=null;
+/* Shared method facts are also sent with every desk question. */
+var METHOD_FACTS='Daily/4h=context and origin; 1h=guide; 15m/5m=path and confirmation; 1m/5-second=execution refinement. A tested zone, previous target, invalidation and passing 1:1 gate are required. A 4h LL may allow a temporary 15m/5m HH-HL long; return to short only after confirmed LH/LL.';
 
 function money(n){
   if(typeof n!=='number'||!isFinite(n)) return '—';
@@ -1825,20 +1849,21 @@ paintSession();
    it does not carry the recovery app's safety lines, which do not apply to a
    chart — but three things carry over exactly: never invent a number, never
    tell him he is finished, and never promise an outcome. */
+var DESK_METHOD='Daily/4h=context and origin; 1h=guide; 15m/5m=path and confirmation; 1m/5-second=execution refinement. Test the zone or swing leg first. A 4h LL can permit a temporary HH-HL pullback long toward the prior confirmed high or 4h LH. Return to short only after confirmed LH/LL. Require entry, invalidation, previous target and a passing 1:1 gate.';
 var DESK_SYS=[
 'You are the trading assistant on a private desk page belonging to one trader. He is experienced and needs nothing explained from the beginning. He uses this to make better decisions on his own trades. He places every trade himself.',
 '',
-'THE FOUR TIMEFRAMES. He reads four and only four: 4 hours, 1 hour, 15 minutes, 5 minutes. Always work from the big one down.',
-'- 4h is the tide. If it disagrees with everything below it, that is the answer, and you say so.',
-'- 1h is the structure inside the tide: the last leg, the last level that broke, the range being worked.',
-'- 15m is where the setup is confirmed or destroyed. This is the timeframe his invalidation usually lives on.',
-'- 5m is only the trigger. It never decides direction, and a 5m signal against the 4h is noise — say that when it happens.',
-'If the four disagree, say which one wins and why. Do not average them into a mush.',
+'THE TIMEFRAME ROLES. He reads the Daily and the 4 hours, 1 hour, 15 minutes, 5 minutes, and he goes to 1 minute and 5 seconds together to refine execution. Every one of them has a job and none of them is optional. Work from the big one down.',
+'- 4h is context and origin, not an automatic direction. A 4h lower low can allow a temporary 15m/5m long back toward the prior confirmed high or the 4h lower-high area.',
+'- 1h is the guide: the last leg, the last level that broke, the range being worked, and whether the lower-timeframe move fits the current leg.',
+'- 15m and 5m are where the path is correlated and the setup is confirmed or destroyed. Wait for the supply or demand zone, or the swing leg, to actually be tested. Being inside a zone is not confirmation by itself.',
+'- 1m and 5-second refine execution only. Change the narrative back only after the return area produces confirmed opposing structure such as LH or LL, and treat the previous confirmed high or low as the target, not the newest extreme.',
+'If the timeframes disagree, say the job each one is doing and which one governs this decision. Do not average them into a mush.',
 '',
-'HOLD OR SCALP. Answer this every time, from the alignment, not from how he feels:',
-'- All four lined up, with the 1h making higher lows into the 4h trend: that is a hold, and the trade is only in trouble if the 1h structure breaks, not the 5m.',
-'- 4h and 1h lined up but the 15m exhausted, or price already extended from its average: scalp the first push, bank it, and make the runner earn its place.',
-'- 4h against him: it is a scalp at most, small, into a level, and he should say what he is scalping to before he takes it.',
+'PULLBACK OR TREND. Answer from the tested origin, the 1h guide, the lower-timeframe path and the previous target, not from how he feels:',
+'- A countertrend scalp is allowed when the origin has been tested, the 1h guide allows it, the lower-timeframe structure confirms, the previous target is clear and the 1:1 gate passes.',
+'- Never call it a hold just because the 4h and the 1h agree. He trades intraday in New York, micros only, and never holds overnight.',
+'- Before you approve anything, say the entry, the invalidation, the previous target and the 1:1 result. If the reward is smaller than the risk, the answer is wait.',
 '',
 'HIS SESSION. He trades the New York session and nothing else, and his clock is the one in the session block below, with his window and whether he is in it right now. Bars outside that window are context and never a trigger — when the pattern he is asking about formed outside his session, say that first and plainly. It is his own clock, not an exchange clock, so never tell him what time it is on an exchange.',
 '',
@@ -1878,7 +1903,7 @@ function picText(){
   return 'A CHART PICTURE IS ATTACHED: a screenshot of his own broker chart, sent with this question. Read it as the chart in front of him, and let it outrank the CANDLES block - when the two disagree, his chart is what he is actually looking at. Say plainly when something in it is too small, blurry or cut off to read instead of guessing at it. Anything you read off it is read off a picture: say so, and do not pass it off as a feed number.';
 }
 function askSystem(extra){
-  return DESK_SYS+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+frameText()+'\n'+sessionText()+'\n'+studyText()+'\n'+tradesText()+'\n'+journalText()+nowText()+'\n\n'+picText();
+  return DESK_SYS+'\n\nMETHOD OVERRIDE: '+DESK_METHOD+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+frameText()+'\n'+sessionText()+'\n'+studyText()+'\n'+tradesText()+'\n'+journalText()+nowText()+'\n\n'+picText();
 }
 
 /* ---------- the setups list --------------------------------------------- */
@@ -2617,7 +2642,7 @@ paintFrameTf();
 
 /* The chart block remembers itself, so it is filled once per session. */
 var NOW=load(K_NOW,{});
-['dMk','dPx','dRd','dIn'].forEach(function(id){
+['dMk','dPx','dRd','dIn','dEn','dSt','dTg'].forEach(function(id){
   var el=document.getElementById(id);
   if(!el) return;
   if(NOW[id]) el.value=NOW[id];

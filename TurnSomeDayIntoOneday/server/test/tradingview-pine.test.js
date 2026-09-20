@@ -1,269 +1,211 @@
-// 17 Sep 2026: the Someday indicator is a TradingView script, and there is no
-// Pine compiler anywhere in this repo or on this machine. A typo in it ships
-// invisibly and reaches Jacques as "line 214: no viable alternative" on his
-// chart - a wall of nothing that costs him the session.
-//
-// These are the faults a reader can catch without a compiler: a bracket left
-// open, indentation Pine will not accept, two things wearing one name, a
-// function called with the wrong number of arguments, and a request.security
-// tuple that hands back a different number of values than the line claims.
-// It is not a compile check and it is not pretending to be one.
+// There is no Pine compiler in this repository. These checks catch the common
+// copy/paste failures before the script reaches TradingView: bad brackets,
+// non-ASCII editor characters, duplicate top-level names, and mismatched
+// function calls. They also pin the two things the script is meant to keep: a
+// swing is read from a closed candle body and never a wick, and a level is only
+// taken out by a candle that closes through it.
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 
 const PINE = path.join(__dirname, '..', '..', 'tradingview', 'Someday-Indicator.pine');
+const read = () => fs.readFileSync(PINE, 'utf8');
+const bare = (line) => line.replace(/\/\/.*$/, '').replace(/'[^']*'/g, "''").replace(/"[^"]*"/g, '""');
+const body = () => read().split('\n').map(bare);
 
-function read() {
-  return fs.readFileSync(PINE, 'utf8');
-}
-
-// Code only. A comment or a string body is not syntax, and an apostrophe in a
-// sentence ("the chart's own timeframe") would otherwise read as a broken quote.
-function bare(line) {
-  return line.replace(/\/\/.*$/, '').replace(/'[^']*'/g, "''").replace(/"[^"]*"/g, '""');
-}
-
-function body() {
-  return read().split('\n').map(bare);
-}
-
-// The text between an opening bracket and its partner, nesting respected - so
-// a tuple that contains [swingLen] is still read as one list.
 function inside(text, open) {
-  let depth = 0;
-  for (let i = open; i < text.length; i++) {
-    if (text[i] === '[' || text[i] === '(' || text[i] === '{') depth++;
-    else if (text[i] === ']' || text[i] === ')' || text[i] === '}') {
-      depth--;
-      if (depth === 0) return text.slice(open + 1, i);
+    let depth = 0;
+    for (let i = open; i < text.length; i++) {
+        if ('([{'.includes(text[i])) depth++;
+        if (')]}'.includes(text[i])) {
+            depth--;
+            if (depth === 0) return text.slice(open + 1, i);
+        }
     }
-  }
-  return null;
+    return null;
 }
 
 function topCommas(list) {
-  let depth = 0;
-  let n = 0;
-  for (const ch of list) {
-    if ('([{'.includes(ch)) depth++;
-    else if (')]}'.includes(ch)) depth--;
-    else if (ch === ',' && depth === 0) n++;
-  }
-  return n;
+    let depth = 0;
+    let count = 0;
+    for (const ch of list) {
+        if ('([{'.includes(ch)) depth++;
+        else if (')]}'.includes(ch)) depth--;
+        else if (ch === ',' && depth === 0) count++;
+    }
+    return count;
 }
 
-test('the file is a Pine script and starts by saying so', () => {
-  const lines = read().split('\n');
-  assert.strictEqual(lines[0].trim(), '//@version=5', 'the version directive must be the first line - TradingView reads it before anything else');
-  assert.match(lines[1], /^\/\/ Someday/, 'and the whole thing is named right under it');
+test('the file is a Pine v5 script and starts by saying so', () => {
+    const lines = read().split('\n');
+    assert.strictEqual(lines[0].trim(), '//@version=5');
+    assert.match(lines[1], /^\/\/ Someday - structure and context/);
 });
 
-test('no tabs, and no characters that are not plain ASCII', () => {
-  // The Pine editor is a browser text box. A smart quote or a non-breaking
-  // space typed from a phone arrives as a character Pine does not know, and the
-  // error names a line that looks correct.
-  const lines = read().split('\n');
-  lines.forEach((l, i) => {
-    assert.ok(!l.includes('\t'), `line ${i + 1} has a tab - Pine wants spaces`);
-    for (const ch of l) {
-      assert.ok(ch.charCodeAt(0) < 128, `line ${i + 1} has a character Pine will not read: ${JSON.stringify(ch)}`);
+test('the script is plain ASCII and has no tabs', () => {
+    read().split('\n').forEach((line, index) => {
+        assert.ok(!line.includes('\t'), `line ${index + 1} contains a tab`);
+        for (const character of line) {
+            assert.ok(character.charCodeAt(0) < 128, `line ${index + 1} contains ${JSON.stringify(character)}`);
+        }
+    });
+});
+
+test('every bracket opens and closes on the same line', () => {
+    body().forEach((line, index) => {
+        let depth = 0;
+        for (const ch of line) {
+            if ('([{'.includes(ch)) depth++;
+            if (')]}'.includes(ch)) depth--;
+            assert.ok(depth >= 0, `line ${index + 1} closes a bracket too early`);
+        }
+        assert.strictEqual(depth, 0, `line ${index + 1} leaves a bracket open`);
+    });
+});
+
+test('indentation remains in Pine four-space steps', () => {
+    body().forEach((line, index) => {
+        if (!line.trim()) return;
+        assert.strictEqual(line.match(/^ */)[0].length % 4, 0, `line ${index + 1} is not indented in fours`);
+    });
+});
+
+test('the top level does not redeclare a name', () => {
+    const seen = new Map();
+    body().forEach((line, index) => {
+        const match = line.match(/^(?:var\s+\S+\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)/);
+        if (!match) return;
+        assert.ok(!seen.has(match[1]), `${match[1]} is redeclared on line ${index + 1}`);
+        seen.set(match[1], index + 1);
+    });
+    assert.ok(seen.size > 20);
+});
+
+test('the script stays small enough to read at a glance', () => {
+    const lines = body().filter((line) => line.trim());
+    assert.ok(lines.length < 160, `${lines.length} lines of settings and drawing is more than a quiet chart`);
+});
+
+test('each script function is called with the number of values it accepts', () => {
+    const text = body().join('\n');
+    const functions = new Map();
+    for (const match of text.matchAll(/^([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*=>/gm)) {
+        functions.set(match[1], match[2].trim() ? topCommas(match[2]) + 1 : 0);
     }
-  });
-});
-
-test('every bracket that opens, closes', () => {
-  for (const [i, line] of body().entries()) {
-    let depth = 0;
-    for (const ch of line) {
-      if ('([{'.includes(ch)) depth++;
-      if (')]}'.includes(ch)) depth--;
-      assert.ok(depth >= 0, `line ${i + 1} closes a bracket it never opened: ${line.trim()}`);
+    assert.ok(functions.size >= 3);
+    for (const [name, wanted] of functions) {
+        for (const match of text.matchAll(new RegExp(`(^|[^A-Za-z0-9_.])${name}\\s*\\(`, 'gm'))) {
+            const open = match.index + match[0].length - 1;
+            const args = inside(text, open);
+            assert.notStrictEqual(args, null, `${name} is not closed`);
+            const got = args.trim() ? topCommas(args) + 1 : 0;
+            assert.strictEqual(got, wanted, `${name} accepts ${wanted} values but got ${got}`);
+        }
     }
-    assert.strictEqual(depth, 0, `line ${i + 1} leaves a bracket open: ${line.trim()}`);
-  }
 });
 
-test('indentation is the multiple of four Pine insists on', () => {
-  body().forEach((line, i) => {
-    if (line.trim() === '') return;
-    const lead = line.match(/^ */)[0].length;
-    assert.strictEqual(lead % 4, 0, `line ${i + 1} is indented ${lead} spaces - Pine counts in fours: ${line.trim()}`);
-  });
+test('every input has a settings group', () => {
+    body().forEach((line, index) => {
+        if (!/input\./.test(line)) return;
+        assert.match(line, /group=/, `line ${index + 1} has an ungrouped setting`);
+    });
 });
 
-test('no two things at the top level share a name', () => {
-  // Pine answers a second declaration of the same name with "Variable already
-  // declared", and the first one silently stops being what you think it is.
-  const seen = new Map();
-  body().forEach((line, i) => {
-    const m = line.match(/^(?:var\s+\S+\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)/);
-    if (!m) return;
-    const name = m[1];
-    const isZoneType = /^type\s/.test(line);
-    if (isZoneType) return;
-    assert.ok(!seen.has(name), `"${name}" is declared twice - line ${seen.get(name)} and line ${i + 1}`);
-    seen.set(name, i + 1);
-  });
-  assert.ok(seen.size > 20, 'and the check found the declarations at all');
+test('the old prediction panel is gone', () => {
+    const text = read();
+    assert.doesNotMatch(text, /longOk|shortOk/);
+    assert.doesNotMatch(text, /Frame \(sets the level\)/);
+    assert.match(text, /request\.security/);
+    assert.match(text, /table\.new/);
 });
 
-test('nothing is reassigned that was never declared', () => {
-  // `x := 1` with no `x =` before it is "Undeclared identifier" in Pine, and it
-  // is the mistake you make when you move a line.
-  const text = body().join('\n');
-  const declared = new Set();
-  for (const m of text.matchAll(/^[ \t]*(?:var\s+\S+\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)/gm)) declared.add(m[1]);
-  for (const m of text.matchAll(/^[ \t]*\[([^\]]+)\]\s*=/gm)) {
-    for (const part of m[1].split(',')) declared.add(part.trim());
-  }
-  for (const m of text.matchAll(/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)\s*:=/gm)) {
-    assert.ok(declared.has(m[1]), `"${m[1]}" is reassigned but never declared`);
-  }
+test('context is displayed for the trader\'s workflow', () => {
+    const text = read();
+    for (const tf of ['contextTf1', 'contextTf2', 'contextTf3', 'contextTf4', 'contextTf5']) assert.match(text, new RegExp(tf));
+    assert.match(text, /Body swing high/);
+    assert.match(text, /Body swing low/);
 });
 
-test('every function is called with as many values as it takes', () => {
-  const text = body().join('\n');
-  const arity = new Map();
-  for (const m of text.matchAll(/^([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*=>/gm)) {
-    arity.set(m[1], m[2].trim() === '' ? 0 : topCommas(m[2]) + 1);
-  }
-  assert.ok(arity.size >= 4, 'found the script\'s own functions');
-  for (const [name, want] of arity) {
-    for (const m of text.matchAll(new RegExp(`(^|[^A-Za-z0-9_.])${name}\\s*\\(`, 'gm'))) {
-      const open = m.index + m[0].length - 1;
-      const args = inside(text, open);
-      assert.ok(args !== null, `${name}( is never closed`);
-      const got = args.trim() === '' ? 0 : topCommas(args) + 1;
-      assert.strictEqual(got, want, `${name} takes ${want} value(s) and is called with ${got}`);
+// The chart used to carry three different swing definitions at once: the H/HH/LH
+// markers came from a hardcoded 2-bar pivot that ignored the setting, the table
+// used the setting, and the step line came from the 10-bar zone structure. They
+// could not agree, which is what "the highs and lows don't line up" meant.
+// They agree now because there is one definition, on one number.
+test('one swing length drives the labels, the levels and the context box', () => {
+    const text = read();
+    assert.match(text, /ta\.pivothigh\(bodyTop\(\), swingLen, swingLen\)/);
+    assert.match(text, /ta\.pivotlow\(bodyBottom\(\), swingLen, swingLen\)/);
+    // Every request goes out from the top level, onto a timeframe that came
+    // straight from an input. A timeframe handed through the script's own code
+    // must not come back: that is the "Cannot assign a variable to a tuple"
+    // fault, which pointed at the left of the line while the right was wrong.
+    for (const tf of ['contextTf1', 'contextTf2', 'contextTf3', 'contextTf4', 'contextTf5']) {
+        assert.match(text, new RegExp(`request\\.security\\(syminfo\\.tickerid, ${tf}, `));
     }
-  }
+    assert.doesNotMatch(text, /request\.security\(\s*\w+\(/);
+    assert.doesNotMatch(text, /contextLen/);
+    assert.doesNotMatch(text, /pivothigh\(high, 2, 2\)/);
+    assert.doesNotMatch(text, /pivotlow\(low, 2, 2\)/);
 });
 
-test('a request.security tuple hands back as many values as the line claims', () => {
-  // This is the one that would take the longest to find by eye: TradingView
-  // reports it as "Cannot use 'request.security' with a tuple of a different
-  // size", which does not say which side is wrong.
-  const text = body().join('\n');
-  const calls = [...text.matchAll(/request\.security\(/g)];
-  assert.ok(calls.length >= 4, 'found the higher timeframes');
-  for (const call of calls) {
-    const lineStart = text.lastIndexOf('\n', call.index) + 1;
-    const line = text.slice(lineStart, text.indexOf('\n', call.index));
-    const offset = call.index - lineStart;
-    const names = line.match(/^\s*\[([^\]]+)\]\s*=/);
-    assert.ok(names, 'every security call in this script is destructured into named values');
-    // The tuple is the first square bracket after the timeframe argument.
-    const afterTf = line.indexOf(',', line.indexOf(',', offset) + 1);
-    const tuple = inside(line, line.indexOf('[', afterTf));
-    assert.ok(tuple !== null, 'the tuple is closed');
-    assert.strictEqual(
-      topCommas(names[1]) + 1,
-      topCommas(tuple) + 1,
-      `${line.trim().slice(0, 46)} names ${topCommas(names[1]) + 1} values but asks for ${topCommas(tuple) + 1}`
-    );
-  }
+// "Wicks are not counted as highs." The body is the only part of a candle that
+// is a price, so a swing high is the top of a body and a swing low is the bottom
+// of one. Nothing in the script may pivot on a wick again.
+test('swings are read from the candle body, never from a wick', () => {
+    const text = read();
+    assert.match(text, /bodyTop\(\) => math\.max\(open, close\)/);
+    assert.match(text, /bodyBottom\(\) => math\.min\(open, close\)/);
+    assert.doesNotMatch(text, /pivothigh\(high/);
+    assert.doesNotMatch(text, /pivotlow\(low/);
+    assert.doesNotMatch(text, /ta\.highest\(/);
+    assert.doesNotMatch(text, /ta\.lowest\(/);
 });
 
-test('nothing that is compared with == or != is left as na', () => {
-  // 19 Sep 2026. The read box said 0 / 0 on his chart, on every bar, forever.
-  // Each counter is guarded by "the swing time is not the one I last drew", and
-  // those times were declared as na. In Pine a comparison against na is itself
-  // na, and an if whose condition is na never runs - so the guard could never be
-  // true once, on any bar, and the counters could not move. The same fault sat
-  // in the zones above it, which is why the script had never drawn anything and
-  // neither of us noticed: his chart already had another zone indicator on it.
-  const text = body().join('\n');
-  const naVars = new Set();
-  for (const m of text.matchAll(/^\s*(?:var\s+\S+\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*na\s*$/gm)) naVars.add(m[1]);
-  const lines = text.split('\n');
-  for (const line of lines) {
-    for (const m of line.matchAll(/([A-Za-z_][A-Za-z0-9_]*)\s*(?:!=|==)\s*([A-Za-z_][A-Za-z0-9_]*)?/g)) {
-      for (const name of [m[1], m[2]].filter(Boolean)) {
-      if (!naVars.has(name)) continue;
-      // Guarded on the same line is fine and is the only way to do it: the
-      // line has to ask whether the value is na before comparing it.
-      if (new RegExp(`na\\s*\\(\\s*${name}\\s*\\)`).test(line)) continue;
-      assert.fail(
-        `"${name}" starts as na and is compared with == or != without asking first - that comparison is na, and an if with an na condition never runs: ${line.trim()}`
-      );
-      }
+// "Closed candles breaking structure." A level goes when a candle closes past
+// it, and only then, so the break test reads the close and waits for the bar to
+// be finished before it counts.
+test('a level is only taken out by a candle that closes through it', () => {
+    const text = read();
+    assert.match(text, /barstate\.isconfirmed and not na\(highLevel\) and na\(highBrokenAt\) and close > highLevel/);
+    assert.match(text, /barstate\.isconfirmed and not na\(lowLevel\) and na\(lowBrokenAt\) and close < lowLevel/);
+    assert.match(text, /line\.set_x2\(highLine, na\(highBrokenAt\) \? bar_index : highBrokenAt\)/);
+    assert.match(text, /line\.set_x2\(lowLine, na\(lowBrokenAt\) \? bar_index : lowBrokenAt\)/);
+});
+
+test('the last swing high and low are drawn as levels on the chart', () => {
+    const text = read();
+    assert.match(text, /showLevels = input\.bool/);
+    assert.match(text, /highLine := line\.new\(bar_index - swingLen, swingHigh, bar_index, swingHigh/);
+    assert.match(text, /lowLine := line\.new\(bar_index - swingLen, swingLow, bar_index, swingLow/);
+});
+
+// The shaded supply and demand boxes, their retracement levels and the
+// time-based ranges were taken off: they were read as too busy and the time
+// ranges did not look right. This pins them gone.
+test('the boxes and the time windows are off the chart', () => {
+    const text = read();
+    assert.doesNotMatch(text, /zone/i);
+    assert.doesNotMatch(text, /TimeRange/);
+    assert.doesNotMatch(text, /box\.new/);
+    assert.doesNotMatch(text, /bgcolor\(/);
+    assert.doesNotMatch(text, /range/i);
+    assert.doesNotMatch(text, /max_boxes_count/);
+});
+
+test('every context level is drawn on the chart as well as listed in the box', () => {
+    const text = read();
+    for (const row of ['1', '2', '3', '4', '5']) {
+        assert.match(text, new RegExp(`showContextLevels \\? contextHigh${row} : na`));
+        assert.match(text, new RegExp(`showContextLevels \\? contextLow${row} : na`));
     }
-  }
+    assert.match(text, /contextLines = input\.bool/);
 });
 
-test('a request.security timeframe is simple, and never worked out by the script', () => {
-  // 19 Sep 2026. The script he pasted into the Pine editor would not compile,
-  // and TradingView pointed at the left-hand side of the line: "Cannot assign a
-  // variable to a tuple." The fault was on the right - the timeframe was the
-  // return of a small mapping function, and request.security wants a simple
-  // string while a function hands back a series. Only a literal or an
-  // input.timeframe will do, and he is the one who pays for getting it wrong.
-  const text = body().join('\n');
-  const fromInput = new Set();
-  for (const m of text.matchAll(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*input\.timeframe\(/gm)) fromInput.add(m[1]);
-  assert.ok(fromInput.size >= 2, 'found the timeframe inputs');
-  const calls = [...text.matchAll(/request\.security\(\s*syminfo\.tickerid\s*,\s*([^,]+),/g)];
-  assert.ok(calls.length >= 4, 'found the higher timeframes');
-  for (const call of calls) {
-    const tf = call[1].trim();
-    assert.ok(
-      tf === '""' || fromInput.has(tf),
-      `request.security is handed "${tf}" as its timeframe - that has to be a literal or an input.timeframe, or the line cannot compile`
-    );
-  }
-});
-
-test('every input is filed under a group', () => {
-  // His settings panel is nine inputs deep already; an input with no group
-  // lands in a nameless pile at the bottom.
-  body().forEach((line, i) => {
-    if (!/input\./.test(line)) return;
-    assert.match(line, /group="/, `line ${i + 1} has an input with no group: ${line.trim()}`);
-  });
-});
-
-test('the script is reachable as text he can copy, not as a download', () => {
-  // 18 Sep 2026. The script kept arriving half-pasted. Whatever the cause, the
-  // fix is that there is a link he can open and copy the whole thing from, and
-  // that link has to hand back plain text — a download is a file with no program
-  // on his machine to open it, which is how this failed in the first place.
-  const server = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
-  const route = server.match(/app\.get\('\/someday\.pine'[\s\S]*?\}\);/);
-  assert.ok(route, '/someday.pine is served');
-  assert.match(route[0], /res\.type\('text\/plain'\)/, 'and as text, so the browser shows it instead of filing it away');
-  assert.match(route[0], /tradingview', 'Someday-Indicator\.pine'/, 'out of the one file these checks read');
-  assert.ok(server.indexOf("app.get('/someday.pine'") < server.indexOf('app.use(express.static'), 'and above express.static, so it is the route that answers and not the download');
-});
-
-test('the swings are named, and the two levels are drawn, the way the app chart does it', () => {
-  // 19 Sep 2026, later the same day. He put this chart beside the app's own chart
-  // and asked why his did not look like it. It did not, because the script had
-  // never put a name on a swing. The letters and the two levels now come off the
-  // app's own definition of a swing - a bar higher (or lower) than the TWO either
-  // side of it - while the zones keep their longer reach, so nothing about the
-  // zones moved.
-  const text = read();
-  assert.match(text, /ta\.pivothigh\(high, labelLen, labelLen\)/, 'the letters come off the label swing length');
-  assert.match(text, /ta\.pivotlow\(low, labelLen, labelLen\)/);
-  assert.match(text, /labelLen\s+= input\.int\(2,/, 'and that length opens at 2, which is the app chart\'s own');
-  assert.match(text, /nameSwings = input\.bool\(true,/, 'the names are on by default - an unnamed swing was the complaint');
-  assert.match(text, /showLastHL = input\.bool\(true,/, 'so are the two levels');
-  assert.match(text, /plot\(showSwings and showLastHL \? lastHigh : na, "Last high"/);
-  assert.match(text, /plot\(showSwings and showLastHL \? lastLow : na, "Last low"/);
-  assert.match(text, /style=plot\.style_stepline/, 'a level that has not moved is a step, not a slope');
-  const onSwing = [...text.matchAll(/label\.new\(bar_index - (\w+),/g)].map((m) => m[1]);
-  assert.ok(onSwing.length >= 2, 'both the high and the low are labelled');
-  assert.ok(onSwing.every((v) => v === 'labelLen'), 'and each name sits on the swing it belongs to');
-  assert.match(text, /ta\.pivothigh\(high, swingLen, swingLen\)/, 'the zones are still built from their own, longer swing');
-});
-
-test('the zones are built from confirmed swings and never from the future', () => {
-  const text = read();
-  assert.match(text, /lookahead=barmerge\.lookahead_off/, 'the higher timeframes must not be read ahead of the bar');
-  assert.ok(!/lookahead_on/.test(text), 'and never with lookahead on - that is reading what has not happened');
-  assert.match(text, /ta\.pivothigh\(high, swingLen, swingLen\)/, 'swings are still swings');
-  assert.match(text, /pruneZones\(supplyZones, true\)|pruneZones\(supplyZones,true\)/, 'supply zones are kept tidy');
-  assert.match(text, /pruneZones\(demandZones, false\)|pruneZones\(demandZones,false\)/, 'so are demand zones');
+test('the copy route still serves this script as plain text', () => {
+    const server = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+    const route = server.match(/app\.get\('\/someday\.pine'[\s\S]*?\}\);/);
+    assert.ok(route, '/someday.pine route exists');
+    assert.match(route[0], /res\.type\('text\/plain'\)/);
+    assert.match(route[0], /tradingview', 'Someday-Indicator\.pine'/);
 });

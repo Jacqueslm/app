@@ -1,644 +1,165 @@
 //@version=5
-// Someday - the indicator, both halves.
+// Someday - structure and context
 //
-// Half one: supply and demand zones built from confirmed swings, read on the
-// chart's own timeframe and on four higher ones, with the retracement levels
-// inside them.
+// Two things, and nothing else:
+//   1. the swing points, read from the candle BODY only, with the last swing
+//      high and low drawn as a level that stops where a candle CLOSES through
+//      it - a wick past a level is not a break;
+//   2. the same swing carried from the Daily, 4h, 1h, 15m and 5m, so the last
+//      high and low he trades back to on each of his timeframes sit in one box.
 //
-// Half two: the times he trades - the range of a chosen timeframe starting at a
-// chosen time on his own clock (8:00 and 14:00 Central, which is 9:00 and 15:00
-// on the exchange clock), shaded as a column, boxed, carrying the same levels
-// inside it, and kept only while price has not taken it out.
-//
-// Nothing here reads the future and nothing here predicts. A zone appears only
-// after its swing has confirmed; a range only after its bars have closed. The
-// drawing choices that are not facts are the "reaches back" and "your clock"
-// inputs, and they are yours.
-//
-// 19 September 2026 - two faults found on a DAILY chart and fixed here:
-//
-// 1. A higher timeframe was being read once per chart bar. On a daily chart the
-//    4h series is only looked at when the day closes, but a swing is worth
-//    something on one bar only - the bar it confirms on - so most 4h swings were
-//    being missed, and the table said "no frame yet" while the chart plainly had
-//    a 4h lower low and a 4h lower high on it. Swings are now carried forward, so
-//    whatever moment the chart samples, it samples a swing that really happened.
-// 2. The table was left at its smallest text. It now opens readable.
-//
-// 19 September 2026, later the same day - he compared this to the app's own
-// chart and asked why his did not look like it. It did not, because this script
-// had never drawn the thing the app's chart draws: a name on every swing. Now
-// it has - HH, HL, LH and LL on the swings, off the app's own definition of a
-// swing (a bar higher or lower than the two either side of it), plus the last
-// high and the last low carried across the chart as two level lines. The zones
-// keep their own, longer swing length, so nothing about them moved.
-indicator("Someday", shorttitle="Someday", overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
-
-// ----------------------------------------------------------------- structure
-// 19 September 2026 - two lengths, on purpose. He looked at the app's own chart
-// and asked why his chart did not look like it. The app labels a swing as a bar
-// higher (or lower) than the TWO either side of it, names every one of them
-// HH, HL, LH or LL, and draws the last high and the last low across as levels.
-// A zone wants a different thing - the leg that led into a swing, which is a
-// longer reach - so the zones keep their own length and the labels get theirs.
-showSwings = input.bool(true, "Swing points", group="Structure")
-swingLen   = input.int(10, "Zone structure length", minval=2, maxval=50, group="Structure")
-labelLen   = input.int(2, "Label swing length (2 = the app's own chart)", minval=1, maxval=20, group="Structure")
-nameSwings = input.bool(true, "Name the swings (HH HL LH LL)", group="Structure")
-showLastHL = input.bool(true, "Last high / last low lines", group="Structure")
-swingCol   = input.color(color.new(color.teal, 25), "Swing colour", group="Structure")
-hlCol      = input.color(color.new(color.gray, 20), "Last high / low colour", group="Structure")
-
-// --------------------------------------------------------------------- zones
-showZones  = input.bool(true, "Display zones", group="Zones")
-zoneSide   = input.string("Both", "Zone display", options=["Both", "Bullish", "Bearish"], group="Zones")
-showLast   = input.int(1, "Show last, per side", minval=1, maxval=10, group="Zones")
-cleanBands = input.bool(true, "Clean up level overlap", group="Zones")
-zoneBack   = input.int(6, "A new zone reaches back (bars)", minval=1, maxval=60, group="Zones")
-zoneLive   = input.int(300, "Zone life (bars)", minval=10, maxval=2000, group="Zones")
-keepBroken = input.bool(false, "Keep zones price has taken out", group="Zones")
-// 19 September 2026 - redrawn to sit beside the zones he already trades off.
-// What changed and why: the box was a grey outline with a nearly invisible fill
-// and dotted levels inside it, so it read as clutter next to the other zone
-// indicator on his chart. A zone now wears its own side's colour as an edge, the
-// fill carries further, and the levels inside it are off unless he asks for
-// them. The levels are still one tick away in "Retracements".
-bullCol    = input.color(color.new(#26a69a, 78), "Bullish zone", group="Zones")
-bearCol    = input.color(color.new(#ef5350, 78), "Bearish zone", group="Zones")
-bullEdge   = input.color(#26a69a, "Bullish edge", inline="edge", group="Zones")
-bearEdge   = input.color(#ef5350, "Bearish edge", inline="edge", group="Zones")
-zoneFib    = input.bool(false, "Draw the levels inside zones", group="Zones")
-
-// -------------------------------------------------------------- retracements
-// Ticked here, drawn inside both: the supply and demand zones, and the boxes
-// around your two times.
-fib0     = input.bool(false, "0", inline="fib", group="Retracements")
-fib3     = input.bool(true, "0.3", inline="fib", group="Retracements")
-fib5     = input.bool(true, "0.5", inline="fib", group="Retracements")
-fib7     = input.bool(true, "0.7", inline="fib", group="Retracements")
-fib1     = input.bool(false, "1", inline="fib", group="Retracements")
-fibStyle = input.string("Dotted", "Line style", options=["Solid", "Dashed", "Dotted"], group="Retracements")
-fibCol   = input.color(color.new(color.gray, 30), "Line colour", group="Retracements")
-
-// --------------------------------------------------------------- timeframes
-useChart = input.bool(true, "Chart timeframe", group="Timeframes")
-use15    = input.bool(true, "15 minutes", group="Timeframes")
-use60    = input.bool(true, "1 hour", group="Timeframes")
-use240   = input.bool(true, "4 hours", group="Timeframes")
-useD     = input.bool(false, "1 day", group="Timeframes")
-
-// -------------------------------------------------------------- time ranges
-showRanges  = input.bool(true, "Shade the ranges", group="Time ranges")
-tzName      = input.string("America/Chicago", "Your clock", group="Time ranges")
-markInsides = input.bool(false, "Mark inside bars", group="Time ranges")
-insChar     = input.string("*", "Marker", group="Time ranges")
-greyMark    = input.color(color.new(color.gray, 25), "Marker away from a range", group="Time ranges")
-mitPct      = input.float(0.0, "Taken out once price closes past the edge by (% of the range)", minval=0, maxval=500, group="Time ranges")
-keepRanges  = input.int(5, "Unmitigated ranges kept, per time", minval=1, maxval=25, group="Time ranges")
-rangeLife   = input.int(500, "Range life (bars)", minval=10, maxval=5000, group="Time ranges")
-extendRng   = input.bool(true, "Extend the range box", group="Time ranges")
-
-// Time 1 - the open, on his clock
-on1  = input.bool(true, "On", group="Time 1")
-hr1  = input.int(8, "Hour", minval=0, maxval=23, group="Time 1")
-mn1  = input.int(0, "Minute", minval=0, maxval=59, group="Time 1")
-tf1  = input.timeframe("60", "Range", group="Time 1")
-col1 = input.color(#2962ff, "Colour", group="Time 1")
-
-// Time 2 - the last hour of the cash session, on his clock
-on2  = input.bool(true, "On", group="Time 2")
-hr2  = input.int(14, "Hour", minval=0, maxval=23, group="Time 2")
-mn2  = input.int(0, "Minute", minval=0, maxval=59, group="Time 2")
-tf2  = input.timeframe("60", "Range", group="Time 2")
-col2 = input.color(#ff9800, "Colour", group="Time 2")
-
-// ------------------------------------------------------------------ a zone
-// A box, plus up to five levels inside it. The levels are counted from the
-// swing itself: 0 sits on the swing, 1 sits at the far end of the leg.
-type Zone
-    box  b
-    line f0
-    line f3
-    line f5
-    line f7
-    line f1
-
-var Zone[] supplyZones = array.new<Zone>()
-var Zone[] demandZones = array.new<Zone>()
-
-lineStyle() =>
-    fibStyle == "Solid" ? line.style_solid : fibStyle == "Dashed" ? line.style_dashed : line.style_dotted
-
-// ------------------------------------------------- a swing, carried forward
-// Why these exist: TradingView hands a higher-timeframe value to a chart bar at
-// the moment that bar closes. Ask a daily chart for a 4h swing and it looks once
-// a day, and a swing only reads non-empty on the single bar it confirms on - so
-// on a daily chart almost every 4h swing was invisible to this script.
-//
-// These carry the last confirmed swing forward. Nothing future is read: the
-// value is the most recent swing that had already confirmed, and it is the same
-// fact, just not thrown away between samples. The token is the time of the bar
-// the swing sits on, which is what stops the same swing being drawn twice.
-// Carried value and token are separate for highs and for lows, so a new low can
-// never make the script think a new high arrived.
-f_phVal(simple int len) =>
-    var float keep = na
-    float p = ta.pivothigh(high, len, len)
-    keep := na(p) ? keep : p
-    keep
-
-f_phTok(simple int len) =>
-    var int keep = na
-    if not na(ta.pivothigh(high, len, len))
-        keep := time[len]
-    keep
-
-f_plVal(simple int len) =>
-    var float keep = na
-    float p = ta.pivotlow(low, len, len)
-    keep := na(p) ? keep : p
-    keep
-
-f_plTok(simple int len) =>
-    var int keep = na
-    if not na(ta.pivotlow(low, len, len))
-        keep := time[len]
-    keep
-
-makeZone(bool supply, float top, float bottom, int left) =>
-    right = bar_index + 20
-    z = Zone.new(box.new(left, top, right, bottom, border_color=supply ? bearEdge : bullEdge, border_width=1, bgcolor=supply ? bearCol : bullCol), na, na, na, na, na)
-    span = top - bottom
-    if span > 0
-        st = lineStyle()
-        if zoneFib and fib0
-            lv = supply ? top : bottom
-            z.f0 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if zoneFib and fib3
-            lv = supply ? top - span * 0.3 : bottom + span * 0.3
-            z.f3 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if zoneFib and fib5
-            lv = supply ? top - span * 0.5 : bottom + span * 0.5
-            z.f5 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if zoneFib and fib7
-            lv = supply ? top - span * 0.7 : bottom + span * 0.7
-            z.f7 := line.new(left, lv, right, lv, color=fibCol, style=st)
-        if zoneFib and fib1
-            lv = supply ? bottom : top
-            z.f1 := line.new(left, lv, right, lv, color=fibCol, style=st)
-    z
-
-killZone(Zone z) =>
-    box.delete(z.b)
-    if not na(z.f0)
-        line.delete(z.f0)
-    if not na(z.f3)
-        line.delete(z.f3)
-    if not na(z.f5)
-        line.delete(z.f5)
-    if not na(z.f7)
-        line.delete(z.f7)
-    if not na(z.f1)
-        line.delete(z.f1)
-
-addZone(bool supply, float top, float bottom, int left) =>
-    wanted = zoneSide == "Both" or (supply and zoneSide == "Bearish") or (not supply and zoneSide == "Bullish")
-    if showZones and wanted and not na(top) and not na(bottom) and top > bottom
-        Zone[] arr = supply ? supplyZones : demandZones
-        if cleanBands and array.size(arr) > 0
-            for i = array.size(arr) - 1 to 0
-                Zone old = array.get(arr, i)
-                if box.get_top(old.b) >= bottom and box.get_bottom(old.b) <= top
-                    killZone(old)
-                    array.remove(arr, i)
-        while array.size(arr) >= showLast
-            killZone(array.shift(arr))
-        array.push(arr, makeZone(supply, top, bottom, left))
-
-pruneZones(Zone[] arr, bool supply) =>
-    if array.size(arr) > 0
-        for i = array.size(arr) - 1 to 0
-            Zone z = array.get(arr, i)
-            top = box.get_top(z.b)
-            bot = box.get_bottom(z.b)
-            left = box.get_left(z.b)
-            box.set_right(z.b, bar_index + 20)
-            if not na(z.f0)
-                line.set_x2(z.f0, bar_index + 20)
-            if not na(z.f3)
-                line.set_x2(z.f3, bar_index + 20)
-            if not na(z.f5)
-                line.set_x2(z.f5, bar_index + 20)
-            if not na(z.f7)
-                line.set_x2(z.f7, bar_index + 20)
-            if not na(z.f1)
-                line.set_x2(z.f1, bar_index + 20)
-            dead = bar_index - left > zoneLive
-            if not keepBroken
-                dead := dead or (supply ? close > top : close < bot)
-            if dead
-                killZone(z)
-                array.remove(arr, i)
-
-// ------------------------------------------------------ a range and its levels
-// A range is a box like a zone, so it carries the same levels: here they are
-// counted from the top of the range down, 0 on the high and 1 on the low, which
-// is how a range is measured rather than how a leg into a swing is.
-newRange(float top, float bottom, int left, color col) =>
-    z = Zone.new(box.new(left, top, bar_index, bottom, border_color=color.new(col, 40), border_width=1, bgcolor=color.new(col, 88)), na, na, na, na, na)
-    span = top - bottom
-    if span > 0
-        st = lineStyle()
-        if fib0
-            z.f0 := line.new(left, top, bar_index, top, color=fibCol, style=st)
-        if fib3
-            lv = top - span * 0.3
-            z.f3 := line.new(left, lv, bar_index, lv, color=fibCol, style=st)
-        if fib5
-            lv = top - span * 0.5
-            z.f5 := line.new(left, lv, bar_index, lv, color=fibCol, style=st)
-        if fib7
-            lv = top - span * 0.7
-            z.f7 := line.new(left, lv, bar_index, lv, color=fibCol, style=st)
-        if fib1
-            z.f1 := line.new(left, bottom, bar_index, bottom, color=fibCol, style=st)
-    z
-
-// ---------------------------------------------------------- a range's upkeep
-// Kept while it lives and while price has not taken it out. "Taken out" means
-// a close past one of its edges by that share of the range's own height, so 0
-// is any close outside and 100 is a close a whole range beyond it. The levels
-// inside it come and go with it.
-runRanges(Zone[] arr) =>
-    if array.size(arr) > 0
-        for i = array.size(arr) - 1 to 0
-            Zone z = array.get(arr, i)
-            top = box.get_top(z.b)
-            bot = box.get_bottom(z.b)
-            span = top - bot
-            if extendRng
-                box.set_right(z.b, bar_index + 5)
-                if not na(z.f0)
-                    line.set_x2(z.f0, bar_index + 5)
-                if not na(z.f3)
-                    line.set_x2(z.f3, bar_index + 5)
-                if not na(z.f5)
-                    line.set_x2(z.f5, bar_index + 5)
-                if not na(z.f7)
-                    line.set_x2(z.f7, bar_index + 5)
-                if not na(z.f1)
-                    line.set_x2(z.f1, bar_index + 5)
-            past = mitPct / 100 * span
-            old = bar_index - box.get_left(z.b) > rangeLife
-            taken = close > top + past or close < bot - past
-            if old or taken
-                killZone(z)
-                array.remove(arr, i)
-
-// ----------------------------------------------------------- the swings, named
-// ph and pl stay fed by swingLen: these are the swings the ZONES are built from
-// and nothing about the zones changed. The letters and the two levels come off
-// labelLen, which is the app's own definition of a swing.
-ph = ta.pivothigh(high, swingLen, swingLen)
-pl = ta.pivotlow(low, swingLen, swingLen)
-
-lph = ta.pivothigh(high, labelLen, labelLen)
-lpl = ta.pivotlow(low, labelLen, labelLen)
-
-var float lastHigh = na
-var float lastLow  = na
-
-if not na(lph)
-    what = na(lastHigh) ? "H" : lph > lastHigh ? "HH" : "LH"
-    lastHigh := lph
-    if showSwings
-        label.new(bar_index - labelLen, lph, nameSwings ? what : "", style=label.style_label_down, color=color.new(color.black, 100), textcolor=swingCol, size=size.small)
-
-if not na(lpl)
-    what = na(lastLow) ? "L" : lpl > lastLow ? "HL" : "LL"
-    lastLow := lpl
-    if showSwings
-        label.new(bar_index - labelLen, lpl, nameSwings ? what : "", style=label.style_label_up, color=color.new(color.black, 100), textcolor=swingCol, size=size.small)
-
-// The two levels the app's chart draws across the whole chart: the last swing
-// high and the last swing low, each carried forward until the next one of its
-// kind confirms. A step line, because that is what a level that has not moved
-// looks like - it is not an average and it is not a forecast.
-plot(showSwings and showLastHL ? lastHigh : na, "Last high", color=hlCol, style=plot.style_stepline, linewidth=1)
-plot(showSwings and showLastHL ? lastLow : na, "Last low", color=hlCol, style=plot.style_stepline, linewidth=1)
-
-// --------------------------------------------------- zones, chart timeframe
-if useChart and not na(ph)
-    addZone(true, ph, ta.lowest(low, swingLen)[swingLen], bar_index - zoneBack)
-
-if useChart and not na(pl)
-    addZone(false, ta.highest(high, swingLen)[swingLen], pl, bar_index - zoneBack)
-
-// ------------------------------------------------ zones, higher timeframes
-// One call per timeframe, reading the swing and the leg that led into it. The
-// token is the time of the swing bar, so a swing that confirms is only drawn
-// once however many chart bars sit inside the confirming bar.
-// These hold the time of the swing last drawn, and they start at 0 rather than
-// na on purpose. In Pine a comparison against na is itself na, and an if whose
-// condition is na never runs - so a token that starts na can never stop being
-// na, the branch never fires once, and the script draws nothing at all while
-// looking perfectly healthy. A bar time is always positive, so 0 is a sentinel
-// that no real swing can match.
-var int seen15h = 0
-var int seen15l = 0
-var int seen60h = 0
-var int seen60l = 0
-var int seen4h  = 0
-var int seen4l  = 0
-var int seen1dh = 0
-var int seen1dl = 0
-
-[a15ph, a15phT, a15pl, a15plT, a15lo, a15hi] = request.security(syminfo.tickerid, "15", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
-
-if use15 and not na(a15ph) and a15phT != seen15h
-    seen15h := a15phT
-    addZone(true, a15ph, a15lo, bar_index - zoneBack)
-
-if use15 and not na(a15pl) and a15plT != seen15l
-    seen15l := a15plT
-    addZone(false, a15hi, a15pl, bar_index - zoneBack)
-
-[b60ph, b60phT, b60pl, b60plT, b60lo, b60hi] = request.security(syminfo.tickerid, "60", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
-
-if use60 and not na(b60ph) and b60phT != seen60h
-    seen60h := b60phT
-    addZone(true, b60ph, b60lo, bar_index - zoneBack)
-
-if use60 and not na(b60pl) and b60plT != seen60l
-    seen60l := b60plT
-    addZone(false, b60hi, b60pl, bar_index - zoneBack)
-
-[c4hph, c4hphT, c4hpl, c4hplT, c4hlo, c4hhi] = request.security(syminfo.tickerid, "240", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
-
-if use240 and not na(c4hph) and c4hphT != seen4h
-    seen4h := c4hphT
-    addZone(true, c4hph, c4hlo, bar_index - zoneBack)
-
-if use240 and not na(c4hpl) and c4hplT != seen4l
-    seen4l := c4hplT
-    addZone(false, c4hhi, c4hpl, bar_index - zoneBack)
-
-[d1dph, d1dphT, d1dpl, d1dplT, d1dlo, d1dhi] = request.security(syminfo.tickerid, "1D", [f_phVal(swingLen), f_phTok(swingLen), f_plVal(swingLen), f_plTok(swingLen), ta.lowest(low, swingLen)[swingLen], ta.highest(high, swingLen)[swingLen]], lookahead=barmerge.lookahead_off)
-
-if useD and not na(d1dph) and d1dphT != seen1dh
-    seen1dh := d1dphT
-    addZone(true, d1dph, d1dlo, bar_index - zoneBack)
-
-if useD and not na(d1dpl) and d1dplT != seen1dl
-    seen1dl := d1dplT
-    addZone(false, d1dhi, d1dpl, bar_index - zoneBack)
-
-// ----------------------------------------------------- the ranges themselves
-// The range is the high and the low of the bars from the chosen time until the
-// chosen timeframe is up. On the exchange clock 8:00 Central is 9:00 and 14:00
-// Central is 15:00, which is what the time input is measured against - your
-// clock, as the device reports it, not an assumption.
-var int   start1 = na
-var float top1   = na
-var float bot1   = na
-var int   left1  = na
-var bool  open1  = false
-var Zone[] boxes1 = array.new<Zone>()
-
-var int   start2 = na
-var float top2   = na
-var float bot2   = na
-var int   left2  = na
-var bool  open2  = false
-var Zone[] boxes2 = array.new<Zone>()
-
-tf1ms = timeframe.in_seconds(tf1) * 1000
-tf2ms = timeframe.in_seconds(tf2) * 1000
-
-if on1 and hour(time, tzName) == hr1 and minute(time, tzName) == mn1
-    start1 := time
-    top1   := high
-    bot1   := low
-    left1  := bar_index
-    open1  := true
-
-if open1
-    here1 = not na(start1) and time >= start1 and time < start1 + tf1ms
-    if here1
-        top1 := math.max(top1, high)
-        bot1 := math.min(bot1, low)
-    else
-        open1 := false
-        if showRanges
-            array.push(boxes1, newRange(top1, bot1, left1, col1))
-            while array.size(boxes1) > keepRanges
-                killZone(array.shift(boxes1))
-
-if on2 and hour(time, tzName) == hr2 and minute(time, tzName) == mn2
-    start2 := time
-    top2   := high
-    bot2   := low
-    left2  := bar_index
-    open2  := true
-
-if open2
-    here2 = not na(start2) and time >= start2 and time < start2 + tf2ms
-    if here2
-        top2 := math.max(top2, high)
-        bot2 := math.min(bot2, low)
-    else
-        open2 := false
-        if showRanges
-            array.push(boxes2, newRange(top2, bot2, left2, col2))
-            while array.size(boxes2) > keepRanges
-                killZone(array.shift(boxes2))
-
-in1 = on1 and not na(start1) and time >= start1 and time < start1 + tf1ms
-in2 = on2 and not na(start2) and time >= start2 and time < start2 + tf2ms
-
-// Inside bars, marked where they sit: in the colour of the range it is inside,
-// grey when it is not inside one.
-inside = high < high[1] and low > low[1]
-
-if markInsides and inside
-    markCol = in1 ? col1 : in2 ? col2 : greyMark
-    label.new(bar_index, high, insChar, style=label.style_none, yloc=yloc.abovebar, textcolor=markCol, size=size.tiny)
-
-// ------------------------------------------------------------------- the read
-// The four states, the level, and the checklist - his rules as numbers.
-//
-// The frame is read off CLOSED candles of the frame set below - 1 hour by
-// default - not off a timeframe this script chose for you. A poke above the
-// level with no close above it on that frame is the grab, and it changes
-// nothing. This section is self-contained: it reads nothing from the halves
-// above it and can sit at the very end of the file.
-//
-// The frame must come from input.timeframe and never from a helper of our own:
-// request.security wants a simple string, and a function hands back a series, so
-// a mapped code makes the whole tuple line fail to compile with an error about
-// the left-hand side - a message that names the wrong end of the line.
-frameTf  = input.timeframe("60", "Frame (sets the level)", group="The read")
-frameTfName = frameTf == "15" ? "15m" : frameTf == "30" ? "30m" : frameTf == "60" ? "1h" : frameTf == "120" ? "2h" : frameTf == "240" ? "4h" : frameTf == "1D" ? "1D" : frameTf
-frameLen = input.int(2, "Frame swing length", minval=2, maxval=20, group="The read")
-smallTf  = input.timeframe("15", "Small chart", group="The read")
-smallLen = input.int(3, "Small chart swing length", minval=2, maxval=20, group="The read")
-showRead = input.bool(true, "Show the read", group="The read")
-lvlCol   = input.color(#ffeb3b, "Level line", group="The read")
-lowCol   = input.color(color.new(color.gray, 15), "Frame low line", group="The read")
-readSize = input.string("huge", "Table text", options=["tiny", "small", "normal", "large", "huge"], group="The read")
-
-readText = readSize == "tiny" ? size.tiny : readSize == "small" ? size.small : readSize == "normal" ? size.normal : readSize == "large" ? size.large : size.huge
-
-[f4hPh, f4hPhT, f4hPl, f4hPlT, f4hClose] = request.security(syminfo.tickerid, frameTf, [f_phVal(frameLen), f_phTok(frameLen), f_plVal(frameLen), f_plTok(frameLen), close[1]], lookahead=barmerge.lookahead_off)
-
-var float fHigh      = na
-var float fPrevHigh  = na
-var float fLow       = na
-var float fPrevLow   = na
-var float theLevel   = na
-var float frameLow   = na
-var int   seenFrameH = 0
-var int   seenFrameL = 0
-// How many frame swings the script has actually been given. This is the row that
-// says whether an empty table means "nothing has happened yet" or "the script
-// cannot see the swings at all" - two very different problems with the same face.
-var int   seenPh     = 0
-var int   seenPl     = 0
-
-if not na(f4hPh) and f4hPhT != seenFrameH
-    seenFrameH := f4hPhT
-    seenPh += 1
-    fPrevHigh := fHigh
-    fHigh := f4hPh
-
-if not na(f4hPl) and f4hPlT != seenFrameL
-    seenFrameL := f4hPlT
-    seenPl += 1
-    fPrevLow := fLow
-    fLow := f4hPl
-    lowerLow = not na(fPrevLow) and f4hPl < fPrevLow
-    if lowerLow
-        frameLow := f4hPl
-        if not na(fHigh)
-            theLevel := fHigh
-
-c4 = f4hClose
-haveFrame = not na(theLevel) and not na(frameLow)
-changed   = haveFrame and c4 > theLevel
-underLow  = haveFrame and c4 < frameLow
-atLevel   = haveFrame and not changed and high >= theLevel
-retracing = haveFrame and not changed and not underLow and not atLevel and close < theLevel
-
-// 19 September 2026. A cancelled frame used to sit there showing its level and
-// its low as though they were still something to use - a price from hours earlier
-// sitting beside a live price, which reads as nonsense, and that was his
-// complaint. A cancelled frame is dropped now: the box says so for twenty bars,
-// then goes back to "no frame yet", and it shows no price at all until a fresh
-// lower low puts a new level up.
-var int frameEnded = na
-if changed
-    frameEnded := bar_index
-    theLevel := na
-    frameLow := na
-
-justEnded = not na(frameEnded) and bar_index - frameEnded <= 20
-
-// The twenty-bar memory of the cancellation can only speak while no frame is up.
-// Without that guard it kept saying "frame changed" over a brand new frame that
-// had formed inside those twenty bars, so the box could read "frame changed" and
-// "long scalp" at the same time - two answers that cannot both be true.
-stateName = justEnded and not haveFrame ? "frame changed" : not haveFrame ? "no frame yet" : underLow ? "under the low" : atLevel ? "level in play" : "retracing"
-
-// The small chart: higher highs, and the last higher low still holding - a
-// close under it ends the hold, a wick does not.
-[fSPh, fSPhT, fSPl, fSPlT, sClose] = request.security(syminfo.tickerid, smallTf, [f_phVal(smallLen), f_phTok(smallLen), f_plVal(smallLen), f_plTok(smallLen), close], lookahead=barmerge.lookahead_off)
-
-var float sHigh      = na
-var float sPrevHigh  = na
-var float sLow       = na
-var float sPrevLow   = na
-var float sHold      = na
-var int   seenSmallH = 0
-var int   seenSmallL = 0
-
-if not na(fSPh) and fSPhT != seenSmallH
-    seenSmallH := fSPhT
-    sPrevHigh := sHigh
-    sHigh := fSPh
-
-if not na(fSPl) and fSPlT != seenSmallL
-    seenSmallL := fSPlT
-    sPrevLow := sLow
-    sLow := fSPl
-    if not na(sPrevLow) and fSPl > sPrevLow
-        sHold := fSPl
-
-ltfUp = not na(sPrevHigh) and sHigh > sPrevHigh and not na(sHold) and sClose > sHold
-
-longOk  = haveFrame and not changed and not underLow and retracing and ltfUp
-shortOk = haveFrame and not changed and atLevel
-verdict = changed ? "wait - the frame changed" : shortOk ? "short" : longOk ? "long scalp" : "wait"
-
-// The level and the frame low, drawn so the thing he is watching is visible.
-var line[] lvlLines = array.new_line()
-var line[] lowLines = array.new_line()
-
-lvChanged = not na(theLevel) and (na(theLevel[1]) or theLevel != theLevel[1])
-if lvChanged
-    array.push(lvlLines, line.new(bar_index, theLevel, bar_index + 20, theLevel, color=lvlCol, width=1))
-    while array.size(lvlLines) > 3
-        line.delete(array.shift(lvlLines))
-
-loChanged = not na(frameLow) and (na(frameLow[1]) or frameLow != frameLow[1])
-if loChanged
-    array.push(lowLines, line.new(bar_index, frameLow, bar_index + 20, frameLow, color=lowCol, width=1))
-    while array.size(lowLines) > 3
-        line.delete(array.shift(lowLines))
-
-if array.size(lvlLines) > 0
-    for i = 0 to array.size(lvlLines) - 1
-        line.set_x2(array.get(lvlLines, i), bar_index + 20)
-
-if array.size(lowLines) > 0
-    for i = 0 to array.size(lowLines) - 1
-        line.set_x2(array.get(lowLines, i), bar_index + 20)
-
-var table dash = table.new(position.top_right, 2, 10, border_width=1, frame_width=1, bgcolor=color.new(color.black, 25))
-
-if showRead and barstate.islast
-    table.cell(dash, 0, 0, "Frame", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 0, frameTfName, text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 1, "State", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 1, stateName, text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 2, "The level", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 2, na(theLevel) ? "none yet" : str.tostring(theLevel, format.mintick), text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 3, "The last low", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 3, na(frameLow) ? "none yet" : str.tostring(frameLow, format.mintick), text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 4, "Lower low made", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 4, haveFrame ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 5, "At the level / working back", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 5, (atLevel or retracing) ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 6, "Small chart turned up", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 6, ltfUp ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 7, "Close above the level", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 7, changed ? "yes" : "no", text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 8, "Swings given (H / L)", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 8, na(f4hPh) ? "nothing given yet" : str.tostring(seenPh) + " / " + str.tostring(seenPl), text_size=readText, text_color=color.white)
-    table.cell(dash, 0, 9, "Verdict", text_size=readText, text_color=color.new(color.white, 45))
-    table.cell(dash, 1, 9, verdict, text_size=readText, text_color=shortOk ? color.red : longOk ? color.teal : color.new(color.white, 35))
-
-alertcondition(longOk and not longOk[1], title="Long scalp", message="The small chart turned up while the frame is down and the level has not been closed above - long scalp into the level")
-alertcondition(shortOk and not shortOk[1], title="Short - price at the level", message="Price is at the frame's lower high and the frame has not closed above it")
-alertcondition(changed and not changed[1], title="Frame changed", message="The frame closed above the level - the down frame is off")
-
-// ----------------------------------------------------------------- the upkeep
-// Zones run to the right while they live, and they come off when price takes
-// them out - unless "keep zones price has taken out" is ticked. The ranges
-// come off the same way, by their own width.
-pruneZones(supplyZones, true)
-pruneZones(demandZones, false)
-runRanges(boxes1)
-runRanges(boxes2)
-
-// The columns. One call only - TradingView allows a script one background.
-bgcolor(showRanges and (in1 or in2) ? (in1 ? color.new(col1, 88) : color.new(col2, 88)) : na, title="Time ranges")
+// No prediction, no probability, no shaded box and no time window. Nothing here
+// invents a level: every number is a candle that has closed.
+
+indicator("Someday - structure and context", shorttitle="Someday", overlay=true, max_lines_count=500, max_labels_count=500)
+
+// -----------------------------------------------------------------------------
+// Settings
+// -----------------------------------------------------------------------------
+showSwings = input.bool(true, "Show swing labels", group="Structure")
+showLevels = input.bool(true, "Draw the last swing high and low", group="Structure")
+swingLen = input.int(2, "Swing length", minval=1, maxval=20, tooltip="Bars either side a candle body has to beat to be a swing. The labels, the drawn levels and the context box all use this one number.", group="Structure")
+structureCol = input.color(color.gray, "Structure colour", group="Structure")
+
+showContext = input.bool(true, "Show the context box", group="Context")
+contextLines = input.bool(true, "Draw the context levels on the chart", group="Context")
+contextTf1 = input.timeframe("D", "Context 1", group="Context")
+contextTf2 = input.timeframe("240", "Context 2", group="Context")
+contextTf3 = input.timeframe("60", "Context 3", group="Context")
+contextTf4 = input.timeframe("15", "Context 4", group="Context")
+contextTf5 = input.timeframe("5", "Context 5", group="Context")
+
+// One colour per context row. The same colour is used for the box row and for
+// the level drawn on the chart, so a number in the box matches a line at a
+// glance instead of being matched up by eye.
+contextColor1 = color.new(#2962ff, 0)
+contextColor2 = color.new(#ff9800, 0)
+contextColor3 = color.new(#089981, 0)
+contextColor4 = color.new(#f23645, 0)
+contextColor5 = color.new(#9c27b0, 0)
+
+// -----------------------------------------------------------------------------
+// Closed-candle structure
+// -----------------------------------------------------------------------------
+// The body is the only part of a candle that is a price. A wick above the last
+// body high is not a high, and a level is taken out only by a candle that closes
+// beyond it, so both readings below use the body and the close, never a wick.
+bodyTop() => math.max(open, close)
+bodyBottom() => math.min(open, close)
+
+swingHigh = ta.pivothigh(bodyTop(), swingLen, swingLen)
+swingLow = ta.pivotlow(bodyBottom(), swingLen, swingLen)
+
+// The letters are against the last swing of the same kind: HH higher high, LH
+// lower high, HL higher low, LL lower low. The first of a kind has nothing to
+// compare with, so it keeps its bare letter rather than a name it has not earned.
+var float namedHigh = na
+var float namedLow = na
+
+if showSwings and not na(swingHigh)
+    highName = na(namedHigh) ? "H" : swingHigh > namedHigh ? "HH" : "LH"
+    label.new(bar_index - swingLen, swingHigh, highName, style=label.style_label_down, color=color.new(color.black, 100), textcolor=structureCol, size=size.tiny)
+    namedHigh := swingHigh
+
+if showSwings and not na(swingLow)
+    lowName = na(namedLow) ? "L" : swingLow > namedLow ? "HL" : "LL"
+    label.new(bar_index - swingLen, swingLow, lowName, style=label.style_label_up, color=color.new(color.black, 100), textcolor=structureCol, size=size.tiny)
+    namedLow := swingLow
+
+// One level per side: the most recent confirmed swing high and swing low, drawn
+// from the bar that made them. While a close has not taken the level out the
+// line keeps up with price; once a candle closes through it the line stops on
+// that bar, so where the move came from and where it broke are both on screen.
+var line highLine = na
+var line lowLine = na
+var float highLevel = na
+var float lowLevel = na
+var int highBrokenAt = na
+var int lowBrokenAt = na
+
+if showLevels and not na(swingHigh)
+    if not na(highLine)
+        line.delete(highLine)
+    highLevel := swingHigh
+    highBrokenAt := na
+    highLine := line.new(bar_index - swingLen, swingHigh, bar_index, swingHigh, color=structureCol, width=1)
+
+if showLevels and not na(swingLow)
+    if not na(lowLine)
+        line.delete(lowLine)
+    lowLevel := swingLow
+    lowBrokenAt := na
+    lowLine := line.new(bar_index - swingLen, swingLow, bar_index, swingLow, color=structureCol, width=1)
+
+if barstate.isconfirmed and not na(highLevel) and na(highBrokenAt) and close > highLevel
+    highBrokenAt := bar_index
+
+if barstate.isconfirmed and not na(lowLevel) and na(lowBrokenAt) and close < lowLevel
+    lowBrokenAt := bar_index
+
+if not na(highLine)
+    line.set_x2(highLine, na(highBrokenAt) ? bar_index : highBrokenAt)
+
+if not na(lowLine)
+    line.set_x2(lowLine, na(lowBrokenAt) ? bar_index : lowBrokenAt)
+
+// -----------------------------------------------------------------------------
+// Multi-timeframe context
+// -----------------------------------------------------------------------------
+// The same swing, carried from each timeframe he trades. These are context and
+// origin, not entries: they are the last high and low a candle body made on that
+// timeframe, which is what he trades back to. Every row uses the same swing
+// length as the labels and levels above.
+// The swing itself, as one named thing, so all ten requests below ask for the
+// same reading of it. The request.security call stays at the top level, with a
+// timeframe that came straight from an input: a timeframe worked out by the
+// script's own code is the mistake that stopped an earlier version compiling.
+lastSwingHigh() => ta.valuewhen(not na(ta.pivothigh(bodyTop(), swingLen, swingLen)), ta.pivothigh(bodyTop(), swingLen, swingLen), 0)
+lastSwingLow() => ta.valuewhen(not na(ta.pivotlow(bodyBottom(), swingLen, swingLen)), ta.pivotlow(bodyBottom(), swingLen, swingLen), 0)
+
+contextHigh1 = request.security(syminfo.tickerid, contextTf1, lastSwingHigh(), lookahead=barmerge.lookahead_off)
+contextLow1 = request.security(syminfo.tickerid, contextTf1, lastSwingLow(), lookahead=barmerge.lookahead_off)
+contextHigh2 = request.security(syminfo.tickerid, contextTf2, lastSwingHigh(), lookahead=barmerge.lookahead_off)
+contextLow2 = request.security(syminfo.tickerid, contextTf2, lastSwingLow(), lookahead=barmerge.lookahead_off)
+contextHigh3 = request.security(syminfo.tickerid, contextTf3, lastSwingHigh(), lookahead=barmerge.lookahead_off)
+contextLow3 = request.security(syminfo.tickerid, contextTf3, lastSwingLow(), lookahead=barmerge.lookahead_off)
+contextHigh4 = request.security(syminfo.tickerid, contextTf4, lastSwingHigh(), lookahead=barmerge.lookahead_off)
+contextLow4 = request.security(syminfo.tickerid, contextTf4, lastSwingLow(), lookahead=barmerge.lookahead_off)
+contextHigh5 = request.security(syminfo.tickerid, contextTf5, lastSwingHigh(), lookahead=barmerge.lookahead_off)
+contextLow5 = request.security(syminfo.tickerid, contextTf5, lastSwingLow(), lookahead=barmerge.lookahead_off)
+
+showContextLevels = showContext and contextLines
+
+plot(showContextLevels ? contextHigh1 : na, "Context 1 high", color=contextColor1, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextLow1 : na, "Context 1 low", color=contextColor1, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextHigh2 : na, "Context 2 high", color=contextColor2, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextLow2 : na, "Context 2 low", color=contextColor2, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextHigh3 : na, "Context 3 high", color=contextColor3, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextLow3 : na, "Context 3 low", color=contextColor3, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextHigh4 : na, "Context 4 high", color=contextColor4, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextLow4 : na, "Context 4 low", color=contextColor4, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextHigh5 : na, "Context 5 high", color=contextColor5, style=plot.style_stepline, linewidth=1)
+plot(showContextLevels ? contextLow5 : na, "Context 5 low", color=contextColor5, style=plot.style_stepline, linewidth=1)
+
+var table contextTable = table.new(position.top_right, 3, 6, border_width=1)
+if barstate.islast and showContext
+    table.cell(contextTable, 0, 0, "TF", text_color=color.white, bgcolor=color.new(color.black, 0))
+    table.cell(contextTable, 1, 0, "Body swing high", text_color=color.white, bgcolor=color.new(color.black, 0))
+    table.cell(contextTable, 2, 0, "Body swing low", text_color=color.white, bgcolor=color.new(color.black, 0))
+    table.cell(contextTable, 0, 1, contextTf1, text_color=contextColor1)
+    table.cell(contextTable, 1, 1, na(contextHigh1) ? "-" : str.tostring(contextHigh1, format.mintick), text_color=contextColor1)
+    table.cell(contextTable, 2, 1, na(contextLow1) ? "-" : str.tostring(contextLow1, format.mintick), text_color=contextColor1)
+    table.cell(contextTable, 0, 2, contextTf2, text_color=contextColor2)
+    table.cell(contextTable, 1, 2, na(contextHigh2) ? "-" : str.tostring(contextHigh2, format.mintick), text_color=contextColor2)
+    table.cell(contextTable, 2, 2, na(contextLow2) ? "-" : str.tostring(contextLow2, format.mintick), text_color=contextColor2)
+    table.cell(contextTable, 0, 3, contextTf3, text_color=contextColor3)
+    table.cell(contextTable, 1, 3, na(contextHigh3) ? "-" : str.tostring(contextHigh3, format.mintick), text_color=contextColor3)
+    table.cell(contextTable, 2, 3, na(contextLow3) ? "-" : str.tostring(contextLow3, format.mintick), text_color=contextColor3)
+    table.cell(contextTable, 0, 4, contextTf4, text_color=contextColor4)
+    table.cell(contextTable, 1, 4, na(contextHigh4) ? "-" : str.tostring(contextHigh4, format.mintick), text_color=contextColor4)
+    table.cell(contextTable, 2, 4, na(contextLow4) ? "-" : str.tostring(contextLow4, format.mintick), text_color=contextColor4)
+    table.cell(contextTable, 0, 5, contextTf5, text_color=contextColor5)
+    table.cell(contextTable, 1, 5, na(contextHigh5) ? "-" : str.tostring(contextHigh5, format.mintick), text_color=contextColor5)
+    table.cell(contextTable, 2, 5, na(contextLow5) ? "-" : str.tostring(contextLow5, format.mintick), text_color=contextColor5)
+else if barstate.islast and not showContext
+    table.clear(contextTable, 0, 0, 2, 5)

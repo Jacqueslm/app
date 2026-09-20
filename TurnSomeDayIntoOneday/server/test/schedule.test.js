@@ -565,8 +565,13 @@ test('every row drawn after boot has its icon drawn too, or it is a blank box', 
   }
 });
 
-test('the app and the service worker moved to 7.10 together', () => {
+// The number itself is Jacques's to pick, and on 20 Sep 2026 he took it back to
+// 5.0 — so this no longer records a version that only ever goes up. What it
+// still holds is that the schedule work and the version it shipped under went
+// together, and that index.html and the service worker carry the same one.
+test('the app and the service worker carry the same version', () => {
   const SW = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-  assert.match(APP, /const APP_VERSION='7\.10';/);
-  assert.match(SW, /CACHE_NAME = 'tsid-shell-v7\.10'/);
+  const ver = APP.match(/const APP_VERSION='([\d.]+)';/);
+  assert.ok(ver, 'index.html must declare APP_VERSION');
+  assert.match(SW, new RegExp("CACHE_NAME = 'tsid-shell-v" + ver[1].replace(/\./g, '\\.') + "';"));
 });

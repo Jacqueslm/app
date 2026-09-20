@@ -26,6 +26,11 @@
  *   6. the wiring: SCREEN_MAP, TITLES, the bottom-nav maps, the refresh on open,
  *      the timer started at boot, and the two arrays in the saved state;
  *   7. the version, to 7.10, in index.html and in the service worker cache name.
+ *
+ * Applied long ago, so step 7 no longer moves anything — see the note over the
+ * version block at the bottom. The version is moved by
+ * tools/apply-app-version.js now, which takes the number you give it instead of
+ * one written in here.
  */
 const fs = require('fs');
 const path = require('path');
@@ -301,20 +306,21 @@ after('the saved state',
   "\n  // The times he set for himself (My Schedule): one entry per time, and a short\n  // list of any snoozed ones. Both in the saved state, so they survive a reload.\n  schedule:[],scheduleSnooze:[],",
   'schedule:[],scheduleSnooze:[],');
 
-/* --------------------------------------------------------- 7. the version */
+/* --------------------------------------------------------- 7. the version
+   This step used to write 7.10 into both places. It must not any more. The
+   version is Jacques's to choose and he took it back to 5.0 on 20 Sep 2026, so
+   a number written into an old script is a number that would silently undo him
+   the next time the script ran. It only checks now, and says who moves it.
+   ---------------------------------------------------------------------- */
 let sw = fs.readFileSync(SW, 'utf8');
 const cache = sw.match(/const CACHE_NAME = 'tsid-shell-v([\d.]+)'/);
 const appVer = page.match(/const APP_VERSION='([\d.]+)';/);
 if (!cache || !appVer) throw new Error('version: could not read one of the two version strings');
-if (cache[1] === '7.10' && appVer[1] === '7.10') {
-  done.push('version: already 7.10');
-} else {
-  if (cache[1] !== appVer[1]) throw new Error('version: index.html and sw.js already disagree (' + appVer[1] + ' / ' + cache[1] + ')');
-  page = page.replace(appVer[0], "const APP_VERSION='7.10';");
-  sw = sw.replace(cache[0], "const CACHE_NAME = 'tsid-shell-v7.10'");
-  fs.writeFileSync(SW, sw);
-  done.push('version: ' + appVer[1] + ' -> 7.10 (index.html and sw.js)');
+if (cache[1] !== appVer[1]) {
+  throw new Error('version: index.html and sw.js disagree (' + appVer[1] + ' / ' + cache[1] +
+    ') — tools/apply-app-version.js moves them together');
 }
+done.push('version: left at ' + appVer[1] + ' — moved by tools/apply-app-version.js, not here');
 
 fs.writeFileSync(PAGE, page);
 for (const line of done) console.log('  ' + line);

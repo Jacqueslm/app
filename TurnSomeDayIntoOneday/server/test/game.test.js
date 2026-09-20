@@ -1,5 +1,5 @@
 // The Fight of Your Life. Rebuilt again after 6 Sep 2026: one building per
-// addiction, ten floors and a roof, the fight itself in 3D on its own page
+// addiction, five floors and a roof, the fight itself in 3D on its own page
 // (game3d.html), a parachute out. This check was rewritten on 8 Sep to match.
 //
 // What this file guards:
@@ -10,7 +10,7 @@
 //     tightens; the app shell has no clock (the 3D ring's round clock is the
 //     one settled exception)
 //   - strength is earned in the app, and the door says what is missing
-//   - the roof opens only after ten floors; leaving a fight costs nothing;
+//   - the roof opens only after five floors; leaving a fight costs nothing;
 //     a relapse costs nothing
 //   - the fight is handed this person's own things, never invented ones
 //   - the house rules: no medical claims, never "finished", no pronouns for
@@ -77,7 +77,7 @@ test('every boss line has one right counter and two wrong ones, in all three tie
 });
 
 test('the art and the sound are on disk: rings, fighters, ref, boxers, gloves, the bell', () => {
-  assert.strictEqual(GAME_FLOORS, 10, 'ten floors, then the roof');
+  assert.strictEqual(GAME_FLOORS, 5, 'five floors, then the roof');
   for (const el of GAME_ELEMENTS) assert.ok(exists('img', 'fight', 'ring-' + el.toLowerCase() + '.jpg'), 'missing ring for ' + el);
   for (const p of GAME_PLACES) assert.ok(exists('img', 'fight', p.k + '.jpg'), 'missing scene ' + p.k);
   for (const n of [1, 2, 3, 4, 5]) assert.ok(exists('img', 'fight', `fighter${n}.glb`), `missing fighter${n}.glb`);
@@ -102,7 +102,7 @@ test('the pace starts slow: single words first, longer lines, a shorter wind-up,
   }
   const early = tierAt(1, 1), mid = tierAt(3, 1), late = tierAt(6, 1);
   assert.strictEqual(early.key, 'short');
-  assert.strictEqual(tierAt(2, 11).key, 'short', 'the whole of building two is still single words');
+  assert.strictEqual(tierAt(2, 6).key, 'short', 'the whole of building two is still single words');
   assert.strictEqual(mid.key, 'mid');
   assert.strictEqual(late.key, 'long');
   assert.ok(early.tell > mid.tell && mid.tell > late.tell, 'the wind-up must shorten');
@@ -115,10 +115,10 @@ test('the pace starts slow: single words first, longer lines, a shorter wind-up,
   assert.match(FIGHT3D, /ROUND_SECS/, 'the ring keeps real boxing rounds');
 });
 
-test('the roof opens only after ten floors, and walking out of a fight costs nothing', () => {
+test('the roof opens only after five floors, and walking out of a fight costs nothing', () => {
   const floors = block('function renderFloors(){', 'function gameFloorGo(');
   assert.match(floors, /roofReady=Object\.keys\(g\.cleared\)\.length>=GAME_FLOORS/);
-  assert.match(floors, /roofReady\?'fight':'ten floors first'/);
+  assert.match(floors, /roofReady\?'fight':'five floors first'/);
   const leave = block('function gameLeaveFight(){', 'function game3dWon(){');
   assert.doesNotMatch(leave, /losses|cleared|g\.f=/, 'leaving the fight changes no score');
   // A draw never costs a loss, and neither does going back into a floor already
@@ -221,4 +221,49 @@ test('the vault, the ninety-floor tower and the game shows are gone from the pag
   assert.match(APP, /id="home-climb"[^>]*onclick="openClimb\(\)"/, 'The Climb is on Today');
   assert.match(APP, /<span>The Fight<\/span>/, 'the tab is called The Fight');
   assert.doesNotMatch(APP, /whole 2AM tower|all 90 floors|ninety floors/i);
+});
+
+test('the roof can never be left loading for good', () => {
+  // Jacques, 20 Sep 2026: "the fight dont load to this next level" - the ring had
+  // sat on LOADING THE ROOF. Eleven models are fetched, and they were counted in
+  // one place and only on the way in: one model dropped on a phone line, or one
+  // that loaded and then threw while it was being dressed, left the count short and
+  // the screen up for good. Every load calls in now whether it arrives or not, a
+  // throw while a body is dressed is caught instead of swallowed, and a deadline
+  // opens the room with whatever did turn up.
+  assert.match(FIGHT3D, /const KIT=11,ROOF_WAIT=\d+;/, 'the ring says what it waits for, and for how long');
+  assert.match(FIGHT3D, /function ready\(\)\{if\(roofUp\)return;if\(\+\+loaded<KIT\)return;startRoof\(\);/,
+    'ready() counts the models in and can only open the roof once');
+  assert.match(FIGHT3D, /setTimeout\(\(\)=>\{if\(!roofUp\)\{console\.warn\('the roof is short '/,
+    'a deadline opens the roof with however many arrived');
+  assert.match(FIGHT3D, /\},ROOF_WAIT\);/, 'and the deadline is the one constant');
+  // every model calls in on the way out, including the six in the crowd
+  assert.match(FIGHT3D, /undefined,e=>\{console\.error\(e\);if\(cb\)cb\(\);\}\)/, 'a fighter that fails still calls in');
+  assert.match(FIGHT3D, /const seated=\(\)=>\{if\(--left===0\)cb\(\);\};/, 'the crowd counts each seat in or out');
+  assert.match(FIGHT3D, /undefined,e=>\{console\.error\(key,e\);seated\(\);\}\)/, 'a dropped body in the crowd still calls in');
+  assert.match(FIGHT3D, /catch\(err\)\{console\.error\(key,err\);\}\}/, 'a throw while a cast member is dressed is caught');
+  assert.match(FIGHT3D, /try\{const old=YOU;/, 'and the same around your fighter');
+  // a body that never arrived is said out loud, and the bell will not ring on an empty ring
+  assert.match(FIGHT3D, /if\(!YOU\|\|!BOSS\)\{\$\('v'\)\.innerHTML=/, 'the ring says so plainly instead of hanging');
+  assert.match(FIGHT3D, /async function startFight\(\)\{if\(!fightOver\|\|!YOU\|\|!BOSS\|\|!REF\)return;/,
+    'and the first bell needs both bodies and the referee');
+  // and the page itself is small enough to arrive: the four place pictures used to
+  // sit in it as base64, 650KB of the same bytes img/fight/ already holds, fetched
+  // again by every phone that opened the roof.
+  assert.doesNotMatch(FIGHT3D, /base64,/, 'the ring carries no inlined images');
+  assert.match(FIGHT3D, /const PICS=\{temple:ART\+'temple\.jpg'/, 'the four places come from img/fight');
+  for (const p of ['temple', 'tomb', 'monastery', 'rooftop']) {
+    assert.ok(exists('img', 'fight', p + '.jpg'), 'the file the ring asks for is on disk: ' + p + '.jpg');
+  }
+});
+
+test('five floors and a roof, and the ring counts them the same way as the app', () => {
+  assert.strictEqual(GAME_FLOORS, 5, 'five floors to a building');
+  assert.match(APP, /Math\.min\(GAME_FLOORS\+1,g\.f\|0\)/, 'the climb stops at the roof');
+  assert.ok(APP.includes("gameFloorGo('+(GAME_FLOORS+1)+')"), 'the roof button opens the roof, whatever the floor count becomes');
+  assert.match(APP, /grid-template-columns:repeat\(6,1fr\)/, 'five floors and the roof fit the bar');
+  assert.match(FIGHT3D, /let floorN=Math\.max\(0,Math\.min\(5,\+/, 'the ring takes floors one to five');
+  assert.match(FIGHT3D, /floorN=Math\.max\(0,Math\.min\(5,\+d\.floor\|\|0\)\)/, 'and the same when the app hands them in');
+  assert.match(FIGHT3D, /function step\(\)\{return \(Math\.max\(1,building\)-1\)\*6\+\(floorN\|\|6\);\}/,
+    'six fights a building, roof included - so the pace still tightens on the same schedule');
 });

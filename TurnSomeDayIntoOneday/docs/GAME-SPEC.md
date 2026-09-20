@@ -148,7 +148,7 @@ ridden out 3 each (to 9) + floors cleared, capped 120.
 
 ## State (`S.bld`)
 
-`b` building, `f` floor (13 = roof), `cleared`, `ups` (this building),
+`b` building, `f` floor (`GAME_FLOORS` = 5, so 6 is the roof), `cleared`, `ups` (this building),
 `upsTotal`, `wins`, `losses`, `rides`, `locked` (snapshot at a loss), `boxer`,
 `glove`, `spun`, `used` (lifelines this building), `streak`.
 
@@ -247,7 +247,11 @@ building and fight any addiction. Only the lessons follow the person's own
 track. Nothing is locked behind the day's work any more; strength carried in is
 still earned in the app.
 
-**Ten floors and a roof, eleven fights.**
+**Five floors and a roof, six fights.** (Changed 20 Sep 2026 — it was ten and a
+roof. Five gets a person to the roof in one sitting, and the roof is the point of
+the building. The ring counts six fights a building too, so the pace still
+tightens on the same schedule: buildings 1–2 in single words, 3–4 in short lines,
+5 and up in full sentences.)
 - Every floor is a different ring with its own element **in** it, not on a
   badge: rain that falls and splashes, fire off the floor, wind streaking
   across, earth, ash, ice, smoke, lightning that strikes and shakes the room,
@@ -261,3 +265,35 @@ still earned in the app.
 **Between buildings:** off the roof under a parachute, land in the street, and
 walk up to the next building with its name across the front. `img/fight/bld-*.jpg`
 holds the thirteen fronts.
+
+## The roof must load — settled 20 Sep 2026
+
+Jacques, twice, with screenshots: "the fight dont load to this next level" — the
+ring sat on **LOADING THE ROOF…** with the round clock and both health bars behind
+it, on the roof of two different buildings. Every handler in `game3d.html` ran, so
+the fault was the screen itself.
+
+**Why.** The ring fetches eleven models: the move library, the addiction's own
+body, six in the crowd, your fighter, the referee, the announcer, the four in the
+corners and the ring card girl. They were counted to eleven **only on the way in**.
+One download dropped on a phone line, or one model that arrived and then threw
+while it was being dressed, left the count at ten and the screen up for good —
+and the app reloads that page for every fight, so it never recovered.
+
+**What it does now.**
+- Every load calls in **whether it arrives or not**: a dropped model, a dropped
+  seat in the crowd and a throw while a body is dressed all count the same.
+- `ready()` is idempotent — the eleventh call opens the roof, and nothing can
+  open it twice.
+- A **deadline** (`ROOF_WAIT`, 22s) opens the room with whatever did turn up.
+- If a body never arrived at all, the ring says so out loud — *The ring did not
+  load. Close the fight and open it again.* — instead of ringing the bell on an
+  empty ring.
+- **The page carries no pictures.** The four places (temple, tomb, monastery,
+  rooftop) were pasted into `game3d.html` as base64 — 650KB of the same bytes
+  `img/fight/` already holds, so every phone downloaded them twice before the
+  first bell. They are read from `img/fight/` like every other asset now, and the
+  page is 156KB instead of 808KB. Nothing on it is inlined.
+
+`server/test/game.test.js` guards all of it, and that the ring counts the same five
+floors as the app.

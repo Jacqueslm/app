@@ -541,7 +541,7 @@ body.g2-fighting .app{overflow:visible}
 .g2-kicker{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--g2-lamp);font-weight:600}
 .g2-sub{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--g2-dim);margin-top:3px}
 .g2-ups{text-align:right}.g2-ups b{display:block;font-family:var(--g2-disp);font-weight:800;font-size:2rem;line-height:.9}.g2-ups span{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g2-dim)}
-.g2-floors{position:relative;z-index:2;display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin:12px 16px 0}
+.g2-floors{position:relative;z-index:2;display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:12px 16px 0}
 .g2-floors i{display:block;height:4px;background:var(--g2-edge)}.g2-floors i.done{background:var(--g2-lamp)}
 .g2-floors i.safe{box-shadow:inset 0 0 0 1px rgba(47,208,138,.7)}.g2-floors i.safe.done{background:var(--g2-you)}
 .g2-floors i.here{background:var(--g2-chalk)}.g2-floors i.roof{background:var(--g2-hit);opacity:.5}.g2-floors i.roof.here{opacity:1}
@@ -6585,7 +6585,7 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 // photos, real sound, and a fight that plays like Punch-Out.
 //
 // The shape:
-//   - A building is a level: twelve floors, then the roof. Then the next
+//   - A building is a level: five floors, then the roof. Then the next
 //     building. It never ends, because nobody is ever finished (house rule).
 //   - Every floor starts with the wheel. It lands on one of three shows:
 //       Who Wants to Recover  - a moment, three moves, one is yours (no clock)
@@ -6625,7 +6625,7 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 //   - No new dependencies. Same file, plain JS, CSS animation, <audio>.
 //   - Art: img/fight (scenes, boss shadows, boxers, gloves). Sound: audio/fight.
 
-const GAME_FLOORS=10;                   // ten floors, then the roof
+const GAME_FLOORS=5;                   // five floors, then the roof
 // Every floor carries an element you can see in the ring. The fight page draws it.
 // How each element boxes. The fight page holds the real numbers; this is the
 // same thing in words, so nobody walks into Ice expecting Lightning.
@@ -6663,8 +6663,8 @@ const GAME_BUILDINGS=[
 function gameBuilding(){const g=gameState();return GAME_BUILDINGS[(g.b-1)%GAME_BUILDINGS.length];}
 function gameLap(){return Math.floor((gameState().b-1)/GAME_BUILDINGS.length)+1;}
 // one continuous climb: every floor of every building is a step, forever
-function gameStep(){const g=gameState();return (g.b-1)*11+Math.min(11,g.f);}
-// every building deals its ten floors a different hand out of the thirteen rooms
+function gameStep(){const g=gameState();return (g.b-1)*6+Math.min(6,g.f);}
+// every building deals its floors a different hand out of the thirteen elements
 function gameFloorEl(n){const g=gameState();return GAME_ELEMENTS[((g.b-1)+(n-1))%GAME_ELEMENTS.length];}
 // What each addiction says to get a person to engage. Temptation only - the
 // fight has no right answer to click any more, it just talks while it winds up.
@@ -6983,8 +6983,8 @@ const GAME_RIDES=[
 // what it throws. Buildings 1-2 show dodge arrows; after that you read it.
 function gameTier(){
   const s=gameStep();
-  return s<=22?{key:'short',label:'Single words',tell:1000,swings:2,feint:false,switch:false,arrows:true,hit:8,given:'word'}
-       :s<=55?{key:'mid',label:'Short lines',tell:800,swings:3,feint:true,switch:false,arrows:false,hit:11,given:'line'}
+  return s<=12?{key:'short',label:'Single words',tell:1000,swings:2,feint:false,switch:false,arrows:true,hit:8,given:'word'}
+       :s<=24?{key:'mid',label:'Short lines',tell:800,swings:3,feint:true,switch:false,arrows:false,hit:11,given:'line'}
        :{key:'long',label:'Full sentences',tell:620,swings:4,feint:true,switch:true,arrows:false,hit:14,given:'line'};
 }
 
@@ -7073,7 +7073,7 @@ function renderApproach(){
   gmPhoto('scene',gameBldImg());gmMiniHide();
   gmBody(`<div class="g2-cat">Building ${g.b}${gameLap()>1?` · time ${gameLap()}`:''}</div>
     <div class="g2-bld"><span>${gmEsc(B.name)}</span><small>${gmEsc(B.kind)}</small></div>
-    <p class="g2-lead">Ten floors and a roof. The same thing waits on every one of them, wearing something different each time. The roof is where it comes from.</p>
+    <p class="g2-lead">Five floors and a roof. The same thing waits on every one of them, wearing something different each time. The roof is where it comes from.</p>
     <button class="g2-big" onclick="gameGoIn()">Go in</button>`);
 }
 function gameGoIn(){const g=gameState();g.inside=true;save();renderFloors();}
@@ -7091,8 +7091,8 @@ function renderFloors(){
   }
   const roofReady=Object.keys(g.cleared).length>=GAME_FLOORS;
   gmBody(`<div class="g2-cat">${gmEsc(B.name)} · ${gmEsc(B.kind)}</div>
-    <button class="g2-flr roof ${roofReady?'here':''}" ${roofReady?'onclick="gameFloorGo(11)"':'disabled'}>
-      <b>&#9650;</b><span>The roof &middot; the source</span><i>${roofReady?'fight':'ten floors first'}</i></button>
+    <button class="g2-flr roof ${roofReady?'here':''}" ${roofReady?'onclick="gameFloorGo('+(GAME_FLOORS+1)+')"':'disabled'}>
+      <b>&#9650;</b><span>The roof &middot; the source</span><i>${roofReady?'fight':'five floors first'}</i></button>
     <div class="g2-flrs">${rows.join('')}</div>
     <button class="g2-ghost" style="margin-top:14px" onclick="gameStartOver()">Start the whole thing over</button>`);
 }
@@ -7224,7 +7224,7 @@ function renderJump(){
   g.rides[ride.key]=(g.rides[ride.key]||0)+1;g.lastRide=ride.key;save();
   gmBody(`<div class="g2-chute" aria-hidden="true"><i></i></div>
   <div class="g2-reveal up" style="font-size:2.8rem">${gmEsc(B.name)} is done</div>
-  <div class="g2-cat g2-center">Eleven fights, roof to street</div>
+  <div class="g2-cat g2-center">Six fights, roof to street</div>
   <p class="g2-lead g2-center">You go off the side and the chute opens. It is still down there and it will be back &mdash; but not tonight, and not in this building.</p>
   <button class="g2-big" onclick="gameNextBuilding()">Land at the next one</button>`);
   gmFight=null;gmBusy=false;

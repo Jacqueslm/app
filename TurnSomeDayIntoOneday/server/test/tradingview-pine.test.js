@@ -40,7 +40,7 @@ function topCommas(list) {
 test('the file is a Pine v5 script and starts by saying so', () => {
     const lines = read().split('\n');
     assert.strictEqual(lines[0].trim(), '//@version=5');
-    assert.match(lines[1], /^\/\/ Someday - structure and context/);
+    assert.match(lines[1], /^\/\/ Someday - swings and structure breaks/);
 });
 
 test('the script is plain ASCII and has no tabs', () => {
@@ -79,7 +79,9 @@ test('the top level does not redeclare a name', () => {
         assert.ok(!seen.has(match[1]), `${match[1]} is redeclared on line ${index + 1}`);
         seen.set(match[1], index + 1);
     });
-    assert.ok(seen.size > 20);
+    // Smaller on purpose: the box, the five timeframe rows and the ten drawn
+    // levels are gone, so there are fewer top-level names to redeclare.
+    assert.ok(seen.size >= 10);
 });
 
 test('the script stays small enough to read at a glance', () => {
@@ -93,7 +95,9 @@ test('each script function is called with the number of values it accepts', () =
     for (const match of text.matchAll(/^([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*=>/gm)) {
         functions.set(match[1], match[2].trim() ? topCommas(match[2]) + 1 : 0);
     }
-    assert.ok(functions.size >= 3);
+    // The script is deliberately two helpers long now, so the guard only has to
+    // prove the scan found them.
+    assert.ok(functions.size >= 2);
     for (const [name, wanted] of functions) {
         for (const match of text.matchAll(new RegExp(`(^|[^A-Za-z0-9_.])${name}\\s*\\(`, 'gm'))) {
             const open = match.index + match[0].length - 1;
@@ -116,15 +120,30 @@ test('the old prediction panel is gone', () => {
     const text = read();
     assert.doesNotMatch(text, /longOk|shortOk/);
     assert.doesNotMatch(text, /Frame \(sets the level\)/);
-    assert.match(text, /request\.security/);
-    assert.match(text, /table\.new/);
 });
 
-test('context is displayed for the trader\'s workflow', () => {
+// "The box it doesn't explain nothing, it's confusing." The box of numbers, the
+// five timeframe rows behind it and the requests that filled them are gone. What
+// is left is the two things he asked to look at: the swings and the breaks.
+test('the numbers box and the timeframe rows are gone', () => {
     const text = read();
-    for (const tf of ['contextTf1', 'contextTf2', 'contextTf3', 'contextTf4', 'contextTf5']) assert.match(text, new RegExp(tf));
-    assert.match(text, /Body swing high/);
-    assert.match(text, /Body swing low/);
+    assert.doesNotMatch(text, /table\.new/);
+    assert.doesNotMatch(text, /table\.cell/);
+    assert.doesNotMatch(text, /Body swing/);
+    assert.doesNotMatch(text, /request\.security/);
+});
+
+// "The 5 sec is not even listed." The script used to carry five rows of
+// timeframes chosen in the settings. A list like that can never hold everything
+// he trades, and it could drift out of step with the chart in front of him. It
+// reads the chart he has open now, so the 5 second chart and the daily chart
+// both work with nothing to set and nothing to keep in step.
+test('the script reads the chart it is on, so every timeframe works', () => {
+    const text = read();
+    assert.doesNotMatch(text, /input\.timeframe/);
+    assert.doesNotMatch(text, /contextTf/);
+    assert.match(text, /ta\.pivothigh\(bodyTop\(\), swingLen, swingLen\)/);
+    assert.match(text, /ta\.pivotlow\(bodyBottom\(\), swingLen, swingLen\)/);
 });
 
 // The chart used to carry three different swing definitions at once: the H/HH/LH
@@ -132,18 +151,10 @@ test('context is displayed for the trader\'s workflow', () => {
 // used the setting, and the step line came from the 10-bar zone structure. They
 // could not agree, which is what "the highs and lows don't line up" meant.
 // They agree now because there is one definition, on one number.
-test('one swing length drives the labels, the levels and the context box', () => {
+test('one swing length drives the letters, the two levels and the breaks', () => {
     const text = read();
     assert.match(text, /ta\.pivothigh\(bodyTop\(\), swingLen, swingLen\)/);
     assert.match(text, /ta\.pivotlow\(bodyBottom\(\), swingLen, swingLen\)/);
-    // Every request goes out from the top level, onto a timeframe that came
-    // straight from an input. A timeframe handed through the script's own code
-    // must not come back: that is the "Cannot assign a variable to a tuple"
-    // fault, which pointed at the left of the line while the right was wrong.
-    for (const tf of ['contextTf1', 'contextTf2', 'contextTf3', 'contextTf4', 'contextTf5']) {
-        assert.match(text, new RegExp(`request\\.security\\(syminfo\\.tickerid, ${tf}, `));
-    }
-    assert.doesNotMatch(text, /request\.security\(\s*\w+\(/);
     assert.doesNotMatch(text, /contextLen/);
     assert.doesNotMatch(text, /pivothigh\(high, 2, 2\)/);
     assert.doesNotMatch(text, /pivotlow\(low, 2, 2\)/);
@@ -167,17 +178,8 @@ test('swings are read from the candle body, never from a wick', () => {
 // be finished before it counts.
 test('a level is only taken out by a candle that closes through it', () => {
     const text = read();
-    assert.match(text, /barstate\.isconfirmed and not na\(highLevel\) and na\(highBrokenAt\) and close > highLevel/);
-    assert.match(text, /barstate\.isconfirmed and not na\(lowLevel\) and na\(lowBrokenAt\) and close < lowLevel/);
-    assert.match(text, /line\.set_x2\(highLine, na\(highBrokenAt\) \? bar_index : highBrokenAt\)/);
-    assert.match(text, /line\.set_x2\(lowLine, na\(lowBrokenAt\) \? bar_index : lowBrokenAt\)/);
-});
-
-test('the last swing high and low are drawn as levels on the chart', () => {
-    const text = read();
-    assert.match(text, /showLevels = input\.bool/);
-    assert.match(text, /highLine := line\.new\(bar_index - swingLen, swingHigh, bar_index, swingHigh/);
-    assert.match(text, /lowLine := line\.new\(bar_index - swingLen, swingLow, bar_index, swingLow/);
+    assert.match(text, /barstate\.isconfirmed and not na\(upLevel\) and na\(upBrokenAt\) and close > upLevel/);
+    assert.match(text, /barstate\.isconfirmed and not na\(downLevel\) and na\(downBrokenAt\) and close < downLevel/);
 });
 
 // The shaded supply and demand boxes, their retracement levels and the
@@ -193,13 +195,33 @@ test('the boxes and the time windows are off the chart', () => {
     assert.doesNotMatch(text, /max_boxes_count/);
 });
 
-test('every context level is drawn on the chart as well as listed in the box', () => {
+// "I want to see when structure is broken." A break is marked on the bar that
+// made it, in the direction it went, and once per level: the level is not raised
+// again until the next swing of the same kind is confirmed, so a run of candles
+// through one level is one break rather than five.
+test('a break is marked on the chart, once per level', () => {
     const text = read();
-    for (const row of ['1', '2', '3', '4', '5']) {
-        assert.match(text, new RegExp(`showContextLevels \\? contextHigh${row} : na`));
-        assert.match(text, new RegExp(`showContextLevels \\? contextLow${row} : na`));
-    }
-    assert.match(text, /contextLines = input\.bool/);
+    assert.match(text, /showBreaks = input\.bool/);
+    assert.match(text, /label\.new\(bar_index, upLevel, "BROKE UP"/);
+    assert.match(text, /label\.new\(bar_index, downLevel, "BROKE DOWN"/);
+    assert.match(text, /upBrokenAt := bar_index/);
+    assert.match(text, /downBrokenAt := bar_index/);
+    assert.match(text, /na\(upBrokenAt\)/);
+    assert.match(text, /na\(downBrokenAt\)/);
+});
+
+// "No lines." Nothing is drawn across the chart at all now: the two watched
+// levels are kept in the script and never drawn, so the swing letters and the
+// break marks are the only things on top of the candles.
+test('nothing is drawn across the chart, only the letters and the break marks', () => {
+    const text = read();
+    assert.doesNotMatch(text, /line\./);
+    assert.doesNotMatch(text, /plot\.style_stepline/);
+    assert.doesNotMatch(text, /(^|[^.\w])plot\(/m);
+    assert.doesNotMatch(text, /hline\(/);
+    assert.doesNotMatch(text, /fill\(/);
+    assert.match(text, /label\.new\(bar_index - swingLen, swingHigh, highName/);
+    assert.match(text, /label\.new\(bar_index, upLevel, "BROKE UP"/);
 });
 
 test('the copy route still serves this script as plain text', () => {

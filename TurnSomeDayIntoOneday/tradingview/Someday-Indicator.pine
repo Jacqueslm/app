@@ -1,49 +1,38 @@
 //@version=5
-// Someday - structure and context
+// Someday - swings and structure breaks
 //
-// Two things, and nothing else:
-//   1. the swing points, read from the candle BODY only, with the last swing
-//      high and low drawn as a level that stops where a candle CLOSES through
-//      it - a wick past a level is not a break;
-//   2. the same swing carried from the Daily, 4h, 1h, 15m and 5m, so the last
-//      high and low he trades back to on each of his timeframes sit in one box.
+// Two things, on the timeframe in front of you:
+//   1. the swing points, read from the candle BODY only - a wick above the last
+//      body high is not a high;
+//   2. a mark on the bar where a candle CLOSES through the last swing high or
+//      low, so you can see structure break as it happens.
 //
-// No prediction, no probability, no shaded box and no time window. Nothing here
-// invents a level: every number is a candle that has closed.
+// Nothing is drawn across the chart. No lines, no box of numbers, no shaded
+// area, no time window. The only marks are the letters on the swings and the
+// break that follows them.
+//
+// It never asks which timeframe to look at. It reads the chart you have open, so
+// the 5 second chart and the daily chart both work, with nothing to list and
+// nothing to keep in step by hand.
 
-indicator("Someday - structure and context", shorttitle="Someday", overlay=true, max_lines_count=500, max_labels_count=500)
+indicator("Someday - swings", shorttitle="Someday", overlay=true, max_labels_count=500)
 
 // -----------------------------------------------------------------------------
 // Settings
 // -----------------------------------------------------------------------------
-showSwings = input.bool(true, "Show swing labels", group="Structure")
-showLevels = input.bool(true, "Draw the last swing high and low", group="Structure")
-swingLen = input.int(2, "Swing length", minval=1, maxval=20, tooltip="Bars either side a candle body has to beat to be a swing. The labels, the drawn levels and the context box all use this one number.", group="Structure")
-structureCol = input.color(color.gray, "Structure colour", group="Structure")
+showSwings = input.bool(true, "Show the swing points", group="Swings")
+swingLen = input.int(2, "Swing length", minval=1, maxval=20, tooltip="Bars either side a candle body has to beat to count as a swing. One number drives the letters and the breaks, so they can never disagree.", group="Swings")
+swingCol = input.color(color.gray, "Swing colour", group="Swings")
 
-showContext = input.bool(true, "Show the context box", group="Context")
-contextLines = input.bool(true, "Draw the context levels on the chart", group="Context")
-contextTf1 = input.timeframe("D", "Context 1", group="Context")
-contextTf2 = input.timeframe("240", "Context 2", group="Context")
-contextTf3 = input.timeframe("60", "Context 3", group="Context")
-contextTf4 = input.timeframe("15", "Context 4", group="Context")
-contextTf5 = input.timeframe("5", "Context 5", group="Context")
-
-// One colour per context row. The same colour is used for the box row and for
-// the level drawn on the chart, so a number in the box matches a line at a
-// glance instead of being matched up by eye.
-contextColor1 = color.new(#2962ff, 0)
-contextColor2 = color.new(#ff9800, 0)
-contextColor3 = color.new(#089981, 0)
-contextColor4 = color.new(#f23645, 0)
-contextColor5 = color.new(#9c27b0, 0)
+showBreaks = input.bool(true, "Mark the structure breaks", group="Breaks")
+breakUpCol = input.color(#089981, "Break up colour", group="Breaks")
+breakDownCol = input.color(#f23645, "Break down colour", group="Breaks")
 
 // -----------------------------------------------------------------------------
-// Closed-candle structure
+// The swings
 // -----------------------------------------------------------------------------
-// The body is the only part of a candle that is a price. A wick above the last
-// body high is not a high, and a level is taken out only by a candle that closes
-// beyond it, so both readings below use the body and the close, never a wick.
+// The body is the only part of a candle that is a price, so both readings below
+// use the body and never a wick.
 bodyTop() => math.max(open, close)
 bodyBottom() => math.min(open, close)
 
@@ -58,108 +47,43 @@ var float namedLow = na
 
 if showSwings and not na(swingHigh)
     highName = na(namedHigh) ? "H" : swingHigh > namedHigh ? "HH" : "LH"
-    label.new(bar_index - swingLen, swingHigh, highName, style=label.style_label_down, color=color.new(color.black, 100), textcolor=structureCol, size=size.tiny)
+    label.new(bar_index - swingLen, swingHigh, highName, style=label.style_label_down, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
     namedHigh := swingHigh
 
 if showSwings and not na(swingLow)
     lowName = na(namedLow) ? "L" : swingLow > namedLow ? "HL" : "LL"
-    label.new(bar_index - swingLen, swingLow, lowName, style=label.style_label_up, color=color.new(color.black, 100), textcolor=structureCol, size=size.tiny)
+    label.new(bar_index - swingLen, swingLow, lowName, style=label.style_label_up, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
     namedLow := swingLow
 
-// One level per side: the most recent confirmed swing high and swing low, drawn
-// from the bar that made them. While a close has not taken the level out the
-// line keeps up with price; once a candle closes through it the line stops on
-// that bar, so where the move came from and where it broke are both on screen.
-var line highLine = na
-var line lowLine = na
-var float highLevel = na
-var float lowLevel = na
-var int highBrokenAt = na
-var int lowBrokenAt = na
-
-if showLevels and not na(swingHigh)
-    if not na(highLine)
-        line.delete(highLine)
-    highLevel := swingHigh
-    highBrokenAt := na
-    highLine := line.new(bar_index - swingLen, swingHigh, bar_index, swingHigh, color=structureCol, width=1)
-
-if showLevels and not na(swingLow)
-    if not na(lowLine)
-        line.delete(lowLine)
-    lowLevel := swingLow
-    lowBrokenAt := na
-    lowLine := line.new(bar_index - swingLen, swingLow, bar_index, swingLow, color=structureCol, width=1)
-
-if barstate.isconfirmed and not na(highLevel) and na(highBrokenAt) and close > highLevel
-    highBrokenAt := bar_index
-
-if barstate.isconfirmed and not na(lowLevel) and na(lowBrokenAt) and close < lowLevel
-    lowBrokenAt := bar_index
-
-if not na(highLine)
-    line.set_x2(highLine, na(highBrokenAt) ? bar_index : highBrokenAt)
-
-if not na(lowLine)
-    line.set_x2(lowLine, na(lowBrokenAt) ? bar_index : lowBrokenAt)
-
 // -----------------------------------------------------------------------------
-// Multi-timeframe context
+// Structure
 // -----------------------------------------------------------------------------
-// The same swing, carried from each timeframe he trades. These are context and
-// origin, not entries: they are the last high and low a candle body made on that
-// timeframe, which is what he trades back to. Every row uses the same swing
-// length as the labels and levels above.
-// The swing itself, as one named thing, so all ten requests below ask for the
-// same reading of it. The request.security call stays at the top level, with a
-// timeframe that came straight from an input: a timeframe worked out by the
-// script's own code is the mistake that stopped an earlier version compiling.
-lastSwingHigh() => ta.valuewhen(not na(ta.pivothigh(bodyTop(), swingLen, swingLen)), ta.pivothigh(bodyTop(), swingLen, swingLen), 0)
-lastSwingLow() => ta.valuewhen(not na(ta.pivotlow(bodyBottom(), swingLen, swingLen)), ta.pivotlow(bodyBottom(), swingLen, swingLen), 0)
+// The last confirmed swing high and the last confirmed swing low are the two
+// levels being watched. Nothing is drawn for them, so the chart stays clear
+// until one of them actually goes.
+var float upLevel = na
+var float downLevel = na
+var int upBrokenAt = na
+var int downBrokenAt = na
 
-contextHigh1 = request.security(syminfo.tickerid, contextTf1, lastSwingHigh(), lookahead=barmerge.lookahead_off)
-contextLow1 = request.security(syminfo.tickerid, contextTf1, lastSwingLow(), lookahead=barmerge.lookahead_off)
-contextHigh2 = request.security(syminfo.tickerid, contextTf2, lastSwingHigh(), lookahead=barmerge.lookahead_off)
-contextLow2 = request.security(syminfo.tickerid, contextTf2, lastSwingLow(), lookahead=barmerge.lookahead_off)
-contextHigh3 = request.security(syminfo.tickerid, contextTf3, lastSwingHigh(), lookahead=barmerge.lookahead_off)
-contextLow3 = request.security(syminfo.tickerid, contextTf3, lastSwingLow(), lookahead=barmerge.lookahead_off)
-contextHigh4 = request.security(syminfo.tickerid, contextTf4, lastSwingHigh(), lookahead=barmerge.lookahead_off)
-contextLow4 = request.security(syminfo.tickerid, contextTf4, lastSwingLow(), lookahead=barmerge.lookahead_off)
-contextHigh5 = request.security(syminfo.tickerid, contextTf5, lastSwingHigh(), lookahead=barmerge.lookahead_off)
-contextLow5 = request.security(syminfo.tickerid, contextTf5, lastSwingLow(), lookahead=barmerge.lookahead_off)
+if not na(swingHigh)
+    upLevel := swingHigh
+    upBrokenAt := na
 
-showContextLevels = showContext and contextLines
+if not na(swingLow)
+    downLevel := swingLow
+    downBrokenAt := na
 
-plot(showContextLevels ? contextHigh1 : na, "Context 1 high", color=contextColor1, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextLow1 : na, "Context 1 low", color=contextColor1, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextHigh2 : na, "Context 2 high", color=contextColor2, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextLow2 : na, "Context 2 low", color=contextColor2, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextHigh3 : na, "Context 3 high", color=contextColor3, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextLow3 : na, "Context 3 low", color=contextColor3, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextHigh4 : na, "Context 4 high", color=contextColor4, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextLow4 : na, "Context 4 low", color=contextColor4, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextHigh5 : na, "Context 5 high", color=contextColor5, style=plot.style_stepline, linewidth=1)
-plot(showContextLevels ? contextLow5 : na, "Context 5 low", color=contextColor5, style=plot.style_stepline, linewidth=1)
+// A break is counted once per level, on a finished candle, and only on a close.
+// The level is not watched again until the next swing of the same kind is
+// confirmed, so a run of candles through the same price is one break and not
+// five. The mark sits on the bar that did it, at the price that was given up.
+if barstate.isconfirmed and not na(upLevel) and na(upBrokenAt) and close > upLevel
+    upBrokenAt := bar_index
+    if showBreaks
+        label.new(bar_index, upLevel, "BROKE UP", style=label.style_label_down, color=breakUpCol, textcolor=color.white, size=size.small)
 
-var table contextTable = table.new(position.top_right, 3, 6, border_width=1)
-if barstate.islast and showContext
-    table.cell(contextTable, 0, 0, "TF", text_color=color.white, bgcolor=color.new(color.black, 0))
-    table.cell(contextTable, 1, 0, "Body swing high", text_color=color.white, bgcolor=color.new(color.black, 0))
-    table.cell(contextTable, 2, 0, "Body swing low", text_color=color.white, bgcolor=color.new(color.black, 0))
-    table.cell(contextTable, 0, 1, contextTf1, text_color=contextColor1)
-    table.cell(contextTable, 1, 1, na(contextHigh1) ? "-" : str.tostring(contextHigh1, format.mintick), text_color=contextColor1)
-    table.cell(contextTable, 2, 1, na(contextLow1) ? "-" : str.tostring(contextLow1, format.mintick), text_color=contextColor1)
-    table.cell(contextTable, 0, 2, contextTf2, text_color=contextColor2)
-    table.cell(contextTable, 1, 2, na(contextHigh2) ? "-" : str.tostring(contextHigh2, format.mintick), text_color=contextColor2)
-    table.cell(contextTable, 2, 2, na(contextLow2) ? "-" : str.tostring(contextLow2, format.mintick), text_color=contextColor2)
-    table.cell(contextTable, 0, 3, contextTf3, text_color=contextColor3)
-    table.cell(contextTable, 1, 3, na(contextHigh3) ? "-" : str.tostring(contextHigh3, format.mintick), text_color=contextColor3)
-    table.cell(contextTable, 2, 3, na(contextLow3) ? "-" : str.tostring(contextLow3, format.mintick), text_color=contextColor3)
-    table.cell(contextTable, 0, 4, contextTf4, text_color=contextColor4)
-    table.cell(contextTable, 1, 4, na(contextHigh4) ? "-" : str.tostring(contextHigh4, format.mintick), text_color=contextColor4)
-    table.cell(contextTable, 2, 4, na(contextLow4) ? "-" : str.tostring(contextLow4, format.mintick), text_color=contextColor4)
-    table.cell(contextTable, 0, 5, contextTf5, text_color=contextColor5)
-    table.cell(contextTable, 1, 5, na(contextHigh5) ? "-" : str.tostring(contextHigh5, format.mintick), text_color=contextColor5)
-    table.cell(contextTable, 2, 5, na(contextLow5) ? "-" : str.tostring(contextLow5, format.mintick), text_color=contextColor5)
-else if barstate.islast and not showContext
-    table.clear(contextTable, 0, 0, 2, 5)
+if barstate.isconfirmed and not na(downLevel) and na(downBrokenAt) and close < downLevel
+    downBrokenAt := bar_index
+    if showBreaks
+        label.new(bar_index, downLevel, "BROKE DOWN", style=label.style_label_up, color=breakDownCol, textcolor=color.white, size=size.small)

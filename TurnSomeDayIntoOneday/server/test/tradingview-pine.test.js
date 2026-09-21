@@ -1,9 +1,14 @@
 // There is no Pine compiler in this repository. These checks catch the common
 // copy/paste failures before the script reaches TradingView: bad brackets,
 // non-ASCII editor characters, duplicate top-level names, and mismatched
-// function calls. They also pin the two things the script is meant to keep: a
-// swing is read from a closed candle body and never a wick, and a level is only
-// taken out by a candle that closes through it.
+// function calls.
+//
+// The rest of the file pins what the script is FOR, which is Jacques's own
+// sentence (17 Sep 2026): "an indicator that aligns with it, letting me know
+// high probability swings and zones and the best time to hold a move or scalp."
+// Three rebuilds lost sight of that - a box of numbers he could not read, then
+// five timeframe rows, then a version cut down to swing letters alone - so the
+// pieces he actually asked for are each held here by name.
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
@@ -40,7 +45,7 @@ function topCommas(list) {
 test('the file is a Pine v5 script and starts by saying so', () => {
     const lines = read().split('\n');
     assert.strictEqual(lines[0].trim(), '//@version=5');
-    assert.match(lines[1], /^\/\/ Someday - swings/);
+    assert.match(lines[1], /^\/\/ Someday/);
 });
 
 test('the script is plain ASCII and has no tabs', () => {
@@ -79,14 +84,12 @@ test('the top level does not redeclare a name', () => {
         assert.ok(!seen.has(match[1]), `${match[1]} is redeclared on line ${index + 1}`);
         seen.set(match[1], index + 1);
     });
-    // Smaller on purpose: the box, the five timeframe rows and the ten drawn
-    // levels are gone, so there are fewer top-level names to redeclare.
-    assert.ok(seen.size >= 5);
+    assert.ok(seen.size >= 8);
 });
 
 test('the script stays small enough to read at a glance', () => {
     const lines = body().filter((line) => line.trim());
-    assert.ok(lines.length < 160, `${lines.length} lines of settings and drawing is more than a quiet chart`);
+    assert.ok(lines.length < 200, `${lines.length} lines of settings and drawing is more than a quiet chart`);
 });
 
 test('each script function is called with the number of values it accepts', () => {
@@ -95,8 +98,6 @@ test('each script function is called with the number of values it accepts', () =
     for (const match of text.matchAll(/^([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*=>/gm)) {
         functions.set(match[1], match[2].trim() ? topCommas(match[2]) + 1 : 0);
     }
-    // The script is deliberately two helpers long now, so the guard only has to
-    // prove the scan found them.
     assert.ok(functions.size >= 2);
     for (const [name, wanted] of functions) {
         for (const match of text.matchAll(new RegExp(`(^|[^A-Za-z0-9_.])${name}\\s*\\(`, 'gm'))) {
@@ -116,42 +117,29 @@ test('every input has a settings group', () => {
     });
 });
 
-test('the old prediction panel is gone', () => {
-    const text = read();
-    assert.doesNotMatch(text, /longOk|shortOk/);
-    assert.doesNotMatch(text, /Frame \(sets the level\)/);
+test('nothing on the chart is invented in a comment', () => {
+    // Every price on screen is read from a bar that closed. No third-party
+    // address either - the same rule the rest of the app keeps.
+    assert.doesNotMatch(read(), /https?:\/\//);
 });
 
-// "The box it doesn't explain nothing, it's confusing." The box of numbers, the
-// five timeframe rows behind it and the requests that filled them are gone. What
-// is left is the two things he asked to look at: the swings and the breaks.
-test('the numbers box and the timeframe rows are gone', () => {
-    const text = read();
-    assert.doesNotMatch(text, /table\.new/);
-    assert.doesNotMatch(text, /table\.cell/);
-    assert.doesNotMatch(text, /Body swing/);
-    assert.doesNotMatch(text, /request\.security/);
-});
-
-// "The 5 sec is not even listed." The script used to carry five rows of
-// timeframes chosen in the settings. A list like that can never hold everything
-// he trades, and it could drift out of step with the chart in front of him. It
-// reads the chart he has open now, so the 5 second chart and the daily chart
-// both work with nothing to set and nothing to keep in step.
-test('the script reads the chart it is on, so every timeframe works', () => {
+// "The 5 sec is not even listed." The script used to carry rows of timeframes
+// chosen in the settings. A list like that can only ever hold what was thought
+// of on the day it was written, so it can never keep up with whatever he
+// decides to trade next - and it drifts out of step with the chart in front of
+// him. It reads the chart he has open now, so the 5 second chart and the daily
+// chart both work with nothing to set and nothing to keep in step.
+test('it reads the chart it is on, so every timeframe works', () => {
     const text = read();
     assert.doesNotMatch(text, /input\.timeframe/);
+    assert.doesNotMatch(text, /request\.security/);
     assert.doesNotMatch(text, /contextTf/);
+    assert.doesNotMatch(text, /Body swing/);
     assert.match(text, /ta\.pivothigh\(bodyTop\(\), swingLen, swingLen\)/);
     assert.match(text, /ta\.pivotlow\(bodyBottom\(\), swingLen, swingLen\)/);
 });
 
-// The chart used to carry three different swing definitions at once: the H/HH/LH
-// markers came from a hardcoded 2-bar pivot that ignored the setting, the table
-// used the setting, and the step line came from the 10-bar zone structure. They
-// could not agree, which is what "the highs and lows don't line up" meant.
-// They agree now because there is one definition, on one number.
-test('one swing length drives every letter on the chart', () => {
+test('one swing length drives every letter and the zone', () => {
     const text = read();
     assert.match(text, /ta\.pivothigh\(bodyTop\(\), swingLen, swingLen\)/);
     assert.match(text, /ta\.pivotlow\(bodyBottom\(\), swingLen, swingLen\)/);
@@ -160,9 +148,32 @@ test('one swing length drives every letter on the chart', () => {
     assert.doesNotMatch(text, /pivotlow\(low, 2, 2\)/);
 });
 
+// 21 Sep 2026, looking at it on the daily: "it still reads every swing". It was
+// marking every turn - a letter every few bars, which is noise rather than
+// structure. The default is now five bars either side, and the floor is two so
+// it cannot be turned back into a letter per twitch by accident.
+test('only the turns that held are marked', () => {
+    const text = read();
+    assert.match(text, /input\.int\(5, "Swing length"/);
+    assert.match(text, /minval=2/);
+    assert.doesNotMatch(text, /input\.int\(2, "Swing length"/);
+});
+
+// "Each letter is coloured by what it says" - green where structure is holding
+// up, red where it is failing. It is the letter's own meaning, not a signal and
+// not a direction call: HH and HL are one colour, LH and LL the other, and the
+// first swing of a kind stays grey because it has earned no name yet.
+test('the letter is coloured by what it says, not by direction', () => {
+    const text = read();
+    assert.match(text, /upCol = input\.color\(#089981/);
+    assert.match(text, /downCol = input\.color\(#f23645/);
+    assert.match(text, /highName == "HH" \? upCol : highName == "LH" \? downCol : color\.gray/);
+    assert.match(text, /lowName == "HL" \? upCol : lowName == "LL" \? downCol : color\.gray/);
+});
+
 // "Wicks are not counted as highs." The body is the only part of a candle that
 // is a price, so a swing high is the top of a body and a swing low is the bottom
-// of one. Nothing in the script may pivot on a wick again.
+// of one. Nothing in the script may pivot on a wick.
 test('swings are read from the candle body, never from a wick', () => {
     const text = read();
     assert.match(text, /bodyTop\(\) => math\.max\(open, close\)/);
@@ -173,64 +184,84 @@ test('swings are read from the candle body, never from a wick', () => {
     assert.doesNotMatch(text, /ta\.lowest\(/);
 });
 
-// The shaded supply and demand boxes, their retracement levels and the
-// time-based ranges were taken off: they were read as too busy and the time
-// ranges did not look right. This pins them gone.
-test('the boxes and the time windows are off the chart', () => {
-    const text = read();
-    assert.doesNotMatch(text, /zone/i);
-    assert.doesNotMatch(text, /TimeRange/);
-    assert.doesNotMatch(text, /box\.new/);
-    assert.doesNotMatch(text, /bgcolor\(/);
-    assert.doesNotMatch(text, /range/i);
-    assert.doesNotMatch(text, /max_boxes_count/);
-});
-
-// "Remove the words, just keep HH HL LL LH." The BROKE UP and BROKE DOWN word
-// labels are gone, so the four letters are the only thing written on the chart.
-test('the words are gone and only the four letters are written', () => {
+// "Remove the words, just keep HH HL LL LH." The four letters are the only
+// words written over the candles. A swing that cannot be named yet writes
+// nothing at all.
+test('the four letters are written, and nothing over the candles but them', () => {
     const text = read();
     assert.doesNotMatch(text, /BROKE/);
     assert.doesNotMatch(text, /showBreaks/);
     for (const letter of ['"HH"', '"LH"', '"HL"', '"LL"']) assert.ok(text.includes(letter), `${letter} is written`);
-    // Exactly two things are ever written: one letter above a swing high and one
-    // below a swing low.
-    assert.strictEqual((text.match(/label\.new\(/g) || []).length, 2);
+    assert.match(text, /if highName != ""/);
+    assert.match(text, /if lowName != ""/);
+    // Two swing letters and the one read - nothing else is ever written.
+    assert.strictEqual((text.match(/label\.new\(/g) || []).length, 3);
 });
 
 // "Why is that a LL when you have not broken the HL?" A low that dips under the
 // last low and closes back above it is not a lower low - the old low is still
-// standing. LL is only written once a candle has closed through the low being
-// tracked, and the same is true of HH on the high side. HL and LH need no such
-// proof: a low that stops short of the last low is a higher low by itself.
-test('a lower low and a higher high wait for a candle to close through the level', () => {
+// standing. Reaching past a level is only named once a candle has CLOSED through
+// it. Stopping short needs no proof: a low that does not reach the last low is a
+// higher low by itself, and a high that does not reach the last high is a lower
+// high by itself.
+test('reaching past a level waits for a candle to close through it', () => {
     const text = read();
     assert.match(text, /barstate\.isconfirmed and not na\(namedLow\) and close < namedLow/);
     assert.match(text, /barstate\.isconfirmed and not na\(namedHigh\) and close > namedHigh/);
     assert.match(text, /lowBroken := true/);
     assert.match(text, /highBroken := true/);
-    // The two letters are behind the break test and nothing else.
-    assert.match(text, /else if lowBroken\n\s+lowName := "LL"/);
-    assert.match(text, /else if highBroken\n\s+highName := "HH"/);
-    // The letter that needs no proof is the plain comparison against the last low.
-    assert.match(text, /else if swingLow > namedLow\n\s+lowName := "HL"/);
-    assert.match(text, /else if swingHigh < namedHigh\n\s+highName := "LH"/);
-    // A swing that cannot be named yet writes nothing and leaves the old level
-    // in place, so the level is not moved by a dip that never closed through it.
-    assert.match(text, /if not na\(lowName\)/);
-    assert.match(text, /if not na\(highName\)/);
+    // Named in this order, so a break wins over the plain comparison and a
+    // comparison that stopped short still gets its letter.
+    assert.match(text, /na\(namedLow\) \? "L" : lowBroken \? "LL" : swingLow > namedLow \? "HL" : ""/);
+    assert.match(text, /na\(namedHigh\) \? "H" : highBroken \? "HH" : swingHigh < namedHigh \? "LH" : ""/);
 });
 
-// "No lines." Nothing is drawn across the chart at all, in any form.
-test('nothing is drawn across the chart', () => {
+// "high probability swings and zones". The zone is the range the market has
+// been dealing between: the last swing high and the last swing low, with the
+// middle of it drawn through. Both levels are kept, so ONE box moves when the
+// structure moves - it does not stamp a new box on every bar.
+test('the zone is drawn, and it is one box that moves rather than a staircase', () => {
     const text = read();
-    assert.doesNotMatch(text, /line\./);
-    assert.doesNotMatch(text, /plot\.style_stepline/);
-    assert.doesNotMatch(text, /(^|[^.\w])plot\(/m);
-    assert.doesNotMatch(text, /hline\(/);
-    assert.doesNotMatch(text, /fill\(/);
-    assert.match(text, /label\.new\(bar_index - swingLen, swingHigh, highName/);
-    assert.match(text, /label\.new\(bar_index - swingLen, swingLow, lowName/);
+    assert.match(text, /max_boxes_count/);
+    assert.match(text, /box\.new\(/);
+    assert.strictEqual((text.match(/box\.new\(/g) || []).length, 1);
+    assert.match(text, /box\.set_top\(/);
+    assert.match(text, /box\.set_bottom\(/);
+    assert.match(text, /box\.set_left\(/);
+    assert.match(text, /box\.set_right\(/);
+    assert.match(text, /line\.new\(/);
+    assert.match(text, /line\.set_xy1\(/);
+    assert.match(text, /line\.set_xy2\(/);
+    // The range is the two tracked levels, and it is up to him whether it is
+    // drawn at all.
+    assert.match(text, /zoneTop = haveZone \? math\.max\(namedHigh, namedLow\)/);
+    assert.match(text, /zoneBot = haveZone \? math\.min\(namedHigh, namedLow\)/);
+    assert.match(text, /if not showZone and not na\(zoneBox\)/);
+});
+
+// "the best time to hold a move or scalp". The read is a description of where
+// price sits in the range and what a hold would need - never a call on what
+// comes next, which a chart cannot know. The forecast wording that used to sit
+// on this page is gone and stays gone.
+test('the read says where in the range price is and what a hold needs', () => {
+    const text = read();
+    assert.match(text, /label\.style_label_left/);
+    assert.match(text, /Near the top of the range/);
+    assert.match(text, /Near the bottom of the range/);
+    assert.match(text, /Middle of the range/);
+    assert.match(text, /A hold needs a close above/);
+    assert.match(text, /A hold needs a close below/);
+    assert.match(text, /A hold needs one of the edges to go first/);
+    assert.match(text, /ticks to the high/);
+    assert.match(text, /ticks to the low/);
+    // Both edges measured off the symbol's own tick, so the numbers are the
+    // ones the chart itself is quoting.
+    assert.match(text, /float tick = syminfo\.mintick/);
+    // No promise about the future, and none of the old signal panel.
+    const code = body().join('\n');
+    assert.doesNotMatch(code, /forecast|predict|guaranteed|longOk|shortOk|Frame \(sets the level\)/);
+    assert.doesNotMatch(text, /table\.new/);
+    assert.doesNotMatch(text, /table\.cell/);
 });
 
 test('the copy route still serves this script as plain text', () => {

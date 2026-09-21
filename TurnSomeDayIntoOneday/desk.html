@@ -395,13 +395,9 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div class="f" id="form" style="display:none">
       <label for="sN">Name it the way you say it out loud</label>
       <input id="sN" placeholder="e.g. London sweep and reclaim" autocomplete="off">
-      <label>Timeframes it lives on</label>
-      <div class="tfpick" id="sTf">
-        <span class="tf" data-tf="4h">4h</span>
-        <span class="tf" data-tf="1h">1h</span>
-        <span class="tf" data-tf="15m">15m</span>
-        <span class="tf" data-tf="5m">5m</span>
-      </div>
+      <label for="sTfIn">Timeframes it lives on</label>
+      <input id="sTfIn" placeholder="However you say them — 5s, 1m, 15m, 1h, 4h, daily …" autocomplete="off">
+      <div class="feedwhy">Write as many or as few as you use, in your own words, separated by commas. Nothing here is a fixed list — a timeframe nobody thought of when this was written is kept the same as any other.</div>
       <label for="sR">What has to be true before you look for it</label>
       <textarea id="sR" placeholder="The read. Where price has to be, what the higher timeframe has to be doing, what you refuse to take it without."></textarea>
       <label for="sE">Where you enter</label>
@@ -449,6 +445,14 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
        never the percentage alone. -->
   <div class="sec">
     <div class="sec-hd">My trades</div>
+    <!-- What a trade costs to place. One number, his own, and it is the only
+         cost this page knows: the spread and his fills are not in here, and
+         the page says that out loud rather than pretending to know them. -->
+    <div style="padding:0 14px 10px">
+      <label for="cRate" style="font-size:.75rem;color:var(--tm)">Commission, per contract, in and out ($)</label>
+      <input id="cRate" inputmode="decimal" placeholder="e.g. 0.78 for a micro" autocomplete="off">
+      <div class="saved" id="cRateHint" style="font-size:.6875rem;color:var(--tm);margin-top:6px"></div>
+    </div>
     <div id="tlist"></div>
     <div id="tnone" class="empty">
       Nothing logged yet. Write a trade down after it is closed — or while it is
@@ -478,6 +482,8 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <label for="tPv">What one point is worth ($)</label>
       <input id="tPv" inputmode="decimal" placeholder="e.g. 2 for MNQ, 10 for MGC" autocomplete="off">
       <div class="saved" id="tPvHint" style="font-size:.6875rem;color:var(--tm);margin-top:6px"></div>
+      <label for="tC">Contracts</label>
+      <input id="tC" inputmode="numeric" placeholder="1" autocomplete="off">
       <label for="tNote">What you saw, and why you took it</label>
       <textarea id="tNote" placeholder="The read you acted on. This is the part the review works from."></textarea>
       <button class="txtbtn" id="saveT">Save the trade</button>
@@ -543,9 +549,22 @@ function esc(s){
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+/* Timeframes, as the words he wrote. Nothing here holds a fixed set: he types
+   whatever he uses, so a timeframe that did not exist on the day this was
+   written is kept exactly like the ones that did. Setups saved earlier as an
+   array still read, so nothing already on a device is lost. */
+function tfList(v){
+  if(!v) return [];
+  if(Array.isArray(v)) return v.slice();
+  return String(v)
+    .split(/[,;+/]|\band\b/i)
+    .map(function(t){ return t.trim() })
+    .filter(Boolean);
+}
 function tfText(list){
-  if(!list||!list.length) return 'no timeframe set';
-  return list.map(function(t){ return t==='5m'?'5 min':t==='15m'?'15 min':t }).join(' and ');
+  var l=tfList(list);
+  if(!l.length) return 'no timeframe set';
+  return l.join(' and ');
 }
 var HOLD={hold:'Hold the move',scalp:'Scalp it',either:'Either, depends on the 1h'};
 
@@ -1938,14 +1957,6 @@ function render(){
   list.innerHTML=h;
 }
 
-var picked=[];
-function paintTf(){
-  var els=document.querySelectorAll('#sTf .tf');
-  for(var i=0;i<els.length;i++){
-    var on=picked.indexOf(els[i].getAttribute('data-tf'))>=0;
-    els[i].className='tf'+(on?' on':'');
-  }
-}
 function openForm(i){
   editing=(typeof i==='number')?i:null;
   var s=editing===null?{tf:['1h','15m','5m']}:SETUPS[editing];
@@ -1955,8 +1966,7 @@ function openForm(i){
   document.getElementById('sS').value=s.s||'';
   document.getElementById('sT').value=s.t||'';
   document.getElementById('sH').value=s.h||'hold';
-  picked=(s.tf||[]).slice();
-  paintTf();
+  document.getElementById('sTfIn').value=tfList(s.tf).join(', ');
   document.getElementById('form').style.display='block';
   document.getElementById('form').scrollIntoView({behavior:'smooth',block:'center'});
 }
@@ -2171,6 +2181,50 @@ function riskMoney(t){
   if(risk===null||pv===null) return null;
   return risk*pv;
 }
+/* ---------- what the trade cost to place --------------------------------
+   Jacques, 21 Sep 2026: "NinjaTrader micros, I pay .39 a contract."
+
+   Every figure above this line is the trade at the market's price, and no
+   trade is ever filled at the market's price. Commission comes off both ends
+   - in and out - so one micro at .39 a side costs .78 to put on and take off.
+   The rate is typed in by him and never assumed: his rate and his contract
+   count are his, not this page's to guess.
+
+   THE POINT OF THIS BLOCK, and why it exists at all: a backtest that does not
+   pay the commission is a different trade from the one in his account. That
+   gap is the first thing to check before believing a backtest, and the page
+   now shows both figures instead of only the flattering one. */
+var K_COST='tsid.desk.cost';
+var COST=load(K_COST, null);
+if(!COST||typeof COST!=='object') COST={};
+/* What one contract costs him across a whole trade - in and out together. */
+function rateOf(){
+  var r=numOf(COST.rate);
+  return (r!==null&&r>=0)?r:null;
+}
+/* One contract unless he says otherwise: that is what a micro is, and what his
+   .39 is priced on. A count of zero or nonsense is one, never zero - a zero
+   here would quietly make the trade free. */
+function contractsOf(t){
+  var c=numOf(t&&t.c);
+  if(c===null||c<=0) return 1;
+  return Math.floor(c);
+}
+/* The commission on this trade. Null when he has not put a rate in - never a
+   default rate, and never a zero that would read as "free". */
+function costOf(t){
+  var r=rateOf();
+  if(r===null) return null;
+  return r*contractsOf(t);
+}
+/* What the trade actually left, after the commission on both ends. Null
+   whenever the gross figure is null: there is no net of a number that does
+   not exist. */
+function netMoneyOf(t){
+  var m=moneyOf(t), c=costOf(t);
+  if(m===null||c===null) return null;
+  return m-c;
+}
 function rText(t){
   var r=rOf(t);
   if(r===null) return t&&t.ex===null ? 'open — no exit written down' : 'no result: needs an entry and a stop';
@@ -2187,6 +2241,8 @@ function tradeLine(t){
   bits.push('exit '+(t.ex===null?'not recorded':two(t.ex)));
   bits.push('result '+rText(t));
   if(pvOf(t)!==null) bits.push('point value '+pvOf(t)+' (one point is '+dollars(pvOf(t))+')');
+  bits.push(contractsOf(t)+' contract'+(contractsOf(t)===1?'':'s'));
+  if(netMoneyOf(t)!==null) bits.push('gross '+dollars(moneyOf(t))+' and net '+dollars(netMoneyOf(t))+' after '+dollars(costOf(t))+' of commission');
   return bits.join(', ')+(t.note?('. What he saw: '+t.note):'');
 }
 
@@ -2202,6 +2258,8 @@ function tradesText(){
   }
   var cl=closedTrades(), missing=TRADES.length-cl.length;
   out.push(TRADES.length+' written down, '+cl.length+' with a result, '+missing+' still open or missing a price (those are counted nowhere).');
+  if(rateOf()===null) out.push('He has not put a commission rate in, so every money figure in this log is BEFORE costs. Say that rather than letting it read as what he kept.');
+  else out.push('Commission is '+dollars(rateOf())+' a contract, in and out, as he typed it. Every net figure is after it. The spread and his fills are still not in here, and neither is anything a backtest did.');
   for(var i=0;i<TRADES.length;i++) out.push('  '+i+': '+tradeLine(TRADES[i]));
   out.push('');
   out.push('Everything above came from him, including the risk in points and the R. The adding up is in the JOURNAL block below and it is the only summary of this log you may use — do not work out an expectancy, an "edge", or anything that is not in it, and never forecast from it.');
@@ -2252,6 +2310,7 @@ var TRADE_SYS=[
   'WHAT YOU NEVER DO:',
   '1. Never invent a price, a level, a statistic, a study or a backtest. Never compute an average, an expectancy or a win rate from his log: there are far too few trades for that to mean anything, and if he asks what his record proves you say exactly that.',
   '2. Never size a position and never invent a money figure. The only money in this review is what the trade block already worked out from the point value he put on the trade: never a balance, never an account, never what it could have made.',
+  '2b. Gross and net are different numbers and you never use the flattering one. If the trade carries a commission rate, the net figure is what he kept; if it does not, say the money is before costs. Never treat a backtest as a measurement, and never compare this log to one.',
   '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If it reads like chasing — entering before the trigger, widening a stop, adding after a loss — name that first and plainly, then answer the rest.',
   '4. Never tell him he is finished, hopeless or no good at this. The mistakes that show up in a trade are the ordinary ones and they are learnable.',
   '5. Never promise an outcome, and never put a probability on the next trade.',
@@ -2298,7 +2357,12 @@ function renderTrades(){
       +'<span>'+esc(t.su||'no setup named')+(t.d?' &middot; '+esc(t.d):'')+'</span></div>'
       +'<div class="body" style="display:block;border-top:none;padding-top:10px">'
       +'<div class="lbl">Result</div><p><b>'+esc(rText(t))+'</b>'
-      +(moneyOf(t)!==null?(' &middot; '+esc(dollars(moneyOf(t)))):'')+'</p>';
+      +(moneyOf(t)!==null?(' &middot; '+esc(dollars(moneyOf(t)))+' before costs'):'')+'</p>';
+    if(netMoneyOf(t)!==null){
+      h+='<div class="lbl">After costs</div><p>'+esc(dollars(netMoneyOf(t)))
+        +' &middot; '+esc(dollars(costOf(t)))+' commission on '+contractsOf(t)+' contract'+(contractsOf(t)===1?'':'s')
+        +' at '+esc(dollars(rateOf()))+' each, in and out</p>';
+    }
     var risk=riskPoints(t);
     if(risk!==null) h+='<div class="lbl">Risk</div><p>'+esc(two(risk))+' points from entry to stop'
       +(riskMoney(t)!==null?(' &middot; '+esc(dollars(riskMoney(t)))):'')+'</p>';
@@ -2339,6 +2403,7 @@ function journalStats(){
     won:0, lost:0, flat:0,
     netR:0, grossWin:0, grossLoss:0, netPts:0,
     netMoney:0, moneyN:0, moneyMissing:0,
+    costN:0, costMissing:0, costTotal:0, netAfter:0, afterN:0,
     bestR:null, worstR:null, avgWin:null, avgLoss:null, winRate:null, by:{}
   };
   for(var i=0;i<closed.length;i++){
@@ -2350,6 +2415,14 @@ function journalStats(){
        total that quietly covers three of five trades is a lie by omission. */
     var m=moneyOf(t);
     if(m===null) s.moneyMissing++; else { s.moneyN++; s.netMoney+=m; }
+    /* The commission on this trade, and what was left of it. Counted only
+       where he gave a rate: a trade with no rate has no net figure at all,
+       and the count of those travels with the total for the same reason the
+       win rate carries its own count. */
+    var cst=costOf(t);
+    if(cst===null){ s.costMissing++; } else { s.costN++; s.costTotal+=cst; }
+    var nm=netMoneyOf(t);
+    if(nm!==null){ s.afterN++; s.netAfter+=nm; }
     if(r>0){ s.won++; s.grossWin+=r; }
     else if(r<0){ s.lost++; s.grossLoss+=r; }
     else { s.flat++; }
@@ -2384,6 +2457,16 @@ function journalFine(s){
 /* The money line, or the honest absence of one. No point value on any closed
    trade means no money figure — not zero, and not a figure taken from the
    symbol's published size behind his back. */
+/* The net line, or the honest absence of one. Three different sentences, and
+   they are not interchangeable: no rate set at all, a rate but no closed trade
+   it can be applied to, and a real net figure. */
+function moneyAfterRow(s){
+  if(!TRADES.length) return '';
+  if(rateOf()===null) return '<span style="color:var(--tm)">no commission rate set, so there is no net figure \u2014 the gross above is the market price, not what you kept</span>';
+  if(!s.afterN) return '<span style="color:var(--tm)">no closed trade carries both a point value and this rate yet, so there is no net figure</span>';
+  return '<b>'+esc(dollars(s.netAfter))+'</b> after '+esc(dollars(s.costTotal))+' of commission on '+s.afterN+' of '+s.closed+' closed'
+    +(s.closed-s.afterN?(' &middot; '+(s.closed-s.afterN)+' left out'):'');
+}
 function moneyRow(s){
   if(!TRADES.length) return '';
   if(!s.moneyN) return '<span style="color:var(--tm)">no point value on any closed trade yet, so there is no money figure</span>';
@@ -2407,6 +2490,7 @@ function journalHtml(){
       + '</span>';
     h+=stRow('Points','<b>'+sgn(s.netPts)+'</b>');
     h+=stRow('Money', moneyRow(s));
+    h+=stRow('After costs', moneyAfterRow(s));
     h+=stRow('Reward vs risk','<b>'+sgn(s.netR,'R')+'</b> net &middot; won '+sgn(s.grossWin,'R')+' against '+sgn(s.grossLoss,'R')+' lost');
   }
   if(s.closed){
@@ -2424,6 +2508,7 @@ function journalHtml(){
     h+='<div class="lbl">By setup</div><p>'+rows+'</p>';
   }
   h+='<p style="margin-top:9px">'+esc(journalFine(s))+'</p>';
+  if(s.closed) h+='<p style="margin-top:6px">'+esc('Commission is the only cost this page knows, because you typed it in. The spread and your fills are not in here, and nothing a backtest did is in here either. A backtest with no commission in it and a log with one are not the same trade \u2014 that gap is the first thing to check before trusting a backtest.')+'</p>';
   h+='</div>';
   return h;
 }
@@ -2489,6 +2574,9 @@ function openTrade(){
     var el=document.getElementById(id); if(el) el.value='';
   });
   fillPointValue();
+  /* One contract is the default, because one micro is what his .39 is priced
+     on; he can change it before saving. */
+  var cEl=document.getElementById('tC'); if(cEl) cEl.value='1';
   var d=document.getElementById('tDir'); if(d) d.value='long';
   var f=document.getElementById('tform');
   if(f){ f.style.display='block'; f.scrollIntoView({behavior:'smooth',block:'center'}) }
@@ -2517,6 +2605,7 @@ function saveTrade(){
     tg:readNum('tTg'),
     ex:readNum('tEx'),
     pv:readNum('tPv'),
+    c:readNum('tC'),
     note:readStr('tNote')
   };
   /* A trade with no entry at all is not a trade he can review, and the page
@@ -2563,7 +2652,7 @@ document.addEventListener('click',function(e){
   if(ctf){ setChartTf(ctf.getAttribute('data-ctf')); return }
   var frtf=t.closest?t.closest('#frTf .tf'):null;
   if(frtf){ setFrameTf(frtf.getAttribute('data-ftf')); return }
-  var tf=t.closest?t.closest('#sTf .tf'):null;  var rv=t.closest?t.closest('[data-rev]'):null;
+  var rv=t.closest?t.closest('[data-rev]'):null;
   if(rv){ reviewTrade(parseInt(rv.getAttribute('data-rev'),10)); return }
   var td=t.closest?t.closest('[data-tdel]'):null;
   if(td){
@@ -2575,11 +2664,6 @@ document.addEventListener('click',function(e){
     return;
   }
 
-  if(tf){
-    var v=tf.getAttribute('data-tf'), at=picked.indexOf(v);
-    if(at>=0) picked.splice(at,1); else picked.push(v);
-    paintTf(); return;
-  }
   var ch=t.closest?t.closest('.chip[data-q]'):null;
   if(ch){
     /* Two chips answer under their own rules: the trade record is read under
@@ -2596,7 +2680,7 @@ document.getElementById('cancelS').onclick=function(){ closeForm() };
 document.getElementById('saveS').onclick=function(){
   var n=val('sN');
   if(!n){ document.getElementById('sN').focus(); return }
-  var rec={n:n, tf:picked.slice(), r:val('sR'), e:val('sE'), s:val('sS'), t:val('sT'),
+  var rec={n:n, tf:tfList(val('sTfIn')), r:val('sR'), e:val('sE'), s:val('sS'), t:val('sT'),
            h:document.getElementById('sH').value||'hold'};
   if(editing===null) SETUPS.push(rec); else SETUPS[editing]=rec;
   save(K_SETUPS,SETUPS);
@@ -2626,6 +2710,25 @@ function fillPointValue(){
 }
 var tMkEl=document.getElementById('tMk');
 if(tMkEl&&tMkEl.addEventListener) tMkEl.addEventListener('input',fillPointValue);
+
+/* The commission box: shown on open, saved on every keystroke, and the log is
+   redrawn with it so the gross and the net can never drift apart. */
+function paintRate(){
+  var el=document.getElementById('cRate'), hint=document.getElementById('cRateHint');
+  if(el&&document.activeElement!==el) el.value=(rateOf()===null?'':String(rateOf()));
+  if(hint) hint.textContent = (rateOf()===null)
+    ? 'What ONE contract costs over a whole trade, in and out. A NinjaTrader micro is about .39 a side, so .78 for the round trip. Nothing is assumed: leave it blank and the log stays gross.'
+    : ('Counted at '+dollars(rateOf())+' a contract, in and out. The spread and your fills are not in here, and neither is anything a backtest did.');
+}
+var cRateEl=document.getElementById('cRate');
+if(cRateEl&&cRateEl.addEventListener) cRateEl.addEventListener('input',function(){
+  var v=numOf(cRateEl.value);
+  if(v===null) delete COST.rate; else COST.rate=v;
+  save(K_COST,COST);
+  paintRate();
+  renderTrades();
+});
+paintRate();
 
 /* The feed: the button, Enter in the symbol field, and one load on open so the
    page is never sitting there looking like it has candles when it does not. */

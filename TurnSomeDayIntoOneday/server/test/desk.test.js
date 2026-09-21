@@ -59,7 +59,8 @@ function stubDom() {
       },
       contains(c) { return this._s.has(c); },
     },
-    addEventListener() {}, setAttribute() {}, removeAttribute() {},
+    _on: {},
+    addEventListener(t, f) { this._on[t] = f }, setAttribute() {}, removeAttribute() {},
     getAttribute() { return null }, focus() {}, closest() { return null; },
     querySelectorAll() { return [] }, appendChild() {}, remove() {},
     scrollIntoView() {}, confirm() { return false }, onclick: null,
@@ -169,7 +170,7 @@ function writeSetup(p, fields) {
   el('sS').value = fields.s || '';
   el('sT').value = fields.t || '';
   el('sH').value = fields.h || 'hold';
-  p.sandbox.picked = fields.tf || [];
+  el('sTfIn').value = (fields.tf || []).join(', ');
   el('saveS').onclick();
 }
 
@@ -205,6 +206,21 @@ test('a setup written on the page is kept, and kept on the device', async () => 
   assert.match(p.stored['tsid.desk.setups'], /London sweep and reclaim/);
   assert.match(p.els.get('list').innerHTML, /London sweep and reclaim/, 'and it appears in the list');
   assert.strictEqual(p.els.get('none').style.display, 'none', 'the empty message goes away');
+});
+
+// Jacques, 21 Sep 2026, on the indicator and again on this form: "you should
+// build for all timeframes anyone i decided to use if i list it or not not just
+// the ones i listed thats not growth thats restraint". So the field is his own
+// words in a text box — a timeframe that did not exist on the day this was
+// written is kept exactly like the four that happened to be listed here.
+test('a timeframe nobody thought of is kept like any other', async () => {
+  const p = await loadPage();
+  writeSetup(p, Object.assign({}, SWEEP, { tf: ['5s', '2m', 'daily'] }));
+  assert.strictEqual(p.sandbox.SETUPS[0].tf.join(','), '5s,2m,daily', 'kept as he typed them');
+  assert.match(p.sandbox.setupsText(), /Timeframes: 5s and 2m and daily/, 'and read back the same way');
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.ok(html.includes('id="sTfIn"'), 'the field is a text box');
+  assert.ok(!/id="sTf"/.test(html), 'with no fixed list left beside the four timeframes');
 });
 
 test('a setup named with markup cannot put markup on the page', async () => {
@@ -709,6 +725,7 @@ function logTrade(p, fields) {
   el('tTg').value = n(fields.tg);
   el('tEx').value = n(fields.ex);
   el('tPv').value = n(fields.pv);
+  el('tC').value = n(fields.c);
   el('tNote').value = fields.note || '';
   el('saveT').onclick();
 }
@@ -973,6 +990,117 @@ test('the log chip answers under the review rules, not the general ones', () => 
 });
 
 // ── the door ────────────────────────────────────────────────────────────────
+
+// -- what the trade cost to place ------------------------------------------
+// 21 Sep 2026. "NinjaTrader micros, I pay .39 a contract." Everything on this
+// page was worked out at the market's price, and nobody is filled at the
+// market's price. That gap is the whole difference between a backtest and an
+// account, so the desk now pays the commission - his rate, typed in by him and
+// never assumed - and says plainly when it has no rate to pay it with.
+
+test('with no commission rate the money stays gross, and the page says so', async () => {
+  const p = await loadPage();
+  logTrade(p, { mk: 'MNQ', su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102, pv: 2 });
+  const t = p.sandbox.TRADES[0];
+  assert.strictEqual(p.sandbox.rateOf(), null, 'nothing is assumed');
+  assert.strictEqual(p.sandbox.costOf(t), null,
+    'no rate means no cost - not a zero, which would read as free');
+  assert.strictEqual(p.sandbox.netMoneyOf(t), null, 'and no net figure to mistake for what he kept');
+  assert.strictEqual(p.sandbox.moneyOf(t), 4, 'the gross is still his own arithmetic');
+  const html = p.els.get('tlist').innerHTML;
+  assert.match(html, /before costs/, 'the one money figure is labelled');
+  assert.ok(!/After costs/.test(html), 'and there is no net line to misread');
+  assert.match(p.els.get('cRateHint').textContent, /Nothing is assumed/);
+  assert.match(p.sandbox.tradesText(), /every money figure in this log is BEFORE costs/);
+});
+
+test('the commission comes off both ends, and the net is what he actually kept', async () => {
+  const p = await loadPage();
+  p.sandbox.COST.rate = 0.78;   // .39 a side, in and out
+  logTrade(p, { mk: 'MNQ', su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102, pv: 2, c: 1 });
+  const t = p.sandbox.TRADES[0];
+  assert.strictEqual(Math.round(p.sandbox.moneyOf(t) * 100) / 100, 4, '2 points at $2 - the market price');
+  assert.strictEqual(Math.round(p.sandbox.costOf(t) * 100) / 100, 0.78);
+  assert.strictEqual(Math.round(p.sandbox.netMoneyOf(t) * 100) / 100, 3.22);
+
+  const html = p.els.get('tlist').innerHTML;
+  assert.match(html, /before costs/);
+  assert.match(html, /After costs/);
+  assert.match(html, /\$3\.22/);
+  assert.match(html, /\$0\.78 commission on 1 contract at \$0\.78 each, in and out/);
+  assert.match(p.sandbox.tradesText(), /gross \$4\.00 and net \$3\.22 after \$0\.78 of commission/,
+    'the assistant is handed both, so it can never quote the flattering one');
+});
+
+test('the cost follows the contract count, and a missing count is one contract', async () => {
+  const p = await loadPage();
+  p.sandbox.COST.rate = 0.78;
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102, pv: 6, c: 3 });
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102, pv: 2 });
+  const three = p.sandbox.TRADES[0];
+  assert.strictEqual(p.sandbox.contractsOf(three), 3);
+  assert.strictEqual(Math.round(p.sandbox.costOf(three) * 100) / 100, 2.34, 'three round turns, not one');
+  assert.strictEqual(Math.round(p.sandbox.netMoneyOf(three) * 100) / 100, 9.66);
+  assert.strictEqual(p.sandbox.contractsOf(p.sandbox.TRADES[1]), 1,
+    'a micro is one contract when he does not say');
+  // A zero or a nonsense count must never quietly make the trade free.
+  assert.strictEqual(p.sandbox.contractsOf({ c: 0 }), 1);
+  assert.strictEqual(p.sandbox.contractsOf({ c: -4 }), 1);
+  assert.strictEqual(p.sandbox.contractsOf({ c: 'nonsense' }), 1);
+  assert.strictEqual(Math.round(p.sandbox.costOf({ c: 0 }) * 100) / 100, 0.78);
+});
+
+test('the journal shows what was kept, not just what the market paid', async () => {
+  const p = await loadPage();
+  p.sandbox.COST.rate = 0.78;
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102, pv: 2 });   // +$4 gross
+  logTrade(p, { su: 'Retest', dir: 'long', en: 100, st: 99, ex: 99, pv: 2 });   // -$2 gross
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(Math.round(s.netMoney * 100) / 100, 2, 'gross: +4 and -2');
+  assert.strictEqual(Math.round(s.costTotal * 100) / 100, 1.56, 'two round turns');
+  assert.strictEqual(Math.round(s.netAfter * 100) / 100, 0.44, 'and this is the honest one');
+  assert.strictEqual(s.afterN, 2, 'both closed trades carry a rate');
+
+  const html = p.sandbox.journalHtml();
+  assert.match(html, /After costs/);
+  assert.match(html, /\$0\.44/);
+  assert.match(html, /A backtest with no commission in it and a log with one are not the same trade/);
+});
+
+test('a trade with no point value is left out of the net, and the count travels with the total', async () => {
+  const p = await loadPage();
+  p.sandbox.COST.rate = 0.78;
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 102, pv: 2 });
+  logTrade(p, { su: 'Sweep', dir: 'long', en: 100, st: 99, ex: 103, pv: null });
+  const s = p.sandbox.journalStats();
+  assert.strictEqual(s.closed, 2);
+  assert.strictEqual(s.afterN, 1, 'only one of them can carry a net figure');
+  assert.match(p.sandbox.journalHtml(), /1 left out/,
+    'a total that quietly covers half the trades is a lie by omission');
+});
+
+test('the rules keep gross and net apart, and never let a backtest be a measurement', async () => {
+  const p = await loadPage();
+  const sys = p.sandbox.TRADE_SYS;
+  assert.match(sys, /Gross and net are different numbers and you never use the flattering one/);
+  assert.match(sys, /the net figure is what he kept/);
+  assert.match(sys, /Never treat a backtest as a measurement/);
+  assert.match(sys, /Never size a position and never invent a money figure/,
+    'the older rule is still there');
+});
+
+test('the rate he types is the rate that is saved and used', async () => {
+  const p = await loadPage();
+  const el = p.els.get('cRate');
+  el.value = '0.39';
+  el._on.input();
+  assert.strictEqual(p.sandbox.rateOf(), 0.39, 'his own number, not a default');
+  assert.match(p.stored['tsid.desk.cost'], /0\.39/, 'and it is kept on the device');
+  assert.match(p.els.get('cRateHint').textContent, /Counted at \$0\.39 a contract, in and out/);
+  el.value = '';
+  el._on.input();
+  assert.strictEqual(p.sandbox.rateOf(), null, 'clearing it goes back to gross rather than to zero');
+});
 
 test('the desk is behind the door, at both of its addresses', () => {
   for (const url of ['/desk', '/desk.html']) {

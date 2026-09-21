@@ -373,17 +373,16 @@ app.get('/desk.html', (req, res) => {
 
 // The Someday indicator, as text he can copy.
 //
-// 18 Sep 2026. Moving the script from this chat into TradingView's Pine editor
-// kept half-failing: the paste that "worked" left his own question on the end of
-// the last line, and TradingView answered with the only word it could see —
-// "Syntax error at input 'what'". Five hundred lines through a chat message is
-// the part that breaks, so the file gets its own address and he copies it out of
-// a browser instead.
+// 21 Sep 2026. Removed with the rest of the script on the 20th ("delete
+// everything with the code"), then brought back the next day when he asked for
+// it rebuilt properly: the swings and zones he asked for in the first place,
+// with no list of timeframes anywhere in it. It reads whatever chart he has
+// open, which is the only way a list can never be out of date.
 //
 // text/plain on purpose. express.static below would answer an unknown extension
 // with a download, and a .pine sitting in his Downloads folder is a file Windows
-// has no program for. The content is already public either way — static serves
-// the same file at /tradingview/Someday-Indicator.pine — so this only changes how
+// has no program for. The content is already public either way - static serves
+// the same file at /tradingview/Someday-Indicator.pine - so this only changes how
 // it arrives, not who can read it.
 app.get('/someday.pine', (req, res) => {
   res.type('text/plain').sendFile(path.join(__dirname, '..', 'tradingview', 'Someday-Indicator.pine'));

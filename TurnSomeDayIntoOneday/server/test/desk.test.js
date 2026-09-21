@@ -342,6 +342,30 @@ test('the rules read his own picture, and never answer one with Not provided', a
     'the page has to load the file, or the prompt it builds is the old one');
 });
 
+// ── a refusal says why ──────────────────────────────────────────────────────
+//
+// Jacques, 21 Sep 2026, chart attached: the answer area read "[object Object]".
+// On a refusal /api/chat hands back the AI provider's own error body, and that
+// body's `error` is an object, so escaping it printed the object. What he needs
+// on that screen is the sentence inside it - and words, always, never a brace.
+test('a refusal shows the sentence inside it, never [object Object]', async () => {
+  const p = await loadPage();
+  assert.strictEqual(p.sandbox.esc({ message: 'API key not valid' }), 'API key not valid',
+    'the message inside the object is the useful thing on screen');
+  assert.strictEqual(p.sandbox.esc({ error: { message: 'quota exceeded' } }), 'quota exceeded',
+    'including when the message is nested');
+  assert.doesNotMatch(p.sandbox.esc({}), /\[object Object\]/,
+    'an object with nothing readable in it still says something in words');
+
+  // And the whole way through the ask box, which is the path he was on.
+  p.setReply({ status: 400, body: { error: { message: 'API key not valid', code: 400 } } });
+  p.els.get('askQ').value = 'What does the feed say?';
+  await p.sandbox.ask();
+  const shown = p.els.get('askA').innerHTML;
+  assert.doesNotMatch(shown, /\[object Object\]/, 'nothing prints the object');
+  assert.match(shown, /API key not valid/, 'the real reason reaches him');
+});
+
 test('an empty desk still gives the read instead of opening with the setup list', async () => {
   const p = await loadPage();
   const text = String(p.sandbox.setupsText());

@@ -574,6 +574,17 @@ var SETUPS=load(K_SETUPS, []);
 if(!Array.isArray(SETUPS)) SETUPS=[];
 
 function esc(s){
+  /* 21 Sep 2026. A failed answer printed the literal words "[object Object]"
+     where the sentence should have been (Jacques's phone, chart attached). The
+     server hands the AI provider's own error body back on a refusal, and that
+     body's `error` is an object - {"message": "..."} - not a string. Nothing on
+     this page renders an object as itself any more: the message inside it is
+     shown, and if there is not one, a plain sentence is. Whatever else goes
+     wrong, what lands on the screen is words. */
+  if(s&&typeof s==='object'){
+    var m=s.message||s.msg||(s.error&&(s.error.message||s.error))||'';
+    s=(typeof m==='string'&&m)?m:'Something went wrong, and the reason did not come back with it.';
+  }
   return String(s==null?'':s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');

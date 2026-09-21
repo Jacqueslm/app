@@ -371,21 +371,21 @@ app.get('/desk.html', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'desk.html'));
 });
 
-// The Someday indicator, as text he can copy.
+// His frame rules as a TradingView strategy - the desk's backtest in a form
+// TradingView itself can run, because its tester holds years of bars where the
+// free feed here keeps weeks.
 //
-// 21 Sep 2026. Removed with the rest of the script on the 20th ("delete
-// everything with the code"), then brought back the next day when he asked for
-// it rebuilt properly: the swings and zones he asked for in the first place,
-// with no list of timeframes anywhere in it. It reads whatever chart he has
-// open, which is the only way a list can never be out of date.
+// 21 Sep 2026: the indicator scripts that used to sit at /someday.pine and
+// /someday-zones.pine were deleted on his word - "drop the indicator and delete
+// it, just wanted to backtest my logic". He had said it the turn before and it
+// had been left in place, so what is here now is only the thing he asked for:
+// his own rules, priced at what he pays.
 //
 // text/plain on purpose. express.static below would answer an unknown extension
 // with a download, and a .pine sitting in his Downloads folder is a file Windows
-// has no program for. The content is already public either way - static serves
-// the same file at /tradingview/Someday-Indicator.pine - so this only changes how
-// it arrives, not who can read it.
-app.get('/someday.pine', (req, res) => {
-  res.type('text/plain').sendFile(path.join(__dirname, '..', 'tradingview', 'Someday-Indicator.pine'));
+// has no program for.
+app.get('/someday-strategy.pine', (req, res) => {
+  res.type('text/plain').sendFile(path.join(__dirname, '..', 'tradingview', 'Someday-Strategy.pine'));
 });
 
 app.use(express.static(path.join(__dirname, '..')));

@@ -320,6 +320,30 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     </div>
   </div>
 
+  <!-- THE TEST.
+       Jacques, 21 Sep 2026: "make me a backtester with my trading logic."
+
+       His rules, entered, exited and priced, on the same bars the study above
+       loaded — no second call to the feed and nothing typed in twice. It runs
+       the frame's own rules as this page already states them, over every
+       timeframe at once, so he can see what the same rule did on the 5m and on
+       the 4h in the same bars.
+
+       It fills at the exact price of the level, the stop and the target, which
+       is the most generous reading of every trade in it: no spread, no
+       slippage, no fill he would not have got. That is why the figure it prints
+       is a ceiling and not an expectation, and the card says so in as many
+       words rather than leaving it to be read as what he would have kept. -->
+  <div class="sec">
+    <div class="sec-hd">Test it on the bars</div>
+    <div class="f">
+      <button class="txtbtn" id="btGo">Run my rules on these bars</button>
+      <div class="feedwhen" id="btMsg">Nothing tested yet. Load bars to study above, then run this: it enters and exits your own frame rules on the bars that came back and prices every trade with your commission.</div>
+      <div id="btOut"></div>
+      <div class="feedwhy">One contract, your own commission rate in and out, and a fill at the exact level, stop and target price on the bars. No spread, no slippage, no fill you may not have got — so every figure here is the best case, not what you would have kept. It is not a promise about the next trade and it is not a measurement of the market: it is what this version of your rules did in the bars the feed gave back.</div>
+    </div>
+  </div>
+
   <!-- WHAT IS IN FRONT OF HIM RIGHT NOW.
        Optional, and remembers itself, so it is filled once at the open of a
        session and then rides along with every question asked in it. Without it
@@ -1757,6 +1781,10 @@ function paintStudy(){
 }
 
 async function loadStudy(){
+  /* New bars mean the last test was run on different bars, so it is dropped
+     rather than left sitting beside a window it no longer describes. */
+  BTLAST=null;
+  if(typeof paintBacktest==='function') paintBacktest();
   var symEl=document.getElementById('fSym'), go=document.getElementById('studyGo');
   var sym=((symEl&&symEl.value)||'').trim()||'NQ';
   if(go) go.disabled=true;
@@ -1836,6 +1864,186 @@ function studyText(){
   return head.join('\n');
 }
 
+/* ── THE TEST: HIS RULES, ENTERED, EXITED AND PRICED ─────────────────────────
+   Jacques, 21 Sep 2026: "make me a backtester with my trading logic."
+
+   This is his logic, entered, exited and priced, on the same bars the study
+   loaded - no second call to the feed and nothing typed in twice. The rules are
+   the ones the frame block above already states as numbers:
+
+     1. A new LOWER LOW on the timeframe turns it down. The level is the swing
+        high that drop came from; the low is that lower low.
+     2. Only a CLOSE above the level cancels it, which is his own rule and the
+        one that has been costing him, so it is in here rather than assumed away.
+     3. Back at the level, that is the short. Nothing chases it.
+     4. The stop is one average bar above the level. A stop has to sit somewhere
+        and the rule for being wrong is the level itself, so that is the room it
+        is given and the card says so.
+     5. The target is the low the frame turned down on: the far side of the
+        range.
+     6. One contract, and his own commission rate in and out on every trade.
+
+   What it is NOT, and the page says all of it: no spread, no slippage, no fill
+   he might not have got, no bar the feed has not got back, and nothing typed in
+   from anywhere else. It fills at the exact price of the level, the stop and the
+   target, so every figure is the best case rather than what he would have kept.
+   It is not a measurement of the market and it is not a promise about the next
+   trade: it is what this version of his rules did in these bars. */
+var BT_TFS=['5m','15m','1h','4h'], BT_LOOK=20, BTLAST=null;
+
+/* One pass of his rules over one timeframe's bars. Pure arithmetic: hand it
+   candles and a commission rate and it hands back what came out, with the count
+   that goes with every figure. Nothing here fills a gap in with a guess - a
+   timeframe with too few bars to carry a swing is reported as that and nothing
+   else. */
+function backtest(sym, tf, candles, rate, wing){
+  var w=(wing==null?WING:wing);
+  var out={tf:tf, ok:false, why:'no bars came back', bars:0, from:null, to:null,
+           frames:0, cancelled:0, noRetrace:0, taken:0, closed:0, wins:0, losses:0, open:0,
+           grossPts:0, pv:pointValueOf(sym), rate:(rate==null?null:rate),
+           gross:null, cost:null, net:null, best:null, worst:null, trades:[]};
+  if(!candles||candles.length<w*2+5){ out.why='too few bars to carry a swing'; return out }
+  out.ok=true; out.bars=candles.length;
+  out.from=candles[0].t; out.to=candles[candles.length-1].t;
+  var sw=structure(candles, w).swings, at=barIndex(candles), i, j, k;
+  for(i=1;i<sw.length;i++){
+    if(sw[i].kind!=='L') continue;
+    var prevLow=null, lvl=null;
+    for(j=i-1;j>=0;j--){
+      if(!prevLow&&sw[j].kind==='L') prevLow=sw[j];
+      if(!lvl&&sw[j].kind==='H') lvl=sw[j];
+      if(prevLow&&lvl) break;
+    }
+    if(!prevLow||!lvl) continue;           /* nothing to set the level off */
+    if(!(sw[i].p<prevLow.p)) continue;     /* not a lower low: no frame */
+    var a=at[sw[i].t];
+    if(a===undefined) continue;
+    out.frames++;
+    var cancelled=false, entry=-1;
+    for(k=a+1;k<candles.length;k++){
+      if(candles[k].c>lvl.p){ cancelled=true; break }
+      if(candles[k].h>=lvl.p){ entry=k; break }
+    }
+    if(cancelled){ out.cancelled++; continue }   /* his rule: a close above ends it */
+    if(entry<0){ out.noRetrace++; continue }
+    var room=avgRange(candles.slice(Math.max(0,entry-BT_LOOK), entry));
+    if(room===null||!(room>0)) room=candles[entry].h-candles[entry].l;
+    var stop=(room>0)?(lvl.p+room):null, tgt=sw[i].p;
+    var exitPx=null, why=null;
+    for(k=entry;k<candles.length;k++){
+      if(stop!==null&&candles[k].h>=stop){ exitPx=stop; why='stop'; break }
+      if(candles[k].l<=tgt){ exitPx=tgt; why='target'; break }
+    }
+    var pts=(exitPx===null)?null:(lvl.p-exitPx);
+    out.taken++;
+    out.trades.push({t:candles[entry].t, level:lvl.p, low:tgt, stop:stop, ex:exitPx, why:why, pts:pts,
+                     bars:(exitPx===null?null:(k-entry))});
+    if(exitPx===null){ out.open++; continue }   /* still open: counted nowhere */
+    out.closed++;
+    out.grossPts+=pts;
+    if(pts>0) out.wins++; else out.losses++;
+    if(out.best===null||pts>out.best) out.best=pts;
+    if(out.worst===null||pts<out.worst) out.worst=pts;
+  }
+  if(out.closed>0){
+    if(out.pv!==null) out.gross=out.grossPts*out.pv;
+    if(out.rate!==null) out.cost=out.rate*out.closed;
+    if(out.gross!==null&&out.cost!==null) out.net=out.gross-out.cost;
+  }
+  return out;
+}
+/* The same rules over every timeframe at once, off the study's own bars. */
+function backtestRows(){
+  var sym=(FEED&&FEED.symbol)||'', rate=rateOf(), out=[], i;
+  for(i=0;i<BT_TFS.length;i++) out.push(backtest(sym, BT_TFS[i], studyBars(BT_TFS[i]), rate));
+  return out;
+}
+function paintBacktest(){
+  var out=document.getElementById('btOut');
+  if(!out) return;
+  if(!BTLAST){ out.innerHTML=''; return }
+  var h='', i;
+  for(i=0;i<BTLAST.length;i++){
+    var r=BTLAST[i];
+    h+='<div class="stcard"><div class="sthd"><b>'+esc(r.tf)+'</b><span class="sttrend">'+(r.taken?'your rules, entered and priced':'nothing to enter')+'</span></div>';
+    if(!r.ok){
+      h+=stRow('Bars','no '+esc(r.tf)+' bars came back for the test - '+esc(r.why));
+    }else{
+      h+='<div class="stsw">'+r.bars+' bars, '+esc(dayText(r.from))+' to '+esc(dayText(r.to))+'</div>';
+      h+=stRow('Frames','<b>'+r.frames+'</b> lower lows on this timeframe');
+      h+=stRow('No trade','<b>'+r.cancelled+'</b> cancelled by a close above the level, <b>'+r.noRetrace+'</b> that never came back to it');
+      h+=stRow('Trades','<b>'+r.taken+'</b> taken &middot; '+r.wins+' to target, '+r.losses+' stopped'+(r.open?(', '+r.open+' still open at the last bar'):''));
+      if(r.closed){
+        h+=stRow('Points','<b>'+(r.grossPts>=0?'+':'')+two(r.grossPts)+'</b> points over '+r.closed+' closed trades');
+        h+=stRow('Best / worst','<b>'+(r.best>=0?'+':'')+two(r.best)+'</b> points and <b>'+two(r.worst)+'</b> points');
+      }
+      if(r.pv===null){
+        h+=stRow('Money','no published contract size for '+esc(baseSym((FEED&&FEED.symbol)||''))+', so this is points only');
+      }else if(r.net!==null){
+        h+=stRow('Money','<b>'+esc(dollars(r.net))+'</b> after '+esc(dollars(r.cost))+' of commission on one contract ('+esc(dollars(r.gross))+' gross)');
+      }else if(r.gross!==null){
+        h+=stRow('Money',esc(dollars(r.gross))+' gross, and no net figure: no commission rate is set');
+      }
+      h+='<div class="feedwhy">Short at the level when price came back to it, stopped one average bar above it, target the low the frame turned down on. One contract.</div>';
+    }
+    h+='</div>';
+  }
+  out.innerHTML=h;
+}
+function btMsg(text, isErr){
+  var el=document.getElementById('btMsg');
+  if(!el) return;
+  el.textContent=text;
+  el.className='feedwhen'+(isErr?' err':'');
+}
+function runBacktest(){
+  if(!(STUDY&&STUDY.ok&&STUDY.timeframes)){
+    BTLAST=null; paintBacktest();
+    btMsg('Press Load bars to study first - the test runs on those bars and never fetches its own.', true);
+    return;
+  }
+  BTLAST=backtestRows();
+  paintBacktest();
+  var taken=0, closed=0, open=0, net=0, money=true, i;
+  for(i=0;i<BTLAST.length;i++){
+    taken+=BTLAST[i].taken; closed+=BTLAST[i].closed; open+=BTLAST[i].open;
+    if(BTLAST[i].net===null) money=false; else net+=BTLAST[i].net;
+  }
+  btMsg('Ran your frame rules on '+((FEED&&FEED.symbol)?FEED.symbol.toUpperCase():'this symbol')+' across the four timeframes: '
+    +taken+' trades taken, '+closed+' closed, '+open+' still open at the last bar.'
+    +(money?(' Net '+dollars(net)+' after commission.'):(rateOf()===null?' No commission rate is set, so the money is before costs.':'')),
+    false);
+}
+/* The test, in the assistant's instructions. Same house rules: every figure
+   carries its count, and the best case is never called the expectation. */
+function backtestText(){
+  var head=['HIS BACKTEST - his own frame rules, entered, exited and priced by this page on the bars the study loaded. It is the ONLY backtest that exists: there is no other one, no other sample and no result anywhere else on this page.'];
+  if(!BTLAST){
+    head.push('');
+    head.push('NOT RUN. He has not run it, so there is no result, no win rate and no figure to quote. If he asks what his rules did, say in one line that he has to load bars and press Run my rules on these bars.');
+    head.push('');
+    return head.join('\n');
+  }
+  head.push('');
+  for(var i=0;i<BTLAST.length;i++){
+    var r=BTLAST[i];
+    if(!r.ok){ head.push(r.tf+': NO BARS - '+r.why+'. Say so; do not fill it in from another timeframe.'); continue }
+    var line=r.tf+': '+r.bars+' bars ('+dayText(r.from)+' to '+dayText(r.to)+'), '+r.frames+' lower lows, '+r.cancelled+' cancelled by a close above the level, '+r.noRetrace+' that never came back to it, '+r.taken+' trades taken, '+r.wins+' to target, '+r.losses+' stopped';
+    if(r.open) line+=', '+r.open+' still open at the last bar and counted nowhere';
+    if(r.closed) line+=', '+two(r.grossPts)+' points gross over the '+r.closed+' closed trades (best '+two(r.best)+', worst '+two(r.worst)+')';
+    if(r.net!==null) line+=', net '+dollars(r.net)+' after '+dollars(r.cost)+' of commission on one contract';
+    else if(r.gross!==null) line+=', '+dollars(r.gross)+' gross with no net figure because no commission rate is set';
+    else line+=' and no money figure, because this symbol has no published contract size here';
+    head.push(line);
+  }
+  head.push('');
+  head.push('HOW TO READ IT: every trade is filled at the exact level, stop and target price on the bars that came back, one contract, with no spread and no slippage. That makes every figure the BEST CASE rather than what he would have kept, and it is a test of THIS version of his rules in THESE bars - not of the market, not of his rules as he trades them by hand, and nothing at all about the next trade.');
+  head.push('Quote the figures with their counts and the timeframe they came from. Never call one an edge, a win rate or a probability, never turn a losing result into him being wrong, never extrapolate a forward, and never invent a trade, a result or a timeframe that is not in this block.');
+  head.push('');
+  return head.join('\n');
+}
+document.getElementById('btGo').onclick=function(){ runBacktest() };
+
 /* The rules for the one chip that reads the study. Same house rules, plus the
    one that matters here: counts stay counts, and it ends in one change. */
 var STUDY_SYS=[
@@ -1894,7 +2102,7 @@ var DESK_SYS=[
 "- Never turn that verdict into a promise, a probability or a target, never supply a level when the block shows none, and do not apologise for wait - it is the answer most of the time and it is a complete answer.",
 "",
 'WHAT YOU NEVER DO',
-'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no backtest result, and no study of your own. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, the ones he typed himself, the counts and sums the JOURNAL block below already worked out, the counts in the STUDY block, which this page worked out itself from bars that loaded, and a price you can actually read in a picture he attached himself - and a number off a picture is always said to be off his screenshot, never passed off as a feed number. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. There is still no backtest on this page — never imply you ran one and never quote a result.',
+'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no backtest result, and no study of your own. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, the ones he typed himself, the counts and sums the JOURNAL block below already worked out, the counts in the STUDY block, which this page worked out itself from bars that loaded, and a price you can actually read in a picture he attached himself - and a number off a picture is always said to be off his screenshot, never passed off as a feed number. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. The only backtest that exists is the backtest block below, worked out from bars that loaded: quote its figures with their counts, and never imply any other test was run.',
 '2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down. Never say a reversal, a pullback or a continuation is coming, and never put a probability on one — that is a forecast and this page does not make them.',
 '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
 '4. Never size a position and never invent a money figure. Risk is the distance to his stop, in R or in points. He trades the micros — MNQ, MES, MGC and the rest — and the point value of one contract is in the CANDLES block and on the trades he wrote. Use it ONLY to repeat the money line in the JOURNAL block: never a balance, never an account size, never how many contracts to trade, and never what a trade could make.',
@@ -1902,8 +2110,10 @@ var DESK_SYS=[
 '6. If he has not told you what price is doing, ask one short question rather than answering round it. One question, not a list.',
 '7. Never tell him he is finished, hopeless, or no good at this. A bad read is a bad read, not a verdict on him.',
 '8. He already knows you are not his broker and not a licensed adviser, so do not open with a disclaimer or repeat one. Give him the honest read instead.',
-'9. The structure block, the session block, the frame block and the STUDY block are the only basis you have for structure and for timing. If any of them says it was not computed or not loaded, say you cannot read structure or timing rather than describing them from nowhere.',
+'9. The structure block, the session block, the frame block and the STUDY block are the only basis you have for structure and for timing. If any of them says it was not computed or not loaded, say you cannot read structure or timing rather than describing them from nowhere. The backtest block is the only basis you have for what his rules returned, and it is a test of this version of them in those bars, not of the market.',
 '10. A picture he sends is his own chart, and it is not a forecast. You may read shapes, levels and swings off it, and you may say what is too small, cut off or unlabelled to read. You may never quote a price off a picture as though it were a feed number, and never claim it is on a timeframe it does not label. When no picture is attached, say you cannot see his chart rather than describing one.',
+'',
+'HIS BACKTEST, IF HE HAS RUN IT. The page can enter his own frame rules on the bars that loaded - short at the level after a lower low, stopped one average bar above it, target the low the frame turned down on - and price every trade with the commission he typed. It fills at the exact price of every level, one contract, with no spread and no slippage, so what it prints is the best case and not what he kept. Quote it with its counts and the timeframe, say plainly what it cannot tell him, and never dress it up as an edge, a probability or what happens next.',
 '',
 'HOW YOU ANSWER',
 '- First line: the answer. Which of his setups this is, by the name he gave it, or that it is not one of them.',
@@ -1922,7 +2132,7 @@ function picText(){
   return 'A CHART PICTURE IS ATTACHED: a screenshot of his own broker chart, sent with this question. Read it as the chart in front of him, and let it outrank the CANDLES block - when the two disagree, his chart is what he is actually looking at. Say plainly when something in it is too small, blurry or cut off to read instead of guessing at it. Anything you read off it is read off a picture: say so, and do not pass it off as a feed number.';
 }
 function askSystem(extra){
-  return DESK_SYS+'\n\nMETHOD OVERRIDE: '+DESK_METHOD+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+frameText()+'\n'+sessionText()+'\n'+studyText()+'\n'+tradesText()+'\n'+journalText()+nowText()+'\n\n'+picText();
+  return DESK_SYS+'\n\nMETHOD OVERRIDE: '+DESK_METHOD+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+frameText()+'\n'+sessionText()+'\n'+studyText()+'\n'+backtestText()+'\n'+tradesText()+'\n'+journalText()+nowText()+'\n\n'+picText();
 }
 
 /* ---------- the setups list --------------------------------------------- */

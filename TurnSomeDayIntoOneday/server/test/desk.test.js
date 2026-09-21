@@ -311,8 +311,8 @@ test('the rules it answers under: no invented numbers, wrong-first, and the four
   // There IS a feed now. What matters is that the only numbers it may quote are
   // the ones that came back from it, and that the backtest still does not exist.
   assert.match(sys, /The ONLY numbers you may quote are the ones in the CANDLES block/);
-  assert.match(sys, /There is still no backtest on this page/);
-  assert.match(sys, /never imply you ran one and never quote a result/);
+  assert.match(sys, /The only backtest that exists is the backtest block below/);
+  assert.match(sys, /never imply any other test was run/);
   assert.match(sys, /If his own price disagrees with it, his chart wins/, 'the feed never overrules his own chart');
   assert.match(sys, /name the timeframe it came from/);
   // Wrong before right.
@@ -1968,7 +1968,11 @@ test('the house rules name the study, and it is still not a backtest', async () 
   assert.ok(desk.includes('the counts in the STUDY block, which this page worked out itself from bars that loaded'));
   assert.ok(desk.includes('no backtest result, and no study of your own'),
     'so the assistant may not run one of its own either');
-  assert.ok(desk.includes('There is still no backtest on this page — never imply you ran one and never quote a result'));
+  assert.ok(desk.includes('The only backtest that exists is the backtest block below, worked out from bars that loaded'),
+    'the backtest that does exist is named, and no other one is allowed');
+  assert.ok(desk.includes('The backtest block is the only basis you have for what his rules returned'));
+  assert.ok(desk.includes('It fills at the exact price of every level, one contract, with no spread and no slippage'),
+    'and the best case is never left to read as what he kept');
   assert.ok(desk.includes('the session block, the frame block and the STUDY block are the only basis you have for structure and for timing'));
 });
 
@@ -1978,4 +1982,126 @@ test('the study chip answers under the study rules, not the desk ones', () => {
   assert.ok(html.includes("sys==='study' ? askSystem(STUDY_SYS)"),
     'the one chip that reads the study is read under the study rules');
   assert.ok(html.includes("getElementById('studyGo').onclick=function(){ loadStudy() }"));
+});
+
+// ── the backtest ────────────────────────────────────────────────────────────
+//
+// Jacques, 21 Sep 2026: "make me a backtester with my trading logic." His logic
+// is the frame block's, as numbers: a new lower low turns the frame down; the
+// level is the swing high the drop came from; only a CLOSE above the level
+// cancels it; the short is the retrace back to that level; the stop is one
+// average bar above it; the target is the low the frame turned down on.
+//
+// The bars below are written out by hand so the answer is known before the
+// engine is asked: a swing high at 108, a low at 99, a higher high at 110 and a
+// LOWER low at 97.5 — so the level is 110 and the target 97.5 — then a retrace
+// that reaches 110 and closes under it (106), then a bar down to 96.
+function bars(rows) {
+  const base = Date.parse('2026-09-21T13:00:00Z');
+  return rows.map((r, i) => ({ t: base + i * 300000, o: r[0], h: r[1], l: r[2], c: r[3], v: 100 }));
+}
+const FRAME_BARS = [
+  [100, 101, 99, 100],
+  [101, 103, 100, 102],
+  [103, 108, 102, 106],
+  [105, 105, 101, 103],
+  [101, 102, 99, 100],
+  [100, 101, 100.5, 100.5],
+  [102, 104, 102, 103],
+  [104, 106, 103, 105],
+  [107, 110, 105, 108],
+  [106, 107, 104, 105],
+  [104, 105, 102, 103],
+  [102, 104, 100, 101],
+  [100, 103, 98, 99],
+  [99, 102, 97.5, 101],
+  [100, 101, 98, 100],
+  [99, 100, 98.5, 99],
+  [99, 104.5, 98, 100],
+  [104, 110.5, 105, 106],
+  [106, 107, 96, 97],
+];
+const withBar = (i, row) => FRAME_BARS.map((r, k) => (k === i ? row : r));
+
+test('his own rules, entered and priced: the retrace to the level, then the low', async () => {
+  const p = await loadPage();
+  const r = p.sandbox.backtest('MNQ', '5m', bars(FRAME_BARS), 0.78);
+  assert.ok(r.ok, 'the bars carry a swing');
+  assert.strictEqual(r.frames, 1, 'exactly one lower low in these bars');
+  assert.strictEqual(r.taken, 1, 'and it is taken');
+  assert.strictEqual(r.cancelled, 0, 'nothing cancelled it');
+  assert.strictEqual(r.noRetrace, 0);
+  assert.strictEqual(r.wins, 1, 'it reached the low the frame turned down on');
+  assert.strictEqual(r.losses, 0);
+  assert.ok(Math.abs(r.grossPts - 12.5) < 1e-9, '110 down to 97.5 is 12.5 points');
+  assert.strictEqual(r.trades[0].level, 110, 'short at the level the drop came from');
+  assert.strictEqual(r.trades[0].ex, 97.5, 'out at the frame low');
+  assert.strictEqual(r.trades[0].why, 'target');
+});
+
+test('the money is after his commission, and there is no net figure without one', async () => {
+  const p = await loadPage();
+  const paid = p.sandbox.backtest('MNQ', '5m', bars(FRAME_BARS), 0.78);
+  assert.strictEqual(paid.pv, 2, 'MNQ is two dollars a point on one contract');
+  assert.strictEqual(paid.gross, 25, '12.5 points on one micro');
+  assert.strictEqual(paid.cost, 0.78, 'one contract, in and out');
+  assert.ok(Math.abs(paid.net - 24.22) < 1e-9, 'gross minus the commission');
+  const blank = p.sandbox.backtest('MNQ', '5m', bars(FRAME_BARS), null);
+  assert.strictEqual(blank.net, null, 'no rate, no net figure — never a zero that reads as free');
+  assert.strictEqual(blank.cost, null);
+  assert.strictEqual(blank.gross, 25, 'the gross is still the market price');
+  const unknown = p.sandbox.backtest('ZZZ', '5m', bars(FRAME_BARS), 0.78);
+  assert.strictEqual(unknown.pv, null, 'a symbol with no published size gets no money figure');
+  assert.strictEqual(unknown.gross, null);
+  assert.strictEqual(unknown.net, null);
+});
+
+test('a close above the level ends the frame and there is no trade', async () => {
+  const p = await loadPage();
+  // The retrace bar closes at 110.5, above the level: his own rule, and the one
+  // that has been costing him, so it is tested rather than assumed away.
+  const r = p.sandbox.backtest('MNQ', '5m', bars(withBar(17, [104, 111.5, 105, 110.5])), 0.78);
+  assert.strictEqual(r.frames, 1);
+  assert.strictEqual(r.cancelled, 1, 'the frame is counted as cancelled');
+  assert.strictEqual(r.taken, 0, 'and nothing is entered on it');
+  assert.strictEqual(r.gross, null, 'so there is no money either');
+});
+
+test('a frame price never came back to is counted, not traded', async () => {
+  const p = await loadPage();
+  const rows = withBar(17, [104, 106, 103, 105]);
+  const r = p.sandbox.backtest('MNQ', '5m', bars(rows.map((x, i) => (i === 18 ? [103, 104, 100, 101] : x))), 0.78);
+  assert.strictEqual(r.taken, 0);
+  assert.strictEqual(r.noRetrace, 1, 'it never reached the level');
+  assert.strictEqual(r.cancelled, 0, 'and nothing closed above it');
+});
+
+test('a trade still open at the last bar is counted nowhere', async () => {
+  const p = await loadPage();
+  const r = p.sandbox.backtest('MNQ', '5m', bars(withBar(18, [106, 108, 100, 102])), 0.78);
+  assert.strictEqual(r.taken, 1, 'it was entered');
+  assert.strictEqual(r.open, 1, 'and it is still open');
+  assert.strictEqual(r.closed, 0, 'so it is in no count');
+  assert.strictEqual(r.wins + r.losses, 0);
+  assert.strictEqual(r.net, null, 'and in no money figure either');
+});
+
+test('no bars to test means it says so rather than printing a result', async () => {
+  const p = await loadPage();
+  assert.strictEqual(p.sandbox.BTLAST, null, 'nothing has been run');
+  assert.match(p.sandbox.backtestText(), /NOT RUN/, 'and the assistant is told there is no result');
+  p.sandbox.runBacktest();
+  assert.strictEqual(p.sandbox.BTLAST, null, 'running it with no bars leaves nothing behind');
+  assert.match(p.els.get('btMsg').textContent, /Press Load bars to study first/);
+  const short = p.sandbox.backtest('MNQ', '5m', bars(FRAME_BARS.slice(0, 4)), 0.78);
+  assert.ok(!short.ok && /too few bars/.test(short.why), 'and too few bars is a reason, not a guess');
+});
+
+test('the test is wired to the page, and priced in points when it has to be', async () => {
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.ok(html.includes('id="btGo"'), 'there is a button to run it');
+  assert.ok(html.includes("getElementById('btGo').onclick=function(){ runBacktest() }"));
+  assert.ok(html.includes('It is not a promise about the next trade and it is not a measurement of the market'),
+    'the card names what it is not');
+  assert.ok(html.includes('No spread, no slippage, no fill you may not have got'), 'on the card, where he reads it');
 });

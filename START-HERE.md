@@ -391,9 +391,8 @@ so no user can ever pay and get nothing.
 - **Branches reconciled:** `main` == deploy (`claude/vibe-code-uwxxlk`) ==
   `claude/status-update-rwf7zx` were made tree-identical; today's Play work is
   on main + deploy. If working on `status-update-rwf7zx`, MERGE MAIN FIRST.
-- **Three projects rescued onto `main`** from dying session branches (only
-  copies anywhere): `Trading/` (+ `.claude/agents/trade-checker.md`),
-  `TradeDesk/`, `LeadCatch/`. Secret-scanned clean before push.
+- **A project rescued onto `main`** from a dying session branch (its only copy
+  anywhere): `LeadCatch/`. Secret-scanned clean before push.
 - **Branch cleanup:** 9 branches verified safe to delete (Jacques's browser
   clicks — sessions get 403 on branch deletion); SHAs + the one KEEP branch
   (`claude/new-session-r8s2fg`, old-spelling app folder) in
@@ -401,7 +400,7 @@ so no user can ever pay and get nothing.
 - **CI:** `.github/workflows/twa-build.yml` exists but is PARKED (3 failed
   runs; bubblewrap rejects the runner's SDK path — unresolved, superseded by
   the local bat). CodeQL runs on pushes to main; one job failed on today's
-  push, unexamined — worth one look, likely the new Trading/ C# code.
+  push, unexamined — worth one look.
 - **GitHub/Google failure emails:** Jacques gets them because it's his repo
   and his console; sessions read and fix them. He does not need to act on them.
 

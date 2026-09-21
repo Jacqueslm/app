@@ -36,9 +36,6 @@ the branch now costs nothing.
 
 | branch | sha (for recovery) | rescued into |
 |---|---|---|
-| `claude/trading-bot-improvements-756gua` | `4215d483c954606f2e20e71b51656522872be56e` | `Trading/` (22 files) + `.claude/agents/trade-checker.md` |
-| `claude/day-trading-market-structure-8kzz7w` | `f59fd1fc16bf03daaf8b7f75fb5bb955a6d22d18` | superseded — its `Trading/` is an older copy of the above |
-| `claude/new-session-undhzr` | `65a5f58fcc65f5db0e91bea52c3fee3bb8f75941` | `TradeDesk/` (42 files) |
 | `claude/lead-generation-app-dbxl0w` | `ea4591b943235955a3317a62181986d7e42d1999` | `LeadCatch/` (18 files) |
 
 ## STILL THE ONLY COPY — do not delete this one
@@ -56,44 +53,24 @@ needs Jacques's call: rescue it under a clearly-dead name like
 `archive/TurnSomeDayIntoDayOne-2026-07/`, or leave the branch alone as the
 archive it already is. **Until he decides, the branch stays.**
 
-## The old trading system — deleted 14 Sep 2026
+## Eight branches deleted remotely, 14 Sep 2026
 
-Jacques asked for the whole old trading system gone, playbook included. Eight
-branches carried a copy of it (`Trading/`, `TradeDesk/`, `trading-bot/`) and all
-eight were deleted from the remote in one `git push --delete` from a Freebuff
-session. That session *can* delete refs — the 403 above was that session's own
-credential, not a GitHub limit.
-
-| deleted branch | sha (for recovery) | what it held |
-|---|---|---|
-| `claude/trading-bot-improvements-756gua` | `4215d483c954606f2e20e71b51656522872be56e` | `Trading/` (22 files) + `.claude/agents/trade-checker.md` |
-| `claude/day-trading-market-structure-8kzz7w` | `f59fd1fc16bf03daaf8b7f75fb5bb955a6d22d18` | `Trading/` (22 files) — older copy of the above |
-| `claude/new-session-undhzr` | `65a5f58fcc65f5db0e91bea52c3fee3bb8f75941` | `TradeDesk/` (42 files) |
-| `claude/document-scan-ocr-convert-n2jofh` | `31094938863db9392d239399f54480ef3cf8a4a8` | `TradeDesk/` + `Trading/` (78 files) |
-| `claude/start-here-2ujk0y` | `c50422bd7fde12f0efacc4cf0c69db2d438edaf4` | `TradeDesk/` + `Trading/` (64 files) |
-| `claude/status-update-rwf7zx` | `07343b400fc0a107a2004e57811458694584ab7b` | `TradeDesk/` + `Trading/` (64 files) |
-| `claude/video-creation-6rh8la` | `261179bd81e98e544b7775718d206e21eeaa8a7f` | `TradeDesk/` + `Trading/` (77 files) |
-| `freebuff-marketing` | `db5b30749abc942694b5785c4f3a03b439d3e84a` | `TradeDesk/` + `Trading/` + `trading-bot/` (81 files) |
-
-Restore any of them with `git push origin <sha>:refs/heads/<branch>`.
-
-Also removed at the same time: `.claude/agents/trade-checker.md` on `main` — it
-graded trades against `Trading/PLAYBOOK.md`, which no longer exists anywhere.
+They were deleted from the remote in one `git push --delete` from a Freebuff
+session — that session *can* delete refs, so the 403 above was that session's own
+credential and not a GitHub limit. The record of what each one held, and its sha
+for recovery, is in this file's git history.
 
 **Tags:** five tags from 6 Sep 2026 — `characters`, `crowd`, `fightermoves`,
-`suzie`, `trainers` — pointed at game/3D handoff commits whose trees included
-`Trading/` and `TradeDesk/`. Jacques wanted the fighters kept, so the tags were
-kept and the trading folders taken out of them: each tag now points at the same
-snapshot minus `Trading/`, `TradeDesk/`, `trading-bot/` and
-`.claude/agents/trade-checker.md`, and every fighter file is untouched (69 and
-77 files in `img/fight` on the two snapshots, unchanged).
+`suzie`, `trainers` — pointed at game/3D handoff commits. Jacques wanted the
+fighters kept, so the tags were kept and re-pointed at the same snapshots with
+every fighter file untouched (69 and 77 files in `img/fight` on the two
+snapshots, unchanged).
 
 They were replaced by deleting each tag and pushing a new one — a force update
 is refused for this credential, a delete and a create are not. Old tag commits,
 for recovery: `characters` `fightermoves` `suzie` `a88d7e7a4392186d8b2e76d10efb59a43220525d`,
 `crowd` `trainers` `77a02d067104c3a56c9f7b16ffbc4750d213f963`.
 
-Note that only the *tips* were cleaned. The trading folders still sit in those
-snapshots' parent commits, and on GitHub unreachable commits survive until
-support purges them, so this is "gone from everything you can open", not
+Note that only the *tips* were cleaned. On GitHub, unreachable commits survive
+until support purges them, so this was "gone from everything you can open", not
 "gone from the server's disk".

@@ -86,9 +86,7 @@ function doorMiddleware(allows) {
 //
 // The pages that have to stay open, and why. Each one is either the app, or
 // something Google Play already points at, or a link that lands in somebody's
-// phone from an email. (/market-maker.html is the one entry that is on this list
-// only so it can reach its own route — that route is where it is judged, and it
-// turns away anybody not signed in, exactly as /key does.)
+// phone from an email.
 const OPEN_PAGES = [
   '/',                  // redirects to /app, so an old bookmark still works
   '/app',               // the app
@@ -100,22 +98,12 @@ const OPEN_PAGES = [
   '/delete-account.html',
   '/letter.html',       // the page a letter link opens
   '/game3d.html',       // the 3D fight inside The Fight tab (added 13 Sep 2026)
-  '/market-maker.html', // the trading practice game — signed in and on the list,
-                        // gated at its own route in server.js (shut 14 Sep 2026)
-  // The herb library and the tax centre (15 Sep 2026), the same shape as the
-  // trading game: private, listed here only so the request can reach the route
-  // that judges it. Both addresses each, because each is a real FILE as well as
-  // a clean URL, and static would otherwise serve the file name unguarded.
+  // The herb library and the tax centre (15 Sep 2026): private, listed here
+  // only so the request can reach the route that judges it. Both addresses
+  // each, because each is a real FILE as well as a clean URL, and static would
+  // otherwise serve the file name unguarded.
   '/herbs', '/herbs.html',
   '/tax', '/tax.html',
-  // The trading school (15 Sep 2026) — the same shape again: private, and
-  // listed here only so the request reaches the route that judges it. Both
-  // addresses, because the page is a real FILE as well as a clean URL.
-  '/school', '/school.html',
-  // The Trading Desk (17 Sep 2026) — the same shape a fourth time: private,
-  // and listed here only so the request can reach the route that judges it.
-  // Both addresses, because it is a real FILE as well as a clean URL.
-  '/desk', '/desk.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the

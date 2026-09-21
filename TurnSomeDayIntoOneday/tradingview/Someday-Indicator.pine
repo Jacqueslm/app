@@ -1,19 +1,21 @@
 //@version=5
-// Someday - swings and structure breaks
+// Someday - swings
 //
-// Two things, on the timeframe in front of you:
-//   1. the swing points, read from the candle BODY only - a wick above the last
-//      body high is not a high;
-//   2. a mark on the bar where a candle CLOSES through the last swing high or
-//      low, so you can see structure break as it happens.
+// One thing, on the timeframe in front of you: the swing points, read from the
+// candle BODY only. A wick above the last body high is not a high and a wick
+// below the last body low is not a low.
 //
-// Nothing is drawn across the chart. No lines, no box of numbers, no shaded
-// area, no time window. The only marks are the letters on the swings and the
-// break that follows them.
+// The letters are against the last swing of the same kind:
+//   HL higher low, LH lower high - those two need nothing else, a low that
+//   stops short of the last low is a higher low on its own;
+//   HH higher high, LL lower low - those two are only written once a candle
+//   has CLOSED through the level being watched. Dipping past a low and closing
+//   back above it is not a lower low, so no letter is written and the old low
+//   stays the one that matters.
 //
-// It never asks which timeframe to look at. It reads the chart you have open, so
-// the 5 second chart and the daily chart both work, with nothing to list and
-// nothing to keep in step by hand.
+// Nothing else is drawn. No lines, no words, no box of numbers, no shaded area,
+// no time window. It reads the chart you have open, so the 5 second chart and
+// the daily chart both work, with nothing to list and nothing to keep in step.
 
 indicator("Someday - swings", shorttitle="Someday", overlay=true, max_labels_count=500)
 
@@ -21,12 +23,8 @@ indicator("Someday - swings", shorttitle="Someday", overlay=true, max_labels_cou
 // Settings
 // -----------------------------------------------------------------------------
 showSwings = input.bool(true, "Show the swing points", group="Swings")
-swingLen = input.int(2, "Swing length", minval=1, maxval=20, tooltip="Bars either side a candle body has to beat to count as a swing. One number drives the letters and the breaks, so they can never disagree.", group="Swings")
+swingLen = input.int(2, "Swing length", minval=1, maxval=20, tooltip="Bars either side a candle body has to beat to count as a swing. One number drives every letter on the chart.", group="Swings")
 swingCol = input.color(color.gray, "Swing colour", group="Swings")
-
-showBreaks = input.bool(true, "Mark the structure breaks", group="Breaks")
-breakUpCol = input.color(#089981, "Break up colour", group="Breaks")
-breakDownCol = input.color(#f23645, "Break down colour", group="Breaks")
 
 // -----------------------------------------------------------------------------
 // The swings
@@ -39,51 +37,46 @@ bodyBottom() => math.min(open, close)
 swingHigh = ta.pivothigh(bodyTop(), swingLen, swingLen)
 swingLow = ta.pivotlow(bodyBottom(), swingLen, swingLen)
 
-// The letters are against the last swing of the same kind: HH higher high, LH
-// lower high, HL higher low, LL lower low. The first of a kind has nothing to
-// compare with, so it keeps its bare letter rather than a name it has not earned.
+// The last high and the last low that are still standing, and whether a candle
+// has closed through each of them since. A close is the only thing that counts.
 var float namedHigh = na
 var float namedLow = na
+var bool highBroken = false
+var bool lowBroken = false
 
+if barstate.isconfirmed and not na(namedHigh) and close > namedHigh
+    highBroken := true
+
+if barstate.isconfirmed and not na(namedLow) and close < namedLow
+    lowBroken := true
+
+// A high that stops short of the last high is a lower high on its own. A high
+// above the last one is only a higher high once a candle has closed through the
+// last one. Until then nothing is written and the old high stays the level.
 if showSwings and not na(swingHigh)
-    highName = na(namedHigh) ? "H" : swingHigh > namedHigh ? "HH" : "LH"
-    label.new(bar_index - swingLen, swingHigh, highName, style=label.style_label_down, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
-    namedHigh := swingHigh
+    string highName = na
+    if na(namedHigh)
+        highName := "H"
+    else if swingHigh < namedHigh
+        highName := "LH"
+    else if highBroken
+        highName := "HH"
+    if not na(highName)
+        label.new(bar_index - swingLen, swingHigh, highName, style=label.style_label_down, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
+        namedHigh := swingHigh
+        highBroken := false
 
+// The same, the other way up. The first swing of each kind has nothing to
+// compare with, so it keeps a bare H or L.
 if showSwings and not na(swingLow)
-    lowName = na(namedLow) ? "L" : swingLow > namedLow ? "HL" : "LL"
-    label.new(bar_index - swingLen, swingLow, lowName, style=label.style_label_up, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
-    namedLow := swingLow
-
-// -----------------------------------------------------------------------------
-// Structure
-// -----------------------------------------------------------------------------
-// The last confirmed swing high and the last confirmed swing low are the two
-// levels being watched. Nothing is drawn for them, so the chart stays clear
-// until one of them actually goes.
-var float upLevel = na
-var float downLevel = na
-var int upBrokenAt = na
-var int downBrokenAt = na
-
-if not na(swingHigh)
-    upLevel := swingHigh
-    upBrokenAt := na
-
-if not na(swingLow)
-    downLevel := swingLow
-    downBrokenAt := na
-
-// A break is counted once per level, on a finished candle, and only on a close.
-// The level is not watched again until the next swing of the same kind is
-// confirmed, so a run of candles through the same price is one break and not
-// five. The mark sits on the bar that did it, at the price that was given up.
-if barstate.isconfirmed and not na(upLevel) and na(upBrokenAt) and close > upLevel
-    upBrokenAt := bar_index
-    if showBreaks
-        label.new(bar_index, upLevel, "BROKE UP", style=label.style_label_down, color=breakUpCol, textcolor=color.white, size=size.small)
-
-if barstate.isconfirmed and not na(downLevel) and na(downBrokenAt) and close < downLevel
-    downBrokenAt := bar_index
-    if showBreaks
-        label.new(bar_index, downLevel, "BROKE DOWN", style=label.style_label_up, color=breakDownCol, textcolor=color.white, size=size.small)
+    string lowName = na
+    if na(namedLow)
+        lowName := "L"
+    else if swingLow > namedLow
+        lowName := "HL"
+    else if lowBroken
+        lowName := "LL"
+    if not na(lowName)
+        label.new(bar_index - swingLen, swingLow, lowName, style=label.style_label_up, color=color.new(color.black, 100), textcolor=swingCol, size=size.tiny)
+        namedLow := swingLow
+        lowBroken := false

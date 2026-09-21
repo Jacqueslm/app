@@ -40,7 +40,7 @@ function topCommas(list) {
 test('the file is a Pine v5 script and starts by saying so', () => {
     const lines = read().split('\n');
     assert.strictEqual(lines[0].trim(), '//@version=5');
-    assert.match(lines[1], /^\/\/ Someday - swings and structure breaks/);
+    assert.match(lines[1], /^\/\/ Someday - swings/);
 });
 
 test('the script is plain ASCII and has no tabs', () => {
@@ -81,7 +81,7 @@ test('the top level does not redeclare a name', () => {
     });
     // Smaller on purpose: the box, the five timeframe rows and the ten drawn
     // levels are gone, so there are fewer top-level names to redeclare.
-    assert.ok(seen.size >= 10);
+    assert.ok(seen.size >= 5);
 });
 
 test('the script stays small enough to read at a glance', () => {
@@ -151,7 +151,7 @@ test('the script reads the chart it is on, so every timeframe works', () => {
 // used the setting, and the step line came from the 10-bar zone structure. They
 // could not agree, which is what "the highs and lows don't line up" meant.
 // They agree now because there is one definition, on one number.
-test('one swing length drives the letters, the two levels and the breaks', () => {
+test('one swing length drives every letter on the chart', () => {
     const text = read();
     assert.match(text, /ta\.pivothigh\(bodyTop\(\), swingLen, swingLen\)/);
     assert.match(text, /ta\.pivotlow\(bodyBottom\(\), swingLen, swingLen\)/);
@@ -173,15 +173,6 @@ test('swings are read from the candle body, never from a wick', () => {
     assert.doesNotMatch(text, /ta\.lowest\(/);
 });
 
-// "Closed candles breaking structure." A level goes when a candle closes past
-// it, and only then, so the break test reads the close and waits for the bar to
-// be finished before it counts.
-test('a level is only taken out by a candle that closes through it', () => {
-    const text = read();
-    assert.match(text, /barstate\.isconfirmed and not na\(upLevel\) and na\(upBrokenAt\) and close > upLevel/);
-    assert.match(text, /barstate\.isconfirmed and not na\(downLevel\) and na\(downBrokenAt\) and close < downLevel/);
-});
-
 // The shaded supply and demand boxes, their retracement levels and the
 // time-based ranges were taken off: they were read as too busy and the time
 // ranges did not look right. This pins them gone.
@@ -195,25 +186,43 @@ test('the boxes and the time windows are off the chart', () => {
     assert.doesNotMatch(text, /max_boxes_count/);
 });
 
-// "I want to see when structure is broken." A break is marked on the bar that
-// made it, in the direction it went, and once per level: the level is not raised
-// again until the next swing of the same kind is confirmed, so a run of candles
-// through one level is one break rather than five.
-test('a break is marked on the chart, once per level', () => {
+// "Remove the words, just keep HH HL LL LH." The BROKE UP and BROKE DOWN word
+// labels are gone, so the four letters are the only thing written on the chart.
+test('the words are gone and only the four letters are written', () => {
     const text = read();
-    assert.match(text, /showBreaks = input\.bool/);
-    assert.match(text, /label\.new\(bar_index, upLevel, "BROKE UP"/);
-    assert.match(text, /label\.new\(bar_index, downLevel, "BROKE DOWN"/);
-    assert.match(text, /upBrokenAt := bar_index/);
-    assert.match(text, /downBrokenAt := bar_index/);
-    assert.match(text, /na\(upBrokenAt\)/);
-    assert.match(text, /na\(downBrokenAt\)/);
+    assert.doesNotMatch(text, /BROKE/);
+    assert.doesNotMatch(text, /showBreaks/);
+    for (const letter of ['"HH"', '"LH"', '"HL"', '"LL"']) assert.ok(text.includes(letter), `${letter} is written`);
+    // Exactly two things are ever written: one letter above a swing high and one
+    // below a swing low.
+    assert.strictEqual((text.match(/label\.new\(/g) || []).length, 2);
 });
 
-// "No lines." Nothing is drawn across the chart at all now: the two watched
-// levels are kept in the script and never drawn, so the swing letters and the
-// break marks are the only things on top of the candles.
-test('nothing is drawn across the chart, only the letters and the break marks', () => {
+// "Why is that a LL when you have not broken the HL?" A low that dips under the
+// last low and closes back above it is not a lower low - the old low is still
+// standing. LL is only written once a candle has closed through the low being
+// tracked, and the same is true of HH on the high side. HL and LH need no such
+// proof: a low that stops short of the last low is a higher low by itself.
+test('a lower low and a higher high wait for a candle to close through the level', () => {
+    const text = read();
+    assert.match(text, /barstate\.isconfirmed and not na\(namedLow\) and close < namedLow/);
+    assert.match(text, /barstate\.isconfirmed and not na\(namedHigh\) and close > namedHigh/);
+    assert.match(text, /lowBroken := true/);
+    assert.match(text, /highBroken := true/);
+    // The two letters are behind the break test and nothing else.
+    assert.match(text, /else if lowBroken\n\s+lowName := "LL"/);
+    assert.match(text, /else if highBroken\n\s+highName := "HH"/);
+    // The letter that needs no proof is the plain comparison against the last low.
+    assert.match(text, /else if swingLow > namedLow\n\s+lowName := "HL"/);
+    assert.match(text, /else if swingHigh < namedHigh\n\s+highName := "LH"/);
+    // A swing that cannot be named yet writes nothing and leaves the old level
+    // in place, so the level is not moved by a dip that never closed through it.
+    assert.match(text, /if not na\(lowName\)/);
+    assert.match(text, /if not na\(highName\)/);
+});
+
+// "No lines." Nothing is drawn across the chart at all, in any form.
+test('nothing is drawn across the chart', () => {
     const text = read();
     assert.doesNotMatch(text, /line\./);
     assert.doesNotMatch(text, /plot\.style_stepline/);
@@ -221,7 +230,7 @@ test('nothing is drawn across the chart, only the letters and the break marks', 
     assert.doesNotMatch(text, /hline\(/);
     assert.doesNotMatch(text, /fill\(/);
     assert.match(text, /label\.new\(bar_index - swingLen, swingHigh, highName/);
-    assert.match(text, /label\.new\(bar_index, upLevel, "BROKE UP"/);
+    assert.match(text, /label\.new\(bar_index - swingLen, swingLow, lowName/);
 });
 
 test('the copy route still serves this script as plain text', () => {

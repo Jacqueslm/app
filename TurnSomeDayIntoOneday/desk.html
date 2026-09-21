@@ -526,6 +526,11 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
      server. See vendor/lightweight-charts/README.md for why, and how to update
      it. If this file ever fails to arrive the chart says so and draws nothing. -->
 <script src="/vendor/lightweight-charts/5.2.1/lightweight-charts.standalone.production.js"></script>
+<!-- 21 Sep 2026. The assistant's instructions, with the three lines that told
+     it to withhold a read fixed: he sent a picture of his own chart and got back
+     "Entry: Not provided." defer, so it runs after the page's own script has
+     defined DESK_SYS and picText. See the file's own header. -->
+<script defer src="/desk-assistant.js"></script>
 <script>
 /* ---------------------------------------------------------------------------
    THE DESK — 17 Sep 2026.
@@ -597,7 +602,7 @@ var HOLD={hold:'Hold the move',scalp:'Scalp it',either:'Either, depends on the 1
    and a model reads a labelled paragraph better than a brace of keys. Nothing
    is added to what he wrote — no interpretation, no invented level. */
 function setupsText(){
-  if(!SETUPS.length) return 'HE HAS NOT WRITTEN ANY SETUPS YET. Say so in the first line and answer nothing else as if one of his setups matched.';
+  if(!SETUPS.length) return 'HE HAS NOT WRITTEN ANY SETUPS YET. Do not open with that and do not let it shorten the answer: give the full read from whatever he sent, and say in ONE short line, after that read, that it does not match a named setup only because he has not written any down yet. Never present it as one of his setups.';
   var out=['HIS SETUPS, in his own words. These are the only ones that count. Do not rename them, do not merge two of them, and do not invent a new one.',''];
   for(var i=0;i<SETUPS.length;i++){
     var s=SETUPS[i];
@@ -628,7 +633,14 @@ function nowText(){
   out.push('Previous confirmed target: '+(plan.target===null?'NOT GIVEN':two(plan.target)));
   out.push(riskGateText(plan,m));
   out.push('');
-  if(!m||!r) out.push('He has not filled this in properly. ASK him for the missing line before you answer, and give no levels in that first reply.');
+  if(!m||!r){
+    // 21 Sep 2026. Jacques sent a chart screenshot and asked, without filling any
+    // of this in, and got back a list of "Not provided" lines. The old rule here
+    // said to ask for the missing line and give no levels at all. A picture he
+    // attached IS the missing line, so the picture now wins over the empty form.
+    if(PIC) out.push('He has not filled this in on the page, BUT HE ATTACHED A CHART PICTURE WITH THE QUESTION. That picture is the answer to the lines above: read the chart in it and answer from it - the levels you can actually see, each one said to be off his screenshot. Do not ask him to fill the form in first, and do not leave a level line blank just because this block is blank. After the read, ask at most one short question, and only about something genuinely unreadable in the picture.');
+    else out.push('He has not filled this in and no picture came with the question, so there is nothing to read. ASK him for the missing line before you answer, and give no levels in that first reply. One question, not a list.');
+  }
   return out.join('\n');
 }
 function riskGateText(plan, market){

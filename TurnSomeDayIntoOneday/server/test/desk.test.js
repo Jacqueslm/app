@@ -129,6 +129,13 @@ async function loadPage(opts) {
   sandbox.confirm = () => false;
   vm.createContext(sandbox);
   vm.runInContext(inlineScript(PAGE), sandbox, { filename: 'desk.html' });
+  // The page loads its assistant patch with <script defer src=...>, and defer
+  // means after the page has parsed — so after the page's own script, here as in
+  // a browser. Skipping it would test a prompt no phone ever gets.
+  const patch = path.join(ROOT, 'desk-assistant.js');
+  if (fs.existsSync(patch)) {
+    vm.runInContext(fs.readFileSync(patch, 'utf8'), sandbox, { filename: 'desk-assistant.js' });
+  }
   // The page loads its candles on open. Let that one request settle before the
   // test touches anything, so nothing it does can race with the open.
   await new Promise((done) => setImmediate(done));
@@ -191,7 +198,12 @@ test('an empty desk says it is empty instead of inventing a setup', async () => 
   assert.strictEqual(p.sandbox.SETUPS.length, 0, 'a fresh desk starts with nothing written');
   const text = p.sandbox.setupsText();
   assert.match(text, /NOT WRITTEN ANY SETUPS YET/);
-  assert.match(text, /answer nothing else as if one of his setups matched/);
+  // 21 Sep 2026: it used to say "answer nothing else as if one of his setups
+  // matched", which on a phone came out as opening the reply with the fact that
+  // he has not written a setup down yet. The read comes first now; that line is
+  // one short line after it.
+  assert.match(text, /Do not open with that and do not let it shorten the answer/);
+  assert.doesNotMatch(text, /Say so in the first line/);
   assert.strictEqual(p.els.get('list').innerHTML, '', 'and the list is empty, not a placeholder setup');
   assert.strictEqual(p.els.get('none').style.display, 'block', 'so the page asks him to write one');
 });
@@ -292,13 +304,60 @@ test('a chart picture rides with the question, and the assistant is told it is t
   assert.match(p.chats[1].body.system[0].text, /NO CHART PICTURE IS ATTACHED/);
 });
 
+// ── the picture is the answer ───────────────────────────────────────────────
+//
+// Jacques, 21 Sep 2026, his own 4h chart on screen with a screenshot of it
+// attached: "The assistant in not helpful at all." What came back was a column of
+// "Not provided" lines. The instructions had told it to ask for the missing line
+// and give no levels at all in that first reply, and the note about a picture
+// never said that the picture he sent WAS the missing line. Both were wrong and
+// both are checked here, because this is the exact complaint and it must not come
+// back by a later edit to the prompt.
+test('a picture he sends is the answer, not a reason to withhold the read', async () => {
+  const p = await loadPage();
+  p.sandbox.PIC = { data: 'QUJD', media_type: 'image/jpeg' };
+  const sent = p.sandbox.askSystem();
+  assert.match(sent, /BUT HE ATTACHED A CHART PICTURE WITH THE QUESTION/,
+    'an empty form and a real picture is not an empty question');
+  assert.match(sent, /HE SENT IT BECAUSE HE WANTS THE READ OUT OF IT/);
+  assert.match(sent, /give him the Entry, the Wrong if and the Target you can read in it/);
+
+  // With no picture at all, asking for the missing line is still the right answer.
+  p.sandbox.PIC = null;
+  const none = p.sandbox.askSystem();
+  assert.match(none, /ASK him for the missing line before you answer, and give no levels in that first reply/);
+  assert.doesNotMatch(none, /HE SENT IT BECAUSE HE WANTS THE READ/);
+});
+
+test('the rules read his own picture, and never answer one with Not provided', async () => {
+  const p = await loadPage();
+  const sys = String(p.sandbox.DESK_SYS);
+  assert.match(sys, /read the invalidation you can see in his picture and say it is off his screenshot/,
+    'where he is wrong is still first, and now it can come off his chart');
+  assert.match(sys, /read it off the picture he attached and answer from it/);
+  assert.match(sys, /the read IS the answer/);
+  assert.match(sys, /Never answer a picture with Not provided on its own/);
+  assert.match(sys, /never leave the Entry, Wrong if or Target lines out because the form on the page is empty/);
+  assert.match(fs.readFileSync(PAGE, 'utf8'), /<script defer src="\/desk-assistant\.js">/,
+    'the page has to load the file, or the prompt it builds is the old one');
+});
+
+test('an empty desk still gives the read instead of opening with the setup list', async () => {
+  const p = await loadPage();
+  const text = String(p.sandbox.setupsText());
+  assert.match(text, /NOT WRITTEN ANY SETUPS YET/);
+  assert.match(text, /Do not open with that and do not let it shorten the answer/);
+  assert.doesNotMatch(text, /Say so in the first line/,
+    'the first line is the read, not the fact that he has not written a setup down yet');
+});
+
 test('the assistant is told what it cannot know, and to ask instead of filling it in', async () => {
   const p = await loadPage();
   const system = p.sandbox.askSystem();
   // The chart block was left empty. A model with no prices and no instruction
   // would happily produce levels; this is the instruction that stops it.
   assert.match(system, /Market: NOT SAID/);
-  assert.match(system, /has not filled this in properly/);
+  assert.match(system, /has not filled this in and no picture came with the question/);
   assert.match(system, /ASK him for the missing line before you answer, and give no levels in that first reply/);
 });
 

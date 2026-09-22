@@ -70,7 +70,11 @@ test('/api/ai-status can only ever answer gemini or none', () => {
     'no model named unless there is a key to call it with - otherwise it reports a provider it cannot reach');
 });
 
-test('The Key sits on the same provider as Friendly', () => {
+test('the desk and The Key sit on the same provider as Friendly', () => {
+  const desk = fs.readFileSync(path.join(__dirname, '..', '..', 'desk.html'), 'utf8');
+  assert.match(desk, /fetch\('\/api\/chat'/,
+    'the desk answers through the same route, so it inherits the same single provider');
+  assert.doesNotMatch(liveCode(desk), VENDOR, 'a page must not name a provider the server no longer calls');
   const key = fs.readFileSync(path.join(__dirname, '..', 'key-reading-route.js'), 'utf8');
   assert.match(key, /generativelanguage\.googleapis\.com/);
   assert.doesNotMatch(liveCode(key), VENDOR);

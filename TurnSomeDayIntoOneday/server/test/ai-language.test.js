@@ -1,9 +1,9 @@
 // Every AI in this app writes in English.
 //
-// Jacques, 15 Sep 2026: "I'm not Chinese" — one of the prompts came back
+// Jacques, 15 Sep 2026: "I'm not Chinese" — one of the four prompts came back
 // in another language, and the reason was that none of them had ever been told
-// which language to write in. Separate prompts are separate chances to drift,
-// so the rule is pinned in every one of them here rather than in one.
+// which language to write in. Four separate prompts, four separate chances to
+// drift, so the rule is pinned in all four here rather than in one.
 //
 // This is a prompt test, not a model test: it cannot prove the model obeys. It
 // proves the instruction is in the bytes that actually get sent, which is the
@@ -71,6 +71,17 @@ test('both reference ask boxes are told to answer in English', () => {
     const rules = askRules(f);
     assert.match(rules, /- In English, always\./, `${f} carries the rule as its own bullet`);
   });
+});
+
+test('the Trading Desk assistant is told to answer in English', () => {
+  // The fifth AI in the app, added 17 Sep 2026 with the desk. Two things are
+  // checked in the same place as the other four: the language rule, and the
+  // lines that must survive any later rewording of this prompt — on a trading
+  // page the ones that matter are the invented number and the verdict on him.
+  const rules = askRules('desk.html', 'DESK_SYS');
+  assert.match(rules, /Plain English, always\./, 'the desk carries the rule as its own bullet');
+  assert.match(rules, /Never invent a number/, 'and still refuses to invent a price or a statistic');
+  assert.match(rules, /Never tell him he is finished/, 'and never tells him he is finished');
 });
 
 test('the pages keep the rules that were there before the language rule', () => {

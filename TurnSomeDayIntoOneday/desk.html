@@ -1,0 +1,3028 @@
+<!-- trading desk:private -->
+<!-- Method note: Daily/4h context and origin; 1h bridge; 15m/5m path; 1m/5-second execution refinement. A 4h LL can permit a temporary 15m/5m HH-HL long back to the prior confirmed high or 4h lower-high area. Change back to short only after LH/LL confirms. The 1:1 gate compares entry-to-invalidation with entry-to-previous-target; if reward is smaller, wait. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="cache-control" content="no-cache, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Trading Desk — private</title>
+<meta name="theme-color" content="#0f0c29">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0c29'/%3E%3Cpath d='M16 40h32M16 24h32M22 44V20M42 44V20' stroke='%237ee8a2' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.18);
+  --acc:#534AB7;--acc-t:#3C3489;--acc-b:#EEEDFE;
+  --ok:#E1F5EE;--ok-t:#085041;
+  --warn:#FAEEDA;--warn-t:#633806;
+  --red:#FCEBEB;--red-t:#7A1F1F;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,.09);--bdr2:rgba(255,255,255,.18);
+  --acc:#AFA9EC;--acc-t:#AFA9EC;--acc-b:#26215C;
+  --ok:#04342C;--ok-t:#5DCAA5;
+  --warn:#2e1f05;--warn-t:#EFA527;
+  --red:#3a1616;--red-t:#f0a8a8;
+}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0f0c29;font-family:var(--f)}
+body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:460px;background:var(--s0);min-height:100dvh;color:var(--tp);padding-bottom:60px}
+.hdr{position:sticky;top:0;z-index:20;background:var(--s0);border-bottom:1px solid var(--bdr);padding:12px 16px 10px;display:flex;align-items:center;gap:10px}
+.hdr h1{font-size:1.0625rem;font-weight:600;line-height:1.2}
+.hdr p{font-size:.75rem;color:var(--tm);margin-top:2px}
+.back{font-size:1.375rem;color:var(--tm);cursor:pointer;text-decoration:none;padding:2px 4px}
+.sec{padding:2px 16px 6px}
+.sec-hd{font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);font-weight:600;padding:14px 0 8px}
+/* ── FOLDED SECTIONS — 22 Sep 2026 ───────────────────────────────────────────
+   Jacques: "simplify my trading desk its kind of complicated". The page was
+   eleven blocks stacked one under the other, with three separate buttons to
+   press before it said anything. Now one press fills the lot, and everything
+   that is a reading rather than a place to act is folded behind a row you tap.
+   Same content, same IDs, same arithmetic — nothing is hidden from the
+   assistant, only from the screen. */
+.fold{margin:0 16px 10px;border:1px solid var(--bdr);border-radius:14px;background:var(--s2);overflow:hidden}
+.fold>summary{cursor:pointer;list-style:none;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);font-weight:600}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary .chev{margin-left:auto;font-size:1rem;flex:0 0 auto;transition:transform .18s}
+.fold[open]>summary .chev{transform:rotate(90deg)}
+.fold[open]>summary{border-bottom:1px solid var(--bdr)}
+.fold .sec{padding:2px 14px 10px}
+.fold .sec-hd{padding:12px 0 6px}
+.fold .f{background:none;border:none;border-radius:0;padding:0;margin-bottom:0}
+.card{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin-bottom:9px;overflow:hidden}
+.row{padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px}
+.row-txt{flex:1;min-width:0}
+.row-txt b{font-size:.9375rem;font-weight:600;display:block}
+.row-txt span{font-size:.8125rem;color:var(--tm);display:block;margin-top:3px;line-height:1.45}
+.chev{color:var(--tm);font-size:1rem;flex:0 0 auto;padding-top:2px;transition:transform .18s}
+.card.open .chev{transform:rotate(90deg)}
+.body{display:none;padding:0 14px 14px;border-top:1px solid var(--bdr)}
+.card.open .body{display:block}
+.lbl{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);font-weight:600;margin:12px 0 4px}
+.body p{font-size:.875rem;line-height:1.55;color:var(--ts)}
+.body p b{color:var(--tp)}
+.big{padding:14px;border-radius:14px;font-size:.875rem;line-height:1.55;margin-bottom:10px;border:1px solid transparent}
+.warnbox{background:var(--warn);color:var(--warn-t)}
+.okbox{background:var(--ok);color:var(--ok-t)}
+.big b{display:block;margin-bottom:5px;font-size:.9375rem}
+.txtbtn{display:inline-block;font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-t);background:var(--acc-b);border:none;border-radius:10px;padding:9px 14px;cursor:pointer;margin-top:10px}
+.empty{padding:30px 20px;text-align:center;color:var(--tm);font-size:.875rem;line-height:1.6}
+.f{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px}
+.f label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin:10px 0 4px}
+.f label:first-child{margin-top:0}
+.f input,.f textarea,.f select{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
+.f textarea{min-height:56px;resize:vertical}
+.f input:focus,.f textarea:focus,.f select:focus{outline:2px solid var(--acc);outline-offset:1px}
+.tfpick{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.tf{font-size:.8125rem;padding:7px 13px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.tf.on{background:var(--acc-b);border-color:var(--acc-b);color:var(--acc-t);font-weight:600}
+.pill{display:inline-block;font-size:.6875rem;padding:3px 9px;border-radius:999px;background:var(--s1);color:var(--ts);border:1px solid var(--bdr);margin:0 4px 4px 0}
+.del{font:inherit;font-size:.75rem;color:var(--red-t);background:none;border:none;cursor:pointer;padding:4px 0;margin-top:8px}
+.ft{padding:26px 16px 40px;text-align:center;font-size:.6875rem;color:var(--tm);line-height:1.7}
+/* ── ASK ──────────────────────────────────────────────────────────────────────
+   The app's own AI, pointed at this page instead of the Friendly tab.
+   Same server route (/api/chat), so the same daily brake covers it. */
+.ask{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin:12px 16px 0;overflow:hidden}
+.ask-hd{display:flex;align-items:center;gap:9px;padding:12px 14px}
+.ask-hd b{font-size:.9375rem;font-weight:600}
+.ask-hd .sub{font-size:.75rem;color:var(--tm);flex:1;min-width:0;line-height:1.35}
+.ask-badge{width:22px;height:22px;border-radius:999px;background:var(--acc-b);color:var(--acc-t);display:flex;align-items:center;justify-content:center;font-size:.8125rem;font-weight:700;flex:0 0 auto}
+.ask textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp);min-height:66px;resize:vertical;margin:12px 14px 0;width:calc(100% - 28px)}
+.ask textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+.ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin:9px 14px 0}
+.chip{font-size:.75rem;padding:6px 11px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s1);color:var(--ts);cursor:pointer}
+.chip:active{background:var(--acc-b);color:var(--acc-t)}
+.ask-go{font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-b);background:var(--acc);border:none;border-radius:10px;padding:10px 16px;cursor:pointer;margin:10px 14px 14px}
+.ask-go[disabled]{opacity:.5}
+.ask-a{display:none;font-size:.875rem;line-height:1.6;color:var(--ts);margin:12px 14px 14px;padding-top:12px;border-top:1px solid var(--bdr)}
+.ask-a.on{display:block}
+.ask-who{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin-bottom:5px}
+.ask-fine{font-size:.6875rem;color:var(--tm);margin:0 14px 14px;line-height:1.6}
+.picrow{margin:9px 14px 0;padding:10px;border-radius:12px;border:1px dashed var(--bdr2);background:var(--s1)}
+.picrow.has{border-style:solid}
+.picbtn{font:inherit;font-size:.8125rem;font-weight:600;color:var(--acc-t);background:var(--acc-b);border:none;border-radius:10px;padding:9px 13px;cursor:pointer}
+.picnote{font-size:.75rem;color:var(--tm);margin-top:8px;line-height:1.5}
+.picnote.err{color:var(--red-t)}
+.pichold{display:flex;align-items:center;gap:10px}
+.pichold img{width:66px;height:66px;object-fit:cover;border-radius:9px;border:1px solid var(--bdr);flex:0 0 auto;background:var(--s2)}
+.pichold .pictxt{flex:1;min-width:0}
+.pichold .pictxt b{display:block;font-size:.8125rem;font-weight:600;color:var(--tp)}
+.pichold .pictxt span{display:block;font-size:.6875rem;color:var(--tm);margin-top:3px;line-height:1.45}
+.picfine{font-size:.6875rem;color:var(--tm);margin:8px 0 0;line-height:1.6}
+.jrow{display:flex;align-items:baseline;gap:9px;padding:9px 0 3px;border-bottom:1px solid var(--bdr);font-size:.8125rem}
+.jdate{font-size:.6875rem;color:var(--tm);font-variant-numeric:tabular-nums;flex:0 0 auto;width:74px}
+.jtxt{flex:1;min-width:0}
+.jtxt b{display:block;font-size:.875rem;font-weight:600;color:var(--tp)}
+.jtxt span{display:block;font-size:.75rem;color:var(--tm);margin-top:2px}
+.jr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ts);flex:0 0 auto}
+.jr.win{color:var(--ok-t)}
+.jr.loss{color:var(--red-t)}
+.jr.open{color:var(--tm);font-weight:400;font-size:.75rem}
+.jnote{font-size:.8125rem;color:var(--ts);line-height:1.55;padding:0 0 9px;border-bottom:1px solid var(--bdr)}
+/* ── THE FEED ────────────────────────────────────────────────────────────────
+   The candles. One row per timeframe: last close, and the low-to-high of what
+   came back, which is a fact about the bars and not an opinion about them. */
+.feedout{margin-top:12px;border-top:1px solid var(--bdr);padding-top:9px}
+.feedout:empty{display:none;border-top:none;padding-top:0;margin-top:0}
+.frow{display:flex;align-items:baseline;gap:9px;padding:5px 0;font-size:.8125rem;color:var(--ts);border-bottom:1px solid var(--bdr)}
+.frow:last-child{border-bottom:none}
+.tfname{font-weight:600;color:var(--tp);width:30px;flex:0 0 auto}
+.last{font-variant-numeric:tabular-nums;color:var(--tp)}
+.rng{margin-left:auto;color:var(--tm);font-variant-numeric:tabular-nums;text-align:right}
+.feedwhen{font-size:.75rem;color:var(--tm);margin-top:10px;line-height:1.5}
+.feedwhen.err{color:var(--red-t);background:var(--red);border-radius:10px;padding:9px 11px;font-size:.8125rem}
+.feedwhy{font-size:.6875rem;color:var(--tm);margin-top:9px;line-height:1.6}
+.srow{display:flex;align-items:baseline;gap:9px;padding:6px 0 2px;font-size:.8125rem;color:var(--ts)}
+.srow b{font-weight:600;color:var(--tp);width:30px;flex:0 0 auto}
+.srow span{font-variant-numeric:tabular-nums;color:var(--acc-t);font-weight:600;letter-spacing:.02em}
+.sdet{font-size:.75rem;color:var(--tm);line-height:1.6;padding:0 0 8px;border-bottom:1px solid var(--bdr)}
+.sdet:last-child{border-bottom:none;padding-bottom:0}
+.stcard{padding:8px 0 9px;border-bottom:1px solid var(--bdr)}
+.stcard:last-child{border-bottom:none;padding-bottom:0}
+.sthd{display:flex;align-items:baseline;gap:9px}
+.sthd b{font-weight:600;color:var(--tp);font-size:.9375rem;width:30px;flex:0 0 auto}
+.sttrend{font-size:.875rem;font-weight:600;color:var(--acc-t)}
+.stsw{font-size:.6875rem;color:var(--tm);font-variant-numeric:tabular-nums;letter-spacing:.03em;padding:3px 0 5px}
+.stline{display:flex;gap:9px;align-items:baseline;padding:2px 0;font-size:.8125rem;line-height:1.5}
+.stk{flex:0 0 72px;color:var(--tm);font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em}
+.stv{flex:1;min-width:0;color:var(--ts)}
+.stx{color:var(--tm);font-size:.75rem}
+.stflag{margin-top:6px;font-size:.8125rem;font-weight:600;color:var(--acc-t)}
+.pvline{margin-top:11px;padding-top:10px;border-top:1px solid var(--bdr);font-size:.75rem;color:var(--ts);line-height:1.55}
+.sessrow{display:flex;align-items:center;gap:8px;margin-top:2px}
+.sessrow input{width:auto;font:inherit;font-size:.875rem;padding:8px 10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
+.sessmid{font-size:.8125rem;color:var(--tm)}
+.sessnow{font-size:.8125rem;color:var(--ts);margin-top:10px;line-height:1.55}
+.sessnow.on{color:var(--ok-t);background:var(--ok);border-radius:10px;padding:9px 11px}
+.sessnow.off{color:var(--warn-t);background:var(--warn);border-radius:10px;padding:9px 11px}
+/* ── THE CHART ───────────────────────────────────────────────────────────────
+   TradingView's own open-source engine on the same delayed bars as everything
+   else on this page. The flag sits ON the chart rather than under it: a delayed
+   candle that looks right is the one way this page could cost him money. */
+.chartwrap{position:relative;margin-top:10px}
+.chartflag{position:absolute;top:8px;left:8px;z-index:3;font-size:.625rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--warn);color:var(--warn-t);pointer-events:none}
+.chartbox{height:300px;border-radius:12px;overflow:hidden;background:var(--s1);border:1px solid var(--bdr)}
+.lw{width:100%;height:300px}
+.credit{font-size:.6875rem;color:var(--tm);margin-top:9px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <a class="back" href="/app" title="Back to the app">&#8592;</a>
+    <div>
+      <h1>Trading Desk</h1>
+      <p>Your setups, the candles, and the assistant that reads both</p>
+    </div>
+  </div>
+
+  <!-- THE FEED.
+       The candles the assistant reads and the page draws its numbers from.
+       The page asks THIS APP'S SERVER (/api/candles), never the feed itself:
+       the address, the shape and any key all live on the server, which is why
+       there is still no third-party address anywhere in this file and why the
+       data vendor never learns who is reading. Remembers the symbol, so it
+       opens on what he was last watching. -->
+  <div class="sec">
+    <div class="sec-hd">The feed</div>
+    <div class="f">
+      <label for="fSym">Symbol</label>
+      <input id="fSym" placeholder="NQ, ES, BTC, SPY" autocomplete="off" autocapitalize="characters">
+      <button class="txtbtn" id="fGo">Load everything</button>
+      <div class="feedout" id="fOut"></div>
+      <div class="feedwhen" id="fWhen">No candles loaded yet. Press Load everything &mdash; it pulls the candles and fills the readings below from the same bars. Until then the assistant is told it has no prices, and gives you none.</div>
+      <div class="feedwhy">4h is built from the 1h bars by arithmetic, not asked for. Times are UTC and are the bar's own time, never the time of the request — a stale bar cannot read as a live one.</div>
+    </div>
+  </div>
+
+  <!-- THE CHART.
+       He asked for it in his own words: "can I make my own personal tradingview
+       for personal trading and get real live data for free". Half of that is
+       true and half is not, and this card says which half is which rather than
+       letting a chart imply the rest.
+
+       The ENGINE is free and is TradingView's own open-source one, kept on this
+       app's server in /vendor, so no third-party address is anywhere on this
+       page and nobody else learns who is reading it. The DATA is the half that
+       is not free: CME sells real-time futures, so every free feed is delayed.
+
+       Every bar drawn here is a bar that came back. No bars, no chart — the box
+       stays empty and says so.
+
+       The swings are marked with the page's own structure code, the same one the
+       block above uses, so the labels on the candles and the letters in the text
+       cannot disagree with each other. -->
+  <details class="fold" id="readings">
+    <summary>Readings &mdash; the chart, the frame, the structure, the counts and the test<span class="chev">&#8250;</span></summary>
+  <div class="sec">
+    <div class="sec-hd">The chart</div>
+    <div class="f">
+      <label>Timeframe</label>
+      <div class="tfpick" id="chTf">
+        <span class="tf" id="ctf-5m" data-ctf="5m">5m</span>
+        <span class="tf" id="ctf-15m" data-ctf="15m">15m</span>
+        <span class="tf" id="ctf-1h" data-ctf="1h">1h</span>
+        <span class="tf" id="ctf-4h" data-ctf="4h">4h</span>
+      </div>
+      <div class="chartwrap">
+        <span class="chartflag">Delayed &mdash; your broker's chart wins</span>
+        <div class="chartbox"><div class="lw" id="chArt"></div></div>
+      </div>
+      <div class="feedwhen" id="chWhen">Nothing drawn yet. Load everything on the feed above, and those bars are what gets drawn here.</div>
+      <div class="feedwhy">The swings are labelled the way you say them out loud — HH, HL, LH, LL — and the last swing high and low are drawn across as two levels. It is the same arithmetic the structure block above does, on the same bars.</div>
+      <p class="credit">Chart engine: TradingView Lightweight Charts v5.2.1, Apache 2.0 &mdash; a copy served from this app, not loaded from anybody else's server. The small TradingView mark in the corner of the chart is theirs, and is part of the licence.</p>
+    </div>
+  </div>
+
+  <!-- THE FRAME.
+       The desk reads its own chart the way the script on his TradingView chart
+       reads it, so the assistant knows the frame instead of being told it, and
+       so the two can be held against each other on the same bars.
+
+       His rules, as numbers: a new LOWER LOW on the frame turns the frame down
+       and sets two things — the level, which is the swing high the drop came
+       from, and the frame low, which is that lower low. Only a CLOSE above the
+       level cancels it; a poke above it changes nothing. On the step below, the
+       small chart is read for higher highs with the last higher low still
+       holding, and a close under that low ends the hold.
+
+       A cancelled frame shows no price at all. A level from hours ago sitting
+       beside a live price reads as nonsense — that was his own complaint on the
+       chart — so the frame is dropped and the page says so instead. -->
+  <div class="sec">
+    <div class="sec-hd">The frame, off the same candles</div>
+    <div class="f">
+      <label>Frame (sets the level)</label>
+      <div class="tfpick" id="frTf">
+        <span class="tf" id="ftf-15m" data-ftf="15m">15m</span>
+        <span class="tf" id="ftf-1h" data-ftf="1h">1h</span>
+        <span class="tf" id="ftf-4h" data-ftf="4h">4h</span>
+      </div>
+      <div id="frOut"></div>
+      <div class="feedwhen" id="frWhen">No candles loaded, so there is no frame to read.</div>
+      <div class="feedwhy">A frame is down when the frame's own bars make a lower low. The level is the swing high that drop came from — the lower high you would short back to — and the frame low is that lower low. Only a close above the level cancels it; a wick does not. The small chart is the step below the frame, read on its own bars. This says wait most of the time, and wait is a complete answer.</div>
+    </div>
+  </div>
+
+  <!-- WHICH SESSION.
+       He said it in one line: he trades the New York session and he is in
+       Central time (St. Louis). So the window is kept in HIS clock — the device
+       this page is open on — and it is editable, because the exact minutes of a
+       session are a trader's own call. The page names the zone it read and never
+       claims to know what another timezone is doing. -->
+  <div class="sec">
+    <div class="sec-hd">Your session</div>
+    <div class="f">
+      <label>New York session, on your own clock</label>
+      <div class="sessrow">
+        <input id="sA" type="time" step="60" aria-label="session start">
+        <span class="sessmid">to</span>
+        <input id="sB" type="time" step="60" aria-label="session end">
+      </div>
+      <div class="sessnow" id="sNow"></div>
+      <div class="feedwhy">Kept on this device and read from your own clock. Nothing converts to exchange time, and the assistant is told that bars outside your window are context and never a trigger. It opens on the US cash session (8:30–15:00 Central) — change it to whatever you trade.</div>
+    </div>
+  </div>
+
+  <!-- STRUCTURE.
+       What the bars have already done: the swings, labelled his way (HH, HL,
+       LH, LL), how far price sits from the last swing high and low, whether the
+       last bars are getting smaller, and whether they are compressed. It is
+       arithmetic on closed bars. It describes, and the page says where; it does
+       not call a turn and the assistant is told it may not either. -->
+  <div class="sec">
+    <div class="sec-hd">Structure, off the candles</div>
+    <div class="f">
+      <div id="stOut"></div>
+      <div class="feedwhen" id="stWhen">No candles loaded, so there is nothing to read yet.</div>
+      <div class="feedwhy">A swing is a bar higher (or lower) than the two bars either side of it. HH higher high, HL higher low, LH lower high, LL lower low — each against the last swing of the same kind. Compressed means the last five bars span under three average bars. This is what has already happened; it says nothing about what comes next.</div>
+    </div>
+  </div>
+
+  <!-- STUDY THE TIMING.
+       He asked for this on 19 Sep 2026: "the trading desk needs a part in there
+       where it helps me ... research for me to get better timing".
+
+       What is here is counting, and only counting. Four things he says out loud
+       about his own trading, asked of the bars themselves: what price did when
+       it reached one of his levels, how far his retraces come back, how long a
+       higher low holds on the 15m, and how much of a day happens inside his own
+       session window on his own clock. Every figure is printed with the count
+       it came from, because four of something is not a percentage.
+
+       It is NOT a backtest. None of his setups is entered, exited or priced
+       anywhere on this page, so there is no result, no win rate and no edge to
+       show him — and the assistant is told all of that in as many words. It is
+       one loaded window of bars, it says which dates and how many, and it
+       teaches him what his own rules did in the bars he is looking at. It says
+       nothing about the market.
+
+       It pulls its own bars, more of them than the read above uses: the read
+       wants the last bars, a study wants a stretch of them. It has no button of
+       its own any more (22 Sep 2026) — the one press that loads the candles
+       fills this from the same feed, which is what makes it the second and last
+       time this page asks the feed for anything. -->
+  <div class="sec">
+    <div class="sec-hd">Study the timing</div>
+    <div class="f">
+      <div class="feedwhen" id="studyMsg">Nothing loaded yet. One press of Load everything fills this too — it pulls 500 bars on each timeframe from the same feed, about three months of 4h and five days of 15m, and counts what your own rules did in them.</div>
+      <div id="studyOut"></div>
+      <div class="feedwhy">Four counts and nothing else: how often a 4h level was only poked and never closed above, which is the grab; how far the down legs in these bars came back to the high that started them; how many 15m bars a higher low lasted before the first close below it; and how much of a day's range was made inside your session window on your own clock. Every number carries the count it came from. Nothing here is a backtest and nothing here is a forecast.</div>
+    </div>
+  </div>
+
+  <!-- THE TEST.
+       Jacques, 21 Sep 2026: "make me a backtester with my trading logic."
+
+       His rules, entered, exited and priced, on the same bars the study above
+       loaded — no second call to the feed and nothing typed in twice. It runs
+       the frame's own rules as this page already states them, over every
+       timeframe at once, so he can see what the same rule did on the 5m and on
+       the 4h in the same bars.
+
+       It fills at the exact price of the level, the stop and the target, which
+       is the most generous reading of every trade in it: no spread, no
+       slippage, no fill he would not have got. That is why the figure it prints
+       is a ceiling and not an expectation, and the card says so in as many
+       words rather than leaving it to be read as what he would have kept. -->
+  <div class="sec">
+    <div class="sec-hd">Test it on the bars</div>
+    <div class="f">
+      <div class="feedwhen" id="btMsg">Nothing tested yet. Load everything and this runs by itself on those same bars: it enters and exits your own frame rules on the bars that came back and prices every trade with your commission.</div>
+      <div id="btOut"></div>
+      <div class="feedwhy">One contract, your own commission rate in and out, and a fill at the exact level, stop and target price on the bars. No spread, no slippage, no fill you may not have got — so every figure here is the best case, not what you would have kept. It is not a promise about the next trade and it is not a measurement of the market: it is what this version of your rules did in the bars the feed gave back.</div>
+    </div>
+  </div>
+  </details>
+
+  <!-- WHAT IS IN FRONT OF HIM RIGHT NOW.
+       Optional, and remembers itself, so it is filled once at the open of a
+       session and then rides along with every question asked in it. Without it
+       the assistant has nothing to read but his setups, and it is told to say
+       so rather than fill the gap in. -->
+  <details class="fold" id="context">
+    <summary>What&rsquo;s in front of you &mdash; price, your read, your levels<span class="chev">&#8250;</span></summary>
+  <div class="sec">
+    <div class="f">
+      <label for="dMk">Market and direction you are looking at</label>
+      <input id="dMk" placeholder="e.g. NQ, looking long" autocomplete="off">
+      <label for="dPx">Where price is right now</label>
+      <input id="dPx" placeholder="e.g. 21,480 — back at the range high it broke" autocomplete="off">
+      <label for="dRd">What you see (your read)</label>
+      <textarea id="dRd" placeholder="e.g. 4h took the overnight high, 1h has not closed back under it, 15m is compressing under it"></textarea>
+      <label for="dIn">Where you would be wrong</label>
+      <input id="dIn" placeholder="e.g. 1h close back inside the range" autocomplete="off">
+      <label for="dEn">Planned entry price</label>
+      <input id="dEn" inputmode="decimal" placeholder="required for the 1:1 check" autocomplete="off">
+      <label for="dSt">Planned invalidation / stop price</label>
+      <input id="dSt" inputmode="decimal" placeholder="where this idea is wrong" autocomplete="off">
+      <label for="dTg">Previous confirmed target price</label>
+      <input id="dTg" inputmode="decimal" placeholder="the prior high or low you actually trade to" autocomplete="off">
+      <div class="saved" id="dSaved" style="font-size:.6875rem;color:var(--tm);margin-top:8px"></div>
+    </div>
+  </div>
+  </details>
+
+  <!-- THE ASSISTANT -->
+  <div class="ask" id="ask">
+    <div class="ask-hd">
+      <span class="ask-badge">?</span>
+      <b>Trading assistant</b>
+      <span class="sub" id="askSub">Reads your setups and the chart above</span>
+    </div>
+    <textarea id="askQ" placeholder="Should I take this one?"></textarea>
+    <div class="ask-chips">
+      <span class="chip" data-q="Is this one of my setups? Which one, and what is missing?">Which setup is this?</span>
+      <span class="chip" data-q="Where does my stop go, and what makes this wrong?">Stop and invalidation</span>
+      <span class="chip" data-q="Is this a hold or a scalp, and why?">Hold or scalp</span>
+      <span class="chip" data-q="What am I missing on the 4h, 1h, 15m and 5m here?">What am I missing?</span>
+      <span class="chip" data-q="Talk me out of this trade, honestly.">Talk me out of it</span>
+      <span class="chip" data-q="Read the structure off the bars: is this a run of higher highs and higher lows pushing into the old high without taking it, with the last bars losing size, and what would end it?">Is this extended?</span>
+      <span class="chip" data-q="Read me the candles you have: what are the four timeframes doing, and what do they agree on?">What does the feed say?</span>
+      <span class="chip" data-q="Read me the timing study: what my own bars did at my levels, how far the retraces came back, how long the holds lasted, and how much of the day is made inside my window. Then the one thing to change." data-sys="study">Study my timing</span>
+      <span class="chip" data-q="Read my journal back to me: the win rate with the count, what my winners paid against what my losers cost, and the one thing the record says to change." data-sys="trade">Read me my journal</span>
+    </div>
+    <div class="picrow" id="picRow">
+      <input type="file" id="picIn" accept="image/*" style="display:none">
+      <button class="picbtn" id="picAdd" type="button">+ Add a chart picture</button>
+      <div class="pichold" id="picHeld" style="display:none">
+        <img id="picImg" alt="The chart you added">
+        <div class="pictxt">
+          <b>Your chart</b>
+          <span id="picMeta"></span>
+        </div>
+        <button class="del" id="picDel" type="button">Remove</button>
+      </div>
+      <p class="picfine" id="picFine">A picture you add is sent to Google with your question &mdash; that chart only, nothing else from your phone. Take it off and it stops being sent.</p>
+    </div>
+    <button class="ask-go" id="askGo">Ask</button>
+    <div class="ask-a" id="askA"></div>
+    <p class="ask-fine">Its words are its own, kept between you and this page. It never invents a price, a level, a statistic or a backtest it has not run, and it has not run any.</p>
+  </div>
+
+  <!-- MY SETUPS -->
+  <div class="sec">
+    <div class="sec-hd">My setups</div>
+    <div id="list"></div>
+    <div id="none" class="empty">
+      Nothing written yet. Write your first setup below — the assistant works from
+      these by name, and it will tell you plainly when a chart is not one of them.
+    </div>
+    <button class="txtbtn" id="addS" style="margin-bottom:14px">+ Add a setup</button>
+    <div class="f" id="form" style="display:none">
+      <label for="sN">Name it the way you say it out loud</label>
+      <input id="sN" placeholder="e.g. London sweep and reclaim" autocomplete="off">
+      <label for="sTfIn">Timeframes it lives on</label>
+      <input id="sTfIn" placeholder="However you say them — 5s, 1m, 15m, 1h, 4h, daily …" autocomplete="off">
+      <div class="feedwhy">Write as many or as few as you use, in your own words, separated by commas. Nothing here is a fixed list — a timeframe nobody thought of when this was written is kept the same as any other.</div>
+      <label for="sR">What has to be true before you look for it</label>
+      <textarea id="sR" placeholder="The read. Where price has to be, what the higher timeframe has to be doing, what you refuse to take it without."></textarea>
+      <label for="sE">Where you enter</label>
+      <input id="sE" placeholder="e.g. first 5m close back above the swept level" autocomplete="off">
+      <label for="sS">Where you are wrong</label>
+      <input id="sS" placeholder="e.g. 15m close back under the level, or beyond the sweep wick" autocomplete="off">
+      <label for="sT">Where you take it</label>
+      <input id="sT" placeholder="e.g. the far side of the range; runner if 1h keeps it" autocomplete="off">
+      <label for="sH">Hold or scalp</label>
+      <select id="sH">
+        <option value="hold">Hold the move</option>
+        <option value="scalp">Scalp it</option>
+        <option value="either">Either — depends on the 1h</option>
+      </select>
+      <button class="txtbtn" id="saveS">Save the setup</button>
+      <button class="txtbtn" id="cancelS" style="background:var(--s1);color:var(--ts)">Cancel</button>
+    </div>
+  </div>
+
+  <!-- THE JOURNAL.
+       What the trade log adds up to, and the dated record underneath it.
+       Jacques asked for this on 18 Sep 2026, having been told the page would
+       not print a win rate. It prints one now, with the count welded to it —
+       that is the difference between a description of what he did and a claim
+       about what happens next. Nothing here is estimated or projected. -->
+  <details class="fold" id="journal">
+    <summary>The journal and my trades &mdash; what you did, added up<span class="chev">&#8250;</span></summary>
+  <div class="sec">
+    <div class="sec-hd">The journal</div>
+    <div id="jsum"></div>
+    <div id="jrec"></div>
+    <div id="jnone" class="empty">
+      Nothing in the journal yet. Log a trade and close it — entry, stop and
+      exit — and the record starts here: what you won and lost, what your
+      winners paid against what your losers cost, and every trade you took,
+      dated, with what you saw at the time.
+    </div>
+  </div>
+
+  <!-- MY TRADES.
+       What he actually did, one entry per trade, and the review that marks the
+       decision rather than the money. Everything on this page is his own
+       arithmetic: points from entry to stop, and R. The adding up lives in THE
+       JOURNAL above the footer; the one rule kept from the version that
+       refused a win rate is that the count is printed beside the percentage,
+       never the percentage alone. -->
+  <div class="sec">
+    <div class="sec-hd">My trades</div>
+    <!-- What a trade costs to place. One number, his own, and it is the only
+         cost this page knows: the spread and his fills are not in here, and
+         the page says that out loud rather than pretending to know them. -->
+    <div style="padding:0 14px 10px">
+      <label for="cRate" style="font-size:.75rem;color:var(--tm)">Commission, per contract, in and out ($)</label>
+      <input id="cRate" inputmode="decimal" placeholder="e.g. 0.78 for a micro" autocomplete="off">
+      <div class="saved" id="cRateHint" style="font-size:.6875rem;color:var(--tm);margin-top:6px"></div>
+    </div>
+    <div id="tlist"></div>
+    <div id="tnone" class="empty">
+      Nothing logged yet. Write a trade down after it is closed — or while it is
+      open, and add the exit when it comes. The review marks the decision, not
+      whether it paid.
+    </div>
+    <button class="txtbtn" id="addT">+ Log a trade</button>
+    <div class="f" id="tform" style="display:none">
+      <label for="tMk">Market</label>
+      <input id="tMk" placeholder="e.g. NQ" autocomplete="off">
+      <label for="tSu">Which setup was it</label>
+      <input id="tSu" placeholder="the name you gave it" autocomplete="off">
+      <div class="saved" id="tSuHint" style="font-size:.6875rem;color:var(--tm);margin-top:6px"></div>
+      <label for="tDir">Direction</label>
+      <select id="tDir">
+        <option value="long">Long</option>
+        <option value="short">Short</option>
+      </select>
+      <label for="tEn">Entry</label>
+      <input id="tEn" inputmode="decimal" placeholder="e.g. 21480.25" autocomplete="off">
+      <label for="tSt">Stop</label>
+      <input id="tSt" inputmode="decimal" placeholder="where you were wrong" autocomplete="off">
+      <label for="tTg">Target</label>
+      <input id="tTg" inputmode="decimal" placeholder="optional" autocomplete="off">
+      <label for="tEx">Exit</label>
+      <input id="tEx" inputmode="decimal" placeholder="leave empty while it is open" autocomplete="off">
+      <label for="tPv">What one point is worth ($)</label>
+      <input id="tPv" inputmode="decimal" placeholder="e.g. 2 for MNQ, 10 for MGC" autocomplete="off">
+      <div class="saved" id="tPvHint" style="font-size:.6875rem;color:var(--tm);margin-top:6px"></div>
+      <label for="tC">Contracts</label>
+      <input id="tC" inputmode="numeric" placeholder="1" autocomplete="off">
+      <label for="tNote">What you saw, and why you took it</label>
+      <textarea id="tNote" placeholder="The read you acted on. This is the part the review works from."></textarea>
+      <button class="txtbtn" id="saveT">Save the trade</button>
+      <button class="txtbtn" id="cancelT" style="background:var(--s1);color:var(--ts)">Cancel</button>
+    </div>
+  </div>
+  </details>
+
+  <div class="ft">
+    Trading Desk — private. Built for Jacques.<br>
+    Progress and notes stay on this device.<br>
+    It is a set of rules and a reader, not a signal service. Every trade is yours.
+  </div>
+</div>
+
+<!-- The chart engine. A copy this app serves itself, vendored in /vendor with
+     its licence beside it — never a script tag pointed at somebody else's
+     server. See vendor/lightweight-charts/README.md for why, and how to update
+     it. If this file ever fails to arrive the chart says so and draws nothing. -->
+<script src="/vendor/lightweight-charts/5.2.1/lightweight-charts.standalone.production.js"></script>
+<!-- 21 Sep 2026. The assistant's instructions, with the three lines that told
+     it to withhold a read fixed: he sent a picture of his own chart and got back
+     "Entry: Not provided." defer, so it runs after the page's own script has
+     defined DESK_SYS and picText. See the file's own header. -->
+<script defer src="/desk-assistant.js"></script>
+<script>
+/* ---------------------------------------------------------------------------
+   THE DESK — 17 Sep 2026.
+
+   Jacques: "something that helps me make better trading decisions that knows
+   all my set ups and can back test for me and an indicator that aligns with it,
+   letting me know high probability swings and zones and the best time to hold a
+   move or scalp using 4hr 1hr 15mon and 5 min."
+
+   This is the first piece of that, and the one everything else reads from: the
+   setups, written down once, in his own words. The assistant answers from them
+   by name. The indicator (next) will flag what he writes here, and the backtest
+   (after that) will run these setups over candles — which is why the setups are
+   written as rules rather than as notes.
+
+   The page holds candles now, and works the structure out of them itself. Nothing
+   here invents a number.
+
+   Three things this page refuses to do, on purpose:
+     1. It will not invent a setup he did not write. If nothing he wrote matches
+        the chart, the assistant says so and stops.
+     2. It will not let a target come before an invalidation. Where he is wrong
+        is asked for before where he is right.
+     3. It will not let the assistant imply it checked anything. There is no
+        backtest yet, and it is told to say that rather than produce one.
+     4. It will not turn structure into a forecast. The swings, the distance to
+        the last high and low, whether the bars are getting smaller — all of it
+        is arithmetic on bars that have closed, and the assistant is told it may
+        not call a turn. The turn is only ever his own 5m trigger.
+--------------------------------------------------------------------------- */
+
+/* ---------- storage: the setups, and today's chart ---------------------- */
+var K_SETUPS='tsid.desk.setups', K_NOW='tsid.desk.now';
+function load(key, fallback){
+  try{ var v=localStorage.getItem(key); return v?JSON.parse(v):fallback }catch(e){ return fallback }
+}
+function save(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)) }catch(e){}
+}
+var SETUPS=load(K_SETUPS, []);
+if(!Array.isArray(SETUPS)) SETUPS=[];
+
+function esc(s){
+  /* 21 Sep 2026. A failed answer printed the literal words "[object Object]"
+     where the sentence should have been (Jacques's phone, chart attached). The
+     server hands the AI provider's own error body back on a refusal, and that
+     body's `error` is an object - {"message": "..."} - not a string. Nothing on
+     this page renders an object as itself any more: the message inside it is
+     shown, and if there is not one, a plain sentence is. Whatever else goes
+     wrong, what lands on the screen is words. */
+  if(s&&typeof s==='object'){
+    var m=s.message||s.msg||(s.error&&(s.error.message||s.error))||'';
+    s=(typeof m==='string'&&m)?m:'Something went wrong, and the reason did not come back with it.';
+  }
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+/* Timeframes, as the words he wrote. Nothing here holds a fixed set: he types
+   whatever he uses, so a timeframe that did not exist on the day this was
+   written is kept exactly like the ones that did. Setups saved earlier as an
+   array still read, so nothing already on a device is lost. */
+function tfList(v){
+  if(!v) return [];
+  if(Array.isArray(v)) return v.slice();
+  return String(v)
+    .split(/[,;+/]|\band\b/i)
+    .map(function(t){ return t.trim() })
+    .filter(Boolean);
+}
+function tfText(list){
+  var l=tfList(list);
+  if(!l.length) return 'no timeframe set';
+  return l.join(' and ');
+}
+var HOLD={hold:'Hold the move',scalp:'Scalp it',either:'Either, depends on the 1h'};
+
+/* ---------- the setups, as the assistant reads them ---------------------- */
+/* Written out plainly rather than as JSON, because it goes into instructions
+   and a model reads a labelled paragraph better than a brace of keys. Nothing
+   is added to what he wrote — no interpretation, no invented level. */
+function setupsText(){
+  if(!SETUPS.length) return 'HE HAS NOT WRITTEN ANY SETUPS YET. Do not open with that and do not let it shorten the answer: give the full read from whatever he sent, and say in ONE short line, after that read, that it does not match a named setup only because he has not written any down yet. Never present it as one of his setups.';
+  var out=['HIS SETUPS, in his own words. These are the only ones that count. Do not rename them, do not merge two of them, and do not invent a new one.',''];
+  for(var i=0;i<SETUPS.length;i++){
+    var s=SETUPS[i];
+    out.push((i+1)+'. '+s.n);
+    out.push('   Timeframes: '+tfText(s.tf));
+    if(s.r) out.push('   Has to be true first: '+s.r);
+    if(s.e) out.push('   Entry: '+s.e);
+    if(s.s) out.push('   Wrong if: '+s.s);
+    if(s.t) out.push('   Target: '+s.t);
+    out.push('   Hold or scalp: '+(HOLD[s.h]||HOLD.hold));
+    out.push('');
+  }
+  return out.join('\n');
+}
+
+/* ---------- the chart in front of him, as the assistant reads it --------- */
+function nowText(){
+  var m=val('dMk'), p=val('dPx'), r=val('dRd'), inv=val('dIn');
+  var out=['THE CHART HE IS LOOKING AT RIGHT NOW, in his own words.', ''];
+  out.push('Market: '+(m||'NOT SAID'));
+  out.push('Where price is: '+(p||'NOT SAID'));
+  out.push('What he sees: '+(r||'NOT SAID'));
+  var plan={entry:numOf(val('dEn')), stop:numOf(val('dSt')), target:numOf(val('dTg'))};
+  out.push('Where he would be wrong: '+(inv||'NOT SAID'));
+  out.push('METHOD FACTS: '+METHOD_FACTS);
+  out.push('Planned entry: '+(plan.entry===null?'NOT GIVEN':two(plan.entry)));
+  out.push('Planned invalidation / stop: '+(plan.stop===null?'NOT GIVEN':two(plan.stop)));
+  out.push('Previous confirmed target: '+(plan.target===null?'NOT GIVEN':two(plan.target)));
+  out.push(riskGateText(plan,m));
+  out.push('');
+  if(!m||!r){
+    // 21 Sep 2026. Jacques sent a chart screenshot and asked, without filling any
+    // of this in, and got back a list of "Not provided" lines. The old rule here
+    // said to ask for the missing line and give no levels at all. A picture he
+    // attached IS the missing line, so the picture now wins over the empty form.
+    if(PIC) out.push('He has not filled this in on the page, BUT HE ATTACHED A CHART PICTURE WITH THE QUESTION. That picture is the answer to the lines above: read the chart in it and answer from it - the levels you can actually see, each one said to be off his screenshot. Do not ask him to fill the form in first, and do not leave a level line blank just because this block is blank. After the read, ask at most one short question, and only about something genuinely unreadable in the picture.');
+    else out.push('He has not filled this in and no picture came with the question, so there is nothing to read. ASK him for the missing line before you answer, and give no levels in that first reply. One question, not a list.');
+  }
+  return out.join('\n');
+}
+function riskGateText(plan, market){
+  var direction=/\bshort\b/i.test(market||'')?'short':(/\blong\b/i.test(market||'')?'long':null);
+  if(plan.entry===null||plan.stop===null||plan.target===null) return '1:1 GATE: BLOCKED - entry, invalidation and previous target are required. Do not approve a trade or invent a missing price.';
+  if(!direction) return '1:1 GATE: BLOCKED - direction must say long or short before reward can be checked.';
+  var risk=Math.abs(plan.entry-plan.stop), reward=direction==='short'?plan.entry-plan.target:plan.target-plan.entry;
+  if(!(risk>0)) return '1:1 GATE: BLOCKED - entry and invalidation are the same price.';
+  if(!(reward>0)) return '1:1 GATE: BLOCKED - the previous target is on the wrong side of the entry.';
+  return '1:1 GATE: '+(reward>=risk?'PASSES':'BLOCKED')+' - risk '+two(risk)+' points; reward '+two(reward)+' points; ratio '+two(reward/risk)+':1. Arithmetic only, not a signal.';
+}
+function val(id){ var el=document.getElementById(id); return el?(el.value||'').trim():'' }
+
+/* ---------- the feed: candles, from the app's own server ----------------- */
+/* The desk keeps no feed of its own and never asks one. It asks /api/candles,
+   which is this app's server, which is where the feed address lives. Two
+   reasons, and both matter: a key on a page is a key anybody can read, and a
+   page that asks a data vendor directly tells that vendor who is reading and
+   from where — on a phone, on a mobile network. Neither is this page's call.
+
+   FEED holds exactly what came back. When the feed fails, FEED stays null, the
+   page shows the sentence and nothing else, and the assistant is told it has no
+   prices. There is no branch here that fills the gap in with anything. */
+var K_SYM='tsid.desk.sym', FEED=null;
+/* Shared method facts are also sent with every desk question. */
+var METHOD_FACTS='Daily/4h=context and origin; 1h=guide; 15m/5m=path and confirmation; 1m/5-second=execution refinement. A tested zone, previous target, invalidation and passing 1:1 gate are required. A 4h LL may allow a temporary 15m/5m HH-HL long; return to short only after confirmed LH/LL.';
+
+function money(n){
+  if(typeof n!=='number'||!isFinite(n)) return '—';
+  return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+/* WHAT ONE POINT IS WORTH, PER CONTRACT.
+   He is right that the log had no idea: it was points and R only, and it said
+   so. These are the published contract sizes — what a one-point move pays on
+   one contract — for the micros he actually trades and their full-size
+   versions. Nothing is guessed: a symbol that is not in this table gets no
+   number at all, and the row says so rather than inventing one.
+
+   The figure that counts is the one ON THE TRADE, not this table: he can
+   overrule it per trade, because his broker's size and his fill are his.
+
+   Every code in here is also in the server's symbol table, so a code he can
+   type and see a size for is a code the feed is asked for AS THE CONTRACT. On
+   19 Sep 2026 those two lists did not agree — MGC had a size here and nothing on
+   the server — and the feed answered a share price under a gold code. A test
+   holds the two lists together now.
+
+   Two things are deliberately absent. The yen is not here: its contract is
+   quoted to six decimals, so a "point" of 1.00 would read as twelve and a half
+   million dollars and be worse than no figure. And the fear index is not here,
+   because the feed only has the index, which has no contract size to publish. */
+var POINT_VALUE={
+  MNQ:2, MES:5, MYM:0.5, M2K:5,
+  NQ:20, ES:50, YM:5, RTY:50, NKD:5,
+  MGC:10, GC:100, SIL:1000, SI:5000,
+  MCL:100, CL:1000, MNG:1000, NG:10000,
+  MHG:2500, HG:25000,
+  MBT:0.1, MET:0.1,
+  M6E:12500, '6E':125000, M6A:10000, '6A':100000, M6B:6250, '6B':62500, '6C':100000,
+  ZT:2000, ZF:1000, ZN:1000, ZB:1000
+};
+/* The feed answers with NQ=F, GC=F, MNQ=F, BTC-USD; he types MNQ or /MNQ. All
+   of them come down to the contract code. */
+function baseSym(sym){
+  var s=String(sym===null||sym===undefined?'':sym).toUpperCase().replace(/^[\/^]/,'');
+  s=s.replace(/=F$/,'').replace(/-USD$/,'').replace(/[^A-Z0-9]/g,'');
+  return s;
+}
+function pointValueOf(sym){
+  var k=baseSym(sym);
+  return Object.prototype.hasOwnProperty.call(POINT_VALUE,k)?POINT_VALUE[k]:null;
+}
+/* Money, always with its own symbol, so a figure can never be read as points. */
+function dollars(n){
+  if(typeof n!=='number'||!isFinite(n)) return '\u2014';
+  return (n<0?'-':'')+'\$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+/* The published size belongs to the CONTRACT. On 19 Sep 2026 the feed answered
+   the bare code MGC with a Vanguard ETF, and this line put gold's size over the
+   top of a share price: a money figure attached to the wrong market is the one
+   thing a trader cannot unsee. So when the feed says the thing it sent is not a
+   contract, the size is named as the contract's and the difference is said out
+   loud instead of being printed under a number as though it were gold. */
+/* A code this page publishes a size for is a code he means as a CONTRACT, and
+   that is the test for whether the feed's instrument type deserves a warning.
+   VIX and the dollar index are read as the index on purpose here — telling him
+   those are "not the contract" would be noise, while MGC arriving as an ETF is
+   exactly the fault worth shouting about. */
+function meansAContract(sym){ return pointValueOf(sym)!==null }
+function pvText(sym, type, name){
+  var pv=pointValueOf(sym), k=baseSym(sym);
+  var notContract = (type && type!=='FUTURE' && pv!==null)
+    ? (' <b>What came back is '+esc(type)+(name?' ('+esc(name)+')':'')+'</b>, not the '+esc(k)+' contract — so the prices above are not its market either. Load the contract or put the market aside.')
+    : '';
+  if(pv===null) return 'No published contract size for '+(k||'this symbol')+'. Put what one point is worth on the trade itself and the money is worked out from that.'+notContract;
+  return '<b>'+esc(k)+'</b> — one point is <b>'+esc(dollars(pv))+'</b> on one contract. That is the published size; overrule it on any trade if your broker or your size differs.'+notContract;
+}
+function utcStamp(ms){
+  var d=new Date(ms);
+  if(isNaN(d.getTime())) return 'time unknown';
+  return d.toISOString().slice(0,16).replace('T',' ')+' UTC';
+}
+/* How much of each timeframe the assistant reads. Twelve 4h bars is two days of
+   structure; twenty-four 5m bars is the last two hours, which is the trigger and
+   nothing more. All of it at once would be noise, and noise is what it starts
+   inventing from. */
+var FEED_KEEP={'4h':12,'1h':16,'15m':20,'5m':24};
+
+function feedText(){
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    return ['CANDLES FROM THE FEED: NOT LOADED.','',
+      'No candles have been fetched, so you cannot see price, structure, highs, lows or levels. Do not describe a chart, do not name a level and do not price anything. Say the candles are not loaded, ask him to load them or to tell you what his own chart shows, and stop there.','',
+    ].join('\n');
+  }
+  var out=['CANDLES FROM THE FEED — real bars from the feed, and the only numbers you may quote. Nothing else has been checked and nothing else is known.',''];
+  out.push('Symbol: '+FEED.symbol+(FEED.name?' ('+FEED.name+')':''));
+  if(FEED.type) out.push('The feed says this instrument is '+FEED.type+(FEED.exchange?' on '+FEED.exchange:'')+'.');
+  if(FEED.type&&FEED.type!=='FUTURE'&&meansAContract(FEED.symbol)){
+    out.push('That is NOT the contract his symbol names. The bars below belong to another market and the published contract size does not belong to them, so say that first and plainly: do not read these bars as '+baseSym(FEED.symbol)+', do not price a level off them, and ask him to load the contract instead.');
+    out.push('');
+  }
+  var pv=pointValueOf(FEED.symbol);
+  out.push(pv===null
+    ? ('One point on '+baseSym(FEED.symbol)+' is NOT known to this page, so there is no money figure for it. Say that rather than working one out.')
+    : ('One point on '+baseSym(FEED.symbol)+' is '+dollars(pv)+' per contract — the published contract size. You may use it ONLY to repeat the money line in the JOURNAL block below. You never size a position from it, never turn a stop into money of your own, and never say what a trade could make.'));
+  if(FEED.partial&&FEED.partial.length) out.push('Timeframes that did not come back: '+FEED.partial.join(' '));
+  out.push('');
+  var tfs=['4h','1h','15m','5m'];
+  for(var i=0;i<tfs.length;i++){
+    var t=tfs[i], d=FEED.timeframes[t];
+    if(!d||!d.candles||!d.candles.length){
+      out.push(t+': NO BARS CAME BACK for this timeframe. Say so if the read needs it; never fill it in from another timeframe.');
+      out.push('');
+      continue;
+    }
+    var bars=d.candles.slice(-(FEED_KEEP[t]||12));
+    out.push(t+': '+bars.length+' bars, oldest first. Last bar opens '+utcStamp(bars[bars.length-1].t)+'.');
+    out.push(bars.map(function(b){
+      return new Date(b.t).toISOString().slice(5,16)+' o'+b.o+' h'+b.h+' l'+b.l+' c'+b.c+(b.v?' v'+b.v:'');
+    }).join(' | '));
+    out.push('');
+  }
+  out.push('These are the feed\'s bars, not his broker\'s chart. They can be delayed; they can be a different contract from the one he has up. If his price disagrees with them, HIS chart wins.');
+  out.push('');
+  return out.join('\n');
+}
+
+function setWhen(text, isErr){
+  var el=document.getElementById('fWhen');
+  if(!el) return;
+  el.textContent=text;
+  el.className='feedwhen'+(isErr?' err':'');
+}
+function paintFeed(){
+  paintStructure();
+  paintChartTf();
+  drawChart();
+  paintFrame();
+  var out=document.getElementById('fOut');
+  if(!out) return;
+  if(!FEED||!FEED.ok||!FEED.timeframes){ out.innerHTML=''; return }
+  var tfs=['4h','1h','15m','5m'], h='';
+  for(var i=0;i<tfs.length;i++){
+    var t=tfs[i], d=FEED.timeframes[t];
+    if(!d||!d.candles||!d.candles.length){
+      h+='<div class="frow"><span class="tfname">'+t+'</span><span class="rng">no bars came back</span></div>';
+      continue;
+    }
+    var last=d.candles[d.candles.length-1], lo=Infinity, hi=-Infinity;
+    for(var j=0;j<d.candles.length;j++){
+      if(d.candles[j].l<lo) lo=d.candles[j].l;
+      if(d.candles[j].h>hi) hi=d.candles[j].h;
+    }
+    h+='<div class="frow"><span class="tfname">'+t+'</span>'
+      +'<span class="last">'+esc(money(last.c))+'</span>'
+      +'<span class="rng">'+esc(money(lo))+' – '+esc(money(hi))+'</span></div>';
+  }
+  h+='<div class="pvline">'+pvText(FEED.symbol, FEED.type, FEED.name)+'</div>';
+  out.innerHTML=h;
+}
+
+async function loadFeed(){
+  var symEl=document.getElementById('fSym'), go=document.getElementById('fGo');
+  var sym=((symEl&&symEl.value)||'').trim()||'NQ';
+  if(go) go.disabled=true;
+  setWhen('Loading '+sym.toUpperCase()+'…', false);
+  try{
+    var r=await fetch('/api/candles?bars=120&symbol='+encodeURIComponent(sym),{credentials:'same-origin'});
+    if(r.status===401){ setWhen('Sign in again and the feed will load.', true); return }
+    if(r.status===429){ setWhen('Too many feed requests at once. Give it a moment.', true); return }
+    var d=null;
+    try{ d=await r.json() }catch(e){ d=null }
+    if(!d||!d.ok){
+      /* The feed's own sentence about what went wrong, or none. Never a number
+         in its place, and the previous candles are dropped rather than left on
+         screen as though they were still what the feed was saying. */
+      FEED=null; paintFeed();
+      setWhen((d&&d.error)||'The feed did not answer.', true);
+      return;
+    }
+    FEED=d;
+    save(K_SYM,d.symbol||sym);
+    if(symEl) symEl.value=(d.symbol||sym).replace(/=F$/,'');
+    paintFeed();
+    var last=d.timeframes['5m']||d.timeframes['1h']||d.timeframes['15m']||d.timeframes['4h'];
+    var notContract=(d.type&&d.type!=='FUTURE'&&meansAContract(d.symbol))
+      ? ' The feed says what came back is '+d.type+(d.exchange?', on '+d.exchange:'')+' — not a contract.'
+      : '';
+    setWhen((d.name?d.name+' — ':'')+(d.symbol||sym)+' loaded.'+notContract+' Last bar '+((last&&last.asOf)?utcStamp(Date.parse(last.asOf)):'time unknown')+'.', !!notContract);
+  }catch(e){
+    FEED=null; paintFeed();
+    setWhen('The feed could not be reached. Nothing was invented in its place.', true);
+  }finally{
+    if(go) go.disabled=false;
+  }
+}
+
+/* ---------- the chart: the bars, drawn ----------------------------------- */
+/* He asked for this by name: "can I make my own personal tradingview for
+   personal trading and get real live data for free".
+
+   The engine is free. It is TradingView's own open-source chart library, copied
+   into /vendor and served by this app, so the page still contains no address
+   belonging to anybody else and no vendor learns who is reading it.
+
+   The DATA is not free and cannot be made so. CME sells real-time futures, so
+   every free feed of NQ, ES and gold is delayed — which is why the delay is
+   stated on the chart itself and not in a footnote under it. He scalps 1m and
+   5m; a delayed candle is the one thing on this page that can cost him money by
+   looking right.
+
+   Nothing is drawn that did not come back. No bars, no chart: the box stays
+   empty and says why. The swing labels come from the SAME structure code the
+   block above uses, so the letters on the candles and the letters in the text
+   can never disagree. */
+var K_CHTF='tsid.desk.charttf', CHTFS=['5m','15m','1h','4h'];
+var CHTF=(function(){ var v=load(K_CHTF,null); return CHTFS.indexOf(v)>=0?v:'4h' })();
+var CHART=null, CHSER=null, CHMARK=null, CHLINES=[], CHTRIED=false;
+
+function chartWhen(text, isErr){
+  var el=document.getElementById('chWhen');
+  if(!el) return;
+  el.textContent=text;
+  el.className='feedwhen'+(isErr?' err':'');
+}
+/* A colour off the page's own palette, so the chart is part of the desk and not
+   a white rectangle dropped into a dark page. If the page cannot be asked — a
+   test harness, an odd browser — the fallback is the light-theme value. */
+function cssVar(name, fallback){
+  try{
+    var v=getComputedStyle(document.body).getPropertyValue(name);
+    v=String(v===null||v===undefined?'':v).trim();
+    return v||fallback;
+  }catch(e){ return fallback }
+}
+function chartBars(){
+  if(!FEED||!FEED.ok||!FEED.timeframes) return [];
+  var d=FEED.timeframes[CHTF];
+  if(!d||!d.candles||!d.candles.length) return [];
+  return d.candles;
+}
+function paintChartTf(){
+  for(var i=0;i<CHTFS.length;i++){
+    var el=document.getElementById('ctf-'+CHTFS[i]);
+    if(!el||!el.classList) continue;
+    if(CHTFS[i]===CHTF) el.classList.add('on'); else el.classList.remove('on');
+  }
+}
+function setChartTf(tf){
+  if(CHTFS.indexOf(tf)<0) return;
+  CHTF=tf;
+  save(K_CHTF,tf);
+  paintChartTf();
+  drawChart();
+}
+/* The two levels: the last swing high and the last swing low in the bars on
+   screen. Taken from the same swing code as the labels, so a level can never be
+   a number this page has not shown him somewhere else. */
+function chartLines(bars){
+  var i;
+  for(i=0;i<CHLINES.length;i++){ try{ CHSER.removePriceLine(CHLINES[i]) }catch(e){} }
+  CHLINES=[];
+  var st=structure(bars, WING), hi=null, lo=null;
+  for(i=st.swings.length-1;i>=0;i--){
+    if(st.swings[i].kind==='H'&&hi===null) hi=st.swings[i].p;
+    if(st.swings[i].kind==='L'&&lo===null) lo=st.swings[i].p;
+  }
+  if(hi!==null) CHLINES.push(CHSER.createPriceLine({price:hi, color:cssVar('--ts','#4a4a46'), lineWidth:1, lineStyle:2, axisLabelVisible:true, title:'last high'}));
+  if(lo!==null) CHLINES.push(CHSER.createPriceLine({price:lo, color:cssVar('--ts','#4a4a46'), lineWidth:1, lineStyle:2, axisLabelVisible:true, title:'last low'}));
+}
+function drawChart(){
+  var host=document.getElementById('chArt');
+  if(typeof LightweightCharts==='undefined'){
+    chartWhen('The chart engine did not load, so nothing is drawn here. That is this page\'s own copy failing to arrive — the candles above are still the feed\'s and their numbers are still right.', true);
+    return;
+  }
+  if(!host) return;
+  var bars=chartBars();
+  try{
+    if(!CHART){
+      CHART=LightweightCharts.createChart(host,{
+        autoSize:true,
+        layout:{background:{type:LightweightCharts.ColorType.Solid, color:cssVar('--s1','#ededea')}, textColor:cssVar('--tm','#888780'), fontSize:11},
+        grid:{vertLines:{color:cssVar('--bdr','rgba(0,0,0,.10)')}, horzLines:{color:cssVar('--bdr','rgba(0,0,0,.10)')}},
+        rightPriceScale:{borderColor:cssVar('--bdr2','rgba(0,0,0,.18)')},
+        timeScale:{borderColor:cssVar('--bdr2','rgba(0,0,0,.18)'), timeVisible:true, secondsVisible:false},
+        crosshair:{mode:0}
+      });
+      CHSER=CHART.addSeries(LightweightCharts.CandlestickSeries,{
+        upColor:'#26a69a', downColor:'#ef5350', borderVisible:false,
+        wickUpColor:'#26a69a', wickDownColor:'#ef5350'
+      });
+      CHMARK=LightweightCharts.createSeriesMarkers(CHSER,[]);
+      CHTRIED=true;
+    }
+  }catch(e){
+    CHART=null; CHSER=null; CHMARK=null; CHLINES=[];
+    chartWhen('The chart engine is here but would not start, so nothing is drawn. Nothing was invented in its place — the candles above are still the feed\'s own bars.', true);
+    return;
+  }
+  if(!bars.length){
+    CHSER.setData([]);
+    CHMARK.setMarkers([]);
+    chartLines([]);
+    chartWhen('No '+CHTF+' bars came back, so there is nothing to draw. Load everything on the feed above — an empty box stays empty here rather than being filled in.', false);
+    return;
+  }
+  CHSER.setData(bars.map(function(b){
+    return {time:Math.round(b.t/1000), open:b.o, high:b.h, low:b.l, close:b.c};
+  }));
+  var st=structure(bars, WING), marks=[];
+  for(var i=0;i<st.swings.length;i++){
+    var s=st.swings[i], lab=st.labels[i];
+    var bare=(lab==='H'||lab==='L');
+    marks.push({
+      time:Math.round(s.t/1000),
+      position:(s.kind==='H'?'aboveBar':'belowBar'),
+      shape:(s.kind==='H'?'arrowDown':'arrowUp'),
+      color:(bare?cssVar('--tm','#888780'):((lab==='HH'||lab==='HL')?'#26a69a':'#ef5350')),
+      text:lab
+    });
+  }
+  CHMARK.setMarkers(marks);
+  chartLines(bars);
+  try{ CHART.timeScale().fitContent() }catch(e){}
+  chartWhen(bars.length+' '+CHTF+' '+(bars.length===1?'bar':'bars')+' drawn, oldest '+utcStamp(bars[0].t)+'. Free feed: delayed, and it can be a different contract from the one you have up.', false);
+}
+
+/* ---------- his session: New York only, on his own clock ------------------ */
+/* He said the two things that decide timing in one line: the New York session
+   is the only one he trades, and he is in Central time (St. Louis). So the
+   window is kept in HIS clock — the clock on the device this page is open on —
+   and the page names the zone it read rather than asserting one. Editable,
+   because the exact minutes of a session are a trader's own call.
+
+   Nothing here converts to exchange time and nothing claims to know what an
+   exchange is doing: a page that announced "9:30 in New York" would be guessing
+   about a clock it cannot see. It says what his own clock says, and the
+   assistant is told that is what it is. */
+var K_SESS='tsid.desk.session', SESS_DEFAULT={a:'08:30',b:'15:00'};
+var SESS=load(K_SESS, null);
+if(!SESS||typeof SESS!=='object'||hhmm(SESS.a)===null||hhmm(SESS.b)===null) SESS={a:SESS_DEFAULT.a,b:SESS_DEFAULT.b};
+
+function hhmm(v){
+  var m=/^(\d{1,2}):(\d{2})$/.exec(String(v==null?'':v).trim());
+  if(!m) return null;
+  var h=parseInt(m[1],10), mi=parseInt(m[2],10);
+  if(h>23||mi>59) return null;
+  return h*60+mi;
+}
+function hhmmText(mins){
+  var h=Math.floor(mins/60), m=mins%60;
+  return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+}
+function clockLabel(mins){
+  var h=Math.floor(mins/60), m=mins%60, ap=h<12?'AM':'PM', h12=h%12; if(h12===0) h12=12;
+  return h12+':'+(m<10?'0':'')+m+' '+ap;
+}
+/* Is this minute inside the window? The start counts and the end does not. A
+   window that runs past midnight is allowed — a session that opens at 6pm is
+   not a mistake. An unusable window is not a window: null, never a guess. */
+function inWindow(mins, win){
+  var a=hhmm(win&&win.a), b=hhmm(win&&win.b);
+  if(a===null||b===null||a===b) return null;
+  return a<b ? (mins>=a&&mins<b) : (mins>=a||mins<b);
+}
+function localMins(ms){
+  var d=new Date(ms==null?Date.now():ms);
+  return d.getHours()*60+d.getMinutes();
+}
+function zoneName(){
+  try{ return (Intl&&Intl.DateTimeFormat&&Intl.DateTimeFormat().resolvedOptions().timeZone)||'this device' }catch(e){ return 'this device' }
+}
+function sessState(ms){
+  var mins=localMins(ms), a=hhmm(SESS.a), b=hhmm(SESS.b), on=inWindow(mins,SESS);
+  var left=null, toOpen=null;
+  if(a!==null&&b!==null&&a!==b){
+    if(on) left = (b>a) ? (b-mins) : (mins>=a ? (24*60-mins+b) : (b-mins));
+    else toOpen = (mins<a) ? (a-mins) : (24*60-mins+a);
+  }
+  return {mins:mins, on:on, a:a, b:b, left:left, toOpen:toOpen, label:clockLabel(mins),
+          window:hhmmText(a===null?0:a)+'-'+hhmmText(b===null?0:b), zone:zoneName()};
+}
+function fmtMins(n){
+  if(n===null||n===undefined) return '';
+  var h=Math.floor(n/60), m=n%60;
+  return (h?h+'h ':'')+m+'m';
+}
+/* The block the assistant reads on every question. It is his clock, his window,
+   and the one rule that matters: bars outside it are context, not triggers. */
+function sessionText(ms){
+  var s=sessState(ms);
+  return [
+    'HIS SESSION. He trades the New York session and nothing else. His window is '+s.window+' on his own clock ('+s.zone+') — the clock on the device this page is open on.',
+    'Right now that clock reads '+s.label+', so he is '+(s.on?'IN his session':'OUTSIDE his session')+'.',
+    'Bars outside that window are context, never a trigger: if the pattern he is asking about formed outside it, say that first and plainly. It is his own clock, never an exchange clock — do not tell him what time it is on an exchange.',
+    ''
+  ].join('\n');
+}
+function paintSession(ms){
+  var el=document.getElementById('sNow');
+  if(!el) return;
+  var s=sessState(ms);
+  el.className='sessnow '+(s.on?'on':'off');
+  el.textContent=(s.on
+    ? 'In your session — your clock reads '+s.label+'.'+(s.left!==null?' '+fmtMins(s.left)+' left of it.':'')
+    : 'Outside your session — your clock reads '+s.label+'.'+(s.toOpen!==null?' It opens in '+fmtMins(s.toOpen)+'.':''))
+    +' Window '+s.window+' ('+s.zone+').';
+}
+function saveSession(){
+  var a=document.getElementById('sA'), b=document.getElementById('sB');
+  var av=hhmm(a?a.value:null), bv=hhmm(b?b.value:null);
+  if(av===null||bv===null||av===bv){ paintSession(); return }
+  SESS={a:hhmmText(av), b:hhmmText(bv)};
+  save(K_SESS, SESS);
+  paintSession();
+}
+
+/* ---------- structure: what the bars have already done ------------------- */
+/* He asked for this one by name: "hh hl hh hl hh ... close to the previous hh
+   not really breaking structure with a lot of momentum" — an unbroken run of
+   higher highs and higher lows into the old high, price not through it, the
+   last bars smaller than the ones before them. So the swings are worked out
+   here, from his candles, and labelled the way he says them out loud.
+
+   Arithmetic on bars that have already closed, and nothing else. It can say
+   what the bars did, how far price is from them, and the level that would end
+   the run — the last higher low, which is a number rather than a guess. It
+   cannot say what comes next and it is never allowed to pretend to: the page
+   never calls a turn, and neither does the assistant. */
+var WING=2, MOM_EASE=0.8, MOM_EXPAND=1.25, COMPRESS_SPAN=3;
+
+function avgRange(list){
+  if(!list||!list.length) return null;
+  var t=0, i;
+  for(i=0;i<list.length;i++) t+=(list[i].h-list[i].l);
+  return t/list.length;
+}
+/* A swing high is a bar whose high is above every high in the WING bars either
+   side of it; a swing low is the same on the other side. Runs of the same kind
+   fold to the most extreme one, so the sequence alternates the way he means it
+   to. Strictly greater, so a flat top is not called a swing. */
+function swings(candles, wing){
+  var w=(wing==null?WING:wing);
+  if(!candles||candles.length<w*2+1) return [];
+  var piv=[], i, j;
+  for(i=w;i<candles.length-w;i++){
+    var hi=true, lo=true;
+    for(j=i-w;j<=i+w;j++){
+      if(j===i) continue;
+      if(candles[j].h>=candles[i].h) hi=false;
+      if(candles[j].l<=candles[i].l) lo=false;
+    }
+    if(hi) piv.push({kind:'H',p:candles[i].h,t:candles[i].t});
+    else if(lo) piv.push({kind:'L',p:candles[i].l,t:candles[i].t});
+  }
+  var seq=[];
+  for(i=0;i<piv.length;i++){
+    var last=seq[seq.length-1];
+    if(last&&last.kind===piv[i].kind){
+      if(piv[i].kind==='H' ? (piv[i].p>=last.p) : (piv[i].p<=last.p)) seq[seq.length-1]=piv[i];
+    } else seq.push(piv[i]);
+  }
+  return seq;
+}
+/* The labels, against the last swing of the same kind: HH higher high, HL
+   higher low, LH lower high, LL lower low. The letter after the H or the L is
+   always about direction — a low that is higher than the last low is HL, never
+   LH, because LH already means something else.
+   The first swing has nothing before it, so it keeps its bare letter rather
+   than a label it has not earned. */
+function structure(candles, wing){
+  var s=swings(candles, wing), labels=[], i, j;
+  for(i=0;i<s.length;i++){
+    var prev=null;
+    for(j=i-1;j>=0;j--){ if(s[j].kind===s[i].kind){ prev=s[j]; break } }
+    if(!prev){ labels.push(s[i].kind); continue }
+    var higher=(s[i].p>prev.p);
+    labels.push(s[i].kind==='H' ? (higher?'HH':'LH') : (higher?'HL':'LL'));
+  }
+  return {swings:s, labels:labels};
+}
+/* One timeframe, read. Everything in here is a measurement of the bars: where
+   the last close sits against the last swing high and low, how big the last ten
+   bars are, whether the last three are smaller than the eight before them, and
+   whether the last five are overlapping. Six bars is the fewest that can carry
+   one swing and a comparison, so fewer than that is nothing rather than a
+   guess. */
+function readOf(tf, candles){
+  if(!candles||candles.length<6) return null;
+  var st=structure(candles, WING), sw=st.swings, lab=st.labels;
+  var last=candles[candles.length-1];
+  var lastH=null, lastL=null, hiLab=null, loLab=null, i;
+  for(i=sw.length-1;i>=0;i--){
+    if(sw[i].kind==='H'&&!lastH){ lastH=sw[i]; hiLab=lab[i] }
+    if(sw[i].kind==='L'&&!lastL){ lastL=sw[i]; loLab=lab[i] }
+  }
+  var shown=lab.slice(-6).filter(function(l){ return l.length>1 });
+  var rNow=avgRange(candles.slice(-3)), rBefore=avgRange(candles.slice(-11,-3));
+  var mom=(rNow&&rBefore)?(rNow/rBefore):null;
+  var l5=candles.slice(-5), span=null;
+  if(l5.length===5){
+    var lo=Infinity, hi=-Infinity;
+    for(i=0;i<5;i++){ if(l5[i].l<lo) lo=l5[i].l; if(l5[i].h>hi) hi=l5[i].h }
+    span=hi-lo;
+  }
+  var bar=avgRange(candles.slice(-10));
+  return {
+    tf:tf, labels:shown, trend:(hiLab==='HH'&&loLab==='HL')?'up':((hiLab==='LH'&&loLab==='LL')?'down':'mixed'),
+    close:last.c, bar:bar,
+    lastH:lastH?lastH.p:null, lastL:lastL?lastL.p:null,
+    gapHigh:lastH?(last.c-lastH.p):null, gapLow:lastL?(last.c-lastL.p):null,
+    mom:mom, span:span, spanBars:(span!==null&&bar)?(span/bar):null
+  };
+}
+/* The picture he described, and only as a question about the bars: is price
+   within an average bar and a half of the last swing high, in an up run, and
+   not through it? When it is, the run is into the old high and the last bars
+   are either losing size or they are not — both are stated, because a small
+   bar count with the same size is a different chart. */
+function extended(r){
+  if(!r||r.trend!=='up') return null;
+  if(r.gapHigh===null||r.gapHigh>0) return null;
+  if(!r.bar||Math.abs(r.gapHigh)>r.bar*1.5) return null;
+  return {easing:(r.mom!==null&&r.mom<MOM_EASE), compressed:(r.spanBars!==null&&r.spanBars<=COMPRESS_SPAN),
+          small:(r.mom!==null&&r.mom>MOM_EXPAND)};
+}
+/* One timeframe, in a sentence. Used for the page and for the assistant, so the
+   two can never say different things about the same bars. */
+function structureLine(r){
+  if(!r) return null;
+  var out=[r.tf+': '];
+  out.push(r.labels.length ? ('swings '+r.labels.join(' ')) : 'no clean swings in the bars that came back');
+  out.push(r.trend==='up' ? ' — the run so far is higher highs and higher lows.'
+    : r.trend==='down' ? ' — lower highs and lower lows so far.'
+    : ' — the swings are not making a clean run either way.');
+  if(r.gapHigh!==null){
+    out.push(r.gapHigh<0
+      ? (' Price '+money(Math.abs(r.gapHigh))+' under the last swing high ('+money(r.lastH)+'), '+(r.bar?('about '+two(Math.abs(r.gapHigh)/r.bar)+' average bars'):'distance in points only')+'.')
+      : (' Price is '+money(r.gapHigh)+' above the last swing high ('+money(r.lastH)+') — that high has been taken.'));
+  }
+  if(r.lastL!==null) out.push(' Last higher-or-lower low: '+money(r.lastL)+'.');
+  if(r.mom!==null) out.push(' Last three bars average '+two(r.mom)+'× the eight before them — '
+    +(r.mom<MOM_EASE?'the bars are getting smaller':(r.mom>MOM_EXPAND?'the bars are getting bigger':'about the same size'))+'.');
+  if(r.spanBars!==null) out.push(' Last five bars span '+money(r.span)+' — '+two(r.spanBars)+' average bars, '+(r.spanBars<=COMPRESS_SPAN?'compressed':'not compressed')+'.');
+  return out.join('');
+}
+/* The block the assistant reads. Yardsticks are spelled out so a word on the
+   page can be checked against the arithmetic behind it, and so nothing reads as
+   a judgement from nowhere. */
+function structureText(){
+  var head=['STRUCTURE OFF THE BARS — worked out on this page from the candle block below, and from nothing else. Every number in it is arithmetic on bars that have already closed.','',
+    'Yardsticks, so a word can be checked: a swing is a bar higher (or lower) than the '+WING+' bars either side of it; HH higher high, HL higher low, LH lower high, LL lower low, each against the last swing of the same kind; "average bars" is the mean size of the last ten bars on that timeframe; the bars are called smaller when the last three average under '+MOM_EASE+'× the eight before them; compressed is the last five bars spanning under '+COMPRESS_SPAN+' average bars.',''];
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    head.push('NOT COMPUTED — no candles came back, so there are no swings, no highs, no lows and no measurements at all. Say you cannot read structure without candles. Do not describe a pattern, do not name a level, and do not guess where the last higher low is.','');
+    return head.join('\n');
+  }
+  var tfs=['4h','1h','15m','5m'], any=false, i;
+  for(i=0;i<tfs.length;i++){
+    var d=FEED.timeframes[tfs[i]];
+    var r=(d&&d.candles)?readOf(tfs[i], d.candles):null;
+    if(!r){
+      head.push(tfs[i]+': not enough bars came back to read a swing off — say so if the read needs it, and never fill it in from another timeframe.');
+      head.push('');
+      continue;
+    }
+    any=true;
+    head.push(structureLine(r));
+    var ext=extended(r);
+    if(ext){
+      head.push('   THIS IS THE PICTURE HE DESCRIBED, if it matches what he is asking about: a run of '+r.labels.join(' ')+' into the old high at '+money(r.lastH)+', price '+money(Math.abs(r.gapHigh))+' short of it and not through it'
+        +(ext.easing?', with the last three bars smaller than the eight before them':'')
+        +(ext.compressed?', and the last five bars compressed':'')+'. That is a read of what has already happened.');
+      head.push('   What would end it: his own rule is that a run of higher lows ends when the last one goes — '+money(r.lastL)+' on this timeframe. Give him that as the level to watch, name the timeframe it came from, and put it before anything to the upside.');
+    } else if(r.trend==='up'){
+      head.push('   The run is up, but price is not up against the last swing high — so this is not the extended-into-the-old-high picture. Say that plainly rather than reaching for it.');
+    }
+    head.push('');
+  }
+  if(!any) head.push('No timeframe had enough bars to read a swing off.');
+  head.push('WHAT THIS IS AND IS NOT: it is what the bars did. Quote it as the bars\' own arithmetic, with the timeframe named, and use it as the only basis for calling a chart extended, easing or compressed. It never becomes a call — not "a reversal is coming", not "this is about to pull back", not "high probability". A turn is only ever his own 5m trigger, and where he is wrong comes first as always.');
+  head.push('');
+  return head.join('\n');
+}
+/* The same read, on the page, so he can see what the assistant was handed. It
+   is painted from the same candles and by the same code, which is the only way
+   the two can be trusted to agree.
+
+   Laid out as a labelled line per fact rather than as one paragraph of numbers
+   — he asked for exactly that, and nothing in the arithmetic changed. */
+function stRow(k,v){
+  if(!v) return '';
+  return '<div class="stline"><span class="stk">'+esc(k)+'</span><span class="stv">'+v+'</span></div>';
+}
+function trendWords(r){
+  return r.trend==='up' ? 'Higher highs, higher lows'
+    : r.trend==='down' ? 'Lower highs, lower lows'
+    : 'Not running either way';
+}
+function priceWords(r){
+  if(r.gapHigh===null) return null;
+  return r.gapHigh<0
+    ? ('<b>'+esc(money(Math.abs(r.gapHigh)))+'</b> under the last high ('+esc(money(r.lastH))+')')
+    : ('<b>'+esc(money(r.gapHigh))+'</b> above the last high ('+esc(money(r.lastH))+') — that high is gone');
+}
+function barsRow(r){
+  if(r.mom===null) return '';
+  var w=r.mom<MOM_EASE ? 'Getting smaller' : (r.mom>MOM_EXPAND ? 'Getting bigger' : 'About the same size');
+  return stRow('Bars', esc(w)+' <span class="stx">'+esc(two(r.mom))+'× the eight before</span>');
+}
+function rangeRow(r){
+  if(r.spanBars===null) return '';
+  return stRow('Range', esc(money(r.span))+' over the last five'
+    +(r.spanBars<=COMPRESS_SPAN ? ' — <b>squeezed</b>' : '')
+    +' <span class="stx">'+esc(two(r.spanBars))+'× a normal bar</span>');
+}
+function watchRow(r){
+  if(r.lastL===null) return '';
+  return stRow('Watch', '<b>'+esc(money(r.lastL))+'</b> — the last higher-or-lower low. The run ends if that goes.');
+}
+function paintStructure(){
+  var out=document.getElementById('stOut'), when=document.getElementById('stWhen');
+  if(!out) return;
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    out.innerHTML='';
+    if(when) when.textContent='No candles loaded, so there is nothing to read yet.';
+    return;
+  }
+  var tfs=['4h','1h','15m','5m'], h='', any=false, i;
+  for(i=0;i<tfs.length;i++){
+    var d=FEED.timeframes[tfs[i]];
+    var r=(d&&d.candles)?readOf(tfs[i], d.candles):null;
+    if(!r){
+      h+='<div class="stcard"><div class="sthd"><b>'+tfs[i]+'</b><span class="sttrend">No read</span></div>'
+        +stRow('Bars','not enough bars came back to read a swing off')+'</div>';
+      continue;
+    }
+    any=true;
+    h+='<div class="stcard">'
+      +'<div class="sthd"><b>'+tfs[i]+'</b><span class="sttrend">'+esc(trendWords(r))+'</span></div>'
+      +'<div class="stsw">Swings: '+esc(r.labels.length?r.labels.join(' '):'none')+'</div>'
+      +stRow('Price', priceWords(r))
+      +barsRow(r)
+      +rangeRow(r)
+      +watchRow(r)
+      +(extended(r)?'<div class="stflag">Run into the old high, not through it.</div>':'')
+      +'</div>';
+  }
+  out.innerHTML=h;
+  if(when) when.textContent=any
+    ? 'Worked out from the bars that came back, and handed to the assistant with every question. It describes what has already happened; it does not predict.'
+    : 'Not enough bars came back to read a swing off.';
+}
+
+/* ---------- the frame, read off this page's own candles -------------------- */
+/* Jacques, 19 Sep 2026: "build the desk reading its own chart".
+
+   The script on his chart (Someday) reads a frame, and he has to carry that read
+   to the assistant himself. This is the same read, worked out here, on the same
+   feed bars - so the assistant knows the frame on its own, and so his chart and
+   this page can be held against each other instead of being taken on trust.
+
+   His rules, as numbers:
+     - a new LOWER LOW on the frame turns the frame down. The level is the swing
+       high the drop came from; the frame low is that lower low.
+     - only a CLOSE above the level cancels the frame. A poke above the level
+       that never closed changes nothing, which is his own rule and the one that
+       has been costing him.
+     - the small chart is the step below the frame, read for higher highs with
+       the last higher low still holding. A close under that low ends the hold.
+     - then: short at the level, long scalp when the small chart turns up,
+       otherwise wait.
+
+   Three things are deliberate here:
+   1. It is a READ, never a prediction. Every number is off bars that came back.
+   2. A cancelled frame is DROPPED. A level from hours ago sitting next to a live
+      price reads as nonsense - his own complaint about the box on his chart - so
+      a cancelled frame shows no price at all until a fresh lower low sets the
+      next one.
+   3. It says which timeframe it read, which bar it read the close off, and how
+      many swings the frame gave it, so an empty read explains itself rather
+      than looking like the market's answer. */
+var K_FRAME='tsid.desk.frame', FRAME_TFS=['15m','1h','4h'];
+var FRAMETF=(function(){ var v=load(K_FRAME,null); return FRAME_TFS.indexOf(v)>=0?v:'1h' })();
+var FRAME_LEN=2, SMALL_LEN=3;
+
+/* The small chart is the step below the frame, so the same bars are never read
+   twice as though they were two different things. */
+function smallTfFor(){
+  return FRAMETF==='15m' ? '5m' : '15m';
+}
+function frameBars(tf){
+  var d=(FEED&&FEED.ok&&FEED.timeframes)?FEED.timeframes[tf]:null;
+  return (d&&d.candles)?d.candles:[];
+}
+/* Is the small chart turning up? The last swing high above the one before it,
+   AND the last higher low still holding on a CLOSE - a wick under it does not
+   end the hold. The same two things the script on his chart asks for. */
+function smallChart(bars){
+  var out={ok:false, high:null, prevHigh:null, hold:null, close:null, up:false};
+  if(!bars||bars.length<SMALL_LEN*2+3) return out;
+  var sw=structure(bars, SMALL_LEN).swings, i;
+  var hi=null, prevHi=null, hold=null, prevLo=null;
+  for(i=0;i<sw.length;i++){
+    if(sw[i].kind==='H'){ prevHi=hi; hi=sw[i].p }
+    else { if(prevLo!==null && sw[i].p>prevLo) hold=sw[i].p; prevLo=sw[i].p }
+  }
+  out.ok=true; out.high=hi; out.prevHigh=prevHi; out.hold=hold;
+  out.close=bars[bars.length-1].c;
+  out.up=(prevHi!==null && hi!==null && hi>prevHi && hold!==null && out.close>hold);
+  return out;
+}
+/* The frame, worked out on the bars that came back. It returns the read and the
+   sentence that goes with it, and it never fills a number in. */
+function frameRead(){
+  var r={tf:FRAMETF, smallTf:smallTfFor(), ok:false, why:'no candles came back',
+         bars:0, swings:0, highs:0, lows:0, level:null, low:null,
+         levelBar:null, lowBar:null, close:null, closedAt:null,
+         state:'no frame yet', verdict:'wait', lowerLow:false, atLevel:false,
+         underLow:false, changed:false, up:false, cancelAgo:null, cancelLive:false};
+  if(!FEED||!FEED.ok||!FEED.timeframes) return r;
+  var bars=frameBars(FRAMETF), i, j;
+  r.bars=bars.length;
+  if(bars.length<FRAME_LEN*2+3){
+    r.why='not enough '+FRAMETF+' bars came back to read a swing off';
+    return r;
+  }
+  r.ok=true;
+  var sw=structure(bars, FRAME_LEN).swings;
+  for(i=0;i<sw.length;i++){ if(sw[i].kind==='H') r.highs++; else r.lows++ }
+  r.swings=sw.length;
+  var last=bars[bars.length-1];
+  r.close=last.c;
+  r.closedAt=last.t;
+  /* The most recent lower low: the newest swing low that sits under the low
+     before it. No lower low in the bars means no frame, and the page says so
+     rather than dressing the run above it up as one. */
+  var lowIdx=-1, prevLow=-1;
+  for(i=sw.length-1;i>=0;i--){
+    if(sw[i].kind!=='L') continue;
+    prevLow=-1;
+    for(j=i-1;j>=0;j--){ if(sw[j].kind==='L'){ prevLow=j; break } }
+    if(prevLow>=0 && sw[i].p<sw[prevLow].p){ lowIdx=i; break }
+  }
+  if(lowIdx<0){ r.why='no lower low on '+FRAMETF+' in the bars that came back'; return r }
+  var lvlIdx=-1;
+  for(j=lowIdx-1;j>=0;j--){ if(sw[j].kind==='H'){ lvlIdx=j; break } }
+  if(lvlIdx<0){ r.why='the '+FRAMETF+' lower low has no swing high before it to set a level'; return r }
+  r.level=sw[lvlIdx].p; r.low=sw[lowIdx].p; r.lowerLow=true;
+  r.levelBar=sw[lvlIdx].t; r.lowBar=sw[lowIdx].t;
+  /* A close above the level cancels the frame, and it is the bar's own close off
+     the feed - a poke above the level with no close above it cancels nothing,
+     which is the rule he wrote himself. */
+  var cancelAt=-1;
+  for(i=0;i<bars.length;i++){
+    if(bars[i].t<=r.lowBar) continue;
+    if(bars[i].c>r.level){ cancelAt=i; break }
+  }
+  if(cancelAt>=0){
+    r.changed=true; r.level=null; r.low=null;
+    r.state='frame changed'; r.verdict='wait - the frame changed';
+    r.cancelAgo=bars.length-1-cancelAt;
+    r.cancelLive=(cancelAt===bars.length-1);
+    r.why='the frame closed above its level';
+    return r;
+  }
+  r.underLow=(last.c<r.low);
+  r.atLevel=!r.underLow && last.h>=r.level;
+  r.state=r.underLow ? 'under the low' : (r.atLevel ? 'level in play' : 'retracing');
+  r.up=smallChart(frameBars(r.smallTf)).up;
+  r.verdict=r.atLevel ? 'short' : ((r.state==='retracing'&&r.up) ? 'long scalp' : 'wait');
+  return r;
+}
+
+function paintFrameTf(){
+  for(var i=0;i<FRAME_TFS.length;i++){
+    var el=document.getElementById('ftf-'+FRAME_TFS[i]);
+    if(!el||!el.classList) continue;
+    if(FRAME_TFS[i]===FRAMETF) el.classList.add('on'); else el.classList.remove('on');
+  }
+}
+function setFrameTf(tf){
+  if(FRAME_TFS.indexOf(tf)<0) return;
+  FRAMETF=tf;
+  save(K_FRAME,tf);
+  paintFrameTf();
+  paintFrame();
+}
+/* Painted from the same function the assistant is handed, so the box on the page
+   and the block in the instructions cannot say different things about the same
+   bars. */
+function paintFrame(){
+  var out=document.getElementById('frOut'), when=document.getElementById('frWhen');
+  if(!out) return;
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    out.innerHTML='';
+    if(when) when.textContent='No candles loaded, so there is no frame to read. Load them on the feed above.';
+    return;
+  }
+  var r=frameRead();
+  var h='<div class="stcard">'
+    +'<div class="sthd"><b>'+esc(r.tf)+'</b><span class="sttrend">'+esc(r.verdict)+'</span></div>'
+    +stRow('State', esc(r.state))
+    +stRow('The level', r.level===null ? 'none shown' : ('<b>'+esc(money(r.level))+'</b>'))
+    +stRow('The frame low', r.low===null ? 'none shown' : ('<b>'+esc(money(r.low))+'</b>'))
+    +stRow('Lower low made', r.lowerLow ? 'yes' : 'no')
+    +stRow('At the level / working back', (r.atLevel||r.state==='retracing') ? 'yes' : 'no')
+    +stRow('Small chart ('+esc(r.smallTf)+') turned up', r.up ? 'yes' : 'no')
+    +stRow('Close above the level', r.changed ? 'yes' : 'no')
+    +stRow('Swings the frame gave', esc(r.highs+' high / '+r.lows+' low'))
+    +'</div>';
+  if(!r.ok) h+='<div class="stflag">Nothing to read: '+esc(r.why)+'.</div>';
+  out.innerHTML=h;
+  if(!when) return;
+  /* Nothing to read and nothing to do are two different things: a frame with no
+     lower low in it is a real read of a market that has not made the pattern,
+     while !ok is the bars not coming back at all. Both say which one it is
+     rather than leaving a blank where an answer goes. */
+  if(!r.lowerLow){
+    when.textContent='No frame read: '+r.why+'.';
+    return;
+  }
+  if(r.changed){
+    when.textContent='The frame was closed above its level '
+      +(r.cancelAgo===0 ? 'on the last bar that came back' : r.cancelAgo+(r.cancelAgo===1?' bar ago':' bars ago'))
+      +', so no level is shown. A fresh lower low sets the next one.'
+      +(r.cancelLive ? ' That last bar may not have finished closing yet.' : '');
+    return;
+  }
+  when.textContent='Read off the '+r.tf+' bars that came back, the last of them opening '+utcStamp(r.closedAt)
+    +'. The same rules the script on your chart runs, on this page\'s own candles.';
+}
+
+/* The block the assistant reads. Same rules, and the same rule about what it may
+   never become: the verdict is one of three answers, and "wait" is a complete
+   one. */
+function frameText(){
+  var head=['THE FRAME - his own rules, worked out on this page from the candle block below, and from nothing else. IT IS THE SAME READ THE SCRIPT ON HIS CHART RUNS, on the same bars, so the two can be held against each other.','',
+    'How it is worked out, so any line can be checked: a frame is down when the frame\'s own bars make a LOWER LOW. The level is the swing high the drop came from - the lower high he would short back to - and the frame low is that lower low. Only a CLOSE above the level cancels the frame; a poke above it cancels nothing. The small chart is the step below the frame, read on its own bars for higher highs with the last higher low still holding, and a close under that low ends the hold. Then: short at the level, long scalp while the small chart is turned up, otherwise wait.',''];
+  if(!FEED||!FEED.ok||!FEED.timeframes){
+    head.push('NOT READ - no candles are loaded, so there is no frame. Say you cannot read the frame without candles: do not describe one, do not name a level, and do not guess where the last lower low is.','');
+    return head.join('\n');
+  }
+  var r=frameRead();
+  head.push('Frame: '+r.tf+'. Small chart: '+r.smallTf+'.');
+  head.push('State: '+r.state+'.');
+  if(r.level!==null){
+    head.push('The level: '+money(r.level)+'. The frame low: '+money(r.low)+'.');
+  }else{
+    head.push('NO LEVEL IS SHOWN, and that is deliberate: '+(r.changed
+      ? 'the frame closed above its level, so it is cancelled and its prices are dropped rather than left standing next to a live price'
+      : r.why)+'. Do not supply one.');
+  }
+  head.push('Lower low made: '+(r.lowerLow?'yes':'no')+'. At the level or working back: '+((r.atLevel||r.state==='retracing')?'yes':'no')+'. Small chart turned up: '+(r.up?'yes':'no')+'. Close above the level: '+(r.changed?'yes':'no')+'.');
+  head.push('Swings the frame gave it: '+r.highs+' highs and '+r.lows+' lows'+(r.swings?'':', so an empty read here is the bars and not the market')+'.');
+  head.push('Verdict, by his own rules: '+r.verdict+'.');
+  if(r.cancelAgo!==null) head.push('The frame was cancelled '+(r.cancelAgo===0?'on the last bar that came back':r.cancelAgo+(r.cancelAgo===1?' bar before it':' bars before it'))+(r.cancelLive?' - and a bar that has not finished closing can still change.':'.'));
+  if(r.closedAt!==null) head.push('The last bar it read the close off opens '+utcStamp(r.closedAt)+'.');
+  head.push('');
+  head.push('WHAT THIS IS AND IS NOT: it is his own rules as arithmetic on bars that came back. The verdict is one of wait, short or long scalp and nothing else. Wait is the answer most of the time and it is a complete answer - never apologise for it or pad it into a maybe. Never turn the verdict into a promise, a probability or a target, never supply a level when this block shows none, and where he is wrong still comes first.');
+  head.push('');
+  return head.join('\n');
+}
+
+/* ---------- study the timing --------------------------------------------- */
+/* Jacques, 19 Sep 2026: "the trading desk needs a part in there where it helps
+   me ... research for me to get better timing".
+
+   So: four questions, and every one of them is something he already says out
+   loud about his own trading. Each is answered by counting what the bars did,
+   on the same swing code the structure block above uses, so the letters on the
+   page and the counts in here cannot disagree with each other.
+
+     1. THE POKE. "A wick is not a break, a close is." How many times did price
+        trade above a 4h swing high, and how many of those did it then CLOSE
+        above? The ones that never closed are the grab — the exact thing that
+        has been costing him, because he reacts to the poke.
+     2. THE RETRACE. He waits for price to come back to the level instead of
+        chasing it. So: of the down legs in these bars, how many came all the
+        way back to the swing high that started them, and how many never came
+        back at all?
+     3. THE HOLD. "Holding for a period of time" is a number of bars or it is
+        not a rule. So: every higher low on the 15m, and how many bars it took
+        before the first close below it.
+     4. THE WINDOW. What share of the range a day made was inside his own
+        session window, and how often the high or the low of the day was made
+        in there.
+
+   WHAT THIS IS NOT. It is not a backtest. No setup of his is entered, exited
+   or priced anywhere in this file, so there is no result to show him, and the
+   assistant is told that in as many words. It is counting on bars that came
+   back, every figure is printed with the count behind it, and nothing is
+   projected from any of it.
+
+   AND IT IS A SMALL SAMPLE ON PURPOSE. One loaded window of bars is a few
+   weeks of 4h and a few days of 15m. The page says which dates and how many
+   bars, and the assistant is told to say how thin a count is whenever it
+   repeats one.
+
+   It pulls its own bars, at 500 a timeframe, because the read above only holds
+   the last few of each and a study needs a stretch. STUDY holds exactly what
+   came back: a failed load leaves nothing behind rather than the previous
+   study, so nothing on the page can be read as a measurement it is not. */
+var STUDY=null, STUDY_BARS=500, POKE_LOOK=6;
+
+function studyMsg(text, isErr){
+  var el=document.getElementById('studyMsg');
+  if(!el) return;
+  el.textContent=text;
+  el.className='feedwhen'+(isErr?' err':'');
+}
+function studyBars(tf){
+  if(!STUDY||!STUDY.ok||!STUDY.timeframes) return null;
+  var d=STUDY.timeframes[tf];
+  return (d&&d.candles&&d.candles.length)?d.candles:null;
+}
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dayText(ms){
+  var d=new Date(ms);
+  return d.getDate()+' '+MONTHS[d.getMonth()];
+}
+/* Bars come back with a time on them and the swings come back as prices and
+   times, and every count below needs to know which bar a swing came from. */
+function barIndex(candles){
+  var m={}, i;
+  for(i=0;i<candles.length;i++) m[candles[i].t]=i;
+  return m;
+}
+function midOf(list){
+  if(!list||!list.length) return null;
+  return list[Math.floor(list.length/2)];
+}
+/* 1. THE POKE AND THE CLOSE. One count per swing high that a later bar traded
+   above: did a bar then CLOSE above it within POKE_LOOK bars, or not? The
+   deepest poke that failed is kept too, in points, because how far a grab goes
+   is the difference between a stop that survives it and one that does not. */
+function pokeStudy(candles){
+  var sw=structure(candles, WING).swings, at=barIndex(candles);
+  var out={pokes:0, closed:0, failed:0, deep:null, level:null}, i, k;
+  for(i=0;i<sw.length;i++){
+    if(sw[i].kind!=='H') continue;
+    var a=at[sw[i].t];
+    if(a===undefined) continue;
+    var j=-1;
+    for(k=a+1;k<candles.length;k++){ if(candles[k].h>sw[i].p){ j=k; break } }
+    if(j<0) continue;                 /* never traded above: not a poke */
+    out.pokes++;
+    var closed=false, top=candles[j].h, end=Math.min(candles.length, j+POKE_LOOK);
+    for(k=j;k<end;k++){
+      if(candles[k].h>top) top=candles[k].h;
+      if(candles[k].c>sw[i].p){ closed=true; break }
+    }
+    if(closed) out.closed++;
+    else {
+      out.failed++;
+      var d=top-sw[i].p;
+      if(out.deep===null||d>out.deep){ out.deep=d; out.level=sw[i].p }
+    }
+  }
+  return out;
+}
+/* 2. THE RETRACE. A down leg is a swing high followed by the next swing low.
+   The retrace is the highest price after that low, before the first bar that
+   CLOSES back below the low — his own close-not-wick rule again. So a leg back
+   at the swing high is 100% of itself, and a leg that broke its low without
+   coming back is 0%. A leg whose low has not gone yet is counted as live and
+   kept in the list, because it has not finished doing anything. */
+function retraceStudy(candles){
+  var sw=structure(candles, WING).swings, at=barIndex(candles);
+  var pcts=[], live=0, whole=0, twoThirds=0, under=0, none=0, i, k;
+  for(i=0;i<sw.length-1;i++){
+    if(sw[i].kind!=='H'||sw[i+1].kind!=='L') continue;
+    var h=sw[i], low=sw[i+1], b=at[low.t];
+    if(b===undefined) continue;
+    var leg=h.p-low.p;
+    if(!(leg>0)) continue;
+    var top=null, broke=false;
+    for(k=b+1;k<candles.length;k++){
+      if(candles[k].c<=low.p){ broke=true; break }
+      if(top===null||candles[k].h>top) top=candles[k].h;
+    }
+    /* A leg whose low has not gone yet has not finished: it is counted as live
+       and left out of the counts below, because counting it would read as a leg
+       that never came back rather than one that is still running. */
+    if(!broke){ live++; continue }
+    var pct=(top===null)?0:((top-low.p)/leg);
+    pcts.push(pct);
+    if(pct>=0.99) whole++;
+    if(pct>=2/3) twoThirds++;
+    if(pct<1/3) under++;
+    if(pct<=0) none++;
+  }
+  var sorted=pcts.slice().sort(function(a,b){ return a-b });
+  return {n:pcts.length, live:live, whole:whole, twoThirds:twoThirds, under:under, none:none, mid:midOf(sorted)};
+}
+/* 3. THE HOLD. Every higher low in the bars, and how many bars it lasted before
+   the first bar CLOSED below it. A higher low still standing when the bars run
+   out is counted as still holding and is not given a length, because it has not
+   had one yet. */
+function holdStudy(candles){
+  var st=structure(candles, WING), sw=st.swings, lab=st.labels, at=barIndex(candles);
+  var holds=[], holding=0, i, k;
+  for(i=0;i<sw.length;i++){
+    if(sw[i].kind!=='L'||lab[i]!=='HL') continue;
+    var a=at[sw[i].t];
+    if(a===undefined) continue;
+    var end=-1;
+    for(k=a+1;k<candles.length;k++){ if(candles[k].c<sw[i].p){ end=k; break } }
+    if(end<0) holding++; else holds.push(end-a);
+  }
+  holds.sort(function(x,y){ return x-y });
+  return {n:holds.length, holding:holding, holds:holds, mid:midOf(holds),
+          lo:holds.length?holds[0]:null, hi:holds.length?holds[holds.length-1]:null};
+}
+/* 4. THE WINDOW. Each day on HIS clock (the clock on the device this page is
+   open on, the same one the session block reads), the whole range the day made
+   and the range that was made inside his session window. A day with no bars in
+   the window contributes its full range and zero inside it — that is a real
+   answer, and it is why the share can come out low. */
+function windowStudy(candles){
+  if(inWindow(0, SESS)===null) return {ok:false, days:0};
+  var days={}, order=[], i;
+  for(i=0;i<candles.length;i++){
+    var d=new Date(candles[i].t);
+    var key=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    if(!days[key]){ days[key]={hi:null,lo:null,inHi:null,inLo:null,in:0,n:0}; order.push(key) }
+    var g=days[key], b=candles[i];
+    if(g.hi===null||b.h>g.hi) g.hi=b.h;
+    if(g.lo===null||b.l<g.lo) g.lo=b.l;
+    g.n++;
+    if(inWindow(localMins(b.t), SESS)){
+      g.in++;
+      if(g.inHi===null||b.h>g.inHi) g.inHi=b.h;
+      if(g.inLo===null||b.l<g.inLo) g.inLo=b.l;
+    }
+  }
+  var total=0, inside=0, hiIn=0, loIn=0, used=0;
+  for(i=0;i<order.length;i++){
+    var day=days[order[i]];
+    if(!day.n||day.hi===null||day.lo===null||day.hi===day.lo) continue;
+    used++;
+    total+=(day.hi-day.lo);
+    inside+=(day.in?Math.max(0,day.inHi-day.inLo):0);
+    if(day.in&&day.inHi!==null&&day.inHi>=day.hi) hiIn++;
+    if(day.in&&day.inLo!==null&&day.inLo<=day.lo) loIn++;
+  }
+  return {ok:true, days:used, share:(total>0?inside/total:null), hi:hiIn, lo:loIn,
+          from:candles.length?candles[0].t:null, to:candles.length?candles[candles.length-1].t:null};
+}
+/* The four, worked out once, so the page and the assistant cannot be handed
+   different arithmetic. A timeframe that came back with too few bars to carry a
+   swing is counted as nothing rather than as a result. */
+function studyFacts(){
+  var b4=studyBars('4h'), b15=studyBars('15m');
+  var enough=function(b){ return !!(b&&b.length>=WING*2+3) };
+  return {
+    b4:b4, b15:b15,
+    poke:enough(b4)?pokeStudy(b4):null,
+    retrace:enough(b4)?retraceStudy(b4):null,
+    hold:enough(b15)?holdStudy(b15):null,
+    window:enough(b15)?windowStudy(b15):null
+  };
+}
+
+/* The study, on the page. Labelled lines, the same shape as the structure block
+   above, and every row carries the count it came from. */
+function paintStudy(){
+  var out=document.getElementById('studyOut');
+  if(!out) return;
+  if(!STUDY||!STUDY.ok||!STUDY.timeframes){ out.innerHTML=''; return }
+  var f=studyFacts(), h='';
+  h+='<div class="stcard"><div class="sthd"><b>4h</b><span class="sttrend">At your levels</span></div>';
+  if(!f.b4){
+    h+=stRow('Bars','no 4h bars came back for the study');
+  }else{
+    h+='<div class="stsw">'+f.b4.length+' bars, '+esc(dayText(f.b4[0].t))+' to '+esc(dayText(f.b4[f.b4.length-1].t))+'</div>';
+    var p=f.poke;
+    if(!p||!p.pokes){
+      h+=stRow('Traded above','no swing high in these bars was traded above — nothing to count');
+    }else{
+      h+=stRow('Traded above','<b>'+p.pokes+'</b> swing highs in these bars');
+      h+=stRow('Then closed above','<b>'+p.closed+'</b> of '+p.pokes+' — the frame changed on those');
+      h+=stRow('Poke only','<b>'+p.failed+'</b> of '+p.pokes+' never closed above — the grab');
+      if(p.deep!==null) h+=stRow('Deepest poke','went <b>'+esc(money(p.deep))+'</b> past the level and came back');
+    }
+    var r=f.retrace;
+    if(!r||!r.n){
+      h+=stRow('Down legs','no down leg with a swing high and a swing low came back in these bars');
+    }else{
+      h+=stRow('Down legs','<b>'+r.n+'</b> finished'+(r.live?(' &middot; '+r.live+' still live, the low not taken yet'):''));
+      h+=stRow('Back to the level','<b>'+r.whole+'</b> of '+r.n+' came all the way back to the high that started them');
+      h+=stRow('Two thirds','<b>'+r.twoThirds+'</b> of '+r.n+' got at least two thirds of the way back');
+      h+=stRow('Barely at all','<b>'+r.under+'</b> of '+r.n+' never got past a third'
+        +(r.none?(' — '+r.none+' had no retrace before the low went'):''));
+      if(r.mid!==null) h+=stRow('Middle','the middle leg came back <b>'+Math.round(r.mid*100)+'%</b> of itself');
+    }
+  }
+  h+='<div class="feedwhy">A swing high counts as poked when a later bar trades above it, and as closed above when a bar crosses it on the close within the next '
+    +POKE_LOOK+' bars — your own rule: a wick is not a break, a close is. A down leg is a swing high followed by the next swing low, so coming back to the high that started it is 100% of that leg.</div></div>';
+  h+='<div class="stcard"><div class="sthd"><b>15m</b><span class="sttrend">The hold, and your clock</span></div>';
+  if(!f.b15){
+    h+=stRow('Bars','no 15m bars came back for the study');
+  }else{
+    h+='<div class="stsw">'+f.b15.length+' bars, '+esc(dayText(f.b15[0].t))+' to '+esc(dayText(f.b15[f.b15.length-1].t))+'</div>';
+    var ho=f.hold;
+    if(!ho||(!ho.n&&!ho.holding)){
+      h+=stRow('Higher lows','no higher low came back in these bars');
+    }else if(!ho.n){
+      h+=stRow('Higher lows','<b>'+ho.holding+'</b> still holding when the bars ran out — none failed in these bars');
+    }else{
+      h+=stRow('Higher lows','<b>'+ho.n+'</b> of them failed in these bars'
+        +(ho.holding?(', and '+ho.holding+' '+(ho.holding===1?'is':'are')+' still holding so far'):''));
+      h+=stRow('Middle hold','<b>'+ho.mid+'</b> bars &middot; '+esc(fmtMins(ho.mid*15))+' on the 15m');
+      h+=stRow('Shortest / longest','<b>'+ho.lo+'</b> bars and <b>'+ho.hi+'</b> bars');
+    }
+    var w=f.window;
+    if(!w||!w.ok){
+      h+=stRow('Your window','no session window is set, so there is nothing to count inside');
+    }else if(!w.days){
+      h+=stRow('Days','no full day of bars came back for this');
+    }else{
+      h+=stRow('Days','<b>'+w.days+'</b> days on your clock, '+esc(dayText(w.from))+' to '+esc(dayText(w.to)));
+      h+=stRow('In your window','<b>'+Math.round(w.share*100)+'%</b> of the whole range over those days was made inside '+esc(hhmmText(hhmm(SESS.a)))+'&ndash;'+esc(hhmmText(hhmm(SESS.b))));
+      h+=stRow('Day&rsquo;s high','made inside your window on <b>'+w.hi+'</b> of '+w.days+' days');
+      h+=stRow('Day&rsquo;s low','made inside your window on <b>'+w.lo+'</b> of '+w.days+' days');
+    }
+  }
+  h+='<div class="feedwhy">A hold is measured on the 15m only, from a higher low to the first bar that closes below it. The days are days on your own clock, the same clock as the session block above.</div></div>';
+  out.innerHTML=h;
+}
+
+async function loadStudy(){
+  /* New bars mean the last test was run on different bars, so it is dropped
+     rather than left sitting beside a window it no longer describes. */
+  BTLAST=null;
+  if(typeof paintBacktest==='function') paintBacktest();
+  var symEl=document.getElementById('fSym');
+  var sym=((symEl&&symEl.value)||'').trim()||'NQ';
+  studyMsg('Loading '+sym.toUpperCase()+' to study…', false);
+  try{
+    var r=await fetch('/api/candles?bars='+STUDY_BARS+'&symbol='+encodeURIComponent(sym),{credentials:'same-origin'});
+    if(r.status===401){ studyMsg('Sign in again and the study bars will load.', true); return }
+    if(r.status===429){ studyMsg('The feed is being asked too often. Give it a moment.', true); return }
+    var d=null;
+    try{ d=await r.json() }catch(e){ d=null }
+    if(!d||!d.ok){
+      STUDY=null; paintStudy();
+      studyMsg((d&&d.error)||'The feed did not answer, so there is nothing to study.', true);
+      return;
+    }
+    STUDY=d;
+    paintStudy();
+    var b4=studyBars('4h'), b15=studyBars('15m');
+    studyMsg('Studied '
+      +(b4?(b4.length+' bars of 4h, '+dayText(b4[0].t)+' to '+dayText(b4[b4.length-1].t)):'no 4h bars')
+      +(b15?(', and '+b15.length+' bars of 15m'):', and no 15m bars')+'.', false);
+  }catch(e){
+    STUDY=null; paintStudy();
+    studyMsg('The feed could not be reached, so nothing was studied. Nothing was made up in its place.', true);
+  }
+}
+
+/* The same four counts, in the assistant's instructions, with the rules that
+   keep them from turning into a promise. */
+function studyText(){
+  var head=['HIS TIMING STUDY — counts this page worked out itself, from bars the study loaded. It is counting on real bars and it is NOT a backtest: none of his setups was entered, exited or priced, so there is no result, no profit, no win rate and no edge anywhere in it.'];
+  if(!(STUDY&&STUDY.ok&&STUDY.timeframes)){
+    head.push('');
+    head.push('NOT LOADED. He has not loaded the candles, so there is nothing here and nothing to quote. If he asks about the study, say in one line that the candles have to be loaded first. Do not describe a study, do not invent a count, and never say what his bars usually do.');
+    head.push('');
+    return head.join('\n');
+  }
+  var f=studyFacts();
+  head.push('');
+  head.push('Every figure below is printed with the count it came from. Keep the two welded together, and say plainly when a count is small — a handful of legs or holds is a handful.');  head.push('');
+  head.push('THE BARS IT COUNTED ARE ITS OWN. The study pulled more bars than the CANDLES block above, so a count here is about that longer window and the dates in it, not about the bars in the CANDLES block. Say which window a count came from when you repeat it, and never mix the two together.');
+  head.push('');
+  if(f.poke&&f.poke.pokes){
+    head.push('THE POKE (4h, '+f.b4.length+' bars, '+dayText(f.b4[0].t)+' to '+dayText(f.b4[f.b4.length-1].t)+'): price traded above a swing high '+f.poke.pokes+' times. It CLOSED above the level within the next '+POKE_LOOK+' bars on '+f.poke.closed+' of those '+f.poke.pokes+' — the frame changed on those — and on '+f.poke.failed+' of '+f.poke.pokes+' it never closed above, which is the poke and nothing else'
+      +(f.poke.deep!==null?('. The deepest of those went '+two(f.poke.deep)+' points past the level before coming back, which is the distance a stop has to sit outside of'):'')+'.');
+  }else{
+    head.push('THE POKE (4h): no swing high in these bars was traded above, so there is nothing to quote here. Say that rather than reaching for an example.');
+  }
+  if(f.retrace&&f.retrace.n){
+    head.push('THE RETRACE (4h): '+f.retrace.n+' finished down legs in these bars'
+      +(f.retrace.live?(', with '+f.retrace.live+' still live because the low has not gone yet'):'')+'. '
+      +f.retrace.whole+' of '+f.retrace.n+' came all the way back to the swing high that started them, '+f.retrace.twoThirds+' of '+f.retrace.n+' got at least two thirds of the way back, and '+f.retrace.under+' of '+f.retrace.n+' never got past a third'
+      +(f.retrace.none?(', of which '+f.retrace.none+' had no retrace at all before the low went'):'')+'.'
+      +(f.retrace.mid!==null?(' The middle leg came back '+Math.round(f.retrace.mid*100)+'% of itself.'):''));
+  }else{
+    head.push('THE RETRACE (4h): no down leg came back in these bars, so there is nothing to quote. Say that.');
+  }
+  if(f.hold&&(f.hold.n||f.hold.holding)){
+    head.push('THE HOLD (15m): '+(f.hold.n
+      ? (f.hold.n+(f.hold.n===1?' higher low failed in these bars, ':' higher lows failed in these bars, ')+'the middle one lasting '+f.hold.mid+' bars of 15 minutes ('+fmtMins(f.hold.mid*15)+'), the shortest '+f.hold.lo+' bars and the longest '+f.hold.hi+' bars'+(f.hold.holding?(', with '+f.hold.holding+' still holding so far'):''))
+      : ('no higher low failed in these bars, and '+f.hold.holding+' were still holding when the bars ran out'))+'.');
+  }else{
+    head.push('THE HOLD (15m): the bars that came back have no higher low in them, so there is nothing to quote. Say that.');
+  }
+  if(f.window&&f.window.ok&&f.window.days){
+    head.push('THE WINDOW (15m, on his own clock): over '+f.window.days+' days, '+Math.round(f.window.share*100)+'% of the whole range those days made was inside his session window. The high of the day was made inside the window on '+f.window.hi+' of those '+f.window.days+' days, and the low of the day on '+f.window.lo+' of '+f.window.days+'.');
+  }else if(f.window&&!f.window.ok){
+    head.push('THE WINDOW: he has no usable session window set, so nothing was counted inside one. Say that.');
+  }else{
+    head.push('THE WINDOW: no full day of bars came back for it, so there is nothing to quote.');
+  }
+  head.push('');
+  head.push('WHAT THIS CANNOT SAY: it is one loaded window of bars and a small sample — one count of four is not a pattern, and three months of 4h bars is not a market. It says what his own rules did in these bars, and nothing about what happens next. Never turn a count into a percentage on its own, never average two of them together, never carry one onto a timeframe it did not come from, and never call any of it an edge.');
+  head.push('');
+  return head.join('\n');
+}
+
+/* ── THE TEST: HIS RULES, ENTERED, EXITED AND PRICED ─────────────────────────
+   Jacques, 21 Sep 2026: "make me a backtester with my trading logic."
+
+   This is his logic, entered, exited and priced, on the same bars the study
+   loaded - no second call to the feed and nothing typed in twice. The rules are
+   the ones the frame block above already states as numbers:
+
+     1. A new LOWER LOW on the timeframe turns it down. The level is the swing
+        high that drop came from; the low is that lower low.
+     2. Only a CLOSE above the level cancels it, which is his own rule and the
+        one that has been costing him, so it is in here rather than assumed away.
+     3. Back at the level, that is the short. Nothing chases it.
+     4. The stop is one average bar above the level. A stop has to sit somewhere
+        and the rule for being wrong is the level itself, so that is the room it
+        is given and the card says so.
+     5. The target is the low the frame turned down on: the far side of the
+        range.
+     6. One contract, and his own commission rate in and out on every trade.
+
+   What it is NOT, and the page says all of it: no spread, no slippage, no fill
+   he might not have got, no bar the feed has not got back, and nothing typed in
+   from anywhere else. It fills at the exact price of the level, the stop and the
+   target, so every figure is the best case rather than what he would have kept.
+   It is not a measurement of the market and it is not a promise about the next
+   trade: it is what this version of his rules did in these bars. */
+var BT_TFS=['5m','15m','1h','4h'], BT_LOOK=20, BTLAST=null;
+
+/* One pass of his rules over one timeframe's bars. Pure arithmetic: hand it
+   candles and a commission rate and it hands back what came out, with the count
+   that goes with every figure. Nothing here fills a gap in with a guess - a
+   timeframe with too few bars to carry a swing is reported as that and nothing
+   else. */
+function backtest(sym, tf, candles, rate, wing){
+  var w=(wing==null?WING:wing);
+  var out={tf:tf, ok:false, why:'no bars came back', bars:0, from:null, to:null,
+           frames:0, cancelled:0, noRetrace:0, taken:0, closed:0, wins:0, losses:0, open:0,
+           grossPts:0, pv:pointValueOf(sym), rate:(rate==null?null:rate),
+           gross:null, cost:null, net:null, best:null, worst:null, trades:[]};
+  if(!candles||candles.length<w*2+5){ out.why='too few bars to carry a swing'; return out }
+  out.ok=true; out.bars=candles.length;
+  out.from=candles[0].t; out.to=candles[candles.length-1].t;
+  var sw=structure(candles, w).swings, at=barIndex(candles), i, j, k;
+  for(i=1;i<sw.length;i++){
+    if(sw[i].kind!=='L') continue;
+    var prevLow=null, lvl=null;
+    for(j=i-1;j>=0;j--){
+      if(!prevLow&&sw[j].kind==='L') prevLow=sw[j];
+      if(!lvl&&sw[j].kind==='H') lvl=sw[j];
+      if(prevLow&&lvl) break;
+    }
+    if(!prevLow||!lvl) continue;           /* nothing to set the level off */
+    if(!(sw[i].p<prevLow.p)) continue;     /* not a lower low: no frame */
+    var a=at[sw[i].t];
+    if(a===undefined) continue;
+    out.frames++;
+    var cancelled=false, entry=-1;
+    for(k=a+1;k<candles.length;k++){
+      if(candles[k].c>lvl.p){ cancelled=true; break }
+      if(candles[k].h>=lvl.p){ entry=k; break }
+    }
+    if(cancelled){ out.cancelled++; continue }   /* his rule: a close above ends it */
+    if(entry<0){ out.noRetrace++; continue }
+    var room=avgRange(candles.slice(Math.max(0,entry-BT_LOOK), entry));
+    if(room===null||!(room>0)) room=candles[entry].h-candles[entry].l;
+    var stop=(room>0)?(lvl.p+room):null, tgt=sw[i].p;
+    var exitPx=null, why=null;
+    for(k=entry;k<candles.length;k++){
+      if(stop!==null&&candles[k].h>=stop){ exitPx=stop; why='stop'; break }
+      if(candles[k].l<=tgt){ exitPx=tgt; why='target'; break }
+    }
+    var pts=(exitPx===null)?null:(lvl.p-exitPx);
+    out.taken++;
+    out.trades.push({t:candles[entry].t, level:lvl.p, low:tgt, stop:stop, ex:exitPx, why:why, pts:pts,
+                     bars:(exitPx===null?null:(k-entry))});
+    if(exitPx===null){ out.open++; continue }   /* still open: counted nowhere */
+    out.closed++;
+    out.grossPts+=pts;
+    if(pts>0) out.wins++; else out.losses++;
+    if(out.best===null||pts>out.best) out.best=pts;
+    if(out.worst===null||pts<out.worst) out.worst=pts;
+  }
+  if(out.closed>0){
+    if(out.pv!==null) out.gross=out.grossPts*out.pv;
+    if(out.rate!==null) out.cost=out.rate*out.closed;
+    if(out.gross!==null&&out.cost!==null) out.net=out.gross-out.cost;
+  }
+  return out;
+}
+/* The same rules over every timeframe at once, off the study's own bars. */
+function backtestRows(){
+  var sym=(FEED&&FEED.symbol)||'', rate=rateOf(), out=[], i;
+  for(i=0;i<BT_TFS.length;i++) out.push(backtest(sym, BT_TFS[i], studyBars(BT_TFS[i]), rate));
+  return out;
+}
+function paintBacktest(){
+  var out=document.getElementById('btOut');
+  if(!out) return;
+  if(!BTLAST){ out.innerHTML=''; return }
+  var h='', i;
+  for(i=0;i<BTLAST.length;i++){
+    var r=BTLAST[i];
+    h+='<div class="stcard"><div class="sthd"><b>'+esc(r.tf)+'</b><span class="sttrend">'+(r.taken?'your rules, entered and priced':'nothing to enter')+'</span></div>';
+    if(!r.ok){
+      h+=stRow('Bars','no '+esc(r.tf)+' bars came back for the test - '+esc(r.why));
+    }else{
+      h+='<div class="stsw">'+r.bars+' bars, '+esc(dayText(r.from))+' to '+esc(dayText(r.to))+'</div>';
+      h+=stRow('Frames','<b>'+r.frames+'</b> lower lows on this timeframe');
+      h+=stRow('No trade','<b>'+r.cancelled+'</b> cancelled by a close above the level, <b>'+r.noRetrace+'</b> that never came back to it');
+      h+=stRow('Trades','<b>'+r.taken+'</b> taken &middot; '+r.wins+' to target, '+r.losses+' stopped'+(r.open?(', '+r.open+' still open at the last bar'):''));
+      if(r.closed){
+        h+=stRow('Points','<b>'+(r.grossPts>=0?'+':'')+two(r.grossPts)+'</b> points over '+r.closed+' closed trades');
+        h+=stRow('Best / worst','<b>'+(r.best>=0?'+':'')+two(r.best)+'</b> points and <b>'+two(r.worst)+'</b> points');
+      }
+      if(r.pv===null){
+        h+=stRow('Money','no published contract size for '+esc(baseSym((FEED&&FEED.symbol)||''))+', so this is points only');
+      }else if(r.net!==null){
+        h+=stRow('Money','<b>'+esc(dollars(r.net))+'</b> after '+esc(dollars(r.cost))+' of commission on one contract ('+esc(dollars(r.gross))+' gross)');
+      }else if(r.gross!==null){
+        h+=stRow('Money',esc(dollars(r.gross))+' gross, and no net figure: no commission rate is set');
+      }
+      h+='<div class="feedwhy">Short at the level when price came back to it, stopped one average bar above it, target the low the frame turned down on. One contract.</div>';
+    }
+    h+='</div>';
+  }
+  out.innerHTML=h;
+}
+function btMsg(text, isErr){
+  var el=document.getElementById('btMsg');
+  if(!el) return;
+  el.textContent=text;
+  el.className='feedwhen'+(isErr?' err':'');
+}
+function runBacktest(){
+  if(!(STUDY&&STUDY.ok&&STUDY.timeframes)){
+    BTLAST=null; paintBacktest();
+    btMsg('Load the candles first - the test runs on those bars and never fetches its own.', true);
+    return;
+  }
+  BTLAST=backtestRows();
+  paintBacktest();
+  var taken=0, closed=0, open=0, net=0, money=true, i;
+  for(i=0;i<BTLAST.length;i++){
+    taken+=BTLAST[i].taken; closed+=BTLAST[i].closed; open+=BTLAST[i].open;
+    if(BTLAST[i].net===null) money=false; else net+=BTLAST[i].net;
+  }
+  btMsg('Ran your frame rules on '+((FEED&&FEED.symbol)?FEED.symbol.toUpperCase():'this symbol')+' across the four timeframes: '
+    +taken+' trades taken, '+closed+' closed, '+open+' still open at the last bar.'
+    +(money?(' Net '+dollars(net)+' after commission.'):(rateOf()===null?' No commission rate is set, so the money is before costs.':'')),
+    false);
+}
+/* The test, in the assistant's instructions. Same house rules: every figure
+   carries its count, and the best case is never called the expectation. */
+function backtestText(){
+  var head=['HIS BACKTEST - his own frame rules, entered, exited and priced by this page on the bars the study loaded. It is the ONLY backtest that exists: there is no other one, no other sample and no result anywhere else on this page.'];
+  if(!BTLAST){
+    head.push('');
+    head.push('NOT RUN. He has not run it, so there is no result, no win rate and no figure to quote. If he asks what his rules did, say in one line that he has to press Load everything to pull the bars first.');
+    head.push('');
+    return head.join('\n');
+  }
+  head.push('');
+  for(var i=0;i<BTLAST.length;i++){
+    var r=BTLAST[i];
+    if(!r.ok){ head.push(r.tf+': NO BARS - '+r.why+'. Say so; do not fill it in from another timeframe.'); continue }
+    var line=r.tf+': '+r.bars+' bars ('+dayText(r.from)+' to '+dayText(r.to)+'), '+r.frames+' lower lows, '+r.cancelled+' cancelled by a close above the level, '+r.noRetrace+' that never came back to it, '+r.taken+' trades taken, '+r.wins+' to target, '+r.losses+' stopped';
+    if(r.open) line+=', '+r.open+' still open at the last bar and counted nowhere';
+    if(r.closed) line+=', '+two(r.grossPts)+' points gross over the '+r.closed+' closed trades (best '+two(r.best)+', worst '+two(r.worst)+')';
+    if(r.net!==null) line+=', net '+dollars(r.net)+' after '+dollars(r.cost)+' of commission on one contract';
+    else if(r.gross!==null) line+=', '+dollars(r.gross)+' gross with no net figure because no commission rate is set';
+    else line+=' and no money figure, because this symbol has no published contract size here';
+    head.push(line);
+  }
+  head.push('');
+  head.push('HOW TO READ IT: every trade is filled at the exact level, stop and target price on the bars that came back, one contract, with no spread and no slippage. That makes every figure the BEST CASE rather than what he would have kept, and it is a test of THIS version of his rules in THESE bars - not of the market, not of his rules as he trades them by hand, and nothing at all about the next trade.');
+  head.push('Quote the figures with their counts and the timeframe they came from. Never call one an edge, a win rate or a probability, never turn a losing result into him being wrong, never extrapolate a forward, and never invent a trade, a result or a timeframe that is not in this block.');
+  head.push('');
+  return head.join('\n');
+}
+
+/* The rules for the one chip that reads the study. Same house rules, plus the
+   one that matters here: counts stay counts, and it ends in one change. */
+var STUDY_SYS=[
+  'HE IS ASKING YOU TO READ THE TIMING STUDY, WHICH IS ALREADY IN YOUR INSTRUCTIONS.',
+  '',
+  'Use only the counts in the STUDY block. Every one of them came from bars that loaded, and every one is printed with the count it came from — keep the figure and its count welded together, and never turn one figure into a probability.',
+  '',
+  'WHEN A COUNT IS SMALL, SAY SO IN THE SAME SENTENCE. Four legs, six pokes and a handful of holds are a handful: the honest read of a small count is that it is small, and that is a complete answer.',
+  '',
+  'NEVER: call the study a backtest, a test you ran, a win rate, an edge or a proof; say a level "usually" holds because of a count this size; promise an outcome; or tell him the study says what the next trade will do.',
+  '',
+  'END WITH ONE CHANGE, and name the count it came from: the single thing his own bars say to do differently about timing — the moment he enters, the level he waits for, or how long he gives a hold before he calls it failed. One change, something he can do on the next trade.',
+  '',
+  'House rules otherwise unchanged: where he is wrong comes first, and plain English.'
+].join('\n');
+
+/* The session window, kept on this device. Two fields and nothing else: the
+   minutes of a session are his call, and the page says which clock it read. */
+(function(){
+  var a=document.getElementById('sA'), b=document.getElementById('sB');
+  if(a) a.value=SESS.a;
+  if(b) b.value=SESS.b;
+  if(a) a.addEventListener('change', saveSession);
+  if(b) b.addEventListener('change', saveSession);
+})();
+paintSession();
+
+/* ---------- what the assistant is instructed to be ---------------------- */
+/* The house rules for a trading page. It is not the recovery app's voice and
+   it does not carry the recovery app's safety lines, which do not apply to a
+   chart — but three things carry over exactly: never invent a number, never
+   tell him he is finished, and never promise an outcome. */
+var DESK_METHOD='Daily/4h=context and origin; 1h=guide; 15m/5m=path and confirmation; 1m/5-second=execution refinement. Test the zone or swing leg first. A 4h LL can permit a temporary HH-HL pullback long toward the prior confirmed high or 4h LH. Return to short only after confirmed LH/LL. Require entry, invalidation, previous target and a passing 1:1 gate.';
+var DESK_SYS=[
+'You are the trading assistant on a private desk page belonging to one trader. He is experienced and needs nothing explained from the beginning. He uses this to make better decisions on his own trades. He places every trade himself.',
+'',
+'THE TIMEFRAME ROLES. He reads the Daily and the 4 hours, 1 hour, 15 minutes, 5 minutes, and he goes to 1 minute and 5 seconds together to refine execution. Every one of them has a job and none of them is optional. Work from the big one down.',
+'- 4h is context and origin, not an automatic direction. A 4h lower low can allow a temporary 15m/5m long back toward the prior confirmed high or the 4h lower-high area.',
+'- 1h is the guide: the last leg, the last level that broke, the range being worked, and whether the lower-timeframe move fits the current leg.',
+'- 15m and 5m are where the path is correlated and the setup is confirmed or destroyed. Wait for the supply or demand zone, or the swing leg, to actually be tested. Being inside a zone is not confirmation by itself.',
+'- 1m and 5-second refine execution only. Change the narrative back only after the return area produces confirmed opposing structure such as LH or LL, and treat the previous confirmed high or low as the target, not the newest extreme.',
+'If the timeframes disagree, say the job each one is doing and which one governs this decision. Do not average them into a mush.',
+'',
+'PULLBACK OR TREND. Answer from the tested origin, the 1h guide, the lower-timeframe path and the previous target, not from how he feels:',
+'- A countertrend scalp is allowed when the origin has been tested, the 1h guide allows it, the lower-timeframe structure confirms, the previous target is clear and the 1:1 gate passes.',
+'- Never call it a hold just because the 4h and the 1h agree. He trades intraday in New York, micros only, and never holds overnight.',
+'- Before you approve anything, say the entry, the invalidation, the previous target and the 1:1 result. If the reward is smaller than the risk, the answer is wait.',
+'',
+'HIS SESSION. He trades the New York session and nothing else, and his clock is the one in the session block below, with his window and whether he is in it right now. Bars outside that window are context and never a trigger — when the pattern he is asking about formed outside his session, say that first and plainly. It is his own clock, not an exchange clock, so never tell him what time it is on an exchange.',
+'',
+'STRUCTURE, NOT A FORECAST. The structure block below is worked out on this page from the candles: the swings he names himself (HH, HL, LH, LL), how far price is from the last swing high and low, whether the last bars are getting smaller, and whether they are compressed. It is arithmetic on bars that have already closed, and it is the only basis you have for calling a chart extended, easing or compressed — always with the timeframe named.',
+'- He is looking for one thing in particular and it is in that block by name: a run of higher highs and higher lows pushing into the old high without taking it, with the last bars smaller than the ones before them. Say the bars match that picture when they do, and say what would end it — the last higher low is a number in the block, and a run of higher lows ends when that one goes.',
+'- You may never say a reversal, a pullback or a continuation is coming, and never put a probability on one. Nothing on this page predicts. The only thing that turns a read into a trade is his own 5m trigger, and where he is wrong comes first as always.',
+'',
+"THE FRAME BLOCK is the script on his chart run on this page's own candles: the level, the frame low, whether the frame has been cancelled, whether the small chart has turned up, and a verdict that is only ever wait, short or long scalp. Quote it as his own rules worked out on these bars, and name the timeframe it read.",
+"- Never turn that verdict into a promise, a probability or a target, never supply a level when the block shows none, and do not apologise for wait - it is the answer most of the time and it is a complete answer.",
+"",
+'WHAT YOU NEVER DO',
+'1. Never invent a number. No price, no level, no average, no range, no statistic, no win rate, no backtest result, and no study of your own. The ONLY numbers you may quote are the ones in the CANDLES block below, which came from the feed, the ones he typed himself, the counts and sums the JOURNAL block below already worked out, the counts in the STUDY block, which this page worked out itself from bars that loaded, and a price you can actually read in a picture he attached himself - and a number off a picture is always said to be off his screenshot, never passed off as a feed number. If the CANDLES block says NOT LOADED, you have no prices at all: say that, price nothing, and ask. The only backtest that exists is the backtest block below, worked out from bars that loaded: quote its figures with their counts, and never imply any other test was run.',
+'2. Never promise an outcome. Not "high probability", not "this will", not "guaranteed". You may say what his setup asks for and whether this chart looks like it, and you may say what most often happens in his own words if he wrote it down. Never say a reversal, a pullback or a continuation is coming, and never put a probability on one — that is a forecast and this page does not make them.',
+'3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If he sounds like he is chasing, say so first and plainly, then answer the chart question.',
+'4. Never size a position and never invent a money figure. Risk is the distance to his stop, in R or in points. He trades the micros — MNQ, MES, MGC and the rest — and the point value of one contract is in the CANDLES block and on the trades he wrote. Use it ONLY to repeat the money line in the JOURNAL block: never a balance, never an account size, never how many contracts to trade, and never what a trade could make.',
+'5. Invalidation comes first, every time. Before any target, say where he is wrong. If he has not said where he is wrong, ask for it.',
+'6. If he has not told you what price is doing, ask one short question rather than answering round it. One question, not a list.',
+'7. Never tell him he is finished, hopeless, or no good at this. A bad read is a bad read, not a verdict on him.',
+'8. He already knows you are not his broker and not a licensed adviser, so do not open with a disclaimer or repeat one. Give him the honest read instead.',
+'9. The structure block, the session block, the frame block and the STUDY block are the only basis you have for structure and for timing. If any of them says it was not computed or not loaded, say you cannot read structure or timing rather than describing them from nowhere. The backtest block is the only basis you have for what his rules returned, and it is a test of this version of them in those bars, not of the market.',
+'10. A picture he sends is his own chart, and it is not a forecast. You may read shapes, levels and swings off it, and you may say what is too small, cut off or unlabelled to read. You may never quote a price off a picture as though it were a feed number, and never claim it is on a timeframe it does not label. When no picture is attached, say you cannot see his chart rather than describing one.',
+'',
+'HIS BACKTEST, IF HE HAS RUN IT. The page can enter his own frame rules on the bars that loaded - short at the level after a lower low, stopped one average bar above it, target the low the frame turned down on - and price every trade with the commission he typed. It fills at the exact price of every level, one contract, with no spread and no slippage, so what it prints is the best case and not what he kept. Quote it with its counts and the timeframe, say plainly what it cannot tell him, and never dress it up as an edge, a probability or what happens next.',
+'',
+'HOW YOU ANSWER',
+'- First line: the answer. Which of his setups this is, by the name he gave it, or that it is not one of them.',
+'- Then short lines, each starting with its label: 4h, 1h, 15m, 5m (only the ones that matter), Entry, Wrong if, Target, Hold or scalp, Before you take it.',
+'- Six to twelve short lines in total. No headings, no markdown, no tables, no emoji, no bolding.',
+'- Say what you do not know rather than filling it in. "I cannot see your chart" is a complete answer.',
+'- When he asks something you have no basis for, say that plainly and then answer the part you can.',
+'- When you use a feed number, name the timeframe it came from ("the 4h high is ..."), never just "the high is ...". A number with no timeframe on it is a number he cannot check.',
+'- The feed is not his broker. If his own price disagrees with it, his chart wins: say what the feed shows, ask which contract or chart he has up, and never correct him with a feed number.',
+'- Plain English, always. Never answer in another language and never borrow a word from one.',
+'- Keep it his desk: refer to his setups by the names he gave them, never yours.'
+].join('\n');
+
+function picText(){
+  if(!PIC) return 'NO CHART PICTURE IS ATTACHED. You cannot see his chart, so do not describe one and do not answer as though you had.';
+  return 'A CHART PICTURE IS ATTACHED: a screenshot of his own broker chart, sent with this question. Read it as the chart in front of him, and let it outrank the CANDLES block - when the two disagree, his chart is what he is actually looking at. Say plainly when something in it is too small, blurry or cut off to read instead of guessing at it. Anything you read off it is read off a picture: say so, and do not pass it off as a feed number.';
+}
+function askSystem(extra){
+  return DESK_SYS+'\n\nMETHOD OVERRIDE: '+DESK_METHOD+(extra?'\n\n'+extra:'')+'\n\n'+setupsText()+'\n'+feedText()+structureText()+frameText()+'\n'+sessionText()+'\n'+studyText()+'\n'+backtestText()+'\n'+tradesText()+'\n'+journalText()+nowText()+'\n\n'+picText();
+}
+
+/* ---------- the setups list --------------------------------------------- */
+var editing=null;
+function render(){
+  var list=document.getElementById('list');
+  var none=document.getElementById('none');
+  if(!list) return;
+  if(!SETUPS.length){
+    list.innerHTML='';
+    if(none) none.style.display='block';
+    return;
+  }
+  if(none) none.style.display='none';
+  var h='';
+  for(var i=0;i<SETUPS.length;i++){
+    var s=SETUPS[i], open=(editing===i);
+    h+='<div class="card'+(open?' open':'')+'">'
+      +'<div class="row" data-open="'+i+'">'
+      +'<div class="row-txt"><b>'+esc(s.n||'Untitled')+'</b>'
+      +'<span>'+esc(tfText(s.tf))+' &middot; '+esc(HOLD[s.h]||HOLD.hold)+'</span></div>'
+      +'<span class="chev">&#8250;</span></div>'
+      +'<div class="body">';
+    if(s.r) h+='<div class="lbl">Has to be true</div><p>'+esc(s.r)+'</p>';
+    if(s.e) h+='<div class="lbl">Entry</div><p>'+esc(s.e)+'</p>';
+    if(s.s) h+='<div class="lbl">Wrong if</div><p>'+esc(s.s)+'</p>';
+    if(s.t) h+='<div class="lbl">Target</div><p>'+esc(s.t)+'</p>';
+    h+='<button class="txtbtn" data-edit="'+i+'">Edit this setup</button><br>'
+      +'<button class="del" data-del="'+i+'">Delete</button>'
+      +'</div></div>';
+  }
+  list.innerHTML=h;
+}
+
+function openForm(i){
+  editing=(typeof i==='number')?i:null;
+  var s=editing===null?{tf:['1h','15m','5m']}:SETUPS[editing];
+  document.getElementById('sN').value=s.n||'';
+  document.getElementById('sR').value=s.r||'';
+  document.getElementById('sE').value=s.e||'';
+  document.getElementById('sS').value=s.s||'';
+  document.getElementById('sT').value=s.t||'';
+  document.getElementById('sH').value=s.h||'hold';
+  document.getElementById('sTfIn').value=tfList(s.tf).join(', ');
+  document.getElementById('form').style.display='block';
+  document.getElementById('form').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function closeForm(){
+  editing=null;
+  document.getElementById('form').style.display='none';
+}
+
+/* ---------- the chart picture -------------------------------------------
+   Jacques, 17 Sep 2026, asked and answered: yes, a chart screenshot goes to the
+   AI. It is the only picture that leaves this page. Three things are deliberate:
+   it is shrunk on the phone before it is sent (a 12 megapixel photo of a screen
+   costs money and reads worse than a screenshot), it goes only with a question
+   he asks while it is attached, and the page says out loud where it goes. */
+var PIC=null, PIC_MAX_EDGE=1200, PIC_MAX_BYTES=900000;
+
+function picNote(msg, bad){
+  var el=document.getElementById('picFine');
+  if(!el) return;
+  if(!msg){ el.innerHTML='A picture you add is sent to Google with your question &mdash; that chart only, nothing else from your phone. Take it off and it stops being sent.'; return; }
+  el.textContent=msg;
+  el.style.color=bad?'var(--red-t)':'var(--tm)';
+}
+
+/* Shrunk here, not on the server: a phone screenshot is often 12 megapixels,
+   and the model reads a 1200px chart better than it reads the full one. */
+function shrinkPic(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), im=new Image();
+    im.onload=function(){
+      try{
+        var w=im.naturalWidth||0, h=im.naturalHeight||0;
+        if(!w||!h) throw new Error('no size');
+        var s=Math.min(1, PIC_MAX_EDGE/Math.max(w,h));
+        var c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(w*s)); c.height=Math.max(1,Math.round(h*s));
+        c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        var out=c.toDataURL('image/jpeg',0.75);
+        res({data:out.split(',')[1],media:'image/jpeg',url:out,w:c.width,h:c.height});
+      }catch(e){ URL.revokeObjectURL(url); rej(e); }
+    };
+    im.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('not an image')); };
+    im.src=url;
+  });
+}
+
+function paintPic(){
+  var row=document.getElementById('picRow'), add=document.getElementById('picAdd'),
+      held=document.getElementById('picHeld'), img=document.getElementById('picImg'),
+      meta=document.getElementById('picMeta'), sub=document.getElementById('askSub');
+  if(!row) return;
+  var on=!!PIC;
+  row.className='picrow'+(on?' has':'');
+  if(add) add.style.display=on?'none':'inline-block';
+  if(held) held.style.display=on?'flex':'none';
+  if(on){
+    if(img) img.src=PIC.url;
+    if(meta) meta.textContent=PIC.w+' by '+PIC.h+' - read off your screenshot, not from the feed';
+    if(sub) sub.textContent='Reads your setups, the chart above, and the picture you added';
+    picNote('');
+  }else{
+    if(sub) sub.textContent='Reads your setups and the chart above';
+  }
+}
+
+(function(){
+  var inp=document.getElementById('picIn'), add=document.getElementById('picAdd'),
+      del=document.getElementById('picDel');
+  if(add&&inp) add.addEventListener('click',function(){ inp.click(); });
+  if(inp) inp.addEventListener('change',async function(){
+    var f=inp.files&&inp.files[0];
+    if(!f) return;
+    picNote('Reading that picture...');
+    try{
+      var p=await shrinkPic(f);
+      if(p.data.length*0.75>PIC_MAX_BYTES){
+        picNote('That one is too big even shrunk. A screenshot works better than a photo of a screen.', true);
+      }else{
+        PIC=p; paintPic();
+      }
+    }catch(e){
+      picNote('That file could not be read as a picture. A screenshot works.', true);
+    }
+    inp.value='';
+  });
+  if(del) del.addEventListener('click',function(){ PIC=null; paintPic(); picNote(''); });
+})();
+paintPic();
+
+/* ---------- the ask box -------------------------------------------------- */
+var BUSY=false, HEAD='<span class="ask-who">Trading assistant</span>';
+async function ask(prefill, systemText){
+  var qEl=document.getElementById('askQ'), aEl=document.getElementById('askA'), go=document.getElementById('askGo');
+  if(!qEl||!aEl) return;
+  var q=(prefill||qEl.value||'').trim();
+  if(!q||BUSY) return;
+  qEl.value=q;
+  BUSY=true; if(go) go.disabled=true;
+  aEl.className='ask-a on';
+  aEl.innerHTML=HEAD+'Working it through…';
+  try{
+    /* The setups, the chart and the picture he added ride along with every
+       question, so a follow-up is answered against the same rules as the first
+       one - and the picture is sent only while it is attached. */
+    var content=[{type:'text',text:q}];
+    if(PIC) content.push({type:'image',media_type:PIC.media,data:PIC.data});
+    var r=await fetch('/api/chat',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system:[{type:'text',text:systemText||askSystem()}],
+        messages:[{role:'user',content:content}]
+      })
+    });
+    if(r.status===429){ aEl.innerHTML=HEAD+"That is today's lot of answers. It comes back tomorrow."; return }
+    if(r.status===401){ aEl.innerHTML=HEAD+'Sign in again and this will answer.'; return }
+    if(r.status===403){ aEl.innerHTML=HEAD+'Not switched on for this account.'; return }
+    if(!r.ok){
+      /* When the server says why - a picture too big, or the wrong kind - that
+         sentence is the useful thing on screen, and it is shown as written. It
+         is never replaced with something invented. */
+      var why='';
+      try{ why=((await r.json())||{}).error||''; }catch(e){}
+      if(!why) why=r.status===413?'That picture is too big. Send a smaller one.':'No answer came back. Try again in a moment.';
+      aEl.innerHTML=HEAD+esc(why);
+      return;
+    }
+    var d=await r.json();
+    var t=((d.content&&d.content[0]&&d.content[0].text)||'').trim();
+    if(!t) throw new Error('empty');
+    aEl.innerHTML=HEAD+esc(t).replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
+  }catch(e){
+    /* Offline, or no answer came back. Nothing invented in its place. */
+    aEl.innerHTML=HEAD+'No answer came back. Try again in a moment.';
+  }finally{
+    BUSY=false; if(go) go.disabled=false;
+  }
+}
+
+/* ---------- wiring ------------------------------------------------------- *//* ---------- the trade log -------------------------------------------------
+   Jacques: "an analyzer ... where I load my actual trades and it analyzes them
+   for me, where I went wrong and what I can improve".
+
+   So this is the record and the review. Two things it does NOT do, on purpose:
+
+     1. It never grades the RESULT. A trade that paid can still have been a bad
+        decision and a loss can be a good one; grading the money teaches
+        hindsight, which is the most expensive lesson there is. The review is
+        told to mark the decision with what was visible at the time.
+     2. It never invents a number, and it never turns his record into a
+        statistic. The only arithmetic on this page is his own: the distance
+        from his entry to his stop, in points, and how far the trade went in R.
+        No win rate, no expectancy, no average, no "edge" — a handful of trades
+        cannot produce one, and printing a percentage would be dressing an
+        invented figure up as a measurement.
+
+   And nothing here knows his account, his size or his money, and nothing ever
+   will. Risk is points and R, never pounds in his pocket. */
+var K_TRADES='tsid.desk.trades';
+var TRADES=load(K_TRADES, []);
+if(!Array.isArray(TRADES)) TRADES=[];
+
+function two(v){ return (Math.round(v*100)/100).toFixed(2) }
+function numOf(v){
+  if(v===null||v===undefined) return null;
+  var s=String(v).replace(/[,\s]/g,'');
+  if(!s) return null;
+  var n=parseFloat(s);
+  return isFinite(n)?n:null;
+}
+/* The risk, in points: the distance from his entry to his stop. Nothing here
+   knows what a point is worth to him and it is never asked. */
+function riskPoints(t){
+  if(!t||t.en===null||t.st===null) return null;
+  var d=Math.abs(t.en-t.st);
+  return d>0?d:null;
+}
+/* R, from his own numbers: how far it went his way, divided by what he was
+   risking. Null when there is no exit, no stop, or the stop sits on the entry —
+   never a made-up number, and never a division by zero. */
+function rOf(t){
+  if(!t||t.ex===null) return null;
+  var risk=riskPoints(t);
+  if(!risk) return null;
+  return (t.dir==='short' ? (t.en-t.ex) : (t.ex-t.en))/risk;
+}
+function closedTrades(){
+  return TRADES.filter(function(t){ return rOf(t)!==null });
+}
+/* The points the trade moved, in his direction: a short that went his way is
+   profit, not a negative number. */
+function pointsOf(t){
+  if(!t||t.en===null||t.ex===null) return null;
+  return t.dir==='short' ? (t.en-t.ex) : (t.ex-t.en);
+}
+/* The point value that counts is the one on the trade. No point value means no
+   money figure at all — never a default, and never a guess from the symbol. */
+function pvOf(t){
+  if(!t) return null;
+  var pv=numOf(t.pv);
+  return (pv!==null&&pv>0)?pv:null;
+}
+function moneyOf(t){
+  var pts=pointsOf(t), pv=pvOf(t);
+  if(pts===null||pv===null) return null;
+  return pts*pv;
+}
+function riskMoney(t){
+  var risk=riskPoints(t), pv=pvOf(t);
+  if(risk===null||pv===null) return null;
+  return risk*pv;
+}
+/* ---------- what the trade cost to place --------------------------------
+   Jacques, 21 Sep 2026: "NinjaTrader micros, I pay .39 a contract."
+
+   Every figure above this line is the trade at the market's price, and no
+   trade is ever filled at the market's price. Commission comes off both ends
+   - in and out - so one micro at .39 a side costs .78 to put on and take off.
+   The rate is typed in by him and never assumed: his rate and his contract
+   count are his, not this page's to guess.
+
+   THE POINT OF THIS BLOCK, and why it exists at all: a backtest that does not
+   pay the commission is a different trade from the one in his account. That
+   gap is the first thing to check before believing a backtest, and the page
+   now shows both figures instead of only the flattering one. */
+var K_COST='tsid.desk.cost';
+var COST=load(K_COST, null);
+if(!COST||typeof COST!=='object') COST={};
+/* What one contract costs him across a whole trade - in and out together. */
+function rateOf(){
+  var r=numOf(COST.rate);
+  return (r!==null&&r>=0)?r:null;
+}
+/* One contract unless he says otherwise: that is what a micro is, and what his
+   .39 is priced on. A count of zero or nonsense is one, never zero - a zero
+   here would quietly make the trade free. */
+function contractsOf(t){
+  var c=numOf(t&&t.c);
+  if(c===null||c<=0) return 1;
+  return Math.floor(c);
+}
+/* The commission on this trade. Null when he has not put a rate in - never a
+   default rate, and never a zero that would read as "free". */
+function costOf(t){
+  var r=rateOf();
+  if(r===null) return null;
+  return r*contractsOf(t);
+}
+/* What the trade actually left, after the commission on both ends. Null
+   whenever the gross figure is null: there is no net of a number that does
+   not exist. */
+function netMoneyOf(t){
+  var m=moneyOf(t), c=costOf(t);
+  if(m===null||c===null) return null;
+  return m-c;
+}
+function rText(t){
+  var r=rOf(t);
+  if(r===null) return t&&t.ex===null ? 'open — no exit written down' : 'no result: needs an entry and a stop';
+  return (r>=0?'+':'')+two(r)+'R';
+}
+
+/* One line per trade, for the assistant. His words and his numbers only. */
+function tradeLine(t){
+  var bits=[t.mk||'market not said', t.dir];
+  if(t.su) bits.push('setup he calls "'+t.su+'"');
+  bits.push('entry '+(t.en===null?'not said':two(t.en)));
+  bits.push('stop '+(t.st===null?'not said':two(t.st)));
+  if(t.tg!==null&&t.tg!==undefined) bits.push('target '+two(t.tg));
+  bits.push('exit '+(t.ex===null?'not recorded':two(t.ex)));
+  bits.push('result '+rText(t));
+  if(pvOf(t)!==null) bits.push('point value '+pvOf(t)+' (one point is '+dollars(pvOf(t))+')');
+  bits.push(contractsOf(t)+' contract'+(contractsOf(t)===1?'':'s'));
+  if(netMoneyOf(t)!==null) bits.push('gross '+dollars(moneyOf(t))+' and net '+dollars(netMoneyOf(t))+' after '+dollars(costOf(t))+' of commission');
+  return bits.join(', ')+(t.note?('. What he saw: '+t.note):'');
+}
+
+/* The whole record, in the assistant's instructions on every question. Compact
+   on purpose: the log is context, not the subject, unless he asks about it. */
+function tradesText(){
+  var out=['HIS OWN TRADE LOG — trades he has written down on this page, and nothing else. It is a record of what he did. It is not a backtest, not a sample and not a statistic, and you never dress it up as one.'];
+  out.push('');
+  if(!TRADES.length){
+    out.push('NOTHING LOGGED YET. He has not written a single trade down. If he asks you to review one, or what his trades say, say plainly that the log is empty and ask him to write the trade down first. Do not invent a trade, a result or a pattern to review.');
+    out.push('');
+    return out.join('\n');
+  }
+  var cl=closedTrades(), missing=TRADES.length-cl.length;
+  out.push(TRADES.length+' written down, '+cl.length+' with a result, '+missing+' still open or missing a price (those are counted nowhere).');
+  if(rateOf()===null) out.push('He has not put a commission rate in, so every money figure in this log is BEFORE costs. Say that rather than letting it read as what he kept.');
+  else out.push('Commission is '+dollars(rateOf())+' a contract, in and out, as he typed it. Every net figure is after it. The spread and his fills are still not in here, and neither is anything a backtest did.');
+  for(var i=0;i<TRADES.length;i++) out.push('  '+i+': '+tradeLine(TRADES[i]));
+  out.push('');
+  out.push('Everything above came from him, including the risk in points and the R. The adding up is in the JOURNAL block below and it is the only summary of this log you may use — do not work out an expectancy, an "edge", or anything that is not in it, and never forecast from it.');
+  out.push('');
+  return out.join('\n');
+}
+
+/* One trade in full, for the review. The page hands over what he typed and says
+   out loud which parts are missing, so the review can say what it cannot judge
+   instead of filling the gap in. */
+function tradeText(t){
+  var risk=riskPoints(t), r=rOf(t);
+  return [
+    'THE TRADE BEING REVIEWED. Every line below came from him; nothing else about this trade is known.',
+    '',
+    'Market: '+(t.mk||'not said'),
+    'Direction: '+t.dir,
+    'Setup he says it was: '+(t.su||'he did not name one'),
+    'Entry: '+(t.en===null?'not said':two(t.en)),
+    'Stop: '+(t.st===null?'not said':two(t.st)),
+    'Target: '+(t.tg===null||t.tg===undefined?'not given':two(t.tg)),
+    'Exit: '+(t.ex===null?'not recorded — it is still open, or he has not written it down':two(t.ex)),
+    'Risk, in points: '+(risk===null?'cannot be worked out: entry or stop is missing':(two(risk)
+      +(riskMoney(t)!==null?(' ('+dollars(riskMoney(t))+' on the point value he put on this trade)'):' (no point value on this trade, so no money)'))),
+    'Result, in R: '+(r===null?'cannot be worked out yet':((r>=0?'+':'')+two(r)+'R'
+      +(moneyOf(t)!==null?(' ('+dollars(moneyOf(t))+' on the point value he put on this trade)'):''))),
+    'What he saw, in his words: '+(t.note||'not written down'),
+    '',
+    'The risk and the R are arithmetic on his own numbers, nothing more. If a field the review needs is missing, name it and review what is there.',
+    ''
+  ].join('\n');
+}
+
+/* What the review is and is not allowed to do. Same house rules as the rest of
+   the desk, plus the one that matters here: grade the decision, never the
+   result. */
+var TRADE_SYS=[
+  'HE IS ASKING YOU TO REVIEW ONE OF HIS OWN TRADES.',
+  '',
+  'MARK THE DECISION, NOT THE RESULT. Judge it on what was visible at the time he took it. A trade that paid can still have been a bad decision and a loss can be a good one — when that is the case, say so plainly, because that is the lesson.',
+  '',
+  'CHECK THESE, IN THIS ORDER, AND SAY EACH ONE:',
+  '1. Was it one of his setups as he wrote it? Name it, or say it was not one of them.',
+  '2. Was the entry at his own trigger, or did he get in early on the idea?',
+  '3. Was the stop where his setup says the stop goes, and did he hold the risk he planned?',
+  'Then the arithmetic he handed you — the risk in points and the R — as his numbers, not yours.',
+  '',
+  'WHAT YOU NEVER DO:',
+  '1. Never invent a price, a level, a statistic, a study or a backtest. Never compute an average, an expectancy or a win rate from his log: there are far too few trades for that to mean anything, and if he asks what his record proves you say exactly that.',
+  '2. Never size a position and never invent a money figure. The only money in this review is what the trade block already worked out from the point value he put on the trade: never a balance, never an account, never what it could have made.',
+  '2b. Gross and net are different numbers and you never use the flattering one. If the trade carries a commission rate, the net figure is what he kept; if it does not, say the money is before costs. Never treat a backtest as a measurement, and never compare this log to one.',
+  '3. Never tell him to make a loss back, to size up, or to take a trade because he is owed one. If it reads like chasing — entering before the trigger, widening a stop, adding after a loss — name that first and plainly, then answer the rest.',
+  '4. Never tell him he is finished, hopeless or no good at this. The mistakes that show up in a trade are the ordinary ones and they are learnable.',
+  '5. Never promise an outcome, and never put a probability on the next trade.',
+  '',
+  'HOW YOU ANSWER:',
+  '- Short lines, each with its label: Setup, Entry, Stop, Risk, Result, and then the change.',
+  '- End with ONE thing to do differently next time — the single change with the most behind it, not a list of five, and something he can actually do on the next trade.',
+  '- If the record is missing something you need, say which field is missing and review the rest. Do not guess the missing number.',
+  '- Plain English, always.'
+].join('\n');
+
+/* ---------- the list ----------------------------------------------------- */
+var editingT=null;
+function renderJournal(){
+  var sum=document.getElementById('jsum'), rec=document.getElementById('jrec'), none=document.getElementById('jnone');
+  if(!sum&&!rec) return;
+  if(!TRADES.length){
+    if(sum) sum.innerHTML='';
+    if(rec) rec.innerHTML='';
+    if(none) none.style.display='block';
+    return;
+  }
+  if(none) none.style.display='none';
+  if(sum) sum.innerHTML=journalHtml();
+  if(rec) rec.innerHTML=journalRecordHtml();
+}
+
+function renderTrades(){
+  var list=document.getElementById('tlist'), none=document.getElementById('tnone');
+  if(!list) return;
+  renderJournal();
+  if(!TRADES.length){
+    list.innerHTML='';
+    if(none) none.style.display='block';
+    return;
+  }
+  if(none) none.style.display='none';
+  var h='';
+  /* Newest first: the trade he has just taken is the one he wants to see. */
+  for(var i=TRADES.length-1;i>=0;i--){
+    var t=TRADES[i];
+    h+='<div class="card"><div class="row-txt" style="padding:13px 14px 0">'
+      +'<b>'+esc(t.mk||'Trade')+(t.dir==='short'?' short':' long')+'</b>'
+      +'<span>'+esc(t.su||'no setup named')+(t.d?' &middot; '+esc(t.d):'')+'</span></div>'
+      +'<div class="body" style="display:block;border-top:none;padding-top:10px">'
+      +'<div class="lbl">Result</div><p><b>'+esc(rText(t))+'</b>'
+      +(moneyOf(t)!==null?(' &middot; '+esc(dollars(moneyOf(t)))+' before costs'):'')+'</p>';
+    if(netMoneyOf(t)!==null){
+      h+='<div class="lbl">After costs</div><p>'+esc(dollars(netMoneyOf(t)))
+        +' &middot; '+esc(dollars(costOf(t)))+' commission on '+contractsOf(t)+' contract'+(contractsOf(t)===1?'':'s')
+        +' at '+esc(dollars(rateOf()))+' each, in and out</p>';
+    }
+    var risk=riskPoints(t);
+    if(risk!==null) h+='<div class="lbl">Risk</div><p>'+esc(two(risk))+' points from entry to stop'
+      +(riskMoney(t)!==null?(' &middot; '+esc(dollars(riskMoney(t)))):'')+'</p>';
+    if(t.en!==null||t.st!==null||t.tg!==null||t.ex!==null){
+      h+='<div class="lbl">The numbers you gave</div><p>'
+        +'entry '+esc(t.en===null?'—':two(t.en))
+        +' &middot; stop '+esc(t.st===null?'—':two(t.st))
+        +' &middot; target '+esc(t.tg===null||t.tg===undefined?'—':two(t.tg))
+        +' &middot; exit '+esc(t.ex===null?'—':two(t.ex))+'</p>';
+    }
+    if(t.note) h+='<div class="lbl">What you saw</div><p>'+esc(t.note)+'</p>';
+    h+='<button class="txtbtn" data-rev="'+i+'">Review this trade</button><br>'
+      +'<button class="del" data-tdel="'+i+'">Delete</button>'
+      +'</div></div>';
+  }
+  list.innerHTML=h;
+}
+
+/* ---------- the journal ---------------------------------------------------
+   Jacques, 18 Sep 2026: "add a journal to the assistant to keep track of
+   trades risk reward and win rate profit losses".
+
+   This page used to refuse a win rate outright, and the reason was written
+   into it: a percentage from a handful of trades reads like a measurement of
+   an edge and is not one. He has asked for it, so it is here — with one
+   condition kept, because it is what makes the number honest rather than
+   forbidden: THE COUNT TRAVELS ON THE SAME LINE AS THE PERCENTAGE. "75%, 3 of
+   4 closed trades" cannot be read as a claim about the next trade. "75%"
+   alone can, and that is the version that gets traders killed.
+
+   Everything below is arithmetic on what he typed in. Nothing is estimated,
+   nothing is projected, and a figure that cannot be worked out from his own
+   numbers is absent rather than filled with a guess. */
+function journalStats(){
+  var closed=closedTrades();
+  var s={
+    written:TRADES.length, closed:closed.length, missing:TRADES.length-closed.length,
+    won:0, lost:0, flat:0,
+    netR:0, grossWin:0, grossLoss:0, netPts:0,
+    netMoney:0, moneyN:0, moneyMissing:0,
+    costN:0, costMissing:0, costTotal:0, netAfter:0, afterN:0,
+    bestR:null, worstR:null, avgWin:null, avgLoss:null, winRate:null, by:{}
+  };
+  for(var i=0;i<closed.length;i++){
+    var t=closed[i], r=rOf(t);
+    var pts=pointsOf(t);
+    s.netR+=r; s.netPts+=pts;
+    /* Money only where he put a point value on the trade. One without it goes
+       into no total, and the count of those is printed with the figure — a
+       total that quietly covers three of five trades is a lie by omission. */
+    var m=moneyOf(t);
+    if(m===null) s.moneyMissing++; else { s.moneyN++; s.netMoney+=m; }
+    /* The commission on this trade, and what was left of it. Counted only
+       where he gave a rate: a trade with no rate has no net figure at all,
+       and the count of those travels with the total for the same reason the
+       win rate carries its own count. */
+    var cst=costOf(t);
+    if(cst===null){ s.costMissing++; } else { s.costN++; s.costTotal+=cst; }
+    var nm=netMoneyOf(t);
+    if(nm!==null){ s.afterN++; s.netAfter+=nm; }
+    if(r>0){ s.won++; s.grossWin+=r; }
+    else if(r<0){ s.lost++; s.grossLoss+=r; }
+    else { s.flat++; }
+    if(s.bestR===null||r>s.bestR) s.bestR=r;
+    if(s.worstR===null||r<s.worstR) s.worstR=r;
+    var k=t.su||'no setup named';
+    if(!s.by[k]) s.by[k]={n:0,won:0,lost:0,r:0};
+    var b=s.by[k];
+    b.n++; b.r+=r;
+    if(r>0) b.won++; else if(r<0) b.lost++;
+  }
+  /* No closed trades means no percentage at all — null, not zero. A 0% win
+     rate and "nothing closed yet" are different sentences and the page must
+     never print the first when it means the second. */
+  if(s.closed){ s.winRate=(s.won/s.closed)*100; }
+  if(s.won){ s.avgWin=s.grossWin/s.won; }
+  if(s.lost){ s.avgLoss=s.grossLoss/s.lost; }
+  return s;
+}
+
+function sgn(v,unit){ return (v>=0?'+':'')+two(v)+(unit||'') }
+
+/* What the journal does and does not mean. One sentence, printed with the
+   numbers rather than tucked under them. */
+function journalFine(s){
+  return 'This is your own arithmetic on the trades you typed in. It is not a backtest, it is not a measurement of an edge, and it says nothing about the next trade. '
+    + (s.closed
+        ? 'A win rate from '+s.closed+' closed trade'+(s.closed===1?'':'s')+' describes those '+s.closed+' and nothing else — the count sits on the same line as the percentage so it can never be read as a claim.'
+        : 'Nothing is closed yet, so there is no win rate and no profit or loss to show. That is a blank, not a zero.');
+}
+
+/* The money line, or the honest absence of one. No point value on any closed
+   trade means no money figure — not zero, and not a figure taken from the
+   symbol's published size behind his back. */
+/* The net line, or the honest absence of one. Three different sentences, and
+   they are not interchangeable: no rate set at all, a rate but no closed trade
+   it can be applied to, and a real net figure. */
+function moneyAfterRow(s){
+  if(!TRADES.length) return '';
+  if(rateOf()===null) return '<span style="color:var(--tm)">no commission rate set, so there is no net figure \u2014 the gross above is the market price, not what you kept</span>';
+  if(!s.afterN) return '<span style="color:var(--tm)">no closed trade carries both a point value and this rate yet, so there is no net figure</span>';
+  return '<b>'+esc(dollars(s.netAfter))+'</b> after '+esc(dollars(s.costTotal))+' of commission on '+s.afterN+' of '+s.closed+' closed'
+    +(s.closed-s.afterN?(' &middot; '+(s.closed-s.afterN)+' left out'):'');
+}
+function moneyRow(s){
+  if(!TRADES.length) return '';
+  if(!s.moneyN) return '<span style="color:var(--tm)">no point value on any closed trade yet, so there is no money figure</span>';
+  return '<b>'+esc(dollars(s.netMoney))+'</b> from '+s.moneyN+' of '+s.closed+' closed'
+    +(s.moneyMissing?(' &middot; '+s.moneyMissing+' left out, no point value on it'):'');
+}
+function journalHtml(){
+  if(!TRADES.length) return '';
+  var s=journalStats();
+  var h='<div class="big"><b>Your own record</b>'
+    + s.written+(s.written===1?' trade':' trades')+' written down, '
+    + '<b>'+s.closed+'</b> closed'
+    + (s.missing?(', '+s.missing+' still open or missing a price — counted nowhere'):'')+'.';
+  if(!s.closed){
+    h+='<span style="display:block;margin-top:7px">Nothing closed yet: no win rate, no profit and loss. Not zero — blank.</span>';
+  }else{
+    h+='<span style="display:block;margin-top:7px">'
+      + 'Win rate: <b>'+Math.round(s.winRate)+'%</b> — '+s.won+' won of '+s.closed+' closed'
+      + (s.lost?(', '+s.lost+' lost'):'')
+      + (s.flat?(', '+s.flat+' at break-even'):'')+'.'
+      + '</span>';
+    h+=stRow('Points','<b>'+sgn(s.netPts)+'</b>');
+    h+=stRow('Money', moneyRow(s));
+    h+=stRow('After costs', moneyAfterRow(s));
+    h+=stRow('Reward vs risk','<b>'+sgn(s.netR,'R')+'</b> net &middot; won '+sgn(s.grossWin,'R')+' against '+sgn(s.grossLoss,'R')+' lost');
+  }
+  if(s.closed){
+    var rw=[];
+    rw.push(s.won ? ('Your winners averaged '+sgn(s.avgWin,'R')+' each') : 'No winner written down yet');
+    rw.push(s.lost ? ('your losers averaged '+two(s.avgLoss)+'R each') : 'no loser written down yet');
+    h+='<div class="lbl">Risk against reward</div><p>'+rw.join('; ')+'.</p>';
+    h+='<div class="lbl">Range</div><p>Best '+sgn(s.bestR,'R')+' &middot; worst '+sgn(s.worstR,'R')+'</p>';
+    var keys=Object.keys(s.by), rows='';
+    for(var i=0;i<keys.length;i++){
+      var b=s.by[keys[i]];
+      rows+=esc(keys[i])+': '+b.n+' closed, '+b.won+' won'
+        +(b.lost?(', '+b.lost+' lost'):'')+' &middot; '+sgn(b.r,'R')+'<br>';
+    }
+    h+='<div class="lbl">By setup</div><p>'+rows+'</p>';
+  }
+  h+='<p style="margin-top:9px">'+esc(journalFine(s))+'</p>';
+  if(s.closed) h+='<p style="margin-top:6px">'+esc('Commission is the only cost this page knows, because you typed it in. The spread and your fills are not in here, and nothing a backtest did is in here either. A backtest with no commission in it and a log with one are not the same trade \u2014 that gap is the first thing to check before trusting a backtest.')+'</p>';
+  h+='</div>';
+  return h;
+}
+
+/* The record itself, newest first: one line per trade, dated. This is the part
+   that makes it a journal rather than a scoreboard — the trade he took three
+   weeks ago is still here, with what he saw at the time. */
+function journalRecordHtml(){
+  if(!TRADES.length) return '';
+  var h='<div class="sec-hd">The record</div>';
+  for(var i=TRADES.length-1;i>=0;i--){
+    var t=TRADES[i], r=rOf(t);
+    h+='<div class="jrow">'
+      +'<span class="jdate">'+esc(t.d||'no date')+'</span>'
+      +'<span class="jtxt"><b>'+esc(t.mk||'Trade')+(t.dir==='short'?' short':' long')+'</b>'
+      +'<span>'+esc(t.su||'no setup named')+'</span></span>'
+      +'<span class="jr'+(r===null?' open':(r>0?' win':(r<0?' loss':'')))+'">'+esc(rText(t))+'</span>'
+      +'</div>';
+    if(t.note) h+='<div class="jnote">'+esc(t.note)+'</div>';
+  }
+  return h;
+}
+
+/* The journal, in the assistant's instructions on every question, so asking
+   about it gets the real numbers instead of a model doing sums in its head. */
+function journalText(){
+  var s=journalStats();
+  var out=['HIS JOURNAL — his own trade log added up. Every figure is arithmetic on trades he typed in, and the count is always attached to it.'];
+  out.push('');
+  if(!s.closed){
+    out.push('NOTHING IS CLOSED YET: '+s.written+' written down, none with a result. There is no win rate and no profit or loss. Say that. Do not report 0% and do not describe a record he does not have.');
+    out.push('');
+    return out.join('\n');
+  }
+  out.push('Closed: '+s.closed+' of '+s.written+' written down'
+    + (s.missing?(' ('+s.missing+' still open or missing a price, counted nowhere)'):'')+'.');
+  out.push('Win rate: '+Math.round(s.winRate)+'% — '+s.won+' won, '+s.lost+' lost'
+    + (s.flat?(', '+s.flat+' at break-even'):'')+'.');
+  out.push('Net: '+sgn(s.netR,'R')+' (won '+sgn(s.grossWin,'R')+', lost '+sgn(s.grossLoss,'R')+'), net '+sgn(s.netPts)+' points.');
+  out.push('Money: '+(s.moneyN
+    ? (dollars(s.netMoney)+' across '+s.moneyN+' of '+s.closed+' closed trades'+(s.moneyMissing?(', with '+s.moneyMissing+' left out because no point value is on it'):''))
+    : 'none — no closed trade has a point value on it, so there is no money figure. Say that instead of working one out.'));
+  if(s.won) out.push("Winners averaged "+sgn(s.avgWin,'R')+' each.');
+  if(s.lost) out.push('Losers averaged '+two(s.avgLoss)+'R each.');
+  out.push('Best '+sgn(s.bestR,'R')+', worst '+sgn(s.worstR,'R')+'.');
+  out.push('');
+  out.push('These numbers describe trades he has already taken. They are not a prediction, not an edge, and not evidence about the next one. Never turn them into a forecast: never say he is "due", never tell him to size up because he is winning, and never tell him to win it back because he is losing. When he asks what the journal says, report it as written above WITH the count, and then say the one thing the record actually shows him — or that it shows nothing yet. The only money you may ever say is the money line above: his own points multiplied by the point value he put on each trade. Never a figure you worked out, never a balance, never an account size, and never what a trade could have made.');
+  out.push('');
+  return out.join('\n');
+}
+
+/* ---------- the form ----------------------------------------------------- */
+function openTrade(){
+  /* It opens either way. Logging the trade he has just taken matters more than
+     the setup list being tidy, and the hint tells him which state he is in —
+     the review will say "he did not name one of his setups" rather than
+     pretending the trade matched something he never wrote. */
+  var hint=document.getElementById('tSuHint');
+  if(hint) hint.textContent = SETUPS.length
+    ? 'Yours: '+SETUPS.map(function(s){ return s.n||'Untitled' }).join(', ')
+    : 'You have not written any setups yet — name this one in your own words for now.';
+  ['tMk','tSu','tEn','tSt','tTg','tEx','tPv','tNote'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  fillPointValue();
+  /* One contract is the default, because one micro is what his .39 is priced
+     on; he can change it before saving. */
+  var cEl=document.getElementById('tC'); if(cEl) cEl.value='1';
+  var d=document.getElementById('tDir'); if(d) d.value='long';
+  var f=document.getElementById('tform');
+  if(f){ f.style.display='block'; f.scrollIntoView({behavior:'smooth',block:'center'}) }
+}
+function closeTrade(){
+  var f=document.getElementById('tform');
+  if(f) f.style.display='none';
+}
+function readNum(id){
+  var el=document.getElementById(id);
+  return numOf(el?el.value:'');
+}
+function readStr(id){
+  var el=document.getElementById(id);
+  return el?String(el.value||'').trim():'';
+}
+function saveTrade(){
+  var dirEl=document.getElementById('tDir');
+  var t={
+    d:new Date().toISOString().slice(0,10),
+    mk:readStr('tMk'),
+    su:readStr('tSu'),
+    dir:(dirEl&&dirEl.value==='short')?'short':'long',
+    en:readNum('tEn'),
+    st:readNum('tSt'),
+    tg:readNum('tTg'),
+    ex:readNum('tEx'),
+    pv:readNum('tPv'),
+    c:readNum('tC'),
+    note:readStr('tNote')
+  };
+  /* A trade with no entry at all is not a trade he can review, and the page
+     says so instead of storing a row of blanks. */
+  if(t.en===null){
+    var e=document.getElementById('tEn'); if(e) e.focus();
+    return;
+  }
+  TRADES.push(t);
+  save(K_TRADES, TRADES);
+  closeTrade();
+  renderTrades();
+}
+
+/* ---------- the review --------------------------------------------------- */
+/* Returns the ask's promise so the answer can be waited on — the review is not
+   finished when the request goes out. */
+function reviewTrade(i){
+  var t=TRADES[i];
+  if(!t) return Promise.resolve();
+  return ask('Review this trade. Where was the decision wrong, and what is the one thing to do differently next time?',
+             askSystem(TRADE_SYS+'\n\n'+tradeText(t)));
+}
+
+
+document.addEventListener('click',function(e){
+  paintSession();
+  var t=e.target;
+  var op=t.closest?t.closest('[data-open]'):null;
+  if(op){ var i=parseInt(op.getAttribute('data-open'),10);
+    editing=(editing===i)?null:i; render(); return }
+  var ed=t.closest?t.closest('[data-edit]'):null;
+  if(ed){ openForm(parseInt(ed.getAttribute('data-edit'),10)); return }
+  var dl=t.closest?t.closest('[data-del]'):null;
+  if(dl){
+    var k=parseInt(dl.getAttribute('data-del'),10);
+    var s=SETUPS[k];
+    if(s&&window.confirm('Delete "'+(s.n||'this setup')+'"? The assistant will stop reading it.')){
+      SETUPS.splice(k,1); editing=null; save(K_SETUPS,SETUPS); render();
+    }
+    return;
+  }
+  var ctf=t.closest?t.closest('#chTf .tf'):null;
+  if(ctf){ setChartTf(ctf.getAttribute('data-ctf')); return }
+  var frtf=t.closest?t.closest('#frTf .tf'):null;
+  if(frtf){ setFrameTf(frtf.getAttribute('data-ftf')); return }
+  var rv=t.closest?t.closest('[data-rev]'):null;
+  if(rv){ reviewTrade(parseInt(rv.getAttribute('data-rev'),10)); return }
+  var td=t.closest?t.closest('[data-tdel]'):null;
+  if(td){
+    var ti=parseInt(td.getAttribute('data-tdel'),10);
+    var tr=TRADES[ti];
+    if(tr&&window.confirm('Delete this trade from the log? The review will not have it any more.')){
+      TRADES.splice(ti,1); save(K_TRADES,TRADES); renderTrades();
+    }
+    return;
+  }
+
+  var ch=t.closest?t.closest('.chip[data-q]'):null;
+  if(ch){
+    /* Two chips answer under their own rules: the trade record is read under
+       the review rules, and the study under the study rules. Every other chip
+       answers under the desk's own rules. */
+    var sys=ch.getAttribute('data-sys');
+    ask(ch.getAttribute('data-q'), sys==='trade' ? askSystem(TRADE_SYS) : (sys==='study' ? askSystem(STUDY_SYS) : undefined));
+    return;
+  }
+});
+
+document.getElementById('addS').onclick=function(){ openForm() };
+document.getElementById('cancelS').onclick=function(){ closeForm() };
+document.getElementById('saveS').onclick=function(){
+  var n=val('sN');
+  if(!n){ document.getElementById('sN').focus(); return }
+  var rec={n:n, tf:tfList(val('sTfIn')), r:val('sR'), e:val('sE'), s:val('sS'), t:val('sT'),
+           h:document.getElementById('sH').value||'hold'};
+  if(editing===null) SETUPS.push(rec); else SETUPS[editing]=rec;
+  save(K_SETUPS,SETUPS);
+  closeForm(); render();
+};
+document.getElementById('askGo').onclick=function(){ ask() };
+document.getElementById('askQ').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask() }
+});
+document.getElementById('addT').onclick=function(){ openTrade() };
+document.getElementById('cancelT').onclick=function(){ closeTrade() };
+document.getElementById('saveT').onclick=function(){ saveTrade() };
+
+/* Type the market and the point value fills itself in from the published
+   contract size — one field less to fill on a phone — and he can overrule it
+   before saving, because his size and his fill are his and not ours. */
+function fillPointValue(){
+  var mk=document.getElementById('tMk'), pvEl=document.getElementById('tPv'), hint=document.getElementById('tPvHint');
+  if(!mk) return;
+  var k=baseSym(mk.value), pv=pointValueOf(k);
+  if(pv!==null&&pvEl&&!pvEl.value) pvEl.value=String(pv);
+  if(hint) hint.textContent = !k
+    ? 'Fills itself in from the contract when you type the market, and you can change it.'
+    : (pv!==null
+      ? (k+' — one point is '+dollars(pv)+' on one contract. Change it if your size or your broker differs.')
+      : ('No published contract size for '+k+'. Put your own figure here or the log stays in points and R.')); 
+}
+var tMkEl=document.getElementById('tMk');
+if(tMkEl&&tMkEl.addEventListener) tMkEl.addEventListener('input',fillPointValue);
+
+/* The commission box: shown on open, saved on every keystroke, and the log is
+   redrawn with it so the gross and the net can never drift apart. */
+function paintRate(){
+  var el=document.getElementById('cRate'), hint=document.getElementById('cRateHint');
+  if(el&&document.activeElement!==el) el.value=(rateOf()===null?'':String(rateOf()));
+  if(hint) hint.textContent = (rateOf()===null)
+    ? 'What ONE contract costs over a whole trade, in and out. A NinjaTrader micro is about .39 a side, so .78 for the round trip. Nothing is assumed: leave it blank and the log stays gross.'
+    : ('Counted at '+dollars(rateOf())+' a contract, in and out. The spread and your fills are not in here, and neither is anything a backtest did.');
+}
+var cRateEl=document.getElementById('cRate');
+if(cRateEl&&cRateEl.addEventListener) cRateEl.addEventListener('input',function(){
+  var v=numOf(cRateEl.value);
+  if(v===null) delete COST.rate; else COST.rate=v;
+  save(K_COST,COST);
+  paintRate();
+  renderTrades();
+});
+paintRate();
+
+/* The feed: the button, Enter in the symbol field, and one load on open so the
+   page is never sitting there looking like it has candles when it does not. */
+/* One press. Jacques, 22 Sep 2026: "simplify my trading desk its kind of
+   complicated". The page used to need three — candles, then study, then test —
+   and two of them were buttons sitting in blocks that pushed the assistant off
+   the screen. Now this one press pulls the candles, then the study bars, then
+   runs the test on those same bars. The pieces still stand alone if asked. */
+async function loadAll(){
+  await loadFeed();
+  if(!(FEED&&FEED.ok)) return;
+  await loadStudy();
+  if(STUDY&&STUDY.ok) runBacktest();
+}
+document.getElementById('fGo').onclick=function(){ loadAll() };
+document.getElementById('fSym').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){ e.preventDefault(); loadAll() }
+});
+document.getElementById('fSym').value=load(K_SYM,'NQ');
+loadFeed();
+/* The chart's timeframe, remembered, so it opens on the one he was reading. */
+paintChartTf();
+paintFrameTf();
+
+/* The chart block remembers itself, so it is filled once per session. */
+var NOW=load(K_NOW,{});
+['dMk','dPx','dRd','dIn','dEn','dSt','dTg'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(!el) return;
+  if(NOW[id]) el.value=NOW[id];
+  el.addEventListener('input',function(){
+    NOW[id]=el.value;
+    save(K_NOW,NOW);
+    var s=document.getElementById('dSaved');
+    if(s) s.textContent='Kept on this device.';
+  });
+});
+
+paintStudy();
+render();
+renderTrades();
+</script>
+</body>
+</html>

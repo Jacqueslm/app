@@ -150,7 +150,10 @@ for (const must of [
   'innerDir:innerDir,innerCoil:innerCoil,innerExpand:innerExpand',
   'function qOutside(st){',
   'return qOutside(st);',
-  'var kinds=["level","inner","event","agree"];',
+  // 23 Sep 2026: tools/apply-market-mtf.js moved the rotation on — the raid read
+  // and the bridge read sit in it now. This tool still owns everything else
+  // about the reads, so the assertion moves with them rather than blocking it.
+  'var kinds=["level","inner","event","raid","agree","bridge"];',
   'numbered 1, 2 and 3',
   'RESTING — price has not been here',
   'opening out — no read yet',

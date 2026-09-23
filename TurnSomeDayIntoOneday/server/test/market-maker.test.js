@@ -47,7 +47,9 @@ const HTML = fs.readFileSync(PAGE, 'utf8');
 const EXPORT = ';window.__mm={levelSpec:levelSpec,buildQ:buildQ,stNow:stNow,structure:structure,'
   + 'drawChart:drawChart,paintGate:paintGate,makeMarket:makeMarket,pickWindow:pickWindow,'
   + 'windowBars:windowBars,qLevel:qLevel,qInner:qInner,qEvent:qEvent,qAgree:qAgree,qOutside:qOutside,'
-  + 'tape:function(){return TAPE},setGm:function(g){Gm=g},setTf:function(t){G.tf=t;return tfNow()}};';
+  + 'qRaid:qRaid,qBridge:qBridge,bridgeTrend:bridgeTrend,bridgeBars:bridgeBars,'
+  + 'execTf:execTf,rollAny:rollAny,windowBarsTf:windowBarsTf,paintBias:paintBias,tfs:function(){return TFS},'
+  + 'tape:function(){return TAPE},setGm:function(g){Gm=g},setTf:function(t){G.tf=t;return tfNow()}};'
 
 function pageScript() {
   let out = '';
@@ -105,6 +107,7 @@ function stubDom() {
       getAttribute(n) { return this.attributes[n] === undefined ? null : this.attributes[n] },
       getBoundingClientRect() { return { top: 0, left: 0, width: 700, height: 320 } },
       focus() {}, closest() { return null }, querySelectorAll() { return [] },
+      querySelector() { return null },
       appendChild(c) { return c }, remove() {}, scrollIntoView() {},
       getContext() { return this.__ctx || (this.__ctx = fakeCtx(this._texts)) },
     };
@@ -163,18 +166,18 @@ let Gm = null;
 function openMarket(n, seed, fromTape) {
   const spec = MM.levelSpec(n);
   MM.setTf(0);                       // the 1H execution frame
-  let bars = null;
+  let bars = null, win = null;
   if (fromTape) {
-    const w = MM.pickWindow(spec, n);
-    if (w) bars = MM.windowBars(w);
+    win = MM.pickWindow(spec, n);
+    if (win) bars = MM.windowBars(win);
   }
-  if (!bars || bars.length < 100) bars = MM.makeMarket(spec, seed);
+  if (!bars || bars.length < 100) { bars = MM.makeMarket(spec, seed); win = null }
   Gm = {
     spec, bars, i: 60, left: spec.session, R: 0, wins: 0, losses: 0, bullets: spec.bullets,
     pos: null, cash: 0, over: false, tilt: 0, sinceLoss: 99, streak: 0, best: 0,
     xray: 0, shield: 0, shieldOn: false, revenges: 0, blown: 0,
     reads: 0, readsRight: 0, readStreak: 0, qn: 0, st: null, stAt: -1, gate: null,
-    xrayOn: false, round: 1, roundLen: 40, tf: null, win: null,
+    xrayOn: false, round: 1, roundLen: 40, tf: null, win: win,
     bot: { R: 0, wins: 0, losses: 0, bullets: spec.bullets, pos: null, done: true },
   };
   MM.setGm(Gm);
@@ -246,10 +249,15 @@ function outsideLabels(bars, upto) {
     if (!last || last.t !== p.t) seq.push(p);
     else if ((p.t === 'H' && p.p > last.p) || (p.t === 'L' && p.p < last.p)) seq[seq.length - 1] = p;
   }
+  // The four words need the CLOSE now (23 Sep 2026). A new high whose own bar
+  // closed back under the previous high is a sweep — SH — and it does not move
+  // the structure. Rebuilt here exactly as the page defines it, because this is
+  // the read whose answer is pure arithmetic on the tape.
   const labs = [];
   for (let i = 2; i < seq.length; i++) {
-    const prev = seq[i - 2];
-    labs.push(seq[i].t === 'H' ? (seq[i].p > prev.p ? 'HH' : 'LH') : (seq[i].p < prev.p ? 'LL' : 'HL'));
+    const prev = seq[i - 2], b = bars[seq[i].i];
+    if (seq[i].t === 'H') labs.push(seq[i].p > prev.p ? (b.c > prev.p ? 'HH' : 'SH') : 'LH');
+    else labs.push(seq[i].p < prev.p ? (b.c < prev.p ? 'LL' : 'SL') : 'HL');
   }
   const last4 = labs.slice(-4);
   if (last4.length < 3) return null;
@@ -509,6 +517,131 @@ test('the buttons carry the number the tape drew on their line', () => {
   MM.drawChart();
   for (let k = 0; k < 3; k++) assert.ok(cv._texts.includes(String(k + 1)), `mark ${k + 1} was not drawn`);
   Gm.gate = null;
+});
+
+// ── the wick rule and the frame switch — 23 Sep 2026 ────────────────────────
+//
+// Jacques, both halves in one message:
+//
+//   "it counts wicks as breaks when i see wicks as close a wick break close back
+//    in the leg or zone it thats ok"
+//
+//   "i want to be able to switch a time frame say a daily get a bias then zoom
+//    down on timeframes to make a decision"
+//
+// Turned into two rules this file can hold him to: the four words need the
+// close, and the frame you execute on can be changed inside an operation on the
+// same tape and the same clock.
+
+// Two turns and a raid, built by hand so the arithmetic is unambiguous: a swing
+// high at 12.0, a swing low at 10.1, then a bar whose wick takes 12.4 and closes
+// wherever the argument says. The old page read the four words off the wicks, so
+// the wick alone was a higher high and moved the trend.
+function raidBars(closeAtRaid) {
+  const b = (h, l, c) => ({ o: c, h: h, l: l, c: c });
+  return [
+    b(10.4, 9.9, 10.2), b(10.9, 10.1, 10.7), b(11.0, 10.5, 10.8), b(11.2, 10.6, 10.9),
+    b(11.0, 10.4, 10.6), b(10.9, 10.2, 10.5), b(11.0, 10.3, 10.8),
+    b(12.0, 10.7, 11.9),                       // 7  — the high that gets raided
+    b(11.6, 11.0, 11.2), b(11.3, 10.9, 11.0),
+    b(11.1, 10.1, 10.6),                       // 10 — the swing low between them
+    b(11.4, 10.5, 11.2),
+    b(12.4, 11.1, closeAtRaid),                // 12 — the wick, and where it closed
+    b(11.8, 11.3, 11.5), b(11.7, 11.2, 11.4), b(11.6, 11.1, 11.3),
+    b(11.5, 11.0, 11.2), b(11.4, 10.9, 11.1), b(11.3, 10.8, 11.0), b(11.2, 10.7, 10.9),
+  ];
+}
+
+function lastTurnOf(st, kind) {
+  const turns = st.seq.filter(p => p.t === kind);
+  return turns[turns.length - 1] || null;
+}
+
+test('a wick through a level is a raid, and a close through it is a break', () => {
+  const raid = raidBars(11.6);                 // wick to 12.4, closes 11.6 — under the old 12.0
+  const st = MM.structure(raid, raid.length - 1);
+  const high = lastTurnOf(st, 'H');
+  assert.strictEqual(high.lab, 'SH', 'a wick through the high was marked ' + high.lab);
+  assert.ok(st.sweeps.indexOf(high) !== -1, 'the swept high is not in the sweeps');
+  assert.notStrictEqual(st.trend, 'up', 'a wick that closed back moved the trend up');
+  assert.strictEqual(st.lastSweep, high, 'the last sweep is not the high that was raided');
+
+  const broke = raidBars(12.2);                // closes above the old high
+  const st2 = MM.structure(broke, broke.length - 1);
+  const high2 = lastTurnOf(st2, 'H');
+  assert.strictEqual(high2.lab, 'HH', 'a close through the high was marked ' + high2.lab);
+  assert.ok(st2.sweeps.indexOf(high2) === -1, 'a real break was filed as a raid');
+
+  // and the read points the way the sweep points, mirrored with the direction
+  MM.setGm({ i: raid.length - 1 });
+  const q = MM.qRaid(st);
+  assert.ok(q, 'the raid read declined a raid that is right there');
+  assert.strictEqual(q.kind, 'raid');
+  assert.strictEqual(q.a, 1, 'a swept high should point down: ' + q.o[q.a]);
+
+  const mirror = raid.map(b => ({ o: 200 - b.o, h: 200 - b.l, l: 200 - b.h, c: 200 - b.c }));
+  const stm = MM.structure(mirror, mirror.length - 1);
+  const qm = MM.qRaid(stm);
+  assert.ok(qm, 'the raid read declined the mirror of the same thing');
+  assert.strictEqual(qm.a, 0, 'a swept low should point up: ' + qm.o[qm.a]);
+
+  // and once the raid is old news it is not asked about any more
+  MM.setGm({ i: raid.length - 1 + 40 });
+  assert.strictEqual(MM.qRaid(st), null, 'the raid read came back on a sweep from forty bars ago');
+});
+
+test('switching the execution frame keeps the clock, the tape and the position', () => {
+  const g = openMarket(3, 4242, true);
+  assert.ok(g.win, 'the level did not come off the real tape');
+  const TFS = MM.tfs();
+  const was = g.bars, clock = was[g.i].t, leftHours = g.left * TFS[0].h;
+  const pos = { dir: 1, entry: was[g.i].c, sl: was[g.i].c - 2, tp: was[g.i].c + 4, risk: 2, tgt: 2, size: 1 };
+  g.pos = pos;
+
+  MM.execTf(1);                                  // 1H → 4H
+  assert.strictEqual(g.tf.n, '4H', 'the execution frame did not change');
+  assert.notStrictEqual(g.bars, was, 'the bars were not regrouped');
+  assert.strictEqual(g.pos, pos, 'the open position was rebuilt — it is a price, not a bar');
+  assert.strictEqual(g.pos.sl, pos.sl, 'the stop moved with the frame change');
+  const now = g.bars[g.i];
+  assert.ok(now.t !== undefined, 'the regrouped bars lost their clock');
+  assert.ok(now.t <= clock, 'the clock moved forward: ' + now.t + ' > ' + clock);
+  assert.ok(clock - now.t < TFS[1].h * 3600, 'the clock moved back further than one bar of the new frame');
+  assert.ok(Math.abs(g.left * TFS[1].h - leftHours) <= TFS[1].h,
+    'the session left is not the same amount of time: ' + g.left + ' bars');
+
+  // asking for the frame it is already on changes nothing
+  const bars4 = g.bars, i4 = g.i;
+  MM.execTf(1);
+  assert.strictEqual(g.bars, bars4, 'a second press on the same frame regrouped the tape again');
+  assert.strictEqual(g.i, i4, 'a second press on the same frame moved the clock');
+
+  // and zooming back in lands on the moment it left
+  MM.execTf(0);
+  assert.strictEqual(g.tf.n, '1H', 'it did not come back to the frame it started on');
+  assert.ok(Math.abs(g.bars[g.i].t - clock) < 3600, 'the clock drifted coming back: ' + g.bars[g.i].t);
+});
+
+test('the bridge bias is the higher frame read as structure, and the read follows it', () => {
+  const g = openMarket(4, 777, true);
+  assert.ok(g.win, 'the level did not come off the real tape');
+  const bt = MM.bridgeTrend();
+  assert.ok(bt, 'the bridge had no bias at all on a real tape');
+  const g4 = MM.rollAny(g.bars.slice(0, g.i + 1), MM.tfs()[0].bh);
+  assert.strictEqual(g4[0].t !== undefined, true, 'the bridge lost the clock — it is not a real higher frame');
+  const bst = MM.structure(g4, g4.length - 1);
+  assert.strictEqual(bt.word, bst.trend.toUpperCase(), 'the bias is not the higher frame\'s own structure');
+  assert.strictEqual(bt.bars.length, g4.length, 'the bridge read bars it did not draw');
+
+  const est = MM.stNow();
+  const q = MM.qBridge();
+  if (bt.trend === 'range' || est.trend === 'range') {
+    assert.strictEqual(q, null, 'the bridge read answered while a frame had nothing to say');
+  } else {
+    const same = bt.trend === 'up' ? est.trend === 'up' : est.trend === 'down';
+    assert.strictEqual(q.kind, 'bridge');
+    assert.strictEqual(q.a, same ? 0 : 1, 'the bridge read does not agree with the two frames');
+  }
 });
 
 test('generated markets carry the same reads as the real tape', () => {

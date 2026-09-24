@@ -11,7 +11,6 @@ const emailer = require('./email');
 const push = require('./push');
 const backup = require('./backup');
 const analytics = require('./analytics');
-const marketData = require('./market-data');
 const aiChatBody = require('./ai-chat-body');
 const {
   COOKIE_NAME,
@@ -261,28 +260,16 @@ app.get('/admin-stats.html', (req, res) => res.status(404).end());
 // Same reason as the line above: static would hand this out to anyone.
 app.get('/key.html', (req, res) => res.status(404).end());
 
-// The trading practice game — private, and the same door as The Key.
-//
-// 14 Sep 2026. Jacques: "lock it behind sign in." It arrived yesterday as a plain
-// page on the app's address, which meant anybody holding the link could open it.
-// Signed in AND on the allowlist, or you go to /app without learning the page is
-// there — the identical rule, in the identical way, as the /key route below.
-//
-// This has to sit ABOVE express.static, not beside /key: static serves the file
-// at its own .html address by default, so a route registered after it would never
-// be reached and the page would stay open to whoever guessed the name. /key needs
-// no such care because there is no key.html file to serve — this one is a file.
-app.get('/market-maker.html', (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'market-maker.html'));
-});
-
 // The two reference pages — private, and the same door as The Key.
 //
 // 15 Sep 2026. Jacques asked for the herb library and the tax centre "apart of my
-// recovery app but made private". Same rule as /key and the trading game: signed
-// in AND on the allowlist, or you go to /app without learning the page is there.
+// recovery app but made private". Same rule as /key: signed in AND on the
+// allowlist, or you go to /app without learning the page is there.
+//
+// The trading game, the trading school and the Trading Desk that used to sit
+// below here were removed outright on 24 Sep 2026 — "remove the trading game
+// the desk everything about trading im done." Nothing trading is served, gated
+// or linked anywhere now. The two pages here are the ones that stayed.
 //
 // BOTH ADDRESSES ARE REGISTERED ON PURPOSE, and this is the part worth keeping.
 // Gating only the clean URL /herbs would lock the front door and leave the side
@@ -291,13 +278,13 @@ app.get('/market-maker.html', (req, res) => {
 // same hole /game3d.html fell through in September, from the other direction.
 // Anything private that is also a real file has to be named twice here.
 //
-// Above express.static for the same reason /market-maker.html is: a route
-// registered after it is never reached.
+// Above express.static: a route registered after it is never reached, and the
+// file would be handed out to anybody who typed its name.
 //
-// Four routes rather than one loop, and the gate written out in each, for the
-// same reason the trading game route is written out: the door has to be readable
-// in the file. A test asserts signed-in, on-the-list and redirect-to-/app inside
-// every one of them, and it cannot read a rule that lives in a shared helper.
+// Four routes rather than one loop, and the gate written out in each, because
+// the door has to be readable in the file. A test asserts signed-in,
+// on-the-list and redirect-to-/app inside every one of them, and it cannot read
+// a rule that lives in a shared helper.
 app.get('/herbs', (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
@@ -317,85 +304,6 @@ app.get('/tax.html', (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'tax.html'));
-});
-
-// The trading school — private, and the same door once more.
-//
-// 15 Sep 2026. Jacques: "a full beginners lesson all the way up the advanced
-// market maker levels ... separate from the game". The game is the practice; this
-// is the teaching, so it is its own page rather than a screen inside either the
-// app or the game, and it sits behind exactly the rule everything private here
-// sits behind: signed in AND on the allowlist, or you go to /app without
-// learning the page is there.
-//
-// Both addresses, for the reason spelled out above the herb routes — this page is
-// a real file as well as a clean URL, and express.static below would serve the
-// file name unguarded if the route were not registered first.
-app.get('/school', (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'trading-school.html'));
-});
-app.get('/school.html', (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'trading-school.html'));
-});
-
-// The Trading Desk — private, and the same door once more.
-//
-// 17 Sep 2026. Jacques: "something that helps me make better trading decisions
-// that knows all my set ups and can back test for me and an indicator that
-// aligns with it ... using 4hr 1hr 15mon and 5 min." This is the first piece:
-// his setups written down, and the assistant that reads them. The multi-
-// timeframe indicator and the backtest are the steps after it, and both read
-// what he writes on this page — which is why it comes first.
-//
-// Its own page rather than a screen inside the app or the trading game, for the
-// same reason the school is: the game is the practice, the school is the
-// teaching, and this is the desk. It sits behind exactly the rule everything
-// private here sits behind — signed in AND on the allowlist, or you go to /app
-// without learning the page is there.
-//
-// Both addresses, for the reason spelled out above the herb routes: this page is
-// a real file as well as a clean URL, and express.static below would serve the
-// file name unguarded if the route were not registered first.
-app.get('/desk', (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'desk.html'));
-});
-app.get('/desk.html', (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'desk.html'));
-});
-
-// His frame rules as a TradingView strategy - the desk's backtest in a form
-// TradingView itself can run, because its tester holds years of bars where the
-// free feed here keeps weeks.
-//
-// 21 Sep 2026: the indicator scripts that used to sit at /someday.pine and
-// /someday-zones.pine were deleted on his word - "drop the indicator and delete
-// it, just wanted to backtest my logic". He had said it the turn before and it
-// had been left in place, so what is here now is only the thing he asked for:
-// his own rules, priced at what he pays.
-//
-// text/plain on purpose. express.static below would answer an unknown extension
-// with a download, and a .pine sitting in his Downloads folder is a file Windows
-// has no program for.
-app.get('/someday-strategy.pine', (req, res) => {
-  res.type('text/plain').sendFile(path.join(__dirname, '..', 'tradingview', 'Someday-Strategy.pine'));
-});
-
-// 23 Sep 2026, and he asked for an indicator again: "to give me what i am seeking
-// out of an assistant and indicator". Asked where it should live, he said BOTH,
-// so the app's half is the desk and the practice game and this is the half that
-// sits on his own TradingView. It is a NEW script for a new request and not the
-// two deleted ones returning: /someday.pine and /someday-zones.pine are still
-// gone, and the tests hold both doors shut.
-app.get('/someday-frames.pine', (req, res) => {
-  res.type('text/plain').sendFile(path.join(__dirname, '..', 'tradingview', 'Someday-Frames.pine'));
 });
 
 app.use(express.static(path.join(__dirname, '..')));
@@ -1496,44 +1404,6 @@ app.get('/api/ai-status', requireAuth, (req, res) => {
   });
 });
 
-// The candle feed, for the Trading Desk (/desk) - 17 Sep 2026.
-//
-// Jacques: "Candles: Connect a market data feed." The desk had nothing but his
-// own words on it, and the assistant was told to say so rather than produce a
-// level. This is the route that gives it real bars.
-//
-// It goes through requireAuth like every other signed-in route in this file, and
-// requireAuth already carries the private door with it - so the feed answers him
-// and nobody else. That matters more here than elsewhere: the account has a
-// request budget, and it is his.
-//
-// The page never talks to the feed itself. It cannot: the address, the shape and
-// any future key all live on this side, which is why the desk page still
-// contains no third-party address at all.
-//
-// A feed that cannot be reached answers 502 with a sentence in `error` and no
-// bars whatsoever. It never answers with placeholder candles - a chart of
-// nothing drawn as if it were something is the one failure worse than no chart.
-const candleLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many feed requests at once - give it a moment.' },
-});
-
-app.get('/api/candles', candleLimiter, requireAuth, async (req, res) => {
-  const symbol = String(req.query.symbol || 'NQ').slice(0, 20);
-  const bars = Number(req.query.bars) > 0 ? Math.min(Number(req.query.bars), 500) : 120;
-  try {
-    const set = await marketData.fetchAll(symbol, { bars });
-    res.status(set.ok ? 200 : 502).json(set);
-  } catch (err) {
-    try { db.logError('candles', err.message, err.stack); } catch (_) {}
-    res.status(502).json({ ok: false, error: 'The feed could not be reached.' });
-  }
-});
-
 app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   if (!GEMINI_API_KEY) {
     // No key on the server. This used to return a bare 503 and nothing else,
@@ -1567,20 +1437,13 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     return res.status(429).json({ error: `That is today's ${CHAT_LIMIT} chats. It resets tomorrow.` });
   }
 
-  // The chart picture, if the desk attached one. Checked here rather than
-  // inside the provider call so a picture that cannot be sent is refused with
-  // a sentence instead of being quietly dropped - an answer about a chart the
-  // model never saw is the one thing this page must never produce.
-  const pics = aiChatBody.collectImages(messages);
-  if (!pics.ok) return res.status(400).json({ error: pics.error });
-
   try {
     let res2, data, geminiEmptyReason = '';
     if (GEMINI_API_KEY) {
       const gemUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
       // The body itself lives in ./ai-chat-body.js - it decides what leaves the
-      // phone, including the picture, so it is the one piece of this route that
-      // has to be testable without a model to answer.
+      // phone, so it is the one piece of this route that has to be
+      // testable without a model to answer.
       const gemBody = (withThinkingOff) => aiChatBody.buildBody({
         model: GEMINI_MODEL,
         system,

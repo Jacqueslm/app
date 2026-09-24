@@ -73,16 +73,10 @@ test('both reference ask boxes are told to answer in English', () => {
   });
 });
 
-test('the Trading Desk assistant is told to answer in English', () => {
-  // The fifth AI in the app, added 17 Sep 2026 with the desk. Two things are
-  // checked in the same place as the other four: the language rule, and the
-  // lines that must survive any later rewording of this prompt — on a trading
-  // page the ones that matter are the invented number and the verdict on him.
-  const rules = askRules('desk.html', 'DESK_SYS');
-  assert.match(rules, /Plain English, always\./, 'the desk carries the rule as its own bullet');
-  assert.match(rules, /Never invent a number/, 'and still refuses to invent a price or a statistic');
-  assert.match(rules, /Never tell him he is finished/, 'and never tells him he is finished');
-});
+// The Trading Desk assistant was the fifth prompt checked here, from 17 Sep to
+// 24 Sep 2026. It went with the desk: "remove the trading game the desk
+// everything about trading im done." Four AI prompts are left in the app —
+// Friendly, The Key, and the two reference ask boxes below.
 
 test('the pages keep the rules that were there before the language rule', () => {
   // A prompt is one string in one place: rewording it is how a safety line goes

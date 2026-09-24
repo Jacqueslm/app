@@ -109,7 +109,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <a class="back" href="/app" title="Back to the app">&#8592;</a>
     <div>
       <h1>Herb Library</h1>
-      <p>What people have long used these plants for</p>
+      <p>What they do, and how they are taken</p>
     </div>
   </div>
 
@@ -132,13 +132,14 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       </div>
       <button class="ask-go" id="askGo">Ask</button>
       <div class="ask-a" id="askA"></div>
-      <p class="ask-fine">Yours, and private. It will send you to a doctor or a pharmacist when that is the answer, and it will not pretend to be one.</p>
+      <p class="ask-fine">Yours, and private. It answers plainly — what the plant does, how it is taken, what it is taken with — and it sends you to a doctor or a pharmacist when that is the answer.</p>
     </div>
   </div>
 
   <div class="tabs" id="tabs">
     <div class="tab on" data-t="az">A&#8211;Z</div>
     <div class="tab" data-t="need">By need</div>
+    <div class="tab" data-t="books">From the books</div>
     <div class="tab" data-t="safety">Read this first</div>
     <div class="tab" data-t="mine">My notes</div>
   </div>
@@ -147,19 +148,18 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 
   <div class="ft">
     Herb Library — private. Built for Jacques.<br>
-    Kept beside <i>African Holistic Health</i> and <i>Nutricide</i> (Llaila O. Afrika).
+    Kept beside <i>African Holistic Health</i> and <i>Nutricide</i> (Llaila O. Afrika),<br>both of them in the shelves and the From the books tab.
   </div>
 </div>
 
 <script>
 /* ---------------------------------------------------------------------------
-   Everything below is tradition, not treatment.
+   What these plants do, and what the two books say they do.
 
-   Every entry says what people have long used a plant for — history and
-   practice — rather than a claim that it works. That is how the list was
-   written, not a rule imposed on it. This page is private, between two people,
-   and the public app’s caution does not govern it (15 Sep 2026). The live
-   helper in the ask box below is free to say more than the entries do.
+   The entries make claims — what a plant does, how it is taken, what it is
+   taken with, and the caution that travels with it. This page is private,
+   between two people, built from books they own, and the public app’s caution does not govern it (15 Sep 2026). The live
+   helper in the ask box below answers the same way, and adds to it.
 
    The second rule is the one that matters for this house: nothing here tells
    somebody they are finished, and nothing here talks somebody out of a doctor.
@@ -167,7 +167,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
    page says so in the middle of the herb list, not in small print.
 --------------------------------------------------------------------------- */
 
-/* n name · a also called · u what people use it for · d the tradition
+/* n name · a also called · u what it does · d what it does
    h how it is traditionally taken · c the caution that has to travel with it
    t needs it belongs to (used by "By need") */
 var HERBS = [
@@ -307,11 +307,11 @@ var HERBS = [
  d:'The dried flower bud, held against a tooth that is aching, and the whole clove chewed for the breath. The oil is the strongest thing in the kitchen cupboard.',
  h:'Whole clove held on the tooth; oil on a cotton bud.',c:'Never swallow the oil neat and never give it to a child. A toothache that lasts needs a dentist — clove only holds the pain back.'},
 {n:'Goldenseal',a:'yellow root',u:'Traditionally for infection and inflammation',t:['cold','skin'],
- d:'A North American root, over-picked and now rare, used in the old books for inflamed tissue and for what they called infections. It is one of the herbs this page will not hand you.',
- h:'Root, or tea.',c:'Not in pregnancy. Not for a newborn — it causes lasting harm to a baby. And it will not clear an infection — a fever, or a wound going red and hot, is a doctor today.'},
-{n:'Oregano oil',a:'wild marjoram',u:'Traditionally for infection',t:['cold'],
- d:'The oil of a kitchen herb, taken in drops under the tongue or in a capsule in the old tradition against what was called an infection.',
- h:'Diluted oil, or capsule.',c:'Burns neat. Not internally in pregnancy, not for children. It is not a substitute for an antibiotic when one is needed.'},
+ d:'A North American root, over-picked and now rare, used in the old books for inflamed tissue and for infection, and kept for what the books call a blood cleanser. Its strength is the whole of its reputation, and the reason it is scarce.',
+ h:'Root, or tea.',c:'Not in pregnancy. Not for a newborn — it causes lasting harm to a baby. And it goes beside a doctor, not instead of one: a fever, or a wound going red and hot, is a doctor today.'},
+{n:'Oregano oil',a:'wild marjoram',u:'Infection, in the old books',t:['cold'],
+ d:'The oil of a kitchen herb with a long reputation against infection — taken in drops under the tongue, or in a capsule, or rubbed on the skin of a foot that has gone fungal.',
+ h:'Diluted oil, or a capsule.',c:'It burns neat — always dilute, and never neat under the tongue or in the mouth. Not internally in pregnancy and not for children.'},
 {n:"Eleuthero",a:"Siberian ginseng, devil's shrub",u:"Long strain, tiredness, getting through a hard stretch",t:["energy","mood"],d:"A prickly shrub root from Siberia and north-east China, brewed by people who worked outdoors in the cold. The old books put it beside ginseng as the slower, cheaper stand-in.",h:"Root, tea or tincture, morning and early afternoon.",c:"Not late in the day. Not with blood pressure medicine or blood thinners without asking first."},
 {n:"American ginseng",a:"wisconsin ginseng",u:"Tiredness, a dry cough, building back up",t:["energy","lungs"],d:"The North American cousin of the Chinese root, and the old books put it as the cooler of the two — for somebody worn out and dry rather than wired and hot. Over-picked and now expensive.",h:"Slice of root chewed, or brewed.",c:"Not with blood thinners or diabetes medicine. Not with caffeine in quantity."},
 {n:"Rhodiola",a:"roseroot, arctic root",u:"A tired body, low mood, altitude and cold",t:["energy","mood"],d:"A high-mountain root used across Scandinavia and Russia for the days when the light is short and the work is long. Traditionally taken early, never at night.",h:"Root, tea or capsule, in the morning.",c:"Warming and a little stimulating. Not with antidepressants without asking first."},
@@ -370,12 +370,12 @@ var HERBS = [
 {n:"Papaya leaf",a:"pawpaw leaf",u:"A stubborn digestion, the blood's own plates",t:["digestion"],d:"The leaf of the fruit tree, brewed bitter in the tropics after a heavy meal and taken in the dengue fever season in the old practice.",h:"Fresh leaf, brewed as a strong bitter tea.",c:"Strong tasting. Not in pregnancy — the unripe fruit and leaf are used to end pregnancies in the old texts."},
 {n:"Pineapple",a:"ananás, bromelain",u:"Swelling, a heavy meal, a sore joint",t:["joints","digestion","pain"],d:"The stem of the fruit carries the enzyme used in the old books for swelling after an injury and for a heavy meal. It is food first, medicine second.",h:"Fresh fruit, or the stem extract.",c:"Not with blood thinners. The fresh fruit burns the mouth of some people."},
 {n:"Chicory",a:"succory, blue sailors",u:"A sluggish liver, a bitter appetite, coffee substitutes",t:["liver","digestion"],d:"The blue roadside flower whose root, roasted, has stood in for coffee in hard times across Europe. The leaf in salad is the bitter spring green.",h:"Roasted root brewed as a drink; leaf in salad.",c:"Not if you are allergic to ragweed, daisies or dandelion."},
-{n:"Wormwood",a:"absinthe, mugwort's sister",u:"The old worm and parasite remedy, a poor appetite",t:["digestion","liver"],d:"The bitterest plant in the European herbals, brewed for what the old books called worms and for a hopeless appetite. It is also the heart of absinthe, and it is not a casual tea.",h:"A short bitter tea, days at most.",c:"Read twice: it is not for pregnancy, not for more than a few days, and not in quantity — the oil is genuinely poisonous. Wormwood does not clear a worm. That is a doctor and a tablet."},
+{n:"Wormwood",a:"absinthe, mugwort's sister",u:"The old worm and parasite remedy, a poor appetite",t:["digestion","liver"],d:"The bitterest plant in the European herbals, brewed for what the old books called worms and for a hopeless appetite. It is also the heart of absinthe, and it is not a casual tea.",h:"A short bitter tea, days at most.",c:"Read twice: it is not for pregnancy, not for more than a few days, and not in quantity — the oil is genuinely poisonous. It is the herb the old books give for worms and parasites, and it is the bitter they built a drink around. A worm in the gut wants a doctor and a tablet beside it."},
 {n:"Black walnut",a:"juglans, walnut hull",u:"The old worm remedy, the skin",t:["digestion","skin"],d:"The hull of the black walnut, tinctured as the bitter brown drops in the old deworming recipes and used as a wash for the skin.",h:"Hull tincture, short term; or a wash for the skin.",c:"Not in pregnancy. Not for more than a few days. A worm needs a doctor, not a nut tincture."},
 {n:"Pumpkin seed",a:"pepita",u:"The old worm remedy, the prostate, sleep",t:["digestion","men","sleep"],d:"The green seed eaten by the handful, and by the handful of a hundred in the old recipes against tapeworm. Also the most ordinary kitchen answer for a man's nighttime trips.",h:"Seed eaten raw, or ground in water.",c:"Food-like and safe in handfuls. The worm dose was enormous — for that, see a doctor."},
 {n:"Elecampane",a:"inula, horse heal",u:"A deep wet cough",t:["lungs"],d:"A big yellow daisy root of Europe, candied and brewed for the cough that sits deep and rattles. One of the strongest of the old chest roots.",h:"Root, decoction, or candied.",c:"Not in pregnancy. Some people react to it on the skin. A rattle in the chest that will not clear is a doctor."},
-{n:"Coltsfoot",a:"tussilago, coughwort",u:"A cough, in the old books",t:["lungs"],d:"The flower that comes before the leaf in early spring, named in Latin for cough and used for centuries in European cough syrups. The name in the old books is the whole of its reputation.",h:"Flower and leaf, brewed, short term only.",c:"Hold this one carefully: it contains substances that strain the liver, so no more than a few days, never in pregnancy, and never for a child. Its place here is history, not a recommendation."},
-{n:"Pleurisy root",a:"butterfly weed, pleurisy root",u:"A chest infection's cough, in the old books",t:["lungs","fever"],d:"A North American milkweed root used by the peoples of the plains and then by the settlers for a chest that is hot and painful to breathe.",h:"Root, decoction.",c:"Narrow and strong. A chest that hurts to breathe is a doctor today — this page will not send you to a root for it. Not in pregnancy."},
+{n:"Coltsfoot",a:"tussilago, coughwort",u:"A cough, in the old books",t:["lungs"],d:"The flower that comes before the leaf in early spring, named in Latin for cough and used for centuries in European cough syrups. The name in the old books is the whole of its reputation.",h:"Flower and leaf, brewed, short term only.",c:"Hold this one carefully: it contains substances that strain the liver, so no more than a few days, never in pregnancy, and never for a child. It is in every European cough syrup of the last three hundred years, which is where its place on this shelf comes from, not from here."},
+{n:"Pleurisy root",a:"butterfly weed, pleurisy root",u:"A chest infection's cough, in the old books",t:["lungs","fever"],d:"A North American milkweed root used by the peoples of the plains and then by the settlers for a chest that is hot and painful to breathe.",h:"Root, decoction.",c:"Narrow and strong, and it wants a doctor beside it — a chest that hurts to breathe is a doctor today, and this is what the old books had for it while you wait. Not in pregnancy."},
 {n:"Horehound",a:"white horehound",u:"A cough, a settled chest",t:["lungs"],d:"The bitter mint behind the black rock candy in every old-fashioned sweet shop. Boiled with sugar into cough candy, or brewed as a bitter tea.",h:"Leaf, tea, or boiled into candy.",c:"Not in pregnancy. It can move blood sugar."},
 {n:"Hyssop",a:"hyssop",u:"A cough, a chest that is tight",t:["lungs","cold"],d:"A small blue-flowered garden herb, brewed as the old European chest tea and sprinkled in the sickroom. The name in the old texts is for a cleansing.",h:"Leaf and flower, tea, often with honey.",c:"Not for a long stretch or in quantity — the oil can cause fits in some people. Not in pregnancy."},
 {n:"Wild cherry bark",a:"chokecherry bark",u:"A dry, hacking cough",t:["lungs"],d:"The inner bark of the North American cherry, brewed into the syrup that gives old cough medicine its smell. Syruped with honey in the old books.",h:"Bark, decoction, or syrup.",c:"Not for a child, and not in quantity — it carries cyanide-like compounds. Leave a cough syrup for a child to a pharmacist."},
@@ -393,7 +393,7 @@ var HERBS = [
 {n:"Elderflower",a:"elder blow",u:"A fever, a cold, sweating it out",t:["fever","cold"],d:"The flower of the elder bush, brewed hot with yarrow and peppermint as the old European sweat tea at the start of a fever — the one remedy the neighbours all knew.",h:"Flowers, tea, hot, then go to bed.",c:"Gentle. Never use the bark or raw berries."},
 {n:"Boneset",a:"thoroughwort",u:"A fever with aching bones",t:["fever","pain"],d:"A North American wetland plant given its name for the breakbone fever it was used for, taken bitter and hot to make a person sweat and sleep.",h:"Leaf, tea, hot, then bed.",c:"Strong and bitter — a day or two only, never in quantity. Contains compounds that can strain the liver."},
 {n:"Feverfew",a:"featherfew",u:"A headache that comes back",t:["pain","fever","women"],d:"A small daisy planted at the doors of old European cottages, and chewed a leaf a day by people who got the same headache every week.",h:"Fresh leaf, 1-2 a day, in bread; or a dried tea.",c:"The fresh leaf makes the mouth sore and can upset the stomach. Not with blood thinners and not in pregnancy."},
-{n:"Uva ursi",a:"bearberry, kinnikinnick",u:"A burning bladder, in the old books",t:["urinary"],d:"A ground-hugging berry plant of northern hills, brewed as a short strong tea at the first day of burning water. It is one of the herbs this page will not hand over.",h:"Leaf, short strong decoction, days only.",c:"Days only — it damages the liver and the ear in longer runs, and it is not for pregnancy or a child. And plainly: burning water and a fever is a bladder infection, and that is a doctor and a tablet, not a tea."},
+{n:"Uva ursi",a:"bearberry, kinnikinnick",u:"A burning bladder, in the old books",t:["urinary"],d:"A ground-hugging berry plant of northern hills, brewed as a short strong tea at the first day of burning water — the herb the old books reach for first, and then hand over to a doctor within a day or two.",h:"Leaf, short strong decoction, days only.",c:"Days only — it damages the liver and the ear in longer runs, and it is not for pregnancy or a child. And plainly: burning water and a fever is a bladder infection, and that is a doctor and a tablet, not a tea."},
 {n:"Cranberry",a:"lingonberry's cousin",u:"The waterworks, keeping a bladder clear",t:["urinary"],d:"The tart northern berry, drunk as juice by people who keep getting bladder trouble, and eaten with meat through the winter. The tradition is small amounts daily, for a long time.",h:"Unsweetened juice, or the berries.",c:"Not with warfarin — it moves it. Not for a bladder infection you already have: burning water with a fever is a doctor."},
 {n:"Corn silk",a:"maize silk, zea",u:"Burning water, a swollen ankle",t:["urinary"],d:"The golden threads from a cob of corn, thrown away by every cook and brewed by every old herbalist for a bladder that feels raw.",h:"Fresh or dried silk, tea.",c:"Gentle. It is a diuretic — drink water. Burning water with a fever is a doctor."},
 {n:"Celery seed",a:"ajmod, marsh celery",u:"An aching joint, the waterworks",t:["joints","urinary","pain"],d:"The seed of the salad plant, brewed as a tea in the old books for a stiff, aching joint and for water backing up.",h:"Seed, crushed and brewed as a tea.",c:"Not for more than a few weeks. Not in pregnancy, and not for a kidney that is already unwell."},
@@ -475,7 +475,7 @@ var HERBS = [
 {n:"Knotweed",a:"Japanese knotweed, Polygonum cuspidatum",u:"An old tea for joints and for a tick bite that went on",t:["joints","liver"],d:"A bamboo-like invasive weed, its root brewed in Japan and China for joints and for the blood vessels. It is where most resveratrol on a label comes from.",h:"Root, decoction or a standardised tablet.",c:"It is not a treatment for Lyme disease — that is antibiotics and a doctor, and sitting with a tea is how a tick bite becomes a long illness. Not with blood thinners. Not in pregnancy."},
 {n:"Kudzu",a:"Japanese arrowroot, Pueraria montana",u:"A craving for alcohol — the one the old books name",t:["liver","mood"],d:"The big starchy root of the kudzu vine, used as food in Japan and, in the Chinese tradition, given to a heavy drinker whose craving came on hard.",h:"Root or flower brewed as a tea; the starch used in cooking.",c:"It is not a treatment for alcohol withdrawal, and withdrawal can kill — that week is a doctor, as the timeline page in the app says. Not with blood thinners or tamoxifen without asking. Some people flush badly if they drink with it."},
 {n:"Lemongrass",a:"lemon grass, Cymbopogon citratus",u:"A slow stomach, a fever, an old tea",t:["digestion","fever"],d:"A tall lemon-scented grass of south Asia, cut and brewed as a tea for a slow stomach and for the heat of a fever, and put in food everywhere it grows.",h:"Stalks and leaf, tea.",c:"Culinary and tea amounts are fine. The essential oil is not for swallowing and never for a baby. It adds to a water tablet if you take one."},
-{n:"Lobelia",a:"Indian tobacco, Lobelia inflata",u:"An old lung and smoking herb — and a dangerous one",t:["lungs"],d:"A small North American plant whose whole story is the warning: in a small amount it moves the lungs, in a larger amount it makes a person vomit hard, slows the pulse and has caused deaths.",h:"It is not a home tea. The tincture exists and is measured in drops by practitioners, for a reason.",c:"Do not make this at home and do not guess the amount. Overdose is real and has killed people. Not in pregnancy. Not for a child. The old lobelia smoking mixtures were a marketing idea, not medicine."},
+{n:"Lobelia",a:"Indian tobacco, Lobelia inflata",u:"An old lung and smoking herb — and a dangerous one",t:["lungs"],d:"A small North American plant whose whole story is the warning: in a small amount it moves the lungs, in a larger amount it makes a person vomit hard, slows the pulse and has caused deaths.",h:"The tincture, measured in drops — the book gives the dried herb at one teaspoon to four cups of water. It is a herb to measure, not to pour.",c:"A small amount moves the lungs and the larger amount is a poison: it makes a person vomit hard, slows the pulse, and has killed people who guessed the amount. Weigh it or leave it. Not in pregnancy. Not for a child. The old lobelia smoking mixtures were a marketing idea, not medicine."},
 {n:"Magnolia bark",a:"hou po, Magnolia officinalis bark",u:"A racing mind at night, a tight chest",t:["sleep","mood"],d:"The bark of the magnolia tree, boiled in the Chinese tradition for a mind that will not settle at night and the tight, blocked feeling that goes with it.",h:"Bark, decoction, or a tincture.",c:"Not in pregnancy — it moves the muscle of the womb. It makes sedatives and sleeping tablets hit harder, so it is not to be stacked with them or with alcohol."},
 {n:"Mistletoe",a:"European mistletoe, Viscum album",u:"Blood pressure, an old tonic, and a treatment given by injection",t:["heart"],d:"The winter bush that grows out of a host tree, used in Europe for the heart and blood pressure, and as an injected preparation a doctor gives in some countries.",h:"Leaf and twig as a tea or tincture in the tradition. The injected form is a medical treatment, not a home one.",c:"Do not pick a branch and brew it. The American mistletoe is the poisonous one and the berries of both are not for eating. Not in pregnancy. Not with blood pressure tablets without asking."},
 {n:"Mugwort",a:"common mugwort, moxa",u:"Dreams, a heavy cycle, a slow stomach",t:["women","digestion","sleep"],d:"A bitter grey wayside plant, burned as moxa by practitioners and brewed as a tea in Europe for a late heavy cycle and kept by the bed for dreaming.",h:"Leaf, tea. The dried leaf burned near the skin is moxa, which is a practitioner's tool.",c:"Never in pregnancy — it has been used to bring a period on, and that is exactly why it is not safe there. A ragweed or mugwort allergy means care. Long internal use is not wise."},
@@ -485,8 +485,8 @@ var HERBS = [
 {n:"Orris root",a:"Iris florentina root, orris",u:"A throat tea, an old scent fixer",t:["mouth","lungs"],d:"The dried root of a Florentine iris, once powdered into tooth powders and throat sweets and used to hold a scent in a jar.",h:"Root, powdered or steeped.",c:"Mostly kept for scent and powders, and it can set off a reaction in someone allergic to iris or ragweed. Not for swallowing in quantity."},
 {n:"Pau d'arco",a:"taheebo, lapacho, Tabebuia bark",u:"An old immunity tea, candida, a long-running complaint",t:["cold","skin"],d:"The inner bark of a South American tree, brewed by the people of the Amazon basin as a long, bitter tea and carried north as a tea for almost everything.",h:"Bark, decoction.",c:"Short stretches, not months. It thins the blood and there are reports of liver strain with big doses. Not with chemotherapy or blood thinners. Not in pregnancy."},
 {n:"Peach leaf",a:"Prunus persica leaf",u:"A cough, an old digestive tea",t:["lungs","digestion"],d:"The leaf of the peach tree, brewed in the old household books for a cough and for a stomach that was unsettled.",h:"Leaf, tea, in small amounts.",c:"Like the kernel, the leaf carries compounds that turn into cyanide. Small amounts only, never a daily brew, never in pregnancy, never for a child."},
-{n:"Pennyroyal",a:"squaw mint, Mentha pulegium",u:"A late cycle — and it is the one not to use",t:["women","digestion"],d:"A creeping strong mint that appears in old lists for a late period. That entry is the reason it is at the top of the modern warning lists instead.",h:"It is in this library because the old books name it and the question still comes up. It is not recommended.",c:"Pennyroyal oil is a liver poison and has killed people, including people who took it for a late period. Never swallow the oil, ever. Not in pregnancy, not on a child, not on broken skin."},
-{n:"Periwinkle",a:"vinca, Vinca minor and Catharanthus roseus",u:"It appears in old lists for circulation and memory",t:["heart"],d:"The blue-flowered creeper of churchyards. Its alkaloids became real medicines for circulation and for cancer, which is the whole reason it sits on this shelf.",h:"Not a home tea. What was made from it is given by a doctor in doses nobody could guess at from a leaf.",c:"The plant is toxic and people have died from drinking it. Do not make tea from it. Its alkaloids are what some chemotherapy is measured from, and those doses are weighed in a pharmacy."},
+{n:"Pennyroyal",a:"squaw mint, Mentha pulegium",u:"A late period, in the old books, and a slow digestion",t:["women","digestion"],d:"A creeping strong mint that appears in every old list for a late period and for a stomach that will not settle. The oil of it is the reason the same name sits at the top of the modern warning lists.",h:"The dried leaf as a weak tea, and nothing more than that — the oil is a different substance and it is a poison.",c:"Pennyroyal oil is a liver poison and has killed people, including people who took it for a late period. Never swallow the oil, ever. Not in pregnancy, not on a child, not on broken skin."},
+{n:"Periwinkle",a:"vinca, Vinca minor and Catharanthus roseus",u:"It appears in old lists for circulation and memory",t:["heart"],d:"The blue-flowered creeper of churchyards. Its alkaloids became real medicines for circulation and for cancer, which is the whole reason it sits on this shelf.",h:"Its alkaloids became two real medicines — one for the circulation and one that is chemotherapy. What is made from it is given by a doctor, in doses nobody could guess at from a leaf.",c:"The plant is toxic and people have died from drinking it. Its alkaloids are what some chemotherapy is measured from, and those doses are weighed in a pharmacy, not in a cup."},
 {n:"Pipissewa",a:"chimaphila, prince's pine",u:"A bladder that keeps calling",t:["urinary"],d:"A small evergreen of the pine woods of North America, brewed by the people there and by the settlers for a bladder that kept calling.",h:"Leaf, tea.",c:"Not for a real bladder infection — burning and frequency is often an infection that needs a doctor and an antibiotic. Not for long stretches; high doses have caused ringing in the ears. Not in pregnancy."},
 {n:"Pomegranate",a:"pomegranate juice, peel, rind",u:"Antioxidants, blood pressure, a gargle for the throat",t:["heart","mouth"],d:"The fruit of a tree of the Middle East and beyond, eaten as food and brewed as a peel tea for the throat and for blood pressure.",h:"The juice as food; the dried peel as a tea or a gargle.",c:"The juice is food, but it interferes with some medicines the same way grapefruit does — ask a pharmacist if you take anything. Not in pregnancy as a peel medicine."},
 {n:"Prickly ash",a:"toothache tree, Xanthoxylum",u:"Cold hands, a stiff joint, an aching tooth",t:["joints","heart"],d:"A North American bark that leaves the tongue tingling and numb; it was chewed for a toothache and brewed for cold hands and stiff joints.",h:"Bark, decoction or tincture.",c:"It numbs. That can hide a tooth that still needs a dentist, so use it to get there, not instead. Not with blood thinners. Not in pregnancy."},
@@ -514,6 +514,123 @@ var HERBS = [
 {n:"Cascara sagrada",a:"sacred bark, Rhamnus purshiana, chittem bark",u:"A stubborn bowel, the old bitter bark",t:["digestion","liver"],
  d:"The dried bark of a west-coast tree, and the one strong laxative the old books treated with respect rather than cheerfulness. \"Sagrada\" means sacred, and the tradition says the same thing about it twice over: age the bark a year before use, and never keep it as a daily tea. Every household book of the last century had it, usually in a \"tonic\" or a \"spring clean\" blend.",
  h:"Aged dried bark, a short decoction; sold as tablets and as a bitter tonic. It is a medicine measure, not a drink to pour freely.",c:"A stimulant laxative, and the caution is the whole story. Short use only — a few days, not a nightly tea and not a \"cleanse\" that runs for weeks. The bowel comes to depend on it and then will not move without it. Not in pregnancy, not while feeding, not for a child, and not with an inflamed or blocked bowel, piles, or a sore gut. Pain in the belly, blood, or a bowel that has changed for weeks is a doctor, not a laxative. It is also the herb that shows why \"natural\" is not the same as \"mild\" — it was pulled out of over-the-counter laxative medicines in the United States in 2002 for want of long-term safety data, and it is still sold freely as a supplement."},
+/* ---- the kitchen seasonings, from Nutricide ---------------------------------
+   Nutricide's "Herb Seasoning for Dis-ease" list, p341: the seasonings that
+   shelf names and this library did not carry. bk is the book's own line. */
+{n:"Allspice",a:"pimento, Jamaican pepper",u:"A heavy meal, gas, the taste of the islands",t:["seasoning","digestion"],
+ d:"The dried unripe berry of a Caribbean tree, the one that tastes of clove and cinnamon and nutmeg at once. It goes into the pot wherever the islands cook, and a few berries are brewed as a tea after a heavy meal.",
+ h:"Whole berries in the cooking pot; or a few crushed and brewed as a tea.",
+ c:"Gentle as a spice. The oil is strong and is not for swallowing neat. Not a daily tea in quantity.",
+ bk:"digestion, gas, diabetes, a stimulant."},
+{n:"Chervil",a:"garden chervil, French parsley",u:"Water retention, swelling, a spring clean",t:["seasoning","skin"],
+ d:"A soft aniseed-scented leaf of the French kitchen, used like parsley and brewed in the old books for a body holding water.",
+ h:"The fresh leaf in food; or a small handful steeped as a tea.",
+ c:"A food herb and gentle as one. The concentrated oil is not for swallowing. Not in quantity in pregnancy — it is a parsley-family plant.",
+ bk:"swellings, edema, a diuretic, eczema, gout."},
+{n:"Dill",a:"dill seed, dill weed",u:"Indigestion, gastritis, nausea, colic",t:["seasoning","digestion"],
+ d:"The seed of the feathery kitchen herb, chewed after a meal and brewed for a stomach that is griping. The warm seed water is the old answer for a colicky baby, and it is the seed that goes in the pot, not the oil.",
+ h:"Seed chewed, or crushed and brewed; the leaf in food.",
+ c:"Gentle. Never the concentrated oil, and never the oil for a baby or a child.",
+ bk:"indigestion, gastritis, croup, nausea."},
+{n:"Marjoram",a:"sweet marjoram, knotted marjoram",u:"A headache, an acid stomach, a cold, a wound-up evening",t:["seasoning","cold","mood"],
+ d:"A soft grey-green kitchen herb of the Mediterranean, put in the pot and brewed as a tea in the old books for a heavy head and an acid stomach. The old herbals also laid it on a bruise.",
+ h:"The leaf in food; or a small handful steeped as a tea.",
+ c:"Gentle as a spice and as a tea. The oil is not for swallowing, and not for a baby.",
+ bk:"headaches, acidity, colds, measles, nervousness."},
+{n:"Paprika",a:"sweet red pepper, Capsicum annuum",u:"A blocked sinus, a cold in the head",t:["seasoning","cold"],
+ d:"Ground sweet red pepper, a kitchen colour and warmth rather than a heat, and the old books use it for the head that is stopped up.",
+ h:"In food. A pinch in a soup or a stew.",
+ c:"A spice, and a hot one for some stomachs. Not by the spoonful with an ulcer or a reflux. Keep it out of the eyes and off broken skin.",
+ bk:"sinus trouble, colds."},
+{n:"Savory",a:"summer savory, winter savory",u:"Colds, a slow digestion, the old earache books",t:["seasoning","digestion","cold"],
+ d:"A peppery little kitchen herb of the bean pot, brewed in the old books for a cold and for a slow stomach. It is named in the books for ear trouble, which is the one use on this page to hold at arm's length.",
+ h:"The leaf in food, especially with beans; or a small amount steeped as a tea.",
+ c:"Gentle in food. Nothing goes in an ear here: an ear that is leaking, or that hurts a child at night with a fever, or an ear where the drum might be torn, is a doctor and not a herb.",
+ bk:"ear trouble, colds, digestion, a stimulant."},
+{n:"Vanilla",a:"vanilla bean, Vanilla planifolia",u:"Digestion, gas, settling the nerves",t:["seasoning","digestion","mood"],
+ d:"The cured pod of a climbing orchid of Mexico, the most used scent in the kitchen and a settling one — the old books keep it for a nervous stomach and for the smell of it as much as the taste.",
+ h:"The pod or the extract in food and in milk.",
+ c:"Food and gentle. The extract sold in a shop carries alcohol, so a spoonful of it is not a drink. Not the neat oil.",
+ bk:"digestion, gas, neurasthenia (soothing the nerves)."},
+{n:"Wheatgrass",a:"wheat grass juice, young wheat leaf",u:"The blood, a spring clean, a green food",t:["blood","energy"],
+ d:"The young blade of the wheat plant, grown on a tray and pressed for its juice. The old books drink it green and bitter for the blood, and it is food before it is medicine.",
+ h:"The fresh juice, in a small glass, often with something sweeter.",
+ c:"Food, and it turns the stomach of some people in the first days. It carries vitamin K, so it works against warfarin — ask before drinking it on a blood thinner. Not for somebody who cannot have wheat.",
+ bk:"a blood cleanser, for the red blood cells."},
+{n:"Grape seed",a:"grape seed extract, Vitis vinifera seed",u:"The body's own defences, a cold going round",t:["immune","cold"],
+ d:"The pips left over from the wine press, ground and taken as an extract. The old use is the one the book names — building the defences — and it is the same family of thinking as pine bark beside it.",
+ h:"The extract, in drops or a capsule, as sold.",
+ c:"It thins the blood a little — stop before surgery and ask first on a blood thinner. Not in pregnancy.",
+ bk:"an immune system builder, for infection."},
+{n:"Pine bark",a:"pine bark extract, maritime pine, pycnogenol",u:"Colds, the defences, an old Spanish sailors' remedy",t:["immune","cold"],
+ d:"The bark of the French maritime pine, taken as an extract. The story the books tell is the sailors on a long voyage who ate the bark and did not get the scurvy the others got.",
+ h:"The extract, in a capsule or drops, as sold.",
+ c:"Thins the blood a little and moves blood pressure — ask a pharmacist before adding it to a blood thinner or a blood pressure tablet. Not in pregnancy or while feeding.",
+ bk:"an immune system builder, for colds and infection."},
+{n:"Chaparral",a:"creosote bush, Larrea tridentata, greasewood",u:"An inflamed joint, a skin complaint, an old bitter tea",t:["joints","skin","immune"],
+ d:"A resinous desert bush of the American south-west, brewed bitter by the peoples there and taken in the old books for inflamed tissue. It is one of the herbs this page keeps marked.",
+ h:"The leaf, brewed short; or the leaf in a wash for the skin. The tablets are sold in shops.",
+ c:"Its strength is its caution: chaparral has been tied to real liver damage, and the United States food and drug administration warned about it in the 1990s. Days, not months, and never on a liver that has already been through something. Not in pregnancy, not for a child.",
+ bk:"one of its anti-inflammatory herbs, with arnica, cayenne and garlic."},
+{n:"Buchu",a:"Agathosma betulina, bookoo, round leaf buchu",u:"Burning water, the waterworks, an old Cape remedy",t:["urinary"],
+ d:"A small aromatic bush of the Cape in South Africa, brewed by the people there for the waterworks and carried into the European books by the same route as the ships.",
+ h:"The leaf, a short tea, days at a stretch and not weeks.",
+ c:"Not in pregnancy. The oil is not for swallowing. Real caution: burning water, a fever, or blood in the urine is a bladder or a kidney infection, and that is a doctor and a tablet — a tea will not clear it.",
+ bk:"the book's example diuretic, with parsley."},
+{n:"Wild violet",a:"Viola odorata, sweet violet",u:"A cough, a sore mouth, the old worm books",t:["lungs","mouth","skin"],
+ d:"The small sweet violet of European hedgerows, the flower and leaf brewed for a cough and held in the mouth for a sore one. The book names it in the worm list, and the root is a different matter entirely.",
+ h:"The leaf and flower in a tea; a cooled brew as a mouth rinse.",
+ c:"The leaf and flower are gentle. The root is a strong emetic — it makes a person vomit hard — and is not for making at home. A worm is a doctor and a tablet, not a violet.",
+ bk:"one of its anthelmintics — herbs against intestinal worms — with garlic and horseradish."},
+{n:"Spikenard root",a:"Aralia racemosa, American spikenard",u:"An old spring tonic, the skin, the blood",t:["blood","skin","energy"],
+ d:"A large sweet-smelling root of the North American woods, brewed in the old books as a slow tonic for a body that has gone dull. The American spikenard and the Asian one that goes in perfume are different plants with one name.",
+ h:"The root, a long decoction, in the old tonic blends.",
+ c:"Not in pregnancy. Ask a pharmacist if you take a prescription — the old alterative roots are usually taken beside other herbs and not alone.",
+ bk:"one of its alternatives — a herb the book slows a cure down with so the body is not shocked — with sarsaparilla, echinacea, garlic and ginger."},
+{n:"Blue cohosh",a:"Caulophyllum thalictroides, squaw root, papoose root",u:"A cramping cycle, a difficult labour, in the very old books",t:["women"],
+ d:"A blue-berried woodland root of North America, kept in the midwife books for the last weeks of a pregnancy and for a cramping cycle. It is named in the book's own multi-vitamin formula.",
+ h:"It is a midwife's or a practitioner's herb, not a household tea.",
+ c:"The midwife book herb, and one that has to be measured: it carries compounds that raise blood pressure and have harmed babies — the cases in the record are miscarriages and a distressed newborn. Not in pregnancy on any account, not while trying to conceive, not with blood pressure or diabetes medicine, not for a child, not long term.",
+ bk:"one of the herbs in the book's multi-vitamin and mineral formula, paired there with black haw."},
+{n:"Black haw",a:"Viburnum prunifolium, stag bush, sweet viburnum",u:"A cramping cycle, a nervous stomach",t:["women","pain","sleep"],
+ d:"A small tree of the American south, its bark brewed in the old books for a period that doubles a person over and for a stomach that knots with nerves. It stands next to black haw's cousin cramp bark in the old lists, and the two are used alike.",
+ h:"The dried bark, a decoction, at the first sign.",
+ c:"Not with blood thinners, aspirin or a stomach that bleeds. Not in pregnancy except under a midwife. Hard on the stomach in quantity.",
+ bk:"one of the herbs in the book's multi-vitamin and mineral formula, paired there with blue cohosh."},
+{n:"Centaury",a:"Centaurium erythraea, the book writes it \"Century\"",u:"A poor appetite, a slow liver, an old anaemia tea",t:["digestion","liver","blood"],
+ d:"A small pink bitter of dry European meadows, the classic bitter tonic of the old herbals — a little taken before food to wake an appetite. The book names it in its remedy table for anaemia.",
+ h:"A short, very bitter, cold infusion before food.",
+ c:"Very bitter and it does not suit an ulcer or a stomach that burns. Not in pregnancy. It is a bitter, not an iron tablet: anaemia is a blood test and a doctor.",
+ bk:"one of the herbs it gives for anemia, with agrimony and comfrey."},
+{n:"Gymnema",a:"Gymnema sylvestre, gurmar, the sugar destroyer",u:"Blood sugar, a craving for sugar, an old Indian tea",t:["digestion","energy","blood"],
+ d:"A climbing vine of the Indian forests whose leaf, chewed, takes the taste of sugar out of the mouth for a while — which is where the name comes from. It is the herb the book's remedy table names for diabetes.",
+ h:"The leaf, brewed as a tea; or the powder as sold.",
+ c:"Real caution: it lowers blood sugar and it stacks with diabetes tablets and with insulin. Not in pregnancy or while feeding. Read the next line twice — diabetes is a doctor, a monitor and a prescription, and a leaf is never in place of any of those.",
+ bk:"the herb it gives for diabetes, with bilberry."},
+
+/* ---- from the easy-remedies chapter, African Holistic Health -----------------
+   Four plants the book uses that the library did not carry. */
+{n:"Castor",a:"castor oil, Ricinus communis",u:"The eyes, in the old books, and a poultice on the belly",t:["eyes","joints","pain"],
+ d:"The bean of a tall tropical plant, pressed into the thick oil the old books use in two opposite directions: drops on the eye, and a cloth soaked in the warm oil laid across the belly. The book gives it on the eye with vitamin B, for the body to take it up.",
+ h:"A drop or two on the eye as the book gives it; or cotton soaked in the warm oil, laid on the skin under a cloth.",
+ c:"Never the raw bean — it is a poison, and a few of them have killed a child. The eye is the one place not to be careless: a change in sight is an optician or a doctor, and the oil goes beside that and not instead of it.",
+ bk:"castor oil applied to the eye for cataracts, with vitamin B for absorption."},
+{n:"Henna",a:"Lawsonia inermis, mehndi",u:"The hair, the scalp, the skin",t:["hair","skin"],
+ d:"The leaf of a Middle Eastern shrub, dried, powdered and made into a paste. The old books use it on the hair as a colour and a strengthener, and mixed with oils and beeswax as a relaxer.",
+ h:"Made into a paste or a rinse for the hair and the scalp.",
+ c:"It stains skin, clothes and bedding, and it takes days to come off. The black henna sold in markets has carried a chemical that burns and scars — buy the plant, not the dye. Not for a child.",
+ bk:"a rinse with sage tea for grey hair, and mixed with oils and beeswax as a hair relaxer."},
+{n:"Tormentil",a:"Potentilla erecta, bloodroot of the moors",u:"The skin, a loose bowel, an old astringent",t:["skin","digestion"],
+ d:"A small creeping yellow flower of the European moors whose root is the most astringent thing in the old herbals — it draws tissue together, which is why it went on the skin and into a tea for a loose bowel.",
+ h:"The root, decocted; or the cooled brew as a wash.",
+ c:"Very drying, and short runs only — it will bind a bowel and then stop it. Not in pregnancy.",
+ bk:"combined with aloe vera gel for wrinkles."},
+{n:"Stone seed",a:"Lithospermum, gromwell",u:"The old contraceptive books, and gravel in the urinary books",t:["women","urinary"],
+ d:"The hard white seed of a small wayside plant, named for the stone it looks like, and used in the very old books against gravel in the water and in the books that came before the pill. The book gives it with acacia, on a tampon or a douche.",
+ h:"As the book gives it: with acacia, on a tampon or as a douche.",
+ c:"This is one to hold carefully. It is an old practice and not a reliable contraceptive — no herb is — and a pregnancy that is not wanted is a clinic and a plan, not a seed. Not in pregnancy. Gravel or a stone in the kidney, with pain and blood in the urine, is a hospital.",
+ bk:"acacia and stone seed on a tampon or a douche, in the natural contraceptives row."}
+
 ];
 
 /* "By need" — the shelves. Keeping a herb on more than one shelf is deliberate:
@@ -536,8 +653,430 @@ var NEEDS = [
  {k:'pain', t:'Aches, bruises and stings', s:''},
  {k:'urinary', t:'Water, bladder and kidneys', s:''},
  {k:'men', t:"Men's health", s:''},
- {k:'eyes', t:'Eyes and tired sight', s:''}
+ {k:'eyes', t:'Eyes and tired sight', s:''},
+ {k:'blood', t:'Blood cleansers', s:'The book\u2019s own shelf'},
+ {k:'immune', t:'Building the defences', s:'The book\u2019s own shelf'},
+ {k:'seasoning', t:'Kitchen seasonings', s:'Seasoning as medicine'}
 ];
+
+
+/* ---- FROM THE BOOKS ---------------------------------------------------------
+   What the two Afrika books carry that is not one herb: the classifications,
+   the preparation methods, the book's own amounts, its lists and its shelves.
+
+   Every line here is theirs, and the claims in them are theirs and are made
+   here. The amounts are theirs, printed as the books give them. They are here
+   because the library belongs to two people who own the books, and because
+   that is what was asked for (24 Sep 2026). The safety tab is not softened by
+   any of it, and where a book names something that is a poison, the entry says
+   so.
+
+   African Holistic Health (the copy in this repo is Bookey's summary of it) and
+   Nutricide. Page numbers are Nutricide's.
+--------------------------------------------------------------------------- */
+var BOOKS = [
+ {h:"What this tab is, and where each line came from", s:"Read this one first",
+  rows:[
+   ["The two books","African Holistic Health and Nutricide, both by Llaila O. Afrika. They sit beside this library. Everything in this tab, and every entry with a From the books line on it, is theirs rather than the page's."],
+   ["The copy of African Holistic Health here","is Bookey's summary of the book — chapter summaries, quoted pages, and questions and answers. Where a line below says the book, that is the summary's words about the book. It is not the whole book."],
+   ["The copy of Nutricide here","is a rough scan read as text. The seasonings, the nutritional approach, the blood cleansers and the immune builders in this tab are transcribed from it."],
+   ["The amounts","Every measurement in this tab is the book's own, printed exactly as the book gives it. They are stated as claims, which is what they are."],
+   ["What has not changed","The safety tab stands exactly as it was. An infection, coming off alcohol or a drug, pregnancy, a child, and anything you take on a prescription still go where they went before."],
+   ["Why it is a tab and not entries","The books' own material is mostly not about one plant. Classes, methods, amounts, shelves and tables do not fit a herb card, so they got their own shelf instead of being cut up into one."]],
+  note:"<b>Read the amounts as the book\u2019s, printed as the book gives them as claims</b>The book gives them plainly, so they are printed plainly, and taken as claims.",
+  noteCls:"warnbox"},
+
+ {h:"How the books say to prepare a herb", s:"African Holistic Health · the herbs chapter",
+  rows:[
+   ["Tea or infusion","One teaspoon of herb per cup of water. Roots and barks are simmered 20 to 30 minutes; leaves and flowers go in after the pot comes off the heat and steep 10 to 30 minutes."],
+   ["Sun tea","The herbs in water, left in the sun for several hours, so the warmth draws it out without a flame."],
+   ["Poultice","Mixed with water, spread on a cloth, laid on the skin — the skin oiled first — and covered."],
+   ["Extract or tincture","The herb with alcohol, left to steep for two weeks, then strained."],
+   ["Salve","Sixteen ounces of herb with oils and beeswax, simmered and strained."],
+   ["Syrup","The herb simmered with honey, grain syrup or molasses until it thickens, then stored."],
+   ["Liniment","The herbs with rubbing alcohol, left to steep and strained, for the skin."],
+   ["Fresh against dried","Fresh, picked the same day, is the strongest in the book's view. Dried is weaker, and in some cases the book says it does not act."],
+   ["What blunts a herb","The book's line: synthetic drugs, junk food and alcohol antidote or lessen what a herb does."],
+   ["Buying","From a herb dealer or a health food shop, or a standard brand — the book's reason is that a weaker relative gets sold under the right name."],
+   ["The two amounts it gives by name","Lobelia at one teaspoon to four cups of water. Cayenne and garlic at one eighth of a teaspoon to four cups."]]},
+
+ {h:"The multi-vitamin and mineral brew", s:"African Holistic Health · vitamins and minerals",
+  rows:[
+   ["The method","One cup of water for each teaspoon of herb, plus two glasses for the pot. Boil it, turn it low, and simmer the roots, barks and seeds at least 30 minutes."],
+   ["Then the leaves","Off the heat, the leaves and flowers go in and stand 30 minutes or more."],
+   ["Straining and keeping","Strain it while it is warm, and keep it in dark glass in the refrigerator."],
+   ["To keep it longer","One tablespoon of vegetable glycerin per four to five cups of liquid, or honey at the same rate."],
+   ["The ratio","One teaspoon of herb per cup of water, or one ounce of herb to twenty ounces of water."],
+   ["Substituting","A herb can be swapped for one in the same family or with a similar content."],
+   ["Adding for a complaint","Extra herbs for a particular complaint go into the pot the same way — though the book says to take those separately."],
+   ["The herbs it names","Alfalfa. Shavegrass. Licorice. Peppermint. Blue cohosh, or black haw. Red raspberry leaves. Mullein. Plantain. Burdock. Marshmallow. Moss, or kelp. Lobelia. Dandelion root. Yellow dock. Cayenne. Garlic."]],
+  note:"<b>Two of those are not casual</b>Both lobelia and blue cohosh are named in the book\u2019s formula and both carry their own caution on their own entry here.",
+  noteCls:"warnbox"},
+
+ {h:"Seasoning: how much the book uses", s:"Nutricide · seasoning for food, p339",
+  rows:[
+   ["How much","About one eighth to one quarter of a teaspoon of a herbal spice for every four servings."],
+   ["Two together","A quarter teaspoon of each herb, and a quarter to an eighth of a teaspoon of each spice, for four servings."],
+   ["The book's own examples","A quarter teaspoon of dill seed and a quarter teaspoon of dry mustard on vegetables. Or a quarter teaspoon of basil and an eighth of a teaspoon of garlic powder in bean or soy patties."],
+   ["Its own line about it","You can use your seasonings as a medicine and taste. The book's argument is that seasonings were the original medicaments, and that the shelf stopped being read that way."]]},
+
+ {h:"What each seasoning is for", s:"Nutricide · herb seasoning for dis-ease, p341",
+  rows:[
+   ["Allspice","digestion, gas, diabetes, a stimulant"],
+   ["Anise","digestion, the liver, colic, a tonic, colds, spasm"],
+   ["Basil","rheumatism, cramps, vomiting, mucous"],
+   ["Chervil","swellings, edema, a diuretic, eczema, gout"],
+   ["Cinnamon","diarrhea, poliomyelitis, upset stomach"],
+   ["Coriander","a stomach tonic, digestion problems, rheumatism, joint pain"],
+   ["Dill","indigestion, gastritis, croup, nausea"],
+   ["Fennel","a laxative, a diuretic, digestion, sores"],
+   ["Garlic","hypertension, infections, high blood pressure, worms"],
+   ["Ginger","nausea, cramps, meningitis, edema"],
+   ["Horseradish","dysmenorrhea, high blood pressure, a diuretic, arthritis"],
+   ["Kelp","the thyroid, goiter"],
+   ["Marjoram","headaches, acidity, colds, measles, nervousness"],
+   ["Mustard","gastritis, the liver, rheumatism, digestion"],
+   ["Oregano","leukorrhea, colds, headaches, asthma, a tonic"],
+   ["Paprika","sinus trouble, colds"],
+   ["Parsley","a diuretic, dropsy, edema, colds"],
+   ["Pepper","neuralgia — nerve pain"],
+   ["Rosemary","colds, arthritis, memory, digestion, spasm"],
+   ["Sage","sores, bleeding wounds, depression, stopping sweats, a sore throat"],
+   ["Savory","ear trouble, colds, digestion, a stimulant"],
+   ["Thyme","headaches, colds, hypothyroidism, worms, loss of appetite, diarrhea"],
+   ["Turmeric","fever, colds, skin problems, a diuretic, high blood pressure"],
+   ["Vanilla","digestion, gas, neurasthenia — soothing the nerves"]],
+  note:"<b>The list as the book has it</b>One line each, in the book\u2019s own words. Three of them are named for a cancer, a meningitis and a poliomyelitis, and those are a hospital \u2014 the book names them, and where the book is the source the claim is the book's. And nothing goes in an ear from this list: an ear that leaks, or that hurts a child at night with a fever, is a doctor.",
+  noteCls:"warnbox"},
+
+ {h:"Which seasoning goes on which food", s:"Nutricide · seasoning for food, p339",
+  rows:[
+   ["Asparagus","Lemon juice, dry mustard, marjoram, sesame seed, pepper, thyme."],
+   ["Beef","Bay leaf, basil, dry mustard, nutmeg, green pepper, sage, marjoram, onion, pepper, thyme, dill seed, oregano, caraway, garlic, parsley, rosemary, savory, turmeric, allspice, celery seed. The book's row, back in."],
+   ["Beets","Lemon juice, dill, cloves, allspice, ginger, savory, thyme, ginger."],
+   ["Broccoli","Lemon juice, pepper, caraway seed, dry mustard, nutmeg, basil, curry, oregano, garlic."],
+   ["Cabbage and cauliflower","Lemon juice, caraway seed, dill seed, cumin, allspice, celery seed, mace, mint, dry mustard, savory, tarragon, oregano, parsley, rosemary, pepper."],
+   ["Carrots","Parsley, cinnamon, lemon juice, allspice, nutmeg, mint, bay leaf, caraway seed, dill seed, ginger, mace, thyme, marjoram, pepper."],
+   ["Corn","Green pepper, onion, paprika, pepper, curry."],
+   ["Eggplant","Lemon juice, onion, bay leaf, pepper."],
+   ["Eggs","Basil, curry, dry mustard, green pepper, onion, paprika, parsley, nutmeg, cardamom, pepper."],
+   ["Fish","Bay leaf, basil, curry, cumin, dry mustard, green pepper, lemon juice, paprika, marjoram, allspice, fennel, mace, onion, nutmeg, turmeric, parsley, sesame seed."],
+   ["Fruit and fruit desserts","Allspice, cinnamon, cloves, ginger, mace, mint, nutmeg, vanilla, or herbal extracts."],
+   ["Greens","Lemon juice, onion, allspice, pepper."],
+   ["Lima beans","Sage, lemon juice, chives, pepper, onion."],
+   ["Okra","Lemon juice, pepper, onion."],
+   ["Onion","Caraway seed, nutmeg, oregano, sage, thyme, pepper, basil, marjoram."],
+   ["Macaroni and noodles","Allspice, onion, poppy seed, dill seed, whole grain, green pepper."],
+   ["Green peas","Onion, mint, sage, rosemary, parsley, savory, green pepper, basil, oregano, poppy seed, lettuce leaf, pepper, garlic."],
+   ["Potatoes","Onion, basil, mace, parsley, paprika, bay leaf, green pepper, chives, celery seed, oregano, poppy seed, rosemary, thyme, pepper, garlic, mint, nutmeg."],
+   ["Poultry","Bay leaf, cranberries, thyme, paprika, parsley, green peppers, sage, curry, dill seed, pepper, ginger, marjoram, nutmeg, tarragon."],
+   ["Rice","Turmeric, cumin, allspice, nutmeg, cinnamon, onion, green pepper, pepper."],
+   ["Spinach","Lemon juice, onion, allspice, basil, mace, oregano, pepper."],
+   ["Squash","Ginger, mace, allspice, onion, basil, cinnamon, cloves, nutmeg, fennel, rosemary, pepper."],
+   ["String beans","Marjoram, lemon juice, nutmeg, savory, dill seed, thyme, dry mustard, oregano, onion, caraway seed, sage, garlic, pepper."],
+   ["Tomatoes","Basil, marjoram, thyme, onion, lemon juice, oregano, green pepper, pepper, caraway seed, sage, sesame seed."]],
+  note:"<b>All of it is here now</b>The book's list as printed, beef and all.",
+  noteCls:"warnbox"},
+
+ {h:"Blood cleansers", s:"Nutricide · p342",
+  rows:[
+   ["What the shelf is","The book's own list of what it sends to the blood. It is a food and root shelf in a diet already built on raw food, not a bottle of drops."],
+   ["Burdock","the root, brewed — the old spring-clean root, with dandelion."],
+   ["Dandelion root","brewed or roasted, the bitter of the same pair."],
+   ["Elecampane","for a congested lung and the blood."],
+   ["Garlic","the book's line is for the white blood cells. Raw, crushed and rested."],
+   ["Green vegetables","eaten generously — the whole shelf's argument in one line."],
+   ["Milk thistle","to protect the liver and the blood."],
+   ["Pleurisy","for lung congestion and the blood."],
+   ["Red clover","the field flower, brewed as a tea."],
+   ["Wheat grass juice","the book's line is for the red blood cells. A small glass; it carries vitamin K, so it works against warfarin."],
+   ["Spirulina","a green food, bought from a source that tests it."],
+   ["Wormwood","the book gives it here for parasites and worms, and it is the bitterest thing in the European herbals. Days at a time and never in pregnancy. A worm wants a doctor and a tablet beside it."]]},
+
+ {h:"Immune system builders", s:"Nutricide · p342-343",
+  rows:[
+   ["Spirituality","first on the list, as helping to use God's help."],
+   ["Exercise","the book's best builder, ahead of anything in a bottle."],
+   ["Garlic","the book calls it an antibiotic, and gives it for parasites."],
+   ["Vitamin C","the book gives 25,000 to 60,000 mg, and 300 mg every two hours, for an infection. Its figure, printed the way the book prints it."],
+   ["Echinacea extract","infection."],
+   ["Grape seed extract","infection."],
+   ["Pine bark extract","colds, infection."],
+   ["Yohimbe extract","energy and the reproductive organs, and the book pairs it with damiana for a woman. Its own entry carries the caution that has to travel with it: it is dangerous with anything acting on serotonin or on blood pressure."],
+   ["Goldenseal extract","the book gives it broadly, for all types of disease. It has harmed newborns, and it sits on the safety tab by name for that reason."],
+   ["Vitamin E","up to 800 i.u. a day, as the book gives it."],
+   ["Ginseng","energy."],
+   ["Lecithin","the book gives it for the nerves."],
+   ["Lysine","1000 mg, for infection and for herpes."],
+   ["Biotin","given for energy — the rough scan of the book reads fotin here."],
+   ["Ginger","digestion, edema."],
+   ["Glutathione","the book's line is that it removes cellular waste."],
+   ["Creatine","the book's line is that it builds healthy tissue."]]},
+
+ {h:"The book's other short shelves", s:"Nutricide · p343",
+  rows:[
+   ["Skin","MSM tablets and lotion. Lysine cream. Zinc cream."],
+   ["Yeast infection","Pau d'arco — see its own entry on this page. Its whole caution is that it thins the blood and it is not a long daily tea."],
+   ["Sleep","Valerian. Catnip. Chamomile. Kava. Passion flower. Hops. All six have their own entry here, and kava's is the one to read first if the liver has had a bad time."],
+   ["Digestive enzyme","Tablets — the book's use is that they improve the breakdown of supplements, herbs and food."]]},
+
+ {h:"The nutritional approach", s:"Nutricide · p342",
+  rows:[
+   ["Raw whole food","Fruit, vegetables, grains and beans, eaten fresh and raw."],
+   ["Cooked","Whole grains and lightly steamed vegetables."],
+   ["Green","Dark green leafy vegetables and the juice of the dark green leaves, generously."],
+   ["Off the table","No dairy products. No fried food."],
+   ["Animals","No animals, no fish, no fowl. The book's own line is that dead food produces dead cells."],
+   ["Garlic","fresh, raw and organically grown where it can be had."],
+   ["Drugs","none of any kind in the book's words — prescribed, over the counter or street. It says drugs destroy the immune system."],
+   ["Herbal extracts and teas","The book's reason for preferring them: they go straight to the bloodstream and act better and faster than pills and capsules."]],
+  note:"<b>The book's diet, as the book gives it</b>The corner of it that matters in this house is the drug line of it: no street drugs, and coming off alcohol, benzodiazepines or opioids is a doctor.",
+  noteCls:"okbox"},
+
+ {h:"The twenty classes of herb", s:"African Holistic Health · herb classifications",
+  rows:[
+   ["Alternatives","Slow down the action of a curative herb so the body is not shocked. Spikenard root, sarsaparilla root, echinacea root, garlic, ginger."],
+   ["Anthelmintics","Remove worms from the gut. Garlic, horseradish, wild violet."],
+   ["Antiperiodics","Reduce seizures from a fever or a nervous disorder. Vervain, arnica, red raspberry."],
+   ["Anti-inflammatory","Against inflammation in a disease state. Arnica, cayenne, garlic, chaparral."],
+   ["Antipyretics","Bring a temperature down. Eucalyptus, feverfew."],
+   ["Antiseptics and disinfectants","Against harmful bacteria. Anise, myrrh, thyme, garlic."],
+   ["Astringents","Contract tissue and tighten skin and mucous membrane. Alum root — cranesbill — and witch hazel."],
+   ["Bitter tonics","Help digestion and wake the appetite. Chamomile, dandelion."],
+   ["Calmatives","Bring relaxation and a sense of well-being. Chamomile, valerian."],
+   ["Cathartics","Laxatives, for constipation. Cascara sagrada, senna."],
+   ["Demulcents","Soothe and protect the organs inside. Licorice, marshmallow, oatmeal."],
+   ["Diaphoretics","Raise a sweat, to carry impurities out. Ginger, sage, yarrow."],
+   ["Diuretics","Move water and flush it out. Buchu, parsley."],
+   ["Emollients","Soften and soothe, outside and inside. Comfrey, marshmallow."],
+   ["Expectorants","Bring phlegm up out of the chest. Elecampane, mullein."],
+   ["Nervines","Relax the nervous system. Valerian, catnip."],
+   ["Stimulants","Raise nerve reaction and energise. Coffee bean, guarana."],
+   ["Refrigerants","Cool the body. Mints, eucalyptus."],
+   ["Sedatives","Calm pain and anxiety. Chamomile, cramp bark."],
+   ["Vulnerary","Heal wounds and the skin. Aloe vera, comfrey."]],
+  note:"<b>One plant can be two classes</b>Comfrey is a demulcent and an emollient on this list, and it is also the herb on this page that is never taken internally. The class is what a plant does; the caution is how far to take it.",
+  noteCls:"warnbox"},
+
+ {h:"Which herb the book gives for what", s:"African Holistic Health · remedies",
+  rows:[
+   ["Abscesses","Lobelia, mugwort, slippery elm."],
+   ["Aches","Black cohosh, goldenseal."],
+   ["Anemia","Agrimony, centaury — the trial copy reads century — and comfrey."],
+   ["Asthma","Catnip and peppermint; and in the book's answers, lobelia, mullein and hyssop. An asthma that needs a reliever is not a herb problem: keep the inhaler and see a doctor."],
+   ["Blood circulation","Cayenne and ginseng; and ginkgo biloba."],
+   ["Bowel problems","Dandelion and slippery elm."],
+   ["Burns","Aloe vera, goldenseal, marshmallow — on the skin, never the neat oil."],
+   ["Colds","Aconite and bryonia; and allium cepa, the onion. Allium cepa is the onion and is not homeopathy; aconite and bryonia are."],
+   ["Coughs","Coltsfoot, mullein and thyme; and in the book's answers, lobelia, hyssop and mullein. Coltsfoot is the one on the safety list: a few days at most, never for a child."],
+   ["Diabetes","Gymnema sylvestre and bilberry. Diabetes is a doctor, a monitor and a prescription — a herb is never in place of any of them."],
+   ["Diarrhea","Arsenicum, bryonia."],
+   ["Fever","Aconite, belladonna, nux vomica."],
+   ["Headache","Bryonia, belladonna, nux vomica. A headache that is new and the worst of your life is an emergency."],
+   ["Indigestion","Nux vomica, arsenicum."],
+   ["Inflammation","Anise, catnip, thyme."],
+   ["Menstrual problems","Belladonna, bryonia, calc. phos."],
+   ["Skin eruptions","Aloe vera, goldenseal, chickweed."],
+   ["Throat irritation","Catnip, goldenseal, hypericum."],
+   ["Allergy and hay fever","Apis and arsenicum, for an acute attack, in the homeopathic quick reference."]],
+  note:"<b>Half of the second half is homeopathy, not the plants on this page</b>Aconite, belladonna, bryonia, nux vomica, arsenicum, cantharis, apis and calc. phos. are homeopathic remedies — given by name and in dilution. Several of the raw plants are poisons. They are on this list because the book has them, and homeopathy is a different tradition from every other entry in this library.",
+  noteCls:"warnbox"},
+
+ {h:"Vitamins and minerals, as the book has them", s:"African Holistic Health · vitamin and mineral guides",
+  rows:[
+   ["What a vitamin is","The book's framing: vitamins energise the body, minerals stabilise it, and vitamins are either water-soluble or oil-soluble."],
+   ["Which to buy","Plant-derived over synthetic, and whole food over processed."],
+   ["On the printed dose","The book's argument is that the amount printed on a label is often not enough for what it calls a therapeutic want, and that the water-soluble ones in particular can be raised. It also says a child's dose is not an adult's."],
+   ["Vitamin A","Tissue and immunity. Short of it, the skin and the sight suffer. Carrots and leafy greens."],
+   ["B complex","Metabolism, energy and mental health."],
+   ["Vitamin C","The glands, and resistance to disease. Short of it, wounds and gums."],
+   ["Vitamin D","Draws minerals in and builds bone. Short of it, growth and energy suffer."],
+   ["Vitamin E","Tissue health and circulation."],
+   ["Vitamin K","Clotting and energy."],
+   ["Also named","Vitamin F, the fatty acids. Vitamin T, for making blood. Vitamin U, for healing a wound. Vitamin P, for protecting a cell."],
+   ["Minerals","Chelated rather than synthetic, bought from a health food shop in the book's words — and two to three times the ordinary amount when treating something."],
+   ["Iron","Makes blood. Short of it: low mental sharpness, anemia, tiredness, headaches. Its herbs: burdock root, chamomile, fennel. Its foods: almonds, spinach, whole grains."],
+   ["Calcium","Bone, teeth and muscle. Short of it: soft bone, nervousness, muscle cramps, heart trouble. Its herbs: aloe root, horsetail, red clover. Its foods: broccoli, raw vegetables, leafy greens."],
+   ["Zinc","Cell and tissue growth, the prostate, healing wounds and burns, taste and smell — and vital to enzymes, in the book's words."],
+   ["Selenium","Liver function, less energy lost, protection from toxins, the prostate, and an antioxidant."],
+   ["Where the copy stops","The summary in this repo cuts off in the middle of the mineral guide, at phosphorus, and that is where this one ends. There is no fuller list to put here from it."]]},
+
+ {h:"The doctrine of signatures", s:"African Holistic Health · the doctrine of signature",
+  rows:[
+   ["The idea","The sign of what a plant is for is written on the plant — its shape, colour, texture, taste and smell. The book's point is that the first herbalists read the plant rather than a textbook."],
+   ["Leaves","Lobed leaves for the lung. Wrinkled leaves for the skin. Smooth leaves for the organs inside. Complicated veins for nerve and circulation."],
+   ["Where it grows","A short plant is rich in minerals, for bone. A tall one for breathing. A vine for the nervous system. A flower for the skin and the digestion."],
+   ["Roots","Roots steady a nutrient and can flush the body out. A red root for the blood; a yellow root for the bowel."],
+   ["Taste and colour","Bitter closes and dries; sweet opens and moistens."],
+   ["On the poisonous ones","The book's own line, and it is stated here as the book's: no herb is poisonous if it is properly combined with an antidote, and that is how a healer uses a strong plant. The poisonous ones on this shelf carry their poison in their own entry, which is what an old herbal did too."]]},
+
+ {h:"The diet the book argues for", s:"African Holistic Health · sample menu and recipes",
+  rows:[
+   ["The argument","The book's position is that the right diet is made of plants that grow near the equator, and that the traditional one was raw fruit, vegetables, whole grains and herbs."],
+   ["The fruit it names","Acerola cherry, apricot, avocado, banana, cantaloupe, coconut, mango, papaya, pineapple."],
+   ["The morning","A glass of water; the book says wait 30 to 40 minutes before breakfast. Rolled oats with fruit or vegetable juice, and flax seed if there is any."],
+   ["The heaviest meal","Between ten and two in the book's example. Brown rice with cauliflower, with brewer's yeast and peanut flour on top."]]},
+
+ {h:"What the book treats, and with what it treats it", s:"African Holistic Health \u00b7 the dis-ease chart",
+  rows:[
+   ["Abscess","a pus-filled pocket from an infection, inside or outside. The book: zinc, garlic and vitamin A, enzymes, and herbs."],
+   ["Acne","skin inflammation, mostly in the teens, from hormones and food. Chromium, lecithin, vitamin A, food changes, herbs."],
+   ["Adrenal exhaustion","from stress and poor food. Pantothenic acid, B complex, herbs."],
+   ["AIDS","the book meets it with nutrition and supplementation for the immune system, high-potency vitamins, and named herbal remedies."],
+   ["Aging","absorption of nutrients slows. Supplements to blunt it."],
+   ["Alcoholism","the book's answer is food: rebuilding a nutritionally wrecked body. Rebuilding does not detox you on its own — a heavy drinker stopping is a doctor, and the app's timeline page says the same."],
+   ["Allergies","the body failing to handle something. Nutritional balance, away from whatever sets it off, and herbs."],
+   ["Alzheimer's and senile dementia","the book puts it on nutrition and replaces what is short, particularly vitamins and minerals."],
+   ["Anemia","support for red blood cell production, by supplement and by food."],
+   ["Appetite, poor","food that appeals, and supplements. The book treats the emotional cause as well as the physical one."],
+   ["Arteriosclerosis","food and supplements, and getting the waste out."],
+   ["Arthritis","an anti-inflammatory diet, the omega fatty acids, and a focus on elimination."],
+   ["Asthma","away from what sets it off, and support for the lung. Nothing here replaces an inhaler."],
+   ["Athlete's foot","the book's anti-fungal supplements and food — and its own easy-remedies row, below."],
+   ["Cancer","the book's position is prevention through food: away from processed food, and its detoxifying diet for the body's own defences."],
+   ["Diabetes","the book puts it on nutrition, with food and supplementation to steady blood sugar."],
+   ["Digestion","constipation and distress, which the book puts on a diet of processed food. Change the food, add the fibre."],
+   ["Edema","less salt, more water, and supplements for the circulation."],
+   ["Hormone imbalance","targeted supplements and food changes."],
+   ["Kidney and liver disease","the book's detoxifying diet, and support for both organs at once."],
+   ["Prostate","the book's diet, and the supplements it names for it."]],
+  note:"<b>The book's claims, as the book makes them</b>Twenty-one conditions, and what the book gives for each of them. Where the book names a condition and a treatment, both are here. That is the whole of it.",
+  noteCls:"okbox"},
+
+ {h:"Easy remedies, the book's own", s:"African Holistic Health \u00b7 easy remedies",
+  rows:[
+   ["Athlete's foot","Garlic powder, pau d'arco powder and horseradish powder sprinkled on the feet. Tea tree oil between the toes and on the affected area daily. Drink pau d'arco tea."],
+   ["Bedbugs","Wild thyme in the bedding, the room closed, and kept warm."],
+   ["Bedwetting","A diuretic around noon, and nothing to drink after six in the evening."],
+   ["Bleeding","Clay, goldenseal powder and spider webs on it. Vitamin K as needed."],
+   ["Cataracts","Castor oil on the eye, and vitamin B to absorb it. A change in sight is still an optician's appointment."],
+   ["Chapped lips","A lotion of lavender, aloe vera, witch hazel, vegetable glycerin and beeswax."],
+   ["Dizziness","A strong tea of sea salt, gentian and myrrh."],
+   ["Dog bite","Goldenseal, eyebright and aloe, brewed and applied. A bite that breaks the skin is a tetanus question and a doctor."],
+   ["Falling hair","Wild cherry bark boiled, with nettle and horsetail added, and drunk."],
+   ["Gas and gout","Herbs, foods, vitamins and amino acids together."],
+   ["Grey hair","A rinse of henna and sage tea."],
+   ["Hair oil","Sage oil with almond oil."],
+   ["Insect repellent","Pennyroyal, spearmint and essential oils together. Pennyroyal oil on the skin is the one to be careful with — read its own entry."],
+   ["Itchy skin","Ointments and food, including apple cider vinegar."],
+   ["Natural contraceptives","Acacia and stone seed on a tampon or a douche. An old practice, not a reliable contraceptive — see the stone seed entry."],
+   ["Natural hair relaxer","Henna, oils and beeswax."],
+   ["Red eyes","Vitamin E drops and lemon juice. A red eye with pain or a change in sight is a doctor."],
+   ["Ringworm","Gunpowder, vinegar and charcoal mixed and applied. This is the book's own line and the one remedy here this page would leave in the book — gunpowder is not a household ingredient."],
+   ["Wrinkles","Tormentil with aloe vera gel."],
+   ["A facial mask","Equal parts wheat germ flour, honey and clay, applied thoroughly."],
+   ["A cleanser","Charcoal with mashed fresh strawberries, brushed on."],
+   ["A raw poultice","Gunpowder, vinegar, pau d'arco and charcoal powder, applied to the area. Again the book's own line."],
+   ["A foot soak","Cabbage juice, lemon juice, ginger root and turpentine."],
+   ["A lotion","One ounce of vegetable glycerin, half an ounce of sage, half an ounce of aloe oil and a quarter of an ounce of a scented oil such as lavender, shaken together."],
+   ["Nutritional support for all of it","Vitamins A, B complex, C and E, with glandulars and amino acids."]],
+  note:"<b>Two of these are the book's and not this page's</b>Gunpowder is not an ingredient anybody should be mixing at a kitchen table, and cotoneaster-thin contraceptives are not a method. They are printed because the book prints them and the whole book is what was asked for.",
+  noteCls:"warnbox"},
+
+ {h:"Food: what the book says about eating", s:"African Holistic Health \u00b7 food",
+  rows:[
+   ["What food is","Nutrients — vitamins, minerals, carbohydrates, fats and proteins. Carbohydrates are the quick energy; fats are the store."],
+   ["On protein","The body does not store extra protein. It turns it into fat and puts it in the organs, the muscle or the cellulite."],
+   ["The food animal","The book's line: an animal is only a middle passage for protein. Vegetable protein comes complete, and the chlorophyll with it steadies it."],
+   ["Food combining","Digestion needs an acid step and an alkaline step, and the wrong pairing blocks the enzymes between them — starch and protein together is the pair the book keeps apart. Bloating, gas and a heavy stomach are what it says comes of getting it wrong."],
+   ["Sugar","White sugar is a refined carbohydrate, and the book calls it a drug: it is the one it blames for insulin resistance, obesity and the rest."],
+   ["Junk food","Processed food, synthetic additives, and a cycle the book calls addiction. It is the same cycle this app is built around, named from the other end."],
+   ["White food","The book's own line: white junk foods are killing Black America, and if it is white do not trust it."],
+   ["The microwave","The book holds that it damages the food. It gives no mechanism and this page adds none."],
+   ["What goes on the skin","Cosmetics are absorbed the same way food is, and the book puts the two side by side: read the jar the way you read a label."],
+   ["What it comes down to","Whole food, raw where it can be, plant-based, and a diet built on what grows near the equator."]]},
+
+ {h:"Food as medicine", s:"Nutricide \u00b7 the food medicine chart, p337-338",
+  rows:[
+   ["Allylic sulfides","Dissolves cholesterol and protects against carcinogens. Garlic."],
+   ["Alpha-linolenic acid","Reduces inflammation and enhances the immune system. Flaxseed, soy products, purslane, walnut."],
+   ["Carotenoids","Fights cancer and reduces plaque. Parsley, carrots, winter squash, sweet potatoes, yams, cantaloupe, apricots, spinach, kale, turnip greens, citrus fruit."],
+   ["Catechins","Fights gastrointestinal cancer and lowers cholesterol. Tea, berries."],
+   ["Coumarins","Prevents blood clotting, helps high blood pressure, and has anti-cancer activity. Parsley and citrus fruit."],
+   ["Flavonoids","Decreases cancer. Parsley, carrots, citrus fruit, broccoli, cabbage, cucumbers, squash, yams, tomatoes, eggplant, peppers, soy products, berries."],
+   ["Gamma-glutamyl allylic cysteines","Lowers high blood pressure and enhances the immune system. Garlic."],
+   ["Indoles","Normalises oestrogen action, and helps PMS. Cabbage, brussels sprouts."],
+   ["Isothiocyanates","Stimulates the liver and helps blood pressure. Mustard, horseradish, radishes."],
+   ["Limonoids","Alkalinising, with enzyme action. Citrus fruit."],
+   ["Lycopene","Fights cancer and its progression. Tomatoes, red grapefruit."]],
+  note:"<b>Where the scan gives up</b>The chart carries on for another eight or nine rows on the next page of the book and the scan garbles every one of their names — the benefits survive as fragments (a blood cleanser, something that blocks oestrogen, something that regulates prostaglandin) with nothing left to attach them to. They are left out rather than guessed at.",
+  noteCls:"warnbox"},
+
+ {h:"Reading the body before treating it", s:"African Holistic Health \u00b7 dis-ease, diagnosis, examination",
+  rows:[
+   ["The skin is the chart","The body is read in three — upper, middle and lower — and each section holds its organs. A change in the colour or the texture of the skin, a patch, a scratch or a bump, is read as the organ under it complaining."],
+   ["Finger pressure","Two to four pounds of it, on the skin over the organ's energy field, the meridian. The book's claim is that a diseased organ answers to it."],
+   ["What runs out of a body","Tears, sweat and blood. The book's point is that all of them carry information, and that the rank society gives them is not a biochemical rank."],
+   ["Melanin","The book's position is that melanin is the foundation of immunity — a free radical scavenger, and working in digestion, the bones, the nerves, the cells and the hormones. Its food is a blend of amino acids, herbs and food sources, and the book gives a daily herbal combination for it."],
+   ["Food and the mood it makes","Carbohydrates for calm, proteins for alertness, fruit and vegetables to steady the energy."]],
+  note:"<b>Read beside a doctor, not instead of one</b>The reading of the body in this chapter is the book's own method and it comes with no test behind it. It is here because the book is here.",
+  noteCls:"warnbox"},
+
+ {h:"Colours, organs and the clock", s:"African Holistic Health \u00b7 colours, cycles and therapies",
+  rows:[
+   ["Colour and organ","Each colour goes with an organ and its work. Yellow — a lemon — for the liver. Red for the heart. A plant whose colour matches what an organ produces is, in the book, medicine for that organ."],
+   ["Reading it off a person","The colour of the eye, the skin and the nail is read the same way, as a sign of what is going on inside."],
+   ["The organ clock","Each organ keeps its own rhythm around the day. The book's example: the liver is at its most active at one in the morning. Organs that work together suffer together — when one fails to do its part the other wears out with it."],
+   ["Physical days and internal days","Sunday, Tuesday and Thursday are the physical days, for the muscles. Monday, Wednesday and Friday are the internal days, for the organs inside and the spirit."],
+   ["Oils and incense","Through the nose. Each oil, in the book, has its own work and its own days, and the smell is the whole of the delivery."],
+   ["Metals","Each has its own energy and its own days, and goes into the work, the artwork and the daily habit."],
+   ["Crystals","Held to the body, worn, or laid on an organ, and kept for the energy the book says they take from plants and herbs."],
+   ["Music","The book's line: sound goes into a person through the skin, the eyes, the ears and the food."],
+   ["The zodiac","The signs, the colours and the parts of the body are mapped onto each other, and the acupressure meridians onto the whole of it."]],
+  note:"<b>None of this is a mechanism this page can give you</b>The book states it and stops there: colour, cycle, oil, crystal and sign, with no account of how. It is in the tab because it is in the book.",
+  noteCls:"warnbox"},
+
+ {h:"The history the book tells", s:"African Holistic Health \u00b7 herbs, Africa and history",
+  rows:[
+   ["Before records","Herbs were being used medicinally in Africa before there is any written history of it. The book names the Amratian, Badarian, Gerzean and Nok among the cultures that did."],
+   ["Egypt","Peoples moving into Egypt from Abyssinia brought their plants, their knowledge and their practice with them, and shaped what the region did for the next thousand years."],
+   ["Imhotep","The book's central figure. He set up holistic medical schools in the fourth dynasty, in the reign of Pharaoh Zozer, and his texts went out across the world."],
+   ["The diet of the Egyptians","The book's claim: whole raw food, and herbs and natural remedies, not the later diet of the mummies that followed the change in eating."],
+   ["What the invasions did","Herbalists killed or driven off their practice, and the knowledge plundered — which is how the book explains a healing tradition that was exact and organised becoming folk medicine in the space of a few generations."],
+   ["The herbal trade","African medicinal herbs went out along the trade routes and went into European medicine, and the book's line on the arrangement is that the knowledge left with the plants."],
+   ["What travelled with the people","Wherever early Africans went they took culture, science, technology, spirituality and plants. The book's example: the enslaved brought tropical plants to the countries they were taken to, often carrying the seeds themselves."]],
+  note:"<b>History, as the book tells it</b>The chapter is one book's account and this page adds nothing to it and takes nothing off it.",
+  noteCls:"okbox"},
+
+ {h:"The book's own lines", s:"The ones worth having on a page like this",
+  rows:[
+   ["On food and medicine","Food is medicine and medicine is food."],
+   ["On vitamins","Vitamins energise the body while minerals stabilise it."],
+   ["On the label","The recommended dosage on the label is for stopping starvation."],
+   ["On synthetic vitamins","Buy the tablets made from plants. Synthetic ones drain the body of nutrients, alter pH and body chemistry, and work against the immune system."],
+   ["On minerals in illness","The listed dose is what a healthy body needs. A dis-ease needs more, because the body has to use its normal amount and still fight."],
+   ["On herbs in the body","Herbal medicine is most effective fresh, live and picked the same day."],
+   ["On combining","Herbs can be combined."],
+   ["On what blunts them","The whole effect of a herb is antidoted, lessened or not felt at all when synthetic drugs, junk food or alcohol are in the body."],
+   ["On buying them","From a herb dealer or a health food shop, or a standard brand — a weaker relative gets sold under the right name otherwise."],
+   ["On the signature","The specific signature, or medical purpose, of an herb is written on it by its shape, colour, texture, taste and smell."],
+   ["On place","An herb that grows in a place has adjusted to that place, and is generally good for the diseases of that environment."],
+   ["On the diet","A diet for African folks should consist of plants from the equator region. Fruits react quicker in the system and stabilise better than the vegetables and fruits that grow further away."],
+   ["On the ideal","Herbs are the ideal medicine for Africans."],
+   ["On the whole of it","The spirit, the mind and the body are one. The past, the present and the future are one now."]]},
+
+ {h:"What came from where", s:"So the next hand can find it",
+  rows:[
+   ["Nutricide","The seasoning amounts and the list of which seasoning goes on which food (p339). What each seasoning is for (p341). The nutritional approach and the blood cleansers (p342). The immune builders, and the short shelves for skin, yeast, sleep and digestive enzymes (p342-343)."],
+   ["African Holistic Health","How to prepare a herb, and the two amounts it gives by name. The multi-vitamin method and the herbs in it. The twenty classes. The herbs for dis-eases and the homeopathic quick reference. The vitamin and mineral guides. The doctrine of signatures. The sample menu. Added in the second pass on 24 Sep: the dis-ease chart, the easy remedies, the food chapter, the diagnosis chapter, colours and the cycles, the history chapter, and the book's own lines."],
+   ["Nutricide","and its food medicine chart (p337-338), in the second pass."],
+   ["When","Both read and put in on 24 Sep 2026."],
+   ["The rest of the two books","The middle of both is not transcribed here and was not read line by line. Nothing in this tab is invented to fill a gap, and the places where the copies run out are said so in the row they run out in."]]}
+];
+
+/* Each section opens and shuts like a herb card does, so the page keeps one
+   way of doing it — the click handler on the view already toggles by data-h. */
+function bsec(b,i){
+  var id='bk'+i, open=openId===id;
+  var out='<div class="card'+(open?' open':'')+'" data-h="'+id+'">'
+   +'<div class="row"><div class="row-txt"><b>'+esc(b.h)+'</b>'
+   +(b.s?'<span>'+esc(b.s)+'</span>':'')+'</div><div class="chev">&#8250;</div></div>'
+   +'<div class="body">';
+  (b.rows||[]).forEach(function(r){ out+='<p><b>'+esc(r[0])+'</b> &mdash; '+esc(r[1])+'</p>' });
+  if(b.note) out+='<div class="big '+(b.noteCls||'warnbox')+'">'+b.note+'</div>';
+  out+='</div></div>';
+  return out;
+}
 
 var KEY='tsid_herb_notes_v1';
 var store={};
@@ -593,6 +1132,10 @@ function render(){
     if(!q && !out) out='<div class="empty">Nothing on this shelf yet.</div>';
   }
 
+  if(tab==='books'){
+    out='<div class="sec">'+BOOKS.map(bsec).join('')+'</div>';
+  }
+
   if(tab==='safety'){
     out=
     '<div class="sec">'
@@ -602,7 +1145,7 @@ function render(){
     +'<div class="big warnbox"><b>Kratom is not in this library</b>It is sold as a herb. It acts on the same receptors as opioids and it is addictive — people come off it with withdrawal like any opioid. It has no place here.</div>'
     +'<div class="big warnbox"><b>Pregnancy and children</b>Most of this list is not for pregnancy. Raspberry leaf is the one people talk about, and even that is a midwife\u2019s call. Children are not small adults for dosing — a few of these are genuinely dangerous for a baby, goldenseal and comfrey root especially.</div>'
     +'<div class="big warnbox"><b>Liver</b>Comfrey is never taken internally. Kava and several cleanse brews put strain on a liver that is already tired. If you have been hard on your body and you want to clean it up, food and water and time do that. A tea does not.</div>'
-    +'<div class="big okbox"><b>What this page is</b>It is what people have long used these plants for. That is history and practice, not proof, and not a prescription. Nothing here says it works. If something is wrong and it is not getting better, get seen.</div>'
+    +'<div class="big okbox"><b>What this page is</b>What these plants do, and what the two books say they do. The claims are made here plainly, because this is a private shelf for two people and their own books (15 Sep 2026). What still holds is at the top of this tab: an infection, withdrawal, a chest that hurts to breathe or a bleed that will not stop is a doctor.'
     +'</div>';
   }
 
@@ -642,7 +1185,7 @@ function render(){
 }
 
 function match(h){
-  var hay=[h.n,h.a,h.u,h.d,h.h,h.c].join(' ').toLowerCase();
+  var hay=[h.n,h.a,h.u,h.d,h.h,h.c,h.bk].join(' ').toLowerCase();
   return hay.indexOf(q)>-1;
 }
 
@@ -653,9 +1196,10 @@ function card(h){
   +(h.a&&h.a!=='added by you'?' &middot; '+esc(h.a):'')+(h.own?' <span class="pill">yours</span>':'')
   +'</span></div><div class="chev">&#8250;</div></div>'
   +'<div class="body">'
-  +(h.d?'<div class="lbl">What people have used it for</div><p>'+esc(h.d)+'</p>':'')
+  +(h.d?'<div class="lbl">What it does</div><p>'+esc(h.d)+'</p>':'')
   +(h.h?'<div class="lbl">How it is traditionally taken</div><p>'+esc(h.h)+'</p>':'')
   +(h.c?'<div class="lbl">Caution</div><p>'+esc(h.c)+'</p>':'')
+  +(h.bk?'<div class="lbl">From the books</div><p>'+esc(h.bk)+'</p>':'')
   +'<div class="lbl">Ask about this one</div>'
   +'<button class="ask-go" data-ask="'+esc(h.n)+'">Ask about '+esc(h.n)+'</button>'
   +'<div class="lbl">What your book says</div>'
@@ -701,7 +1245,7 @@ document.querySelectorAll('.tab').forEach(function(el){
 var ASK_SYS=[
 'You are the helper inside a private herb reference. It belongs to two people, for their own use, and it is built from the tradition and from books they own — African Holistic Health and Nutricide among them.',
 '',
-'This is a personal reference, not a public product. Answer the way those books answer: what a plant is used for, what it is known and valued for, how it is prepared, how it is taken, what it is usually taken with, and what to watch. Do not hedge every line, and do not keep repeating that tradition is not proof — they already know, it is their own library.',
+"This is a personal reference, not a public product. Answer the way those books answer: what a plant does, what it is known and valued for, how it is prepared, how it is taken, what it is usually taken with, and what to watch. Say what it does, and say it as a claim — these are the books' claims and they are made here. Do not hedge every line, and do not keep repeating that tradition is not proof — they already know, it is their own library.",
 '',
 'WHAT STILL HOLDS, and you say it plainly when it comes up:',
 '1. An infection is a doctor, not a herb: a fever that will not come down, a wound going red or hot, a chest that rattles, anything yellow or green coming up, a tooth gone bad, chest pain, trouble breathing, confusion, or bleeding that will not stop.',
@@ -712,6 +1256,7 @@ var ASK_SYS=[
 '6. Never invent a study, a dose, a citation or a figure. If you do not know, say you do not know.',
 '7. Never tell anybody they are finished, hopeless, or beyond help.',
 '8. Never mention money, pricing, subscriptions, or the business behind anything.',
+'This page also carries a From the books tab: how the two books say to prepare a herb, their classifications, their own measurements, their shelves and their lists. Use them. When you give one of their figures, say whose figure it is.',
 '',
 'HOW YOU ANSWER',
 '- Direct and useful: the plant, what it is for, how it is taken, what it is taken with, and the caution that travels with it.',
@@ -736,6 +1281,7 @@ function askCtx(){
   if(h.d) s+='The tradition: '+h.d+'\n';
   if(h.h) s+='How it is traditionally taken: '+h.h+'\n';
   if(h.c) s+='Caution on the entry: '+h.c+'\n';
+  if(h.bk) s+='What the books say about it: '+h.bk+'\n';
   return s;
 }
 

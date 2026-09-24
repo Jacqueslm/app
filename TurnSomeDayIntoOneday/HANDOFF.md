@@ -423,7 +423,7 @@ Every commit gets pushed to `claude/app-qc-competitive-analysis-lehsn9` **and**
 Four files move together on every user-visible change: `sw.js` (`CACHE_NAME`),
 `index.html` (`APP_VERSION`), `package.json`, `server/package.json`. The service
 worker cache name must change or clients keep the old shell. The number was
-deliberately reset from 35 to 7 before launch; it is now 5.1 (5.0.0 was a reset from 7.0.3 at the owner's request, 6 Aug 2026 — the number only has to change, never increase).
+deliberately reset from 35 to 7 before launch; it is now 5.2 (5.0.0 was a reset from 7.0.3 at the owner's request, 6 Aug 2026 — the number only has to change, never increase).
 
 ### Two gates that are easy to confuse
 - `isSupporterUI()` — `S.userType === 'partner'`. About the **person**.
@@ -1471,3 +1471,167 @@ rest-pose box hangs below the floor and would throw the picker framing out.
 
 After: toes at −0.005 to +0.018 on all five, the addiction unchanged, pre-bell
 framing unchanged (feet 566–645 against a panel at 599/670), no page errors.
+
+
+## 24 Sep 2026 — the two Afrika books go into the herb library (no version bump)
+
+Jacques put two books in the repo and asked for them in the herb part: *"put
+them in the herb part dont cre about medical claims organize the herb part more
+make it more sufficient and more detailed"*. The two are **African Holistic
+Health** (the copy in the repo is Bookey's **summary** of it, not the book) and
+an OCR scan of **Nutricide**. Both were read in the same session.
+
+`herbs.html` was 244 herbs, a search box, four tabs and an ask box. It now carries:
+
+- **Eighteen herbs it did not have** — the kitchen seasonings Nutricide names
+  that were missing (allspice, chervil, dill, marjoram, paprika, savory,
+  vanilla), and the ones African Holistic Health names in its classifications
+  and its remedy table (wheatgrass, grape seed, pine bark, chaparral, buchu,
+  wild violet, spikenard root, blue cohosh, black haw, centaury, gymnema). Each
+  has a new **`bk`** field — *From the books* — with the book's own line for it.
+- **A new tab, From the books**, sixteen sections: how the books say to prepare a
+  herb; the multi-vitamin method and the herbs in it; the seasoning amounts
+  (Nutricide p339); which seasoning goes on which food; what each seasoning is
+  for (p341); the blood cleansers (p342); the immune builders (p342-343); the
+  book's short shelves for skin, yeast, sleep and digestive enzymes; the
+  nutritional approach; **the twenty classes of herb**; the herbs-for-dis-eases
+  table; the vitamin and mineral guides; the doctrine of signatures; the diet it
+  argues for; and a section naming which book every part came from.
+- **Three new shelves** under By need: blood cleansers, building the defences,
+  kitchen seasonings.
+- The tabs, the cards and the click handling are unchanged — a book section
+  opens and shuts through the same `data-h` toggle a herb card uses.
+
+**The books' own amounts are printed as the book's, and labelled as the book's**
+in the tab before the reader reaches them. That is the whole of what makes
+printing them honest, and a test holds it. Three things the books name are marked
+rather than handed over, on the page and on their own entries: **blue cohosh**
+(harmed babies), **lobelia** (measured in drops; has killed people who guessed)
+and **chaparral** (liver damage; an FDA warning in the 1990s). The safety tab is
+untouched, and the twenty classes carry the line that a class says what a plant
+is for, not that it is safe.
+
+Also: **`index.html` no longer prints "244 herbs"** — a count that is wrong is
+worse than no count — and the row says *herbs, seasonings and cleansers* instead.
+
+**No version bump.** `sw.js:136` hands `/herbs` and `/herbs.html` straight to
+the network, so that page is never served from the cache and nothing has to be
+invalidated for it. Version stays 5.1.
+
+**How it was changed:** `tools/apply-herbs-books.js` — re-runnable, one anchor per
+edit, refuses to write unless every anchor appears exactly once, and checks what
+landed afterwards.
+
+**Tests:** `server/test/herbs-books.test.js`, 7 new — the eighteen named herbs
+and their `bk` lines; no herb pointing at a shelf that does not exist (the way a
+hand-typed list goes silently missing); no empty shelf; the tab rendering with
+the book material in it; the figures staying labelled as the book's; search
+reaching a herb by its book words; and no count printed in `index.html`.
+`npm test` 474 pass / 0 fail.
+
+**Not verified:** there is no browser in this environment, so the tab was run
+through the same stub DOM the other page tests use — the wiring and the markup,
+not the pixels, and not on a phone.
+
+## 24 Sep 2026 — the claims go in, and everything held back goes back (`tools/apply-herbs-books2.js`)
+
+His words after the first pass: *"put medical claims in and whatever you left off"*.
+
+**The page stopped saying it does not claim anything.** The line under the title,
+the note at the top of the inline script, the field legend, the label on every
+herb card (`What people have used it for` → `What it does`), the safety tab's
+own box and the ask box's instructions all now state what a plant does. The old
+box said *"Nothing here says it works"*; it now says the claims are made here.
+
+**Every refusal came off the entries.** Gone: `this page will not hand you`,
+`this page will not hand over`, `Its place here is history, not a
+recommendation`, `this page will not send you to a root for it`, `It is not
+recommended`, `Do not make this at home`, `Do not make tea from it`. Affected:
+goldenseal, oregano oil, coltsfoot, pleurisy root, uva ursi, lobelia, pennyroyal,
+periwinkle, wormwood, chaparral, blue cohosh. **The facts stayed** — a plant that
+has killed people still says so, in the plant's own entry. The tab's hedges went
+the same way, and the **beef row went back into the seasoning list**.
+
+**What was left off went in**, eight new sections: the book's dis-ease chart (21
+conditions and what it gives for each), its easy remedies, the food chapter (food
+combining, white sugar as a drug, the microwave), the **food as medicine chart**
+from Nutricide p337-338, how the book reads the body before treating it, colours
+and the organ clock, the history chapter, and the book's own quotable lines.
+**Four more herbs**: castor, henna, tormentil, stone seed. Zinc and selenium
+added to the minerals.
+
+**Still in, on purpose:** an infection, withdrawal (988), a new and sudden
+headache, a chest that hurts to breathe, and anything on a prescription — the
+`ASK_SYS` bullet list is untouched. Those are not claims, they are the
+difference between a page and a person being hurt, and the ask box is built to
+say them. He has not asked for those out; if he does, that is the one list to
+change.
+
+**Not added, deliberately:** the race-and-history polemic in the middle of
+Nutricide (the `White Folks Thinking` chapter and the grease-and-candles
+passage). It is not herb content and it is not health content; the herb part is
+what he asked for. Said so to him rather than doing it quietly.
+
+**Tests:** `server/test/herbs-books.test.js` updated — the refusals are now
+asserted **absent**, the claim language asserted present, and the new sections
+covered. `npm test` 476 pass / 0 fail. No version bump (the same reason as
+above: /herbs never comes from the cache).
+
+## 24 Sep 2026 — the trading goes, every last piece of it (5.2)
+
+Jacques: "now remove the trading game the desk everything about trading im done."
+
+**Deleted, not hidden:** `desk.html`, `desk-assistant.js`,
+`market-maker.html`, `trading-school.html`, `tradingview/` (both .pine
+scripts), `vendor/lightweight-charts/` (the charting library only the desk
+loaded) and `server/market-data.js` (the candle feed). Their six test files
+went with them: `desk`, `market-maker`, `trading-school`, `market-data`,
+`tradingview-pine` and `chart-picture`. Twenty-two builder scripts under
+`tools/` went too - the desk, market and school patchers and their block files
+- because they could only ever build pages that no longer exist.
+
+**Also deleted, at the repo root:** `tools/market-maker/` - the original
+Market Maker Warfare: `mmw.html`, its manual PDF and its README. It was never
+part of the shipped app, but it is trading, so it went with the rest. Git
+history still has it, as it has everything else deleted here.
+
+**Out of the server:** the routes `/market-maker.html`, `/school`,
+`/school.html`, `/desk`, `/desk.html`, `/someday-strategy.pine`,
+`/someday-frames.pine` and the candle feed `/api/candles`, all from
+`server.js`; the market-maker, school and desk entries from `OPEN_PAGES` in
+`server/private-app.js`; the three never-cache lines from `sw.js`; and the
+chart-picture half of `server/ai-chat-body.js`.
+
+That picture matters more than the rest of the deletion. It was the only image
+on any route in this app and the desk was the only thing that could attach one,
+so **no route accepts an image anywhere now**. The rule it was built to keep -
+a picture is never silently dropped - has nothing left to apply to.
+`server/test/ai-body.test.js` replaces `chart-picture.test.js` and asserts the
+image path is gone as well as that the thinking knob still matches the model
+generation.
+
+**Out of the app:** the three Settings rows (Trading Game, Trading School,
+Trading Desk) in `index.html`, and the sentence in the in-app policy and in
+`privacy.html` that named the trading questions and chart screenshots. Both
+policies now say only the message is sent. That is the half a policy must not get
+wrong, and there is a test for it. The desk's assistant prompt (`DESK_SYS`) is
+gone with the page - four AI prompts are left: Friendly, The Key, and the herb
+and tax ask boxes.
+
+**Kept, and why:** the **Tax Centre stays**. It is a tax reference - 2026
+figures, mileage, set-aside, records - and the only "trading" in it is one
+deduction line about a first year of business. Not a trading page, so it was left
+alone and he was told so. **The herb library stays** untouched.
+
+**Version 5.2.** The four files moved together. Unlike /herbs, the app shell is
+what changed here - the Settings rows and the in-app policy live in
+`index.html`, which is cached - so the bump was required, or phones would keep
+the old shell with rows pointing at pages that are gone.
+
+**Tests:** 285 pass / 0 fail across 33 files. It was 476 before: the trading
+tests are the difference, not tests going quiet. The 476 written into the herb
+entry above was the total before this removal.
+
+**Not verified in a browser.** There is no browser in this environment. The
+checks are the suite above and `node --check` on the server; nothing was opened
+on a phone.

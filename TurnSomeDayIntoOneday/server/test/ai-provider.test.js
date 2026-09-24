@@ -70,14 +70,15 @@ test('/api/ai-status can only ever answer gemini or none', () => {
     'no model named unless there is a key to call it with - otherwise it reports a provider it cannot reach');
 });
 
-test('the desk and The Key sit on the same provider as Friendly', () => {
-  const desk = fs.readFileSync(path.join(__dirname, '..', '..', 'desk.html'), 'utf8');
-  assert.match(desk, /fetch\('\/api\/chat'/,
-    'the desk answers through the same route, so it inherits the same single provider');
-  assert.doesNotMatch(liveCode(desk), VENDOR, 'a page must not name a provider the server no longer calls');
+test('The Key sits on the same provider as Friendly', () => {
+  // The Trading Desk answered through /api/chat as well and was checked here
+  // beside The Key until 24 Sep 2026, when it was deleted with everything else
+  // trading: "remove the trading game the desk everything about trading im
+  // done." The Key is the only second caller left.
   const key = fs.readFileSync(path.join(__dirname, '..', 'key-reading-route.js'), 'utf8');
-  assert.match(key, /generativelanguage\.googleapis\.com/);
-  assert.doesNotMatch(liveCode(key), VENDOR);
+  assert.match(key, /generativelanguage\.googleapis\.com/,
+    'the reading reaches the same single provider, or it is a second one');
+  assert.doesNotMatch(liveCode(key), VENDOR, 'a page must not name a provider the server no longer calls');
 });
 
 test('the written record matches the code: Google, and no retired processor', () => {

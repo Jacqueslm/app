@@ -15,7 +15,7 @@
 // do not "correct" it upward on sight. The name is new to every install, so
 // each phone builds the cache fresh and drops the old one at activate, exactly
 // as it does on any other bump.
-const CACHE_NAME = 'tsid-shell-v5.0';
+const CACHE_NAME = 'tsid-shell-v5.1';
 const SHELL_FILES = [
   '/',
   '/app',

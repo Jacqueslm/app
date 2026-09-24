@@ -9331,7 +9331,7 @@ let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,
 // pause/resume/seek, and gets a lock-screen card. Anything without a recording
 // (older manifests, lesson packs) show a clear 'recording unavailable' note
 // below, which still gains pause/resume.
-let lessonAudioMode='tts',laAudio=null,laPausedByUser=false,lessonAudioMeta=null,lessonAudioText='',lessonAudioTtsPausedIdx=0;
+let lessonAudioMode='tts',laAudio=null,laPausedByUser=false,lessonAudioMeta=null,lessonAudioText='',lessonAudioTtsPausedIdx=0,laLastResume=null;
 let LESSON_AUDIO_MANIFEST=null,lessonAudioManifestReq=null;
 const IS_ANDROID=/Android/i.test(navigator.userAgent||'');
 // Desktop Chrome's speech engine silently stops producing audio after ~15s of
@@ -9534,11 +9534,27 @@ function updateListenBtn(){
     :'<i class="ti ti-headphones"></i> Listen to this lesson';
   renderIcons(b);
 }
-function loadLessonAudioManifest(){
-  if(LESSON_AUDIO_MANIFEST)return Promise.resolve(LESSON_AUDIO_MANIFEST);
-  if(!lessonAudioManifestReq)lessonAudioManifestReq=fetch('data/lesson-audio-manifest.json')
-    .then(r=>r.ok?r.json():null).then(m=>{LESSON_AUDIO_MANIFEST=m;return m;}).catch(()=>null);
-  return lessonAudioManifestReq;
+// force asks for a new copy from the network rather than the one in memory.
+// It is asked for by a query string, because a plain re-fetch is answered out
+// of the service worker's cached copy - which is the stale thing we are trying
+// to get past.
+function loadLessonAudioManifest(force){
+  if(LESSON_AUDIO_MANIFEST&&!force)return Promise.resolve(LESSON_AUDIO_MANIFEST);
+  if(lessonAudioManifestReq&&!force)return lessonAudioManifestReq;
+  const url='data/lesson-audio-manifest.json'+(force?('?v='+Date.now()):'');
+  const req=fetch(url).then(r=>r.ok?r.json():null)
+    .then(m=>{
+      if(m&&m.items){LESSON_AUDIO_MANIFEST=m;return m;}
+      // A failed fetch is NOT remembered. It used to be: the empty answer stayed
+      // the answer for the rest of the session, so one bad moment on a weak
+      // signal made every lesson after it silent, with no way back short of
+      // closing the app.
+      if(lessonAudioManifestReq===req)lessonAudioManifestReq=null;
+      return null;
+    })
+    .catch(()=>{if(lessonAudioManifestReq===req)lessonAudioManifestReq=null;return null;});
+  lessonAudioManifestReq=req;
+  return req;
 }
 function lessonVoiceKey(){return VG_VOICES[S.lessonVoice]?S.lessonVoice:'warm';}
 function updateLessonVoiceBtns(){
@@ -9557,19 +9573,34 @@ function lessonVariantKey(lesson){
 function startLessonAudio(text,btnId,meta,resume){
   stopLessonAudio();
   lessonAudioText=text;lessonAudioBtnId=btnId;lessonAudioMeta=meta||null;
+  laLastResume=resume||null;
   lessonAudioState='playing';laPausedByUser=!!(resume&&resume.paused);
   updateListenBtn();
   logActivity('lesson_listen',{});
   wakeLockAcquire('lesson-audio');
+  laStartFromManifest(false);
+}
+// Find the recording for the lesson already being listened to and start it.
+// Kept apart from startLessonAudio so a recording that fails can be looked up a
+// second time without setting the whole listen up again.
+function laStartFromManifest(fresh){
+  const meta=lessonAudioMeta||{};
+  const text=lessonAudioText;
   const voice=lessonVoiceKey();
-  const key=meta&&meta.category&&meta.day?`${meta.category}|${meta.day}|${meta.variant||'base'}`:null;
+  const key=meta.category&&meta.day?`${meta.category}|${meta.day}|${meta.variant||'base'}`:null;
   const fail=()=>{if(lessonAudioState==='playing'&&lessonAudioText===text)laRecordingUnavailable();};
   if(!key){fail();return;}
-  loadLessonAudioManifest().then(m=>{
-    if(lessonAudioState!=='playing'||lessonAudioText!==text)return;// stopped or replaced while the manifest loaded
-    const entry=m&&m.items&&m.items[key];
+  loadLessonAudioManifest(fresh).then(m=>{
+    if(lessonAudioState!=='playing'||lessonAudioText!==text)return;// stopped or replaced while it loaded
+    // No manifest at all means the fetch failed, which is a different thing from
+    // a lesson with no recording. Ask for it again before saying there is none.
+    if(!m){
+      if(!fresh){laStartFromManifest(true);return;}
+      fail();return;
+    }
+    const entry=m.items&&m.items[key];
     const rel=entry&&entry[voice];
-    if(rel)startLessonMp3((m.base||'')+rel,resume);
+    if(rel)startLessonMp3((m.base||'')+rel,laLastResume,fresh);
     else fail();
   });
 }
@@ -9596,7 +9627,7 @@ function startLessonTTS(text,resume){
   if(speechSynthesis.getVoices().length)go();
   else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;go();};setTimeout(()=>{if(lessonAudioState==='playing'&&!laPausedByUser&&!speechSynthesis.speaking)go();},700);}
 }
-function startLessonMp3(url,resume){
+function startLessonMp3(url,resume,fresh){
   lessonAudioMode='mp3';
   const a=new Audio(url);
   laAudio=a;a.preload='auto';
@@ -9604,11 +9635,13 @@ function startLessonMp3(url,resume){
   if(resume&&resume.atFraction)a.addEventListener('loadedmetadata',()=>{try{a.currentTime=resume.atFraction*a.duration;}catch(e){}},{once:true});
   a.addEventListener('timeupdate',laOnTime);
   a.addEventListener('ended',()=>{if(laAudio===a)stopLessonAudio();});
-  // A recording that can't load or play hands the lesson to the phone's own
-  // voice at the same spot, rather than going silent.
+  // A file that will not load is looked up once more against a fresh manifest:
+  // a page left open for days can be holding file names that have since been
+  // replaced, which looks exactly like a lesson with no recording.
   a.addEventListener('error',()=>{
     if(laAudio!==a||lessonAudioState!=='playing')return;
-    laStopMp3();laRecordingUnavailable();
+    laStopMp3();
+    if(!fresh)laStartFromManifest(true);else laRecordingUnavailable();
   });
   // Same rule as the SOS talk: everything except the user's own pause is
   // retried, so battery savers and audio-focus grabs don't end the lesson.
@@ -9620,9 +9653,19 @@ function startLessonMp3(url,resume){
   updateListenBtn();
   if(laPausedByUser)return;
   const p=a.play();
-  if(p&&p.catch)p.catch(()=>{
+  if(p&&p.catch)p.catch(err=>{
     if(laAudio!==a||lessonAudioState!=='playing')return;
-    laStopMp3();laRecordingUnavailable();
+    laStopMp3();
+    // The recording is there and the phone refused to start it, because the tap
+    // that asked for it was spent waiting on the manifest. That is not a missing
+    // recording, so say the thing that is actually true - and the fix is one
+    // more tap, not another voice.
+    if(!fresh&&err&&err.name==='NotAllowedError'){
+      stopLessonAudio();
+      appInfo('Listen','Your phone wouldn\'t start the recording that time. Tap Listen again and it will play.');
+      return;
+    }
+    if(!fresh)laStartFromManifest(true);else laRecordingUnavailable();
   });
 }
 function laStopMp3(){
@@ -12668,7 +12711,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.0';
+const APP_VERSION='5.1';
 // The server not answering is said in five places, and it had been typed out
 // five times — which is how five copies of one sentence quietly drift apart.
 const OFFLINE_ERR='Could not reach the server. Check your connection and try again.';
@@ -14321,6 +14364,11 @@ function enterApp(){
   document.addEventListener('click',armAppBackTrap,true);
   updateAccountUI();
   loadLessonPacks();
+  // Fetched here as well as when the lesson screen opens. A phone only lets a
+  // recording start inside the tap that asked for it, and waiting on this fetch
+  // spends that tap - so having it in hand already is what makes the first
+  // press of Listen work.
+  loadLessonAudioManifest();
   // Also checked on open, not only after a lesson. The lesson hook alone meant
   // the ask could never reach somebody in their first half hour - which is
   // exactly when people rate an app they like.

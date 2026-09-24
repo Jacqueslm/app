@@ -1,0 +1,265 @@
+//@version=5
+// Someday - the frames: the read on his own chart, and the frame above it
+//
+// Jacques, 23 Sep 2026, asking for the two things together:
+//
+//   "to give me what i am seeking out of an assistant and indicator"
+//
+//   "i want to be able to switch a time frame say a daily get a bias then zoom
+//    down on timeframes to make a decision because i need to improve stops and
+//    targets it to make me better through repetition and mechanical without
+//    being emotional on what i think it is and more so what it is not what i
+//    think but what i see"
+//
+// Asked where it should live, he said BOTH. The app's half is the desk and the
+// practice game. This is the other half: the same read, drawn on the chart he
+// actually executes from, on whatever timeframe that chart is on.
+//
+// The rules are the desk's rules and the practice game's rules, in the same
+// order, and nothing here is invented:
+//
+//   1. A turn earns its word only if its OWN bar CLOSED through the previous
+//      turn. A new high whose bar closed back under the old high is a raid
+//      (SH), not a break, and it moves nothing. The mirror is SL. This is his
+//      correction of 23 Sep: "it counts wicks as breaks when i see wicks as
+//      close a wick break close back in the leg".
+//   2. A new LOW that closed under the low before it turns the frame down. The
+//      level is the swing high that drop came from, the stop is one average bar
+//      above that level, and the target is the frame low.
+//   3. Only a CLOSE back above the level cancels it. A wick does not.
+//   4. The bridge is the frame above the chart in front of him, read off the
+//      same symbol with the same rule. Two of them, so a chart at 15m carries
+//      the 4H and the day beside it without changing tabs.
+//
+// WHAT THIS CANNOT SHOW, said plainly: a pivot is only known swingLen bars after
+// the fact, so a word and a raid appear where the turn was, not where it became
+// knowable. Nothing here predicts and nothing here is a signal - it is the same
+// bars, drawn so the read comes out the same every time.
+//
+// NO PINE COMPILER EXISTS IN THE REPOSITORY THIS WAS WRITTEN IN. The tests
+// around this file check brackets, indentation, editor-unsafe characters,
+// duplicate names, ungrouped settings and argument counts, which are the common
+// copy-and-paste failures. It has not been pasted into TradingView from here and
+// it has not been run over bars. Treat the first paste as a check, not a
+// formality.
+
+indicator("Someday - the frames", shorttitle="Someday frames", overlay=true, max_lines_count=500, max_labels_count=500)
+
+// -----------------------------------------------------------------------------
+// Settings
+// -----------------------------------------------------------------------------
+swingLen = input.int(5, "Swing length", minval=2, maxval=50, group="Rules", tooltip="Bars either side a candle body has to beat to count as a swing. Five shows turns that held rather than every twitch.")
+stopRoom = input.float(1.0, "Stop room, in average bars", minval=0.25, maxval=5, step=0.25, group="Rules", tooltip="How far beyond the level the stop sits, measured in average bars so it means the same thing on every timeframe.")
+takeTarget = input.bool(true, "Target the frame low", group="Rules", tooltip="Off hides the target line. No trade is placed here either way.")
+biasA = input.string("240", "Frame above, first", options=["60", "240", "D"], group="Bridge", tooltip="Read off this chart's own symbol, so the two frames are one tape and cannot disagree about what the market did.")
+biasB = input.string("D", "Frame above, second", options=["240", "D", "W"], group="Bridge")
+showPanel = input.bool(true, "Show the panel", group="Drawing")
+showRaid = input.bool(true, "Mark the raids", group="Drawing")
+showLevels = input.bool(true, "Draw the level, stop and target", group="Drawing")
+levelCol = input.color(#f23645, "Level", group="Drawing")
+stopCol = input.color(#787b86, "Stop", group="Drawing")
+targetCol = input.color(#089981, "Target", group="Drawing")
+raidCol = input.color(#ffc53d, "Raid", group="Drawing")
+
+// -----------------------------------------------------------------------------
+// The bars
+// -----------------------------------------------------------------------------
+// The body is what decides, not the wick, so the pivots and the close rule are
+// both read off the body. A wick is allowed to be a wick here on purpose.
+bodyTop() => math.max(open, close)
+bodyBottom() => math.min(open, close)
+
+unitRaw = ta.sma(high - low, 20)
+unit = na(unitRaw) or unitRaw <= 0 ? syminfo.mintick : unitRaw
+
+// -----------------------------------------------------------------------------
+// The four words, with the close
+// -----------------------------------------------------------------------------
+// One function, two callers, same answer: the chart in front of him, and each
+// bridge frame. isHigh picks the side. An empty word means there is no turn to
+// name yet, and an empty word never moves anything.
+f_turn(float now, float before, float closeAtTurn, bool isHigh) =>
+    turn = ""
+    if not na(now) and not na(before)
+        if isHigh
+            turn := now > before ? (closeAtTurn > before ? "HH" : "SH") : "LH"
+        else
+            turn := now < before ? (closeAtTurn < before ? "LL" : "SL") : "HL"
+    turn
+
+// The plain side, out of the same four words. A raid (SH or SL) changes nothing:
+// it is the shape that reads as a break and is not one, so the side before it
+// stands and the panel keeps saying so.
+f_side(string turn, string before) =>
+    side = before
+    if turn == "HH" or turn == "HL"
+        side := "UP"
+    if turn == "LH" or turn == "LL"
+        side := "DOWN"
+    side
+
+// -----------------------------------------------------------------------------
+// The frame in front of him
+// -----------------------------------------------------------------------------
+var float lastHigh = na
+var float priorHigh = na
+var float priorLow = na
+var float level = na
+var float frameLow = na
+var float stopPx = na
+var float targetPx = na
+var bool live = false
+var string chartWord = ""
+var string chartSide = "SIDEWAYS"
+
+pivHigh = ta.pivothigh(bodyTop(), swingLen, swingLen)
+pivLow = ta.pivotlow(bodyBottom(), swingLen, swingLen)
+
+newHigh = not na(pivHigh)
+newLow = not na(pivLow)
+
+// The turn's OWN bar, which is swingLen bars back: a pivot is only confirmed by
+// the bars after it, so the close that decides is that bar's close, not this one.
+turnClose = close[swingLen]
+
+// A swing high is the level a drop would come back to, so the newest one is kept
+// ready for the next lower low, and the one before it names the turn. The value
+// before the update is held first, or the turn would be measured against itself.
+highBefore = priorHigh
+lowBefore = priorLow
+
+if newHigh
+    priorHigh := lastHigh
+    lastHigh := pivHigh
+if newLow
+    priorLow := pivLow
+
+wordHigh = newHigh ? f_turn(lastHigh, highBefore, turnClose, true) : ""
+wordLow = newLow ? f_turn(pivLow, lowBefore, turnClose, false) : ""
+
+if wordHigh != ""
+    chartWord := wordHigh
+    chartSide := f_side(wordHigh, chartSide)
+if wordLow != ""
+    chartWord := wordLow
+    chartSide := f_side(wordLow, chartSide)
+
+// A lower low that CLOSED under the low before it turns the frame down. A low
+// taken and given back is a raid: still drawn, still where the stops are sitting,
+// and it turns nothing.
+if wordLow == "LL" and not na(lastHigh)
+    level := lastHigh
+    frameLow := pivLow
+    stopPx := level + stopRoom * unit
+    targetPx := frameLow
+    live := true
+
+// His own rule, and the one that has been costing him: only a CLOSE above the
+// level cancels the frame. The poke that closed back under it cancels nothing.
+if live and close > level
+    live := false
+
+// -----------------------------------------------------------------------------
+// The frame above, read off the same symbol
+// -----------------------------------------------------------------------------
+// gaps_off and lookahead_off on purpose: a bridge bar is read after it has closed,
+// so the bias cannot move under him while the higher frame is still filling in.
+b1HiRaw = request.security(syminfo.tickerid, biasA, ta.pivothigh(math.max(open, close), swingLen, swingLen), barmerge.gaps_off, barmerge.lookahead_off)
+b1LoRaw = request.security(syminfo.tickerid, biasA, ta.pivotlow(math.min(open, close), swingLen, swingLen), barmerge.gaps_off, barmerge.lookahead_off)
+b1TurnClose = request.security(syminfo.tickerid, biasA, close[swingLen], barmerge.gaps_off, barmerge.lookahead_off)
+
+b2HiRaw = request.security(syminfo.tickerid, biasB, ta.pivothigh(math.max(open, close), swingLen, swingLen), barmerge.gaps_off, barmerge.lookahead_off)
+b2LoRaw = request.security(syminfo.tickerid, biasB, ta.pivotlow(math.min(open, close), swingLen, swingLen), barmerge.gaps_off, barmerge.lookahead_off)
+b2TurnClose = request.security(syminfo.tickerid, biasB, close[swingLen], barmerge.gaps_off, barmerge.lookahead_off)
+
+var float b1High = na
+var float b1HighBefore = na
+var float b1Low = na
+var float b1LowBefore = na
+var string b1Word = ""
+var string b1Side = "SIDEWAYS"
+var float b2High = na
+var float b2HighBefore = na
+var float b2Low = na
+var float b2LowBefore = na
+var string b2Word = ""
+var string b2Side = "SIDEWAYS"
+
+newBridgeA = not na(b1HiRaw) or not na(b1LoRaw)
+newBridgeB = not na(b2HiRaw) or not na(b2LoRaw)
+
+b1HighBefore := b1High
+b1LowBefore := b1Low
+b2HighBefore := b2High
+b2LowBefore := b2Low
+
+if not na(b1HiRaw)
+    b1High := b1HiRaw
+if not na(b1LoRaw)
+    b1Low := b1LoRaw
+if not na(b2HiRaw)
+    b2High := b2HiRaw
+if not na(b2LoRaw)
+    b2Low := b2LoRaw
+
+wBridgeHiA = newBridgeA ? f_turn(b1HiRaw, b1HighBefore, b1TurnClose, true) : ""
+wBridgeLoA = newBridgeA ? f_turn(b1LoRaw, b1LowBefore, b1TurnClose, false) : ""
+wBridgeHiB = newBridgeB ? f_turn(b2HiRaw, b2HighBefore, b2TurnClose, true) : ""
+wBridgeLoB = newBridgeB ? f_turn(b2LoRaw, b2LowBefore, b2TurnClose, false) : ""
+
+if wBridgeHiA != ""
+    b1Word := wBridgeHiA
+    b1Side := f_side(wBridgeHiA, b1Side)
+if wBridgeLoA != ""
+    b1Word := wBridgeLoA
+    b1Side := f_side(wBridgeLoA, b1Side)
+if wBridgeHiB != ""
+    b2Word := wBridgeHiB
+    b2Side := f_side(wBridgeHiB, b2Side)
+if wBridgeLoB != ""
+    b2Word := wBridgeLoB
+    b2Side := f_side(wBridgeLoB, b2Side)
+
+// -----------------------------------------------------------------------------
+// The raid, named where it happened
+// -----------------------------------------------------------------------------
+// His words for it, on the bar that did it: the wick went through and the close
+// came back inside. Drawn, because the shape is the lesson.
+if showRaid and wordHigh == "SH"
+    label.new(bar_index - swingLen, lastHigh, "WICK THROUGH, CLOSED BACK", xloc.bar_index, yloc.price, color.new(raidCol, 88), label.style_label_down, raidCol, size.tiny, text.align_center)
+if showRaid and wordLow == "SL"
+    label.new(bar_index - swingLen, pivLow, "WICK THROUGH, CLOSED BACK", xloc.bar_index, yloc.price, color.new(raidCol, 88), label.style_label_up, raidCol, size.tiny, text.align_center)
+
+// -----------------------------------------------------------------------------
+// Drawing
+// -----------------------------------------------------------------------------
+plot(showLevels and live ? level : na, "Frame level", color=levelCol, style=plot.style_linebr, linewidth=1)
+plot(showLevels and live ? stopPx : na, "Stop", color=stopCol, style=plot.style_linebr, linewidth=1)
+plot(showLevels and live and takeTarget ? targetPx : na, "Target", color=targetCol, style=plot.style_linebr, linewidth=1)
+
+// -----------------------------------------------------------------------------
+// The panel
+// -----------------------------------------------------------------------------
+// Four rows, in the order the decision is made in: the frame he is on, then the
+// two frames above it. The word is shown as well as the side, so the one shape
+// that gets mistaken for a break can never be read as one.
+var table panel = table.new(position.top_right, 3, 4, border_width=1, border_color=color.new(color.gray, 70), frame_color=color.new(color.gray, 80), frame_width=1)
+
+if showPanel and barstate.islast
+    table.cell(panel, 0, 0, "FRAME", text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 1, 0, timeframe.period, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 2, 0, "WORD", text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 0, 1, "here", text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 1, 1, chartSide, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 2, 1, chartWord == "" ? "-" : chartWord, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 0, 2, biasA, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 1, 2, b1Side, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 2, 2, b1Word == "" ? "-" : b1Word, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 0, 3, biasB, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 1, 3, b2Side, text_color=color.new(color.gray, 0), text_size=size.tiny)
+    table.cell(panel, 2, 3, b2Word == "" ? "-" : b2Word, text_color=color.new(color.gray, 0), text_size=size.tiny)
+
+// The live frame in numbers: a level he has to squint at is not a level he can
+// set a stop from. Prices only, read off the bars, never forecast.
+if showPanel and barstate.islast and live
+    label.new(bar_index, level, "LEVEL " + str.tostring(level, format.mintick) + "  STOP " + str.tostring(stopPx, format.mintick), xloc.bar_index, yloc.price, color.new(levelCol, 85), label.style_label_left, levelCol, size.tiny, text.align_left)

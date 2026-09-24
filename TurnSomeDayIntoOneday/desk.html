@@ -247,9 +247,11 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
        reads it, so the assistant knows the frame instead of being told it, and
        so the two can be held against each other on the same bars.
 
-       His rules, as numbers: a new LOWER LOW on the frame turns the frame down
-       and sets two things — the level, which is the swing high the drop came
-       from, and the frame low, which is that lower low. Only a CLOSE above the
+       His rules, as numbers: a lower low that CLOSED under the low before it
+       turns the frame down and sets two things - the level, which is the swing
+       high the drop came from, and the frame low, which is that lower low. A
+       wick through that closed back inside is a raid and turns nothing. Only a
+       CLOSE above the
        level cancels it; a poke above it changes nothing. On the step below, the
        small chart is read for higher highs with the last higher low still
        holding, and a close under that low ends the hold.
@@ -268,7 +270,30 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       </div>
       <div id="frOut"></div>
       <div class="feedwhen" id="frWhen">No candles loaded, so there is no frame to read.</div>
-      <div class="feedwhy">A frame is down when the frame's own bars make a lower low. The level is the swing high that drop came from — the lower high you would short back to — and the frame low is that lower low. Only a close above the level cancels it; a wick does not. The small chart is the step below the frame, read on its own bars. This says wait most of the time, and wait is a complete answer.</div>
+      <div class="feedwhy">A frame is down when a lower low CLOSES under the low before it — a low taken and given back is a raid, and it turns nothing. The level is the swing high that drop came from — the lower high you would short back to — and the frame low is that lower low. Only a close above the level cancels it; a wick does not. The small chart is the step below the frame, read on its own bars. This says wait most of the time, and wait is a complete answer.</div>
+    </div>
+  </div>
+
+
+  <!-- YOUR TWO SCRIPTS.
+       He asked for an indicator and said BOTH for where it lives, so the app has
+       to be able to hand it over. Both addresses are served by this app as plain
+       text - /someday-frames.pine is the read, /someday-strategy.pine is the same
+       rules over years of bars in TradingView's own tester. Plain text on
+       purpose: a .pine landing in his Downloads is a file Windows has no program
+       for, and a page he can select beats a file he has to open.
+
+       The line under them is the only instruction needed, and it is the whole of
+       it: copy, paste into Pine editor, add to chart. -->
+  <div class="sec">
+    <div class="sec-hd">Your scripts, on your own chart</div>
+    <div class="f">
+      <label>Open one, select all of it, paste it into Pine editor</label>
+      <div id="pinerow">
+        <a class="tf" style="text-decoration:none;display:inline-block;margin:0 6px 6px 0" href="/someday-frames.pine" target="_blank" rel="noopener">The frames &mdash; the read</a>
+        <a class="tf" style="text-decoration:none;display:inline-block" href="/someday-strategy.pine" target="_blank" rel="noopener">The backtest &mdash; the same rules</a>
+      </div>
+      <div class="feedwhy">The frames draws on the chart you are on: the word each turn earns, a wick through that closed back drawn and named as a raid, the level, the stop and the target of the frame that is live, and a panel carrying the frames above it. The backtest is the same rules in TradingView's own tester, priced at what you pay a side. Both come from this app, and neither one places a trade.</div>
     </div>
   </div>
 
@@ -294,7 +319,9 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 
   <!-- STRUCTURE.
        What the bars have already done: the swings, labelled his way (HH, HL,
-       LH, LL), how far price sits from the last swing high and low, whether the
+       LH, LL) with the raids marked as raids (SH, SL - a wick through that
+       closed back inside, which moves nothing), how far price sits from the
+       last swing high and low, whether the
        last bars are getting smaller, and whether they are compressed. It is
        arithmetic on closed bars. It describes, and the page says where; it does
        not call a turn and the assistant is told it may not either. -->
@@ -303,7 +330,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div class="f">
       <div id="stOut"></div>
       <div class="feedwhen" id="stWhen">No candles loaded, so there is nothing to read yet.</div>
-      <div class="feedwhy">A swing is a bar higher (or lower) than the two bars either side of it. HH higher high, HL higher low, LH lower high, LL lower low — each against the last swing of the same kind. Compressed means the last five bars span under three average bars. This is what has already happened; it says nothing about what comes next.</div>
+      <div class="feedwhy">A swing is a bar higher (or lower) than the two bars either side of it. HH a new high that closed above the high before it, SH the same high where the bar closed back under it — a raid, and it moves nothing — LH a lower high, HL a higher low, LL a new low that closed under the low before it, SL the same low where the bar closed back above it — a raid too. Each against the last swing of the same kind. Compressed means the last five bars span under three average bars. This is what has already happened; it says nothing about what comes next.</div>
     </div>
   </div>
 
@@ -1014,7 +1041,7 @@ function drawChart(){
       time:Math.round(s.t/1000),
       position:(s.kind==='H'?'aboveBar':'belowBar'),
       shape:(s.kind==='H'?'arrowDown':'arrowUp'),
-      color:(bare?cssVar('--tm','#888780'):((lab==='HH'||lab==='HL')?'#26a69a':'#ef5350')),
+      color:(bare?cssVar('--tm','#888780'):((lab==='SH'||lab==='SL')?'#ffc53d':((lab==='HH'||lab==='HL')?'#26a69a':'#ef5350'))),
       text:lab
     });
   }
@@ -1149,8 +1176,8 @@ function swings(candles, wing){
       if(candles[j].h>=candles[i].h) hi=false;
       if(candles[j].l<=candles[i].l) lo=false;
     }
-    if(hi) piv.push({kind:'H',p:candles[i].h,t:candles[i].t});
-    else if(lo) piv.push({kind:'L',p:candles[i].l,t:candles[i].t});
+    if(hi) piv.push({kind:'H',p:candles[i].h,t:candles[i].t,c:candles[i].c});
+    else if(lo) piv.push({kind:'L',p:candles[i].l,t:candles[i].t,c:candles[i].c});
   }
   var seq=[];
   for(i=0;i<piv.length;i++){
@@ -1160,6 +1187,24 @@ function swings(candles, wing){
     } else seq.push(piv[i]);
   }
   return seq;
+}
+/* The word a turn earns, and the rule he corrected the game with on 23 Sep:
+   the turn's OWN bar has to CLOSE through the turn before it.
+
+     HH  a new high with the close above the previous high  - a real break
+     SH  a new high with the close back under it            - a raid, no change
+
+   and the mirror for lows, where LL is the break and SL is the raid. SH and
+   SL are still turns, still drawn, still where the stops are sitting; they
+   just do not move the structure on their own. The turn's own bar decides,
+   so the same bars always give the same answer. */
+function turnWord(now, prev){
+  if(now.kind==='H'){
+    if(!(now.p>prev.p)) return 'LH';
+    return now.c>prev.p ? 'HH' : 'SH';
+  }
+  if(!(now.p<prev.p)) return 'HL';
+  return now.c<prev.p ? 'LL' : 'SL';
 }
 /* The labels, against the last swing of the same kind: HH higher high, HL
    higher low, LH lower high, LL lower low. The letter after the H or the L is
@@ -1174,9 +1219,12 @@ function structure(candles, wing){
     for(j=i-1;j>=0;j--){ if(s[j].kind===s[i].kind){ prev=s[j]; break } }
     if(!prev){ labels.push(s[i].kind); continue }
     var higher=(s[i].p>prev.p);
-    labels.push(s[i].kind==='H' ? (higher?'HH':'LH') : (higher?'HL':'LL'));
+    labels.push(turnWord(s[i], prev));
   }
-  return {swings:s, labels:labels};
+  var sweeps=[];
+  for(i=0;i<labels.length;i++){ if(labels[i]==='SH'||labels[i]==='SL') sweeps.push(s[i]) }
+  return {swings:s, labels:labels, sweeps:sweeps,
+          lastSweep:sweeps.length?sweeps[sweeps.length-1]:null};
 }
 /* One timeframe, read. Everything in here is a measurement of the bars: where
    the last close sits against the last swing high and low, how big the last ten
@@ -1193,6 +1241,14 @@ function readOf(tf, candles){
     if(sw[i].kind==='H'&&!lastH){ lastH=sw[i]; hiLab=lab[i] }
     if(sw[i].kind==='L'&&!lastL){ lastL=sw[i]; loLab=lab[i] }
   }
+  /* The run, off the last turn that actually CLOSED through the one before it.
+     A raid is not one: the wick went through and the close came back inside, so
+     the side before it stands until a close says otherwise. */
+  var hiSettle=null, loSettle=null;
+  for(i=lab.length-1;i>=0;i--){
+    if(sw[i].kind==='H'&&!hiSettle&&(lab[i]==='HH'||lab[i]==='LH')) hiSettle=lab[i];
+    if(sw[i].kind==='L'&&!loSettle&&(lab[i]==='HL'||lab[i]==='LL')) loSettle=lab[i];
+  }
   var shown=lab.slice(-6).filter(function(l){ return l.length>1 });
   var rNow=avgRange(candles.slice(-3)), rBefore=avgRange(candles.slice(-11,-3));
   var mom=(rNow&&rBefore)?(rNow/rBefore):null;
@@ -1204,7 +1260,9 @@ function readOf(tf, candles){
   }
   var bar=avgRange(candles.slice(-10));
   return {
-    tf:tf, labels:shown, trend:(hiLab==='HH'&&loLab==='HL')?'up':((hiLab==='LH'&&loLab==='LL')?'down':'mixed'),
+    tf:tf, labels:shown,
+    trend:(hiSettle==='HH'&&loSettle==='HL')?'up':((hiSettle==='LH'&&loSettle==='LL')?'down':'mixed'),
+    sweep:st.lastSweep?(st.lastSweep.kind==='H'?'SH':'SL'):null,
     close:last.c, bar:bar,
     lastH:lastH?lastH.p:null, lastL:lastL?lastL.p:null,
     gapHigh:lastH?(last.c-lastH.p):null, gapLow:lastL?(last.c-lastL.p):null,
@@ -1232,6 +1290,9 @@ function structureLine(r){
   out.push(r.trend==='up' ? ' — the run so far is higher highs and higher lows.'
     : r.trend==='down' ? ' — lower highs and lower lows so far.'
     : ' — the swings are not making a clean run either way.');
+  if(r.sweep) out.push(' The most recent raid in these bars was a '+r.sweep+': price went'
+    +' through the level and the close came back inside, so nothing broke and by his'
+    +' own rule that shape points the other way. It is a raid, never a break.');
   if(r.gapHigh!==null){
     out.push(r.gapHigh<0
       ? (' Price '+money(Math.abs(r.gapHigh))+' under the last swing high ('+money(r.lastH)+'), '+(r.bar?('about '+two(Math.abs(r.gapHigh)/r.bar)+' average bars'):'distance in points only')+'.')
@@ -1248,7 +1309,7 @@ function structureLine(r){
    a judgement from nowhere. */
 function structureText(){
   var head=['STRUCTURE OFF THE BARS — worked out on this page from the candle block below, and from nothing else. Every number in it is arithmetic on bars that have already closed.','',
-    'Yardsticks, so a word can be checked: a swing is a bar higher (or lower) than the '+WING+' bars either side of it; HH higher high, HL higher low, LH lower high, LL lower low, each against the last swing of the same kind; "average bars" is the mean size of the last ten bars on that timeframe; the bars are called smaller when the last three average under '+MOM_EASE+'× the eight before them; compressed is the last five bars spanning under '+COMPRESS_SPAN+' average bars.',''];
+    'Yardsticks, so a word can be checked: a swing is a bar higher (or lower) than the '+WING+' bars either side of it; HH a new high that closed above the high before it, SH a new high whose bar closed back under it, LH lower high, HL higher low, LL a new low that closed under the low before it, SL a new low whose bar closed back above it, each against the last swing of the same kind; a raid is a wick through a level that closed back inside, it changes nothing, and it is never to be called a break; "average bars" is the mean size of the last ten bars on that timeframe; the bars are called smaller when the last three average under '+MOM_EASE+'× the eight before them; compressed is the last five bars spanning under '+COMPRESS_SPAN+' average bars.',''];
   if(!FEED||!FEED.ok||!FEED.timeframes){
     head.push('NOT COMPUTED — no candles came back, so there are no swings, no highs, no lows and no measurements at all. Say you cannot read structure without candles. Do not describe a pattern, do not name a level, and do not guess where the last higher low is.','');
     return head.join('\n');
@@ -1398,14 +1459,15 @@ function smallChart(bars){
   var out={ok:false, high:null, prevHigh:null, hold:null, close:null, up:false};
   if(!bars||bars.length<SMALL_LEN*2+3) return out;
   var sw=structure(bars, SMALL_LEN).swings, i;
-  var hi=null, prevHi=null, hold=null, prevLo=null;
+  var hi=null, prevHi=null, hiClose=null, hold=null, prevLo=null;
   for(i=0;i<sw.length;i++){
-    if(sw[i].kind==='H'){ prevHi=hi; hi=sw[i].p }
+    if(sw[i].kind==='H'){ prevHi=hi; hi=sw[i].p; hiClose=sw[i].c }
     else { if(prevLo!==null && sw[i].p>prevLo) hold=sw[i].p; prevLo=sw[i].p }
   }
   out.ok=true; out.high=hi; out.prevHigh=prevHi; out.hold=hold;
   out.close=bars[bars.length-1].c;
-  out.up=(prevHi!==null && hi!==null && hi>prevHi && hold!==null && out.close>hold);
+  out.up=(prevHi!==null && hi!==null && hiClose!==null && hi>prevHi && hiClose>prevHi
+    && hold!==null && out.close>hold);
   return out;
 }
 /* The frame, worked out on the bars that came back. It returns the read and the
@@ -1438,7 +1500,7 @@ function frameRead(){
     if(sw[i].kind!=='L') continue;
     prevLow=-1;
     for(j=i-1;j>=0;j--){ if(sw[j].kind==='L'){ prevLow=j; break } }
-    if(prevLow>=0 && sw[i].p<sw[prevLow].p){ lowIdx=i; break }
+    if(prevLow>=0 && sw[i].p<sw[prevLow].p && sw[i].c<sw[prevLow].p){ lowIdx=i; break }
   }
   if(lowIdx<0){ r.why='no lower low on '+FRAMETF+' in the bars that came back'; return r }
   var lvlIdx=-1;

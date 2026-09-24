@@ -388,6 +388,16 @@ app.get('/someday-strategy.pine', (req, res) => {
   res.type('text/plain').sendFile(path.join(__dirname, '..', 'tradingview', 'Someday-Strategy.pine'));
 });
 
+// 23 Sep 2026, and he asked for an indicator again: "to give me what i am seeking
+// out of an assistant and indicator". Asked where it should live, he said BOTH,
+// so the app's half is the desk and the practice game and this is the half that
+// sits on his own TradingView. It is a NEW script for a new request and not the
+// two deleted ones returning: /someday.pine and /someday-zones.pine are still
+// gone, and the tests hold both doors shut.
+app.get('/someday-frames.pine', (req, res) => {
+  res.type('text/plain').sendFile(path.join(__dirname, '..', 'tradingview', 'Someday-Frames.pine'));
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 // The Key — private. Signed in AND on the allowlist, or you go to /app without

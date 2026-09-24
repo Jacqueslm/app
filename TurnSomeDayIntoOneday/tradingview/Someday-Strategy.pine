@@ -7,8 +7,12 @@
 // years of bars in TradingView's own tester instead of the few weeks a free feed
 // keeps. Same rules as the desk, in the same order:
 //
-//   1. A new LOWER LOW turns the frame down. The level is the swing high that
-//      drop came from; the frame low is that lower low.
+//   1. A new LOWER LOW that CLOSED under the low before it turns the frame down.
+//      The level is the swing high that drop came from; the frame low is that
+//      lower low. The close is his correction of 23 Sep: a low taken and given
+//      back is a raid that turns nothing, so it is the same words, the same rule
+//      the desk and the practice game use, and the same bars give the same
+//      answer. It is why this backtest now shows fewer turns than the first one.
 //   2. Only a CLOSE above the level cancels it. A poke above that never closed
 //      cancels nothing, and the order is pulled.
 //   3. Back at the level is the short. Nothing chases: the order sits at the
@@ -68,10 +72,13 @@ var bool live = false
 if not na(pivHigh)
     lastHigh := pivHigh
 
-// A lower low than the one before it turns the frame down and sets everything:
-// the level, the frame low, the stop and the target.
+// A lower low than the one before it, with its OWN bar closed under that low,
+// turns the frame down and sets everything: the level, the frame low, the stop
+// and the target. A wick through that closed back inside is a raid, it is not a
+// break, and it leaves the frame exactly as it was. close[swingLen] is the
+// pivot's own bar - the pivot is only confirmed swingLen bars later.
 if not na(pivLow)
-    if not na(prevLowSwing) and pivLow < prevLowSwing and not na(lastHigh)
+    if not na(prevLowSwing) and pivLow < prevLowSwing and close[swingLen] < prevLowSwing and not na(lastHigh)
         level := lastHigh
         frameLow := pivLow
         stopPx := level + stopRoom * unit

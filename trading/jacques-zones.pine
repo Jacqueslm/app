@@ -1,0 +1,461 @@
+//@version=5
+// Jacques — TBR zones + method.
+//
+// The shaded boxes are the "DTFX Time based range" zones, drawn the same way Wang's indicator
+// draws them: take the candle at the chosen hour (9:00 and 15:00 New York by default), draw its
+// range, and once price closes outside that range the zone is live. 30/50/70 levels included.
+//
+// DTFX Time based range [Wang Indicators] © MrWangTactics — MPL 2.0
+// https://mozilla.org/MPL/2.0/
+//
+// The trade is the time-based range itself. The candle at the chosen hour IS the range — its
+// own high and low, nothing to do with structure. Price runs away from the candle, then comes
+// back to it. The fib is measured from the candle's top to its bottom (30/50/70); shorts
+// measure the same levels up from the bottom. Long entry is the return to the chosen level,
+// or the sweep of the candle's low snapped back inside. Out once price trades back out of the
+// candle — for a long, back above the candle's high. Short is the mirror.
+//
+// Everything on the chart above (zones, boxes, 30/50/70 lines) is Wang's indicator, unchanged.
+
+strategy("Jacques TBR Zones", overlay = true, max_boxes_count = 500, max_lines_count = 500, max_labels_count = 500,
+     initial_capital = 25000, default_qty_type = strategy.fixed, default_qty_value = 1,
+     commission_type = strategy.commission.cash_per_contract, commission_value = 0.39, slippage = 1)
+
+//---------------------------------------------------------------------------------------------------------------------}
+// TBR inputs
+//---------------------------------------------------------------------------------------------------------------------{
+
+var string HEADER = "Enable    Hour                        Minute                        Timeframe            "
+var bool active_1 = input.bool(true, "", group = HEADER, inline = "group_1")
+var int hour_1 = input.int(9, "", group = HEADER, minval = 0, maxval = 23, inline = "group_1")
+var int minute_1 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_1")
+var string timeframe_1 = input.timeframe("60", "", group = HEADER, inline = "group_1")
+color_1 = input.color(color.blue, " ", group = HEADER, inline = "group_1")
+
+var bool active_2 = input.bool(true, "", group = HEADER, inline = "group_2")
+var int hour_2 = input.int(15, "", group = HEADER, inline = "group_2")
+var int minute_2 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_2")
+var string timeframe_2 = input.timeframe("60", "", group = HEADER, inline = "group_2")
+color_2 = input.color(color.orange, "", group = HEADER, inline = "group_2")
+
+var bool active_3 = input.bool(false, "", group = HEADER, inline = "group_3")
+var int hour_3 = input.int(0, "", group = HEADER, inline = "group_3")
+var int minute_3 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_3")
+var string timeframe_3 = input.timeframe("60", "", group = HEADER, inline = "group_3")
+color_3 = input.color(color.gray, "", group = HEADER, inline = "group_3")
+
+var bool active_4 = input.bool(false, "", group = HEADER, inline = "group_4")
+var int hour_4 = input.int(0, "", group = HEADER, inline = "group_4")
+var int minute_4 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_4")
+var string timeframe_4 = input.timeframe("60", "", group = HEADER, inline = "group_4")
+color_4 = input.color(color.gray, "", group = HEADER, inline = "group_4")
+
+var bool active_5 = input.bool(false, "", group = HEADER, inline = "group_5")
+var int hour_5 = input.int(0, "", group = HEADER, inline = "group_5")
+var int minute_5 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_5")
+var string timeframe_5 = input.timeframe("60", "", group = HEADER, inline = "group_5")
+color_5 = input.color(color.gray, "", group = HEADER, inline = "group_5")
+
+var bool active_6 = input.bool(false, "", group = HEADER, inline = "group_6")
+var int hour_6 = input.int(0, "", group = HEADER, inline = "group_6")
+var int minute_6 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_6")
+var string timeframe_6 = input.timeframe("60", "", group = HEADER, inline = "group_6")
+color_6 = input.color(color.gray, "", group = HEADER, inline = "group_6")
+
+var bool active_7 = input.bool(false, "", group = HEADER, inline = "group_7")
+var int hour_7 = input.int(0, "", group = HEADER, inline = "group_7")
+var int minute_7 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_7")
+var string timeframe_7 = input.timeframe("60", "", group = HEADER, inline = "group_7")
+color_7 = input.color(color.gray, "", group = HEADER, inline = "group_7")
+
+var bool active_8 = input.bool(false, "", group = HEADER, inline = "group_8")
+var int hour_8 = input.int(0, "", group = HEADER, inline = "group_8")
+var int minute_8 = input.int(0, "", group = HEADER, minval = 0, maxval = 59, inline = "group_8")
+var string timeframe_8 = input.timeframe("60", "", group = HEADER, inline = "group_8")
+color_8 = input.color(color.gray, "", group = HEADER, inline = "group_8")
+
+var show_inside_bars = input.bool(true, "Show insides bars", tooltip = "Finds and highlights inside bars inside a TBR", group = "Inside bar")
+var inside_bar_type = input.string("Asterisk", "Indicator", ["Asterisk", "Arrow", "Cross", "Hollow"])
+
+var percent_mitigation = input.int(100, "% mitigation", tooltip = "% of the range zone at which retracements/box stops", minval = 0, maxval = 100, group = "SETTINGS")
+
+var retracements = input.string('Hidden', "Retracements Style", options = ['Hidden', 'Solid', 'Dashed', 'Dotted'])
+var extend_box = input.bool(false, "Extend box", tooltip = "Extend the range box until it gets mitigated")
+var max_unmitigated = input.int(5, "Number of unmitigated zones (per config)")
+var timezone = input.string('America/New_York', "Timezone", options = ['America/New_York', 'GMT-12', 'GMT-11', 'GMT-10', 'GMT-9', 'GMT-8', 'GMT-7', 'GMT-6', 'GMT-5', 'GMT-4', 'GMT-3', 'GMT-2', 'GMT-1', 'GMT+0', 'GMT+1', 'GMT+2', 'GMT+3', 'GMT+4', 'GMT+5', 'GMT+6', 'GMT+7', 'GMT+8', 'GMT+9', 'GMT+10', 'GMT+11', 'GMT+12', 'GMT+13', 'GMT+14'])
+
+//---------------------------------------------------------------------------------------------------------------------}
+// Method inputs
+//---------------------------------------------------------------------------------------------------------------------{
+
+entryStyle = input.string("Fib", "Entry", options = ["Fib", "Sweep"], group = "Method",
+     tooltip = "Fib — price comes back to the level and holds. Sweep — price takes out the candle's high or low and snaps back inside.")
+fibPct     = input.string("50", "Fib level", options = ["30", "50", "70"], group = "Method",
+     tooltip = "30 is nearest the candle's high, 70 is nearest its low. Shorts use the same levels up from the candle's low.")
+
+useEntries  = input.bool(true, "Trade the long side", group = "Method")
+useShorts   = input.bool(true, "Trade the short side", group = "Method")
+nyOnly      = input.bool(true, "New York only (09:30-16:00)", group = "Method")
+useZoneStop = input.bool(false, "Stop at the far side of the candle", group = "Method")
+
+//---------------------------------------------------------------------------------------------------------------------}
+// Types
+//---------------------------------------------------------------------------------------------------------------------{
+
+type pb
+    float price
+    int bar
+
+type Candle
+    string tf
+    bool active
+    bool complete
+    int _t
+    float _o
+    float _h
+    float _l
+    float _c
+    color _color
+    bool bull
+    box _box
+    line _0
+    line _30
+    line _50
+    line _70
+    line _100
+    float mitigation
+    bool retested
+    int _activeBar
+
+type Config
+    bool active
+    int _hour
+    int _minute
+    string tf
+    color _color
+    array<Candle> candles
+    bool activated
+    bool insideBar
+    bool alertRetested
+
+//---------------------------------------------------------------------------------------------------------------------}
+// Structure engine, off the chart, for the trading frames
+//---------------------------------------------------------------------------------------------------------------------{
+
+f_engine() =>
+    var int dir = 0
+    float top = na
+    float btm = na
+    var pb t = pb.new(na, na)
+    var pb b = pb.new(na, na)
+    var bool bos_up_check = false
+    var bool bos_down_check = false
+    var string last_top = "NA"
+    var string last_bot = "NA"
+    var string prev_top = "NA"
+    var string prev_bot = "NA"
+    var int swHighTime = na
+
+    upper = ta.highest(10)
+    lower = ta.lowest(10)
+
+    if dir >= 0 and high[10] > upper
+        dir := -1
+        top := high[10]
+
+    if dir <= 0 and low[10] < lower
+        dir := 1
+        btm := low[10]
+
+    top_conf = not na(top)
+    bot_conf = not na(btm)
+
+    if top_conf
+        t := pb.new(top, bar_index - 10)
+        bos_up_check := true
+        swHighTime := time
+
+    if bot_conf
+        b := pb.new(btm, bar_index - 10)
+        bos_down_check := true
+
+    HH = top_conf and t.price > t.price[1]
+    HL = bot_conf and b.price > b.price[1]
+    LH = top_conf and t.price < t.price[1]
+    LL = bot_conf and b.price < b.price[1]
+
+    prev_top := last_top
+    prev_bot := last_bot
+    last_top := HH ? "HH" : LH ? "LH" : last_top
+    last_bot := LL ? "LL" : HL ? "HL" : last_bot
+
+    [last_top, last_bot, prev_top, prev_bot, t.price, swHighTime]
+
+[sT240, sB240, pT240, pB240, swH240, drop240] = request.security(syminfo.tickerid, "240", f_engine(), lookahead = barmerge.lookahead_off)
+[sT60, sB60, pT60, pB60, swH60, drop60] = request.security(syminfo.tickerid, "60", f_engine(), lookahead = barmerge.lookahead_off)
+[sT15, sB15, pT15, pB15, swH15, drop15] = request.security(syminfo.tickerid, "15", f_engine(), lookahead = barmerge.lookahead_off)
+[sT5, sB5, pT5, pB5, swH5, drop5] = request.security(syminfo.tickerid, "5", f_engine(), lookahead = barmerge.lookahead_off)
+
+//---------------------------------------------------------------------------------------------------------------------}
+// TBR drawing — Wang's logic, unchanged
+//---------------------------------------------------------------------------------------------------------------------{
+
+var r_style = switch retracements
+    'Solid' => line.style_solid
+    'Dashed' => line.style_dashed
+    'Dotted' => line.style_dotted
+    'Hidden' => na
+
+var configs = array.new<Config>()
+
+if configs.size() == 0
+    configs.push(Config.new(active_1, hour_1, minute_1, timeframe_1, color_1, array.new<Candle>(), false, false))
+    configs.push(Config.new(active_2, hour_2, minute_2, timeframe_2, color_2, array.new<Candle>(), false, false))
+    configs.push(Config.new(active_3, hour_3, minute_3, timeframe_3, color_3, array.new<Candle>(), false, false))
+    configs.push(Config.new(active_4, hour_4, minute_4, timeframe_4, color_4, array.new<Candle>(), false, false))
+    configs.push(Config.new(active_5, hour_5, minute_5, timeframe_5, color_5, array.new<Candle>(), false, false))
+    configs.push(Config.new(active_6, hour_6, minute_6, timeframe_6, color_6, array.new<Candle>(), false, false))
+    configs.push(Config.new(active_7, hour_7, minute_7, timeframe_7, color_7, array.new<Candle>(), false, false))
+    configs.push(Config.new(active_8, hour_8, minute_8, timeframe_8, color_8, array.new<Candle>(), false, false))
+
+var candles = array.new<Candle>()
+
+method drawCandle(Candle candle) =>
+    _0 = candle.bull ? candle._l : candle._h
+    _100 = candle.bull ? candle._h : candle._l
+    diff = candle.bull ? candle._h - candle._l : candle._l - candle._h
+    _30 = _0 + (diff * 0.7)
+    _50 = _0 + (diff * 0.5)
+    _70 = _0 + (diff * 0.3)
+    candle._box := box.new(candle._t, candle._h, time, candle._l, border_color = color.new(color.gray, 100), bgcolor = color.new(color.gray, 90), xloc = xloc.bar_time)
+    candle._0 := line.new(candle._t, _0, time, _0, color = color.gray, style = line.style_solid, xloc = xloc.bar_time)
+    candle._100 := line.new(candle._t, _100, time, _100, color = color.gray, style = line.style_solid, xloc = xloc.bar_time)
+
+    if not na(r_style)
+        _t = extend_box ? candle._t : time
+        candle._30 := line.new(_t, _30, time, _30, color = color.gray, style = r_style, xloc = xloc.bar_time)
+        candle._50 := line.new(_t, _50, time, _50, color = color.gray, style = r_style, xloc = xloc.bar_time)
+        candle._70 := line.new(_t, _70, time, _70, color = color.gray, style = r_style, xloc = xloc.bar_time)
+
+method setColor(Candle candle) =>
+    candle._box.set_bgcolor(color.new(candle._color, 90))
+    candle._box.set_border_color(color.new(candle._color, 100))
+    candle._0.set_color(candle._color)
+    if not na(candle._30)
+        candle._30.set_color(candle._color)
+    if not na(candle._50)
+        candle._50.set_color(candle._color)
+    if not na(candle._70)
+        candle._70.set_color(candle._color)
+    candle._100.set_color(candle._color)
+
+method setMitigation(Candle candle) =>
+    diff = candle._h - candle._l
+    mitigation = (diff * percent_mitigation / 100)
+    candle.mitigation := candle.bull ? candle._h - mitigation : candle._l + mitigation
+
+method extend(Candle c) =>
+    if not na(r_style)
+        if not na(c._30)
+            c._30.set_x2(time)
+        if not na(c._50)
+            c._50.set_x2(time)
+        if not na(c._70)
+            c._70.set_x2(time)
+    if extend_box
+        c._box.set_right(time)
+
+method removeDrawing(Candle c) =>
+    if not na(r_style)
+        if not na(c._30)
+            line.delete(c._30)
+        if not na(c._50)
+            line.delete(c._50)
+        if not na(c._70)
+            line.delete(c._70)
+    if not na(c._box)
+        box.delete(c._box)
+
+isTime(tf, _hour, _minute) =>
+    if timeframe.in_seconds(tf) < timeframe.in_seconds("D")
+        if hour(time, timezone) == _hour and minute(time) == _minute
+            true
+        else
+            false
+    else
+        true
+
+changes = array.new<bool>()
+changes.push(ta.change(time(timeframe_1)) != 0)
+changes.push(ta.change(time(timeframe_2)) != 0)
+changes.push(ta.change(time(timeframe_3)) != 0)
+changes.push(ta.change(time(timeframe_4)) != 0)
+changes.push(ta.change(time(timeframe_5)) != 0)
+changes.push(ta.change(time(timeframe_6)) != 0)
+changes.push(ta.change(time(timeframe_7)) != 0)
+changes.push(ta.change(time(timeframe_8)) != 0)
+
+validInsideBar = false
+color validInsideBarColor = na
+
+// The live zone the trade uses: the newest active TBR range on each side.
+float zBullTop = na
+float zBullBot = na
+int zBullTime = na
+bool zBullRetest = false
+
+float zBearTop = na
+float zBearBot = na
+int zBearTime = na
+bool zBearRetest = false
+
+for [index, conf] in configs
+    conf.activated := false
+    conf.insideBar := false
+    conf.alertRetested := false
+    if conf.active
+        lastCandle = conf.candles.size() > 0 ? conf.candles.get(0) : na
+
+        if changes.get(index)
+            if isTime(conf.tf, conf._hour, conf._minute)
+                conf.candles.unshift(Candle.new(conf.tf, false, false, time, open, high, low, close, conf._color))
+            else if not(na(lastCandle))
+                if not(lastCandle.complete)
+                    lastCandle.complete := true
+                    lastCandle.drawCandle()
+                else if lastCandle.complete and not(lastCandle.active)
+                    closeBear = close < lastCandle._l
+                    closeBull = close > lastCandle._h
+                    if closeBear or closeBull
+                        if closeBear
+                            lastCandle.bull := false
+                        else
+                            lastCandle.bull := true
+                        lastCandle.setMitigation()
+                        lastCandle.setColor()
+                        lastCandle.active := true
+                        lastCandle._activeBar := bar_index
+                        conf.activated := true
+        else if not(na(lastCandle)) and not(lastCandle.complete)
+            lastCandle._c := close
+            lastCandle._h := high > lastCandle._h ? high : lastCandle._h
+            lastCandle._l := low < lastCandle._l ? low : lastCandle._l
+
+    for [index2, c] in conf.candles
+        // A retest has to come after the bar that made the zone live.
+        if c.active and not c.retested and not na(c._activeBar) and bar_index > c._activeBar and ((not c.bull and high >= c._l) or (c.bull and low <= c._h))
+            c.retested := true
+            conf.alertRetested := true
+
+        if c.active and ((not c.bull and high >= c.mitigation) or (c.bull and low <= c.mitigation))
+            conf.candles.remove(index2)
+        else if index2 > max_unmitigated - 1
+            c.removeDrawing()
+            conf.candles.remove(index2)
+        else if c.active
+            c.extend()
+
+        isInTbr = (c.bull and open < c._h and close > c._l) or (not c.bull and open > c._l and close < c._h)
+        if show_inside_bars and c.active and isInTbr
+            previousCandleBull = open[1] < close[1]
+            isInsideBar = high[1] > high and low[1] < low
+            validInsideBar := isInsideBar and ((c.bull and not previousCandleBull) or (not c.bull and previousCandleBull))
+            validInsideBarColor := c._color
+            conf.insideBar := validInsideBar
+
+        if c.active and c.bull and (na(zBullTime) or c._t >= zBullTime)
+            zBullTop := c._h
+            zBullBot := c._l
+            zBullTime := c._t
+            zBullRetest := c.retested
+
+        if c.active and not c.bull and (na(zBearTime) or c._t >= zBearTime)
+            zBearTop := c._h
+            zBearBot := c._l
+            zBearTime := c._t
+            zBearRetest := c.retested
+
+barcolor(validInsideBar and inside_bar_type == "Hollow" ? color.new(color.black, 100) : na)
+plotshape(validInsideBar and inside_bar_type == "Arrow", style = shape.arrowdown, color = validInsideBarColor)
+plotshape(validInsideBar and inside_bar_type == "Cross", style = shape.xcross, color = validInsideBarColor)
+plotchar(validInsideBar and inside_bar_type == "Asterisk", char = "", text = "✱", textcolor = validInsideBarColor)
+
+//---------------------------------------------------------------------------------------------------------------------}
+// The time-based range scalp, on the live TBR candle
+//---------------------------------------------------------------------------------------------------------------------{
+
+nyOk = not nyOnly or not na(time(timeframe.period, "0930-1600", "America/New_York"))
+
+// Long — the fib of the live bull candle, measured from its top down.
+float fibLong = na
+if not na(zBullTop)
+    _rngL = zBullTop - zBullBot
+    if fibPct == "30"
+        fibLong := zBullTop - 0.30 * _rngL
+    else if fibPct == "70"
+        fibLong := zBullTop - 0.70 * _rngL
+    else
+        fibLong := zBullTop - 0.50 * _rngL
+
+var float entryTargetL = na
+var float entryStopL = na
+var int tradedZone = na
+
+// Fib: price comes back down to the level and holds inside the candle.
+fibLongOk = useEntries and entryStyle == "Fib" and not na(zBullTime) and zBullTime != tradedZone and nyOk and not na(fibLong) and low <= fibLong and close >= fibLong and close <= zBullTop
+
+// Sweep: price takes out the candle's low and snaps back inside.
+sweepLongOk = useEntries and entryStyle == "Sweep" and not na(zBullTime) and zBullTime != tradedZone and nyOk and not na(zBullBot) and low < zBullBot and close > zBullBot and close <= zBullTop
+
+// One trade per candle.
+if (fibLongOk or sweepLongOk) and strategy.position_size == 0
+    entryTargetL := zBullTop
+    entryStopL := zBullBot
+    tradedZone := zBullTime
+    strategy.entry("long", strategy.long)
+
+// Out once price trades back out of the candle. Back above the top is the trade;
+// the optional stop is the far side of the candle.
+if strategy.position_size > 0
+    if not na(entryTargetL) and close > entryTargetL
+        strategy.close("long", comment = "out of range")
+    else if useZoneStop and not na(entryStopL) and close < entryStopL
+        strategy.close("long", comment = "under range")
+
+// --- short side, the mirror of the above ------------------------------------------------
+
+// Short — the mirror. The fib of the live bear candle, measured from its bottom up.
+float fibShort = na
+if not na(zBearTop)
+    _rngS = zBearTop - zBearBot
+    if fibPct == "30"
+        fibShort := zBearBot + 0.30 * _rngS
+    else if fibPct == "70"
+        fibShort := zBearBot + 0.70 * _rngS
+    else
+        fibShort := zBearBot + 0.50 * _rngS
+
+var float entryTargetS = na
+var float entryStopS = na
+var int tradedZoneBear = na
+
+// Fib: price comes back up to the level and holds inside the candle.
+fibShortOk = useShorts and entryStyle == "Fib" and not na(zBearTime) and zBearTime != tradedZoneBear and nyOk and not na(fibShort) and high >= fibShort and close <= fibShort and close >= zBearBot
+
+// Sweep: price takes out the candle's high and snaps back inside.
+sweepShortOk = useShorts and entryStyle == "Sweep" and not na(zBearTime) and zBearTime != tradedZoneBear and nyOk and not na(zBearTop) and high > zBearTop and close < zBearTop and close >= zBearBot
+
+// One trade per candle.
+if (fibShortOk or sweepShortOk) and strategy.position_size == 0
+    entryTargetS := zBearBot
+    entryStopS := zBearTop
+    tradedZoneBear := zBearTime
+    strategy.entry("short", strategy.short)
+
+// Out once price trades back out of the candle. Back below the bottom is the trade;
+// the optional stop is the far side of the candle.
+if strategy.position_size < 0
+    if not na(entryTargetS) and close < entryTargetS
+        strategy.close("short", comment = "out of range")
+    else if useZoneStop and not na(entryStopS) and close > entryStopS
+        strategy.close("short", comment = "over range")

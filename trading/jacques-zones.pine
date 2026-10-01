@@ -1,18 +1,57 @@
 //@version=5
-// Jacques TBR Zones. 1 hour. 9:00 and 15:00 NY candles are the ranges.
-strategy("Jacques TBR Zones", overlay=true, initial_capital=25000, commission_type=strategy.commission.cash_per_contract, commission_value=0.39, slippage=1)
+// Jacques TBR Zones
+// The range candle (TBR) is the scalp play. The zones are the bigger-move layer.
+// Zone identification adapted from "DTFX Algo Zones [LuxAlgo]"
+// (CC BY-NC-SA 4.0, (c) LuxAlgo).
+strategy("Jacques TBR Zones", overlay=true, initial_capital=25000, commission_type=strategy.commission.cash_per_contract, commission_value=0.39, slippage=1, max_boxes_count=500, max_lines_count=500)
 sty = input.string("Fib", "Entry", options=["Fib", "Sweep"])
 lvl = input.string("50", "Level", options=["30", "50", "70"])
 longs = input.bool(true, "Longs")
 shorts = input.bool(true, "Shorts")
-at9 = not na(time(timeframe.period, "0900-1000", "America/New_York"))
-at15 = not na(time(timeframe.period, "1500-1600", "America/New_York"))
-nyok = not na(time(timeframe.period, "0930-1600", "America/New_York"))
+useZones = input.bool(true, "Trade only inside a zone", group="Zones")
+showZones = input.bool(true, "Show zones", group="Zones")
+structureLen = input.int(10, "Zone structure length", minval=2, group="Zones")
+maxZones = input.int(3, "Zones kept on chart", minval=1, group="Zones")
 f = lvl == "30" ? 0.3 : lvl == "70" ? 0.7 : 0.5
+nyok = not na(time(timeframe.period, "0930-1600", "America/New_York"))
+
+// A swing point used by the zone engine.
+type pb
+    float price
+    int bar
+
+// The range candle is the 9:00 and 15:00 New York hourly candle.
+// It is rebuilt from the chart bars of that hour, so this works on any
+// timeframe that divides the hour (1h, 15m, 5m).
+nyHour = hour(time, "America/New_York")
+newHour = nz(ta.change(time("60")), 1) != 0
+var float curHi = na
+var float curLo = na
+var float doneHi = na
+var float doneLo = na
+var int doneHour = -1
+var int curHrTime = na
+var int doneHrTime = na
+if newHour
+    doneHi := curHi
+    doneLo := curLo
+    doneHour := nyHour[1]
+    doneHrTime := curHrTime
+    curHi := high
+    curLo := low
+    curHrTime := time("60")
+else
+    curHi := na(curHi) ? high : math.max(curHi, high)
+    curLo := na(curLo) ? low : math.min(curLo, low)
+
 var box abox = na
 var line aline = na
+var line a30 = na
+var line a70 = na
 var box bbox = na
 var line bline = na
+var line b30 = na
+var line b70 = na
 var float atop = 0.0
 var float abot = 0.0
 var int atim = 0
@@ -25,31 +64,41 @@ var int btim = 0
 var bool hasb = false
 var bool blive = false
 var bool bup = false
-if at9
-    atop := high
-    abot := low
-    atim := time
+if newHour and doneHour == 9
+    atop := doneHi
+    abot := doneLo
+    atim := doneHrTime
     alive := false
     if hasa
         box.delete(abox)
         line.delete(aline)
+        line.delete(a30)
+        line.delete(a70)
     hasa := true
     abox := box.new(atim, atop, time, abot, xloc=xloc.bar_time)
     aline := line.new(atim, atop - f * (atop - abot), time, atop - f * (atop - abot), xloc=xloc.bar_time)
-if at15
-    btop := high
-    bbot := low
-    btim := time
+    a30 := line.new(atim, atop - 0.3 * (atop - abot), time, atop - 0.3 * (atop - abot), xloc=xloc.bar_time)
+    a70 := line.new(atim, atop - 0.7 * (atop - abot), time, atop - 0.7 * (atop - abot), xloc=xloc.bar_time)
+if newHour and doneHour == 15
+    btop := doneHi
+    bbot := doneLo
+    btim := doneHrTime
     blive := false
     if hasb
         box.delete(bbox)
         line.delete(bline)
+        line.delete(b30)
+        line.delete(b70)
     hasb := true
     bbox := box.new(btim, btop, time, bbot, xloc=xloc.bar_time)
     bline := line.new(btim, btop - f * (btop - bbot), time, btop - f * (btop - bbot), xloc=xloc.bar_time)
+    b30 := line.new(btim, btop - 0.3 * (btop - bbot), time, btop - 0.3 * (btop - bbot), xloc=xloc.bar_time)
+    b70 := line.new(btim, btop - 0.7 * (btop - bbot), time, btop - 0.7 * (btop - bbot), xloc=xloc.bar_time)
 if hasa
     abox.set_right(time)
     aline.set_x2(time)
+    a30.set_x2(time)
+    a70.set_x2(time)
     if not alive and (close > atop or close < abot)
         alive := true
         aup := close > atop
@@ -57,9 +106,13 @@ if hasa
     abox.set_bgcolor(color.new(ca, 90))
     abox.set_border_color(color.new(ca, 0))
     aline.set_color(ca)
+    a30.set_color(ca)
+    a70.set_color(ca)
 if hasb
     bbox.set_right(time)
     bline.set_x2(time)
+    b30.set_x2(time)
+    b70.set_x2(time)
     if not blive and (close > btop or close < bbot)
         blive := true
         bup := close > btop
@@ -67,6 +120,98 @@ if hasb
     bbox.set_bgcolor(color.new(cb, 90))
     bbox.set_border_color(color.new(cb, 0))
     bline.set_color(cb)
+    b30.set_color(cb)
+    b70.set_color(cb)
+
+// Zones: swing structure, break of structure and change of character, the
+// same identification the DTFX Algo Zones indicator uses.
+var array<box> zBoxes = array.new<box>()
+var array<line> zL30 = array.new<line>()
+var array<line> zL50 = array.new<line>()
+var array<line> zL70 = array.new<line>()
+var float bullTop = na
+var float bullBot = na
+var float bearTop = na
+var float bearBot = na
+var int zd = 0
+float zHigh = na
+float zLow = na
+var pb zsTop = pb.new(na, na)
+var pb zsBot = pb.new(na, na)
+var bool zBosUp = false
+var bool zBosDn = false
+var int ztDir = 0
+zBullCol = #089981
+zBearCol = #f23645
+zUpper = ta.highest(structureLen)
+zLower = ta.lowest(structureLen)
+if zd >= 0 and high[structureLen] > zUpper
+    zd := -1
+    zHigh := high[structureLen]
+if zd <= 0 and low[structureLen] < zLower
+    zd := 1
+    zLow := low[structureLen]
+if not na(zHigh)
+    zsTop := pb.new(zHigh, bar_index - structureLen)
+    zBosUp := true
+if not na(zLow)
+    zsBot := pb.new(zLow, bar_index - structureLen)
+    zBosDn := true
+zChochUp = ta.crossover(close, zsTop.price) and high == zUpper and ztDir <= 0
+zChochDn = ta.crossunder(close, zsBot.price) and low == zLower and ztDir >= 0
+if zChochUp
+    ztDir := 1
+if zChochDn
+    ztDir := -1
+zMssUp = (ta.crossover(close, zsTop.price) and zBosUp and ztDir >= 0) or zChochUp
+zMssDn = (ta.crossunder(close, zsBot.price) and zBosDn and ztDir <= 0) or zChochDn
+if zMssUp
+    zBosUp := false
+    zt = zsTop.price
+    zb = zd == -1 ? zLower : zd == 1 ? zsBot.price : 0
+    if showZones
+        zBoxes.push(box.new(zsTop.bar, zt, bar_index, zb, bgcolor=color.new(zBullCol, 88), border_color=color.new(zBullCol, 0)))
+        zL30.push(line.new(zsTop.bar, zt - 0.3 * (zt - zb), bar_index, zt - 0.3 * (zt - zb), color=color.new(zBullCol, 0)))
+        zL50.push(line.new(zsTop.bar, zt - 0.5 * (zt - zb), bar_index, zt - 0.5 * (zt - zb), color=color.new(zBullCol, 0)))
+        zL70.push(line.new(zsTop.bar, zt - 0.7 * (zt - zb), bar_index, zt - 0.7 * (zt - zb), color=color.new(zBullCol, 0)))
+        if zBoxes.size() > maxZones
+            box.delete(zBoxes.shift())
+            line.delete(zL30.shift())
+            line.delete(zL50.shift())
+            line.delete(zL70.shift())
+    bullTop := zt
+    bullBot := zb
+if zMssDn
+    zBosDn := false
+    zt = zsBot.price
+    zb = zd == 1 ? zUpper : zd == -1 ? zsTop.price : 0
+    if showZones
+        zBoxes.push(box.new(zsBot.bar, zt, bar_index, zb, bgcolor=color.new(zBearCol, 88), border_color=color.new(zBearCol, 0)))
+        zL30.push(line.new(zsBot.bar, zt - 0.3 * (zt - zb), bar_index, zt - 0.3 * (zt - zb), color=color.new(zBearCol, 0)))
+        zL50.push(line.new(zsBot.bar, zt - 0.5 * (zt - zb), bar_index, zt - 0.5 * (zt - zb), color=color.new(zBearCol, 0)))
+        zL70.push(line.new(zsBot.bar, zt - 0.7 * (zt - zb), bar_index, zt - 0.7 * (zt - zb), color=color.new(zBearCol, 0)))
+        if zBoxes.size() > maxZones
+            box.delete(zBoxes.shift())
+            line.delete(zL30.shift())
+            line.delete(zL50.shift())
+            line.delete(zL70.shift())
+    bearTop := zt
+    bearBot := zb
+if showZones and zBoxes.size() > 0
+    box zlastBox = array.get(zBoxes, zBoxes.size() - 1)
+    line zlast30 = array.get(zL30, zL30.size() - 1)
+    line zlast50 = array.get(zL50, zL50.size() - 1)
+    line zlast70 = array.get(zL70, zL70.size() - 1)
+    box.set_right(zlastBox, bar_index)
+    line.set_x2(zlast30, bar_index)
+    line.set_x2(zlast50, bar_index)
+    line.set_x2(zlast70, bar_index)
+
+inBull = not na(bullTop) and close <= bullTop and close >= bullBot
+inBear = not na(bearTop) and close <= bearTop and close >= bearBot
+zOKlong = not useZones or inBull
+zOKshort = not useZones or inBear
+
 upB = hasb and blive and bup
 upA = hasa and alive and aup
 dnB = hasb and blive and not bup
@@ -85,19 +230,27 @@ var float ltg = 0.0
 var int lz = 0
 var float stg = 0.0
 var int sz = 0
+var float lstp = 0.0
+var float sstp = 0.0
 lfib = sty == "Fib" and have1 and low <= fl and close >= fl and close <= top1
 lswp = sty == "Sweep" and have1 and low < bot1 and close > bot1 and close <= top1
 sfib = sty == "Fib" and have2 and high >= fs and close <= fs and close >= bot2
 sswp = sty == "Sweep" and have2 and high > top2 and close < top2 and close >= bot2
-if longs and nyok and have1 and tim1 != lz and (lfib or lswp) and strategy.position_size == 0
+if longs and nyok and have1 and tim1 != lz and (lfib or lswp) and zOKlong and strategy.position_size == 0
     ltg := top1
+    lstp := bot1
     lz := tim1
-    strategy.entry("long", strategy.long)
-if strategy.position_size > 0 and close > ltg
+    strategy.entry("long", strategy.long, comment=sty + " " + lvl)
+    alert("long " + sty + " " + lvl)
+if strategy.position_size > 0 and (close > ltg or close < lstp)
     strategy.close("long", comment="out of range")
-if shorts and nyok and have2 and tim2 != sz and (sfib or sswp) and strategy.position_size == 0
+    alert("out of range")
+if shorts and nyok and have2 and tim2 != sz and (sfib or sswp) and zOKshort and strategy.position_size == 0
     stg := bot2
+    sstp := top2
     sz := tim2
-    strategy.entry("short", strategy.short)
-if strategy.position_size < 0 and close < stg
+    strategy.entry("short", strategy.short, comment=sty + " " + lvl)
+    alert("short " + sty + " " + lvl)
+if strategy.position_size < 0 and (close < stg or close > sstp)
     strategy.close("short", comment="out of range")
+    alert("out of range")

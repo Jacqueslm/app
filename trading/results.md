@@ -5,6 +5,33 @@ Kept here so every session can read it. Edit freely.
 Symbol: MGC1! unless marked. Window: Last 365 days unless marked.
 Correction frame = the lower timeframe the bot drops to.
 
+## 0. Jacques TBR Zones — the candle play — reported 1 Oct 2026
+
+Read off his TradingView screenshots. Account 25K USD, slippage and commission
+as in the script. **The Entry setting (Fib or Sweep) and the Fib level (30 / 50
+/ 70) used for each run are NOT visible in the screenshots** — the code default
+is Fib + 50. Ask before treating any row as tied to a setting.
+
+| Chart | Frame | Window | P/L | Max drawdown | Profitable | PF |
+|---|---|---|---|---|---|---|
+| MGCZ2026 | 1h | Feb 6 2025 – Oct 1 2026 (Deep) | +2,953.40 (+11.81%) | 2,670.39 (10.62%) | 95.00% 19/20 | 77.158 |
+| MGCZ2026 | 15m | Feb 6 2025 – Oct 1 2026 (Deep) | +4,405.44 (+17.62%) | 5,446.39 (21.62%) | 88.46% 46/52 | 10.34 |
+| MGCZ2026 | 5m | Feb 6 2025 – Oct 1 2026 (Deep) | +2,105.34 (+8.42%) | 941.39 (3.60%) | 87.23% 41/47 | 22.121 |
+| MNQZ2026 | 1h | Oct 1 2025 – Oct 1 2026 | +1,214.69 (+4.86%) | 2,722.89 (10.27%) | 92.86% 13/14 | 8.8 |
+| MNQZ2026 | 15m | Oct 1 2025 – Oct 1 2026 | +3,713.82 (+14.86%) | 4,131.39 (15.48%) | 100.00% 31/31 | not shown |
+| MNQZ2026 | 5m | Jun 14 2026 – Oct 1 2026 | +2,749.28 (+11.00%) | 2,583.89 (10.27%) | 89.80% 44/49 | 33.965 |
+
+Every row is positive. The two short windows (MNQ 1h and 5m) are the least
+real — 13 and 49 trades. The MGC rows run Deep Backtesting, so trades show in
+the Strategy report only, not on the chart.
+
+The MNQ 1h chart also shows the on-chart labels `short` and `out of range`,
+which is what the entry and exit comments are supposed to print.
+
+On the MGC charts three indicators were loaded at once — `LuxAlgo DTFX Algo
+Zones`, `Jacques Zones` and `Jacques TBR Zones`. Only `Jacques TBR Zones` is
+the bot; the other two should come off before the next run.
+
 **NOT confirmed which run is the TBR (Wang zones) bot.** The rows below are
 everything that has been reported so far; the labels are what each set was
 described as at the time. Correct them if they are wrong.
@@ -48,5 +75,5 @@ the 365-day figure above is the one to use.
 
 ## Not written here
 
-No result has been recorded yet for the TBR (Wang zones) bot. Nothing about
-that script is confirmed working — it has not been run from here.
+Not run from this machine — Pine cannot be compiled or tested here. Everything
+above came from his own TradingView screenshots.

@@ -33,6 +33,19 @@ went with it. `/app` is free and private: the door is the `FRIENDLY_EMAILS`
 allowlist plus the owner address. Nothing is sold, so ignore every entry below
 about payments, Stripe, rooms or the store listing billing.
 
+**Where it is served, 4 Oct 2026.** The app runs on **Vercel**, not Railway.
+The live address is **https://thetruth-theta.vercel.app** (a second alias,
+`https://app-thetruth.vercel.app`, resolves to the same build and behaves
+identically — both gate every private page). Vercel checks the filesystem
+before it runs any rewrite, so the private pages are deliberately **not**
+static files there: `vercel.json` builds into `webroot/`, `vercel-build.js`
+copies only assets into it and refuses to finish if a `.html` ever lands
+there, and the six pages travel inside the `api/index.js` function
+(`includeFiles` is one brace-expansion glob — Vercel rejects a list). The door
+is `APP_PASSWORD` plus the `FRIENDLY_EMAILS` allowlist; the AI routes proxy
+Gemini with `GEMINI_API_KEY` held server-side. The Railway host below is kept
+as the record of how it was built, not as the current host.
+
 **The push rule (from CLAUDE.md, and it is the current one):** never push unless
 Jacques says push. When he does: `claude/new-session-im7bzg`, then `main`, then
 `claude/vibe-code-uwxxlk` — all three, same commit. The branch names in older

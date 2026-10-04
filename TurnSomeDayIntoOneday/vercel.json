@@ -1,0 +1,31 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node vercel-build.js",
+  "outputDirectory": "webroot",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": [
+        "hub.html",
+        "key.html",
+        "herbs.html",
+        "tax.html",
+        "fight.html",
+        "game3d.html"
+      ]
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api/index.js" },
+    { "source": "/app", "destination": "/api/index.js" },
+    { "source": "/key", "destination": "/api/index.js" },
+    { "source": "/key.html", "destination": "/api/index.js" },
+    { "source": "/herbs", "destination": "/api/index.js" },
+    { "source": "/herbs.html", "destination": "/api/index.js" },
+    { "source": "/tax", "destination": "/api/index.js" },
+    { "source": "/tax.html", "destination": "/api/index.js" },
+    { "source": "/fight", "destination": "/api/index.js" },
+    { "source": "/fight.html", "destination": "/api/index.js" },
+    { "source": "/game3d.html", "destination": "/api/index.js" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" }
+  ]
+}

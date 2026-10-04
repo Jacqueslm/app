@@ -93,3 +93,7 @@ node_modules/
 # site root, so they stay out of git.
 *.bak
 
+
+# Vercel build output - regenerate with the build command (node vercel-build.js).
+# Only public assets land here; a page in this folder is a page served to the world.
+TurnSomeDayIntoOneday/webroot/

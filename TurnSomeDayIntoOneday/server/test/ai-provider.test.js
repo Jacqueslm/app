@@ -81,10 +81,10 @@ test('The Key sits on the same provider as Friendly', () => {
   assert.doesNotMatch(liveCode(key), VENDOR, 'a page must not name a provider the server no longer calls');
 });
 
-// Two tests used to sit here reading the in-app policy out of index.html: that it
-// named Google and not the retired processor, and that it promised a count it
-// could actually list. Both the policy and the app it was written into went on
-// 4 Oct 2026 with the recovery app, so there is no in-app policy left to read.
+// Two tests used to sit here reading the app's own in-app policy: that it named
+// Google and not the retired processor, and that it promised a count it could
+// actually list. Both the policy and the page it was written into were deleted
+// on 4 Oct 2026 with the recovery app, so there is no in-app policy left to read.
 //
 // privacy.html is the disclosure of record from here, and it is asserted here
 // rather than dropped - a false disclosure is not something to lose a guard over.

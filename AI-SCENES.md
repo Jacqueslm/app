@@ -1243,12 +1243,14 @@ illustration of the screen, not a claim about any user.
 
 ## One thing found and deliberately not fixed
 
-`index.html:15633` — the FAQ answer to *"Are the people in the Rooms real? Can I
-reply to them?"* still says the stories are written reflections, the names
-aren't real people, and there is no commenting or messaging. **It never mentions
-the live room.** That is the exact text that misled me, and it reads as a flat
-contradiction of a Pro feature being sold at $9.99/mo. Jacques said don't fix
-anything, so it stands — logged here so it isn't lost.
+Line 15633 of the app's page as it stood — the FAQ answer to *"Are the people in
+the Rooms real? Can I reply to them?"* — said the stories are written
+reflections, the names aren't real people, and there is no commenting or
+messaging. **It never mentioned the live room.** That was the exact text that
+misled me, and it read as a flat contradiction of a Pro feature being sold at
+$9.99/mo. Jacques said don't fix anything, so it stood - and then the whole
+question went away: the Rooms, the Pro tier and the page itself were all deleted
+by 4 Oct 2026. Logged here so the reasoning isn't lost.
 
 
 ---

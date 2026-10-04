@@ -7,8 +7,8 @@
 // voices were available offline and Deep was not. "Talk me through it" is the
 // crisis walkthrough - free, always, and needed precisely when the signal is
 // gone. Anyone who chose Deep had the one voice that goes silent offline.
-// Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
-// cannot drift apart unnoticed again.
+// Fixed 28 Aug; the cache name now tracks APP_VERSION in the page /app serves -
+// hub.html - so the two cannot drift apart unnoticed again.
 //
 // Taken back to 5.0 on 20 Sep 2026, at Jacques's word — the number is his to
 // pick and it is not a mistake. It still has to match APP_VERSION exactly, so

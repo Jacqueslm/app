@@ -9,8 +9,10 @@ The app only ships the small manifest, which maps
 
     "<Category>|<day>|<variant>"  ->  { voiceKey: "relative/path.mp3", ... }
 
-Variants mirror applyRelationshipVariant in index.html: 'base' for everyone,
-plus 'single' / 'family' where a lesson authors single_variant/family_variant.
+Variants mirrored applyRelationshipVariant, which lived in the recovery app's
+page (deleted 4 Oct 2026): 'base' for everyone, plus 'single' / 'family' where a
+lesson authors single_variant/family_variant. Those recordings are kept, and this
+file is the shape they were built to.
 The spoken text mirrors toggleLessonAudio's composition exactly:
 
     "<title>. <content>\n\nToday's action: <action>\n\nSomething to reflect on: <reflection>"
@@ -45,8 +47,9 @@ LESSONS = os.path.join(HERE, 'data', 'lessons.json')
 MANIFEST = os.path.join(HERE, 'data', 'lesson-audio-manifest.json')
 BASE_URL = 'https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/'
 
-# Same five voices as the SOS talk (VG_VOICES in index.html). Lessons are read
-# at conversational pace - the in-app speed button handles slower/faster.
+# The same five voices the SOS talk used (the list lived in the recovery app's
+# page, deleted 4 Oct 2026). Lessons are read at conversational pace; the in-app
+# speed button that used to handle slower/faster went with that app.
 # FIXED 27 Aug 2026. This map still pointed at hfc_female, amy, hfc_male and
 # lessac - the four voices the 8 Aug licence audit banned as non-commercial.
 # The shipped recordings were made with the clean set, but re-running this file

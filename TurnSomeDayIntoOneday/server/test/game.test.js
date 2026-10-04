@@ -23,8 +23,8 @@ const vm = require('vm');
 
 const ROOT = path.join(__dirname, '..', '..');
 // 4 Oct 2026: the fight is its own page now. Its markup, its CSS and its 669
-// lines of JavaScript were lifted out of index.html into fight.html, and this
-// is the file that has to be read if these tests are to describe what ships.
+// lines of JavaScript were lifted out of the recovery app into fight.html, and
+// this is the file that has to be read if these tests are to describe what ships.
 const APP = fs.readFileSync(path.join(ROOT, 'fight.html'), 'utf8');
 // The shell that holds the three pages. What belongs to the shell (the way in
 // to the fight, what the tab is called) is asserted here against this file, not

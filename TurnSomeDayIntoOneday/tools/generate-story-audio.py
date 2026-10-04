@@ -5,8 +5,9 @@ that never committed its script, so the audio could not be reproduced from this
 repo and set two could not be made without re-deriving the whole pipeline. This
 is that script.
 
-Each story becomes ONE mp3 named after its id, matching what index.html asks
-for: <base>stories/<id>.mp3, where base comes from the lesson audio manifest.
+Each story becomes ONE mp3 named after its id, in the shape the player asked for
+before it was deleted on 4 Oct 2026 with the recovery app: <base>stories/<id>.mp3,
+where base comes from the lesson audio manifest.
 The recordings live on the repo's `lesson-audio` branch and are served from
 raw.githubusercontent.com, exactly like the lesson audio - they are far too
 large to ship in the app.

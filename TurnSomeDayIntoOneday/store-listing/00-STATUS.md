@@ -1,5 +1,16 @@
 # Play Store — live status
 
+> **4 Oct 2026 — read this before using anything below.** The app was stripped to
+> three pages: the Zodiacs, the Fight and the Herbs. **The recovery app is
+> deleted** — its page, its server routes, and the tests that read it — and the
+> Rooms, the chat, the journal, the day counter, the lesson programs, the SOS
+> tools and Friendly went with it. The listing answers that describe those
+> features no longer describe the app, and every code location cited below
+> (`index.html:NNNN`) points into a file that no longer exists; it is in git
+> before that date. The declarations were corrected in the pull requests that
+> landed on 6 and 8 Sep 2026. Kept as the record of what was submitted and
+> checked, not as a description of what ships now.
+
 ## 🟢 29 AUG 2026, 2:42 PM — ANDROID PURCHASES WORK. VERIFIED ON DEVICE.
 
 A Google Play purchase completed in the installed app: "You're Pro. Your
@@ -169,14 +180,14 @@ nothing carries over from the previous one.
 | Downloaded App | Yes |
 | Violence / Fear / Gambling / Crude Humor | No |
 | Sexuality | Yes → Suggestive/Sexual Themes → *References to sexual activity without descriptive detail* |
-| Language | **No** — verified in code: the only profanity in the repo is the Rooms blocklist at `index.html:7890` |
+| Language | **No** — verified in code at the time: the only profanity in the repo was the Rooms blocklist, in the recovery app's page (deleted 4 Oct 2026; line 7890 of the committed copy) |
 | Controlled Substance | Yes → Illegal/Recreational **Reference**, Medical **Reference**, Alcohol **Reference + Often**, Tobacco **Reference + Often**. Not Fantasy Drugs. No "Use", no "Encourages/Glamorizes". |
 | **User Content Sharing** | **Yes** — Rooms is native in-app text between users |
 | ↳ UGC the primary source of content? | No |
 | ↳ Public sharing of nudity / graphic violence? | No — Rooms is text only |
 | ↳ Block users or content? | **No** — verified: no block/mute/ignore exists anywhere in the app |
-| ↳ Report users or content? | **Yes** — `index.html:7969` `reportPost()`; line 7791 "two reports hide a post until a human reviews it" |
-| ↳ Chat moderation? | **Yes** — `index.html:2571` a moderator reads every post before the room sees it |
+| ↳ Report users or content? | **Yes** — `reportPost()` in the recovery app's page (deleted 4 Oct 2026; line 7969 of the committed copy); line 7791 "two reports hide a post until a human reviews it" |
+| ↳ Chat moderation? | **Yes** — a moderator read every post before the room saw it, in the recovery app's page (deleted 4 Oct 2026; line 2571 of the committed copy) |
 | ↳ Limited to invited friends only? | No — no friends-only mode exists |
 | Online Content | **Yes** — the app is a TWA that loads the website, embeds YouTube, and Friendly generates AI content |
 | ↳ Is this content the focus? | No |

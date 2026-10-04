@@ -1,10 +1,12 @@
 """Generate the three SOS "Talk me through it" recordings + their cue timelines.
 
-The SOS talk plays as pre-recorded MP3s because a real <audio> element is the
-only audio Android keeps playing when the screen locks. The app offers three
-voices (Warm / Soft / Clear - VG_VOICES in index.html) plus the phone's own
-speech engine; this script builds the three recordings locally with Piper TTS -
-free, no API, no account.
+The SOS talk was pre-recorded MP3s because a real <audio> element is the only
+audio Android keeps playing when the screen locks. Three voices were offered -
+Warm / Soft / Clear, held in VG_VOICES in the recovery app's page, which was
+DELETED on 4 Oct 2026 with the rest of that app as "Talk me through it" went with
+it. Nothing on a page offers these voices any more: the list below is the only
+copy left, and this script is kept so the recordings can be rebuilt rather than
+lost. It builds them locally with Piper TTS - free, no API, no account.
 
 One-time setup (all free):
     pip install piper-tts lameenc numpy
@@ -19,8 +21,9 @@ Run from the TurnSomeDayIntoOneday directory:
     python3 tools/generate-sos-talk.py path/to/folder-containing-the-three-voice-folders
 
 It writes audio/sos-talk-{warm,soft,clear}.mp3 and prints the VG_VOICES cue
-lines. If STEPS below ever changes, VG_STEPS and VG_VOICES in index.html MUST
-be updated in the same commit - captions are synced to these exact timings.
+lines. Nothing on a page reads these any more - the recovery app that offered the
+three voices is deleted (4 Oct 2026) - so this file carries the only copy of the
+timings and the cue lines.
 
 REQUIRED LAST STEP - soften, then match the loudness. The models come out up
 to 6dB apart, which means switching voice in the app means reaching for the
@@ -51,7 +54,7 @@ from piper import PiperVoice, SynthesisConfig
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(HERE, 'audio')
 
-# Must mirror VG_STEPS in index.html exactly.
+# The only copy of VG_STEPS now - captions were synced to these exact timings.
 STEPS = [
     "I'm here with you. You don't have to do anything right now except listen.",
     "This craving is a wave. It rises, it peaks, and it always comes back down. Your only job is to ride it out with me.",

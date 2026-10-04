@@ -257,8 +257,8 @@ const pageLimiter = rateLimit({
 // The marketing landing page went with the rest of them, so the root now sends
 // everybody to the app, where a signed-in person carries on and anybody else
 // meets the app's own closed door rather than a page selling them something.
-// Registered ahead of express.static below, since static would otherwise
-// auto-serve index.html at '/' by its own default-index behavior.
+// Registered ahead of express.static below, because static serves the app
+// folder and would otherwise answer '/' with whatever it finds there.
 app.get('/', (req, res) => {
   res.redirect('/app');
 });
@@ -268,10 +268,11 @@ app.get('/', (req, res) => {
 // nomore recovery app". So /app serves hub.html - a small shell holding the
 // Zodiacs, the Fight and the Herbs - and no longer the recovery app.
 //
-// index.html is still on disk and is still reachable by nothing: the route here
-// stopped pointing at it. Deleting the file and the eighteen test files that
-// read it is the next pass, kept out of this one so that the app he opens is
-// never briefly missing while a 15,000-line deletion lands underneath it.
+// The recovery app itself is gone, file and all: its page, its server routes for
+// that page, and the eighteen test files that read it were deleted in the pass
+// that followed, so nothing here may name it again. The gate in private-app.js
+// answers 410 for any page it has not been told about, which is what an old
+// bookmark to it now gets.
 app.get('/app', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'hub.html'));
 });
@@ -312,12 +313,19 @@ app.get('/key.html', (req, res) => res.status(404).end());
 // the door has to be readable in the file. A test asserts signed-in,
 // on-the-list and redirect-to-/app inside every one of them, and it cannot read
 // a rule that lives in a shared helper.
-// The Fight — the last of the three, added to this same door on 4 Oct 2026.
+// The Fight - the last of the three, added to this same door on 4 Oct 2026.
 // Same shape as /key and /herbs, and registered for the same reason BOTH
 // addresses matter: game3d.html is a real file that express.static below would
 // hand out by name to anybody who typed it, exactly as /herbs.html would have
 // been. The page was open in September precisely because a file was not named
 // twice, which is the mistake this pair exists not to repeat.
+//
+// The route itself is new the same day: the fight became a page of its own
+// instead of a tab inside the recovery app, so its markup, its CSS and its 669
+// lines of JavaScript moved out of that app and into fight.html. The page frames
+// /game3d.html for the roof. The two are separate on purpose - the ring is a
+// self-contained 3D engine, and the game around it has no business loading
+// three.js to draw a menu.
 app.get('/fight', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
@@ -343,12 +351,6 @@ app.get('/game3d.html', pageLimiter, (req, res) => {
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'game3d.html'));
 });
-// The game's own route, added 4 Oct 2026. The fight became its own page instead
-// of a tab inside the recovery app, so its markup, its CSS and its 669 lines of
-// JavaScript moved out of index.html and into fight.html. /fight serves the
-// page; the page frames /game3d.html for the roof. The two are separate on
-// purpose — the ring is a self-contained 3D engine, and the game around it has
-// no business loading three.js to draw a menu.
 app.get('/herbs', (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');

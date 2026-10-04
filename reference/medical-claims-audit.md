@@ -790,4 +790,4 @@ That makes the pipeline safe and puts the rewrites in both places at once.
 
 ## HOW IT SHIPS (after your approval)
 - Apply rewrites to source files → run build-lessons.js → verify lessons.json has 13 packs x 30 days and zero remaining claim phrases → bump service worker so phones refetch lesson content → partner + anger regression tests → commit and push.
-- Out of scope, noted for a future task: the Withdrawal Timeline screen in index.html contains medical-adjacent content ("brain chemistry rebalancing", seizure-risk warnings). The seizure warnings should STAY (safety), but the timeline was not part of Task 4's file list, so I touched nothing there.
+- Out of scope, noted for a future task: a Withdrawal Timeline screen carried medical-adjacent content ("brain chemistry rebalancing", seizure-risk warnings). The seizure warnings were the ones to keep (safety). That screen lived in the recovery app's page, which was deleted on 4 Oct 2026, so there is nothing left to audit there.

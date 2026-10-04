@@ -2,6 +2,13 @@
 
 *You asked, 12 Aug 2026. Checked against your actual code, not from memory.*
 
+> **4 Oct 2026 — what changed since.** The recovery app is deleted, and with it
+every place the old page mentioned "Add to Home Screen". The install offer that
+shipped in the end lives on the Zodiacs page (`/key`, the `rp-install` button and
+the note it opens), and on Android the browser's own offer is still caught with
+`beforeinstallprompt`. The reasoning below is unchanged; the two line references
+are into a file that no longer exists.
+
 **Short answer: Apple blocks it, and there is no code you can write to fix it.
 But there is a lot you can do about it, and right now you are doing none of it.**
 
@@ -55,8 +62,9 @@ And right now nobody does. **Your site has no install prompt code at all** — n
 `beforeinstallprompt` handler for Android, and no iPhone instructions anywhere a
 new visitor would see them. The only two places "Add to Home Screen" appears are:
 
-- buried inside notification settings (`index.html:8061`)
-- buried inside discretion mode (`index.html:9065`)
+- buried inside notification settings (the recovery app's page, deleted 4 Oct
+  2026; line 8061 of the committed copy)
+- buried inside discretion mode (same file, line 9065)
 
 Both are things you only reach **after** you're already using the app. A first
 time iPhone visitor is told nothing.
@@ -94,9 +102,9 @@ tells people what to tap.
    in the app, instead of relying on people finding Chrome's ⋮ menu.
 4. **Already installed** → show nothing, ever. (`display-mode: standalone`.)
 
-**This touches `index.html`, and your rule is no app changes until you are
-through the Play Store.** That rule is yours, so this is your call, not mine.
-It is maybe an hour and it is revertible in one commit.
+**This touched the app's page, and your rule was no app changes until you were
+through the Play Store.** That rule was yours. Item 3 shipped on the Zodiacs page
+(`/key`), and hub.html and fight.html carry no install prompt of their own.
 
 My read: it is not a feature, it is a fix for something already broken on half
 your traffic — but it is still your rule and your decision.

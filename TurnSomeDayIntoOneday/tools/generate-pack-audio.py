@@ -3,8 +3,11 @@
 
 The third source of lesson text, and the one the other two generators miss.
 generate-lesson-audio.py reads data/lessons.json (days 1-30 per track) and
-generate-phase-audio.py reads data/phases.json (days 31-90); the packs live in
-PREDEFINED_PACKS inside index.html and were voiced by neither.
+generate-phase-audio.py reads data/phases.json (days 31-90); the packs lived in a
+PREDEFINED_PACKS table in the recovery app's page, and were voiced by neither.
+That page, and the packs with it, were DELETED on 4 Oct 2026, and the dump script
+named below is not in the repo either - so this generator has no source for its
+table any more and needs one written before it can be run again.
 
     node tools/dump-packs.js > /tmp/packs.json     # or extract however you like
     PACK_ONLY=deep python3 tools/generate-pack-audio.py <packs.json> <voices> <out>

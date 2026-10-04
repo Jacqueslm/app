@@ -57,7 +57,9 @@ test('both shapes of the link exist', () => {
 
 test('the store URL now lives in one place, not in every page', () => {
   assert.match(SERVER, /const PLAY_URL = 'https:\/\/play\.google\.com\/store\/apps\/details\?id=com\.turnsomedayintodayone\.app'/);
-  const stray = fs.readdirSync(ROOT).filter((f) => f.endsWith('.html') && f !== 'index.html')
+  // Every page in the app folder, with nothing exempt. The recovery app's page
+  // used to be excluded here; it is deleted, so the scan is the whole folder.
+  const stray = fs.readdirSync(ROOT).filter((f) => f.endsWith('.html'))
     .filter((f) => fs.readFileSync(path.join(ROOT, f), 'utf8').includes('play.google.com/store/apps/details'));
   assert.deepEqual(stray, [], 'these pages still link straight to Google, so their clicks are invisible');
 });

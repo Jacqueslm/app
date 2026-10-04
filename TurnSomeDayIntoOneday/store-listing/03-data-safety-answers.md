@@ -83,7 +83,8 @@ you can defend the answer if Play ever asks.
 >
 > The note below remains accurate for Friendly and is worth keeping as the
 > defence of the "not stored" half:
-> `serializeState()` in `index.html` explicitly strips `chatHistory` before
+> `serializeState()` (in the recovery app's page, deleted 4 Oct 2026) explicitly
+> stripped `chatHistory` before
 > anything is written to storage, and `load()` clears it on every start. The
 > server stores only a per-day integer count in the `chat_usage` table — there
 > is no column anywhere that holds message text. Conversation text is sent to
@@ -96,9 +97,11 @@ you can defend the answer if Play ever asks.
 | **Photos** | Yes | No | App functionality | **Optional** |
 
 > The profile photo. It is resized to 300px and stored as a data URL inside the
-> user's own synced state (`S.profilePhoto` in `index.html`, written by `save()`
-> and pushed by `pushStateToServer`), which means it does reach the server and
-> must be declared. It is deleted with the account.
+> user's own synced state (`S.profilePhoto`, written by `save()` and pushed by
+> `pushStateToServer`, in the recovery app's page that was deleted on 4 Oct 2026),
+> which means it did reach the server and had to be declared. It was deleted with
+> the account. **No page now collects a profile photo**, so this row no longer
+> describes the app.
 
 ### Audio files
 
@@ -119,9 +122,10 @@ you can defend the answer if Play ever asks.
 |---|---|---|---|
 | **App interactions** | Yes | No | App functionality |
 
-> The in-app activity log (`logActivity` in `index.html`) records which features
-> were used and when. It lives in the user's own synced state, not in an
-> analytics product.
+> The in-app activity log (`logActivity`, in the recovery app's page deleted on
+> 4 Oct 2026) recorded which features were used and when. It lived in the user's
+> own synced state, not in an analytics product. Nothing records app activity any
+> more.
 
 ### App info and performance
 
@@ -182,8 +186,9 @@ Push notifications use self-issued VAPID keys and no third party.
 from the app outright ("unwire claude not going to use it and use the gemini
 key"), so `server/server.js` now reaches Google and nothing else. There is no
 fallback provider, and `ANTHROPIC_API_KEY` is read nowhere in the codebase. Two
-written sentences moved with it: the in-app policy in `index.html` named
-Anthropic (and promised "two outside services" while listing one), and
+written sentences moved with it: the in-app policy (in the recovery app's page, deleted
+4 Oct 2026) named Anthropic and promised "two outside services" while listing
+one, and
 `privacy.html` carried a conditional line about the fallback. Both corrected.
 
 **Plausible is the one that changes an answer.** It is cookieless and does not

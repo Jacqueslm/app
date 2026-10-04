@@ -21,10 +21,10 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-// 4 Oct 2026: the app became three things and its shell moved from index.html
-// to hub.html. The door to /key is a card on that shell now rather than a
-// settings row and a bar tab inside the recovery app, so the three tests below
-// read the shell that is actually served.
+// 4 Oct 2026: the app became three things and its shell moved to hub.html. The
+// door to /key is a card on that shell now rather than a settings row and a bar
+// tab inside the recovery app, so the three tests below read the shell that is
+// actually served.
 const APP = fs.readFileSync(path.join(ROOT, 'hub.html'), 'utf8');
 const SERVER = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
 const SW = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');

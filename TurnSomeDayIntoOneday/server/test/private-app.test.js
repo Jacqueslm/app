@@ -265,13 +265,19 @@ test('the fight, exercised over HTTP, is never served cold from disk', async () 
   // does — gated route, then static — and makes the request, because "nothing
   // came back" is the only proof that the file is not being handed out.
   const express = require('express');
+  const rateLimit = require('express-rate-limit');
   const ROOT = path.join(__dirname, '..', '..');
+  // The same page limiter server.js puts in front of these routes, for the same
+  // reason it is there: a handler that reads a file off disk is a disk read
+  // anybody can ask for in a loop. Mirrored here rather than left out so the
+  // test exercises the shape that actually ships.
+  const pageLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false });
   const app = express();
   const gate = (file) => (req, res) => {
     if (req.get('x-signed-in') !== 'yes') return res.redirect('/app');
     res.sendFile(path.join(ROOT, file));
   };
-  for (const url of ['/fight', '/fight.html', '/game3d.html']) app.get(url, gate('game3d.html'));
+  for (const url of ['/fight', '/fight.html', '/game3d.html']) app.get(url, pageLimiter, gate('game3d.html'));
   app.use(express.static(ROOT));
   app.get('/app', (req, res) => res.type('text/plain').send('the app'));
 

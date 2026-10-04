@@ -237,6 +237,23 @@ app.use((req, res, next) => {
   res.status(410).type('text/plain').send(PAGE_GONE);
 });
 
+// Every page route below reads a file off disk and hands it back. CodeQL calls
+// that out on sight (js/missing-rate-limiting), and it is right to: the path is a
+// constant chosen here and never comes from the request, so there is no way to
+// read a file the route did not name - but nothing stops somebody asking for it
+// as fast as they can send requests, and every one of those is a disk read.
+//
+// 200 in ten minutes, because a page is loaded once and then sat on. The hedges
+// that already exist upstream (the sign-in check, the allowlist) run BEFORE this
+// one, so a person who is turned away never spends a request.
+const pageLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests. Give it a moment.',
+});
+
 // The marketing landing page went with the rest of them, so the root now sends
 // everybody to the app, where a signed-in person carries on and anybody else
 // meets the app's own closed door rather than a page selling them something.
@@ -255,7 +272,7 @@ app.get('/', (req, res) => {
 // stopped pointing at it. Deleting the file and the eighteen test files that
 // read it is the next pass, kept out of this one so that the app he opens is
 // never briefly missing while a 15,000-line deletion lands underneath it.
-app.get('/app', (req, res) => {
+app.get('/app', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'hub.html'));
 });
 
@@ -301,12 +318,12 @@ app.get('/key.html', (req, res) => res.status(404).end());
 // hand out by name to anybody who typed it, exactly as /herbs.html would have
 // been. The page was open in September precisely because a file was not named
 // twice, which is the mistake this pair exists not to repeat.
-app.get('/fight', (req, res) => {
+app.get('/fight', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'game3d.html'));
 });
-app.get('/fight.html', (req, res) => {
+app.get('/fight.html', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'game3d.html'));
@@ -321,7 +338,7 @@ app.get('/fight.html', (req, res) => {
 // gating /fight while /game3d.html stayed open, which is a lock with the window
 // still up. It has to be registered above express.static or static answers
 // first, exactly as the herbs note above describes.
-app.get('/game3d.html', (req, res) => {
+app.get('/game3d.html', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'game3d.html'));

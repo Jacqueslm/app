@@ -208,15 +208,24 @@ Audio files, stays unticked.
 ## Section 3 — Data sharing
 
 **Nothing is shared** in Play's sense of the word (transferred to a third party
-for their own use). Two processors are worth stating plainly if asked:
+for their own use). Three processors are worth stating plainly if asked:
 
-- **The model provider** receives conversation text solely to generate a reply.
-- **Stripe** processes payments on the website. In the Android app the purchase
-  runs through **Google Play**, and the server only verifies the resulting token
-  against Google's own API.
+- **Google (Gemini)** receives a Friendly message solely to generate a reply,
+  and the owner's own Key reading to write it up. Nothing else is sent.
+- **Resend** delivers email — an address and a message body — when somebody asks
+  for a password reset or a letter.
+- **Plausible** counts a visit: the page URL, plus an IP and user agent so the
+  same visit is not counted twice.
 
 Play does not classify a service provider acting on your instructions as
-"sharing", so both remain **Collected: yes / Shared: no**.
+"sharing", so all three remain **Collected: yes / Shared: no**.
+
+> **Corrected 4 Oct 2026.** This list named **Stripe** for website payments and
+> **Google Play** for Android purchases. Nothing is sold any more, so neither is
+> reached: the app is free, `server/billing.js` and `server/store-billing.js`
+> were deleted, and no file in the codebase requires `stripe`. Leaving the old
+> pair here would have contradicted the processor table above in the same file —
+> which is exactly how a declaration audit goes wrong.
 
 ---
 

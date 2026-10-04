@@ -329,11 +329,14 @@ the old one.
 other options."** Staying on Railway at $5/month. Nothing was migrated and
 nothing in the app changed.
 
-**Standing instruction:** re-check roughly twice a year, and when he asks. The
-table above is the whole prior art — do not re-derive it. What would change the
-answer: Oracle's free ARM capacity actually becoming available, or a host
-appearing that gives an always-on process, a disk, and real bandwidth for
-nothing.
+**CLOSED, 4 Oct 2026: "im not doing that google cloud."** He was halfway through
+the Google Cloud free-trial signup and stopped. Hosting is settled — nothing
+moves, and the table above is history rather than a list of options to work
+through. Do not raise it again, do not run the bandwidth sums for him, and do
+not price hosts at him. Only revisit if HE brings it up. The one number that was
+wrong here is already corrected above (the app's pages are `hub.html` 10KB,
+`fight.html` 86KB, `key.html` 1.38MB — the 1MB file this row was written about is
+deleted).
 
 The lasting good that came out of the first round: the database had no backup at
 all, and now has one (see the backup section above).

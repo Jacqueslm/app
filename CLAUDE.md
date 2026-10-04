@@ -51,6 +51,12 @@ Standing instructions. These override default behaviour and repo conventions.
 
 ## Settled — do not raise again
 
+- **Hosting stays as it is.** 4 Oct 2026: "im not doing that google cloud." He was
+  halfway through the Google Cloud free-trial signup and stopped. Do not price
+  hosts at him again, do not re-open Google Cloud, Oracle, Render or the rest,
+  and do not raise moving off Railway. The host table in
+  `TurnSomeDayIntoOneday/START-HERE.md` is history, not a queue of options. Ask
+  again only if HE asks.
 - **The gmail address stays.** `turnsomedayintodayone@gmail.com` is the single
   inbound address, used in nine places including compliance pages Google has
   reviewed. Researched 31 Aug; changing it was the wrong call.

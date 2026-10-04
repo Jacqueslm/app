@@ -184,7 +184,7 @@ nothing carries over from the previous one.
 | ↳ Referred to in text or spoken? | Yes |
 | Promotion or Sale of Age-Restricted Products | No — the app helps people quit, it does not promote or sell |
 | Miscellaneous — shares precise location with other users? | No |
-| Miscellaneous — allow users to purchase digital goods? | **Yes** — Pro |
+| Miscellaneous — allow users to purchase digital goods? | **No** — corrected 4 Oct 2026. The app is free and Friendly is private, so nothing is sold and there is nothing to buy. This row read **Yes — Pro** while the paid tier existed; it went on 8 Sep 2026 and the billing code went with it. |
 | ↳ Loot boxes / chance-based purchases? | No |
 | ↳ Cash rewards, crypto, NFTs? | No |
 | ↳ Web browser or search engine? | No |
@@ -203,9 +203,12 @@ nothing carries over from the previous one.
 **Ratings are unchanged by this pass:** ESRB Teen / 14+, PEGI 12, USK 12,
 IARC 12+, ClassInd 14.
 
-### 4. ⏳ Buy Pro on a real phone, from the live listing
-Never tested. Closed testing is a different billing path. Install from Play,
-buy, confirm Friendly opens and the rooms open, cancel. (Lessons stopped being a Pro feature on 1 Sep 2026 - every day is free.)
+### 4. ✅ Buy Pro on a real phone — CLOSED, there is nothing to buy (4 Oct 2026)
+Never tested, and it never will be. The app is free and Friendly is private, so
+no purchase exists on any platform and the billing paths were deleted from the
+code (`server/billing.js`, `server/store-billing.js`). Kept as the record of a
+step that stopped applying, not as anything still owed. Lessons stopped being a
+Pro feature on 1 Sep 2026; the paid tier itself went on 8 Sep 2026.
 
 ### 5. ✅ Billing Library 8 — CLOSED, already updated
 **Jacques, 26 Aug 2026: "it's already updated, no extension."** The shell is on

@@ -1100,7 +1100,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div style="font-size:.6875rem;color:var(--accent);margin-top:6px">Tap to use this prompt</div>
           </div>
           <div id="jour-prompt-free" style="display:none;background:var(--s1);border:0.5px dashed var(--bdr2);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;text-align:center;color:var(--ts);font-size:.78125rem" onclick="openProTool('proJournal')">
-            Guided prompts and emotional insights are part of <span style="color:var(--accent);font-weight:500">Pro</span>
+            Guided prompts and emotional insights live in the journal — tap to open it.
           </div>
           <div style="font-size:.8125rem;color:var(--tm);margin-bottom:10px">How are you feeling today?</div>
           <div class="mood-row" id="jour-mood-row">
@@ -2739,7 +2739,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <!-- GENERIC INFO MODAL (single acknowledgement, no false choice) -->
 <div class="sos-modal" id="info-modal" onclick="if(event.target===this)closeInfoModal()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)" id="info-modal-title">Pro</div>
+    <div class="sos-title" style="color:var(--accent)" id="info-modal-title">Heads up</div>
     <div class="sos-sub" id="info-modal-msg"></div>
     <button class="ob-btn" style="margin-top:8px" onclick="closeInfoModal()">OK</button>
   </div>

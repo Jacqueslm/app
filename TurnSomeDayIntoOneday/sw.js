@@ -10,12 +10,16 @@
 // Fixed 28 Aug; the cache name now tracks APP_VERSION in the page /app serves -
 // hub.html - so the two cannot drift apart unnoticed again.
 //
-// Taken back to 5.0 on 20 Sep 2026, at Jacques's word — the number is his to
-// pick and it is not a mistake. It still has to match APP_VERSION exactly, so
-// do not "correct" it upward on sight. The name is new to every install, so
-// each phone builds the cache fresh and drops the old one at activate, exactly
-// as it does on any other bump.
-const CACHE_NAME = 'tsid-shell-v5.2';
+// Taken back to 5.0 on 20 Sep 2026 and to 2.0 on 4 Oct 2026, at Jacques's word —
+// the number is his to pick and it is not a mistake, and it is not a step
+// backwards either: it only has to be a name no install has cached yet. It still
+// has to match APP_VERSION exactly, so do not "correct" it upward on sight. The
+// name is new to every install, so each phone builds the cache fresh and drops
+// the old one at activate, exactly as it does on any other bump.
+//
+// 2.0 goes with the app being named The Truth and the herb library getting its
+// read-aloud voice (4 Oct 2026), so an installed copy picks both up.
+const CACHE_NAME = 'tsid-shell-v2.0';
 const SHELL_FILES = [
   '/',
   '/app',

@@ -20,14 +20,27 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', '..');
 const HTML = fs.readFileSync(path.join(ROOT, 'herbs.html'), 'utf8');
 
+// The page's own inline script, cut out by index rather than by a regex over
+// HTML. The regex the sibling tests use is case-sensitive and silently misses an
+// uppercase <SCRIPT>, which is exactly the bug CodeQL flagged in the first
+// version of this file; a page is not a regular language, and this only has to
+// find the blocks this page actually ships.
 function inlineScript(file) {
   const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
-  let out = '';
-  for (const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
-    if (/\bsrc=/.test(m[1])) continue;
-    out += m[2] + '\n;\n';
+  const lower = html.toLowerCase();
+  const out = [];
+  let i = 0;
+  for (;;) {
+    const open = lower.indexOf('<script', i);
+    if (open === -1) break;
+    const openEnd = lower.indexOf('>', open);
+    const close = lower.indexOf('</script', openEnd);
+    if (openEnd === -1 || close === -1) break;
+    // A block with a src is somebody else's file, not the page's own script.
+    if (lower.slice(open + 7, openEnd).indexOf('src=') === -1) out.push(html.slice(openEnd + 1, close));
+    i = close + 1;
   }
-  return out;
+  return out.join('\n;\n');
 }
 
 function loadPage() {

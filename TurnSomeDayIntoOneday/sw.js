@@ -134,6 +134,12 @@ self.addEventListener('fetch', (event) => {
   // pages themselves, so their lines went too.
   if (['/herbs', '/herbs.html', '/tax', '/tax.html'].includes(url.pathname)) return;
 
+  // The Fight joined the same door on 4 Oct 2026, when the app became three
+  // things and this became one of them. Both addresses again - the clean URL and
+  // the file name reach the same gated route, so a cached copy of either would
+  // outlive the check that is supposed to be guarding it.
+  if (url.pathname === '/fight' || url.pathname === '/fight.html') return;
+
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 
   if (isPage) {

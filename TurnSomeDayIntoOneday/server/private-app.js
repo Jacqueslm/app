@@ -103,6 +103,11 @@ const OPEN_PAGES = [
   '/delete-account.html',
   '/letter.html',       // the page a letter link opens
   '/game3d.html',       // the 3D fight inside The Fight tab (added 13 Sep 2026)
+  // The Fight's own clean URL (4 Oct 2026). game3d.html is one of the three
+  // things the app still is, so it needs an address of its own that the gate
+  // lets through to the route that checks the door — the .html rule below only
+  // ever lets a request REACH a route, it never opens a page by itself.
+  '/fight', '/fight.html',
   // The herb library and the tax centre (15 Sep 2026): private, listed here
   // only so the request can reach the route that judges it. Both addresses
   // each, because each is a real FILE as well as a clean URL, and static would

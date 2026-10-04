@@ -4,14 +4,7 @@
   "outputDirectory": "webroot",
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "hub.html",
-        "key.html",
-        "herbs.html",
-        "tax.html",
-        "fight.html",
-        "game3d.html"
-      ]
+      "includeFiles": "{hub,key,herbs,tax,fight,game3d}.html"
     }
   },
   "rewrites": [

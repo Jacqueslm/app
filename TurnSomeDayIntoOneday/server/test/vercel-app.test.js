@@ -243,10 +243,16 @@ test('every gated address is rewritten into the function, file names included', 
 
 test('the pages travel inside the function, because they are not files out there', () => {
   const included = vercelJson.functions['api/index.js'].includeFiles;
-  const listed = Array.isArray(included) ? included : [included];
+  // A list here is rejected outright by Vercel: "Invalid request:
+  // functions.api/index.js.includeFiles should be string." — a real error, from
+  // the first import attempt on 4 Oct 2026. It takes one glob, so the six pages
+  // are named in a brace expansion and the test reads them back out of it.
+  assert.equal(typeof included, 'string', 'includeFiles is a string to Vercel, not a list');
+  assert.match(included, /\.html$/, 'a glob that does not end in .html matches no page');
   for (const page of PAGE_FILES) {
-    assert.ok(listed.includes(page),
-      `${page} has to be in the function bundle - nothing else can hand it over`);
+    const stem = page.replace('.html', '');
+    assert.ok(included.includes(stem),
+      `${page} (named "${stem}" in the glob) has to be in the function bundle - nothing else can hand it over`);
   }
 });
 

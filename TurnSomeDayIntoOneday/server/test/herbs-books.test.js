@@ -191,7 +191,10 @@ test('the herb library: the page makes its claims, and no longer refuses to', as
   // And the claims are in the page's own voice, on the page's own furniture.
   assert.match(html, /<div class="lbl">What it does<\/div>/, 'the herb card asks what it does, not what it was ever used for');
   assert.match(html, /The claims are made here/, 'and the safety tab says so plainly');
-  assert.match(html, /these are the books' claims and they are made here/, 'and the ask box is told to make them too');
+  assert.match(html, /The claims are made here plainly/, 'in the page\u2019s own voice, not in a prompt\u2019s');
+  // The ask box that used to be told to make them too came off the page with
+  // Friendly on 4 Oct 2026. The claims are the page's own and they stay.
+  assert.doesNotMatch(html, /Friendly/, 'no helper is left on the page');
 });
 
 test('the herb library: what was left off is in — the chart, the remedies, the food, the history', () => {

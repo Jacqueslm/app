@@ -2,9 +2,19 @@
 
 ## Where things stand, 4 Oct 2026 (read this first)
 
-**The app is three pages and nothing else.** `/app` serves `hub.html`, a small
+**The app is three pages and nothing else — and it is called The Truth.**
+Jacques named it on 4 Oct 2026 ("name the app the truth"); that is the name on
+the phone (the home-screen name), the browser tab, the shell heading and
+`manifest.json`. `/app` serves `hub.html`, a small
 shell holding three cards: the Zodiacs (`/key`), the Fight (`/fight`) and the
-Herbs (`/herbs`). Everything else is a reference page (`/tax`, `/privacy`,
+Herbs (`/herbs`).
+
+**The herb library has no Friendly on it.** The ask box came off `/herbs` on
+4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
+to me** button instead, which reads the entry out loud with the phone's own
+voice (`speechSynthesis`) — no key, no server, no cost and nothing sent
+anywhere. Its safety lines are unchanged and still on the page's own safety tab;
+the tax page's ask box is untouched. Everything else is a reference page (`/tax`, `/privacy`,
 `/delete-account`, `/letter.html`, `/admin/stats`), the 3D ring
 (`/game3d.html`), or an asset.
 

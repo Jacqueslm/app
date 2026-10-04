@@ -12,7 +12,9 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const PAGES = ['index.html', 'key.html'];
+// The pages whose long copy is a reading: key.html is the only one left that
+// carries a pageful of it. The recovery app's page was the other and is deleted.
+const PAGES = ['key.html'];
 
 function values(html) {
   const out = [];

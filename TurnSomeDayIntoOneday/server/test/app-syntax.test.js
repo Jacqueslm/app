@@ -3,7 +3,8 @@
 // of the script - so every button in the app did nothing, including sign-in,
 // and there was no error message anywhere because no code ran at all.
 //
-// index.html is one 733KB inline script and nothing was checking it. This does.
+// The app's own page was one 733KB inline script and nothing was checking it.
+// This does.
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
@@ -11,9 +12,9 @@ const path = require('path');
 const os = require('os');
 const { execFileSync } = require('child_process');
 
-// 4 Oct 2026: this read index.html, the recovery app, which is no longer served.
-// hub.html is the app now, and it brings its own inline script, so the same
-// guard moves with it. fight.html joined through the second test below.
+// 4 Oct 2026: this read the recovery app's page, which is deleted. hub.html is
+// the app now, and it brings its own inline script, so the same guard moves with
+// it. fight.html joined through the second test below.
 const APP = path.join(__dirname, '..', '..', 'hub.html');
 
 // Only real JavaScript. A <script type="application/ld+json"> block holds
@@ -67,9 +68,9 @@ test('the other shipped HTML pages parse too', () => {
   // when they were deleted with everything else trading: "remove the trading
   // game the desk everything about trading im done."
   // fight.html joined on 4 Oct 2026, and it is the reason this list matters more
-  // than it ever did: the fight is 669 lines of game lifted out of index.html
-  // into a page of its own, and a SyntaxError in it means the whole game is dead
-  // in the browser while the page still looks like it loaded.
+  // than it ever did: the fight is 669 lines of game lifted out of the recovery
+  // app into a page of its own, and a SyntaxError in it means the whole game is
+  // dead in the browser while the page still looks like it loaded.
   const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {

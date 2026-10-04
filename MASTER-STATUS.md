@@ -1,5 +1,14 @@
 # MASTER STATUS — every request, one place
 
+> **4 Oct 2026 — the Day One app is three pages now, and half of this log is
+> about the app it used to be.** `/app` serves `hub.html` (the Zodiacs, the Fight,
+> the Herbs). **The recovery app is deleted** — its page, its server routes and
+> the eighteen test files that read it — so every `index.html` reference below is
+> a dated entry about a file that no longer exists (it is in git before that
+> date), and the live rules further down that depend on it no longer apply. The
+> `Studio/web/index.html` references in this log are a DIFFERENT, live file and
+> are unaffected.
+
 **This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Sep 13, 2026.
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
@@ -1496,13 +1505,14 @@ is CC BY-NC-ND - never shippable in a paid app.
 
 ## House rule 13 — the ask-me-anything bot is updated with EVERY change (Jacques, 18 Aug 2026)
 
-Friendly is the app's ask-me-anything bot. Her app knowledge lives in
-`SYSTEM_APP_MAP` in TurnSomeDayIntoOneday/index.html, right above
-SYSTEM_FREE_ADDENDUM. **Any commit that ships, changes or removes a feature
-updates that block in the same commit.** No exceptions, no "later". A feature
-she doesn't know about is a feature she will deny exists - to the face of the
-person paying for it. She should know the app in and out, better than Jacques
-does.
+**Superseded 8 Sep 2026, and the bot is gone with the app (4 Oct 2026).** Friendly
+was the app's ask-me-anything bot and her app knowledge lived in
+`SYSTEM_APP_MAP`, a block in the app's page. The paid tier went on 8 Sep 2026,
+Friendly became the one private feature, and then the recovery app it described
+was deleted on 4 Oct 2026 — page, bot and block together. **The rule kept:** a
+feature that ships must be visible where a person would look for it, or they
+will be told it does not exist. It now applies to the three pages' own copy and
+to `START-HERE.md`, not to a bot block that is gone.
 
 ## House rule 14 — video format (Jacques, 18 Aug 2026)
 

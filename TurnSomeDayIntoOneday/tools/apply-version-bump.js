@@ -3,19 +3,20 @@
  *
  *   node tools/apply-version-bump.js 5.1
  *
- * HANDOFF.md, under Versioning: sw.js (CACHE_NAME), index.html (APP_VERSION),
+ * HANDOFF.md, under Versioning: sw.js (CACHE_NAME), hub.html (APP_VERSION),
  * package.json and server/package.json move together on every user-visible
  * change, because the service worker cache name is what makes an installed
  * phone build a fresh shell instead of serving the copy of /app it already has.
  * Nothing enforced the four moving together, so they drifted (sw.js sat at v9.0
- * while index.html went 9.4, 9.5, 9.6) and server/test/sw-version.test.js was
+ * while the app went 9.4, 9.5, 9.6) and server/test/sw-version.test.js was
  * written to catch the two that matter. This is the other half: it refuses to
  * touch anything unless all four currently name the same version, then writes
  * the new one to all four.
  *
- * index.html can only change through a script like this one - it is 1MB, and
- * the file tools match against a truncated read of it - so the bump lives here
- * rather than in a hand edit.
+ * The page holding APP_VERSION used to be the recovery app's page, which is
+ * deleted (4 Oct 2026); hub.html is what /app serves, so that is where the
+ * version lives now. hub.html is small enough to edit by hand, but the version
+ * thread across the four files is not, which is why this stays a script.
  *
  * Safe to run more than once: a second run reports the four are already at the
  * target and writes nothing.
@@ -39,7 +40,7 @@ const FILES = [
     build: (v) => `const CACHE_NAME = 'tsid-shell-v${v}';`,
   },
   {
-    file: 'index.html',
+    file: 'hub.html',
     re: /const APP_VERSION='(\d+(?:\.\d+)*)';/,
     build: (v) => `const APP_VERSION='${v}';`,
   },

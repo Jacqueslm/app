@@ -1,8 +1,33 @@
 # GAME-SPEC.md — "The Fight of Your Life"
 
-The recovery game inside Turn Someday Into Day One. The Fight tab opens it (the
-tab was "Game" until 6 Sep). The Climb lives on Today and in Tools. Code identifiers still say `tower`, `2AM`, `gm`,
-`g2-`.
+**The fight is a page of its own as of 4 Oct 2026** — `fight.html`, served at
+`/fight` and `/fight.html`, reached from the card on `/app`. It is no longer a tab
+inside anything. Code identifiers still say `tower`, `2AM`, `gm`, `g2-`.
+
+## What changed on 4 Oct 2026 (read this before the rest)
+
+The recovery app was deleted. `/app` is now a small shell holding three things —
+the Zodiacs, the Fight and the Herbs — and the fight's markup, its CSS and its
+javascript were lifted out of that app into `fight.html`. Three things below this
+note are now historical and superseded:
+
+1. **The game has no app to read.** The page keeps its own state under
+   `tsid-fight-v1` in `localStorage`, and it cannot see lessons, journals,
+   pledges or cravings — there is nothing there to see. **Strength is counted
+   from this page alone**: days here, floors cleared, buildings behind you.
+   Everything further down that says strength, the roof door or the lock reads
+   "today's lesson" or "the pledge" describes the design before that date, and is
+   kept for the record.
+2. **The track comes from the building, not from the app.** `gameTrack()` returns
+   `gameBuilding().track`. A supporter's building is its own — `The Checking` — so
+   a supporter still never fights their person's habit, but the page is no longer
+   told who is holding the phone.
+3. **There is no Fight tab and no Climb on it.** The shell has three cards. The
+   Climb, Today and Tools went with the recovery app.
+
+The game's own behaviours below — five floors and a roof, the counter rules, the
+house rules on words, the 3D ring on `/game3d.html`, no clock in the shell — all
+still hold and are enforced by `server/test/game.test.js`.
 
 **Rewritten 6 Sep 2026.** Jacques on the 3 Sep version: "the game is wack, the
 fight is ok but the questions on all levels are wack." The quick-fire floors are
@@ -23,8 +48,8 @@ app.
 "the questions on all levels are wack", then "the whole question is wacky, the
 graphics is not fun". Every building now opens on the roof. The addiction's own
 lines from `GAME_BOSSES` were not lost — they moved *into* the ring, said while
-it winds up, with two answers and a counter for the right one. The show code in
-`index.html` is unreachable and can be deleted; it is in git before this date.
+it winds up, with two answers and a counter for the right one. The show code was
+deleted with the recovery app on 4 Oct 2026; it is in git before that date.
 
 ---
 

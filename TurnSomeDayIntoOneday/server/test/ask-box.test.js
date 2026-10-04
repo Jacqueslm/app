@@ -1,10 +1,9 @@
 // The ask box on the two reference pages (/herbs and /tax).
 //
 // These pages are static HTML with their whole logic in one inline script, and
-// nothing was checking them: app-syntax.test.js only looked at index.html,
-// key.html, letter.html, admin-stats.html and landing.html until 15 Sep 2026,
-// when the ask box was added. A SyntaxError in either page would leave it
-// looking fine and doing nothing.
+// nothing was checking them: app-syntax.test.js did not read either page until
+// 15 Sep 2026, when the ask box was added. A SyntaxError in either page would
+// leave it looking fine and doing nothing.
 //
 // So this runs the page's real inline script in a stub DOM, with fetch stubbed
 // to a fake /api/chat, and drives the box the way a person's thumb does. It is

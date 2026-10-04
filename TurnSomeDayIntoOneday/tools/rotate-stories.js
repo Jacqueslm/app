@@ -23,7 +23,9 @@ const { execFileSync } = require('child_process');
 const ROOT = path.join(__dirname, '..');
 const DATA = path.join(ROOT, 'data', 'audio-stories.json');
 const LOG = path.join(ROOT, 'data', 'story-rotations.txt');
-const APP = path.join(ROOT, 'index.html');
+// 4 Oct 2026: APP_VERSION moved with the app. hub.html is what /app hands out
+// now, and it is the page whose version has to move with the cache name.
+const APP = path.join(ROOT, 'hub.html');
 const SW = path.join(ROOT, 'sw.js');
 const AUDIO_BRANCH = 'lesson-audio';
 
@@ -104,7 +106,7 @@ Written by tools/rotate-stories.js. Do not edit by hand.
 // Bump both, or installed phones keep serving the old shelf from the precache.
 let app = fs.readFileSync(APP, 'utf8');
 const vm = app.match(/const APP_VERSION='(\d+)\.(\d+)';/);
-if (!vm) die('Could not find APP_VERSION in index.html.');
+if (!vm) die('Could not find APP_VERSION in hub.html.');
 const newApp = `${vm[1]}.${Number(vm[2]) + 1}`;
 let sw = fs.readFileSync(SW, 'utf8');
 const cm = sw.match(/'tsid-shell-v(\d+)\.(\d+)'/);

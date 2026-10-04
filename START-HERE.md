@@ -3,6 +3,16 @@
 Orientation for Jacques and for any Claude session picking this up. Chat history
 does NOT carry between sessions — this repo is the shared memory. Read this first.
 
+> **4 Oct 2026 — read this before acting on anything below.** The Day One app is
+> three pages and nothing else: `/app` serves `hub.html`, a shell with cards for
+> the Zodiacs (`/key`), the Fight (`/fight`) and the Herbs (`/herbs`). **The
+> recovery app is deleted** — its page, its server routes and the eighteen test
+> files that read it. So any instruction below that says to edit
+> `TurnSomeDayIntoOneday/index.html` is dead: that file no longer exists, and it
+> is in git before that date. The file to edit today is `hub.html` (the shell),
+> `fight.html` (the game) or the page the feature lives on. References to
+> `Studio/web/index.html` are a DIFFERENT, live file and still apply.
+
 **RULE ONE — JACQUES GETS PDFs, NOT MARKDOWN.** He reads and forwards PDFs.
 A `.md` file handed to him is a file he cannot comfortably read on a phone or
 send to anyone. Every handover, summary, plan or research doc goes to him as a
@@ -551,9 +561,11 @@ were completed. Do not let that lapse unclaimed.
 
 Three separate apps in one repo (kept fully separate on disk):
 
-- **`TurnSomeDayIntoOneday/`** — the recovery app + companion for the person who
-  loves them. A web app (Node/Express server + `index.html` front end) wrapped as
-  an Android TWA for the Play Store. This is the one in active launch.
+- **`TurnSomeDayIntoOneday/`** — three pages and nothing else: the Zodiacs, The
+  Fight of Your Life and the Herb Library, in a shell at `/app`. A web app
+  (Node/Express server + `hub.html` / `fight.html` / `key.html` / `herbs.html` /
+  `tax.html` front end) wrapped as an Android TWA for the Play Store. The recovery
+  app that used to live here was deleted on 4 Oct 2026.
 - **`Studio/`** — an AI music-video / content-creation tool (separate product;
   used here to produce marketing videos: teleprompter, webcam recorder, AI scenes).
 - **`YourAI/`** — Jacques's private chat assistant (built 10 Sep 2026). Runs
@@ -858,7 +870,8 @@ do not chase before ~19 Aug. Missouri DBH stays parked behind it; the play when
 NASADAD lists us is one line back into the DBH thread, per NEW-AVENUES/COMPANIES.
 
 ### 15-16 Aug — App: repo locked down, navigation tour, real mini player
-Three things, all in the Day One app (TurnSomeDayIntoOneday/index.html):
+Three things, all in the Day One app (in the page that was then the whole app,
+deleted 4 Oct 2026):
 
 1. **THE REPO IS NOW PRIVATE (16 Aug).** `Jacqueslm/app` was **public** from the
 day it was connected — anyone could read and clone all of it: both apps, the
@@ -1132,9 +1145,9 @@ moderation + privacy + Data safety — a decision, not a build).
 
 ### Shipped today
 - **iPhone install fixed.** `landing.html` had **no manifest link and none of
-  the Apple home-screen tags** that `index.html` has always carried. Add to Home
-  Screen from the front page was saving a Safari bookmark to marketing copy
-  instead of installing the app. Broken long before this session. Now installs
+  the Apple home-screen tags** that the app's page carried. Add to Home Screen
+  from the front page was saving a Safari bookmark to marketing copy instead of
+  installing the app. Broken long before this session. Now installs
   correctly from `/` or `/app`. ("Daily Journal" on the icon is discretion
   mode working as designed — not a bug.)
 - **Studio b0844** — `▦ Panels`: **4-panel collage** and **Duet** (stacked
@@ -1359,7 +1372,7 @@ that opens `https://www.turnsomedayintodayone.com/app?src=play`. So:
 
 | Change | Play impact |
 |---|---|
-| Anything in `index.html`, `server/`, pages, lessons, audio, Studio | **None.** Ships with the Railway deploy. No .aab, no review, no clock reset. |
+| Anything in a shipped page (`hub.html`, `fight.html`, `key.html`, `herbs.html`, `tax.html`, `game3d.html`), `server/`, lessons, audio, Studio | **None.** Ships with the Railway deploy. No .aab, no review, no clock reset. |
 | A **web API** the page calls (wake lock, push, camera, notifications) | **None for the .aab** — the browser handles it, Android sees no new permission. |
 | Anything in `TurnSomeDayIntoOneday/twa/` — package name, icon, splash, target SDK, `startUrl` | **New .aab required.** Bump `appVersionCode`, `bubblewrap build`, re-upload. |
 | Anything that **collects new user data** | **No .aab, but the Data safety form must be updated BEFORE it ships.** |

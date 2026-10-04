@@ -1,16 +1,16 @@
 // The service worker cache name and APP_VERSION must move together.
 //
 // sw.js says so in its own header comment: "the cache name now tracks
-// APP_VERSION in index.html so the two cannot drift apart unnoticed again."
-// Nothing enforced it, so they drifted anyway - the cache sat at v9.0 while
-// index.html went 9.4, 9.5, 9.6. A stale cache name means the install event
+// APP_VERSION in the page /app serves so the two cannot drift apart unnoticed
+// again." Nothing enforced it, so they drifted anyway - the cache sat at v9.0
+// while the app went 9.4, 9.5, 9.6. A stale cache name means the install event
 // never repopulates the shell, so an installed user keeps being served the
 // old precached copy of /app whenever the network answer is not used - which
 // is exactly what "I'm seeing an old version" looks like from the outside.
 //
-// 4 Oct 2026: APP_VERSION moved with the app itself. index.html was the recovery
-// app and is no longer served; hub.html is what /app hands out now, so that is
-// where the version lives and that is what this reads.
+// 4 Oct 2026: APP_VERSION moved with the app itself. It used to live in the
+// recovery app's page, which is deleted; hub.html is what /app hands out now, so
+// that is where the version lives and that is what this reads.
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');

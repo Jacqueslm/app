@@ -1,144 +1,134 @@
-// "Save to my phone" in the app's Profile — 18 Sep 2026.
+// "Save to my phone" — the one install offer that still ships.
 //
 // Jacques, 18 Sep: "Put the same Save to my phone button in the main Day One
-// app." The Zodiacs page (key.html) has had one since the player was rebuilt;
-// this puts the same offer in Profile, where the rest of the settings live.
+// app." The Zodiacs page (key.html) had one already; the recovery app got its
+// own copy of the same offer in Profile.
 //
-// The wiring is small but it is not nothing: it is the difference between a row
-// that hands the job to the browser's own installer and a row that tells an
-// iPhone owner to go looking for a button Safari does not have. So the block is
-// taken out of index.html and RUN here, in a fake page, rather than inspected as
-// text. A regex can prove a function exists; it cannot prove which of the two
-// answers the phone gets.
+// 4 Oct 2026: the recovery app is deleted, along with the tests that read its
+// page. The Zodiacs page is what is left, and this file now guards that one
+// offer instead of two. The parts of it that matter are unchanged, because
+// they are the difference between a button that hands the job to the browser's
+// own installer and a button that tells an iPhone owner to go looking for a
+// button Safari does not have.
+//
+// rpInstall is taken out of the page and RUN here rather than inspected as text:
+// a regex can prove the function exists, it cannot prove which answer a phone
+// gets.
+//
+// Run:  cd TurnSomeDayIntoOneday/server && npm test
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const APP = path.join(__dirname, '..', '..', 'index.html');
 const KEY = path.join(__dirname, '..', '..', 'key.html');
-const html = fs.readFileSync(APP, 'utf8');
+const html = fs.readFileSync(KEY, 'utf8');
 
-// The block index.html carries, from its banner comment to the last line of it.
-// Both markers are asserted, so a rename fails loudly instead of quietly
-// testing three lines of something else.
-const MARK = '// ─── SAVE TO MY PHONE';
-function blockSource() {
-  const start = html.indexOf(MARK);
-  assert.ok(start > -1, 'the install block must be in index.html');
-  const endMark = html.indexOf('\ndayOneInstallRow();\n', start);
-  assert.ok(endMark > -1, 'the install block must end by refreshing the row');
-  const src = html.slice(start, endMark + '\ndayOneInstallRow();\n'.length);
-  assert.ok(!/renderIcons|boot\(\)/.test(src), 'the block is on its own, not the boot section');
+// The functions as the page ships them: the banner and the two answers, then the
+// handler itself. rpNote is left out on purpose - the note it draws is DOM, and
+// this is the behaviour underneath it. Both markers are asserted, so a rename
+// fails loudly instead of quietly testing three lines of something else.
+function installSource() {
+  const start = html.indexOf('  var installEvent = null;\n  function rpStandalone(){');
+  assert.ok(start > -1, 'the install banner must be in key.html');
+  const mid = html.indexOf('  function rpNote(', start);
+  assert.ok(mid > start, 'the banner must end where the note is drawn');
+  const tap = html.indexOf('  function rpInstall(){');
+  assert.ok(tap > mid, 'the handler must sit below the note');
+  const end = html.indexOf('  window.addEventListener(\'beforeinstallprompt\'', tap);
+  assert.ok(end > tap, 'the handler must end at the browser offer');
+  const src = html.slice(start, mid) + html.slice(tap, end);
+  assert.ok(/function rpStandalone\(\)/.test(src) && /function rpApple\(\)/.test(src) && /function rpInstall\(\)/.test(src),
+    'the whole offer is read from the same place');
   return src;
 }
 
-function fakePage(opts) {
+const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+const MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
+const ANDROID = 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Mobile Safari/537.36';
+
+function page(opts) {
   opts = opts || {};
-  const appInfoCalls = [];
-  const row = { id: 'd1-install-row', style: { display: '' } };
-  const listeners = {};
+  const notes = [];
   const prompted = [];
   const sandbox = {
-    console, Object, Array, String, Number, Boolean, RegExp, Error, JSON, Math,
-    document: { getElementById: (id) => (id === 'd1-install-row' ? row : null) },
-    navigator: { userAgent: opts.ua || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+    console, Object, Array, String, Number, Boolean, RegExp, Error, JSON,
+    document: opts.touch ? { addEventListener() {}, ontouchend: null } : { addEventListener() {} },
+    navigator: { userAgent: opts.ua || ANDROID, standalone: !!opts.iosStandalone },
     matchMedia: () => ({ matches: !!opts.standalone }),
-    appInfo: (title, message) => appInfoCalls.push([title, message]),
-    addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
+    rpNote: (title, body) => notes.push({ title, body }),
   };
   sandbox.window = sandbox;
-  sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
-  vm.runInContext(blockSource(), sandbox, { filename: 'day-one-install.js' });
-  return {
-    sandbox, appInfoCalls, row,
-    rowShown() { return !opts.standalone; },
-    install() { sandbox.dayOneInstall(); },
-    offerInstall() {
-      (listeners.beforeinstallprompt || []).forEach((fn) => fn({
-        preventDefault() {},
-        prompt() { prompted.push(1); },
-      }));
-    },
-    prompted,
-  };
+  vm.runInContext(installSource() + '\nthis.rpInstall=rpInstall;this.rpStandalone=rpStandalone;this.rpApple=rpApple;', sandbox,
+    { filename: 'key-install.js' });
+  // installEvent is set by the page's own beforeinstallprompt listener; here it
+  // is set the same way, before the tap, exactly as a browser would.
+  sandbox.installEvent = opts.pending ? { prompt: () => prompted.push(1) } : null;
+  return { notes, prompted, sandbox, tap: () => sandbox.rpInstall() };
 }
 
-const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
-
-/* ------------------------------------------------------------------ the offer */
-
-test('Profile carries the offer, at the top of the same block the settings sit in', () => {
-  const at = html.indexOf('id="d1-install-row"');
-  assert.ok(at > -1, 'the row must be in the app');
-  const row = html.slice(at, at + 600);
-  assert.match(row, /onclick="dayOneInstall\(\)"/, 'and it must do something when tapped');
-  assert.match(row, /Save to my phone</, 'with the same words the Zodiacs page uses');
-  // The row belongs with the app-about rows, not buried in the account ones.
-  assert.ok(at > html.indexOf('Privacy Policy'), 'after the legal rows');
-  assert.ok(at < html.indexOf('id="app-version-txt"'), 'and above the version line');
+test('the Zodiacs page carries the offer, and it is wired to something', () => {
+  assert.match(html, />Save to my phone</, 'the button is there, in those words');
+  assert.match(html, /id="rp-install"/, 'and it has the id the handler looks for');
+  assert.match(html, /if\(t\.id === 'rp-install'\)\{ rpInstall\(\); return; \}/, 'a tap on it calls rpInstall');
+  assert.match(html, /if\(ib\) ib\.hidden = rpStandalone\(\);/, 'already saved: the button is retired, not left doing nothing');
+  // One button and one handler — a leftover id from an earlier pass would be two.
+  assert.strictEqual(html.split('id="rp-install"').length - 1, 1);
+  assert.match(html, /window\.addEventListener\('beforeinstallprompt'/, 'the browser offer is caught when it comes');
 });
-
-test('it is the same offer as the Zodiacs page, not a second, conflicting one', () => {
-  const key = fs.readFileSync(KEY, 'utf8');
-  assert.match(key, />Save to my phone</, 'key.html still offers it too');
-  assert.match(html, /function dayOneInstall\(\)/, 'and the app has its own copy of the logic');
-  // One row, one handler — a leftover id from an earlier pass would be two.
-  assert.strictEqual(html.split('id="d1-install-row"').length - 1, 1);
-  assert.strictEqual(html.split('function dayOneInstall()').length - 1, 1);
-});
-
-/* ----------------------------------------------------------------- the wiring */
 
 test('where the browser offers a real install, that is what gets used', () => {
-  const p = fakePage({});
-  p.offerInstall();
-  p.install();
-  assert.strictEqual(p.prompted.length, 1, 'the browser\'s own prompt is what runs');
-  assert.strictEqual(p.appInfoCalls.length, 0, 'so no explanation is needed');
+  const p = page({ pending: true });
+  p.tap();
+  assert.strictEqual(p.prompted.length, 1, "the browser's own prompt is what runs");
+  assert.strictEqual(p.notes.length, 0, 'so no explanation is needed');
 });
 
 test('on an iPhone it gives the two taps, because Safari has no install button', () => {
-  const p = fakePage({ ua: IPHONE });
-  p.install();
-  assert.strictEqual(p.appInfoCalls.length, 1);
-  const [title, msg] = p.appInfoCalls[0];
-  assert.match(title, /home screen/i);
-  assert.match(msg, /Share/, 'the button that exists');
-  assert.match(msg, /Add to Home Screen/, 'and where to go in it');
-  assert.doesNotMatch(msg, /browser menu/, 'never the Android answer on an iPhone');
-  assert.match(msg, /Nothing is downloaded and nothing is charged/,
+  const p = page({ ua: IPHONE });
+  p.tap();
+  assert.strictEqual(p.notes.length, 1);
+  const [note] = p.notes;
+  assert.match(note.title, /home screen/i);
+  assert.match(note.body, /Share/, 'the button that exists');
+  assert.match(note.body, /Add to Home Screen/, 'and where to go in it');
+  assert.doesNotMatch(note.body, /browser menu/, 'never the Android answer on an iPhone');
+  assert.match(note.body, /Nothing is downloaded and nothing is charged/,
     'it never claims to be something it is not');
 });
 
+test('an iPad that calls itself a Mac is still an iPad', () => {
+  // iPadOS 13+ reports itself as a Macintosh. Without the touch check it would
+  // be sent down the desktop answer, which is the wrong two taps.
+  const p = page({ ua: MAC, touch: true });
+  p.tap();
+  assert.match(p.notes[0].body, /Add to Home Screen/, 'given the iPad answer');
+  assert.doesNotMatch(p.notes[0].body, /browser menu/);
+});
+
 test('everywhere else it points at the browser menu, not at Safari', () => {
-  const p = fakePage({});
-  p.install();
-  const [, msg] = p.appInfoCalls[0];
-  assert.match(msg, /browser menu/);
-  assert.match(msg, /Add to Home screen/i);
-  assert.doesNotMatch(msg, /Share button in Safari/, 'never the iPhone answer elsewhere');
+  const p = page({ ua: ANDROID });
+  p.tap();
+  const [note] = p.notes;
+  assert.match(note.body, /browser menu/);
+  assert.match(note.body, /Add to Home screen/i);
+  assert.doesNotMatch(note.body, /Share button in Safari/, 'never the iPhone answer elsewhere');
 });
 
-test('once it is on the home screen the offer is withdrawn, and says so if asked', () => {
-  const done = fakePage({ standalone: true });
-  assert.strictEqual(done.row.style.display, 'none',
-    'already saved: the row is retired rather than left there doing nothing');
-  done.install();
-  assert.strictEqual(done.appInfoCalls.length, 1);
-  assert.match(done.appInfoCalls[0][0], /Already saved/);
-  assert.strictEqual(done.prompted.length, 0, 'and nothing is prompted');
-
-  const fresh = fakePage({});
-  assert.notStrictEqual(fresh.row.style.display, 'none',
-    'not saved yet: the row is there to be tapped');
+test('once it is on the home screen the tap is answered as already saved', () => {
+  const p = page({ standalone: true });
+  assert.strictEqual(p.sandbox.rpStandalone(), true, 'the display mode is read, not guessed');
+  p.tap();
+  assert.strictEqual(p.notes.length, 1);
+  assert.match(p.notes[0].title, /Already saved/);
+  assert.strictEqual(p.prompted.length, 0, 'and nothing is prompted');
 });
 
-test('the install is said in the app\'s own voice, not with a browser popup', () => {
-  const src = blockSource();
-  assert.match(src, /appInfo\(/, 'every answer goes through the app\'s own modal');
+test('the offer is the page\'s own note, never a native popup or another site', () => {
+  const src = installSource();
+  assert.match(src, /rpNote\(/, "every answer goes through the page's own note");
   assert.doesNotMatch(src, /\balert\(/, 'never a native alert');
   assert.doesNotMatch(src, /https?:\/\//, 'and it never sends anyone to another site');
 });

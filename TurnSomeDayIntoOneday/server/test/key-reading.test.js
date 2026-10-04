@@ -112,8 +112,8 @@ test('the Gemini key never reaches a page or a response', () => {
     'the request URL must not carry the key');
   assert.ok(!/res\.json\([^)]*\bkey\b/.test(ROUTE) && !/json\(\{\s*key/.test(ROUTE),
     'and never in a response body');
-  // index.html was in this loop until 4 Oct 2026. It is no longer served, and
-  // the only page left that could leak the key is the one that uses it.
+  // The recovery app's page was in this loop until 4 Oct 2026. It is deleted,
+  // and the only page left that could leak the key is the one that uses it.
   for (const page of ['key.html']) {
     const text = fs.readFileSync(path.join(ROOT, page), 'utf8');
     assert.ok(!/GEMINI_API_KEY|ANTHROPIC_API_KEY/.test(text),

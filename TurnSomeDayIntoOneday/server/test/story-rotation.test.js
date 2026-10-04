@@ -5,63 +5,21 @@
 //
 // So the shelf is no longer a function of the date. It is whatever set the
 // `live` field in data/audio-stories.json names, and it moves only when that
-// word is edited and shipped. These tests guard the two things that can go
-// quietly wrong: the app going back to a timer, and `live` naming a set that
-// isn't there (which would silently show the wrong ten).
+// word is edited and shipped. These tests guard the data file and the tool that
+// rotates it.
+//
+// 4 Oct 2026: the recovery app is deleted, along with the tests that read its
+// page. The seven tests that read the story shelf out of that page went with it -
+// they were guards on code that no longer exists anywhere. What is left is what
+// is still on disk: the data file, its rotation log, and the tool. The shelf as
+// rendered has no page to be checked on, so nothing here claims to check it.
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-const APP = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const DATA = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'audio-stories.json'), 'utf8'));
-
-// The two pure functions exactly as shipped, with their globals injected.
-function shelfFor(batchIds, liveId, batches) {
-  const i = batchIds.indexOf(liveId);
-  return (batches[i >= 0 ? i : 0] || []).slice();
-}
-
-const setA = Array.from({ length: 10 }, (_, i) => `a${i + 1}`);
-const setB = Array.from({ length: 10 }, (_, i) => `b${i + 1}`);
-
-test('nothing in the shipped shelf code depends on the date', () => {
-  assert.doesNotMatch(APP, /STORY_FORTNIGHT_DAYS/,
-    'the fortnight timer is gone - a new set must never publish itself');
-  assert.match(APP, /STORY_LIVE_ID=d\.live\|\|''/, 'the shelf is named, not calculated');
-});
-
-test('the live set is served whole - all ten, not five', () => {
-  assert.deepEqual(shelfFor(['set-1', 'set-2'], 'set-1', [setA, setB]), setA);
-  assert.equal(shelfFor(['set-1', 'set-2'], 'set-1', [setA, setB]).length, 10);
-  assert.doesNotMatch(APP, /set\.slice\(5,10\)/, 'sets no longer split in half');
-});
-
-test('a set written but not named live stays off the shelf', () => {
-  const shelf = shelfFor(['set-1', 'set-2'], 'set-1', [setA, setB]);
-  assert.equal(shelf.filter((x) => setB.includes(x)).length, 0,
-    'adding the next ten to the file must not publish them');
-});
-
-test('rotating is one word - naming the other set swaps all ten', () => {
-  assert.deepEqual(shelfFor(['set-1', 'set-2'], 'set-2', [setA, setB]), setB);
-});
-
-test('an unknown or missing live id falls back to the first set, never empty', () => {
-  assert.deepEqual(shelfFor(['set-1', 'set-2'], 'set-3', [setA, setB]), setA, 'typo');
-  assert.deepEqual(shelfFor(['set-1', 'set-2'], '', [setA, setB]), setA, 'no live field');
-});
-
-test('a flat file with no batches is read as a single set', () => {
-  assert.match(APP, /Array\.isArray\(d\.batches\)&&d\.batches\.length/, 'batches when present');
-  assert.match(APP, /\{id:'all',stories:d\.stories\|\|\[\]\}/, 'falls back to the flat list');
-});
-
-test('every story ever published stays looked-up-able by id', () => {
-  assert.match(APP, /STORIES_POOL=STORY_BATCHES\.reduce\(\(a,b\)=>a\.concat\(b\),\[\]\)/,
-    'the player reads titles from this, including for a story off the shelf');
-});
 
 test('the data file names a set that actually exists', () => {
   const ids = DATA.batches.map((b) => b.id);
@@ -118,4 +76,12 @@ test('the rotation tool is the thing that does it, and it deletes', () => {
   assert.match(tool, /data\.batches = kept/, 'the retired sets are dropped from the file');
   assert.match(tool, /git rm/, 'and their recordings are deleted from the audio branch');
   assert.match(tool, /APP_VERSION='\$\{newApp\}'/, 'and the version bumps, or phones keep the old shelf');
+  // The version it bumps has to be the version the shipping page declares, or
+  // the bump moves a number nothing reads and every installed phone keeps the
+  // old shelf - the exact failure this tool exists to prevent.
+  assert.match(tool, /const APP = path\.join\(ROOT, 'hub\.html'\)/,
+    'the version bumped is the one the page /app hands out declares');
+  assert.match(fs.readFileSync(path.join(ROOT, 'hub.html'), 'utf8'), /const APP_VERSION='/,
+    'and that page does declare it');
+  assert.doesNotMatch(tool, /index\.html/, 'and it no longer reaches for a page that is gone');
 });

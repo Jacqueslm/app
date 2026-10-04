@@ -302,11 +302,21 @@ that day off each provider's own pricing page or docs, not off blogs.
 Three things a host must do, and they are why most of these fail: **not sleep**
 (the hourly email scheduler needs it), **keep a disk** (the SQLite database
 lives there), and **carry real bandwidth** (the app ships 63MB of images and 3D
-models in `img/` and 37MB of audio in `audio/`; one meditation track is ~3MB).
+models in `img/` and 37MB of audio in `audio/`; the 3D ring alone is
+`game3d.html` at 156KB plus `js/ring3d-three.js` at 832KB, fetched once per
+fight).
+
+**4 Oct 2026 — the numbers below changed.** The app is three pages now and the
+recovery app's 1MB page is deleted. The pages that ship, measured on disk:
+`hub.html` 10KB, `fight.html` 86KB, `game3d.html` 156KB, `tax.html` 38KB,
+`herbs.html` 191KB, and **`key.html` 1.38MB** — the Zodiacs page is the biggest
+thing served now, larger than the page that was deleted. So a bandwidth
+argument that rested on the old file has to be re-made on these numbers, not on
+the old one.
 
 | Host | Verdict |
 |---|---|
-| **Google Cloud** | 1 e2-micro always free, 30GB disk, Oregon/Iowa/South Carolina — but only **1GB outbound per month**. `index.html` is **1,022,626 bytes** and nothing in `server/` compresses it, so that is roughly 300 meditation plays a month. **Dead for this app.** |
+| **Google Cloud** | 1 e2-micro always free, 30GB disk, Oregon/Iowa/South Carolina — but only **1GB outbound per month**. Nothing in `server/` compresses what it sends: `key.html` alone is **1.38MB**, so one zodiac reading costs about a seventh of the whole month's allowance, and the ring is another 1MB on top. **Re-check this row before deciding** — the file it was first judged on (the recovery app's 1MB page) is deleted, and the heaviest page left is bigger than it was. |
 | **Oracle Cloud** | The only free tier that meets all three: **10TB out per month**, 200GB disk, 2 cores/12GB. He tried to create one and got **"out of host capacity"** — Oracle's own doc answer is a different availability domain, the AMD micro shape instead of the ARM one, or upgrading to pay-as-you-go (always-free shapes stay free). He stopped there. |
 | **Render (free)** | Sleeps after 15 minutes idle, no disk on free, and their docs say not to use free for production. **Dead.** |
 | **Northflank Sandbox** | Genuinely always-on with no sleeping (rare), 2 services + 1 database — but their own billing doc says do not run production on it, a card is required before anything can be created, and storage is a paid extra. **Not for this.** |
@@ -338,7 +348,8 @@ subscription** on his own active plan and got:
 Every cancel went to the Stripe billing portal, and a Play subscriber has no
 Stripe customer, so `createPortalSession` threw that message at somebody
 looking at a live subscription. The client had no idea `billing_source` even
-existed — the word appeared nowhere in index.html.
+existed — the word appeared nowhere in the app's page (the recovery app, since
+deleted; it is in git before 4 Oct 2026).
 
 Fixed: `/api/billing/status` now returns `billingSource` and `storeProductId`;
 the app routes Cancel and Resume to the Google Play subscriptions page when
@@ -353,7 +364,7 @@ including that lifetime is still answered before any billing route is chosen.
 ### 🔴 I BROKE THE LIVE APP FOR ~25 MINUTES (29 Aug) — app 7.4 is the fix
 
 App 7.3 shipped `const PLAY_PACKAGE='com.turnsomedayintodayone.app';` a second
-time. It was already declared at index.html:11565. A duplicate `const` is a
+time. It was already declared in the same file further up. A duplicate `const` is a
 **SyntaxError**, and a SyntaxError means the browser parses **none** of the
 script — so every button in the app did nothing. Sign-in did nothing. There was
 no error message anywhere, because no code ran at all.
@@ -361,18 +372,20 @@ no error message anywhere, because no code ran at all.
 Jacques found it the hard way: reinstalled twice, then reported "it does
 nothing". He was right and I had shipped it.
 
-**Root cause of the root cause: nothing was checking that index.html parses.**
-It is one 733KB inline script, edited constantly by scripted find-and-replace,
+**Root cause of the root cause: nothing was checking that the page parses.**
+It was one 733KB inline script, edited constantly by scripted find-and-replace,
 and a single duplicate identifier takes the whole product down silently.
 
-`server/test/app-syntax.test.js` now extracts every inline script from
-index.html and the other shipped pages and runs `node --check` on each. It
+`server/test/app-syntax.test.js` extracts every inline script from every shipped
+page — `hub.html` and, since 4 Oct 2026, the pages listed in it — and runs
+`node --check` on each. It
 excludes `type="application/ld+json"` blocks, which are structured data rather
 than JavaScript — checking those as JS reported a false failure on reviews.html
 the first time round.
 
-**Rule from this: never ship an index.html edit without running the tests.**
-The suite catches this in under a second; a person cannot eyeball 733KB.
+**Rule from this: never ship a page edit without running the tests.** The suite
+catches this in under a second; a person cannot eyeball a megabyte of inline
+script, and the biggest page now is `key.html` at 1.38MB.
 
 ### Stories now rotate in fortnightly SETS (29 Aug) — app 7.5
 

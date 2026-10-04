@@ -37,7 +37,8 @@ MANIFEST = os.path.join(HERE, 'data', 'lesson-audio-manifest.json')
 MP3_KBPS = 40
 LENGTH_SCALE = 1.05  # same conversational pace as the day 1-30 recordings
 
-# Must mirror HABIT_WORDS in index.html.
+# HABIT_WORDS was mirrored from the recovery app's page, which was deleted on
+# 4 Oct 2026. This is the only copy left.
 HABIT_WORDS = {'Alcohol': 'drinking', 'Porn & Sex': 'porn', 'Smoking': 'smoking',
                'Substances': 'using', 'Gambling': 'gambling', 'Social media': 'the scroll',
                'Gaming': 'gaming', 'Food / Binging': 'binging', 'Shopping / Spending': 'the spending',

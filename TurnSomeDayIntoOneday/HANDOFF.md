@@ -1,5 +1,35 @@
 # Handoff — Turn Someday Into Day One
 
+## Where things stand, 4 Oct 2026 (read this first)
+
+**The app is three pages and nothing else.** `/app` serves `hub.html`, a small
+shell holding three cards: the Zodiacs (`/key`), the Fight (`/fight`) and the
+Herbs (`/herbs`). Everything else is a reference page (`/tax`, `/privacy`,
+`/delete-account`, `/letter.html`, `/admin/stats`), the 3D ring
+(`/game3d.html`), or an asset.
+
+**The recovery app is deleted.** Its page — the 15,000-line single file every
+entry below calls `index.html` — was removed on 4 Oct 2026, along with the
+server routes that served it and the eighteen test files that read it. Anything
+below this note that names that file, or describes editing it, is a dated record
+of work done while it existed. **Nothing edits it now, and no rule about it
+applies.** Where an entry says to change a version, a screen or a helper, the
+file to change today is almost always `hub.html` (the shell), `fight.html` (the
+game) or the page the feature lives on.
+
+**What is live and what is not.** The day counter, the lesson programs, the
+journal, the SOS tools, the weeklies and Friendly were all part of that app and
+went with it. `/app` is free and private: the door is the `FRIENDLY_EMAILS`
+allowlist plus the owner address. Nothing is sold, so ignore every entry below
+about payments, Stripe, rooms or the store listing billing.
+
+**The push rule (from CLAUDE.md, and it is the current one):** never push unless
+Jacques says push. When he does: `claude/new-session-im7bzg`, then `main`, then
+`claude/vibe-code-uwxxlk` — all three, same commit. The branch names in older
+entries below are out of date.
+
+---
+
 ## Where the game is, 6 Sep 2026 (read this first if you are continuing the game work)
 
 Jacques is rebuilding **The Fight of Your Life** (The Fight tab) with the person
@@ -268,7 +298,8 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   is the same fight with the blobs taken out: three.js moved to
   `js/ring3d-three.js` and every model and sound loads from `img/fight/` and
   `audio/fight/`, so it is **724 KB instead of 15.6 MB and opens in 2.5 s**.
-  The app's roof screen (`startFight` in `index.html`) now mounts it in a
+  The game's roof screen (`startFight`, in the app's page then, now in
+  `fight.html`) mounted it in a
   full-screen iframe (`#g2-3d`) and hands it, by postMessage, the person's own
   opponent and its lines from `GAME_BOSSES` at the building's tier, their
   boxer (1-9 mapped onto the five 3D bodies), glove colour, building, place
@@ -286,8 +317,8 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   sends every building straight to `renderRoofDoor()` and `gameNextBuilding()`
   starts the next building on its roof; the floor strip in the header counts
   buildings instead of floors. The shows' code (`renderDoor`, `gameSpin`, the
-  three shows) is still in `index.html` but unreachable — **delete it once he
-  confirms he likes the simpler game**. Nothing was lost: the addiction's lines
+  three shows) stayed in that file, unreachable, until it was deleted with the
+  rest of the recovery app on 4 Oct 2026. Nothing was lost: the addiction's lines
   live in the ring now.
 - **The corner, sitting, and a 360 camera (10.6).** His notes: the fighter
   stood instead of sitting, the trainer did nothing, and he wanted the camera
@@ -377,29 +408,42 @@ the Latino man (4) and the white woman (8) are punch-only.
 ---
 
 State as of 3 August 2026. Written so someone picking this up cold does not have
-to rediscover it. Current version: **5.1** (`APP_VERSION` in `index.html`,
-`tsid-shell-v5.1` in `sw.js` — the line was deliberately renamed from 12.x
-back to 7, the same kind of reset done once before launch; the in-app updater
-compares commit SHAs, so the number only has to change, never increase).
+to rediscover it. Written when the app was still one page; the app it describes
+was deleted on 4 Oct 2026 (see the top of this file). Current version:
+**5.2** (`APP_VERSION` in `hub.html`, `tsid-shell-v5.2` in `sw.js` — the line was
+deliberately renamed from 12.x back to 7, the same kind of reset done once
+before launch; the number only has to change, never increase).
 
 ---
 
 ## What this is
 
-A recovery companion — day counter, 30-day lesson programs, private journal,
-SOS tools, and an AI companion called **Friendly**. Live, taking real payments.
-One person built it and runs it.
-
-Two audiences share the same app: people working on their own recovery, and
-people supporting someone else. That split runs through the whole codebase.
+**Three pages and nothing else, free and private.** The Zodiacs (`/key`), the
+Fight of Your Life (`/fight`) and the Herb Library (`/herbs`), reached from the
+shell at `/app`, plus a reference page for tax, the policy pages the store
+requires, a letter link and the owner's stats page. The day counter, the lesson
+programs, the journal, the SOS tools, the weeklies, the live rooms and the AI
+companion all belonged to the recovery app that was deleted on 4 Oct 2026.
+Nothing is sold. One person built it and runs it.
 
 ## Shape of it
 
-- `index.html` — the entire client, ~9,000 lines, no build step. Plain JS.
+- `hub.html` — the shell at `/app`: three cards, the sign-in form and the door.
+- `fight.html` — the game, a page of its own. `game3d.html` — the 3D ring it
+  frames for the roof.
+- `key.html` (The Zodiacs), `herbs.html` (the Herb Library), `tax.html` — the
+  private reference pages. `letter.html`, `admin-stats.html`, `privacy.html`,
+  `delete-account.html` — the plumbing and the policy pages.
 - `server/` — Node/Express, `node:sqlite`. `server.js` routes, `db.js` schema,
-  `billing.js` Stripe, `store-billing.js` Play/Apple, `email.js`.
+  `auth.js`, `private-app.js` (the door), `key-reading.js`, `push.js`,
+  `backup.js`, `email.js`, `analytics.js`.
+- `img/fight/` and `audio/fight/` — the fight's art and sound. `js/ring3d-three.js`
+  — three.js for the ring, loaded by `game3d.html` only.
 - `data/lessons/lesson1..13.json` → `node data/build-lessons.js` → `lessons.json`.
-  **390 lessons, ~166k words. Never hand-edit `lessons.json`.**
+  **390 lessons, ~166k words. Never hand-edit `lessons.json`.** Kept, but **no
+  page serves lessons any more** (4 Oct 2026) - the reader that used it was the
+  recovery app. Same for `data/stories.json`, `data/audio-stories.json` and the
+  lesson audio below: the files and the tools stay, the screens are gone.
 - Lesson audio: real recordings (five Piper voices, same as the SOS talk) live
   on the repo's **`lesson-audio` branch** — never merged, served straight from
   `raw.githubusercontent.com`, so they add zero weight to Railway builds and
@@ -421,7 +465,7 @@ Every commit gets pushed to `claude/app-qc-competitive-analysis-lehsn9` **and**
 
 ### Versioning
 Four files move together on every user-visible change: `sw.js` (`CACHE_NAME`),
-`index.html` (`APP_VERSION`), `package.json`, `server/package.json`. The service
+`hub.html` (`APP_VERSION`), `package.json`, `server/package.json`. The service
 worker cache name must change or clients keep the old shell. The number was
 deliberately reset from 35 to 7 before launch; it is now 5.2 (5.0.0 was a reset from 7.0.3 at the owner's request, 6 Aug 2026 — the number only has to change, never increase).
 

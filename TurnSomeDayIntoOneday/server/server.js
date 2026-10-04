@@ -321,12 +321,12 @@ app.get('/key.html', (req, res) => res.status(404).end());
 app.get('/fight', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
+  res.sendFile(path.join(__dirname, '..', 'fight.html'));
 });
 app.get('/fight.html', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
+  res.sendFile(path.join(__dirname, '..', 'fight.html'));
 });
 // THE THIRD ADDRESS, and the one that matters most. game3d.html was served
 // straight off disk by express.static below, because it sat on the gate's open
@@ -343,6 +343,12 @@ app.get('/game3d.html', pageLimiter, (req, res) => {
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'game3d.html'));
 });
+// The game's own route, added 4 Oct 2026. The fight became its own page instead
+// of a tab inside the recovery app, so its markup, its CSS and its 669 lines of
+// JavaScript moved out of index.html and into fight.html. /fight serves the
+// page; the page frames /game3d.html for the roof. The two are separate on
+// purpose — the ring is a self-contained 3D engine, and the game around it has
+// no business loading three.js to draw a menu.
 app.get('/herbs', (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');

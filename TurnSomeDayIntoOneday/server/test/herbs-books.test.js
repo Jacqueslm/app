@@ -240,9 +240,9 @@ test('the herb library: searching finds a herb by the book words too', () => {
 
 test('the app no longer prints a herb count it cannot keep true', () => {
   // It said 244. The library now holds more than that, and the count is the one
-  // thing on that row that goes stale by itself.
-  const index = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  assert.doesNotMatch(index, /\b\d+ herbs\b/, 'no number of herbs is printed anywhere in index.html');
-  assert.match(index, /location\.href='\/herbs'/, 'and the library is still a door in the app');
-  assert.match(index, /Herbs, seasonings and cleansers/, 'the row says what is behind it instead');
+  // thing that goes stale by itself. The row that carried it went with the
+  // recovery app on 4 Oct 2026, so the check reads the shell that replaced it.
+  const shell = fs.readFileSync(path.join(ROOT, 'hub.html'), 'utf8');
+  assert.doesNotMatch(shell, /\b\d+ herbs\b/, 'no number of herbs is printed anywhere in the shell');
+  assert.match(shell, /href="\/herbs"/, 'and the library is still a door in the app');
 });

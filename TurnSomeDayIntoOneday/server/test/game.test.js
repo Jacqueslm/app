@@ -22,7 +22,14 @@ const path = require('path');
 const vm = require('vm');
 
 const ROOT = path.join(__dirname, '..', '..');
-const APP = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+// 4 Oct 2026: the fight is its own page now. Its markup, its CSS and its 669
+// lines of JavaScript were lifted out of index.html into fight.html, and this
+// is the file that has to be read if these tests are to describe what ships.
+const APP = fs.readFileSync(path.join(ROOT, 'fight.html'), 'utf8');
+// The shell that holds the three pages. What belongs to the shell (the way in
+// to the fight, what the tab is called) is asserted here against this file, not
+// against the fight's page.
+const HUB = fs.readFileSync(path.join(ROOT, 'hub.html'), 'utf8');
 const FIGHT3D = fs.readFileSync(path.join(ROOT, 'game3d.html'), 'utf8');
 const exists = (...p) => fs.existsSync(path.join(ROOT, ...p));
 
@@ -190,37 +197,65 @@ test('house rules: no medical claims, never finished, no pronouns for a supporte
   for (const r of GAME_RIDES) assert.ok(r.key && r.line && typeof r.min === 'number', 'every ride has a key, a line and a floor');
 });
 
-test('strength is earned in the app and the door says what is missing', () => {
+test('strength is counted from this page, and the door shows what it is made of', () => {
+  // 4 Oct 2026: the fight is a page of its own and there is no recovery app
+  // around it. It can no longer count lessons done, pledges or cravings, so
+  // strength is what this page actually holds: days here, floors cleared,
+  // buildings behind you. The old numbers are gone, not faked.
   const fn = block('function gameStrength(){', 'let gmBusy=');
-  for (const need of ['lessonDoneDates', 'journals', 'pledged', 'cravings']) assert.ok(fn.includes(need), 'strength must read ' + need);
-  assert.match(fn, /hint:lesson\?null:'Do today/);
-  assert.match(fn, /hint:pledge\?null:'Take the pledge on Home/);
+  for (const need of ['gameDays()', "k:'Days here'", "k:'Floors this building'", "k:'Buildings behind you'"]) {
+    assert.ok(fn.includes(need), 'strength must count ' + need);
+  }
+  assert.doesNotMatch(fn, /lessonDoneDates|journals|pledged|cravings/,
+    'nothing is counted that this page cannot see');
   assert.match(fn, /Math\.min\(120,/, 'strength is capped');
   const door = block('function renderRoofDoor(){', 'function game3dLines(){');
-  assert.match(door, /Strength · earned in the app/);
-  assert.match(door, /p\.hint\?`<small>/, 'the door prints what is missing');
+  assert.match(door, /<b>\$\{str\.total\}<\/b><span>Strength<\/span>/, 'the door shows the number');
+  assert.match(door, /str\.parts\.map/, 'and it shows every part the number is made of');
+  assert.match(door, /p\.hint\?`<small>/, 'a part may still say what is missing');
 });
 
 test('a relapse costs nothing in the game', () => {
   assert.match(APP, /function towerOnRelapse\(\)\{\}/);
 });
 
-test('the supporter gets their own opponent, never their person\'s habit', () => {
+test('the opponent is the building\'s own track, never somebody else\'s habit', () => {
+  // The page no longer knows who is holding the phone, so it cannot decide for
+  // them. The building does: a supporter's building is its own, which is what
+  // keeps a supporter from fighting their person's habit.
   const fn = block('function gameTrack(){', 'function gameBossName');
-  assert.match(fn, /S\.userType==='partner'[\s\S]*?return 'Supporting Someone'/);
-  assert.ok(GAME_BUILDINGS.some(b => b.track === 'Supporting Someone' && b.name === 'The Checking'));
+  assert.match(fn, /const t=gameBuilding\(\)\.track;/, 'the track comes from the building in front of you');
+  assert.match(fn, /return GAME_BOSSES\[t\]\?t:'Other';/, 'and it is only used when there is an opponent for it');
+  assert.ok(GAME_BUILDINGS.some(b => b.track === 'Supporting Someone' && b.name === 'The Checking'),
+    'the supporter still has their own building, so they still get their own opponent');
 });
 
 test('the vault, the ninety-floor tower and the game shows are gone from the page', () => {
+  // The page the fight ships on is fight.html now, so this is the file that has
+  // to be clean of them. The Fight tab and The Climb were part of the recovery
+  // app around the game and went with it; the shell's own way into the fight is
+  // asserted against hub.html, below.
   assert.doesNotMatch(APP, /renderTowerVault|TOWER_FLOORS|TOWER_ARTIFACTS|id="s-vault"|tw-door/);
   assert.doesNotMatch(APP, /GAME_TOP_FLOOR|function showWheel\(|function showWWR\(|function showHeal\(/, 'the shows were cleared out');
-  assert.match(APP, /id="s-tower"/);
-  // 6 Sep: The Climb moved off the fight screen. It lives on Today, under the
-  // lesson that takes its step, and in Tools.
-  assert.doesNotMatch(APP, /id="tw-climb-link"/, 'The Climb is no longer on the fight screen');
-  assert.match(APP, /id="home-climb"[^>]*onclick="openClimb\(\)"/, 'The Climb is on Today');
-  assert.match(APP, /<span>The Fight<\/span>/, 'the tab is called The Fight');
+  assert.doesNotMatch(APP, /id="tw-climb-link"/, 'The Climb is not on the fight screen');
+  assert.match(APP, /<div class="g2" id="g2">/, 'the fight is one screen of its own');
+  assert.match(HUB, /<a class="card f" href="\/fight">[\s\S]{0,400}?<h2 class="name">The Fight<\/h2>/,
+    'the shell opens the fight and calls it The Fight');
   assert.doesNotMatch(APP, /whole 2AM tower|all 90 floors|ninety floors/i);
+});
+
+test('the fight opens on its own, with nothing of the app around it', () => {
+  // The page has to stand up by itself: its own state, its own save, its own
+  // boot. Anything it used to borrow from the recovery app has to be here.
+  assert.match(APP, /var FIGHT_KEY='tsid-fight-v1'/, 'it keeps its own state');
+  assert.match(APP, /localStorage\.getItem\(FIGHT_KEY\)/, 'loaded from its own key');
+  assert.match(APP, /localStorage\.setItem\(FIGHT_KEY,JSON\.stringify\(S\)\)/, 'and saved back to it');
+  for (const shim of ['function save(){', 'function switchTo(){', 'function actBn(){', 'function appInfo(', 'function appConfirm(']) {
+    assert.ok(APP.includes(shim), 'the page needs its own ' + shim);
+  }
+  assert.match(APP, /^renderTower\(\);$/m, 'and it boots itself');
+  // Nothing about it reaches the network: there is no app to talk to.
+  assert.doesNotMatch(APP, /\bfetch\(/, 'no page fetch');
 });
 
 test('the roof can never be left loading for good', () => {

@@ -7,6 +7,10 @@
 // never repopulates the shell, so an installed user keeps being served the
 // old precached copy of /app whenever the network answer is not used - which
 // is exactly what "I'm seeing an old version" looks like from the outside.
+//
+// 4 Oct 2026: APP_VERSION moved with the app itself. index.html was the recovery
+// app and is no longer served; hub.html is what /app hands out now, so that is
+// where the version lives and that is what this reads.
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
@@ -14,13 +18,13 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
 const SW = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-const APP = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const APP = fs.readFileSync(path.join(ROOT, 'hub.html'), 'utf8');
 
 test('the service worker cache name matches APP_VERSION', () => {
   const cache = SW.match(/const CACHE_NAME = 'tsid-shell-v([\d.]+)'/);
   const app = APP.match(/const APP_VERSION='([\d.]+)'/);
   assert.ok(cache, 'sw.js must declare CACHE_NAME as tsid-shell-v<version>');
-  assert.ok(app, 'index.html must declare APP_VERSION');
+  assert.ok(app, 'hub.html must declare APP_VERSION');
   assert.equal(cache[1], app[1],
     `sw.js caches v${cache[1]} but the app is ${app[1]} - bump CACHE_NAME with every release`);
 });

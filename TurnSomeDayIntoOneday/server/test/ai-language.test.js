@@ -52,13 +52,9 @@ function askRules(file, varName) {
   return ctx.S.join('\n');
 }
 
-test('Friendly, the chat, is told to answer in English', () => {
-  const h = read('index.html');
-  const base = h.indexOf('const SYSTEM_BASE');
-  const rule = h.indexOf('You write in plain English, always');
-  assert.ok(base > -1 && rule > base, 'the English rule is inside SYSTEM_BASE, not loose in the page');
-  assert.match(h.slice(base, rule), /You are Friendly/, 'and it is still Friendly being described');
-});
+// Friendly was the first of the four prompts this file checked. It went on
+// 4 Oct 2026 with the rest of the recovery app: "i dont need friendly its my
+// personal app." The rule below is the one that still has a prompt to guard.
 
 test('The Key reading is told to answer in English', () => {
   const sys = require('../key-reading.js').systemPrompt();
@@ -75,8 +71,9 @@ test('both reference ask boxes are told to answer in English', () => {
 
 // The Trading Desk assistant was the fifth prompt checked here, from 17 Sep to
 // 24 Sep 2026. It went with the desk: "remove the trading game the desk
-// everything about trading im done." Four AI prompts are left in the app —
-// Friendly, The Key, and the two reference ask boxes below.
+// everything about trading im done." Friendly was the fourth and went on
+// 4 Oct 2026 with the recovery app. What is left is The Key and the two
+// reference ask boxes below.
 
 test('the pages keep the rules that were there before the language rule', () => {
   // A prompt is one string in one place: rewording it is how a safety line goes

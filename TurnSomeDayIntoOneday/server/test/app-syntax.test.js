@@ -11,7 +11,10 @@ const path = require('path');
 const os = require('os');
 const { execFileSync } = require('child_process');
 
-const APP = path.join(__dirname, '..', '..', 'index.html');
+// 4 Oct 2026: this read index.html, the recovery app, which is no longer served.
+// hub.html is the app now, and it brings its own inline script, so the same
+// guard moves with it. fight.html joined through the second test below.
+const APP = path.join(__dirname, '..', '..', 'hub.html');
 
 // Only real JavaScript. A <script type="application/ld+json"> block holds
 // structured data for search engines and is not JS - checking it as JS reports
@@ -30,7 +33,7 @@ function inlineScripts(file) {
   return out;
 }
 
-test('every inline script in index.html actually parses', () => {
+test('every inline script in the app shell actually parses', () => {
   const blocks = inlineScripts(APP);
   assert.ok(blocks.length > 0, 'found inline scripts to check');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-'));
@@ -63,7 +66,11 @@ test('the other shipped HTML pages parse too', () => {
   // trading-school.html and desk.html were on this list too until 24 Sep 2026,
   // when they were deleted with everything else trading: "remove the trading
   // game the desk everything about trading im done."
-  const pages = ['key.html', 'letter.html', 'admin-stats.html', 'landing.html', 'herbs.html', 'tax.html', 'game3d.html'];
+  // fight.html joined on 4 Oct 2026, and it is the reason this list matters more
+  // than it ever did: the fight is 669 lines of game lifted out of index.html
+  // into a page of its own, and a SyntaxError in it means the whole game is dead
+  // in the browser while the page still looks like it loaded.
+  const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

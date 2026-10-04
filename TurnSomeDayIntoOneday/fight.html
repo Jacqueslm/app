@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Fight</title>
+<meta name="theme-color" content="#070a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070a14'/%3E%3Crect x='14' y='26' width='36' height='14' rx='3' fill='%23f2a93b'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#070a14;color:#eef1ff;font-family:'Barlow','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+body.g2-fighting{overflow:hidden}
+   bottom. Classes are g2-* so nothing here collides with the rest of the app. */
+#s-tower{background:#000;min-height:calc(100vh - 132px);padding:0 0 30px;color:#eef1ff}
+.g2{--g2-ink:#070a14;--g2-edge:#2a3350;--g2-lamp:#f2a93b;--g2-hit:#e24b4a;--g2-you:#2fd08a;--g2-chalk:#eef1ff;--g2-dim:#a9b1d6;--g2-disp:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  position:relative;min-height:calc(100vh - 132px);max-width:480px;margin:0 auto;background:var(--g2-ink);color:var(--g2-chalk);display:flex;flex-direction:column;overflow:hidden;font-size:16px;line-height:1.4}
+.g2 button{font:inherit;color:inherit;cursor:pointer}
+/* the 3D fight takes the whole screen so nobody is cut off at the edges */
+.g2-bld{margin:6px 0 14px;padding:16px 0 14px;border-top:2px solid var(--g2-lamp);border-bottom:2px solid var(--g2-lamp)}
+.g2-bld span{display:block;font-family:var(--g2-disp);font-weight:800;text-transform:uppercase;font-size:2.4rem;line-height:.95;letter-spacing:.01em}
+.g2-bld small{display:block;margin-top:6px;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g2-dim)}
+.g2-flrs{display:grid;gap:6px;margin-top:10px}
+.g2-flr{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;width:100%;text-align:left;
+  background:rgba(10,13,22,.72);border:1px solid var(--g2-edge);border-radius:4px;padding:11px 12px;color:var(--g2-dim)}
+.g2-flr b{font-family:var(--g2-disp);font-size:1.3rem;color:var(--g2-dim)}
+.g2-flr span{font-size:.92rem}
+.g2-flr i{font-style:normal;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase}
+.g2-flr.done{border-color:rgba(47,208,138,.5)}.g2-flr.done b,.g2-flr.done i{color:var(--g2-you)}
+.g2-flr.here{border-color:var(--g2-lamp);color:var(--g2-chalk);background:rgba(242,169,59,.12)}
+.g2-flr.here b,.g2-flr.here i{color:var(--g2-lamp)}
+.g2-flr.roof{margin-bottom:4px}
+.g2-flr[disabled]{opacity:.55}
+.g2-chute{position:relative;height:120px;margin:4px 0 10px;overflow:hidden}
+.g2-chute i{position:absolute;left:50%;top:-40px;width:64px;height:34px;margin-left:-32px;border-radius:64px 64px 0 0;
+  background:linear-gradient(180deg,var(--g2-lamp),#c8262a);animation:g2fall 2.6s ease-out forwards}
+.g2-chute i::after{content:"";position:absolute;left:50%;top:34px;width:2px;height:34px;margin-left:-1px;background:var(--g2-dim)}
+@keyframes g2fall{from{top:-40px;transform:rotate(-6deg)}to{top:56px;transform:rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.g2-chute i{animation:none;top:56px}}
+.g2.g2-full{position:fixed;inset:0;width:100%;max-width:none;min-height:0;height:100dvh;margin:0;z-index:60;padding:0}
+.g2-full .g2-photo,.g2-full .g2-grain,.g2-full .g2-glove,.g2-full .g2-red,.g2-full .g2-mini,.g2-full .g2-ref,.g2-full .g2-top,.g2-full .g2-floors{display:none}
+.g2-full .g2-body{padding:0}
+/* the fight takes the whole phone: the tab bar and the guide button would sit on the buttons, so they step aside and a way out goes in the corner */
+body.g2-fighting .bnav,body.g2-fighting #guide-fab,body.g2-fighting .hdr{display:none}
+body.g2-fighting .screens{overflow:visible;-webkit-overflow-scrolling:auto;padding-bottom:0}
+body.g2-fighting .app{overflow:visible}
+.g2-exit{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;z-index:70;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(7,10,20,.6);color:#fff;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.g2-photo{position:absolute;inset:0;background-size:cover;background-position:center top;background-repeat:no-repeat;transform-origin:50% 60%}
+.g2-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,20,.15) 0%,rgba(7,10,20,.25) 45%,rgba(7,10,20,.92) 100%)}
+.g2-photo.boss{animation:g2sway 3.2s ease-in-out infinite alternate}
+@keyframes g2sway{from{transform:translateX(-6px) scale(1.02)}to{transform:translateX(6px) scale(1.04)}}
+.g2-photo.boss.tired{animation-duration:5.5s;filter:saturate(.6) brightness(.85)}
+.g2-photo.boss.far{animation:none;transform:scale(.9) translateY(-20px);filter:brightness(.6)}
+.g2-photo.boss.floor{animation:none;transform:scale(1.1) translateY(160px) rotate(6deg);filter:brightness(.5) blur(1px);transition:transform 1s,filter 1s}
+.g2-photo.boss.recoil{animation:g2recoil .38s ease-out}
+.g2-photo.boss.recoil.hard{animation:g2recoilhard .45s ease-out}
+@keyframes g2recoil{0%{transform:translateX(0)}30%{transform:translateX(34px) rotate(3deg) scale(.97);filter:brightness(1.8) contrast(1.2)}100%{transform:translateX(0);filter:none}}
+@keyframes g2recoilhard{0%{transform:translateX(0)}30%{transform:translate(-60px,18px) rotate(-7deg) scale(.92);filter:brightness(2.2) saturate(0)}100%{transform:translateX(0);filter:none}}
+.g2-photo.boss.lunge{animation:g2lunge .55s cubic-bezier(.3,.9,.4,1) forwards}
+@keyframes g2lunge{0%{transform:scale(1)}55%{transform:scale(1.55) translateY(70px);filter:blur(1px)}100%{transform:scale(1.6) translateY(80px);filter:blur(2px) brightness(.7)}}
+.g2-photo.boss.tellL{animation:g2tellL var(--tell,1s) ease-in forwards}.g2-photo.boss.tellR{animation:g2tellR var(--tell,1s) ease-in forwards}
+@keyframes g2tellL{0%{transform:translateX(0) rotate(0)}100%{transform:translateX(-70px) rotate(-9deg) scale(1.12);filter:brightness(1.3) drop-shadow(-30px 0 40px rgba(226,75,74,.9))}}
+@keyframes g2tellR{0%{transform:translateX(0) rotate(0)}100%{transform:translateX(70px) rotate(9deg) scale(1.12);filter:brightness(1.3) drop-shadow(30px 0 40px rgba(226,75,74,.9))}}
+.g2-photo.boss.swingL{animation:g2swingL .22s ease-out forwards}.g2-photo.boss.swingR{animation:g2swingR .22s ease-out forwards}
+@keyframes g2swingL{from{transform:translateX(-70px) rotate(-9deg) scale(1.12)}to{transform:translateX(90px) rotate(10deg) scale(1.3)}}
+@keyframes g2swingR{from{transform:translateX(70px) rotate(9deg) scale(1.12)}to{transform:translateX(-90px) rotate(-10deg) scale(1.3)}}
+.g2.shake{animation:g2shake .4s}
+@keyframes g2shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.g2.dodgeL{animation:g2dodgeL .45s ease-out}.g2.dodgeR{animation:g2dodgeR .45s ease-out}
+@keyframes g2dodgeL{30%{transform:translateX(-60px) rotate(-4deg)}100%{transform:none}}
+@keyframes g2dodgeR{30%{transform:translateX(60px) rotate(4deg)}100%{transform:none}}
+.g2-grain{position:absolute;inset:0;pointer-events:none;opacity:.08;background-image:radial-gradient(rgba(255,255,255,.9) .5px,transparent 1px);background-size:5px 5px;mix-blend-mode:overlay}
+.g2-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;padding:16px 16px 0}
+.g2-kicker{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--g2-lamp);font-weight:600}
+.g2-sub{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--g2-dim);margin-top:3px}
+.g2-ups{text-align:right}.g2-ups b{display:block;font-family:var(--g2-disp);font-weight:800;font-size:2rem;line-height:.9}.g2-ups span{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g2-dim)}
+.g2-floors{position:relative;z-index:2;display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:12px 16px 0}
+.g2-floors i{display:block;height:4px;background:var(--g2-edge)}.g2-floors i.done{background:var(--g2-lamp)}
+.g2-floors i.safe{box-shadow:inset 0 0 0 1px rgba(47,208,138,.7)}.g2-floors i.safe.done{background:var(--g2-you)}
+.g2-floors i.here{background:var(--g2-chalk)}.g2-floors i.roof{background:var(--g2-hit);opacity:.5}.g2-floors i.roof.here{opacity:1}
+.g2-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 16px 72px}
+.g2-h1{font-family:var(--g2-disp);font-weight:800;font-size:3rem;line-height:.92;letter-spacing:.01em;text-transform:uppercase;margin:0 0 8px;color:var(--g2-chalk)}
+.g2-h1 em{font-style:normal;color:var(--g2-lamp)}
+.g2-q{font-family:var(--g2-disp);font-weight:800;font-size:1.9rem;line-height:1.02;margin:0 0 16px}
+.g2-lead{margin:0 0 18px;color:var(--g2-dim);font-size:.95rem;max-width:40ch}
+.g2-center{text-align:center;margin-left:auto;margin-right:auto}
+.g2-voice{background:var(--g2-chalk);color:var(--g2-ink);padding:10px 12px;font-weight:600;font-size:.95rem;line-height:1.3;border-radius:14px 14px 14px 4px;margin:0 0 14px;max-width:88%}
+.g2-voice small{display:block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-bottom:2px}
+.g2-cat{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--g2-lamp);margin-bottom:8px}
+.g2-from{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g2-dim);text-align:center;margin-bottom:6px}.g2-from em{font-style:normal;color:var(--g2-lamp)}
+.g2-big{background:var(--g2-lamp);color:var(--g2-ink);border:0;font-family:var(--g2-disp);font-weight:800;font-size:1.45rem;letter-spacing:.06em;text-transform:uppercase;padding:15px;border-radius:4px;width:100%}
+.g2-big:disabled{opacity:.4}
+.g2-ghost{background:rgba(7,10,20,.72);color:var(--g2-chalk);border:1px solid var(--g2-edge);font-family:var(--g2-disp);font-weight:700;font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase;padding:13px;border-radius:4px;width:100%}
+.g2-ghost:disabled{opacity:.35}
+.g2-opts{display:grid;gap:8px}
+.g2-opt{background:rgba(7,10,20,.72);border:1px solid var(--g2-edge);color:var(--g2-chalk);text-align:left;padding:13px 12px;font-weight:600;font-size:.95rem;line-height:1.25;border-radius:4px;min-height:52px;display:flex;gap:10px;align-items:flex-start;width:100%}
+.g2-opt b{font-family:var(--g2-disp);font-weight:800;color:var(--g2-lamp);font-size:1.05rem;line-height:1.1}
+.g2-opt.pick{border-color:var(--g2-lamp);box-shadow:inset 0 0 0 1px var(--g2-lamp)}
+.g2-opt.right{border-color:var(--g2-you);background:rgba(47,208,138,.14)}.g2-opt.wrong{border-color:var(--g2-hit);background:rgba(226,75,74,.14)}
+.g2-opt.gone{opacity:.18;pointer-events:none}
+.g2-lifelines{display:flex;gap:8px;margin:14px 0 10px}
+.g2-ll{flex:1;background:transparent;border:1px solid var(--g2-edge);color:var(--g2-chalk);padding:10px 6px;border-radius:4px;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:3px}
+.g2-ll small{font-size:.58rem;color:var(--g2-dim);letter-spacing:.06em;text-transform:none;text-align:center}
+.g2-ll:disabled{opacity:.3}.g2-ll.earned{border-color:var(--g2-lamp)}
+.g2-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.g2-note{font-size:.66rem;color:var(--g2-dim);margin-top:12px;letter-spacing:.04em}.g2-note em{font-style:normal;color:var(--g2-lamp)}
+.g2-reveal{font-family:var(--g2-disp);font-weight:800;font-size:4.2rem;line-height:.9;text-transform:uppercase;text-align:center;margin:0 0 6px}
+.g2-reveal.up{color:var(--g2-you)}.g2-reveal.down{color:var(--g2-hit)}
+.g2-pick{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap}
+.g2-thumb{width:44px;height:64px;border-radius:5px;border:2px solid var(--g2-edge);background-size:cover;background-position:center 20%;padding:0;opacity:.7}
+.g2-thumb.on{border-color:var(--g2-lamp);opacity:1;box-shadow:0 0 14px rgba(242,169,59,.5)}
+.g2-gl{flex:1;background:transparent;border:1px solid var(--g2-edge);color:var(--g2-dim);padding:8px;border-radius:4px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
+.g2-gl.on{border-color:var(--g2-lamp);color:var(--g2-lamp)}
+/* the wheel */
+.g2-wheelwrap{position:relative;width:min(70vw,290px);margin:0 auto 10px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}
+.g2-wheelwrap svg{display:block;width:100%;height:auto;overflow:visible}
+.g2-spinner{transform-origin:200px 200px;transition:transform 4s cubic-bezier(.12,.72,.08,1)}
+.g2-wlbl{font-family:var(--g2-disp);font-weight:800;font-size:23px;letter-spacing:.5px;text-transform:uppercase;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:5px;text-anchor:middle}
+.g2-hubspin{transform-origin:200px 200px;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.g2-hubspin.whirl{animation:g2whirl .28s linear infinite}
+@keyframes g2whirl{to{transform:rotate(360deg)}}
+.g2-wheelwrap.lit{animation:g2wpulse .9s ease-in-out infinite alternate}
+@keyframes g2wpulse{from{filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}to{filter:drop-shadow(0 18px 30px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(242,169,59,.7))}}
+.g2-landed{font-family:var(--g2-disp);font-weight:800;font-size:1.7rem;text-transform:uppercase;text-align:center;color:var(--g2-lamp);min-height:1.1em;line-height:1.1;margin-bottom:4px}
+.g2-landed small{display:block;font-family:inherit;font-weight:400;font-size:.7rem;letter-spacing:.2em;color:var(--g2-dim)}
+/* the one-letter puzzle */
+.g2-board{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin:6px 0 10px}
+.g2-word{display:flex;gap:3px}
+.g2-tile{width:24px;height:34px;display:flex;align-items:center;justify-content:center;font-family:var(--g2-disp);font-weight:800;font-size:1.25rem;background:rgba(7,10,20,.72);border:1px solid var(--g2-edge);border-radius:3px;color:var(--g2-chalk);font-style:normal}
+.g2-tile.on{background:var(--g2-chalk);color:var(--g2-ink);border-color:var(--g2-chalk)}
+.g2-tile.new{animation:g2flip .5s ease}.g2-tile.pun{background:transparent;border-color:transparent;width:12px;color:var(--g2-dim)}
+.g2-tile.gap:not(.on){border-color:var(--g2-lamp);box-shadow:0 0 12px rgba(242,169,59,.5);animation:g2gap 1.2s ease-in-out infinite alternate}
+@keyframes g2gap{from{background:rgba(7,10,20,.72)}to{background:rgba(242,169,59,.35)}}
+@keyframes g2flip{from{transform:rotateX(90deg);background:var(--g2-lamp)}to{transform:rotateX(0)}}
+.g2-keys{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:10px 0 8px}
+.g2-keys button{background:rgba(7,10,20,.72);border:1px solid var(--g2-edge);color:var(--g2-chalk);font-family:var(--g2-disp);font-weight:800;font-size:1.05rem;padding:9px 0;border-radius:3px}
+.g2-keys button:disabled{opacity:.18}
+.g2-strikes{display:flex;gap:6px;justify-content:center;margin:4px 0 8px}.g2-strikes i{width:12px;height:12px;border-radius:50%;border:1px solid var(--g2-hit);display:block}.g2-strikes i.x{background:var(--g2-hit)}
+/* three doors */
+.g2-doors{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 12px;perspective:900px}
+.g2-door{position:relative;height:170px;border:0;background:transparent;padding:0}
+.g2-door .leaf{position:absolute;inset:0;border-radius:60px 60px 4px 4px;background:linear-gradient(90deg,#4a2c14,#7a4a22 30%,#5a3418 55%,#8a5426 80%,#3d2410);box-shadow:inset 0 0 0 3px rgba(0,0,0,.5),inset 0 0 40px rgba(0,0,0,.6),0 10px 20px rgba(0,0,0,.6);transform-origin:left center;transition:transform 1.1s cubic-bezier(.6,.05,.3,1);display:flex;align-items:center;justify-content:center;font-family:var(--g2-disp);font-weight:800;font-size:2.4rem;color:rgba(255,220,160,.85);text-shadow:0 2px 6px #000;backface-visibility:hidden}
+.g2-door .leaf::after{content:'';position:absolute;right:14px;top:50%;width:9px;height:9px;border-radius:50%;background:#e2b45a;box-shadow:0 0 8px #e2b45a}
+.g2-door .inside{position:absolute;inset:0;border-radius:60px 60px 4px 4px;background:rgba(7,10,20,.85);border:1px solid var(--g2-edge);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;text-align:center;font-size:.72rem;line-height:1.3;color:var(--g2-chalk);overflow:hidden}
+.g2-door .inside b{display:block;font-family:var(--g2-disp);font-size:1.15rem;line-height:1.05;margin-bottom:4px}
+.g2-door.heal .inside{box-shadow:inset 0 0 40px rgba(47,208,138,.35);border-color:var(--g2-you)}.g2-door.heal .inside b{color:var(--g2-you)}
+.g2-door.boss .inside{box-shadow:inset 0 0 40px rgba(226,75,74,.45);border-color:var(--g2-hit)}.g2-door.boss .inside b{color:var(--g2-hit)}
+.g2-door.open .leaf{transform:rotateY(-108deg)}
+.g2-door.mine .leaf{box-shadow:inset 0 0 0 3px var(--g2-lamp),inset 0 0 40px rgba(0,0,0,.6),0 0 24px rgba(242,169,59,.6)}
+.g2-door.dim{opacity:.35}
+.g2-deal{background:rgba(226,75,74,.12);border:1px solid var(--g2-hit);border-radius:4px;padding:12px;margin:0 0 10px}
+.g2-deal small{display:block;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--g2-hit);margin-bottom:4px}
+.g2-deal b{font-family:var(--g2-disp);font-size:1.3rem;line-height:1.1;display:block}
+.g2-breath{width:110px;height:110px;border-radius:50%;margin:8px auto;border:2px solid var(--g2-you);display:flex;align-items:center;justify-content:center;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g2-you);animation:g2breathe 8s ease-in-out infinite}
+@keyframes g2breathe{0%,100%{transform:scale(.7);box-shadow:0 0 0 rgba(47,208,138,0)}50%{transform:scale(1.1);box-shadow:0 0 40px rgba(47,208,138,.5)}}
+/* the roof */
+.g2-strength{text-align:center;margin:6px 0 4px}.g2-strength b{display:block;font-family:var(--g2-disp);font-weight:800;font-size:3.4rem;line-height:1;color:var(--g2-lamp)}.g2-strength span{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g2-dim)}
+.g2-strrows{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin:8px 0 14px;font-size:.8rem;color:var(--g2-dim)}
+.g2-strrows div{display:flex;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid var(--g2-edge);padding:3px 0}.g2-strrows b{color:var(--g2-chalk)}.g2-strrows small{flex-basis:100%;font-size:.62rem;color:var(--g2-lamp)}
+.g2-locked{background:rgba(226,75,74,.12);border:1px solid var(--g2-hit);border-radius:4px;padding:12px;margin:0 0 10px;font-size:.95rem}
+.g2-fhud{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--g2-dim);margin-bottom:10px}
+.g2-fhud .right{text-align:right}.g2-fhud .rd{font-family:var(--g2-disp);font-weight:800;font-size:1.1rem;color:var(--g2-chalk)}
+.g2-bar{height:8px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden;margin-top:4px}.g2-bar i{display:block;height:100%;width:100%;background:var(--g2-hit);transition:width .35s}.g2-bar.you i{background:var(--g2-you)}
+.g2-counters{display:grid;gap:8px}.g2-counters .g2-ghost{text-align:left;text-transform:none;letter-spacing:0;font-family:inherit;font-weight:600;font-size:1rem;padding:13px 12px}
+.g2-stars{display:flex;gap:8px;justify-content:center;min-height:44px;align-items:center}
+.g2-star{background:rgba(242,169,59,.15);border:2px solid var(--g2-lamp);color:var(--g2-lamp);border-radius:8px;padding:6px 12px;font-size:1.4rem;line-height:1;display:flex;flex-direction:column;align-items:center;font-weight:800}
+.g2-star span{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;font-family:inherit;font-weight:600}
+.g2-nostar{font-size:.72rem;color:var(--g2-dim);text-align:center}
+.g2-target{position:absolute;z-index:8;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:50%;border:3px solid var(--g2-lamp);background:radial-gradient(circle,rgba(242,169,59,.55),rgba(242,169,59,.08) 70%);color:#fff;font-family:var(--g2-disp);font-weight:800;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;animation:g2tgt .6s ease-in-out infinite alternate;touch-action:manipulation}
+.g2-target.chin{width:96px;height:96px;border-color:#fff}
+.g2-target.counter{border-color:var(--g2-you);background:radial-gradient(circle,rgba(47,208,138,.6),rgba(47,208,138,.1) 70%);animation-duration:.25s}
+@keyframes g2tgt{from{box-shadow:0 0 0 0 rgba(242,169,59,.9);transform:translate(-50%,-50%) scale(.92)}to{box-shadow:0 0 0 18px rgba(242,169,59,0);transform:translate(-50%,-50%) scale(1.05)}}
+.g2-cue{position:absolute;top:30%;z-index:8;pointer-events:none;text-align:center;color:var(--g2-hit);font-family:var(--g2-disp);font-weight:800;animation:g2cue .3s ease-in-out infinite alternate}
+.g2-cue.L{left:8%}.g2-cue.R{right:8%}
+.g2-cue b{display:block;font-size:4rem;line-height:1;text-shadow:0 0 30px rgba(226,75,74,.9)}.g2-cue span{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g2-chalk)}
+@keyframes g2cue{from{transform:scale(.9);opacity:.7}to{transform:scale(1.1);opacity:1}}
+.g2-dodgebar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.g2-dodgebar button{background:rgba(7,10,20,.78);border:2px solid var(--g2-edge);color:var(--g2-chalk);border-radius:8px;padding:14px 6px;font-family:var(--g2-disp);font-weight:800;font-size:1.6rem;line-height:1;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.g2-dodgebar button span{display:block;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g2-dim);margin-top:4px}
+.g2-dodgebar .dodge{border-color:var(--g2-lamp);color:var(--g2-lamp)}.g2-dodgebar .blockbtn{border-color:var(--g2-you);color:var(--g2-you)}
+.g2-dodgebar button.on{background:var(--g2-chalk);color:var(--g2-ink)}
+.g2-glove{position:absolute;z-index:7;width:150px;height:340px;background-size:contain;background-repeat:no-repeat;background-position:center top;pointer-events:none;opacity:0;bottom:-60px;left:50%;filter:drop-shadow(0 14px 22px rgba(0,0,0,.85))}
+.g2-glove.red{background-image:url(img/fight/glove-red.png)}.g2-glove.blue{background-image:url(img/fight/glove-blue.png)}.g2-glove.white{background-image:url(img/fight/glove-white.png)}
+.g2-glove.swl{animation:g2swl .34s ease-out forwards}.g2-glove.swr{animation:g2swr .34s ease-out forwards}.g2-glove.swu{animation:g2swu .4s ease-out forwards}
+@keyframes g2swl{0%{opacity:1;transform:translate(-170%,30%) rotate(-30deg) scale(1.5)}60%{opacity:1;transform:translate(-45%,-45%) rotate(12deg) scale(.8)}100%{opacity:0;transform:translate(-45%,-52%) rotate(12deg) scale(.7)}}
+@keyframes g2swr{0%{opacity:1;transform:translate(70%,30%) rotate(30deg) scaleX(-1) scale(1.5)}60%{opacity:1;transform:translate(-55%,-45%) rotate(-12deg) scaleX(-1) scale(.8)}100%{opacity:0;transform:translate(-55%,-52%) rotate(-12deg) scaleX(-1) scale(.7)}}
+@keyframes g2swu{0%{opacity:1;transform:translate(-50%,50%) rotate(-8deg) scale(1.7)}55%{opacity:1;transform:translate(-50%,-50%) rotate(4deg) scale(.95)}100%{opacity:0;transform:translate(-50%,-60%) rotate(4deg) scale(.85)}}
+.g2-mini{position:absolute;right:12px;top:64px;width:72px;height:112px;z-index:4;border-radius:6px;border:2px solid rgba(255,255,255,.35);box-shadow:0 8px 20px rgba(0,0,0,.7);background-size:cover;background-position:center 20%;transition:transform .2s}
+.g2-mini.punch{transform:translateX(14px) scale(1.06)}.g2-mini.count{transform:translateX(-8px) rotate(-6deg)}.g2-mini.down{transform:translateY(20px) rotate(-12deg);filter:brightness(.6)}
+#g2-3d{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#05070d;z-index:9}
+.g2-ref{position:absolute;left:-40%;bottom:calc(215px + env(safe-area-inset-bottom));width:26%;max-width:118px;aspect-ratio:361/1100;z-index:5;background:url(img/fight/ref.png) center/contain no-repeat;filter:drop-shadow(0 16px 18px rgba(0,0,0,.8));transition:left .9s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.g2-ref.in{left:4%}.g2-ref.bob{animation:g2refbob .3s ease-out}
+@keyframes g2refbob{30%{transform:translateY(-10px)}}
+.g2-red{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(226,75,74,0) 30%,rgba(226,75,74,.85) 100%);transition:opacity .12s}
+.g2-red.on{opacity:1}.g2-red.on.soft{opacity:.45}
+.g2-dmg{position:absolute;left:55%;top:32%;z-index:5;font-family:var(--g2-disp);font-weight:800;font-size:2.4rem;color:var(--g2-lamp);text-shadow:0 2px 8px #000;animation:g2dmg .9s ease-out forwards;pointer-events:none}
+.g2-dmg.huge{font-size:3.4rem}.g2-dmg.onyou{left:20%;top:45%;color:var(--g2-hit)}
+@keyframes g2dmg{from{opacity:1;transform:translateY(0) scale(.8)}to{opacity:0;transform:translateY(-70px) scale(1.2)}}
+.g2-slam{position:absolute;left:0;right:0;top:36%;z-index:6;text-align:center;font-family:var(--g2-disp);font-weight:800;font-size:5rem;color:#fff;text-shadow:0 0 30px var(--g2-lamp),0 4px 0 #000;animation:g2slam .6s ease-out forwards;pointer-events:none;letter-spacing:.04em}
+@keyframes g2slam{from{opacity:1;transform:scale(.4) rotate(-8deg)}60%{transform:scale(1.15) rotate(2deg)}to{opacity:0;transform:scale(1.3)}}
+.g2-count{position:absolute;left:0;right:0;top:28%;z-index:9;text-align:center;font-family:var(--g2-disp);font-weight:800;font-size:9rem;line-height:1;color:#fff;text-shadow:0 0 40px rgba(0,0,0,.9),0 6px 0 #000;animation:g2count .85s ease-out forwards;pointer-events:none}
+@keyframes g2count{0%{opacity:0;transform:scale(1.6)}20%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.9)}}
+.g2-getup{height:150px;border:3px solid var(--g2-hit);border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--g2-disp);font-weight:800;font-size:1.7rem;color:var(--g2-hit);background:rgba(226,75,74,.12);user-select:none;-webkit-user-select:none;touch-action:manipulation;animation:g2pz .4s ease-in-out infinite alternate}
+.g2-getup small{display:block;font-family:inherit;font-weight:600;font-size:.9rem;letter-spacing:.1em;color:var(--g2-chalk)}
+@keyframes g2pz{from{box-shadow:0 0 0 rgba(226,75,74,0)}to{box-shadow:0 0 30px rgba(226,75,74,.5)}}
+.g2-cornerbox{background:rgba(7,10,20,.85);border:1px solid var(--g2-you);border-radius:6px;padding:14px;font-size:1.05rem;line-height:1.35;color:var(--g2-chalk)}
+.g2-cornerbox small{display:block;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g2-you);margin-bottom:6px}
+.g2-ride{font-size:4rem;text-align:center;line-height:1.1;margin:6px 0 2px}
+/* Only three things change now that this is a whole page instead of a block
+   sitting between the app's header and its bottom bar. Everything else in the
+   block above is the game's own CSS, taken across untouched. */
+.g2{min-height:100dvh;max-width:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.g2-body{padding-bottom:26px}
+body.g2-fighting{overflow:hidden}
+</style>
+</head>
+<body>
+      <div class="g2" id="g2">
+        <div class="g2-photo" id="g2-photo"></div>
+        <div class="g2-grain"></div>
+        <div class="g2-glove red" id="g2-glove"></div>
+        <div class="g2-mini" id="g2-mini" hidden></div>
+        <div class="g2-red" id="g2-red"></div>
+        <div class="g2-ref" id="g2-ref" hidden></div>
+        <div class="g2-top"><div><div class="g2-kicker">The Fight of Your Life</div><div class="g2-sub" id="g2-sub"></div></div><div class="g2-ups"><b id="g2-ups">0</b><span>Ups</span></div></div>
+        <div class="g2-floors" id="g2-floors"></div>
+        <div class="g2-body" id="g2-body"></div>
+<script>
+/* the stand-alone shim - the few things this page used to borrow from the app */
+var FIGHT_KEY='tsid-fight-v1';
+var S={};
+try{ S=JSON.parse(localStorage.getItem(FIGHT_KEY)||'{}')||{}; }catch(e){ S={}; }
+if(!S.startDate){ S.startDate=new Date().toISOString().slice(0,10); }
+function save(){ try{ localStorage.setItem(FIGHT_KEY,JSON.stringify(S)); }catch(e){} }
+function switchTo(){}
+function actBn(){}
+function appInfo(title,message){ try{ alert(title+'\n\n'+message); }catch(e){} }
+// The app's own confirm sheet. This page has none of that chrome, so it asks
+// the plain way and only runs the callback when the answer is yes.
+function appConfirm(message,onConfirm){ try{ if(confirm(message)&&typeof onConfirm==='function')onConfirm(); }catch(e){} }
+
+/* the game */
+// ─── THE FIGHT OF YOUR LIFE (The Fight tab) ───────────────────────────────────
+// Jacques, 6 Sep 2026, rebuilt from the 2AM buildings: "the game is wack, the
+// fight is ok but the questions on all levels are wack." Game shows, no clock,
+// photos, real sound, and a fight that plays like Punch-Out.
+//
+// The shape:
+//   - A building is a level: five floors, then the roof. Then the next
+//     building. It never ends, because nobody is ever finished (house rule).
+//   - Every floor starts with the wheel. It lands on one of three shows:
+//       Who Wants to Recover  - a moment, three moves, one is yours (no clock)
+//       Wheel of Your Addictions - a word or line of this person's own, from
+//                               their journal or their lessons, one letter gone
+//       Time to Heal          - three doors, two heal, one is the boss; before
+//                               the door opens the boss offers a deal. There is
+//                               never anything behind the deal.
+//     Floors score Ups. Lose a floor and you drop to the last safe floor
+//     (4 or 8) for reinforcements. Ups are never taken away.
+//   - The roof is the boss: the thing this person is fighting, by name, as a
+//     shadow in the ring. It says its line, you pick the counter. Right, and
+//     targets light up on it: tap them, three is the combo, stars are uppercuts
+//     earned in the app today. Then its turn: it winds up (the tell), you dodge
+//     the other way or block. Dodge clean and you get a counter-punch. Every
+//     boss has its own pattern. Bell, announcer, ref, crowd, grunts: recorded
+//     files in audio/fight, the same Deep male voice as the SOS talk.
+//   - Your strength is earned in the app: days, today's lesson, today's
+//     journal, today's pledge, cravings ridden out. Do the work, walk in strong.
+//   - Lose on the roof and the door locks until you do one real thing in the
+//     app. Win and a parachute, helicopter or jet takes you to the next
+//     building. The boss's last line is always "same time tomorrow".
+//   - Buildings 1-2 talk in single words with dodge arrows shown. Lines get
+//     longer, tells shorter, feints and the switch arrive as buildings go up.
+//
+// House rules, and where they live here:
+//   - The game knows the track from the app (gameTrack). Supporters get their
+//     own opponent, The Checking, and never their person's addiction.
+//   - No invented numbers: every card behind a door and every corner line is
+//     read from what this person actually did. No made-up crowd figures.
+//   - Unbiased: no line blames the person struggling to comfort the supporter,
+//     or the reverse. No pronouns for a supporter's person - "they" only.
+//   - No medical claims. It says what people report and what the app does.
+//   - It can end a fight, a floor, a building. It never tells anyone they are
+//     finished.
+//   - A relapse costs nothing in here. The building stands where it stood.
+//   - No new dependencies. Same file, plain JS, CSS animation, <audio>.
+//   - Art: img/fight (scenes, boss shadows, boxers, gloves). Sound: audio/fight.
+
+const GAME_FLOORS=5;                   // five floors, then the roof
+// Every floor carries an element you can see in the ring. The fight page draws it.
+// How each element boxes. The fight page holds the real numbers; this is the
+// same thing in words, so nobody walks into Ice expecting Lightning.
+const GAME_ELEMENT_HOW={
+  Rain:'Steady. It just keeps coming.',
+  Fire:'Fast and heavy, and it leaves itself open.',
+  Wind:'Quick and light. A lot of them.',
+  Earth:'Slow, heavy, hard to move.',
+  Ash:'Dull and grinding. It wears you down.',
+  Ice:'You will see it coming. It still hurts.',
+  Smoke:'You cannot read it. Half of it is a lie.',
+  Lightning:'Barely a warning. Hands up early.',
+  Sand:'It will not go down. Go the distance.',
+  Shadow:'It sells one and throws the other.',
+  Rust:'Old and slow and it takes forever.',
+  Void:'Almost no wind-up, and it takes a lot.',
+  Metal:'Clean and hard, and it blocks well.'};
+const GAME_ELEMENTS=['Rain','Fire','Wind','Earth','Ash','Ice','Smoke','Lightning','Sand','Shadow','Rust','Void','Metal'];
+// One building per addiction, each its own kind of place. Anybody can walk into
+// any of them - only the lessons follow the person's own track.
+const GAME_BUILDINGS=[
+ {k:'drink',   name:'The Drink',      kind:'Brewery tower',           track:'Alcohol'},
+ {k:'screen',  name:'The Screen',     kind:'Neon motel block',        track:'Porn & Sex'},
+ {k:'smoke',   name:'The Smoke',      kind:'Cigarette factory',       track:'Smoking'},
+ {k:'hit',     name:'The Hit',        kind:'Boarded-up tenement',     track:'Substances'},
+ {k:'bet',     name:'The Bet',        kind:'Casino tower',            track:'Gambling'},
+ {k:'scroll',  name:'The Scroll',     kind:'Glass tower of screens',  track:'Social media'},
+ {k:'match',   name:'One More Match', kind:'Arcade block',            track:'Gaming'},
+ {k:'binge',   name:'The Binge',      kind:'Diner and cold-store',    track:'Food / Binging'},
+ {k:'cart',    name:'The Cart',       kind:'Shopping mall',           track:'Shopping / Spending'},
+ {k:'inbox',   name:'The Inbox',      kind:'Office tower, all lit',   track:'Work'},
+ {k:'heat',    name:'The Heat',       kind:'Boiler house',            track:'Anger & Control'},
+ {k:'checking',name:'The Checking',   kind:'One window still lit',    track:'Supporting Someone'},
+ {k:'habit',   name:'The Habit',      kind:'Grey block, no sign',     track:'Other'}];
+function gameBuilding(){const g=gameState();return GAME_BUILDINGS[(g.b-1)%GAME_BUILDINGS.length];}
+function gameLap(){return Math.floor((gameState().b-1)/GAME_BUILDINGS.length)+1;}
+// one continuous climb: every floor of every building is a step, forever
+function gameStep(){const g=gameState();return (g.b-1)*6+Math.min(6,g.f);}
+// every building deals its floors a different hand out of the thirteen elements
+function gameFloorEl(n){const g=gameState();return GAME_ELEMENTS[((g.b-1)+(n-1))%GAME_ELEMENTS.length];}
+// What each addiction says to get a person to engage. Temptation only - the
+// fight has no right answer to click any more, it just talks while it winds up.
+const GAME_TEMPT={
+"Alcohol":["One?","Just tonight.","You've earned it.","Friday.","Everyone's having one.","Half a glass.","It takes the edge off.","Nobody's looking.","You're not like them.","Start again tomorrow.","It's a celebration.","You can stop whenever.","One won't touch you.","It's been a week.","You used to be fun.","Water's boring.","You'll sleep better.","Just to take the edge off today."],
+"Porn & Sex":["Five minutes.","Nobody will know.","You're alone anyway.","It's not hurting anyone.","Just looking.","You can't sleep.","One tab.","You're stressed.","Delete it after.","Everybody does it.","It's private.","You're already up.","Nothing else is on.","It's easier than people.","One more, then bed."],
+"Smoking":["One drag.","With the coffee.","You're outside anyway.","After this call.","It's the only break you get.","Just this pack.","Quit Monday.","Bum one, it doesn't count.","Your hands are empty.","It's the ritual, not the smoke.","Vape doesn't count.","A pouch isn't smoking.","One with a drink.","You're stressed, not weak."],
+"Substances":["Just tonight.","You're in pain.","It's only weed.","It was prescribed.","A small one.","You've been clean a while.","You can handle it.","Nobody's checking.","One won't restart anything.","You need to sleep.","It's a party, not a relapse.","Half. Just half.","You're not who you were.","It's medicine tonight."],
+"Gambling":["One bet.","You're due.","Win it back.","Free bet, no risk.","You were so close.","The line is wrong, you saw it.","Small stake.","Last one and I stop.","You know this sport.","It's not gambling, it's a trade.","The chart's about to run.","Double it and you're even.","It's entertainment money.","You've got a system."],
+"Social media":["Just checking.","Two minutes.","You might miss something.","Everyone's up.","One video.","You deserve a break.","See what they said.","You're waiting anyway.","Nothing else to do.","Look who posted.","Refresh once.","You need to know what happened.","Just the news.","One more and you'll sleep."],
+"Gaming":["One more match.","You'll win this one.","The queue's already up.","Don't leave the team.","Ten minutes.","You've nearly ranked.","The event ends tonight.","Just the daily.","One more roll.","You've come too far to stop.","It's how you switch off.","Nobody's waiting on you."],
+"Food / Binging":["You barely ate today.","It's just food.","Start clean Monday.","You've had a day.","Nobody's counting.","Finish it so it's gone.","You're already over.","It's the last time.","Sweet, then sleep.","You need something.","One plate more.","It's not the same as drinking."],
+"Shopping / Spending":["It's on sale.","You work hard.","You need one anyway.","Return it later.","It's only money.","Free delivery ends tonight.","Treat yourself.","It's an investment.","Small amount.","Just add it to the card.","You'll feel better when it comes.","Everyone spends."],
+"Work":["Just one more.","Nobody else will do it.","Get ahead for tomorrow.","Five minutes.","It's not work, it's your thing.","They're waiting on you.","You can rest when it's done.","Answer it now, sleep later.","Nobody works like you.","One last look at the phone.","If you stop it falls apart."],
+"Other":["Once won't matter.","You can stop whenever.","Just this once.","Nobody sees it.","It's how you cope.","One more, then done.","It's not that bad.","Everyone has something.","You're tired, not weak.","It's the only thing that's yours.","Just to get through today.","One little hit of it.","It's a habit, not a problem.","Tomorrow you start clean.","Late is the same as never.","Nothing else works."],
+"Anger & Control":["Say it.","They started it.","You're right, though.","One text.","Set them straight.","You're allowed to be angry.","Have the last word.","They need to hear it.","Slam it, then apologise.","It's not anger, it's honesty.","Make them understand.","Just this once, let go."],
+"Supporting Someone":["Check the phone.","Just look once.","You need to know.","Nobody else is watching.","Count it for them.","Search the room.","Call again.","Ask where they were.","You can fix this.","If you stop watching it all falls apart.","One look, then you'll rest.","You're the only one paying attention.","Wait up.","Just check the bank."]};
+const GAME_BOSSES={
+'Alcohol':{
+ short:[
+  {line:"One?",right:"No.",wrong:["Maybe.","Small."]},
+  {line:"Friday.",right:"Still no.",wrong:["Fair.","One."]},
+  {line:"Thirsty?",right:"Water.",wrong:["Beer.","Wine."]},
+  {line:"Celebrate.",right:"Sober.",wrong:["Cheers.","Toast."]},
+  {line:"Relax.",right:"Breathe.",wrong:["Pour.","Drink."]},
+  {line:"Nobody's looking.",right:"I am.",wrong:["Quick.","Once."]}],
+ mid:[
+  {line:"Just one tonight.",right:"Not tonight.",wrong:["Just one.","A small one."]},
+  {line:"You've earned it.",right:"I've earned sleep.",wrong:["I have, actually.","One as a reward."]},
+  {line:"It's been 14 days.",right:"Fifteen tomorrow.",wrong:["So I'm fine now.","Time for a break."]},
+  {line:"Everyone's having one.",right:"Not everyone.",wrong:["I'll hold one.","Fit in, then stop."]},
+  {line:"Half a glass.",right:"Half's the door.",wrong:["Half's nothing.","Pour, don't finish."]},
+  {line:"Start again tomorrow.",right:"Tonight counts.",wrong:["Tomorrow's cleaner.","One last night."]}],
+ long:[
+  {line:"It's been a good week. You've earned one.",right:"A good week is the reason to keep it, not spend it.",wrong:["Just one, then. I'll stop after.","Fine. But only because it's Friday."]},
+  {line:"Everyone else is having one. You'll look odd.",right:"Nobody's counting my glass. That's just you talking.",wrong:["I'll hold one so nobody asks.","I'll have a small one to fit in."]},
+  {line:"You didn't drink for 14 days. That proves you can control it.",right:"14 days proves I can do 15.",wrong:["True. So one won't hurt now.","Maybe I was never that bad."]},
+  {line:"Nobody would know.",right:"I would.",wrong:["Then it doesn't really count.","Just this once, in private."]},
+  {line:"You're wound up. This is the only thing that works.",right:"It's the only thing I've tried tonight. Breathing first.",wrong:["Fair. Just enough to take the edge off.","I've had a bad day, I deserve it."]},
+  {line:"Tomorrow, then. Start again tomorrow.",right:"Tomorrow is what I said last time. Tonight is the one that counts.",wrong:["Tomorrow's a cleaner start anyway.","One last night, then done."]}]},
+'Porn & Sex':{
+ short:[
+  {line:"Check.",right:"No.",wrong:["Quick.","Once."]},
+  {line:"Two minutes.",right:"Never two.",wrong:["Timer.","Fine."]},
+  {line:"Bored?",right:"Walk.",wrong:["Scroll.","Look."]},
+  {line:"Private.",right:"Still me.",wrong:["Harmless.","Nobody knows."]},
+  {line:"1am.",right:"Bed.",wrong:["Later.","Just once."]},
+  {line:"Stressed?",right:"Breathe.",wrong:["Release.","Quick fix."]}],
+ mid:[
+  {line:"Just checking. Two minutes.",right:"There's no two minutes.",wrong:["Timer on, then.","A look, not the rest."]},
+  {line:"Nobody gets hurt.",right:"I do.",wrong:["It's private.","Not cheating."]},
+  {line:"You've been so good.",right:"So I stay good.",wrong:["One night off.","Reset after."]},
+  {line:"The old bookmark.",right:"Gone for a reason.",wrong:["Old times' sake.","Delete after."]},
+  {line:"You're stressed.",right:"Then sleep, not this.",wrong:["Just to calm down.","Better than snapping."]},
+  {line:"Nobody's up.",right:"The plan is for now.",wrong:["Too tired to fight.","Scroll, don't click."]}],
+ long:[
+  {line:"You're just checking. Two minutes.",right:"There's no two minutes. There never has been.",wrong:["I'll set a timer.","Just a look, not the rest."]},
+  {line:"You're stressed. You need the release.",right:"I need sleep. This is the thing that steals it.",wrong:["Just tonight, to calm down.","Better than snapping at people."]},
+  {line:"Nobody gets hurt. It's private.",right:"I get hurt. I've seen the morning after.",wrong:["It's harmless if nobody knows.","At least it isn't cheating."]},
+  {line:"You've been so good. You've earned a break.",right:"The break is the thing I'm taking a break from.",wrong:["One night off won't undo it.","I'll reset the counter after."]},
+  {line:"It's 1am. Nobody's up. Nobody's watching.",right:"1am is exactly when this plan was written for.",wrong:["I'm too tired to fight it now.","I'll just scroll, not click."]},
+  {line:"Just the old bookmark. You know what's there.",right:"I know what's there. That's why it's gone.",wrong:["One look for old times' sake.","I'll delete it after this."]}]},
+'Smoking':{
+ short:[
+  {line:"Break?",right:"Walk.",wrong:["One.","Quick."]},
+  {line:"Coffee.",right:"Just coffee.",wrong:["And one.","Outside."]},
+  {line:"Stressed.",right:"Breathe.",wrong:["Light up.","Half."]},
+  {line:"Someone's got one.",right:"Not me.",wrong:["Borrow.","Share."]},
+  {line:"After dinner.",right:"Teeth.",wrong:["Habit.","Last one."]},
+  {line:"Vape's fine.",right:"Same thing.",wrong:["Cleaner.","Zero nic."]}],
+ mid:[
+  {line:"Just a drag.",right:"A drag is a pack.",wrong:["One drag, that's it.","Their smoke, not mine."]},
+  {line:"You quit before. Easy.",right:"So I know how it comes back.",wrong:["So one won't stick.","I can quit again."]},
+  {line:"Everyone's outside.",right:"I'll stand out there empty-handed.",wrong:["Hold one, unlit.","Just to talk."]},
+  {line:"You're snapping at people.",right:"That passes. Smoking doesn't.",wrong:["One calms me down.","Better than shouting."]},
+  {line:"Vape's not smoking.",right:"It's the same hand, same hour.",wrong:["It's a step down.","No smoke, no harm."]},
+  {line:"Last one, then done.",right:"I've had my last one.",wrong:["Fair, one to finish.","Then throw the pack."]}],
+ long:[
+  {line:"Just a drag. Not even a whole one.",right:"A drag is how the whole pack starts, every single time.",wrong:["One drag, then I hand it back.","It's their cigarette, doesn't count."]},
+  {line:"You've quit before. You can quit again any time.",right:"I've quit before, so I know exactly how it gets back in.",wrong:["So one now won't matter.","I'll quit again on Monday."]},
+  {line:"Everyone's outside having one. You'll miss the chat.",right:"I'll go out and stand there with nothing in my hand.",wrong:["I'll hold one so I fit in.","Just one to be sociable."]},
+  {line:"You're stressed and snapping at people. This calms you.",right:"It's the wanting that's making me snap, and it passes.",wrong:["One to calm down, then done.","Better than taking it out on them."]},
+  {line:"Vaping isn't smoking. You're allowed that.",right:"Same hand, same hour, same reach. Same thing.",wrong:["It's a step down, at least.","No smoke, so no harm."]},
+  {line:"Have the last one properly. Say goodbye to it.",right:"I already had the last one. That's what last means.",wrong:["One ceremonial one to close it out.","Then I'll throw the pack away."]}]},
+'Substances':{
+ short:[
+  {line:"Bump.",right:"No.",wrong:["Small.","Once."]},
+  {line:"Party.",right:"Leave.",wrong:["Stay.","Watch."]},
+  {line:"Can't sleep.",right:"Lie still.",wrong:["Half.","Just one."]},
+  {line:"He's holding.",right:"Not mine.",wrong:["Look.","Later."]},
+  {line:"Pain.",right:"Doctor.",wrong:["Old stash.","One."]},
+  {line:"Numb it.",right:"Feel it.",wrong:["Quick.","Tonight."]}],
+ mid:[
+  {line:"Just a little.",right:"There's no little.",wrong:["A little's fine.","Half of before."]},
+  {line:"You need to sleep.",right:"Sleep comes without it.",wrong:["One to sleep.","Just tonight."]},
+  {line:"Same crowd, same place.",right:"New place, then.",wrong:["I'll just say hi.","Stay sober there."]},
+  {line:"Your tolerance is gone.",right:"That's the danger, not the deal.",wrong:["So less is enough.","One won't be much."]},
+  {line:"You feel nothing anyway.",right:"Numb is the thing I'm leaving.",wrong:["Then what's the harm.","Feel something, once."]},
+  {line:"Delete the number tomorrow.",right:"Delete it now.",wrong:["After tonight.","Keep it, don't use it."]}],
+ long:[
+  {line:"Just a little. You're not going back to how it was.",right:"There's no little. That's the one thing I know about it.",wrong:["A little is manageable now.","Half what I used to do."]},
+  {line:"You haven't slept properly in days. You need something.",right:"Sleep comes back on its own. It never came with that.",wrong:["Just one to get some sleep.","Only tonight, for the sleep."]},
+  {line:"They're all going to be there. Same crowd, same place.",right:"Then I'm not going to be there. New place, new crowd.",wrong:["I'll go and just say hi.","I can be there and stay clean."]},
+  {line:"Your tolerance is gone. It would take almost nothing.",right:"That's exactly why it could take everything.",wrong:["So a tiny bit would be enough.","One won't do much now."]},
+  {line:"You feel nothing anyway. What's the difference.",right:"Numb is the thing I'm walking away from, not towards.",wrong:["Then one more won't hurt.","Feel something, just once."]},
+  {line:"Keep the number. You don't have to use it.",right:"The number goes tonight. Keeping it is using it slowly.",wrong:["I'll delete it tomorrow.","Keep it, just for emergencies."]}]},
+'Gambling':{
+ short:[
+  {line:"Due.",right:"Never.",wrong:["Maybe.","Once."]},
+  {line:"Twenty.",right:"No.",wrong:["Only twenty.","Small."]},
+  {line:"Free bet.",right:"Bait.",wrong:["Free.","No risk."]},
+  {line:"Big game.",right:"Just watch.",wrong:["Small stake.","One acca."]},
+  {line:"Win it back.",right:"Chasing.",wrong:["One bet.","Square it."]},
+  {line:"Lucky?",right:"Rigged.",wrong:["Feeling it.","Tonight."]}],
+ mid:[
+  {line:"You're due a win.",right:"Nothing is due.",wrong:["Odds favour me.","Small test bet."]},
+  {line:"Win back the loss.",right:"Chasing is how I lost.",wrong:["One bet squares it.","Only what I'm down."]},
+  {line:"It's only twenty.",right:"Never only twenty.",wrong:["Twenty's a takeaway.","Twenty limit, then."]},
+  {line:"You're good at this.",right:"Nobody is. That's the model.",wrong:["I have a system.","Skill counts."]},
+  {line:"Free bet waiting.",right:"Free is the bait.",wrong:["Waste not to use it.","No risk, it's free."]},
+  {line:"Stake on the game.",right:"Nothing on. Still a game.",wrong:["Makes it interesting.","One acca for fun."]}],
+ long:[
+  {line:"You're due. It has to come in.",right:"Nothing is due. That's the machine talking.",wrong:["The odds are in my favour now.","Just a small one to test it."]},
+  {line:"Win back what you lost, then stop.",right:"Chasing it is how I lost it.",wrong:["One good bet squares it.","I'll only stake what I'm down."]},
+  {line:"It's only twenty. That's nothing.",right:"Twenty is never twenty by the end of the night.",wrong:["Twenty is a takeaway, who cares.","I'll set a twenty limit and stick to it."]},
+  {line:"You know this game. You're good at it.",right:"Nobody's good at it. That's the whole business model.",wrong:["I do have a system though.","Skill counts for something."]},
+  {line:"Free bet. It's not even your money.",right:"It's bait. Free is the most expensive word in that app.",wrong:["It'd be a waste not to use it.","Free means no risk."]},
+  {line:"Everyone's on the game tonight. Just watch with a stake on.",right:"I'll watch it with nothing on. It's still a game.",wrong:["A small one makes it interesting.","Just one accumulator for fun."]}]},
+'Social media':{
+ short:[
+  {line:"Check.",right:"Later.",wrong:["Quick.","One look."]},
+  {line:"Bored.",right:"Outside.",wrong:["Scroll.","Five mins."]},
+  {line:"Buzz.",right:"Face down.",wrong:["Peek.","Might matter."]},
+  {line:"Bed.",right:"Phone's out.",wrong:["Wind down.","One video."]},
+  {line:"Missing it.",right:"Missing nothing.",wrong:["Catch up.","Just headlines."]},
+  {line:"Lonely.",right:"Text one person.",wrong:["Feed.","Likes."]}],
+ mid:[
+  {line:"Five minutes.",right:"It's never five.",wrong:["Timer on.","Five, then bed."]},
+  {line:"Something might have happened.",right:"It'll be there tomorrow.",wrong:["Quick check.","Just notifications."]},
+  {line:"You're bored.",right:"Bored is fine.",wrong:["Kill some time.","Just one video."]},
+  {line:"Everyone's on there.",right:"Everyone's not asleep either.",wrong:["Keep up.","Don't be left out."]},
+  {line:"Wind down with it.",right:"That's the opposite.",wrong:["Helps me sleep.","Just calm videos."]},
+  {line:"Delete it tomorrow.",right:"Delete it now.",wrong:["Last scroll.","Tomorrow, promise."]}],
+ long:[
+  {line:"Five minutes. You've got five minutes.",right:"It has never once been five minutes. Not once.",wrong:["I'll set a timer this time.","Five minutes, then I'm off."]},
+  {line:"Something might have happened. You should check.",right:"Anything real will still be there in the morning.",wrong:["Just a quick look at notifications.","Only the important ones."]},
+  {line:"You're bored. What else are you going to do.",right:"Bored is allowed. It's where the other things start.",wrong:["Just kill twenty minutes.","One video and I'll stop."]},
+  {line:"Everyone's on there. You'll be out of the loop.",right:"The loop is the problem. I'm fine out of it.",wrong:["I'll keep up a little.","Don't want to be left out."]},
+  {line:"Wind down with it. It relaxes you.",right:"It wires me. I wake up tired every time.",wrong:["Only calm videos, then bed.","It helps me switch off."]},
+  {line:"Delete it tomorrow. One last scroll tonight.",right:"Tonight is when I delete it. Tomorrow never came last time.",wrong:["One last scroll to say goodbye.","Tomorrow, first thing, promise."]}]},
+'Gaming':{
+ short:[
+  {line:"One match.",right:"No.",wrong:["Quick.","Ranked."]},
+  {line:"Squad's on.",right:"Text them.",wrong:["Just join.","Watch."]},
+  {line:"Bored.",right:"Outside.",wrong:["Load up.","Casual."]},
+  {line:"3am.",right:"Bed.",wrong:["Last one.","Almost ranked up."]},
+  {line:"Stressed.",right:"Walk.",wrong:["Unwind.","One game."]},
+  {line:"Event ends.",right:"Let it.",wrong:["Grind.","Just rewards."]}],
+ mid:[
+  {line:"One more match.",right:"There's no one more.",wrong:["Last one, promise.","Just a quick one."]},
+  {line:"The squad needs you.",right:"They'll play without me.",wrong:["Can't let them down.","One game for them."]},
+  {line:"You're so close to ranking up.",right:"The rank's not the point.",wrong:["Just get the rank.","Then I stop."]},
+  {line:"It's how you relax.",right:"It's how I disappear.",wrong:["Just to unwind.","Casual only."]},
+  {line:"The event ends tonight.",right:"Events always end tonight.",wrong:["Just the rewards.","One hour of grind."]},
+  {line:"Uninstall tomorrow.",right:"Uninstall now.",wrong:["After the season.","Last session."]}],
+ long:[
+  {line:"One more match. It's twenty minutes.",right:"There is no one more match. There's the next one, and the next.",wrong:["One last one, then I'm off.","Just a quick casual game."]},
+  {line:"The squad's on. They need you tonight.",right:"They'll play without me. They did before I existed.",wrong:["I can't let the lads down.","One game for the team."]},
+  {line:"You're so close to ranking up. Just get there.",right:"The rank is a number the game invented to keep me in the chair.",wrong:["I'll stop the second I rank up.","Just this one push."]},
+  {line:"It's how you relax. Everyone needs that.",right:"It's how I disappear. Relaxing doesn't leave me like this.",wrong:["Just a bit to unwind.","Casual mode only, no stress."]},
+  {line:"The event ends tonight. You'll miss the rewards.",right:"There is always an event ending tonight. That's the design.",wrong:["Just grab the rewards, then out.","One hour of grind, no more."]},
+  {line:"Uninstall it tomorrow. One last session tonight.",right:"Tonight is the uninstall. There's no goodbye session.",wrong:["After the season ends.","One last session, then gone."]}]},
+'Food / Binging':{
+ short:[
+  {line:"Kitchen.",right:"Bed.",wrong:["One look.","Just water."]},
+  {line:"Bad day.",right:"Bath.",wrong:["Treat.","Deserve it."]},
+  {line:"Already slipped.",right:"Stop here.",wrong:["Ruined.","Finish it."]},
+  {line:"Alone.",right:"Call.",wrong:["Snack.","Nobody knows."]},
+  {line:"Start Monday.",right:"Start now.",wrong:["Last one.","Weekend's gone."]},
+  {line:"Just a taste.",right:"Not tonight.",wrong:["One bite.","Small plate."]}],
+ mid:[
+  {line:"You've already blown it.",right:"One thing isn't the night.",wrong:["May as well finish.","Start again tomorrow."]},
+  {line:"Nobody's home.",right:"I'm home.",wrong:["Nobody would know.","Quick, before they're back."]},
+  {line:"You had a hard day.",right:"Hard day, kind night.",wrong:["I've earned it.","Just something small."]},
+  {line:"Just one biscuit.",right:"It's never one.",wrong:["One, then done.","Two at most."]},
+  {line:"Start fresh Monday.",right:"Fresh is now.",wrong:["Weekend's already gone.","One last blowout."]},
+  {line:"Eat it, then bed.",right:"Bed, without it.",wrong:["Then straight to sleep.","Helps me sleep."]}],
+ long:[
+  {line:"You've already blown it today. May as well.",right:"One thing was one thing. The night is still mine.",wrong:["May as well finish the day off.","I'll start clean tomorrow."]},
+  {line:"Nobody's home. Nobody would ever know.",right:"I'm home. I'd know. That's the only one that counts.",wrong:["Quick, before anyone's back.","It doesn't count if nobody sees."]},
+  {line:"You had a hard day. You deserve something nice.",right:"I deserve a kind night, and this is never kind by the end.",wrong:["I've earned a treat.","Just something small to feel better."]},
+  {line:"Just one biscuit. That's normal.",right:"For me it's never one. That's the thing I'm learning.",wrong:["One, and I'll put the packet away.","Two at the very most."]},
+  {line:"Start fresh Monday. The weekend's gone anyway.",right:"Fresh is now. Monday is the story I tell to get tonight.",wrong:["One last weekend, then serious.","The weekend's already written off."]},
+  {line:"Eat it, then go to bed. It'll help you sleep.",right:"I'll go to bed without it and sleep better for it.",wrong:["Then straight to sleep after.","It does help me drop off."]}]},
+'Shopping / Spending':{
+ short:[
+  {line:"Sale.",right:"Close it.",wrong:["Just look.","Basket."]},
+  {line:"Bad day.",right:"Walk.",wrong:["Treat.","Small thing."]},
+  {line:"Free delivery.",right:"Not free.",wrong:["Save money.","Might as well."]},
+  {line:"Returnable.",right:"Won't return it.",wrong:["No risk.","Try it."]},
+  {line:"Payday.",right:"Bills first.",wrong:["Earned it.","One thing."]},
+  {line:"Cart's waiting.",right:"Empty it.",wrong:["Later.","Sleep on it."]}],
+ mid:[
+  {line:"It's on sale. Today only.",right:"There's always a today only.",wrong:["Save money buying now.","Just check the price."]},
+  {line:"You can return it.",right:"I never do.",wrong:["So it's risk-free.","Order two, return one."]},
+  {line:"You've had a hard week.",right:"A parcel won't fix the week.",wrong:["One little treat.","I've earned this."]},
+  {line:"Just browsing.",right:"Browsing is buying, slowly.",wrong:["Looking's free.","Just the wishlist."]},
+  {line:"It's payday.",right:"Payday is for the plan.",wrong:["One thing for me.","I've earned it."]},
+  {line:"Leave it in the cart.",right:"Delete the cart.",wrong:["Sleep on it.","Decide tomorrow."]}],
+ long:[
+  {line:"It's on sale. Today only. You'd be mad not to.",right:"There is always a today only. That's how the button works.",wrong:["I'll save money buying it now.","Just check the final price."]},
+  {line:"You can always return it. There's no risk.",right:"I never return anything. The risk is the whole point.",wrong:["So it's basically a free trial.","Order two, send one back."]},
+  {line:"You've had a hard week. Treat yourself.",right:"A parcel has never once fixed a week. I've tested it.",wrong:["One little treat won't hurt.","I've earned something nice."]},
+  {line:"You're just browsing. Looking is free.",right:"Browsing is buying with extra steps. I know how this ends.",wrong:["Just adding to the wishlist.","Looking costs nothing."]},
+  {line:"It's payday. You've got the money right now.",right:"Payday is for the plan I wrote when I wasn't tired.",wrong:["One thing for me, then bills.","I've earned one purchase."]},
+  {line:"Leave it in the cart and sleep on it.",right:"The cart gets emptied tonight. A saved cart is a slow yes.",wrong:["I'll decide in the morning.","Sleep on it, that's sensible."]}]},
+'Work':{
+ short:[
+  {line:"One email.",right:"Morning.",wrong:["Quick.","Then bed."]},
+  {line:"They need you.",right:"They'll wait.",wrong:["Five mins.","Just reply."]},
+  {line:"Sunday.",right:"Off.",wrong:["Get ahead.","One hour."]},
+  {line:"Guilty.",right:"Rest anyway.",wrong:["Log on.","Catch up."]},
+  {line:"Phone's buzzing.",right:"Face down.",wrong:["Peek.","Could be urgent."]},
+  {line:"Dinner's waiting.",right:"Laptop shut.",wrong:["Two mins.","Bring it."]}],
+ mid:[
+  {line:"Just one email.",right:"It's never one email.",wrong:["Quick reply, then off.","So it's not on my mind."]},
+  {line:"Get ahead for Monday.",right:"Monday can have Monday.",wrong:["One hour now saves stress.","Just a plan for the week."]},
+  {line:"They can't do it without you.",right:"They can. That's what teams are.",wrong:["I'll just check in.","Five minutes to unblock them."]},
+  {line:"You'll feel guilty resting.",right:"Guilty and rested beats neither.",wrong:["Work through it.","Rest after the deadline."]},
+  {line:"Bring the laptop to dinner.",right:"Laptop stays shut.",wrong:["Just in case.","Only if it buzzes."]},
+  {line:"Nobody else stops.",right:"I'm not nobody else.",wrong:["Keep up.","Can't be seen slacking."]}],
+ long:[
+  {line:"Just one email. Then you can properly relax.",right:"It is never one email, and relaxing doesn't need permission.",wrong:["Quick reply so it's off my mind.","One, then I'll shut it."]},
+  {line:"Get ahead for Monday. You'll thank yourself.",right:"Monday can have Monday. Sunday is already spoken for.",wrong:["One hour now saves stress later.","Just a quick plan for the week."]},
+  {line:"They can't do it without you. Be honest.",right:"They can. If they can't, that's a bigger problem than tonight.",wrong:["I'll just check in briefly.","Five minutes to unblock them."]},
+  {line:"You'll only feel guilty if you rest anyway.",right:"Guilty and rested still beats guilty and burnt out.",wrong:["May as well work through it.","Rest after the deadline."]},
+  {line:"Bring the laptop to dinner. Just in case.",right:"The laptop stays shut. Dinner isn't a standby shift.",wrong:["Only if something comes in.","Just to keep an eye on it."]},
+  {line:"Nobody else stops. You'll fall behind.",right:"I'm not measuring myself against people who never stop.",wrong:["I can't be seen slacking.","Keep up now, rest later."]}]},
+'Other':{
+ short:[
+  {line:"Once.",right:"No.",wrong:["Quick.","Small."]},
+  {line:"Bored.",right:"Move.",wrong:["Just this.","Kill time."]},
+  {line:"Nobody's looking.",right:"I am.",wrong:["Then fine.","Quietly."]},
+  {line:"Bad day.",right:"Breathe.",wrong:["Deserve it.","Just tonight."]},
+  {line:"Later.",right:"Now.",wrong:["Tomorrow.","Monday."]},
+  {line:"You're fine.",right:"Staying fine.",wrong:["So one's ok.","Proved it."]}],
+ mid:[
+  {line:"Just this once.",right:"There's no once.",wrong:["Once, then done.","Small version."]},
+  {line:"You've been good for weeks.",right:"So I keep it.",wrong:["So a break's fine.","Earned one."]},
+  {line:"Nobody would know.",right:"I would.",wrong:["Then it's harmless.","In private, then."]},
+  {line:"You're stressed.",right:"Stressed passes.",wrong:["This helps.","Just to cope."]},
+  {line:"Start again tomorrow.",right:"Tonight is the start.",wrong:["Tomorrow's cleaner.","One last time."]},
+  {line:"It's not that bad.",right:"It's bad enough that I'm here.",wrong:["Others are worse.","I could stop any time."]}],
+ long:[
+  {line:"Just this once. Nobody's counting.",right:"I'm counting. That's the whole thing I'm doing now.",wrong:["Once, and then I'm done.","A small version of it."]},
+  {line:"You've been good for weeks. You've proved it.",right:"Weeks are the reason to keep it, not the permission to stop.",wrong:["So a night off won't undo it.","I've earned one."]},
+  {line:"Nobody would ever know.",right:"I would know, and I'm the one who has to live here.",wrong:["Then it doesn't really count.","Just this once, privately."]},
+  {line:"You're stressed. This is what gets you through.",right:"It's what got me here. Stressed passes; this doesn't.",wrong:["Just enough to cope tonight.","Better than falling apart."]},
+  {line:"Start again tomorrow. Tonight's already gone.",right:"Tonight is the start. Tomorrow is what I said last time.",wrong:["Tomorrow's a cleaner start.","One last time, then done."]},
+  {line:"It's not that bad. Look at other people.",right:"It's bad enough that I built a plan for it. That's enough.",wrong:["Other people are far worse.","I could stop any time I wanted."]}]},
+'Anger & Control':{
+ short:[
+  {line:"Say it.",right:"Wait.",wrong:["Now.","Loud."]},
+  {line:"They started it.",right:"I finish it calm.",wrong:["Then fine.","Match it."]},
+  {line:"Door.",right:"Walk out.",wrong:["Slam.","Block it."]},
+  {line:"Disrespect.",right:"Breathe.",wrong:["Correct them.","Louder."]},
+  {line:"Last word.",right:"Theirs.",wrong:["Mine.","Always."]},
+  {line:"Heat rising.",right:"Ninety seconds.",wrong:["Let it.","Use it."]}],
+ mid:[
+  {line:"They need to hear this.",right:"Not at this volume.",wrong:["Right now, while it's fresh.","Or they'll never learn."]},
+  {line:"They started it.",right:"How I finish is mine.",wrong:["So it's fair.","I'm just matching them."]},
+  {line:"Walking out is weak.",right:"Walking out is the plan.",wrong:["Stand my ground.","Finish the conversation."]},
+  {line:"You're being disrespected.",right:"Ninety seconds first.",wrong:["Correct it now.","Raise my voice a bit."]},
+  {line:"Get the last word.",right:"Let them have it.",wrong:["Just one more line.","Can't let that stand."]},
+  {line:"Your hand's a fist.",right:"Open it.",wrong:["Table, not them.","Just once."]}],
+ long:[
+  {line:"They need to hear this and they need to hear it now.",right:"They can hear it tomorrow at a normal volume. Nothing is lost.",wrong:["Right now, while it's fresh.","If I wait, they'll never learn."]},
+  {line:"They started it. You're just responding.",right:"They started it. How I finish it is the only part that's mine.",wrong:["So it's fair enough.","I'm only matching their energy."]},
+  {line:"Walking out looks weak. Stand your ground.",right:"Walking out is the plan I wrote. Standing here is the old me.",wrong:["I'll stand my ground this once.","Just finish the conversation first."]},
+  {line:"You're being disrespected in your own house.",right:"Ninety seconds first. Then I'll decide what it was.",wrong:["I'll correct it right now.","A raised voice sets the boundary."]},
+  {line:"Get the last word. Don't let that stand.",right:"The last word is theirs. I'm keeping the house quiet instead.",wrong:["Just one more line and I'm done.","I can't let that be the end of it."]},
+  {line:"Your hand's already a fist. Use the table, not them.",right:"Open hand. Out of the room. That's the whole move.",wrong:["The table's fine, it's not a person.","Just once, to make the point."]}]},
+'Supporting Someone':{
+ short:[
+  {line:"Check their phone.",right:"Not mine.",wrong:["Quick look.","For safety."]},
+  {line:"Your fault.",right:"Nobody's.",wrong:["Partly.","If I'd noticed."]},
+  {line:"Say it better.",right:"No sentence.",wrong:["Try again.","Send the article."]},
+  {line:"Count their days.",right:"Count mine.",wrong:["Track it.","Just quietly."]},
+  {line:"Cancel your plans.",right:"Keep them.",wrong:["Just in case.","They need me."]},
+  {line:"Tell nobody.",right:"Tell one.",wrong:["Private.","Protect them."]}],
+ mid:[
+  {line:"Just check their phone once.",right:"Their phone is their job.",wrong:["Once, for peace of mind.","Only if it's unlocked."]},
+  {line:"If you'd said it better.",right:"There's no better sentence.",wrong:["One more try.","I'll find the words."]},
+  {line:"You should have seen it sooner.",right:"Nobody sees it sooner.",wrong:["I missed the signs.","Partly on me."]},
+  {line:"Cancel tonight. They might need you.",right:"My night is still mine.",wrong:["Stay home, just in case.","They come first."]},
+  {line:"Don't tell anyone.",right:"One person knows.",wrong:["It's private.","Protect their name."]},
+  {line:"You can fix this.",right:"I can only do my side.",wrong:["If I try harder.","One more plan."]}],
+ long:[
+  {line:"Just check their phone once. Then you'll know.",right:"Their phone has never once changed what happens. Mine is mine.",wrong:["Once, just for peace of mind.","Only if they leave it unlocked."]},
+  {line:"If you'd only said it better, they'd have listened.",right:"There is no sentence. There never was. They already knew.",wrong:["I'll find the right words tomorrow.","One more try, more gently."]},
+  {line:"You should have seen it sooner. You lived with it.",right:"Nobody sees it sooner. That's not a failure, that's how it hides.",wrong:["I did miss the signs.","Some of this is on me."]},
+  {line:"Cancel tonight. What if they need you.",right:"My life isn't the thing that gets paused. They know where I am.",wrong:["I'll stay home, just in case.","They come first tonight."]},
+  {line:"Don't tell anyone. Protect them.",right:"One person outside this house knows. That's protection, for both of us.",wrong:["It's private, it stays in the house.","I'll protect their name."]},
+  {line:"You can fix this if you try hard enough.",right:"I can do my side of it completely. That's the whole of what's mine.",wrong:["If I try harder this time.","One more plan might work."]}]},
+};
+
+// The exits. A short situation and three moves. One gets you out.
+const GAME_RIDES=[
+ {min:.7,icon:'✈️',key:'jet',name:'The jet',line:"Barely touched. Straight over. The jet's yours."},
+ {min:.4,icon:'🚁',key:'heli',name:'The helicopter',line:"Took some. Still flying. Helicopter to the next roof."},
+ {min:0,icon:'🪂',key:'chute',name:'The parachute',line:"Took a lot. Still standing. Parachute. Do a lesson tonight and next time it's the helicopter."}];
+
+// Pace per building. Jacques: "start each rooftop level off slow ... just a
+// word, as levels progress they can become longer." No clock anywhere: the
+// only thing that tightens is the wind-up before its swing (tell, in ms) and
+// what it throws. Buildings 1-2 show dodge arrows; after that you read it.
+function gameTier(){
+  const s=gameStep();
+  return s<=12?{key:'short',label:'Single words',tell:1000,swings:2,feint:false,switch:false,arrows:true,hit:8,given:'word'}
+       :s<=24?{key:'mid',label:'Short lines',tell:800,swings:3,feint:true,switch:false,arrows:false,hit:11,given:'line'}
+       :{key:'long',label:'Full sentences',tell:620,swings:4,feint:true,switch:true,arrows:false,hit:14,given:'line'};
+}
+
+// Art. The boss shadows are in img/fight/boss-*.jpg, one per opponent, plus a
+// plain shadow for anything without its own. Scenes rotate by building.
+const GAME_PLACES=[{k:'temple',name:'The Temple'},{k:'tomb',name:'The Tomb'},{k:'monastery',name:'The Monastery'},{k:'rooftop',name:'The Rooftop'}];
+// The boxers people can pick. Numbers are the photo sets in img/fight
+// (boxerN-punch/guard/corner/count/down.jpg). Only complete sets are listed.
+const GAME_BOXERS=[1,2,3,5,6,7,9];
+const GAME_GLOVES=['red','blue','white','black','gold','green','pink'];
+// Every boss fights differently. Learn the pattern, like Punch-Out.
+// L/R = it swings from that side, you dodge the other way. F = feint: it winds
+// up and stops. S = the switch: winds up one side, swings from the other.
+function gameState(){
+  if(!S.bld||typeof S.bld!=='object')S.bld={b:1,f:1,cleared:{},wins:0,losses:0,locked:null,rides:{jet:0,heli:0,chute:0},streak:0,ups:0,upsTotal:0,boxer:1,glove:'red',spun:0};
+  const g=S.bld;
+  g.b=Math.max(1,g.b|0);g.f=Math.max(1,Math.min(GAME_FLOORS+1,g.f|0));
+  g.cleared=g.cleared||{};g.rides=g.rides||{jet:0,heli:0,chute:0};
+  g.ups=g.ups|0;g.upsTotal=g.upsTotal|0;g.spun=g.spun|0;
+  if(!GAME_BOXERS.includes(g.boxer))g.boxer=1;if(!GAME_GLOVES.includes(g.glove))g.glove='red';
+  return g;
+}
+// Which opponent. Supporters get their own; everybody else gets the track
+// their lessons are open on. The app decides, never the game.
+function gameTrack(){
+  const t=gameBuilding().track;
+  return GAME_BOSSES[t]?t:'Other';
+}
+function gameBossName(){return gameBuilding().name;}
+function gameBossImg(){return 'img/fight/boss-'+gameBuilding().k+'.jpg';}
+function gameBldImg(){return 'img/fight/bld-'+gameBuilding().k+'.jpg';}
+function gamePlace(){const g=gameState();return GAME_PLACES[(g.b-1)%GAME_PLACES.length];}
+function gameDays(){
+  try{if(!S.startDate)return 0;return Math.max(0,Math.floor((Date.now()-new Date(S.startDate).getTime())/86400000));}catch(e){return 0;}
+}
+function gameToday(){return new Date().toDateString();}
+function gameStrength(){
+  const days=Math.min(30,gameDays());
+  const g=gameState();
+  const floors=Object.keys(g.cleared).length;
+  const behind=Math.min(36,Math.max(0,g.b-1)*6);
+  const parts=[
+    {k:'Days here',v:days,hint:null},
+    {k:'Floors this building',v:floors,hint:null},
+    {k:'Buildings behind you',v:behind,hint:null}];
+  const total=Math.min(120,50+parts.reduce((s,p)=>s+p.v,0));
+  return {total,parts};
+}
+// Stars are uppercuts: one for each real thing done today.
+let gmBusy=false,gmFight=null,gmQ=null,gmPZ=null,gmH=null,gmInput=null,gmAC=null,gmCrowd=null,gmCrowdT=null;
+function gm(id){return document.getElementById(id);}
+function gmEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function openTower(){switchTo('tower');actBn('bn-game');}
+function gameStop(){gmBusy=false;gmFight=null;gmInput=null;try{if(gmCrowd){gmCrowd.pause();}}catch(e){}clearInterval(gmCrowdT);}
+function gmPhoto(cls,src){const p=gm('g2-photo');if(!p)return;p.className='g2-photo '+(cls||'');if(src!==undefined)p.style.backgroundImage=src?`url(${src})`:'';}
+function gmBoxerImg(pose){return `img/fight/boxer${gameState().boxer}-${pose}.jpg`;}
+function gmMini(pose){const m=gm('g2-mini');if(!m)return;m.hidden=false;m.className='g2-mini '+pose;m.style.backgroundImage=`url(${gmBoxerImg(pose)})`;}
+function gmMiniHide(){const m=gm('g2-mini');if(m)m.hidden=true;}
+function gmTop(){
+  const g=gameState();
+  const sub=gm('g2-sub'),ups=gm('g2-ups'),fl=gm('g2-floors');
+  if(sub)sub.textContent=`Building ${g.b} · ${gameBuilding().name}`;
+  if(ups)ups.textContent=g.ups;
+  if(fl)fl.innerHTML=Array.from({length:GAME_FLOORS},(_,i)=>`<i class="${g.cleared[i+1]?'done':(g.f===i+1?'here':'')}"></i>`).join('')+`<i class="roof ${g.f>GAME_FLOORS?'here':''}"></i>`;
+}
+function gmBody(html){const b=gm('g2-body');if(b)b.innerHTML=html;}
+function renderTower(){
+  gameStop();
+  const g=gameState();
+  if(!gm('g2'))return;
+  gmTop();
+  if(!g.inside)renderApproach();else renderFloors();
+}
+// You land in the street and the building is standing there with its name on it.
+function renderApproach(){
+  const g=gameState(),B=gameBuilding();
+  gmPhoto('scene',gameBldImg());gmMiniHide();
+  gmBody(`<div class="g2-cat">Building ${g.b}${gameLap()>1?` · time ${gameLap()}`:''}</div>
+    <div class="g2-bld"><span>${gmEsc(B.name)}</span><small>${gmEsc(B.kind)}</small></div>
+    <p class="g2-lead">Five floors and a roof. The same thing waits on every one of them, wearing something different each time. The roof is where it comes from.</p>
+    <button class="g2-big" onclick="gameGoIn()">Go in</button>`);
+}
+function gameGoIn(){const g=gameState();g.inside=true;save();renderFloors();}
+// The climb. One fight a floor, then the roof.
+function renderFloors(){
+  gmReplay=null;
+  const g=gameState(),B=gameBuilding();
+  gmPhoto('boss',gameBossImg());gmMiniHide();
+  const rows=[];
+  for(let n=GAME_FLOORS;n>=1;n--){
+    const done=!!g.cleared[n],here=g.f===n&&!done;
+    const go=here?'gameFloorGo('+n+')':done?'gameFloorReplay('+n+')':'';
+    rows.push(`<button class="g2-flr ${done?'done':''} ${here?'here':''}" ${go?'onclick="'+go+'"':'disabled'}>
+      <b>${n}</b><span>${gmEsc(gameFloorEl(n))}${here?'<small style="display:block;font-size:.7rem;opacity:.75">'+gmEsc(GAME_ELEMENT_HOW[gameFloorEl(n)]||'')+'</small>':''}</span><i>${done?'cleared &middot; go again':here?'fight':'locked'}</i></button>`);
+  }
+  const roofReady=Object.keys(g.cleared).length>=GAME_FLOORS;
+  gmBody(`<div class="g2-cat">${gmEsc(B.name)} · ${gmEsc(B.kind)}</div>
+    <button class="g2-flr roof ${roofReady?'here':''}" ${roofReady?'onclick="gameFloorGo('+(GAME_FLOORS+1)+')"':'disabled'}>
+      <b>&#9650;</b><span>The roof &middot; the source</span><i>${roofReady?'fight':'five floors first'}</i></button>
+    <div class="g2-flrs">${rows.join('')}</div>
+    <button class="g2-ghost" style="margin-top:14px" onclick="gameStartOver()">Start the whole thing over</button>`);
+}
+function gameFloorGo(n){gmReplay=null;const g=gameState();g.f=n;save();gmTop();renderRoofDoor();}
+// Walking back into a fight you already cleared (Jacques, 8 Sep 2026). It changes
+// nothing: the floor is not re-cleared, and the win and loss counts are left alone.
+// Progress only ever moves forward the first time through, so going back to floor
+// two on your way up cannot cost you floors three to seven.
+let gmReplay=null;
+function gmFloor(){const g=gameState();return gmReplay!=null?gmReplay:g.f;}
+function gameFloorReplay(n){gmReplay=n;gmTop();renderRoofDoor();}
+function gameFightAgain(){
+  const g=gameState();
+  // The one just won is already marked cleared, so going again is a replay. A fight
+  // that was lost cleared nothing and g.f never moved - that is a straight retry.
+  gmReplay=g.cleared[gmFloor()]?gmFloor():null;
+  gmTop();renderRoofDoor();
+}
+// Start the whole thing over: building one, floor one, nothing cleared. Asked for
+// out loud, never offered mid-fight, and it says what it costs before it does it.
+function gameStartOver(){
+  appConfirm('Start the whole fight over? Every building and every floor goes back to the beginning. Nothing outside the fight changes.',
+    ()=>{
+      const g=gameState();
+      g.b=1;g.f=1;g.cleared={};g.inside=false;g.wins=0;g.losses=0;g.rides={};g.lastRide='';
+      gmReplay=null;gmFight=null;gmBusy=false;
+      save();gmTop();renderTower();
+    },{okText:'Start over'});
+}
+
+function gameFighter(){const g=gameState();return Math.max(1,Math.min(5,(g.fighter|0)||(((g.boxer-1)%5)+1)));}
+function gameSetFighter(n){const g=gameState();g.fighter=Math.max(1,Math.min(5,n|0));save();renderRoofDoor();}
+function gmCrowdLevel(level){try{if(!gmCrowd){gmCrowd=new Audio('audio/fight/crowd.mp3');gmCrowd.loop=true;gmCrowd.volume=0;gmCrowd.play().catch(()=>{});}
+  clearInterval(gmCrowdT);const target=Math.min(1,level*4);gmCrowdT=setInterval(()=>{if(!gmCrowd)return clearInterval(gmCrowdT);const d=target-gmCrowd.volume;if(Math.abs(d)<.02){gmCrowd.volume=target;clearInterval(gmCrowdT);if(target===0)gmCrowd.pause();return;}if(gmCrowd.paused)gmCrowd.play().catch(()=>{});gmCrowd.volume=Math.max(0,Math.min(1,gmCrowd.volume+d*.2));},60);}catch(e){}}
+function renderRoofDoor(){
+  const g=gameState(),T=gameTier(),str=gameStrength(),boss=gameBossName();
+  const F=gmFloor(),again=gmReplay!=null;
+  const roof=F>GAME_FLOORS;
+  gmPhoto('boss',gameBossImg());gmMini('guard');
+  const rows=str.parts.map(p=>`<div><span>${gmEsc(p.k)}</span><b>${p.v?'+'+p.v:'—'}</b>${p.hint?`<small>${gmEsc(p.hint)}</small>`:''}</div>`).join('');
+  gmBody(`<div class="g2-cat">${gmEsc(gameBuilding().name)} · ${roof?'the roof':'floor '+F+' · '+gmEsc(gameFloorEl(F))} · ${T.label}</div>
+    <h1 class="g2-h1">${roof?`${gmEsc(boss)} <em>itself.</em>`:`${gmEsc(boss)} is <em>waiting.</em>`}</h1>
+    <div class="g2-from" style="text-align:left">${roof?'The source. No element, no disguise. It fights straight, and it hits hardest.':gmEsc(gameFloorEl(F))+' in the ring. '+gmEsc(GAME_ELEMENT_HOW[gameFloorEl(F)]||'')} It swings from one side, you go the other &middot; swipe or use the arrows. Some of them sell a punch they never throw.</div>
+    ${again?'<div class="g2-from" style="text-align:left">You have already cleared this one. Go as many rounds as you want &mdash; nothing here counts against you.</div>':''}
+    <div class="g2-strength"><b>${str.total}</b><span>Strength</span></div>
+    <div class="g2-strrows">${rows}</div>
+    <div class="g2-pick g2-gloves" role="group" aria-label="Your fighter">${[1,2,3,4,5].map(n=>`<button class="g2-gl ${gameFighter()===n?'on':''}" aria-pressed="${gameFighter()===n}" onclick="gameSetFighter(${n})">Fighter ${n}</button>`).join('')}</div>
+    <button class="g2-big" onclick="startFight()">Ring the bell</button>
+    <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">Back to the stairs</button>`);
+}
+
+// The roof is the 3D fight. It runs in its own page (game3d.html) so the app shell
+// stays light; this hands it the person's own opponent, lines, boxer and gloves and
+// waits to hear how it ended. The photo fight it replaced is in git before this date.
+function game3dLines(){
+  const track=gameBuilding().track,B=GAME_BOSSES[track]||{};
+  const out=[];
+  for(const k of ['short','mid','long'])for(const q of (B[k]||[]))out.push({line:q.line});
+  for(const line of (GAME_TEMPT[track]||GAME_TEMPT['Other']||[]))out.push({line:line});
+  const seen={};return out.filter(q=>q.line&&!seen[q.line]&&(seen[q.line]=1));
+}
+function game3dSupport(){
+  const out=[];
+  try{const j=(S.journal||[]).slice(-6).map(e=>(e&&e.text||'').trim()).filter(Boolean);for(const line of j)out.push(line.length>44?line.slice(0,41)+'…':line);}catch(e){}
+  try{if(S.partnerName)out.push(S.partnerName+' is up.');}catch(e){}
+  const d=gameDays();if(d>0)out.push(d===1?'One day.':d+' days.');
+  out.push('Hands up.','Breathe.');
+  return out.slice(0,8);
+}
+async function startFight(){
+  if(gmBusy)return;
+  const g=gameState(),track=gameTrack(),str=gameStrength();
+  gmFight={round:0,you:str.total,youMax:str.total,building:g.b};
+  gmCrowdLevel(0);
+  try{gm('g2').classList.add('g2-full');document.body.classList.add('g2-fighting');}catch(e){}
+  gmBody(`<button class="g2-exit" title="Leave the fight" onclick="gameLeaveFight()">&#10005;</button><iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(gameBuilding().k)}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}&floor=${gmFloor()>GAME_FLOORS?0:gmFloor()}"></iframe>`);
+  const f=gm('g2-3d');if(!f)return;
+  if(!window.__g3d){window.__g3d=true;addEventListener('message',game3dMessage);}
+  f.addEventListener('load',()=>{try{f.contentWindow.postMessage({to:'fightofyourlife',
+    bossKey:gameBuilding().k,bossName:gameBossName(),lines:game3dLines(),
+    support:game3dSupport(),tempt:game3dLines().map(q=>q.line).slice(0,6),
+    place:gamePlace().k,glove:g.glove,fighter:gameFighter(),building:g.b,floor:(gmFloor()>GAME_FLOORS?0:gmFloor()),name:(S.name||'you')},'*');}catch(e){}});
+}
+function game3dMessage(ev){
+  const d=ev&&ev.data;if(!d||d.from!=='fightofyourlife')return;
+  if(d.type!=='fight-over')return;
+  const F=gmFight;if(!F)return;
+  F.round=d.round||1;F.you=Math.max(0,Math.round((d.youHP||0)/100*F.youMax));
+  if(d.result==='won')game3dWon();else game3dLost(d.result==='draw');
+}
+// stepping out of the fight without a result: back to the stairs
+function gameLeaveFight(){
+  try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
+  gmFight=null;gmBusy=false;renderFloors();}
+function game3dWon(){
+  const F=gmFight,g=gameState();
+  try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
+  // A floor walked back into is practice: it was already cleared, so nothing is
+  // added to the record and the climb does not move.
+  if(gmReplay!=null){
+    const n=gmReplay;
+    gmBody(`<div class="g2-reveal up" style="font-size:3rem">Took it again</div>
+    <div class="g2-cat g2-center">Floor ${n} &middot; round ${F.round}</div>
+    <p class="g2-lead g2-center">This one was already yours. Nothing counted, nothing moved &mdash; you just wanted the round.</p>
+    <button class="g2-big" onclick="gameFightAgain()">Again</button>
+    <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">The stairs</button>`);
+    gmFight=null;gmBusy=false;return;
+  }
+  const roof=g.f>GAME_FLOORS;
+  g.wins++;
+  if(!roof){g.cleared[g.f]=true;g.f=Math.min(GAME_FLOORS+1,g.f+1);}
+  save();
+  if(typeof logActivity==='function')try{logActivity('game_building_cleared',{building:g.b,floor:roof?'roof':g.f});}catch(e){}
+  if(roof)return renderJump();
+  const nextEl=g.f>GAME_FLOORS?'the roof':gameFloorEl(g.f);
+  gmBody(`<div class="g2-reveal up" style="font-size:3rem">Floor clear</div>
+  <div class="g2-cat g2-center">${gmEsc(S.name||'You')} · round ${F.round}</div>
+  <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. I am on the next one too.</div>
+  <p class="g2-lead g2-center">It is waiting one floor up, in ${gmEsc(String(nextEl))}. Same thing, different face.</p>
+  <button class="g2-big" onclick="gameFloorGo(${g.f})">${g.f>GAME_FLOORS?'Up to the roof':'Floor '+g.f}</button>
+  <button class="g2-ghost" style="margin-top:8px" onclick="gameFightAgain()">Fight that one again</button>
+  <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">The stairs</button>`);
+  gmFight=null;gmBusy=false;
+}
+// The roof is done: off the side, under the chute, on to the next one.
+function renderJump(){
+  const g=gameState(),B=gameBuilding();
+  const pct=gmFight?gmFight.you/gmFight.youMax:1,ride=GAME_RIDES.find(r=>pct>=r.min)||GAME_RIDES[GAME_RIDES.length-1];
+  g.rides[ride.key]=(g.rides[ride.key]||0)+1;g.lastRide=ride.key;save();
+  gmBody(`<div class="g2-chute" aria-hidden="true"><i></i></div>
+  <div class="g2-reveal up" style="font-size:2.8rem">${gmEsc(B.name)} is done</div>
+  <div class="g2-cat g2-center">Six fights, roof to street</div>
+  <p class="g2-lead g2-center">You go off the side and the chute opens. It is still down there and it will be back &mdash; but not tonight, and not in this building.</p>
+  <button class="g2-big" onclick="gameNextBuilding()">Land at the next one</button>`);
+  gmFight=null;gmBusy=false;
+}
+function game3dLost(draw){
+  const g=gameState();
+  try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
+  // Losing a floor you already cleared costs nothing either - it was practice.
+  if(!draw&&gmReplay==null)g.losses++;
+  save();
+  gmBody(`<div class="g2-reveal" style="font-size:2.6rem">${draw?'Even':'Saved by the bell'}</div>
+  <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>
+  <p class="g2-lead g2-center">${draw?'Nobody took it. The floor is still there to walk back into.':'It took this one. The floor is still there, and so are you. Go again when you are ready.'}</p>
+  <button class="g2-big" onclick="renderRoofDoor()">Go again</button>
+  <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">The stairs</button>`);
+  gmFight=null;gmBusy=false;
+}
+
+function gameNextBuilding(){const g=gameState();
+  g.b++;g.f=1;g.cleared={};g.inside=false;g.locked=null;g.ups=0;g.used={};save();
+  gmFight=null;gmBusy=false;renderTower();}
+
+function towerOnRelapse(){}
+function towerStop(){gameStop();}
+
+/* boot - the app used to call this when its Fight tab opened */
+renderTower();
+</script>
+</body>
+</html>

@@ -138,7 +138,7 @@ self.addEventListener('fetch', (event) => {
   // things and this became one of them. Both addresses again - the clean URL and
   // the file name reach the same gated route, so a cached copy of either would
   // outlive the check that is supposed to be guarding it.
-  if (url.pathname === '/fight' || url.pathname === '/fight.html') return;
+  if (['/fight', '/fight.html', '/game3d.html'].includes(url.pathname)) return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

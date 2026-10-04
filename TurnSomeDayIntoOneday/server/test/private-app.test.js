@@ -306,10 +306,15 @@ test('the fight, exercised over HTTP, is never served cold from disk', async () 
 test('the worker never caches the fight either', () => {
   // The same rule as The Key and the herb library: a cached copy of a gated page
   // outlives the check that let it in, and the offline fallback then hands it out
-  // with no check at all. Both addresses, because both reach the same route.
+  // with no check at all. All three addresses reach the same gated route now -
+  // the clean URL, the file name, and game3d.html, which is a real file the
+  // fight's page frames and which the gate covers for itself.
+  //
+  // The ring is still there offline: it is precached by name at install, which
+  // happens from inside the app as somebody already signed in.
   const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
-  assert.match(SW, /url\.pathname === '\/fight' \|\| url\.pathname === '\/fight\.html'/,
-    'both the clean URL and the file name must be skipped by the worker');
+  assert.match(SW, /\['\/fight', '\/fight\.html', '\/game3d\.html'\]\.includes\(url\.pathname\)\) return;/,
+    'the clean URL, the file name and the ring must all be skipped by the worker');
 });
 
 test('the worker never caches the herb library or the tax centre', () => {

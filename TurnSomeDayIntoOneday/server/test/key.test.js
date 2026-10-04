@@ -21,41 +21,38 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-const APP = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+// 4 Oct 2026: the app became three things and its shell moved from index.html
+// to hub.html. The door to /key is a card on that shell now rather than a
+// settings row and a bar tab inside the recovery app, so the three tests below
+// read the shell that is actually served.
+const APP = fs.readFileSync(path.join(ROOT, 'hub.html'), 'utf8');
 const SERVER = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
 const SW = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const ROBOTS = fs.readFileSync(path.join(ROOT, 'robots.txt'), 'utf8');
 
-test('the home screen has a door to /key', () => {
-  const row = APP.match(/<div class="setting-row[^"]*" data-friendly="1" id="home-key-row"[^>]*onclick="location\.href='\/key'"/);
-  assert.ok(row, 'home-key-row must exist on the home screen and open /key');
-  assert.match(row[0], /\bfriendly-door\b/,
-    'and it must carry friendly-door, or it is visible before the server has said yes');
+test('the shell carries a door to /key', () => {
+  const card = APP.match(/<a class="card z" href="\/key">/);
+  assert.ok(card, 'the Zodiacs card must exist on the shell and open /key');
+  // The door answers "where do I go" from one place now. The old build had it
+  // twice - a settings row and a bar tab - and two doors that can disagree is
+  // how one of them ends up visible to somebody it should not be.
+  assert.strictEqual(APP.split('href="/key"').length - 1, 1,
+    'exactly one door to /key, not two that can drift apart');
 });
 
-test('the bar carries a Zodiacs switch, hidden the same way', () => {
-  // The row answers "where do I go"; this answers "how do I switch between the
-  // two apps" - a place in the bar, not something to scroll for. Same door, so
-  // the same rule applies: invisible until the server has said yes.
-  const tab = APP.match(/<div class="[^"]*" data-friendly="1" id="bn-key"[^>]*onclick="location\.href='\/key'"/);
-  assert.ok(tab, 'bn-key must exist in the bottom bar and open /key');
-  assert.match(tab[0], /\bfriendly-door\b/,
-    'and it must carry friendly-door, or the switch is visible to everybody');
-  assert.match(tab[0], /class="bn[ "]/, 'and it must be a bar item (.bn), not a stray div');
-});
-
-test('the door is hidden unless the server says this account is on the list', () => {
-  // Hidden in CSS by default, so a failed or never-run access check leaves the
-  // door shut rather than half-open.
-  assert.match(APP, /\.friendly-door\{display:none!important\}/,
-    'friendly-door must be hidden in CSS, not by a class the script adds');
-  // The only thing that opens it, and the answer comes from the server.
-  assert.match(APP, /document\.querySelectorAll\('\[data-friendly\]'\)\.forEach/,
-    'applyFriendlyAccess must toggle the class on every data-friendly element');
-  assert.match(APP, /fetch\('\/api\/friendly\/access'\)/,
-    'and ask the server rather than deciding on the client');
-  assert.match(SERVER, /app\.get\('\/api\/friendly\/access', requireAuth, \(req, res\) => \{\s*res\.json\(\{ allowed: isFriendlyAllowed\(/,
-    '/api/friendly/access must require auth and answer from the allowlist');
+test('the door is shut until the server says this account is on the list', () => {
+  // The three cards are hidden in the markup and only revealed by the script,
+  // so a failed or never-run check leaves them shut rather than half-open. This
+  // is the recovery app's rule carried across: hide by default, open on an
+  // answer from the server, never on a decision made in the browser.
+  assert.match(APP, /<section id="open" class="cards" hidden>/,
+    'the cards must start hidden in the markup');
+  assert.match(APP, /fetch\('\/api\/auth\/me'/,
+    'and the shell must ask the server who this is rather than deciding itself');
+  assert.match(APP, /if \(me && me\.email\) showOpen\(me\.email\);\s*\n\s*else showLocked\(\);/,
+    'me with an email opens the cards; anything else gets the lock');
+  assert.match(SERVER, /app\.get\('\/api\/auth\/me', requireAuth, \(req, res\) => \{/,
+    '/api/auth/me must require a session, or the shell opens for anybody');
 });
 
 test('the /key.html 404 is registered above express.static', () => {

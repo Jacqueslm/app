@@ -81,25 +81,16 @@ test('The Key sits on the same provider as Friendly', () => {
   assert.doesNotMatch(liveCode(key), VENDOR, 'a page must not name a provider the server no longer calls');
 });
 
+// Two tests used to sit here reading the in-app policy out of index.html: that it
+// named Google and not the retired processor, and that it promised a count it
+// could actually list. Both the policy and the app it was written into went on
+// 4 Oct 2026 with the recovery app, so there is no in-app policy left to read.
+//
+// privacy.html is the disclosure of record from here, and it is asserted here
+// rather than dropped - a false disclosure is not something to lose a guard over.
 test('the written record matches the code: Google, and no retired processor', () => {
-  const app = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8');
-  assert.match(app, /<b>Google<\/b> processes the messages you send to Friendly/,
-    'the in-app policy must name the processor that actually receives the messages');
-  assert.doesNotMatch(app, VENDOR,
-    'the in-app policy named Anthropic until 17 Sep 2026 - that was a false disclosure once Claude was unwired');
-
   const privacy = fs.readFileSync(path.join(__dirname, '..', '..', 'privacy.html'), 'utf8');
   assert.doesNotMatch(privacy, VENDOR,
     'the public policy carried a conditional line about the fallback - there is no fallback now');
   assert.match(privacy, /<b>Google<\/b> processes the messages/);
-});
-
-test('the in-app policy does not promise a count it does not list', () => {
-  // It said "Two outside services are used" while listing one. Google and
-  // Resend are the two, and both have to be on the page.
-  const app = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8');
-  assert.match(app, /Two outside services are used/);
-  assert.match(app, /• <b>Google<\/b> processes the messages you send to Friendly/);
-  assert.match(app, /• <b>Resend<\/b> delivers the emails/,
-    'Resend sends the reset links - a page that promises two processors and lists one is a gap, not tidiness');
 });

@@ -7,11 +7,12 @@ does NOT carry between sessions — this repo is the shared memory. Read this fi
 > three pages and nothing else: `/app` serves `hub.html`, a shell with cards for
 > the Zodiacs (`/key`), the Fight (`/fight`) and the Herbs (`/herbs`). **The
 > recovery app is deleted** — its page, its server routes and the eighteen test
-> files that read it. So any instruction below that says to edit
-> `TurnSomeDayIntoOneday/index.html` is dead: that file no longer exists, and it
-> is in git before that date. The file to edit today is `hub.html` (the shell),
-> `fight.html` (the game) or the page the feature lives on. References to
-> `Studio/web/index.html` are a DIFFERENT, live file and still apply.
+> files that read it. So any instruction below that says to edit the one big
+> page that used to hold the whole app is dead: that file no longer exists, and
+> it is in git before that date. The file to edit today is `hub.html` (the
+> shell), `fight.html` (the game) or the page the feature lives on. References to
+> the Studio app's own page in this file are a DIFFERENT, live file and still
+> apply.
 
 **RULE ONE — JACQUES GETS PDFs, NOT MARKDOWN.** He reads and forwards PDFs.
 A `.md` file handed to him is a file he cannot comfortably read on a phone or

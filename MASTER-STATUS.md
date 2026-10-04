@@ -2,12 +2,12 @@
 
 > **4 Oct 2026 — the Day One app is three pages now, and half of this log is
 > about the app it used to be.** `/app` serves `hub.html` (the Zodiacs, the Fight,
-> the Herbs). **The recovery app is deleted** — its page, its server routes and
-> the eighteen test files that read it — so every `index.html` reference below is
-> a dated entry about a file that no longer exists (it is in git before that
-> date), and the live rules further down that depend on it no longer apply. The
-> `Studio/web/index.html` references in this log are a DIFFERENT, live file and
-> are unaffected.
+> the Herbs). **The recovery app is deleted** — the one big page that held it,
+> its server routes and the eighteen test files that read it — so every entry
+> below that describes editing the app's page is a dated record of work done
+> while it existed (it is in git before that date), and the live rules further
+> down that depend on it no longer apply. References to the Studio app's own
+> page in this log are a DIFFERENT, live file and are unaffected.
 
 **This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Sep 13, 2026.
 
@@ -333,7 +333,8 @@ the whole story.
 2. So the Android app falls back to **Custom Tabs** instead of running as a
    verified TWA — that is the address bar.
 3. The upgrade path calls `window.getDigitalGoodsService('https://play.google.com/billing')`
-   at `index.html:11515`. **That function exists only inside a verified TWA.**
+   at line 11515 of the app's page (deleted 4 Oct 2026). **That function exists
+   only inside a verified TWA.**
 4. In Custom Tabs it is undefined, the call throws, and the catch at the end of
    `startStorePurchase` prints the exact words he saw.
 
@@ -877,7 +878,8 @@ Verified: 11/11 server tests, node --check on all inline scripts, all handlers
 + element refs resolve, live `/data/reviews.json` returns 11 reviews.
 
 ⚠️ **Lane heads-up for the other AI:** if you touch `reviews.html`,
-`reviews.json`, or the reviews bits of `index.html` on main and merge main→vibe,
+`reviews.json`, or the reviews bits of the app's page on main and merge main→vibe
+(moot since 4 Oct 2026 — that page is deleted),
 merge carefully — vibe (deploy) now intentionally differs from main on those
 files (schema restored, 11 reviews). Don't silently take main's version.
 
@@ -1063,7 +1065,8 @@ incoming treatment as the beds (silence trimmed both ends, normalised to
   caught the singing bowl being inaudible when the numbers said it was fine —
   the ear is his job, and levels are mine.
 
-Version quadruple 6.2 → 6.3 (index.html, sw.js, both package.json).
+Version quadruple 6.2 → 6.3 (the app's page, sw.js, both package.json). The page
+that carried `APP_VERSION` then is deleted; `hub.html` carries it now.
 
 ## 🔧 17 AUG 2026 (later) — APP 5.7.0 + STUDIO b0877: onboarding freeze, Pro opened up, backups fixed
 
@@ -1122,9 +1125,9 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 
 ## 🛣 LANE SPLIT (two AI sessions, agreed Aug 16 2026)
 
-- **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (`index.html`), `server/`, `data/`, and the app's files. This is MY lane.
+- **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (its one big page, since deleted), `server/`, `data/`, and the app's files. This was MY lane; the three pages that replaced it are `hub.html`, `fight.html`, `key.html`, `herbs.html` and `tax.html`.
 - **Studio AI (the other session):** `Studio/`, `reference/`, and `START-HERE.md`. That is THEIR lane.
-- Neither touches the other's lane unless Jacques says otherwise. The other session touched `TurnSomeDayIntoOneday/index.html` once (7 string swaps + 2 hints in the "Other" copy, commit `6f56112`) — already merged cleanly into my push `c20f262`. No collision. Do NOT re-edit each other's work.
+- Neither touches the other's lane unless Jacques says otherwise. The other session touched the app's page once (7 string swaps + 2 hints in the "Other" copy, commit `6f56112`) — already merged cleanly into my push `c20f262`. No collision. Do NOT re-edit each other's work.
 
 ---
 

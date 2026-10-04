@@ -153,8 +153,9 @@ controls, and measure what percentage install.**
 
 Reasoning, given zero downloads: install count is an outcome, not a goal, and
 cannot be forced. Play search ranking cannot be won before there are ratings.
-Free-to-Pro conversion cannot be measured on single-digit users without
-reading noise. Review count — an earlier draft's answer — is one step too far
+Paid conversion is not a number he can chase any more — nothing is sold
+(4 Oct 2026) — and it was never measurable on single-digit users regardless.
+Review count — an earlier draft's answer — is one step too far
 down the funnel, because reviews require installs first.
 
 Store conversion rate is the one number that tells him whether the listing is
@@ -162,11 +163,15 @@ the problem or the traffic is. Until he has it, any ASO work is guesswork.
 
 Jacques's call, and he may override this. `[CONFIRM]`
 
-**Monetisation context.** $9.99/mo, $59.99/yr (both with a 7-day free trial),
-$149.99 lifetime. Core app free forever with no card — day counter, SOS tools,
-journal, reminders, insights, and the first half of every program (15 of 30
-lessons). Pro unlocks the second half, the AI companion (Friendly) and the
-live rooms.
+**Monetisation context (corrected 4 Oct 2026).** There is no pricing. The app is
+free, with no subscription, no trial and no in-app purchase on any platform.
+Friendly is not paid but **private** — two emails on an allowlist — so it is not
+part of what is offered to a stranger and must never be described as a paid tier.
+The paragraph here used to carry $9.99/mo, $59.99/yr and $149.99 lifetime, with
+Pro gating the second half of every program, the AI companion and the live rooms.
+None of that is true: the paid tier went on 8 Sep 2026, every lesson day on every
+track is free, the live rooms were removed with the tier, and **no price may be
+quoted anywhere, because none exists.**
 
 ## 9. Competitors
 

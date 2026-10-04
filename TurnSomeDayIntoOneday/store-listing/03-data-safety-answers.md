@@ -140,17 +140,20 @@ you can defend the answer if Play ever asks.
 | Data type | Collected | Shared | Purpose | Optional? |
 |---|---|---|---|---|
 | **Payment info** | **No** | No | — | — |
-| **Purchase history** | Yes | No | App functionality, Account management | Required |
+| **Purchase history** | **No** | No | — | — |
 
-> **Payment info: No.** Card details are never handled by this app on any
-> platform. In the Android build the purchase happens inside Google Play and the
-> app only ever receives a purchase token; on the web, card details go straight
-> to Stripe and never touch this server.
+> **Payment info: No — and there is nothing left to pay for (corrected 4 Oct
+> 2026).** The app is free on every platform, so no payment can be made in it and
+> card details never come near this server. While a paid tier existed the Android
+> build bought it inside Google Play and the web build bought it through Stripe;
+> both of those paths are gone from the code.
 >
-> **Purchase history: Yes.** The Android build sells Pro through Google Play, and
-> `recordStorePurchase` in `server/db.js` stores the plan, the store product ID
-> and the purchase token against the account. That is purchase history in Play's
-> sense and must be declared — it is what keeps Pro unlocked across devices.
+> **Purchase history: No (corrected 4 Oct 2026).** Nothing is sold, so nothing is
+> purchased and there is no purchase history to declare. This row read **Yes —
+> Pro** while the Android build sold the paid tier through Google Play, and
+> `recordStorePurchase` in `server/db.js` was what made that true. The paid tier
+> went on 8 Sep 2026. **If a paid tier ever comes back, this row goes back to Yes
+> — and so does the purchase declaration in the console.**
 
 ### ⚠ Also check while you are in there (28 Aug 2026)
 
@@ -162,11 +165,16 @@ list, read from the code:
 
 | Processor | What it receives | Where |
 |---|---|---|
-| **Google (Gemini)** | Friendly messages, and every room post for moderation | `server/server.js`, `server/rooms.js` |
-| **Stripe** | Card details and email, web purchases only | `server/billing.js` |
-| **Google Play** | Android purchases | `server/store-billing.js` |
+| **Google (Gemini)** | Friendly messages, and The Key reading | `server/server.js`, `server/key-reading.js` |
 | **Resend** | Email address and message body | `server/email.js` |
 | **Plausible** | Page URL, plus IP and user agent so a visit counts once | `server/analytics.js` |
+
+**Updated 4 Oct 2026 — the Stripe and Google Play rows are gone.** Neither
+processor is reached any more: `server/billing.js`, `server/store-billing.js`
+and `server/rooms.js` have all been deleted, and `stripe` is required nowhere in
+the codebase. Rooms went with the paid tier, so Gemini no longer receives any
+other person's words for moderation — it sees a Friendly message from the account
+that sent it, and the owner's own Key reading, and nothing else.
 
 Push notifications use self-issued VAPID keys and no third party.
 

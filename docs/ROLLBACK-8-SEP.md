@@ -3,6 +3,12 @@
 Written for Jacques, 8 Sep 2026, after a day that ended with the fight glitching
 and being put back to where it started.
 
+**4 Oct 2026 — read this as an archive.** It describes the app as it was on
+8 Sep. The recovery app is deleted since 4 Oct 2026: the page this document calls
+`the app's page` (its § "Still in the app from today" lead item) no longer exists,
+so the undo steps against it are moot. The fight and its own files are live and
+untouched.
+
 **The fight page is already back to yesterday.** `game3d.html` is byte for byte
 the file from 7 Sep 22:39. Nothing I did today is in it. If the fight still
 glitches, it is glitching on yesterday's code, and the cause is not in this list.
@@ -45,7 +51,10 @@ would return. I would leave it.
 
 ## Still in the app from today
 
-### `index.html`
+### The app's page (deleted 4 Oct 2026)
+
+The file this section is about no longer exists; the list is kept as the record
+of what was in it on 8 Sep.
 
 - **Friendly is private.** Six ways in — the tab, the Tools row, two Profile
   rows, the SOS sheet, the "I slipped" sheet — are all hidden unless the server

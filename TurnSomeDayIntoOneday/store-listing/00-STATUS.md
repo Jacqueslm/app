@@ -6,7 +6,7 @@
 > Rooms, the chat, the journal, the day counter, the lesson programs, the SOS
 > tools and Friendly went with it. The listing answers that describe those
 > features no longer describe the app, and every code location cited below
-> (`index.html:NNNN`) points into a file that no longer exists; it is in git
+> (`page:NNNN`) points into that page, which no longer exists; it is in git
 > before that date. The declarations were corrected in the pull requests that
 > landed on 6 and 8 Sep 2026. Kept as the record of what was submitted and
 > checked, not as a description of what ships now.

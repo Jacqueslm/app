@@ -8,14 +8,14 @@ Herbs (`/herbs`). Everything else is a reference page (`/tax`, `/privacy`,
 `/delete-account`, `/letter.html`, `/admin/stats`), the 3D ring
 (`/game3d.html`), or an asset.
 
-**The recovery app is deleted.** Its page — the 15,000-line single file every
-entry below calls `index.html` — was removed on 4 Oct 2026, along with the
-server routes that served it and the eighteen test files that read it. Anything
-below this note that names that file, or describes editing it, is a dated record
-of work done while it existed. **Nothing edits it now, and no rule about it
-applies.** Where an entry says to change a version, a screen or a helper, the
-file to change today is almost always `hub.html` (the shell), `fight.html` (the
-game) or the page the feature lives on.
+**The recovery app is deleted.** Its page — the one 15,000-line file that held
+the entire client, every entry below's "the app's page" — was removed on 4 Oct
+2026, along with the server routes that served it and the eighteen test files
+that read it. Anything below this note that describes editing that page is a
+dated record of work done while it existed. **Nothing edits it now, and no rule
+about it applies.** Where an entry says to change a version, a screen or a
+helper, the file to change today is almost always `hub.html` (the shell),
+`fight.html` (the game) or the page the feature lives on.
 
 **What is live and what is not.** The day counter, the lesson programs, the
 journal, the SOS tools, the weeklies and Friendly were all part of that app and
@@ -399,7 +399,8 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
 5. **Every character interactive**: tap the ref for a warning, tap the boss
    while it winds up for a free block, tap yourself to hear your last counter.
 6. Then put the 3D fight on the roof in the app in place of the photo boss,
-   driven by the same rules already in `index.html`.
+   driven by the same rules the app's page already had. Those rules live in
+   `fight.html` now.
 
 He sends art as zips (inline images do not always arrive as files). Boss
 photos for every addiction are done; boxers 1,2,3,5,6,7,9 are complete sets;
@@ -836,7 +837,7 @@ partial, or orphaned files anywhere — same-name files across `Studio/` and
 `TurnSomeDayIntoOneday/` are two separate apps, never to be merged. All routes,
 sitemap entries, and internal links verified against real files. Fixed then:
 three `/quiz.html` links normalized to the canonical `/quiz` route
-(`index.html`, `landing.html` ×2), and two stale references to the renamed
+(the app's page, `landing.html` ×2), and two stale references to the renamed
 `ai-shorts-scripts.md` now point at `AI-SCENES.md`. `KEYWORDS.md` was found to
 have never been committed despite this file and the marketer agent depending on
 it — **fixed same day**: built at the repo root from a live Semrush pull
@@ -940,7 +941,7 @@ the far ropes, and the centre-ring introductions.
 - **Fighter 1 to Fighter 5.** The picker in the fight says so instead of bare
   numbers, and the app's roof door now has the same picker — it had none, and
   the fighter was derived from the old photo-boxer number. `gameFighter()` and
-  `gameSetFighter()` in index.html; `g.fighter` in the saved game.
+  `gameSetFighter()` in the app's page; `g.fighter` in the saved game.
 - **The addiction keeps its colour.** `bossLook` painted the body near-black
   once it was in the ring, so it walked in gold and fought black. The body is
   now its own glow colour, dark (glow × 0.13) with a low emissive of the same
@@ -971,14 +972,14 @@ its does ends 90 levels like the app 90 day program"*
   `hitDmg()` 11 → 22, `bossBlocks()` up to 45%, the swing gap down to 460 ms.
 - **The scene changes.** Six moods for the canvas and the ring light rotate with
   the level on top of the three roofs.
-- **Every temptation, per addiction.** `GAME_TEMPT` in index.html (13 tracks)
+- **Every temptation, per addiction.** `GAME_TEMPT` in the app's page (13 tracks)
   and the built-in `LINES` in the fight: what each one actually says to get
   someone to engage — just one, you've earned it, nobody will know, start again
   tomorrow, it's how you cope. The ones the app does not name a track for live
   under Other/The Habit, which covers vaping, caffeine, streaming, picking,
   spending, the phone at night. No medical claims, nothing that blames anyone.
 
-Checked in headless Chromium: index.html loads clean with GAME_LEVELS 90 and 13
+Checked in headless Chromium: the app's page loaded clean with GAME_LEVELS 90 and 13
 temptation sets, and the fight at levels 1, 2 and 45 shows the tell shortening,
 the damage rising and the canvas colour changing, with an auto-played round
 through the bell and no page errors.
@@ -1230,7 +1231,7 @@ Gone: the front door with the floor button, the wheel and the three shows
 whole photo fight (its rounds, counters, openings, uppercuts, corner, referee
 count, knockdowns, "saved by the bell"), its sound helpers, the boss patterns,
 the daily lock, the 2D win and loss screens, and the constants only they used.
-631 lines, and `index.html` went from 1.09 MB to 1.04 MB.
+631 lines, and the app's page went from 1.09 MB to 1.04 MB.
 
 Still there on purpose: `GAME_BOXERS` and `gmBoxerImg`, because the little
 photo boxer in the corner of the stairs screen still uses them; the old fight
@@ -1555,7 +1556,7 @@ and **chaparral** (liver damage; an FDA warning in the 1990s). The safety tab is
 untouched, and the twenty classes carry the line that a class says what a plant
 is for, not that it is safe.
 
-Also: **`index.html` no longer prints "244 herbs"** — a count that is wrong is
+Also: **the app's page no longer prints "244 herbs"** — a count that is wrong is
 worse than no count — and the row says *herbs, seasonings and cleansers* instead.
 
 **No version bump.** `sw.js:136` hands `/herbs` and `/herbs.html` straight to
@@ -1570,7 +1571,7 @@ landed afterwards.
 and their `bk` lines; no herb pointing at a shelf that does not exist (the way a
 hand-typed list goes silently missing); no empty shelf; the tab rendering with
 the book material in it; the figures staying labelled as the book's; search
-reaching a herb by its book words; and no count printed in `index.html`.
+reaching a herb by its book words; and no count printed in the app's page.
 `npm test` 474 pass / 0 fail.
 
 **Not verified:** there is no browser in this environment, so the tab was run
@@ -1655,7 +1656,7 @@ image path is gone as well as that the thinking knob still matches the model
 generation.
 
 **Out of the app:** the three Settings rows (Trading Game, Trading School,
-Trading Desk) in `index.html`, and the sentence in the in-app policy and in
+Trading Desk) in the app's page, and the sentence in the in-app policy and in
 `privacy.html` that named the trading questions and chart screenshots. Both
 policies now say only the message is sent. That is the half a policy must not get
 wrong, and there is a test for it. The desk's assistant prompt (`DESK_SYS`) is
@@ -1669,7 +1670,7 @@ alone and he was told so. **The herb library stays** untouched.
 
 **Version 5.2.** The four files moved together. Unlike /herbs, the app shell is
 what changed here - the Settings rows and the in-app policy live in
-`index.html`, which is cached - so the bump was required, or phones would keep
+the app's page, which is cached - so the bump was required, or phones would keep
 the old shell with rows pointing at pages that are gone.
 
 **Tests:** 285 pass / 0 fail across 33 files. It was 476 before: the trading

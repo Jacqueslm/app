@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Zodiacs, Fight &amp; Herbs</title>
+<title>The Truth</title>
 <meta name="theme-color" content="#07060d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -101,8 +101,8 @@
 
   <header>
     <div>
-      <h1>Zodiacs, Fight &amp; Herbs</h1>
-      <p class="sub" id="whoTag">Three things, and nothing else.</p>
+      <h1>The Truth</h1>
+      <p class="sub" id="whoTag">Three things: the Zodiacs, the Fight, and the Herbs.</p>
     </div>
     <button class="quiet" id="signOut" hidden>Sign out</button>
   </header>
@@ -174,7 +174,7 @@
     locked.hidden = false;
     open.hidden = true;
     signOut.hidden = true;
-    whoTag.textContent = 'Three things, and nothing else.';
+    whoTag.textContent = 'Three things: the Zodiacs, the Fight, and the Herbs.';
     try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
   }
 
@@ -182,7 +182,7 @@
     locked.hidden = true;
     open.hidden = false;
     signOut.hidden = false;
-    whoTag.textContent = email ? ('Signed in as ' + email) : 'Three things, and nothing else.';
+    whoTag.textContent = email ? ('Signed in as ' + email) : 'Three things: the Zodiacs, the Fight, and the Herbs.';
     msg.textContent = '';
   }
 

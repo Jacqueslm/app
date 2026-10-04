@@ -1,7 +1,7 @@
 {
-  "name": "Zodiacs, Fight & Herbs",
-  "short_name": "The Three",
-  "description": "Three things: the Zodiacs, the Fight and the Herbs. Private, and nothing else.",
+  "name": "The Truth",
+  "short_name": "The Truth",
+  "description": "The Truth: the Zodiacs, the Fight and the Herbs. Private, and nothing else.",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",

@@ -62,11 +62,13 @@ test('The Key reading is told to answer in English', () => {
   assert.match(sys, /HARD RULES/, 'and the hard rules are still in the same prompt');
 });
 
-test('both reference ask boxes are told to answer in English', () => {
-  ['herbs.html', 'tax.html'].forEach((f) => {
-    const rules = askRules(f);
-    assert.match(rules, /- In English, always\./, `${f} carries the rule as its own bullet`);
-  });
+// The herb library carried a second box until 4 Oct 2026, when Friendly came
+// off the page: "take a friendly off the herbs and add voice to herbs." Its
+// read-aloud voice has no prompt to guard, so the tax centre's box is what is
+// left here.
+test('the reference ask box is told to answer in English', () => {
+  const rules = askRules('tax.html');
+  assert.match(rules, /- In English, always\./, 'tax.html carries the rule as its own bullet');
 });
 
 // The Trading Desk assistant was the fifth prompt checked here, from 17 Sep to
@@ -78,8 +80,6 @@ test('both reference ask boxes are told to answer in English', () => {
 test('the pages keep the rules that were there before the language rule', () => {
   // A prompt is one string in one place: rewording it is how a safety line goes
   // missing without anybody noticing. These are the ones that must survive.
-  assert.match(askRules('herbs.html'), /An infection is a doctor/, 'herb box still sends an infection to a doctor');
-  assert.match(askRules('herbs.html'), /988/, 'herb box still names the crisis line for withdrawal');
   assert.match(askRules('tax.html'), /never invent a number/i, 'tax box still refuses to invent a figure');
 
   const sys = require('../key-reading.js').systemPrompt();

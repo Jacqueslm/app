@@ -70,7 +70,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (_) { data = {}; }
-  const title = data.title || 'Turn Someday Into Day One';
+  const title = data.title || 'The Truth';
   const options = {
     body: data.body || 'Your daily lesson is ready.',
     icon: 'icons/icon-192.png',

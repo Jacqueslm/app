@@ -236,6 +236,76 @@ test('the herb library and the tax centre are behind the door too', () => {
   }
 });
 
+test('the fight is behind the door too, at all three of its addresses', () => {
+  // Added 4 Oct 2026, when the app became three things and the fight was one of
+  // them. The reason this needs its own test rather than a line in the list above
+  // is the third address: /game3d.html is a REAL FILE, and it sat on the open
+  // list only so the recovery app could frame it. express.static below served it
+  // straight off disk to anybody who typed the name, signed in or not — so the
+  // fight was readable by URL while every test that read the route list passed.
+  for (const url of ['/fight', '/fight.html', '/game3d.html']) {
+    assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
+    assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
+    const at = SRC.indexOf("app.get('" + url + "'");
+    assert.ok(at > -1, `the ${url} route must still be findable in server.js`);
+    const block = SRC.slice(at, at + 320);
+    assert.match(block, /isValidSession\(req\)/, `${url}: signed out gets nothing`);
+    assert.match(block, /isFriendlyRequest\(req\)/, `${url}: off the list gets nothing`);
+    assert.match(block, /res\.redirect\('\/app'\)/, `${url}: a page visit goes to the app, not JSON`);
+    assert.ok(
+      SRC.indexOf("app.get('" + url + "'") < SRC.indexOf('app.use(express.static('),
+      `${url} must be registered above static, which would serve the file itself`,
+    );
+  }
+});
+
+test('the fight, exercised over HTTP, is never served cold from disk', async () => {
+  // The test above reads server.js as text and cannot see whether express.static
+  // answers first. This one registers the real routes in the order server.js
+  // does — gated route, then static — and makes the request, because "nothing
+  // came back" is the only proof that the file is not being handed out.
+  const express = require('express');
+  const ROOT = path.join(__dirname, '..', '..');
+  const app = express();
+  const gate = (file) => (req, res) => {
+    if (req.get('x-signed-in') !== 'yes') return res.redirect('/app');
+    res.sendFile(path.join(ROOT, file));
+  };
+  for (const url of ['/fight', '/fight.html', '/game3d.html']) app.get(url, gate('game3d.html'));
+  app.use(express.static(ROOT));
+  app.get('/app', (req, res) => res.type('text/plain').send('the app'));
+
+  const server = app.listen(0);
+  await new Promise((done) => server.once('listening', done));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const get = (p, signedIn) => fetch(base + p, {
+    redirect: 'manual',
+    headers: signedIn ? { 'x-signed-in': 'yes' } : {},
+  }).then(async (r) => ({ status: r.status, location: r.headers.get('location'), body: await r.text() }));
+  try {
+    for (const url of ['/fight', '/fight.html', '/game3d.html']) {
+      const cold = await get(url);
+      assert.strictEqual(cold.status, 302, `${url}: signed out must be redirected, not served`);
+      assert.strictEqual(cold.location, '/app', `${url}: and sent to the app`);
+      assert.ok(!cold.body.includes('ring3d-three'), `${url}: no part of the game may come back`);
+
+      const warm = await get(url, true);
+      assert.strictEqual(warm.status, 200, `${url}: signed in and on the list gets the game`);
+    }
+  } finally {
+    server.close();
+  }
+});
+
+test('the worker never caches the fight either', () => {
+  // The same rule as The Key and the herb library: a cached copy of a gated page
+  // outlives the check that let it in, and the offline fallback then hands it out
+  // with no check at all. Both addresses, because both reach the same route.
+  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
+  assert.match(SW, /url\.pathname === '\/fight' \|\| url\.pathname === '\/fight\.html'/,
+    'both the clean URL and the file name must be skipped by the worker');
+});
+
 test('the worker never caches the herb library or the tax centre', () => {
   const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
   assert.match(SW, /\['\/herbs', '\/herbs\.html', '\/tax', '\/tax\.html'\]\.includes\(url\.pathname\)\) return;/,

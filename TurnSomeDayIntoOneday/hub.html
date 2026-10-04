@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zodiacs, Fight &amp; Herbs</title>
+<meta name="theme-color" content="#07060d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307060d'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23e8c07a' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='13' r='3.5' fill='%23e8c07a'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/zodiacs-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#07060d; --bg2:#0d0b1a;
+    --ink:#ece9f5; --dim:#a29cbb; --dimmer:#6f6890;
+    --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
+    --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.055);
+    --gold:#e8c07a; --violet:#a78bfa; --teal:#5fd9c4; --rose:#f0919f;
+    --lamp:#f2a93b; --ring:#e24b4a;
+    --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; min-height:100dvh; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    padding:calc(env(safe-area-inset-top,0px) + 26px) 18px calc(env(safe-area-inset-bottom,0px) + 30px);
+  }
+  .wrap{width:100%; max-width:520px}
+  header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:26px}
+  h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter-spacing:.01em}
+  .sub{margin:6px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
+  .quiet{
+    background:none; border:1px solid var(--line); color:var(--dim);
+    font:inherit; font-size:.75rem; padding:7px 12px; border-radius:999px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .quiet:hover{color:var(--ink); border-color:var(--line)}
+  .cards{display:grid; gap:12px}
+  a.card{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    padding:18px 18px 17px; position:relative; overflow:hidden;
+    transition:background .16s ease, border-color .16s ease, transform .16s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  a.card:hover{background:var(--card2); border-color:rgba(255,255,255,.18); transform:translateY(-1px)}
+  a.card:active{transform:translateY(0)}
+  a.card .mark{
+    position:absolute; left:0; top:0; bottom:0; width:3px;
+  }
+  a.card.z .mark{background:var(--gold)}
+  a.card.f .mark{background:var(--lamp)}
+  a.card.h .mark{background:var(--teal)}
+  .kicker{
+    font-size:.625rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--dimmer); margin:0 0 7px;
+  }
+  a.card.z .kicker{color:var(--gold)}
+  a.card.f .kicker{color:var(--lamp)}
+  a.card.h .kicker{color:var(--teal)}
+  .name{margin:0; font-family:var(--serif); font-size:1.1875rem; font-weight:500; line-height:1.25}
+  .note{margin:7px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
+  .go{
+    margin-top:13px; font-size:.75rem; color:var(--dim);
+    display:flex; align-items:center; gap:6px;
+  }
+  a.card:hover .go{color:var(--ink)}
+  form{margin:0}
+  .lock{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    padding:20px 18px;
+  }
+  label{display:block; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer); margin:0 0 7px}
+  input{
+    width:100%; margin:0 0 14px; padding:12px 13px; font:inherit; font-size:1rem;
+    color:var(--ink); background:rgba(0,0,0,.28);
+    border:1px solid var(--line); border-radius:11px; outline:none;
+  }
+  input:focus{border-color:rgba(232,192,122,.55)}
+  .go-btn{
+    width:100%; padding:13px 14px; font:inherit; font-size:.9375rem; font-weight:500;
+    color:#1a1408; background:var(--gold); border:0; border-radius:11px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .go-btn[disabled]{opacity:.55; cursor:default}
+  .msg{margin:13px 0 0; font-size:.8125rem; line-height:1.5; min-height:1.2em; color:var(--rose)}
+  .msg.ok{color:var(--teal)}
+  footer{
+    margin-top:26px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center;
+  }
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Zodiacs, Fight &amp; Herbs</h1>
+      <p class="sub" id="whoTag">Three things, and nothing else.</p>
+    </div>
+    <button class="quiet" id="signOut" hidden>Sign out</button>
+  </header>
+
+  <!-- Locked: the three pages are private, so this is the way in. It is the
+       only screen shown until the server says who you are. -->
+  <section id="locked" hidden>
+    <form class="lock" id="lockForm" autocomplete="on">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocapitalize="none" autocorrect="off"
+             autocomplete="username" inputmode="email" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="go-btn" id="lockBtn" type="submit">Unlock</button>
+      <p class="msg" id="lockMsg" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <!-- Open: the whole app, now. -->
+  <section id="open" class="cards" hidden>
+    <a class="card z" href="/key">
+      <span class="mark" aria-hidden="true"></span>
+      <p class="kicker">The Key</p>
+      <h2 class="name">The Zodiacs</h2>
+      <p class="note">Every birthday read in full — the day itself, the week it sits in, the life it points to, and what happens when two people meet.</p>
+      <p class="go">Open <span aria-hidden="true">→</span></p>
+    </a>
+
+    <a class="card f" href="/fight">
+      <span class="mark" aria-hidden="true"></span>
+      <p class="kicker">On the roof</p>
+      <h2 class="name">The Fight</h2>
+      <p class="note">The Fight of Your Life — the ring, sixty-second rounds, real boxing rules.</p>
+      <p class="go">Open <span aria-hidden="true">→</span></p>
+    </a>
+
+    <a class="card h" href="/herbs">
+      <span class="mark" aria-hidden="true"></span>
+      <p class="kicker">The library</p>
+      <h2 class="name">The Herbs</h2>
+      <p class="note">The herb library — what each one is, what it is used for, and where it comes from.</p>
+      <p class="go">Open <span aria-hidden="true">→</span></p>
+    </a>
+  </section>
+
+  <footer id="foot">Private. Signed in only.</footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var locked = document.getElementById('locked');
+  var open   = document.getElementById('open');
+  var form   = document.getElementById('lockForm');
+  var btn    = document.getElementById('lockBtn');
+  var msg    = document.getElementById('lockMsg');
+  var signOut = document.getElementById('signOut');
+  var whoTag = document.getElementById('whoTag');
+  var emailEl = document.getElementById('email');
+  var passEl  = document.getElementById('password');
+
+  function showLocked(){
+    locked.hidden = false;
+    open.hidden = true;
+    signOut.hidden = true;
+    whoTag.textContent = 'Three things, and nothing else.';
+    try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
+  }
+
+  function showOpen(email){
+    locked.hidden = true;
+    open.hidden = false;
+    signOut.hidden = false;
+    whoTag.textContent = email ? ('Signed in as ' + email) : 'Three things, and nothing else.';
+    msg.textContent = '';
+  }
+
+  // Who am I? /api/auth/me is 401 when signed out and carries the email when
+  // not, so this single call decides which of the two screens is shown. It is
+  // also the only check that matters — the three pages re-check on the server
+  // for themselves, so faking a 200 here would still leave nothing to open.
+  function who(){
+    return fetch('/api/auth/me', { credentials: 'same-origin' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .catch(function(){ return null; });
+  }
+
+  who().then(function(me){
+    if (me && me.email) showOpen(me.email);
+    else showLocked();
+  });
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var email = (emailEl.value || '').trim();
+    var password = passEl.value || '';
+    if (!email || !password) { msg.className = 'msg'; msg.textContent = 'Both fields, please.'; return; }
+
+    btn.disabled = true;
+    msg.className = 'msg';
+    msg.textContent = 'Checking…';
+
+    fetch('/api/auth/login', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    })
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
+    .then(function(out){
+      if (!out.ok) {
+        msg.className = 'msg';
+        msg.textContent = (out.d && out.d.error) || 'That did not work.';
+        passEl.value = '';
+        return;
+      }
+      passEl.value = '';
+      showOpen(out.d && out.d.email ? out.d.email : email);
+    })
+    .catch(function(){
+      msg.className = 'msg';
+      msg.textContent = 'Could not reach the server. Check your connection.';
+    })
+    .then(function(){ btn.disabled = false; });
+  });
+
+  signOut.addEventListener('click', function(){
+    signOut.disabled = true;
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+      .catch(function(){})
+      .then(function(){
+        signOut.disabled = false;
+        msg.className = 'msg';
+        msg.textContent = '';
+        passEl.value = '';
+        showLocked();
+      });
+  });
+})();
+</script>
+</body>
+</html>

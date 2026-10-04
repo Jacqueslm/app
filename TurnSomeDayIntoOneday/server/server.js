@@ -245,8 +245,18 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.redirect('/app');
 });
+
+// The app is three things now (4 Oct 2026). Jacques: "i dont want the app
+// nomore just parts i added the zodiac the fight and the herbs", then "strip it
+// nomore recovery app". So /app serves hub.html - a small shell holding the
+// Zodiacs, the Fight and the Herbs - and no longer the recovery app.
+//
+// index.html is still on disk and is still reachable by nothing: the route here
+// stopped pointing at it. Deleting the file and the eighteen test files that
+// read it is the next pass, kept out of this one so that the app he opens is
+// never briefly missing while a 15,000-line deletion lands underneath it.
 app.get('/app', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'hub.html'));
 });
 
 // The server/ folder must never be reachable over HTTP: it holds the source,
@@ -285,6 +295,37 @@ app.get('/key.html', (req, res) => res.status(404).end());
 // the door has to be readable in the file. A test asserts signed-in,
 // on-the-list and redirect-to-/app inside every one of them, and it cannot read
 // a rule that lives in a shared helper.
+// The Fight — the last of the three, added to this same door on 4 Oct 2026.
+// Same shape as /key and /herbs, and registered for the same reason BOTH
+// addresses matter: game3d.html is a real file that express.static below would
+// hand out by name to anybody who typed it, exactly as /herbs.html would have
+// been. The page was open in September precisely because a file was not named
+// twice, which is the mistake this pair exists not to repeat.
+app.get('/fight', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
+});
+app.get('/fight.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
+});
+// THE THIRD ADDRESS, and the one that matters most. game3d.html was served
+// straight off disk by express.static below, because it sat on the gate's open
+// list only so the recovery app could load it in an iframe - so the full URL
+// handed the fight to anybody who typed it, signed in or not.
+//
+// That was survivable while the fight was one tab inside a gated app. It is not
+// survivable now that the fight IS the app: leaving this route out would mean
+// gating /fight while /game3d.html stayed open, which is a lock with the window
+// still up. It has to be registered above express.static or static answers
+// first, exactly as the herbs note above describes.
+app.get('/game3d.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
+});
 app.get('/herbs', (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');

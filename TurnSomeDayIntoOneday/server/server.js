@@ -10,7 +10,6 @@ const update = require('./update');
 const emailer = require('./email');
 const push = require('./push');
 const backup = require('./backup');
-const analytics = require('./analytics');
 const aiChatBody = require('./ai-chat-body');
 const {
   COOKIE_NAME,
@@ -21,7 +20,6 @@ const {
   // Names are load-bearing: the private-app gate further down is a wrapper
   // around this one, and the wrapper is what every route in this file uses.
   requireAuth: requireSession,
-  verifyUnsubToken,
   isValidSession,
 } = require('./auth');
 const {
@@ -186,24 +184,11 @@ app.use((req, res, next) => {
   res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
 });
 
-// ─── PLAUSIBLE PAGEVIEWS ─────────────────────────────────────────────────────
-// Recorded server-side (no third-party script on the visitor's device, no
-// cookies). The guard limits it to genuine page loads so assets, API calls and
-// the unsubscribe token never leak into the dashboard.
-function shouldTrackPageview(req) {
-  if (req.method !== 'GET') return false;
-  const p = req.path;
-  if (p.startsWith('/api/')) return false;
-  if (p.startsWith('/admin')) return false;
-  if (p.startsWith('/go/')) return false;
-  if (p === '/unsubscribe') return false; // URL carries a capability token
-  if (/\.(js|css|png|jpe?g|webp|svg|gif|ico|json|woff2?|map|mp3|mp4|webmanifest|xml|txt|pdf)$/i.test(p)) return false;
-  return true;
-}
-app.use((req, res, next) => {
-  if (shouldTrackPageview(req)) analytics.pageview(req);
-  next();
-});
+// ─── the pageview counter went, 5 Oct 2026 ───────────────────────────────────
+// A small block here sent a server-side pageview to Plausible for every real
+// page load - no script on the visitor's device, but still an outside company
+// being told what got opened and when. This is one man's app and there is
+// nobody to advertise it to, so the counter and the account behind it are gone.
 
 app.use('/preview', requireAuth);
 
@@ -393,199 +378,19 @@ app.get('/key', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'key.html'));
 });
 
-// Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
-// flyers, and video end cards, instead of the .html extension.
-app.get('/brainreset', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'brainreset.html'));
-});
+// ─── the marketing routes went, 5 Oct 2026 ───────────────────────────────────
+// Around forty clean URLs used to live here: the quizzes, the partner pages,
+// the "<app> alternative" comparisons, the symptom pages and the per-competitor
+// roundup, each with its own app.get and its own sendFile. All of them were
+// already shut at the gate (a stranger gets the 410 page, not the file), and the
+// pages themselves are deleted now. The app is one person's and it is behind a
+// sign-in; there is nothing here for a search engine to carry.
 
-// Clean URL for the 2-Minute Check-In quiz - speakable in videos
-// ("turnsomedayintodayone.com/quiz") without the .html extension.
-app.get('/quiz', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'quiz.html'));
-});
 
-// The partner-facing landing page - the day-2 trial email and the "Send this
-// page to her" button both link here.
-app.get('/for-her', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'for-her.html'));
-});
-
-// Door-specific partner landing: the wife of the man who drinks. Same house,
-// narrower front door - drinking-angle videos and ads point here so the page
-// continues the exact sentence the post started.
-app.get('/when-he-drinks', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'when-he-drinks.html'));
-});
-
-// Lowest-difficulty term in the keyword set, and the quiz already answers it -
-// so this page is a short honest bridge: it refuses to diagnose him, reframes
-// the question onto her own life, and routes to /quiz (primary) and /for-her.
-app.get('/is-my-husband-an-alcoholic', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'is-my-husband-an-alcoholic.html'));
-});
-
-// The inclusive supporter pages (KEYWORDS.md lanes 1-2): one page per
-// addiction naming husband, wife, boyfriend, girlfriend so the whole
-// low-difficulty cluster ranks on a single URL. Both route to /quiz and
-// /for-her; crisis resources sit above every signup link.
-app.get('/partner-drinks', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'partner-drinks.html'));
-});
-
-app.get('/partner-watches-porn', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'partner-watches-porn.html'));
-});
-
-// The biggest winnable term in KEYWORDS.md (9,900/mo, KD 37): the food-track
-// page. Self-directed (not supporter), so its CTA goes straight to /app;
-// eating-disorder referral language is SAFETY class in the claims audit and
-// sits above the signup links.
-app.get('/how-to-stop-binge-eating', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'how-to-stop-binge-eating.html'));
-});
-
-// The quiz that page sends people to. This route was missing, and one missing
-// route caused five separate findings in the 15 Aug site audit: the URL 404'd,
-// the two internal links pointing at it were "broken internal links", it was an
-// "incorrect page found in sitemap.xml", and it sat in the sitemap inviting
-// Google to crawl a 404.
-//
-// The page file existed the whole time — express.static serves it, but only at
-// the .html address. Every clean URL on this site needs its own route; there is
-// no catch-all, on purpose (see ALT_PAGES below). A page whose canonical tag,
-// sitemap entry and inbound links all point at an unrouted URL is invisible.
-app.get('/do-i-have-a-binge-eating-problem-quiz', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'do-i-have-a-binge-eating-problem-quiz.html'));
-});
-
-// Final two pages of the KEYWORDS.md plan: the moat's companion page
-// (betrayal trauma recovery, supporter side) and the one borderline
-// long-form worth attempting (how to stop drinking, self side - carries
-// the cold-turkey SAFETY warning twice, above the fold and above signup).
-app.get('/betrayal-trauma-recovery', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'betrayal-trauma-recovery.html'));
-});
-
-app.get('/how-to-stop-drinking', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'how-to-stop-drinking.html'));
-});
-
-// The morning-after anxiety. 12,100 searches a month at difficulty 33 - the
-// biggest winnable term on the site, and the doorway most people come through
-// long before they'd call it a problem.
-app.get('/hangxiety', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'hangxiety.html'));
-});
-
-// Three pages built 26 Aug around long-form videos that already existed and had
-// nowhere to live. Each one is written for the winnable long tail, not the head
-// term - the head terms here (alcohol withdrawal, quit vaping) belong to
-// treatment chains with medical review boards and we are not going to take them.
-app.get('/alcohol-withdrawal-timeline', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'alcohol-withdrawal-timeline.html'));
-});
-
-app.get('/quit-vaping', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'quit-vaping.html'));
-});
-
-app.get('/how-to-stop-watching-porn', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'how-to-stop-watching-porn.html'));
-});
-
-// The partner audience's two biggest search terms, added 2026-08-12 after a
-// live Semrush pull: `codependency` (33,100/mo) and `al anon` (33,100/mo)
-// together outweigh anything else this side of the door, and the site had no
-// page for either. Both head terms are hard (KD 72 and 68), so each page is
-// written for the winnable half of its cluster: `how to stop being
-// codependent` (1,600, KD 46) / `codependency test` (390, KD 15), and
-// `what is al anon` (3,600, KD 33) / `al anon online meetings` (2,900, KD 26).
-// The Al-Anon page links out to al-anon.org and states plainly that we are not
-// affiliated - the search intent there is navigational, so intercepting it
-// without sending people on to the real thing would be a bait page.
-app.get('/codependency', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'codependency.html'));
-});
-
-app.get('/what-is-al-anon', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'what-is-al-anon.html'));
-});
-
-// "Dry drunk" - about 11,700 searches a month across six phrasings, all at
-// difficulty 30-34, and one page answers the lot: what is a dry drunk / dry
-// drunk meaning / definition / syndrome / alcoholic dry drunk / dry drunkenness.
-// Sober and still the same person. Both audiences search it - the one who
-// stopped and the one living with them - so the page carries a CTA for each.
-// The partner-program page for treatment centers and sober living homes. A real
-// page on his own domain beats a PDF attachment in a cold email: nothing to
-// open, it survives forwarding, and a director who Googles him lands here.
-app.get('/for-programs', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'for-programs.html'));
-});
-
-app.get('/dry-drunk', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'dry-drunk.html'));
-});
-
-// The three from the final Semrush sweep (12 Aug), in the order they pay:
-//   /adult-children-of-alcoholics - 8,100/mo at KD 31, plus the "laundry list"
-//     cluster at ~6,000/mo and KD 14-24. A THIRD audience: not the drinker and
-//     not the partner, but the person who grew up in it. Links out to
-//     adultchildren.org rather than reproducing ACA's list, which is theirs.
-//   /alcoholic-personality - ~9,400/mo across six phrasings, all KD 33 or under.
-//     Written as "here is what the behavior does, and why it is not who they
-//     are" - the claims audit applies at full strength on this one.
-//   /codependency-test - `codependency test` (390, KD 15) and `am i codependent
-//     quiz` (390, KD 14). Same eight-question shape as the binge-eating quiz.
-//     NOTE: deliberately NO email capture. /api/lead collapses any unrecognized
-//     source into the 'quiz' nurture, which is written in Jacques's voice and
-//     must never go to the partner - and this audience IS the partner. A
-//     partner-side sequence would need writing before a capture box goes here.
-app.get('/adult-children-of-alcoholics', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'adult-children-of-alcoholics.html'));
-});
-
-app.get('/alcoholic-personality', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'alcoholic-personality.html'));
-});
-
-app.get('/codependency-test', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'codependency-test.html'));
-});
-
-// Our own "best recovery apps" roundup - the standard competitor move done
-// honestly (disclosure up top, real alternatives listed). Targets the
-// "best recovery apps 2026" search and anchors the rehab outreach emails.
-app.get('/best-recovery-apps', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'best-recovery-apps.html'));
-});
-
-// Per-competitor "<name> alternative" pages: same honest-comparison move,
-// one clean extension-less URL per page, all listed in sitemap.xml. A
-// whitelist, not a catch-all - unknown paths must keep 404ing normally.
-const ALT_PAGES = [
-  'i-am-sober-alternative', 'reframe-app-alternative', 'sunnyside-app-alternative',
-  'loosid-app-alternative', 'sober-time-alternative', 'quittr-app-alternative',
-  'covenant-eyes-alternative', 'brainbuddy-alternative', 'fortify-app-alternative',
-  'betblocker-alternative', 'quitnow-app-alternative', 'ever-accountable-alternative',
-  'blockerx-alternative', 'nomo-app-alternative',
-];
-ALT_PAGES.forEach((slug) => {
-  app.get('/' + slug, (req, res) => {
-    res.sendFile(path.join(__dirname, '..', slug + '.html'));
-  });
-});
-
-// Short bio links with tracking baked in, so a platform bio only ever needs
-// "/go/tiktok" - the redirect adds the UTM tags and stats attribution works
-// without anyone hand-building tagged URLs. Unknown names still land safely.
-const GO_SOURCES = new Set(['tiktok', 'youtube', 'facebook', 'instagram', 'buffer']);
-app.get('/go/:src', (req, res) => {
-  const src = String(req.params.src || '').toLowerCase();
-  if (!GO_SOURCES.has(src)) return res.redirect('/when-he-drinks');
-  res.redirect(`/when-he-drinks?utm_source=${src}&utm_medium=social&utm_campaign=her-drinking`);
-});
+// ─── the social bio redirects went with the pages, 5 Oct 2026 ───────────────
+// "/go/tiktok" and its four siblings used to land people on the supporter
+// page with the UTM tags baked in, so a bio link never had to be hand-built.
+// The page they pointed at is deleted, so the routes went with it.
 
 // ─── /play went with the store, 5 Oct 2026 ───────────────────────────────────
 // The counted route to the Play listing lived here. Every store button on the
@@ -595,117 +400,14 @@ app.get('/go/:src', (req, res) => {
 // counter behind it, and the buttons that used it all went together. The store
 // URL used to live in this one place instead of in 27 files; there is no URL now.
 
-// One-click unsubscribe from any inbox - no login. Idempotent by design:
-// setting the flag to 1 again is the same write and the same page, so a
-// double-click or a second device never sees an error.
-app.get('/unsubscribe', (req, res) => {
-  const hit = verifyUnsubToken(req.query.token);
-  if (!hit) {
-    return res.status(400).type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">This link isn't valid.</body>");
-  }
-  if (hit.type === 'lead') db.setLeadUnsubscribed(hit.id, 1);
-  else db.setUnsubscribed(hit.id, 1);
-  res.type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">You're unsubscribed. Password reset emails still work.</body>");
-});
+// ─── the mailing list went, 5 Oct 2026 ──────────────────────────────────────
+// /unsubscribe and /api/lead lived here. Between them they were the whole of
+// the public side of this repo: a quiz or a landing page handed over an email
+// address, /api/lead wrote it into a leads table and started a five-day
+// sequence written to sell the app, and every email carried a one-click
+// unsubscribe link back into /unsubscribe. The addresses were the only reason
+// any of it existed - there is no list now, and nothing to mail.
 
-// Public lead capture: the quiz result screen and the /brainreset page.
-// Additive and skippable everywhere - skipping changes nothing.
-const leadLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many requests from this network. Try again later.' },
-});
-
-// UTM values are attacker-supplied query strings, so every field is length-capped
-// before it reaches the database.
-function cleanUtmTag(v) {
-  return typeof v === 'string' && v.trim() ? v.trim().slice(0, 60) : null;
-}
-function readUtm(body) {
-  const b = body || {};
-  const u = b.utm && typeof b.utm === 'object' ? b.utm : {};
-  return {
-    source: cleanUtmTag(u.source) || cleanUtmTag(b.utm_source),
-    medium: cleanUtmTag(u.medium) || cleanUtmTag(b.utm_medium),
-    campaign: cleanUtmTag(u.campaign) || cleanUtmTag(b.utm_campaign),
-  };
-}
-
-app.post('/api/lead', leadLimiter, async (req, res) => {
-  const { email: rawEmail, quiz_result, source } = req.body || {};
-  const addr = (rawEmail || '').trim().toLowerCase();
-  if (!EMAIL_RE.test(addr)) {
-    return res.status(400).json({ error: 'Enter a valid email address.' });
-  }
-  // 'for-her' is the older partner-page capture: she gets the PDF she asked for
-  // and nothing else. 'partner' (added 13 Aug) is the real partner sequence -
-  // five emails written to the person who LOVES somebody with a habit. Both are
-  // kept away from the quiz nurture, which is written in his voice to the person
-  // struggling and would land badly on her.
-  //
-  // 'binge-quiz' added 28 Aug. The binge check-in had been sending it all
-  // along, but it was not listed here, so it fell through to 'quiz' and was
-  // written into the leads table as 'quiz'. The emails were right - a binge
-  // check-in taker IS the person struggling - but the admin dashboard groups
-  // leads by this column ("which page each lead came in through"), so every
-  // binge signup was indistinguishable from a main-quiz signup and the page
-  // could never be judged on its own numbers.
-  //
-  // The fallback is 'quiz', which is HIS voice. An earlier comment here claimed
-  // the opposite - that collapsing to 'quiz' stopped a new page sending her his
-  // emails - and it is exactly backwards: a new PARTNER page that forgets to
-  // declare source:'partner' will send her his sequence. Declare every new page
-  // here, and check `isSelfQuiz` below when adding another self-facing one.
-  const src = source === 'brainreset' ? 'brainreset'
-    : source === 'for-her' ? 'for-her'
-    : source === 'partner' ? 'partner'
-    : source === 'binge-quiz' ? 'binge-quiz'
-    : 'quiz';
-  // Sources written to the person struggling: same nurture, separate reporting.
-  const isSelfQuiz = src === 'quiz' || src === 'binge-quiz';
-  const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
-  const cleanUtm = readUtm(req.body);
-
-  const existingUser = db.getUserByEmail(addr);
-  const existingLead = db.getLeadByEmail(addr);
-
-  // Dedup rule: an email already known (lead or user) never restarts the
-  // nurture - but a brainreset request still gets its PDF.
-  if (existingUser || existingLead) {
-    if (src === 'brainreset' || src === 'for-her') {
-      const pdf = emailer.brainresetPdfEmail(existingLead || null);
-      // They just asked for it by typing their address - deliver even if
-      // previously unsubscribed from sequences.
-      emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
-    }
-    return res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? "You're all set." : 'Check your email — the PDF is on the way.' });
-  }
-
-  const leadId = db.createLead(addr, isSelfQuiz ? cleanResult : null, src, cleanUtm);
-  const lead = db.getLeadById(leadId);
-  if (isSelfQuiz) {
-    emailer.startQuizNurture(lead).catch(() => {});
-  } else if (src === 'partner') {
-    // Her day 1 goes immediately; the hourly runner picks up days 2-5.
-    emailer.startPartnerNurture(lead).catch(() => {});
-  } else {
-    if (src === 'brainreset') {
-      // Brainreset leads skip day 1 (it restates a quiz result they don't have):
-      // pre-mark step 1 consumed so the scheduler starts them at day 2.
-      // for-her leads are excluded from the nurture entirely (see runQuizNurture),
-      // so no pre-marking is needed for them.
-      db.logEmailSent(null, addr, 'quiz', 1);
-    }
-    const pdf = emailer.brainresetPdfEmail(lead);
-    emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
-  }
-  // New-lead funnel event, tagged with the door they came through (quiz,
-  // partner, for-her or brainreset) - no email, no result, no PII.
-  analytics.event(req, 'Lead', { source: src });
-  res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
-});
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -816,14 +518,8 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   }
   const cleanPhone = typeof phone === 'string' ? phone.trim().slice(0, 30) : '';
   const userId = db.createUser(normalizedEmail, hashPassword(password), cleanPhone || null);
-  // Attribution must never be able to fail a signup - a malformed tag is worth
-  // losing, an account is not.
-  try { db.setUserUtm(userId, readUtm(req.body)); } catch (_) {}
   setSessionCookie(req, res, userId);
   res.status(201).json({ email: normalizedEmail });
-  // Funnel event - fire-and-forget, and it carries only the plan level, never
-  // anything that could identify the person who just signed up.
-  analytics.event(req, 'Signup', { plan: 'free' });
   // After the response - a slow or failed email must never slow down signup.
   const user = db.getUserById(userId);
   if (user) {
@@ -1253,7 +949,6 @@ app.post('/api/letter/share', letterCreateLimiter, requireAuth, (req, res) => {
   const side = ['recovering', 'partner', 'both'].includes(senderType) ? senderType : 'recovering';
   const token = crypto.randomBytes(16).toString('hex');
   const row = db.createLetter(req.userId, token, side, senderName, recipientName, text);
-  analytics.event(req, 'LetterSent', { side });
   res.status(201).json({
     url: `${letterOrigin(req)}/l/${row.token}`,
     token: row.token,
@@ -1274,8 +969,7 @@ app.post('/api/letter/revoke', requireAuth, (req, res) => {
 app.get('/api/letter/:token', (req, res) => {
   const row = db.getLetterByToken(req.params.token);
   if (!row) return res.status(404).json({ error: 'gone' });
-  const open = db.markLetterOpened(req.params.token);
-  if (open && open.first) analytics.event(req, 'LetterOpened', { side: row.sender_type });
+  db.markLetterOpened(req.params.token);
   res.json({
     body: row.body,
     senderName: row.sender_name,
@@ -1316,7 +1010,6 @@ app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
   setSessionCookie(req, res, userId);
   const youAre = db.LETTER_OPPOSITE[row.sender_type] || 'partner';
   res.status(201).json({ email: normalizedEmail, youAre, senderName: row.sender_name });
-  analytics.event(req, 'AccountCreatedFromLetter', { side: youAre });
   try {
     push.sendToUser(row.user_id, {
       title: 'They read your letter',
@@ -1486,8 +1179,8 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'messages array is required.' });
   }
 
-  // Server-side daily limit for signed-in users. Only a server-confirmed paid plan (never a
-  // client-reported isPro flag, which the client fully controls) can bypass this.
+  // Server-side daily limit for signed-in users. Only the server's own allowlist can
+  // bypass this - never a client-reported flag, which the client fully controls.
   const user = db.getUserById(req.userId);
   if (!isFriendlyAllowed(user)) {
     return res.status(403).json({ error: 'Not available on this account.' });
@@ -1619,7 +1312,8 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err);
 });
 
-emailer.startScheduler();
+// emailer.startScheduler() is gone with the marketing sequences - there is no
+// hourly pass left to run. Push reminders still have one.
 push.startScheduler();
 backup.startBackupScheduler(emailer, DIAG_OWNER_EMAIL, (scope, msg, detail) => db.logError(scope, msg, detail));
 

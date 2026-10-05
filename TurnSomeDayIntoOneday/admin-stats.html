@@ -51,9 +51,9 @@ fetch('/api/admin/stats').then(async r=>{
   const t=d.totals,u=d.usage;
   let h='';
   h+='<h2>Totals</h2><div class="cards">'+
-    [['Signups',t.signups],['Trial starts',t.trial_starts],['Paid (active)',t.paid],['Trialing',t.trialing],['Leads',t.leads]]
+    [['Accounts',t.signups]]
       .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>'+
-    '<div class="note">Paid counts Stripe status <code>active</code> only. Trialing is shown separately — a trial that has not converted is not revenue.</div>';
+    '<div class="note">Trial starts, paid accounts, conversion rates and lead totals were shown here until 5 Oct 2026. They went with the billing columns and the mailing list: there is nothing on sale and no list of addresses, so every one of those numbers was counting something that no longer exists.</div>';
 
   // The Play listing block sat here until 5 Oct 2026. The listing is
   // unpublished, the /play counter behind it is gone, and this is a personal
@@ -84,19 +84,8 @@ fetch('/api/admin/stats').then(async r=>{
     }
   }
 
-  // Funnel and retention. Both deliberately print "—" rather than a percentage
-  // until the sample is big enough to mean anything: one paying customer out of
-  // three is not "33% conversion", and a number that precise invites decisions
-  // the data cannot support.
-  if(d.funnel){
-    const f=d.funnel, pc=v=>v===null||v===undefined?'—':v+'%';
-    h+='<h2>Funnel</h2><div class="cards">'+
-      [['Leads',f.leads],['Signups',f.signups],['Trials',f.trial_starts],['Paid',f.paid]]
-        .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+
-      [['Lead → signup',f.lead_to_signup],['Signup → trial',f.signup_to_trial],['Trial → paid',f.trial_to_paid]]
-        .map(([l,v])=>`<div class="card"><div class="n">${esc(pc(v))}</div><div class="l">${esc(l)}</div></div>`).join('')+
-      '</div><div class="note">Rates appear once there are at least '+esc(f.min_sample)+' in the denominator. <b>Trial → paid is the number that decides whether to make more content or fix the product.</b></div>';
-  }
+  // The funnel that used to print here went with the trials and the paid step.
+  // Retention is the half of it that was never about money, and it stays.
   if(d.retention){
     const r=d.retention, cell=x=>x.pct===null?`— <span style="color:#7e86b8">(${esc(x.kept)}/${esc(x.eligible)})</span>`:`${esc(x.pct)}% <span style="color:#7e86b8">(${esc(x.kept)}/${esc(x.eligible)})</span>`;
     h+='<h2>Retention</h2><div class="cards">'+
@@ -105,27 +94,14 @@ fetch('/api/admin/stats').then(async r=>{
       '</div><div class="note">Of the accounts old enough to reach each day, how many were still doing something in the app by then. Anchored to each person\'s own start date, so a new cohort cannot dilute Day 30. Shown once '+esc(r.min_sample)+' accounts are eligible.</div>';
   }
 
-  const srcCols=[{key:'utm_source',label:'Source'},{key:'signups',label:'Signups',n:1},{key:'trial_starts',label:'Trials',n:1},{key:'paid',label:'Paid',n:1},{key:'leads',label:'Leads',n:1}];
-  h+='<h2>By UTM source</h2>'+table(srcCols,d.by_utm_source,{
-    utm_source:'TOTAL',signups:sum(d.by_utm_source,'signups'),trial_starts:sum(d.by_utm_source,'trial_starts'),
-    paid:sum(d.by_utm_source,'paid'),leads:sum(d.by_utm_source,'leads')});
-  h+='<div class="note">Untagged traffic is grouped as <code>(direct)</code>, so these rows always sum back to the totals above.</div>';
+  // By UTM source and Leads by page sat here until 5 Oct 2026. Both grouped
+  // people by the advert or the page that brought them in, and the pages, the
+  // campaigns and the utm columns all went the same day. Nothing tags a visit
+  // now, so there is no source column left to group by.
 
-  const wkCols=[{key:'week',label:'Week of'},{key:'signups',label:'Signups',n:1},{key:'trial_starts',label:'Trials',n:1},{key:'paid',label:'Paid',n:1},{key:'leads',label:'Leads',n:1}];
-  h+='<h2>By week</h2>'+table(wkCols,d.by_week,{
-    week:'TOTAL',signups:sum(d.by_week,'signups'),trial_starts:sum(d.by_week,'trial_starts'),
-    paid:sum(d.by_week,'paid'),leads:sum(d.by_week,'leads')});
-  h+='<div class="note">Week starts Monday. Trials bucket by when the trial began, not when the account was created.</div>';
-
-  // Which page produced each lead. A UTM tells you where they came FROM; this
-  // tells you what they actually filled in — the quiz, the free guide, or the
-  // partner page — which is the thing worth knowing when the campaign column
-  // says (direct) for everybody.
-  if (d.leads_by_page && d.leads_by_page.length) {
-    const lpCols=[{key:'page',label:'Where they signed up'},{key:'leads',label:'Leads',n:1}];
-    h+='<h2>Leads by page</h2>'+table(lpCols,d.leads_by_page,{page:'TOTAL',leads:sum(d.leads_by_page,'leads')});
-    h+='<div class="note">quiz = finished the quiz and asked for the result. brainreset = asked for the free 90-day guide. for-her = the partner page.</div>';
-  }
+  const wkCols=[{key:'week',label:'Week of'},{key:'signups',label:'Accounts',n:1}];
+  h+='<h2>By week</h2>'+table(wkCols,d.by_week,{week:'TOTAL',signups:sum(d.by_week,'signups')});
+  h+='<div class="note">Week starts Monday.</div>';
 
   h+='<h2>Friendly usage (free tier)</h2><div class="cards">'+
     [['Avg chats / active free user / day',u.avg_chats_per_active_free_user_per_day],

@@ -84,9 +84,9 @@ function doorMiddleware(allows) {
 // more" at the exact moment the bell rang. It belongs to the app, so it sits
 // on the list beside /app.
 //
-// The pages that have to stay open, and why. Each one is either the app, or
-// something Google Play already points at, or a link that lands in somebody's
-// phone from an email.
+// The pages that have to stay open. Each one is the app itself; the two policy
+// pages are on the list because they are the only pages here that are meant to
+// be read without signing in.
 //
 // The trading game, the trading school and the Trading Desk came off this list
 // on 24 Sep 2026 with the pages themselves - "remove the trading game the desk
@@ -97,9 +97,9 @@ const OPEN_PAGES = [
   '/app',               // the app
   '/key',               // The Key — owner and list only, gated at its own route
   '/admin/stats',       // owner only, gated at its own route
-  '/privacy',           // Play requires the policy without signing in
+  '/privacy',           // the policy, readable without signing in
   '/privacy.html',
-  '/delete-account',    // Play requires the deletion page the same way
+  '/delete-account',    // the deletion page, readable the same way
   '/delete-account.html',
   '/letter.html',       // the page a letter link opens
   '/game3d.html',       // the 3D fight inside The Fight tab (added 13 Sep 2026)
@@ -121,10 +121,13 @@ const OPEN_PAGES = [
   '/music', '/music.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
-// prefix: the API the app is nothing without, a letter link (/l/<token>), the
-// redirect behind an old post (/go/<src>), the store listing (/play) and the
-// one-click unsubscribe in every email.
-const OPEN_PREFIXES = ['/api/', '/l/', '/go/', '/unsubscribe'];
+// prefix: the API the app is nothing without, and a letter link (/l/<token>).
+//
+// /go/ and /unsubscribe were on this list until 5 Oct 2026 - the redirect
+// behind a social bio, and the one-click opt-out at the bottom of every
+// marketing email. Both routes went with the pages and the mailing list, so
+// there is nothing behind either prefix now.
+const OPEN_PREFIXES = ['/api/', '/l/'];
 
 const PAGE_GONE = 'This page is not here any more. The app it belongs to is private.';
 

@@ -1,9 +1,9 @@
 // docs.js — what Your AI knows.
 //
 // The assistant is only as honest as the files it reads. This module discovers
-// the repo's business documents (root *.md plus a curated reference set) and
-// loads whichever ones the user ticks, fresh from disk on every message, so an
-// edit made yesterday is what the AI sees today.
+// the repo's business documents (root *.md plus a short curated set) and loads
+// whichever ones the user ticks, fresh from disk on every message, so an edit
+// made yesterday is what the AI sees today.
 //
 // Safety: the client never sends a path. It sends a key, and a key is only
 // accepted if the server itself discovered it in this module — so a request
@@ -17,15 +17,15 @@ const REPO_ROOT = path.join(__dirname, '..');
 // Curated set beyond the root *.md files. Root files are discovered
 // automatically, so this list only needs to grow when a doc elsewhere in the
 // repo becomes something Jacques actually works out of.
+// Four of these were the marketing playbook, the claims audit, the post-launch
+// build list and the content pack, and two more were the LeadCatch documents.
+// All six went on 5 Oct 2026 with the reference library and the LeadCatch tool.
+// A path that is not there is not an error here - it is read as an empty
+// document, silently - so leaving one in would make the assistant quietly
+// worse rather than fail.
 const EXTRA_DOCS = [
-  'reference/marketing-playbook.md',
-  'reference/medical-claims-audit.md',
-  'reference/POST-LAUNCH-BUILD-LIST.md',
-  'reference/marketing-content-pack.md',
   'TurnSomeDayIntoOneday/HANDOFF.md',
   'TurnSomeDayIntoOneday/docs/GAME-SPEC.md',
-  'LeadCatch/README.md',
-  'LeadCatch/MARKETING.md',
 ];
 
 // Files too big to feed a model whole get cut off, with a note so the AI knows
@@ -34,13 +34,13 @@ const MAX_BYTES_PER_DOC = 300 * 1024;
 // The client may tick up to this many docs per message.
 const MAX_DOCS_PER_MESSAGE = 10;
 
-// Docs that ship pre-ticked: the standing rules + the current status + the
-// medical-claims audit, because every content question should answer from them.
+// Docs that ship pre-ticked: the standing rules and the current status, because
+// every question should answer from those first. The medical-claims audit was
+// the fourth until 5 Oct 2026, when it went with the reference library.
 const CORE_DOCS = [
   'CLAUDE.md',
   'START-HERE.md',
   'MASTER-STATUS.md',
-  'reference/medical-claims-audit.md',
 ];
 
 function readSize(file) {

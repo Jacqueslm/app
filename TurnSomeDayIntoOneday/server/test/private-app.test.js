@@ -166,12 +166,21 @@ test('the marketing pages are gone', () => {
   }
 });
 
-test('the app, the store pages and every link that lands from an email stay open', () => {
+test('the app, the policy pages and the letter links stay open', () => {
   for (const p of ['/', '/app', '/key', '/admin/stats',
     '/privacy', '/privacy.html', '/delete-account', '/delete-account.html',
-    '/letter.html', '/game3d.html', '/l/abc123', '/unsubscribe', '/go/yt',
+    '/letter.html', '/game3d.html', '/l/abc123',
     '/api/state', '/api/auth/login']) {
     assert.strictEqual(pageIsServed(p), true, `${p} must stay open`);
+  }
+});
+
+// 5 Oct 2026. The social-bio redirect and the one-click unsubscribe were the
+// last two public addresses on the site. Both routes are gone, so both prefixes
+// must fall through to the gate rather than being waved past it.
+test('the public redirect prefixes are no longer open', () => {
+  for (const p of ['/go/yt', '/go/tiktok', '/unsubscribe']) {
+    assert.strictEqual(pageIsServed(p), false, `${p} must be shut`);
   }
 });
 
@@ -409,7 +418,7 @@ test('a signed-out request for a private reference page never gets the file', as
 
 test('assets are never judged — the app on the phone needs all of them', () => {
   for (const p of ['/sw.js', '/manifest.json', '/icons/icon-192.png',
-    '/js/ring3d-three.js', '/audio/sos.mp3', '/robots.txt', '/sitemap.xml',
+    '/js/ring3d-three.js', '/audio/sos.mp3', '/robots.txt',
     '/index.css']) {
     assert.strictEqual(isPagePath(p), false, `${p} is not a page`);
     assert.strictEqual(pageIsServed(p), true);
@@ -426,7 +435,11 @@ test('the gate runs before every page route and before static', () => {
   const gate = at('if (pageIsServed(req.path)) return next();');
   assert.ok(gate > 0, 'the gate must be in server.js');
   assert.ok(gate < at("app.get('/app'"), 'the app route is below the gate');
-  assert.ok(gate < at("app.get('/quiz'"), 'the marketing routes are below the gate');
+  // The marketing routes the gate used to be checked against are gone entirely
+  // as of 5 Oct 2026, so the check is now that none of them came back.
+  assert.strictEqual(at("app.get('/quiz'"), -1, 'no marketing route may be registered');
+  assert.strictEqual(at("app.get('/for-her'"), -1, 'no marketing route may be registered');
+  assert.strictEqual(at("app.get('/play'"), -1, 'the store route may not come back');
   assert.ok(gate < at('app.use(express.static('), 'static must not get there first');
   assert.match(SRC, /res\.status\(410\)/, 'a retired page says 410 so a search engine drops it');
 });

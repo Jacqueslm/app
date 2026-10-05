@@ -2,6 +2,16 @@
 // "It should look like a man wrote it on his phone, because that's the whole
 // brand." (email-sequences.md)
 //
+// ─── THE MARKETING SEQUENCES WENT, 5 OCT 2026 ────────────────────────────────
+// This file used to carry four things beyond the two below: a five-day quiz
+// nurture, a five-day sequence for the partner, a win-back email for somebody
+// who had gone quiet, and an hourly scheduler that walked every lead and every
+// account to decide who was due one. All of it was written to sell the app, and
+// all of it was addressed to strangers who had handed an address to a landing
+// page. There are no landing pages and no addresses now. What is left is the
+// two messages that are about the account itself, which nobody opted into and
+// which nobody can opt out of.
+//
 // Env:
 //   RESEND_API_KEY   - required for real sends; missing = emails silently skip
 //   EMAIL_FROM       - e.g. "Jacques <jacques@turnsomedayintodayone.com>"
@@ -9,7 +19,6 @@
 //   APP_URL          - absolute base URL used in links
 //   EMAIL_DRY_RUN=1  - treat sends as successful without calling Resend (tests)
 const db = require('./db');
-const { signUnsubToken, signLeadUnsubToken } = require('./auth');
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM || 'Jacques <jacques@turnsomedayintodayone.com>';
@@ -21,20 +30,11 @@ function isConfigured() {
   return Boolean(RESEND_API_KEY);
 }
 
-// Every send funnels through here. Honoring `unsubscribed` lives at this
-// choke point on purpose - no caller can forget it. The single exception is
-// force:true, reserved for account access (password reset): opting out of
-// emails must never lock someone out of their own account.
+// Every send funnels through here, and there is no longer an opt-out to honour:
+// the only two messages left are an account's own welcome and its own password
+// reset, and opting out of those is not a thing. `force` survives because the
+// reset path passes it and the call reads better than a missing argument.
 async function sendEmail({ to, subject, text, force, attachments }) {
-  const addr = String(to).toLowerCase();
-  const user = db.getUserByEmail(addr);
-  if (user && user.unsubscribed && !force) {
-    return { ok: false, skipped: 'unsubscribed' };
-  }
-  const lead = db.getLeadByEmail(addr);
-  if (lead && lead.unsubscribed && !force) {
-    return { ok: false, skipped: 'unsubscribed' };
-  }
   if (DRY_RUN) {
     const lastLine = text.trimEnd().split('\n').pop();
     const att = attachments && attachments.length ? ` +${attachments.length} attachment(s)` : '';
@@ -75,21 +75,18 @@ async function sendEmail({ to, subject, text, force, attachments }) {
 }
 
 // Guarded send for anything that must happen at most once per (user, sequence,
-// step) - the double-send protection from the spec. Logging happens only after
-// a successful send, so a failed attempt is retried on the next scheduler tick
-// while a restart mid-sequence can never produce duplicates.
+// step). Logging happens only after a successful send, so a failed attempt is
+// retried on the next call while a restart can never produce duplicates.
+//
+// No unsubscribe footer is appended any more: the footer pointed at a
+// /unsubscribe route that no longer exists, and both messages left are
+// transactional - one is the welcome that says who is writing, the other is the
+// only way back into a locked account.
 async function sendSequenceEmail(user, sequence, step, subject, text) {
   if (db.hasEmailBeenSent(user.id, sequence, step)) {
     return { ok: false, skipped: 'already-sent' };
   }
-  // The unsubscribe footer is attached at send time, never stored in the copy:
-  // marketing sequences (trial, future quiz nurture) get it; transactional
-  // account mail does not.
-  let outgoing = text;
-  if (sequence !== 'transactional') {
-    outgoing += `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signUnsubToken(user.id, user.email)}`;
-  }
-  const result = await sendEmail({ to: user.email, subject, text: outgoing });
+  const result = await sendEmail({ to: user.email, subject, text });
   if (result.ok) {
     db.logEmailSent(user.id, user.email, sequence, step);
   }
@@ -128,390 +125,10 @@ If it wasn't you, ignore this and nothing changes.
   };
 }
 
-// ---- Quiz nurture sequence (copy VERBATIM from quiz-nurture-emails.md) -----
-// Day 1 substitutes {result}; days 4-5 substitute {APP_URL}.
-
-const QUIZ_EMAILS = [
-  { step: 1, subject: 'Your result, and the one thing it actually means', text: `Jacques here. You took the check-in, so you're getting an email from me and not a robot.
-
-Your result: {result}.
-
-Here's what that actually means, stripped of anything fancy: the habit has a pattern, and now you've seen a piece of it on paper. Most men never get that far — they fight the fog instead of the pattern, lose, and call themselves weak. You just did the one thing willpower can't: you looked at it.
-
-The single most useful thing you can do this week costs nothing. Pick your worst hour — for most of us it's late, alone, tired — and change ONE thing about it. Phone charges in the kitchen. Lights out at a decided time. A walk at the hour the walls usually close in. Don't fix your life. Move one domino.
-
-That's it. That's day one.
-
-Tomorrow I'll tell you about 2am — the hour that beat me for 38 years.
-
-— Jacques` },
-  { step: 2, subject: 'The 2am problem', text: `At noon you're fine. At noon you're a guy with a plan.
-
-It's never noon when it happens. It's late, the house is quiet, and your head starts talking. And here's the part nobody tells you — it isn't a stupid argument. It's a good one. It's reasonable. It has evidence. You've been rehearsing it for years.
-
-I lost to that argument for 38 years. Not because I was weak. Because I kept trying to out-think it live, at 2am, with the worst version of my brain in the driver's seat.
-
-You cannot win that fight in real time. You can only win it in advance.
-
-Tomorrow I'm going to give you the exact tool for that — the relapse plan. You'll write it on paper, in the daylight, and it'll be waiting for the 2am version of you like a note from someone smarter.
-
-Tonight, just notice the hour your head gets loud. That's all. Name the hour.
-
-— Jacques` },
-  { step: 3, subject: 'Write this down before you need it', text: `Today you write the plan. Ten minutes, on paper, while you're clear-headed. This is the tool that finally worked for me, and I'm giving you the whole thing — no app required, no catch.
-
-Grab a pen. Answer these five, in your own words:
-
-1. MY TOP 3 TRIGGERS ARE:
-   (The exact times, feelings, places. "Alone after 11pm." "After a fight." "Bored on Sunday afternoon.")
-
-2. THE STORY MY HEAD TELLS ME AT THE WORST MOMENT IS:
-   (Write the actual sentence. "One more time won't matter." "I've had a hard week, I deserve it." Seeing it in daylight takes half its power.)
-
-3. WHEN THE URGE HITS, MY FIRST THREE MOVES ARE:
-   (Physical, decided now: 1) Leave the room. 2) Cold water on my face. 3) Walk around the block. Motion first — argue later.)
-
-4. THE PERSON I CAN TEXT, AND THE WORD I'LL SEND:
-   (One safe person. One code word. Secrets are where this thing gets its power.)
-
-5. IF I SLIP, I WILL:
-   (Reset the same hour — not Monday. Ask "what was the trigger," not "what's wrong with me." The slip costs one day. The shame spiral costs thirty.)
-
-Fold it. Put it in your wallet or your nightstand. That paper is now smarter than 2am you — and that's the whole trick.
-
-The app does this with reminders and a panic button, but the paper version works. Start with the paper.
-
-— Jacques` },
-  { step: 4, subject: "If there's someone else in the house", text: `This one you might not read for yourself. That's fine. It might be one to forward.
-
-For 38 years, my addiction made everything about me. My struggle, my shame, my progress, my slips. And the person lying next to me — worrying, wondering, doing quiet math about what was real — got erased. Nobody asked how she was doing. Nobody built anything for her.
-
-If you're the one struggling: the person who loves you is carrying this too, even when they don't say it. You don't have to have the whole conversation today. But know there's something built for them when it's time.
-
-If this email was forwarded to you — if you're the one on the other side of this: you're not crazy, and you're not the only one awake right now. Your emotions are valid. Supporting someone doesn't mean losing yourself. There's a section built just for you — not about them, FOR you:
-
-{APP_URL}/for-her
-
-Whichever side of this you're on, it counts.
-
-— Jacques` },
-  { step: 5, subject: '38 years', text: `I'll keep this one honest and then I'll leave you alone.
-
-I was addicted for 38 years. Porn. Food. Anger. Not one habit — a rotation, each one covering for the others. I made the Sunday promise a thousand times. Broke it by Tuesday a thousand times. I got very good at hiding, and very good at hating myself quietly, and I called that "managing it."
-
-At 50 it was do or die. Not a slogan — an actual fork. I looked at the next thirty years and saw the same fog, just older. And something in me said: someday is a real place, and it's crowded, and nobody there is happy.
-
-So I chose day one. And it held. Not because I found more willpower — because I finally stopped fighting at 2am and started winning at 2pm. The plan on paper. The named triggers. The one safe person. Everything I've sent you this week.
-
-Then I built all of it into an app, because paper doesn't ping you at your worst hour and paper can't talk back at 2am.
-
-Turn Someday Into Day One. A private AI companion for the hour your head gets loud — your 2am conversations are never saved. A relapse plan with a panic button. A day counter that doesn't shame you when you reset. And a section for the partner that no other app has.
-
-The check-in you took is the front door. The free tier is real. Pro is $9.99 a month with 7 days free, and I email you before anything is ever charged.
-
-{APP_URL}
-
-Whatever you decide, you have the tools now. The plan works on paper too — I'd rather you free than subscribed.
-
-Day one is a decision, not a date.
-
-— Jacques` },
-];
-
-// The lead-magnet delivery mail (subject and body approved by Jacques).
-// It carries an unsubscribe link like everything else that goes to a lead: a
-// for-her lead is promised exactly one email and never enters a sequence, so
-// this is the only message she ever gets - and it was the only one with no way
-// out of the list at the bottom of it.
-function brainresetPdfEmail(lead) {
-  let text = `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
-
-${APP_URL}/The90DayBrainReset.pdf
-
-— Jacques`;
-  if (lead && lead.id && lead.email) {
-    text += `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signLeadUnsubToken(lead.id, lead.email)}`;
-  }
-  return { subject: 'The 90-Day Brain Reset (your PDF)', text };
-}
-
-// Same contract as sendSequenceEmail, but for leads: guard keys on the email
-// address, the unsubscribe footer carries a lead token, log rows carry no user id.
-async function sendLeadSequenceEmail(lead, sequence, step, subject, text) {
-  if (db.hasEmailBeenSentToAddress(lead.email, sequence, step)) {
-    return { ok: false, skipped: 'already-sent' };
-  }
-  const outgoing = text + `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signLeadUnsubToken(lead.id, lead.email)}`;
-  const result = await sendEmail({ to: lead.email, subject, text: outgoing });
-  if (result.ok) {
-    db.logEmailSent(null, lead.email, sequence, step);
-  }
-  return result;
-}
-
-// ---- Partner sequence (written 12 Aug 2026, wired 13 Aug) -----------------
-// Five emails for the person who LOVES somebody with a habit - never the
-// person with the habit. It exists because every other sequence here is
-// written in Jacques's voice TO the one struggling, and would land badly on a
-// wife who just took the codependency check-in at midnight.
-// The rules these follow, and which must survive any rewrite:
-//   - no day counting, no relapse talk, no quitting advice; she isn't quitting
-//   - never tells her to leave, and never tells her to stay. That is her call
-//   - never asks her to manage him. His recovery is not her job
-//   - Jacques's angle is the one nobody else has: he was the one with the
-//     secret for 38 years, so he can say what was behind the behaviour
-const PARTNER_EMAILS = [
-  { step: 1, subject: "You're not imagining it", text: `Jacques here. I built this thing, so you get an email from me and not a robot.
-
-I'm going to start with the thing nobody said to you: you're not imagining it, and you're not dramatic, and you're not "reading into things."
-
-I know that because I was the one being read. For thirty-eight years I was the person with the secret in the house. And every single time somebody close to me noticed something was off, they were right. Every time. Not once was anybody wrong about me - they just couldn't prove it, and I was very good at making them feel unreasonable for asking.
-
-So if you've been told you're paranoid, or too sensitive, or that you're making something out of nothing - I'd trust what you noticed over what you were told about noticing it.
-
-That's all for today. Tomorrow I'll tell you the one thing that changed everything for the people around me, and it isn't what you'd expect.
-
-- Jacques
-{APP_URL}` },
-  { step: 2, subject: 'Two jobs, and you only ever had one', text: `There are two jobs in your house.
-
-One is theirs: stopping, and staying stopped, and dealing with whatever the drink or the phone or the betting was covering up. The other is yours: sleeping, eating, seeing your friends, being someone other than the person who manages them.
-
-Almost everybody in your position quietly takes on both. It's not weakness - it's what happens when somebody has to keep the household upright and nobody else is going to. But here's the thing I watched from the other side: me not getting better was never once caused by somebody not managing me well enough. Nobody talked me into it and nobody could have. The people who tried the hardest just got the most worn out.
-
-Your healing does not have to wait in a queue behind theirs.
-
-That's not permission to stop caring. It's permission to stop carrying the half that was never yours.
-
-- Jacques
-{APP_URL}` },
-  { step: 3, subject: 'The ten minutes when you want to check their phone', text: `You know the ten minutes. They're in the shower, or asleep, or out, and the phone is right there, and you hate that you want to look and you're going to look anyway.
-
-I'm not going to tell you not to. Checking is not a character flaw - it's what a person does when they've been lied to and their own judgment stopped feeling reliable. That's the real injury, by the way. Not the drinking. The fact that you can't trust your own read on your own life anymore.
-
-Here's what I'd say instead. Whatever you find, you already know. You've known for a while. Checking doesn't give you information - it gives you thirty seconds of certainty and then a worse night.
-
-So: when the ten minutes come, write it down instead. In the app, in a notebook, in your phone's notes. There's a journal in there that nobody else can open, and it's free. Put the 2am sentence somewhere other than around and around your own head.
-
-It won't fix anything tonight. It'll give you back one night.
-
-- Jacques
-{APP_URL}` },
-  { step: 4, subject: 'A promise and a change look identical from the outside', text: `This is the one I owe you an honest answer on, because I made a lot of promises and meant every single one of them.
-
-That's what nobody tells you. They aren't lies at the moment they're said. At 9am I completely intended it. By 6pm I was a different set of priorities with the same face. Which is why "they promised" and "they lied to me" both feel true - they are both true, and living inside that contradiction is exhausting.
-
-So here's the only thing I know that separates a promise from a change, and it's not what they say:
-
-A promise is about the future. A change shows up in the boring middle of an ordinary week. Not a grand declaration after a bad night - the Tuesday. Did anything about the Tuesday get different? That's the whole test. It takes weeks to read, it can't be rushed, and it's the only honest measure there is.
-
-You don't have to decide anything based on it. Just stop grading them on the apologies. They were never the evidence.
-
-- Jacques
-{APP_URL}` },
-  { step: 5, subject: "One thing this week that's yours", text: `Last one, then I'll leave you alone.
-
-I want you to do one thing this week that has nothing to do with them. Not a grand gesture. One hour, one coffee, one walk, one phone call to the friend you've been too tired to ring back.
-
-I'm asking because of something I saw and can't unsee. The people around me disappeared slowly. Not in a dramatic way - they just stopped having answers to "what have you been up to?", because the answer was me, for years. By the time I finally stopped, some of them had no idea what they even liked anymore. That was mine too. That was on my account.
-
-Don't let that be yours.
-
-The app's free and there's a section built for your side of it - not monitoring tools, not couples homework. Yours. Use it, don't use it, that's genuinely fine. But do the one hour.
-
-You've been the reliable one for a long time. Somebody should be telling you to put it down for an afternoon, so it may as well be me.
-
-- Jacques
-{APP_URL}` },
-];
-
-function partnerEmailFor(step) {
-  const e = PARTNER_EMAILS.find((x) => x.step === step);
-  if (!e) return null;
-  return { subject: e.subject, text: e.text.split('{APP_URL}').join(APP_URL) };
-}
-
-function quizEmailFor(step, lead) {
-  const e = QUIZ_EMAILS.find((x) => x.step === step);
-  if (!e) return null;
-  const text = e.text
-    .replace('{result}', lead.quiz_result || 'your check-in result')
-    .split('{APP_URL}').join(APP_URL);
-  return { subject: e.subject, text };
-}
-
-// Fired at capture time so day 1 lands while the quiz is still open in their
-// other tab. The guard makes any later scheduler pass a no-op.
-async function startQuizNurture(lead) {
-  const e = quizEmailFor(1, lead);
-  return sendLeadSequenceEmail(lead, 'quiz', 1, e.subject, e.text);
-}
-
-async function startPartnerNurture(lead) {
-  const e = partnerEmailFor(1);
-  return sendLeadSequenceEmail(lead, 'partner', 1, e.subject, e.text);
-}
-
-// Hourly runner: step N sends only while the lead is actually on day N-1
-// (created day counts as day 0), same skip-if-down policy as the trial.
-// Brainreset leads had step 1 pre-marked consumed at signup, so they start
-// at step 2 with no special casing here.
-async function runQuizNurture() {
-  for (const lead of db.getLeadsInNurtureWindow()) {
-    // The sequence is written in the voice of the man doing the work. Partner
-    // leads (source 'for-her') asked for one PDF, not his emails - and any
-    // future source is excluded until a sequence is written for it.
-    //
-    // KEEP THIS LIST IN STEP WITH /api/lead's `isSelfQuiz`. Day 1 is sent
-    // directly at signup and days 2-5 only ever come from this loop, so a
-    // self-facing source that is missing here does not fail loudly - it
-    // delivers exactly one of the five emails the page promised and stops.
-    // 'binge-quiz' was added 28 Aug for that reason.
-    const NURTURE_SOURCES = ['quiz', 'binge-quiz', 'brainreset'];
-    if (lead.source && !NURTURE_SOURCES.includes(lead.source)) continue;
-    const day = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
-    const step = day + 1;
-    if (step < 1 || step > 5) continue;
-    const e = quizEmailFor(step, lead);
-    if (e) await sendLeadSequenceEmail(lead, 'quiz', step, e.subject, e.text);
-  }
-}
-
-// The partner side. Same one-a-day cadence as the quiz nurture, but a separate
-// sequence name so email_log can never confuse the two - and so a person who
-// somehow appears on both lists still gets each one exactly once.
-async function runPartnerNurture() {
-  for (const lead of db.getLeadsInNurtureWindow()) {
-    if (lead.source !== 'partner') continue;
-    const day = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
-    const step = day + 1;
-    if (step < 1 || step > 5) continue;
-    const e = partnerEmailFor(step);
-    if (e) await sendLeadSequenceEmail(lead, 'partner', step, e.subject, e.text);
-  }
-}
-
-// ---- Win-back (13 Aug 2026) ------------------------------------------------
-// The gap this closes: somebody slips, stops opening the app out of shame, and
-// hears nothing from us ever again. That is the exact moment the whole product
-// is FOR, and it was the one moment with no email attached to it.
-//
-// Rules, because this one can do harm if it gets them wrong:
-//   - it is never disappointed, and it never mentions a broken streak
-//   - it never asks why they stopped
-//   - it goes out ONCE. If it doesn't land, that's the answer, and a second
-//     nudge to somebody in shame is just pressure
-//   - a person who reset and came back is active, so the quiet window is
-//     measured from their last activity, not from their start date
-const WINBACK_EMAILS = [
-  { step: 1, subject: 'Day one is still there', text: `It's Jacques. You haven't been in for a couple of weeks, and I'm not writing to ask why.
-
-I stopped and started more times than I could count over thirty-eight years, and the thing that kept me away longest was never the drink. It was the feeling of having to explain myself to somebody before I could start again.
-
-So: no explanation needed here. Nothing expired. Your account is exactly where you left it, and the counter starts whenever you say it does - today, next week, or a year from now.
-
-If you want the smallest possible step, open the app and do one lesson. Not a plan, not a commitment. One lesson, then close it.
-
-And if you're not ready, that's genuinely all right. This email is the only one you'll get about it - I'm not going to chase you. But the door doesn't lock.
-
-- Jacques
-{APP_URL}/app
-
-If you'd rather not hear from me again, the unsubscribe link is below and I won't take it personally.` },
-];
-
-function winbackEmailFor(step) {
-  const e = WINBACK_EMAILS.find((x) => x.step === step);
-  if (!e) return null;
-  return { subject: e.subject, text: e.text.split('{APP_URL}').join(APP_URL) };
-}
-
-// Quiet for 14+ days, but with a real history behind them (someone who signed
-// up and never started has nothing to come back TO - they get the trial
-// sequence instead, and a win-back would just be a second cold pitch).
-const WINBACK_QUIET_DAYS = 14;
-const WINBACK_MAX_QUIET_DAYS = 120; // beyond this it reads as a cold email, not a welcome back
-
-// How long since this person was last in, or null if we cannot tell. Pulled out
-// of the runner so it can be tested without sending anything.
-//
-// Three signals, and the most recent one wins. The activity log alone was wrong:
-// it records 33 specific actions, so somebody who opens the app and reads leaves
-// no trace in it and looked gone for a fortnight (28 Aug 2026 - an active member
-// was emailed "you haven't been in for a couple of weeks").
-//   activityLog    - she did something the app counts
-//   state sync     - her app wrote anything back to the server
-//   last_seen_at   - any authenticated request arrived at all, which is the
-//                    honest reading of "been in"
-function quietDaysFor(row, state, now) {
-  const log = Array.isArray(state.activityLog) ? state.activityLog : [];
-  const stamps = [
-    log.reduce((m, a) => {
-      const t = a && a.ts ? new Date(a.ts).getTime() : 0;
-      return t > m ? t : m;
-    }, 0),
-    row.state_updated_at ? new Date(row.state_updated_at).getTime() : 0,
-    row.last_seen_at ? new Date(row.last_seen_at).getTime() : 0,
-  ].filter((t) => t > 0 && !Number.isNaN(t));
-  if (!stamps.length) return null;
-  return Math.floor(((now || Date.now()) - Math.max(...stamps)) / 86400000);
-}
-
-async function runWinbackSequence() {
-  let rows = [];
-  try { rows = db.getUsersWithState(); } catch (_) { return; }
-  for (const row of rows) {
-    let st = null;
-    try { st = JSON.parse(row.state_json); } catch (_) { continue; }
-    if (!st || !st.startDate) continue;
-    if (st.remindersEnabled === false) continue; // they asked for quiet; honour it here too
-    if (!Array.isArray(st.activityLog) || !st.activityLog.length) continue;
-    const quietDays = quietDaysFor(row, st);
-    if (quietDays === null) continue;
-    if (quietDays < WINBACK_QUIET_DAYS || quietDays > WINBACK_MAX_QUIET_DAYS) continue;
-    const e = winbackEmailFor(1);
-    // sendSequenceEmail's email_log guard makes this send-once by construction.
-    await sendSequenceEmail({ id: row.id, email: row.email }, 'winback', 1, e.subject, e.text);
-  }
-}
-
-// Hourly scheduler. Task 5 ships the machinery; Tasks 6/7 register their
-// sequences. Each runner must use the guarded senders so email_log applies.
-const SEQUENCE_RUNNERS = [runQuizNurture, runPartnerNurture, runWinbackSequence];
-
-async function runScheduledEmails() {
-  for (const runner of SEQUENCE_RUNNERS) {
-    try {
-      await runner();
-    } catch (err) {
-      try { db.logError('email-scheduler', err.message, err.stack); } catch (_) {}
-    }
-  }
-}
-
-function startScheduler() {
-  // Hourly per the spec, plus one pass shortly after boot so a restart never
-  // delays a due send by a full hour.
-  setTimeout(runScheduledEmails, 15 * 1000);
-  setInterval(runScheduledEmails, 60 * 60 * 1000);
-}
-
 module.exports = {
   isConfigured,
   sendEmail,
   sendSequenceEmail,
   welcomeEmail,
   passwordResetEmail,
-  startQuizNurture,
-  runQuizNurture,
-  startPartnerNurture,
-  runPartnerNurture,
-  runWinbackSequence,
-  brainresetPdfEmail,
-  sendLeadSequenceEmail,
-  runScheduledEmails,
-  startScheduler,
-  SEQUENCE_RUNNERS,
-  quietDaysFor,
-  WINBACK_QUIET_DAYS,
 };

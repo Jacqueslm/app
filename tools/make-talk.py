@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Script in, narrated slide video out - the format the channel already posts.
 
-    python3 tools/make-talk.py reference/scripts/02-2500-reviews.md out.mp4
+    python3 tools/make-talk.py my-script.md out.mp4
 
 Reads a script written as `## SECTION` headings with prose under each, renders
 one slide per section in the house style (dark gradient, big number, green

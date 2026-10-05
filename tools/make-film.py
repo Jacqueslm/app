@@ -29,7 +29,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FF = "/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2"
 CHROME = os.environ.get("PW_CHROME", "/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
 NODE_PATH = os.environ.get("NODE_PATH", "")
-WATERMARK = os.path.join(ROOT, "reference/business-card/icon-512.png")
+# The mark burnt into the corner of every frame. This pointed at
+# reference/business-card/icon-512.png until 5 Oct 2026, when the reference
+# library was deleted with the rest of the marketing material. The app's own
+# icon is the same mark and it stays in the repo, so the film tool still runs.
+WATERMARK = os.path.join(ROOT, "TurnSomeDayIntoOneday/icons/icon-512.png")
 W, H = 1080, 1920
 
 CAP_HTML = """<!doctype html><meta charset="utf-8"><style>

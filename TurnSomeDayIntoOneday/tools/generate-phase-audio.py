@@ -17,8 +17,10 @@ all public domain or CC0.
 
 The 'jacques' YourTTS path was REMOVED 26 Aug 2026: that model is licensed
 CC BY-NC-ND 4.0 (non-commercial) and the app charges money. Do not re-add it,
-and do not reach for XTTS v2 either - same problem. See
-reference/asset-licenses-2026-08-08.md.
+and do not reach for XTTS v2 either - same problem. (That finding was written
+up in reference/asset-licenses-2026-08-08.md, which was deleted with the
+reference library on 5 Oct 2026. The rule is the part that mattered and it is
+recorded right here, so nothing was lost with the file.)
 
 Then commit the output folder to the `lesson-audio` branch and the updated
 manifest to main in the same change.
@@ -45,7 +47,9 @@ HABIT_WORDS = {'Alcohol': 'drinking', 'Porn & Sex': 'porn', 'Smoking': 'smoking'
                'Work': 'overworking', 'Anger & Control': 'the anger', 'Other': 'the habit'}
 
 # License-clean set only (public domain / CC0). hfc_*, ryan, lessac, amy are
-# NOT usable - see reference/asset-licenses-2026-08-08.md.
+# NOT usable. That audit lived in reference/asset-licenses-2026-08-08.md and
+# went with the reference library on 5 Oct 2026; the two lists here are the
+# conclusion it reached.
 PIPER_VOICES = {
     'warm':   'vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx',
     'soft':   'vits-piper-en_GB-cori-medium/en_GB-cori-medium.onnx',

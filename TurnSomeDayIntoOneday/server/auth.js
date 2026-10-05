@@ -22,43 +22,13 @@ if (!JWT_SECRET) {
   );
 }
 
-// Stateless unsubscribe tokens: "{userId}.{HMAC(userId:email)}". Forging one
-// for another user requires the server secret; no table, no expiry - an
-// unsubscribe link in an old email should work forever.
-function signUnsubToken(userId, email) {
-  const mac = crypto.createHmac('sha256', JWT_SECRET).update(`unsub:${userId}:${email}`).digest('hex');
-  return `${userId}.${mac}`;
-}
-
-// Leads (quiz/brainreset emails, not yet accounts) get their own token form:
-// "L{leadId}.{HMAC(unsub-lead:leadId:email)}".
-function signLeadUnsubToken(leadId, email) {
-  const mac = crypto.createHmac('sha256', JWT_SECRET).update(`unsub-lead:${leadId}:${email}`).digest('hex');
-  return `L${leadId}.${mac}`;
-}
-
-// Returns { type: 'user'|'lead', id } or null. User tokens keep the original
-// pure-digit form so links in already-sent emails stay valid.
-function verifyUnsubToken(token) {
-  const m = /^(L?)(\d+)\.([a-f0-9]{64})$/.exec(String(token || ''));
-  if (!m) return null;
-  const isLead = m[1] === 'L';
-  const id = Number(m[2]);
-  let expected;
-  if (isLead) {
-    const lead = db.getLeadById(id);
-    if (!lead) return null;
-    expected = crypto.createHmac('sha256', JWT_SECRET).update(`unsub-lead:${id}:${lead.email}`).digest('hex');
-  } else {
-    const user = db.getUserById(id);
-    if (!user) return null;
-    expected = crypto.createHmac('sha256', JWT_SECRET).update(`unsub:${id}:${user.email}`).digest('hex');
-  }
-  const a = Buffer.from(m[3]);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
-  return { type: isLead ? 'lead' : 'user', id };
-}
+// ─── THE UNSUBSCRIBE TOKENS WENT, 5 OCT 2026 ────────────────────────────────
+// Three functions lived here: signUnsubToken and signLeadUnsubToken, which
+// stamped a one-click opt-out into the footer of every marketing email, and
+// verifyUnsubToken, which checked one when somebody clicked. The emails and the
+// /unsubscribe route both went on the same day, so there is nothing left to
+// sign and nothing left to verify. The two messages the server still sends are
+// about the account itself.
 
 function hashPassword(password) {
   return bcrypt.hashSync(password, 10);
@@ -117,9 +87,6 @@ function isValidSession(req) {
 
 module.exports = {
   COOKIE_NAME,
-  signUnsubToken,
-  signLeadUnsubToken,
-  verifyUnsubToken,
   hashPassword,
   verifyPassword,
   signSession,

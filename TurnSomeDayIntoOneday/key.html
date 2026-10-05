@@ -2846,8 +2846,10 @@ function renderSex(P){
   const other = me === 'woman' ? 'man' : 'woman';
   const label = { woman: 'As a woman', man: 'As a man' };
   const order = me ? [me, other] : ['woman', 'man'];
+  /* The word is escaped on the way into the markup like every other value that
+     came off the page — the choice is somebody's own input. */
   const lead = me
-    ? `You said <b>${me}</b>. That half is put first &mdash; the other is here beside it, so the difference is in front of you rather than argued about.`
+    ? `You said <b>${esc(me)}</b>. That half is put first &mdash; the other is here beside it, so the difference is in front of you rather than argued about.`
     : `Nobody has said which. Both halves are here, side by side.`;
   const box = ([t, v]) => `<div class="dp"><div class="dt">${esc(t)}</div><div class="db">${
     order.map(k=>`<b>${label[k]}.</b> ${v[k]}`).join(' ')}</div></div>`;

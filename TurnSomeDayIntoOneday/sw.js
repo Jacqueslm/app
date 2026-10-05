@@ -117,10 +117,10 @@ self.addEventListener('fetch', (event) => {
   // shell cache would burn the storage quota for no gain.
   if (url.origin !== location.origin) return;
 
-  // /play is a server-side redirect off to Google. Answering a navigation with
-  // a redirected response from inside a service worker is exactly the kind of
-  // thing that breaks for installed users only, so it never enters the worker.
-  if (url.pathname === '/play' || url.pathname.startsWith('/play/')) return;
+  // /play used to be bypassed here: it was a server-side redirect off to
+  // Google, and answering a navigation with a redirected response from inside a
+  // worker breaks for installed users only. The route went with the store on
+  // 5 Oct 2026, so the bypass went too.
 
   // The Key is private: /key sends anyone not signed in and on the allowlist
   // back to /app. Caching a 200 response for /key would put the page in the

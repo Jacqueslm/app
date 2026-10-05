@@ -156,6 +156,7 @@ button.btn{
 }
 .layer.two > h3{background:linear-gradient(90deg,var(--violet),#8f74e8)}
 .layer.three > h3{background:linear-gradient(90deg,var(--teal),#46bda9)}
+.layer.sex > h3{background:linear-gradient(90deg,var(--gold),var(--teal))}
 .layer > h3 small{display:block; font-size:10px; letter-spacing:.12em; text-transform:none; font-weight:500; opacity:.72; margin-top:2px}
 .layer-body{padding:22px 20px; background:rgba(255,255,255,.022)}
 .layer-body h4{
@@ -1271,6 +1272,7 @@ function todayHtml(R){
   <div class="mark">Personology</div>
   <h1>Life's Zodiacs</h1>
   <p class="sub">One birthday, read three ways — the period you were born into, the path it implies, and what happens when it meets someone else's.</p>
+  <button class="btn ghost sm" id="btn-home">Main menu</button>
   <button class="btn ghost sm" id="btn-help">How to use this</button>
 </header>
 
@@ -1335,6 +1337,8 @@ function todayHtml(R){
   of the app from six screens deep. It closes whatever is open first (the instructions, the voice
   picker, the short version), then walks back through the tabs. When there is nowhere left to go
   the arrow disappears, and the next press leaves properly.</p>
+  <p><strong>Main menu</strong>, at the top, skips all of that. One press from wherever you are and
+  it closes everything that is open and puts you back on the screen the page opens on.</p>
 
   <h4>The 48</h4>
   <p>The whole year, week by week. Useful for finding somebody when you know roughly when their
@@ -1388,6 +1392,7 @@ function todayHtml(R){
       <div><label for="f-month">Birth month</label><select id="f-month"></select></div>
       <div><label for="f-day">Day</label><select id="f-day"></select></div>
       <div><label for="f-year">Year <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="f-year" type="text" inputmode="numeric" placeholder="1990" maxlength="4" autocomplete="off"></div>
+      <div><label for="f-sex">Woman or man <span style="text-transform:none;letter-spacing:0">(optional)</span></label><select id="f-sex"><option value="">Not saying</option><option value="woman">Woman</option><option value="man">Man</option></select></div>
     </div>
     <div class="actions">
       <button class="btn primary" id="btn-read">Read it</button>
@@ -2804,6 +2809,57 @@ function renderDepth(P){
       </div>
       <p class="disclaim">Stages describe how this temperament tends to move through a life, not a schedule
       and not a prediction. Ages are rough and plenty of people run early or late.</p>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   WOMAN AND MAN — 5 Oct 2026, at his ask
+
+   Choose woman or man on the Read tab and this is drawn with the reading.
+   It is written as what people describe meeting — how a life gets looked at,
+   care, what is expected, and the place held in society — and not as a rule, a
+   ranking or a prediction. Neither half is flattered and neither is blamed;
+   the chosen one is simply put first so the difference is in front of you.
+   ============================================================ */
+const SEXREAD = [
+  ['Life, looked at', {
+    woman: 'A life is usually read from the inside out — how a day actually feels, who is in it, whether the room is warm. Most describe running two things at once: living the moment and watching how it lands on everybody else. What is changing is that this is being claimed as a skill rather than served as a duty.',
+    man: 'A life is usually read from the outside in — what is being built, what it holds, what it will stand up to. Most describe going forward and saying very little about the cost. What is changing is that the silence is being questioned, and saying the hard thing no longer has to read as coming apart.'
+  }],
+  ['Care and nurture', {
+    woman: 'Care is expected of a woman before it is asked for. Most describe knowing how to hold somebody without being taught, and being the one the family rings first. What is reported as the cost is that the giving gets assumed rather than chosen — and care chosen freely is a different thing from care assigned.',
+    man: 'Care is offered by a man rather than expected of one, so it can be missed in both directions: given less often, and noticed less when it is given. Most describe getting to it later, often as a partner or a parent. The capacity was never the missing part; the permission was.'
+  }],
+  ['What is expected', {
+    woman: 'The expectations arrive early and contradict each other: be warm and be formidable, be ambitious and be available, make it look effortless the whole way. Most describe being told afterwards that one of those was let down.',
+    man: 'The expectation is narrower and rarely said out loud: be the one who does not come apart. Most describe having nowhere to put the hard parts, and a habit of going quiet instead of saying so.'
+  }],
+  ['The place held', {
+    woman: 'A woman is still read from the outside — as carer, as mother, as the one who will notice. What people report is that the role is handed over long before it is agreed to, and that stepping out of it is read as a failure rather than a choice.',
+    man: 'A man is still read from the doing — provider, builder, the one holding it together. What people report is that when the doing stops there is nothing underneath it, and that asking for help reads as losing the role rather than keeping the person.'
+  }],
+];
+
+function renderSex(P){
+  const me = (P.person.sex === 'woman' || P.person.sex === 'man') ? P.person.sex : '';
+  const other = me === 'woman' ? 'man' : 'woman';
+  const label = { woman: 'As a woman', man: 'As a man' };
+  const order = me ? [me, other] : ['woman', 'man'];
+  const lead = me
+    ? `You said <b>${me}</b>. That half is put first &mdash; the other is here beside it, so the difference is in front of you rather than argued about.`
+    : `Nobody has said which. Both halves are here, side by side.`;
+  const box = ([t, v]) => `<div class="dp"><div class="dt">${esc(t)}</div><div class="db">${
+    order.map(k=>`<b>${label[k]}.</b> ${v[k]}`).join(' ')}</div></div>`;
+  return `
+  <div class="layer sex">
+    <h3>Woman and man <small>the difference as it stands now &mdash; not a rule, a ranking or a prediction</small></h3>
+    <div class="layer-body">
+      <p class="lead">${lead}</p>
+      ${SEXREAD.map(box).join('')}
+      <p class="disclaim">Written as description, not instruction. Most people meet several of these at once,
+      and plenty meet neither. The reading above is about the birthday; this is only the weather around it,
+      and nothing here is a limit.</p>
     </div>
   </div>`;
 }
@@ -5605,13 +5661,15 @@ function toast(msg){
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
   btn.addEventListener('click', ()=>showTab(btn.id));
 });
-function showTab(id){
+function showTab(id, silent){
   /* What gets read aloud depends on which panel is open, so a tab change has
      to end the reading rather than carry on reading a page nobody is on. */
   const already = document.querySelector('nav.tabs button[aria-selected="true"]');
   if(already && already.id !== id){
     stopSpeaking();
-    backPush({k:'tab', id:already.id});
+    /* The main-menu button asks for no step: it is already throwing the steps
+       away, and recording one here would leave the corner arrow showing. */
+    if(!silent) backPush({k:'tab', id:already.id});
   }
   document.querySelectorAll('nav.tabs button').forEach(b=>{
     const on = b.id === id;
@@ -5651,7 +5709,11 @@ function currentInput(){
   if(!name) return {err:'Give this person a name first.'};
   if(yRaw && (!/^\d{4}$/.test(yRaw) || year < 1000 || year > 3000)) return {err:'Year should be four digits, or left blank.'};
   if(month === 2 && day === 29 && year && !isLeap(year)) return {err:`${year} was not a leap year — there is no 29 February in it.`};
-  return {person:{id:'p' + Date.now() + Math.random().toString(36).slice(2,7), name, month, day, year}};
+  /* Woman, man, or not said. It only chooses which half of the woman-and-man
+     layer is put first, and it is never sent anywhere. */
+  const sexEl = $('f-sex');
+  const sex = sexEl ? sexEl.value : '';
+  return {person:{id:'p' + Date.now() + Math.random().toString(36).slice(2,7), name, month, day, year, sex}};
 }
 
 function doRead(){
@@ -5661,7 +5723,7 @@ function doRead(){
   const P = profileOf(r.person);
   $('result').innerHTML = renderCrest(P) + renderTools(P) +
     '<div id="reading-full">' + renderDay(P) + renderReading(P) + renderDepth(P) +
-    renderPairStub(P) + renderPath(P) + '</div>';
+    renderSex(P) + renderPairStub(P) + renderPath(P) + '</div>';
   writeHash(r.person);
   $('result').scrollIntoView({behavior:'smooth', block:'start'});
   return P;
@@ -6891,6 +6953,45 @@ function backStep(){
   stopSpeaking();
   return true;
 }
+
+/* ============================================================
+   THE MAIN MENU
+
+   He asked for one button that takes every selection back to the
+   top. The corner arrow walks back a screen at a time, which is
+   slow from six screens deep, so this one closes whatever is
+   open, throws away the steps it would have walked, and puts the
+   page back on the screen it opens on.
+   ============================================================ */
+function goHome(){
+  try{ stopSpeaking(); }catch(e){ /* nothing was being read */ }
+
+  /* Every step we pushed is a history entry. Drop the count and walk back
+     over them in one move, so the phone's own back button has nothing stale
+     left to chew on. */
+  const steps = BACK.length;
+  BACK = [];
+  backPaint();
+  if(steps){ try{ history.go(-steps); }catch(e){ /* file:// may refuse */ } }
+
+  /* Everything that can be open, closed. */
+  const help = $('help-box'); if(help) help.hidden = true;
+  const hb = $('btn-help'); if(hb) hb.classList.remove('on');
+  Array.prototype.forEach.call(document.querySelectorAll('.voicebar'), v=>{ v.hidden = true; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-act="voice"]'), b=>{ b.classList.remove('on'); });
+  const simple = $('simple-box'), full = $('reading-full'), sb = $('btn-simple');
+  if(simple && full){ simple.hidden = true; full.hidden = false; }
+  if(sb){ sb.textContent = 'Short version'; sb.classList.remove('on'); }
+
+  /* Back to the screen the page opens on. */
+  showTab('tab-today', true);
+  if(window.todayShow) window.todayShow();
+  try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0, 0); }
+}
+
+document.addEventListener('click', e=>{
+  if(e.target.closest && e.target.closest('#btn-home')) goHome();
+});
 
 addEventListener('popstate', ()=>{ backStep(); });
 

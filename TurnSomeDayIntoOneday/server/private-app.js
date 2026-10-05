@@ -130,7 +130,7 @@ const PAGE_GONE = 'This page is not here any more. The app it belongs to is priv
 
 // Is this request for a page at all? Anything carrying a file extension — the
 // scripts, the styles, the images, the manifest, the service worker,
-// assetlinks.json, robots.txt — is not judged here, because the app installed on
+// robots.txt — is not judged here, because the app installed on
 // a phone needs every one of them and none of them says anything to a stranger.
 //
 // A .html address IS a page, though — every page on this site has one, and

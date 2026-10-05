@@ -174,22 +174,11 @@ app.use((req, res, next) => {
 const CANONICAL_HOST = process.env.CANONICAL_HOST || 'www.turnsomedayintodayone.com';
 const APEX_HOST = CANONICAL_HOST.replace(/^www\./, '');
 
-// One path must never be redirected: Digital Asset Links. Chrome and Google's
-// validator both fetch /.well-known/assetlinks.json with redirects disabled -
-// a 301 is not followed, it is a verification failure. Confirmed 27 Aug 2026:
-// the apex returns ERROR_CODE_REDIRECT from Google's own checker while www
-// returns both statements cleanly.
-//
-// That matters because the Android shell in the Play Store was built before
-// twa/twa-manifest.json existed in this repo, so nothing here proves which
-// host it declares. If it declares the apex, the redirect above is the reason
-// the app never verifies and falls back to a browser tab. Serving the file on
-// both hosts costs nothing and removes the question either way.
-const ASSETLINKS_PATH = '/.well-known/assetlinks.json';
-const ASSETLINKS_FILE = path.join(__dirname, '..', '.well-known', 'assetlinks.json');
-app.get(ASSETLINKS_PATH, (req, res) => {
-  res.type('application/json').sendFile(ASSETLINKS_FILE);
-});
+// The Digital Asset Links exception used to sit here: /\.well-known/assetlinks.json,
+// served on both hosts because Chrome will not follow a redirect to it. It was
+// there for the Android app on the Play Store, and 5 Oct 2026 that went — the
+// listing is unpublished and this is a personal app, so there is nothing left to
+// verify. The file and the route went with it.
 
 app.use((req, res, next) => {
   const host = String(req.headers.host || '').toLowerCase().split(':')[0];

@@ -410,7 +410,7 @@ test('a signed-out request for a private reference page never gets the file', as
 test('assets are never judged — the app on the phone needs all of them', () => {
   for (const p of ['/sw.js', '/manifest.json', '/icons/icon-192.png',
     '/js/ring3d-three.js', '/audio/sos.mp3', '/robots.txt', '/sitemap.xml',
-    '/.well-known/assetlinks.json', '/index.css']) {
+    '/index.css']) {
     assert.strictEqual(isPagePath(p), false, `${p} is not a page`);
     assert.strictEqual(pageIsServed(p), true);
   }

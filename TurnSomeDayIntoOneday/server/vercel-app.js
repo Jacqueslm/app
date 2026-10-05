@@ -39,6 +39,18 @@ const keyReading = require('./key-reading');
 const ROOT = path.join(__dirname, '..');
 
 const PASSWORD = String(process.env.APP_PASSWORD || '');
+// The spare word, added 5 Oct 2026 after Jacques could not get in and there was
+// nothing to get in with. One password and no way back means a forgotten word
+// locks him out of his own app, and the only cure was a settings screen on a
+// host he had to find on a phone. This is a second word that opens the same
+// door, for the owner only, so the way back is something he can keep written
+// down somewhere away from the phone.
+//
+// Deliberately NOT a reset by email: this host has no accounts and no database,
+// so there is nowhere to keep a token and nothing to send a link to. A word
+// kept in two places is the honest version of the same safety.
+const RECOVERY = String(process.env.APP_RECOVERY_PASSWORD || '');
+const OWNER_EMAIL = String(process.env.APP_OWNER_EMAIL || '').trim().toLowerCase();
 const SECRET = String(process.env.APP_SECRET || PASSWORD);
 const COOKIE = 'tsid_pass_v1';
 const SESSION_DAYS = 180;
@@ -107,6 +119,31 @@ function readSession(req) {
 function allowed(email) {
   if (!FRIENDLY_EMAILS.length) return true;
   return FRIENDLY_EMAILS.includes(String(email || '').toLowerCase());
+}
+
+// Which words open the door for this email. The everyday password opens it for
+// everybody on the list. The spare opens it for the owner alone - it is the way
+// back in when the everyday one is forgotten, and a way back in for one person
+// is not the same thing as a second password for the household.
+//
+// With no APP_OWNER_EMAIL set there is no owner to spare, so the list is just
+// the everyday password. That is the safe reading: a spare word that opens the
+// door for anyone on the list is a second password for everyone, which is not
+// what it is for.
+function spareWords(email) {
+  const who = String(email || '').trim().toLowerCase();
+  const words = PASSWORD ? [PASSWORD] : [];
+  if (RECOVERY && OWNER_EMAIL && who === OWNER_EMAIL) words.push(RECOVERY);
+  return words;
+}
+
+// Is there any word at all that can open the door? Without APP_PASSWORD there
+// is one only when a spare exists AND there is an owner for it to open for.
+// Otherwise the door is shut to everybody, and answering "that password is not
+// right" would be a lie about why - the plain "no password is set" is the
+// truth, and it names the setting to fix.
+function doorConfigured() {
+  return !!PASSWORD || !!(RECOVERY && OWNER_EMAIL);
 }
 
 function cookieOptions() {
@@ -182,17 +219,23 @@ function buildApp() {
   // --- signing in. The page (hub.html) posts the same shape it always has, so
   // it did not have to change when the accounts went: an email and a password.
   app.post('/api/auth/login', loginLimiter, (req, res) => {
-    if (!PASSWORD) {
+    if (!doorConfigured()) {
       return res.status(503).json({ error: 'No password is set on the server yet.' });
     }
     const email = String((req.body && req.body.email) || '').trim().toLowerCase();
     const password = String((req.body && req.body.password) || '');
     if (!email || !password) return res.status(400).json({ error: 'Both fields, please.' });
-    // Constant time on the password, so a wrong guess says nothing about how
-    // close it was.
+    // Constant time on every word, so a wrong guess says nothing about how close
+    // it was, and the same work is done whichever one is tried. The spare is
+    // only ever in this list for the owner, so for anybody else it is exactly
+    // the one word it always was.
     const given = crypto.createHash('sha256').update(password).digest();
-    const want = crypto.createHash('sha256').update(PASSWORD).digest();
-    if (!crypto.timingSafeEqual(given, want)) {
+    let right = false;
+    for (const word of spareWords(email)) {
+      const want = crypto.createHash('sha256').update(word).digest();
+      if (crypto.timingSafeEqual(given, want)) right = true;
+    }
+    if (!right) {
       return res.status(401).json({ error: 'That password is not right.' });
     }
     if (!allowed(email)) {
@@ -314,6 +357,8 @@ function buildApp() {
 
 module.exports = buildApp();
 module.exports.buildApp = buildApp;
+module.exports.spareWords = spareWords;
+module.exports.doorConfigured = doorConfigured;
 module.exports.readSession = readSession;
 module.exports.issue = issue;
 module.exports.PAGES = PAGES;

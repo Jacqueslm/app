@@ -27,6 +27,11 @@
 // Set before the app is required: it reads its configuration once, at load.
 process.env.APP_PASSWORD = 'let-me-in';
 process.env.FRIENDLY_EMAILS = 'jacques@example.com, wife@example.com';
+// The spare word, and the one email it opens for. Added 5 Oct 2026: one
+// password and no way back meant a forgotten word locked the owner out of his
+// own app, with the cure sitting on a host's settings screen.
+process.env.APP_OWNER_EMAIL = 'jacques@example.com';
+process.env.APP_RECOVERY_PASSWORD = 'the-spare-word';
 delete process.env.GEMINI_API_KEY;
 
 const { test, before, after } = require('node:test');
@@ -102,6 +107,67 @@ test('the wrong password gets nothing, and no cookie', async () => {
   assert.equal(res.status, 401);
   assert.equal(cookie, null, 'a wrong password must not leave a session behind');
   assert.match(body.error, /not right/i);
+});
+
+test('the spare word opens the door for the owner, and for nobody else', async () => {
+  // The way back in. Same door, same pages, one person.
+  const owner = await signIn('jacques@example.com', 'the-spare-word');
+  assert.equal(owner.res.status, 200, 'the owner gets in with the spare');
+  assert.ok(owner.cookie, 'and a real session comes back');
+  assert.equal((await get('/music', owner.cookie)).status, 200, 'and the pages open for him');
+
+  // And it is not a second password for the household: a way back in for one
+  // person is not the same thing as a second word for everybody.
+  const wife = await signIn('wife@example.com', 'the-spare-word');
+  assert.equal(wife.res.status, 401, 'the spare is not a password for the list');
+  assert.equal(wife.cookie, null, 'and leaves no session behind');
+  const stranger = await signIn('somebody-else@example.com', 'the-spare-word');
+  assert.equal(stranger.res.status, 401, 'nor for anybody off it');
+
+  // Stated plainly, so the rule is readable without the HTTP around it.
+  assert.deepEqual(app.spareWords('jacques@example.com'), ['let-me-in', 'the-spare-word']);
+  assert.deepEqual(app.spareWords('wife@example.com'), ['let-me-in']);
+  assert.deepEqual(app.spareWords('WIFE@example.com '), ['let-me-in'], 'case and stray spaces are the same person');
+});
+
+test('the spare alone, with no owner to open for, is not a password at all', async () => {
+  // A spare belongs to one person, so with no APP_OWNER_EMAIL there is nobody
+  // it can open for - and a word that opens the door for whoever guesses it
+  // would be a back door, not a way back. The settings are read once, at load,
+  // so this is a second instance of the same file with the owner taken away.
+  const saved = {
+    owner: process.env.APP_OWNER_EMAIL,
+    password: process.env.APP_PASSWORD,
+  };
+  delete process.env.APP_OWNER_EMAIL;
+  delete process.env.APP_PASSWORD;
+  const modulePath = require.resolve('../vercel-app');
+  delete require.cache[modulePath];
+  let spare;
+  try {
+    spare = require('../vercel-app');
+    assert.equal(spare.doorConfigured(), false,
+      'with no owner the spare opens nothing, so there is no word at all');
+    assert.deepEqual(spare.spareWords('jacques@example.com'), [], 'and nobody holds one');
+    const server2 = spare.listen(0);
+    await new Promise((r) => server2.once('listening', r));
+    try {
+      const res = await fetch(`http://127.0.0.1:${server2.address().port}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'jacques@example.com', password: 'the-spare-word' }),
+      });
+      assert.equal(res.status, 503, 'and the door says the truth about why');
+    } finally {
+      server2.close();
+    }
+  } finally {
+    if (saved.owner === undefined) delete process.env.APP_OWNER_EMAIL;
+    else process.env.APP_OWNER_EMAIL = saved.owner;
+    if (saved.password === undefined) delete process.env.APP_PASSWORD;
+    else process.env.APP_PASSWORD = saved.password;
+    delete require.cache[modulePath];
+  }
 });
 
 test('the right password with an email that is not on the list is still refused', async () => {

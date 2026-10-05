@@ -46,6 +46,20 @@ is `APP_PASSWORD` plus the `FRIENDLY_EMAILS` allowlist; the AI routes proxy
 Gemini with `GEMINI_API_KEY` held server-side. The Railway host below is kept
 as the record of how it was built, not as the current host.
 
+**The spare word, 5 Oct 2026.** Jacques could not get in — the password box
+answered "that password is not right" — and there was no way back: one word,
+kept nowhere but the host's own settings screen, on a host he had to find on a
+phone. So there are now two settings beside `APP_PASSWORD`:
+`APP_RECOVERY_PASSWORD` (a second word that opens the same door) and
+`APP_OWNER_EMAIL` (the one address it opens for — the same address Friendly
+already uses for diagnostics, and it must be on `FRIENDLY_EMAILS` as well).
+Either word signs the owner in; the list still decides who belongs. Set both
+and keep the spare written down somewhere away from the phone. With
+`APP_OWNER_EMAIL` unset the spare opens nothing, on purpose: a word that opens
+the door for whoever guesses it is a back door, not a way back. The tests in
+`server/test/vercel-app.test.js` hold all of this, including that the spare is
+refused for the wife's address.
+
 **The push rule (from CLAUDE.md, and it is the current one):** never push unless
 Jacques says push. When he does: `claude/new-session-im7bzg`, then `main`, then
 `claude/vibe-code-uwxxlk` — all three, same commit. The branch names in older

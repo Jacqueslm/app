@@ -9,7 +9,7 @@ or send to anyone.
 This is the same renderer as Studio/tools-make-guide.py, made general.
 
     python3 tools-md-to-pdf.py START-HERE.md
-    python3 tools-md-to-pdf.py reference/*.md
+    python3 tools-md-to-pdf.py docs/*.md
     python3 tools-md-to-pdf.py --all          # every handover doc, in one go
     python3 tools-md-to-pdf.py --all --png    # ...and page images beside them
 
@@ -41,19 +41,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # The set that gets handed to people. --all rebuilds exactly these.
 #
-# KEYWORDS.md was the second entry until 5 Oct 2026. It and the rest of the
-# marketing and outreach notes at the repo root were deleted that day - this is
-# one man's private app now, with nothing to advertise. --all lists only files
-# that exist, so a missing one here is a crash rather than a skipped page.
+# This list is much shorter than it was. Until 5 Oct 2026 it was nine entries:
+# KEYWORDS.md at the root plus eight files under reference/ - the search
+# research, the episode series, the Buffer queue, the music library, the
+# marketing playbook and the claims audit. The marketing material was deleted
+# that day; this is one man's private app now, with nothing to advertise.
+# --all rebuilds exactly the names below and no others, so an entry here that
+# does not exist is a crash rather than a skipped page - which is why the list
+# was cut rather than left to fail.
 HANDOVER = [
     'START-HERE.md',
-    'reference/HANDOVER-SEARCH-RESEARCH.md',
-    'reference/SERIES-COUPLES.md',
-    'reference/SERIES-2026-08-FOUR-EPISODES.md',
-    'reference/BUFFER-QUEUE-2026-08-14.md',
-    'reference/MUSIC-LIBRARY.md',
-    'reference/marketing-playbook.md',
-    'reference/medical-claims-audit.md',
 ]
 
 # Same palette as the Studio guide, so every document looks like a set.

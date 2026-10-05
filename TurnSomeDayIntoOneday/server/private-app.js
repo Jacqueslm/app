@@ -124,7 +124,7 @@ const OPEN_PAGES = [
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the
 // redirect behind an old post (/go/<src>), the store listing (/play) and the
 // one-click unsubscribe in every email.
-const OPEN_PREFIXES = ['/api/', '/l/', '/go/', '/play', '/unsubscribe'];
+const OPEN_PREFIXES = ['/api/', '/l/', '/go/', '/unsubscribe'];
 
 const PAGE_GONE = 'This page is not here any more. The app it belongs to is private.';
 

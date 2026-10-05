@@ -203,6 +203,19 @@
       </div>
       <p class="note" id="playerNote"></p>
     </div>
+
+    <div class="card">
+      <p class="kicker">Going from one song to the next</p>
+      <h2>Fade between them</h2>
+      <p class="hint">Fade the end of a song into the start of the next one so it does not jump. Off means the next song starts the moment this one ends. The choice is kept on the phone.</p>
+      <div class="chips" id="fadeChips">
+        <button class="chip" data-fade="0" type="button" aria-pressed="true">Off</button>
+        <button class="chip" data-fade="3" type="button" aria-pressed="false">3 sec</button>
+        <button class="chip" data-fade="5" type="button" aria-pressed="false">5 sec</button>
+        <button class="chip" data-fade="10" type="button" aria-pressed="false">10 sec</button>
+      </div>
+      <p class="status" id="fadeStatus" role="status" aria-live="polite"></p>
+    </div>
   </section>
 
   <!-- ───────────────────────── RINGTONE ───────────────────────── -->
@@ -748,10 +761,11 @@
     selectSong(n, true);
   }
 
-  audio.addEventListener('play', function(){ $('playBtn').textContent = '❚❚'; });
-  audio.addEventListener('pause', function(){ $('playBtn').textContent = '▶'; });
+  audio.addEventListener('play', function(){ $('playBtn').textContent = '❚❚'; startFade(); });
+  audio.addEventListener('pause', function(){ $('playBtn').textContent = '▶'; stopFade(); if (!fadeSec) audio.volume = 1; });
   audio.addEventListener('ended', function(){
     if (roomIndex >= 0 ? ROOM.length > 1 : songs.length > 1) step(1);
+    else { stopFade(); audio.volume = 1; }
   });
   audio.addEventListener('loadedmetadata', function(){ $('dText').textContent = fmt(audio.duration); });
   audio.addEventListener('timeupdate', function(){
@@ -766,6 +780,57 @@
     var d = audio.duration;
     if (isFinite(d) && d > 0) audio.currentTime = Number($('seek').value) / 1000 * d;
   });
+
+  // ── fade between songs ────────────────────────────────────────────────────
+  // 5 Oct 2026. There is one <audio> here, so this is not a true cross-fade
+  // with two songs at once: the tail of the song being played comes down and
+  // the head of the next one comes up, so the join is a fade rather than a
+  // jump. Off, 3, 5 or 10 seconds, and the choice is kept on the phone.
+  var FADE_KEY = 'tsid-music-fade';
+  var fadeSec = 0;
+  var fadeTimer = null;
+
+  function fadeTick(){
+    var d = audio.duration;
+    if (!(fadeSec > 0) || !isFinite(d) || d <= 0){ audio.volume = 1; return; }
+    var left = d - audio.currentTime;
+    if (left <= fadeSec) audio.volume = Math.max(0, left / fadeSec);
+    else if (audio.currentTime < fadeSec) audio.volume = Math.min(1, audio.currentTime / fadeSec);
+    else audio.volume = 1;
+  }
+  function startFade(){
+    if (fadeTimer) return;
+    fadeTimer = setInterval(fadeTick, 80);
+    fadeTick();
+  }
+  function stopFade(){
+    if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
+  }
+
+  var fadeChips = $('fadeChips').querySelectorAll('.chip');
+  function setFade(sec, tell){
+    fadeSec = Number(sec) || 0;
+    Array.prototype.forEach.call(fadeChips, function(c){
+      c.setAttribute('aria-pressed', Number(c.getAttribute('data-fade')) === fadeSec ? 'true' : 'false');
+    });
+    if (!fadeSec){ stopFade(); audio.volume = 1; }
+    else if (!audio.paused) startFade();
+    try { window.localStorage.setItem(FADE_KEY, String(fadeSec)); } catch(e){ /* private window */ }
+    if (tell) say($('fadeStatus'), fadeSec
+      ? 'Fading the end of one song into the start of the next, over ' + fadeSec + ' seconds.'
+      : 'Fade off — the next song starts straight away.');
+  }
+  Array.prototype.forEach.call(fadeChips, function(c){
+    c.addEventListener('click', function(){ setFade(c.getAttribute('data-fade'), true); });
+  });
+  /* The chips are painted from here rather than trusted to the markup, so the
+     setting and the row can never disagree about which one is on. */
+  var startFadeChoice = 0;
+  try {
+    var keptFade = window.localStorage.getItem(FADE_KEY);
+    if (keptFade !== null) startFadeChoice = keptFade;
+  } catch(e){ /* nothing kept, the default stands */ }
+  setFade(startFadeChoice, false);
 
   // ── ringtone ──────────────────────────────────────────────────────────────
   function renderRingtoneOptions(){

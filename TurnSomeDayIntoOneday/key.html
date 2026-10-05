@@ -363,6 +363,9 @@ td.m-self{background:rgba(255,255,255,.02); color:var(--dimmer)}
 .db{font-size:15.5px; line-height:1.72; color:var(--ink)}
 .stages .dp{border-left-color:var(--dimmer)}
 @media(min-width:720px){ .stages{display:grid; grid-template-columns:1fr 1fr; gap:0 14px} }
+/* the three-card draw: the card's own name sits above its reading */
+.dp .dcard{font-family:var(--serif); font-size:19px; font-weight:500; margin:0 0 7px; color:var(--gold)}
+.dp .dcard .dr{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dimmer); margin-right:7px}
 
 .game{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:26px 22px}
 .game h2{font-family:var(--serif); font-weight:500; font-size:27px; margin:0 0 8px}
@@ -522,7 +525,7 @@ ol.steps li b{color:var(--gold); font-weight:600}
   /* The tabs that had no bar of their own. The birthday and The Key keep
      theirs — they came first, and their copies are written for a long read.
      Today joined on 19 Sep 2026 and takes this bar like the rest. */
-  const BARS = ['panel-today', 'panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel'];
+  const BARS = ['panel-today', 'panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel', 'panel-cards'];
   const BAR =
     '<div class="tools">'
     + '<button class="btn ghost sm speak-btn" data-act="speak">Read it to me</button>'
@@ -546,6 +549,7 @@ ol.steps li b{color:var(--gold); font-weight:600}
     'panel-matrix': 'matrix-box',
     'panel-game':   'game-box',
     'panel-wheel':  'wheel-list',
+    'panel-cards':  'cards-result',
   };
 
   let NOTE = null;
@@ -1354,6 +1358,7 @@ function todayHtml(R){
   <button role="tab" id="tab-game"   aria-selected="false" data-panel="panel-game">Learn</button>
   <button role="tab" id="tab-key"    aria-selected="false" data-panel="panel-key">The Key</button>
   <button role="tab" id="tab-wheel"  aria-selected="false" data-panel="panel-wheel">The 48</button>
+  <button role="tab" id="tab-cards"  aria-selected="false" data-panel="panel-cards">The cards</button>
 </nav>
 
 <!-- TODAY — the daily. Its own name and birthday rather than the Read tab's, so
@@ -1490,6 +1495,22 @@ Emeka Nwosu&#9;Oct 21, 1975"></textarea>
 <section class="panel" id="panel-wheel" role="tabpanel" hidden>
   <div class="note">All 48 periods of the year, in order. Click any one to read it from its first day.</div>
   <div class="people" id="wheel-list"></div>
+</section>
+
+<!-- THE CARDS — the three-card draw -->
+<section class="panel" id="panel-cards" role="tabpanel" hidden>
+  <div class="card">
+    <h2 class="ktitle">The cards</h2>
+    <p class="note" style="margin:0 0 4px">A draw is a way of asking yourself one question properly. Hold it in your head &mdash;
+    there is nothing to type, because the cards do not need the words, and this page never reads what you write.</p>
+    <p class="note" style="margin:0 0 16px">It comes back in three parts: <b>what you are facing</b>, <b>what is in the way</b>,
+    and <b>what to do</b>. The deck is the page's own &mdash; the same twenty-two Major Arcana your birthday draws from,
+    and the same meanings it already uses. Nothing is predicted, nothing is stored, and drawing again gives a different spread.</p>
+    <div class="actions">
+      <button class="btn primary" id="btn-cards">Draw three cards</button>
+    </div>
+  </div>
+  <div class="result" id="cards-result"></div>
 </section>
 
 <footer>
@@ -2762,6 +2783,15 @@ function renderDepth(P){
       <h4>How close people get</h4>
       <p>${D.close}</p>
 
+      <h4>Marriage and the long bond <small>what a lifelong partnership asks of you</small></h4>
+      ${box('The long haul', D.bond)}
+
+      <h4>Sex and closeness <small>written as a reading of temperament, nothing explicit</small></h4>
+      ${box('Intimacy', D.sex)}
+
+      <h4>Work that fits <small>the shape of job this temperament does best in</small></h4>
+      ${box('The work', D.call)}
+
       <h4>The direction</h4>
       <div class="pull">${D.direction}</div>
 
@@ -2954,6 +2984,9 @@ const DAYS = {"1-1":{"t":"The Day of the Fresh Start","d":"You are good at start
 const DEPTH = {
 
 "Pisces II":{
+ sex:"Closeness is where the solitude briefly lifts, and you are more available here than in almost any other room. You need quiet and no performance. What goes wrong is afterwards: you disappear, and the leaving is read as rejection when it is only the usual need to be alone.",
+ bond:"Marriage suits you only if the other person can be alone too. What works is two rooms and a shared middle, said out loud early. Most people read a partner's need for distance as a verdict on them, so the arrangement has to be named rather than assumed.",
+ call:"Work you can do without a room full of people: writing, research, craft, night shifts, anything where the output speaks and you do not have to. You will take less money for solitude, repeatedly. Notice that you are paying for it.",
  hinge:"All three books are looking at a door that stopped being a choice. Birthdays calls this the Week of the Loner — solitude is not recovery from company for you, it is the condition in which you are actually yourself. Destiny runs from a richly furnished interior toward solitude that stays genuinely chosen. Relationships puts you charged with Air and Fire, and the same thing happens: people enjoy you, invite you, and gradually stop.",
  tension:"Birthdays counts the self-sufficiency as real, and you are rarely bored alone, which most people cannot say. Destiny says solitude chosen often enough stops being chosen. Both hold. Nobody is telling you to be sociable. They are pointing out that the door you were keeping shut is now simply shut.",
  strong:"You do not need managing, entertaining or reassuring, and you have an interior that keeps you company. You can sit with your own thoughts for an entire day and come out better rather than worse, which almost nobody can do. What you produce alone has a depth to it that group work never reaches.",
@@ -2985,6 +3018,9 @@ const DEPTH = {
   later:"Later, if you kept the door working, you have deep solitude and two or three people who know you. If you did not, you have a great deal of solitude."}},
 
 "Pisces III":{
+ sex:"Romantic, generous and unhurried, and closeness for you is atmosphere before it is anything else. Lovely to be with, hard to pin to a plan. A partner who needs to feel chosen on a specific day may not feel chosen.",
+ bond:"You want the romance of a whole life together and you resist the small arrangements that hold one up. Marriage asks you for a Thursday, not a poem. Pick one practical thing you will do reliably and keep doing it, because that is what the person staying needs from you.",
+ call:"Work with rhythm, image or beauty in it: music, design, film, dance, anything you can feel your way through. Rules alone will not hold you. Paired with somebody who does the schedules, you produce things other people cannot.",
  hinge:"All three books are watching something stay airborne. Birthdays calls this the Week of Dancers and Dreamers — you move by rhythm and image rather than argument, and you are usually right without being able to show the working. Destiny runs from grace and instinct toward bringing one vision all the way down to the ground. Relationships puts you charged with Air and Fire, and the same thing is said afterwards: what a beautiful idea, and nothing came of it.",
  tension:"Birthdays counts the felt sense as genuine, and your instincts are sound more often than most people's reasoning. Destiny asks for a landing strip. Both hold. Nobody wants you to become methodical. They are pointing out that a dream with no date on it stays up there indefinitely, and you have several circling now.",
  strong:"Rightness announces itself to you ahead of any reasoning, and your hit rate renders the missing argument irrelevant. Something in the manner of your doing things registers with onlookers who never find words for it — the timing, the absence of strain, the impression that nothing was shoved. Whatever you have carried to completion carries that signature, and nothing produced by effort alone ever does.",
@@ -3016,6 +3052,9 @@ const DEPTH = {
   later:"Later, if one of them landed, everything else you touch is trusted because there is proof. If none did, the visions are as lovely as ever and you are the only one who has seen them."}},
 
 "Aquarius–Pisces Cusp":{
+ sex:"You take everything in through the skin, and closeness can be overwhelming before it is anything else. You need warning, quiet and someone who does not rush you. When it is right it is unusually deep. When it is loud you shut down, and the shutdown reads to them as distance.",
+ bond:"Marriage works here only if you publish the conditions: the quiet hour, the day after a hard week, the warning before people come. Nobody can guess them. You have spent years resenting people for failing a test you never set.",
+ call:"Work that uses the fine instrument and protects it: care, music, art, writing, rooms where reading people is the skill. Nine-to-five noise costs you days. Design the week around the equipment you actually have.",
  hinge:"All three books are describing an instrument nobody calibrated. Birthdays calls this the Cusp of Sensitivity — ordinary life comes in loud, and you know things about people they never told you. Destiny runs from perceptiveness fine enough to be painful toward protecting it so it can keep being used. Relationships puts you charged with Fire and Earth, and the same thing occurs: people are startled by how accurately you read them, and then by how thin your reserves are.",
  tension:"Birthdays counts the compassion as real rather than performed, and it is. Destiny says the sensitivity is equipment requiring conditions, not a weakness to be overcome. Both hold. The mistake you may have been making for thirty years is trying to toughen up, when the actual task is arranging a life the instrument can survive.",
  strong:"You register what is happening in a person before they have found words for it, and the compassion that follows is not a performance. People are met by you. In a world where most exchanges are transactions, being properly perceived by somebody is rare enough that people remember individual conversations with you for years.",
@@ -3047,6 +3086,9 @@ const DEPTH = {
   later:"Later, with the conditions built, the instrument works beautifully and people come to you for exactly what you spent decades trying to suppress."}},
 
 "Pisces I":{
+ sex:"Tender, unguarded and generous, and you give yourself over completely once you trust someone. What you avoid is the practical layer of closeness: the asking, the arranging, the saying what you need. The other person ends up managing the intimacy rather than receiving it.",
+ bond:"You love expansively and you leave the admin to your partner, and they have been tired for years without saying so. Take over three real things permanently. Marriage for you is depth plus turning up, not depth plus drift.",
+ call:"Anything where meaning is the product: art, faith, music, care, teaching. Pure commerce wastes you and a job with no purpose lets you drift. Whatever the work is, somebody has to handle the invoices, and you have assumed it will not be you.",
  hinge:"All three books are watching the ordinary week go unattended. Birthdays calls this the Week of Spirit — something in you is oriented past the material and you feel it as a pull rather than a belief. Destiny runs from that faith toward keeping it while still showing up for the boring parts. Relationships puts you charged with Air and Fire, and the same complaint recurs: profound company, and somebody else is dealing with the post.",
  tension:"Birthdays makes the orientation genuine rather than decorative, and it is. Destiny says the forms and the appointments are the floor the inner life stands on. Both hold. Nobody wants you more materialistic. They are pointing out that the practical layer is not beneath the spiritual one, it is underneath it, holding it up.",
  strong:"Charity is your default interpretation of anybody, which alters what they become in your presence. Belief for you was never a stance adopted after consideration — it is a tug you register in the body, and that cannot be counterfeited and hardly anybody has it. You have handed people hope in circumstances where no practical measure existed, and that counted for a great deal.",
@@ -3078,6 +3120,9 @@ const DEPTH = {
   later:"Late on, having laid the foundation, your belief rests on something solid and others seek you out for it. Having laid none, the yearning burns exactly as bright and your affairs have been run for decades by somebody else entirely."}},
 
 "Aquarius II":{
+ sex:"Easy, curious and unpossessive, with a lightness people find freeing. You are not jealous and you do not want to be owned. What the other person needs to know is that your ease is not indifference, because from close up it can look exactly like it.",
+ bond:"Marriage works if it stays a friendship with a commitment attached. You do best with someone who does not fence you in, and badly with anyone who reads your calm as having one foot out. Say which one it is, early.",
+ call:"Work that stays new: startups, invention, anything that resets. You will not do twenty years in one chair and it is not a flaw. Structure the money so the changes are chosen rather than forced.",
  hinge:"All three books are watching things fail to stick. Birthdays calls this the Week of Youth and Ease — life has not hardened you the way it hardens most people. Destiny runs from that lightness toward letting a few things matter enough to cost you. Relationships puts you charged with Earth and Water, and the same observation recurs: lovely company, and nothing ever seems to land on you.",
  tension:"Birthdays counts the unhardened quality as genuinely enviable, and it is. Destiny points out that nothing sticking also means nothing holding. Both hold. Nobody wants you weighed down. They are asking whether anything has been permitted to matter enough to hurt.",
  strong:"Something survived in you that most grown people mislay by thirty, and proximity to it restores those hauling decades of freight. Fresh starts happen for you without the previous chapter dragging along behind. Naivety is not the explanation — absence of bitterness is, an entirely different and far scarcer condition, and it renders you enormously forgivable and enormously pleasant to sit beside.",
@@ -3109,6 +3154,9 @@ const DEPTH = {
   later:"Late on, having permitted a few attachments, you carry buoyancy and ballast at once, which almost nobody manages. Having permitted none, the years have passed over you leaving no trace whatsoever, and that is its own quiet verdict."}},
 
 "Aquarius III":{
+ sex:"You take a person exactly as they are here as everywhere else, which is rarer than it sounds and genuinely disarming. Your reserve can read as detachment, so say the thing out loud at least once. Nobody should have to infer that they are wanted.",
+ bond:"The person who ends up with you gets a partner who never tries to change them, and that is the whole gift. What they do not get, unless you work at it, is the line drawn. You will tolerate something for years that should have been raised in week two.",
+ call:"Work with a group, a cause or an idea bigger than the personalities in the room. You are at your best holding something open for other people, and at your worst pretending a situation suits you when it stopped.",
  hinge:"All three books are looking at a line that never gets drawn. Birthdays calls this the Week of Acceptance — you take people exactly as they are, not as worked-at tolerance but as your default setting. Destiny runs from that wide genuine tolerance toward accepting people fully and still holding a line. Relationships puts you charged with Earth and Water, and the same thing happens: people relax around you, and some of them take advantage of it.",
  tension:"Birthdays counts the acceptance as rare and real, and it is — people can tell they are not being assessed. Destiny says accepting everything means some things get absorbed that should have been refused. Both hold. Nobody is asking you to judge people. They are pointing out that the resentment surfaces later, somewhere else, aimed at somebody who did nothing.",
  strong:"People are not on trial with you, and they can feel it within about ten minutes. That is genuinely uncommon and it is why people tell you things. You have no interest in ranking anybody and you extend the same welcome to somebody with nothing to offer you as to somebody with everything, and a few people have been steadied by that when nothing else would have done it.",
@@ -3140,6 +3188,9 @@ const DEPTH = {
   later:"Later, if you learned to refuse, the acceptance becomes something with weight behind it. If you did not, you are beloved and quietly worn out."}},
 
 "Capricorn–Aquarius Cusp":{
+ sex:"Conventional on the surface, genuinely unusual underneath, and only the second one shows in private. Closeness is where the strangeness gets to exist. You need a partner who finds that interesting rather than something to correct.",
+ bond:"You build a life in the dark and hand over something finished, including in a marriage. The risk is that the other person never sees the workshop. Let them into the working, not only the result. That is the whole ask.",
+ call:"Work that is your own and nobody's business until it is done: workshops, studios, labs, long projects. Given a door and an unreasonable amount of time, you build something real.",
  hinge:"All three books are standing outside a locked workshop. Birthdays calls this the Cusp of Mystery and Imagination — conventional on the surface, genuinely strange underneath. Destiny runs from structural discipline serving an unusual interior toward getting the strange thing actually built. Relationships puts you charged with Fire and Water, and the same surprise recurs: people think they know you, then something appears that they had no idea was in there.",
  tension:"Birthdays counts both the discipline and the oddness as real, and they are. Destiny warns that the interior can stay so private it never gets made. Both hold. Nobody is asking you to explain yourself. They are pointing out that the most interesting thing about you may go to the grave unseen.",
  strong:"You have the two halves that almost never occur together: a genuinely odd imagination and the organisational discipline to build things. Most strange people cannot finish and most finishers are not strange. When you do produce something it arrives complete, unexplained and unlike anything else, and people remember it for decades.",
@@ -3171,6 +3222,9 @@ const DEPTH = {
   later:"Later, if you built and showed it, people find you remarkable and are astonished it was in there all along. If you did not, you are respected, competent, and nobody ever met you."}},
 
 "Aquarius I":{
+ sex:"Your mind is the front door, and it stays the front door here too. You need a partner who finds you interesting; being merely desired bores you. What can go missing is the ordinary warmth, because you will explain the feeling instead of having it.",
+ bond:"Marriage here is a meeting of minds first, and the friendship has to be real. You run at an angle to everyone else and the right partner finds the angle fascinating. The wrong one spends the marriage trying to straighten it.",
+ call:"Work that nobody else is doing: invention, systems, sideways solutions, future things. You will be undervalued for years and then right. Build the thing and let somebody else do the marketing.",
  hinge:"All three books are watching a room fail to follow. Birthdays calls this the Week of Genius — your mind arrives by a route nobody can retrace and skips the steps they still need. Destiny runs from that angle toward making it legible enough to be useful. Relationships puts you charged with Earth and Water, and the same friction recurs: brilliant, and exhausting to be explained to.",
  tension:"Birthdays counts the leap as the gift and when you are right you are right early and by a distance. Destiny says an idea nobody can follow helps nobody. Both hold. The difficulty was never intellectual. It is that the contempt showing on your face has cost you exactly the influence the thinking deserved.",
  strong:"You get there by a route nobody else could have taken and you get there years early. That is not cleverness, which is common, but a genuinely different architecture, and the handful of times you have been listened to properly, things changed. People who worked with you closely describe it as the most interesting period of their career.",
@@ -3202,6 +3256,9 @@ const DEPTH = {
   later:"Later, if you learned to translate, you are the one whose thinking outlives you. If you did not, you were right about a great deal and it made no difference to anybody."}},
 
 "Capricorn II":{
+ sex:"Reserved and slow to trust, and once in, steady and unshowy. You are not demonstrative and that has been misread for years. Say what you want plainly, because the other person has been working from very little information the whole time.",
+ bond:"You outlast problems, which is exactly what a marriage needs and also the thing that keeps you in a wrong one for a decade. Endurance is not compatibility. Check each year whether the thing still deserves the patience.",
+ call:"Work with a long horizon and real consequence: building, running, institutions, anything that rewards staying. You do not need motivating and you do not need praise. You do need a finish line, or you will grind past the point of use.",
  hinge:"All three books are watching you keep going. Birthdays calls this the Week of Determination — you outlast the problem and you do not require motivation to continue. Destiny runs from persistence that needs no enthusiasm toward spending that endurance on something that deserves it. Relationships puts you charged with Fire and Air, and the same thing gets noticed: unshakeable, and nobody is sure you are choosing any of it.",
  tension:"Birthdays counts the persistence as the gift, and it puts you decades ahead of everyone waiting to feel inspired. Destiny says the vulnerability is aim, not effort. Both hold. Nobody wants you to give up more easily. They want you to look up once, because this much endurance pointed wrong produces years of expensive progress in a direction you never chose.",
  strong:"You continue when there is no reason to and no feeling behind it, and that is worth more than talent in most of life. You have finished things that broke other people, not through heroics but by turning up again. Anybody who has depended on you has never once had to wonder whether you would still be there.",
@@ -3233,6 +3290,9 @@ const DEPTH = {
   later:"Later, if you chose it, the endurance reads as devotion and there is something substantial behind you. If you did not, you have twenty more years of the same and nobody has ever asked whether you wanted it."}},
 
 "Capricorn III":{
+ sex:"You take the space you need in every room, including this one, and it suits the right partner and exhausts the wrong one. What you need underneath the command is an hour of not being in charge. Ask for that. Nobody offers it.",
+ bond:"You are comfortable at the top, and a marriage is the one place that has to be a partnership rather than a command. Let the other person run something. Being the only adult in the house is the loneliness you have not named yet.",
+ call:"Work where you set the direction and take the pressure: running a business, a department, a team. You will not survive a job where somebody watches you closely. Get the title, because you are doing the role anyway.",
  hinge:"All three books are watching a room go quiet. Birthdays calls this the Week of Dominance — you take the space you need without apology, and pressure that flattens others is your ordinary weather. Destiny runs from command and a high tolerance for pressure toward occupying your natural altitude while leaving room for others. Relationships puts you charged with Fire and Air, and the same thing happens each time: capable people around you contribute less and less.",
  tension:"Birthdays counts the command as the gift, and under real pressure people are lucky you are there. Destiny points at the silence you leave behind you. Both hold. Nobody wants you smaller. They want you to notice that the competence draining out of the room is not evidence about them.",
  strong:"You are calm where other people come apart, and you will make the decision nobody wants to own. In a genuine crisis you are the one to have, and there are situations that would have gone very badly without somebody willing to stand in front of them. You do not flinch and you do not need reassurance, and both are rarer than they sound.",
@@ -3264,6 +3324,9 @@ const DEPTH = {
   later:"Late on, having made space, you become the person things get brought to and somebody stands alongside you. Having made none, the summit is yours and the silence up there is total."}},
 
 "Sagittarius–Capricorn Cusp":{
+ sex:"You see how it is going before it arrives, here as everywhere, and you say so. Being right in advance is not a comfort to the other person. Save the forecast for the things that matter and let the rest simply happen.",
+ bond:"You called the shape of the relationship years before either of you could see it. Being right did not help. Warmth in the delivery is what helps. The foresight is real and so is the way it lands.",
+ call:"Strategy, forecasting, planning, anywhere being early is the job rather than an irritation. You will be the one who saw it coming and still has to live through it.",
  hinge:"All three books are watching you be right too early. Birthdays calls this the Cusp of Prophecy — you see where it goes before evidence exists, and unusually you have the discipline to act on it. Destiny runs from that sight toward making it usable by people who cannot see it yet. Relationships puts you charged with Air and Water, and the same wound recurs: you told them, they did not act, and afterwards nobody remembered you told them.",
  tension:"Birthdays counts the foresight plus the discipline as a genuinely rare pairing, and it is. Destiny says the sight is worthless untranslated. Both hold. Nobody is asking you to be less far ahead. They are pointing out that being right in a language nobody speaks is indistinguishable from being wrong.",
  strong:"Perception plus execution, which is the scarce combination — hunches are common and restructuring an entire life around one is not. Catastrophes that swallowed others, you sidestepped, and you constructed things whose logic only surfaced half a decade on. Everybody who acted on your early counsel prospered by it, acknowledgement or no acknowledgement.",
@@ -3295,6 +3358,9 @@ const DEPTH = {
   later:"Later, if you learned to translate, you are the one people consult before deciding anything. If you did not, you are extremely accurate and nobody has asked in years."}},
 
 "Capricorn I":{
+ sex:"Responsibility follows you into this room, which is the one room it should be able to leave. Shut the door for an hour. You are the one who does not drop things, and the other person needs to see you put something down.",
+ bond:"You end up carrying the marriage the way you carry everything, which is admirable and unsustainable. Tell one person how heavy it actually is. They have been assuming you are fine because you never said otherwise.",
+ call:"Work where people depend on you and it stays standing because you do: running, building, being the one who does not drop it. Put a boundary around what you are responsible for, in writing, or the list keeps growing.",
  hinge:"All three books are looking at the same load-bearing wall. Birthdays calls this the Week of the Ruler — responsibility finds you and does not leave. Destiny runs from earned authority and a long sense of duty toward carrying responsibility without holding every part of it. Relationships puts you charged with Fire and Air, and the same slow exchange occurs: you handle it, they stop handling it, and you resent a weight you refuse to put down.",
  tension:"Birthdays counts the duty as the gift, and people are genuinely safer for it. Destiny says care and control have become the same gesture. Both hold. Nobody wants you to stop taking responsibility. They want to know why you have never let anybody else hold any of it.",
  strong:"You have already war-gamed the failure before anyone else has considered it possible, and that silent contingency planning has spared people ruin they never heard about. Authority is not seized by you; it accumulates because you alone did the preparation. Households, firms and parishes have remained standing because somebody grave was positioned beneath them holding the weight.",
@@ -3326,6 +3392,9 @@ const DEPTH = {
   later:"Later, if you shared it, you are surrounded by capable people and you can finally rest. If you did not, you are indispensable, exhausted, and no closer to being relieved."}},
 
 "Sagittarius II":{
+ sex:"Enthusiastic, funny and generous, and easily made to feel fenced in. You need a partner who keeps the door open by choice. What you leave half-done in private is the same as everywhere else: version one.",
+ bond:"You start things that did not exist before, including lives, and then move on to the next one. A partner needs to know they are the thing you are doing rather than a thing you did. Finish one of them properly.",
+ call:"Version one is your gift: founding, starting, the blank page. You will lose interest at about sixty per cent, every time. Pair with a finisher or the drawer stays full.",
  hinge:"All three books are looking at the same drawer of sixty-per-cent things. Birthdays calls this the Week of the Originator — you make version one, the thing that did not exist. Destiny runs from the will to originate toward carrying at least a few of them all the way. Relationships puts you charged with Earth and Water, and the same story is told about you: full of ideas, and somebody else finished the good one.",
  tension:"Birthdays counts being the source as your genuine role, and it is. Destiny points at the unglamorous back half. Both hold. Nobody wants fewer ideas from you. They are pointing out that an idea nobody built is indistinguishable from an idea nobody had.",
  strong:"You manufacture what did not previously exist. Not an adaptation of an existing article — the inaugural article itself, cast in a shape no one else had considered, which others then extend for a decade. True origination cannot be taught and is uncommon, and several livelihoods near you rest on groundwork you laid down and strolled away from.",
@@ -3357,6 +3426,9 @@ const DEPTH = {
   later:"Later, if you carried a few, you are an originator with a body of work and that combination is formidable. If you did not, you are the most inventive person in the room with nothing to point at."}},
 
 "Sagittarius III":{
+ sex:"Large appetite and large honesty, and small containers make you strange here too. You need room and enthusiasm rather than rules. Watch the gap between what you promise at the start and what you can keep over years.",
+ bond:"You work at scale and so does your patience. What you carry alone is heavier than anybody has been told. Tell them the whole aim, because you have been holding it by yourself far longer than is reasonable.",
+ call:"Anywhere the vision and the building are one job: the big build, the long campaign. You are not comfortable in a small container and you should stop apologising for that.",
  hinge:"All three books are standing next to something very large. Birthdays calls this the Week of the Titan — small containers are uncomfortable and modest plans bore you. Destiny runs from scope and endurance toward building big without trampling the small details. Relationships puts you charged with Earth and Water, and the same report keeps coming back: extraordinary to work alongside, and somebody got flattened.",
  tension:"Birthdays counts the scale as the gift, and what you have built is bigger than your circumstances should have allowed. Destiny says at that scale individual people become details. Both hold. Nobody wants you thinking smaller. They want you to notice that the details have names.",
  strong:"You undertake ventures at dimensions others consider preposterous, and you travel further than any sober forecast allows for. Overreaching and missing appeals to you infinitely more than flawless miniature work, and that instinct has generated every worthwhile thing you own. Those in your orbit wind up in grander halls than they would ever have located unaccompanied.",
@@ -3388,6 +3460,9 @@ const DEPTH = {
   later:"Later, if you learned the names, you are a builder people speak of warmly. If you did not, the achievements stand and there is a list of people who will not be at the funeral."}},
 
 "Scorpio–Sagittarius Cusp":{
+ sex:"Intense and honest past the point of comfort, and the right partner finds that electric. You do not do polite distance. What you need is somebody who can meet the heat without flinching and can also laugh, which is rarer than it sounds.",
+ bond:"You overturn what deserves overturning, including inside a relationship. The other person needs to know they are being renovated with rather than around. Say what you are tearing down before you start.",
+ call:"Work that breaks a bad system: reform, investigation, startups that replace something. Received wisdom irritates you on contact, and that irritation is a professional asset pointed at a real problem.",
  hinge:"All three books are standing in the rubble. Birthdays calls this the Cusp of Revolution — received wisdom irritates you on contact. Destiny runs from the nerve to break an arrangement that deserved breaking toward building whatever replaces it. Relationships has you charged with Earth and Air, and the same account keeps being given: bracing to be around, and something usually ends.",
  tension:"Birthdays counts the nerve as the gift, and several things you demolished genuinely needed it. Destiny asks the boring question about what goes in the gap. Both hold. The difference between a revolutionary and a wrecker is not courage, which you have in quantity — it is whether you thought about the morning after.",
  strong:"You declare a setup rotten while the whole room has silently resolved to endure it, and that requires a spine most people cannot locate. Custom, rank and the way it has always been done deceive you not at all. Genuinely foul practices have ceased because you refused to let them continue, and those spared will never learn whose doing it was.",
@@ -3419,6 +3494,9 @@ const DEPTH = {
   later:"Later, if you built anything, the nerve carries authority because there is something behind it. If you did not, you are right about a great deal and increasingly alone with it."}},
 
 "Sagittarius I":{
+ sex:"You need room and you have paid for it, including here. Closeness that constrains you does the opposite of what was intended. Be honest about that early rather than charming and then bolting.",
+ bond:"You keep the door propped open and you need a partner who is not threatened by that. Marriage works here if the same person gets the freedom and the loyalty. If they only get one of them, neither survives.",
+ call:"Work with movement and independence: travel, fieldwork, the freelance life, teaching somewhere new. A cubicle slowly kills you and you have already felt it.",
  hinge:"All three books are looking at a door you keep propped open. Birthdays calls this the Week of Independence — you need room and you have paid for it, in money, relationships and worse terms accepted to avoid strings. Destiny runs from self-reliance that asks nobody's permission toward staying free while letting yourself be carried sometimes. Relationships puts you charged with Earth and Water, and the same thing recurs: admired for the freedom, and quietly kept at arm's length by it.",
  tension:"Birthdays counts the self-reliance as hard-won and it genuinely is. Destiny says a good deal of it is refusal rather than preference. Both hold. Nobody is trying to tie you down. They are pointing out that you have turned down help you needed, on the grounds that needing it was the problem.",
  strong:"You are honest to a degree most people cannot manage, because you have arranged a life where you do not have to flatter anybody. You will say the true thing to a person who could hurt you. You have got yourself out of situations with no help and no complaint. There are people who learned from watching you that they were allowed to leave something.",
@@ -3450,6 +3528,9 @@ const DEPTH = {
   later:"Later, if you learned to be carried, you are free and also held, which is the rare version. If you did not, you are entirely self-sufficient and there is nobody to ring."}},
 
 "Scorpio I":{
+ sex:"Half measures are not on the menu, and that is as true here as of anything else. You want the whole thing or nothing, and that is a large gift when the trust is real. The risk is possession dressed up as passion.",
+ bond:"Marriage with you is total, and it will be tested, by silence and jealousy and the things you do not say. The way through is honesty about what you actually want, delivered before it hardens into a grievance.",
+ call:"Work with real stakes and depth: crisis, investigation, the difficult case, anywhere you go under and come back with the truth. Surface work wastes you and you will know it.",
  hinge:"All three books are watching the same throttle stuck open. Birthdays calls this the Week of Intensity — half measures are simply not stocked. Destiny runs from total commitment toward intensity that lasts long enough to finish something. Relationships puts you charged with Fire and Air, and the same account is given afterwards: extraordinary while it lasted, and it did not last.",
  tension:"Birthdays counts the focus as the gift, and it accomplishes what moderate effort never could. Destiny says it burns through everything including you. Both hold. Nobody wants you restrained. They want you to last past month four, which you have never once managed.",
  strong:"When you are in, you are all the way in, and things get finished that no reasonable amount of effort would have finished. People near you find themselves working harder without being asked. Whatever you have committed to has had more of you than most people give anything in a lifetime, and the results show it.",
@@ -3481,6 +3562,9 @@ const DEPTH = {
   later:"Later, if you found the throttle, the intensity is a resource rather than a weather system and you finish what you start. If you did not, you are formidable and there is very little standing."}},
 
 "Scorpio II":{
+ sex:"You go under the surface as a matter of course, and small talk is a foreign country here too. You want to be met at depth and you will not do that at a party. The person for you is the one who comes to the quiet room.",
+ bond:"You hold a great deal in reserve, and a marriage is the one place that has to open. They do not need the whole archive. They need to stop feeling that something is being kept from them.",
+ call:"Work that rewards going deep and staying: research, fine craft, investigation, other people's secrets handled carefully. You are at your best where nobody else wants to look.",
  hinge:"All three books are looking at the same descent. Birthdays calls this the Week of Depth — small talk is a foreign country and you go under as a matter of course. Destiny runs from perception that reaches what others miss toward going that deep and reliably coming back up. Relationships puts you charged with Fire and Air, and the same thing occurs: people tell you what they had told nobody, and then find you are still down there when they have gone home.",
  tension:"Birthdays makes the depth the gift, and people are genuinely changed by being properly seen. Destiny says descending is effortless for you and surfacing is not. Both hold. Nobody wants you shallower. They are pointing out that there is a version of this that spends decades submerged and calls it depth long after it became a habit.",
  strong:"You go past what people are saying to what is actually happening, and you do it without effort or technique. Strangers tell you things they had not planned to tell anybody. You take what people bring you seriously, which sounds small and is the rarest thing in this system. Several people have been genuinely helped by one conversation with you.",
@@ -3512,6 +3596,9 @@ const DEPTH = {
   later:"Later, if you learned the return, you are the one people go to and you still surface for dinner. If you did not, the perception is intact and you have been down there a very long time."}},
 
 "Libra III":{
+ sex:"Presentation is your medium, and it shows here: atmospheric, generous, slow to be raw. Your partner may be with the performance rather than the person. The occasional unarranged, unlovely moment is the thing that makes it real.",
+ bond:"You stage a whole life beautifully, and the risk is that the marriage becomes stagecraft. Somebody has to be allowed to see the unfinished version. That is what they are actually trying to marry.",
+ call:"Work in front of the room: presenting, performing, designing, diplomacy. You are wasted in a back office and you know it. Work that lets you stage things is the work you will be good at.",
  hinge:"All three books are watching the same performance. Birthdays calls this the Week of Theater — presentation is not dishonesty for you, it is the medium you think in. Destiny runs from an instinct for the moment toward being reachable once the show ends. Relationships puts you charged with Earth and Water, and the identical uncertainty arrives each time: people find you compelling and cannot say whether they have met you.",
  tension:"Birthdays insists the performance is not a lie, and it is not. Destiny says it can outlast the honesty underneath it. Both hold. Nobody is asking you to stop staging things. They are asking whether one person alive gets the unstaged version, and you already know the answer.",
  strong:"You know how a room will take a gesture, how timing turns a sentence, when a pause does the work three sentences could not. That is craft, and it means the important things you say actually land instead of evaporating. You have carried people through funerals, weddings and disasters by knowing exactly what the moment needed, and that is a service.",
@@ -3543,6 +3630,9 @@ const DEPTH = {
   later:"Later you can be dull in front of people you love without panic, and that is when the closeness you always staged becomes real. The craft stays. It just stops being compulsory."}},
 
 "Libra–Scorpio Cusp":{
+ sex:"You see the flaw first, and that eye comes into this room too. The right partner finds the honesty bracing; the wrong one feels permanently on trial. Name what is good as often as what is wrong.",
+ bond:"You criticise and you taste intensity, and a marriage needs both pointed somewhere useful. The flaw you spot in them is usually the one you have decided not to look at in yourself. Say it the other way round once.",
+ call:"Work that needs judgment and nerve together: editing, critiquing, reviewing, negotiating, the sharp end of a creative business. You will be resented and you will be right.",
  hinge:"All three books are watching you spot the flaw. Birthdays calls this the Cusp of Drama and Criticism — the fault is simply the first thing that presents itself, in a plan, a film, a person. Destiny runs from judgment that cuts straight to the defect toward criticism in service of the work rather than against its maker. Relationships has you charged with Fire and Air, and the same warning is passed around: brilliant company, and do not show them anything you are still fond of.",
  tension:"Birthdays makes the eye the gift and it is genuinely formidable. Destiny points out that noticing the fault is the easy half. Both hold. Nobody wants you blunted. They want you to remember that the thing you are taking apart was harder to build than your critique was to deliver.",
  strong:"The defect surfaces instantly and your verdict is generally sound, and anything that has passed under your gaze emerges markedly improved. Packaging, reputation and consensus deceive you not at all. Those with the stomach for it submit their drafts specifically because kindness will not be forthcoming, and they are right to, and their drafts get better.",
@@ -3574,6 +3664,9 @@ const DEPTH = {
   later:"Later, if you made something, the criticism carries weight because it comes from inside the work. If you did not, it is still accurate and increasingly nobody asks."}},
 
 "Libra I":{
+ sex:"A high standard aimed first and hardest at yourself, here as everywhere. You will not ask for what you want because you have already judged the wanting. Say it out loud once and watch the ceiling move.",
+ bond:"You hold a line for the relationship and then hold it against yourself when it slips. The work is not a better performance. It is letting them see you below the standard without treating it as a verdict.",
+ call:"Work where the standard is the point: design, craft, curation, quality of any kind. Your ceiling is perfectionism, and the fix is shipping one thing at ninety per cent.",
  hinge:"All three books are listening to the same internal voice. Birthdays calls this the Week of the Perfectionist — a high line, aimed first and hardest at yourself. Destiny runs from that uncompromising standard toward keeping it while stopping the assault on your own person. Relationships puts you charged with Earth and Water, and the same discovery arrives: you are gentler with everybody in the room than with the one holding the standard.",
  tension:"Birthdays counts the high line as the gift, and your work genuinely is better for it. Destiny says the self-attack is not what produces the quality. Both hold, and the evidence is on Destiny's side: every time you did something well you felt precisely nothing, which is not how a working reward system behaves.",
  strong:"You will not let something through that is not right, and the people who benefit from that mostly never learn they did. You are extraordinarily patient with everybody else's failures — genuinely so, not performatively — and people bring you their botched work because they know you will help rather than judge. That generosity is real, and you have never once extended it to yourself.",
@@ -3605,6 +3698,9 @@ const DEPTH = {
   later:"Later, if you separated the two, you are exacting and warm and people flourish near you. If you did not, you are the best in the room and the only person who has never enjoyed it."}},
 
 "Libra II":{
+ sex:"You take the temperature of the room, and this is a room. Attuned and generous, and you can spend a whole encounter managing your partner's mood rather than being present in your own. Let yourself be wanted instead of hosting.",
+ bond:"Marriage is a social fact for you as well as a private one, and that is not shallow, because you genuinely think in terms of the pair. Just check occasionally that you are in it for the two of you rather than for the picture.",
+ call:"Work with people, teams and the social fabric: partnership, community, hosting, business development, holding a group together. That is what you are for.",
  hinge:"All three books are watching you take the room's temperature. Birthdays calls this the Week of Society — real social intelligence, an eye for what the group needs and who is being left out. Destiny runs from genuine care for the collective toward serving it without disappearing into it. Relationships has you charged with Earth and Water, and the same slow thing happens: everybody feels included and nobody can say what you actually think.",
  tension:"Birthdays counts the social reading as the gift, and it is real rather than performed. Destiny says you have weighed the collective view so long you have lost track of which opinions were ever yours. Both hold. The corrective is not selfishness. It is saying the unpopular thing you believe, out loud, once in a while.",
  strong:"You notice who is on the edge of the group and you bring them in, and you do it without making a performance of the rescue. You think about what the whole thing needs rather than what you need from it. Communities, teams and families run better with you in them, and most of the reason is invisible work you have never claimed.",
@@ -3636,6 +3732,9 @@ const DEPTH = {
   later:"Later, if you found your own positions, you are the elder people come to for a straight answer. If you did not, you are universally liked and nobody could tell you what you believed."}},
 
 "Virgo III":{
+ sex:"You take things at their word and you expect the same, including in private. Say plainly what you want rather than hinting and waiting. The other person is not being obtuse. They are being literal in a room where you were not.",
+ bond:"You mean exactly what you say and you assume they do too. Most people do not, and the disappointment compounds quietly. When something lands wrong, ask what they meant rather than filing it.",
+ call:"Work where exactness matters: editing, accounting, engineering, data, quality control, the detail nobody else checks. You will be relied on and rarely thanked.",
  hinge:"All three books are watching a sentence get answered too exactly. Birthdays calls this the Week of the Literalist — you take people at their word and expect the same back. Destiny runs from a refusal of vagueness toward accuracy that keeps the human meaning intact. Relationships puts you charged with Fire and Water, and the same misfire recurs: somebody says one thing, means another, gets a correct reply and feels unheard.",
  tension:"Birthdays counts the precision as a service to everybody around you, and it genuinely is. Destiny says the correct answer sometimes misses the person entirely. Both hold. Nobody wants you vaguer. They want you to hear the second sentence, the one nobody said out loud.",
  strong:"You catch the imprecision that would have cost somebody a fortnight three months from now. You do what you said you would do, on the day you said it, and that reliability is worth more than most talents. People who work near you make fewer mistakes and they usually do not know why.",
@@ -3667,6 +3766,9 @@ const DEPTH = {
   later:"Later the precision comes with an ear attached, and people bring you both kinds of problem. It is the same gift, finally aimed at people as well as facts."}},
 
 "Virgo–Libra Cusp":{
+ sex:"Craft and grace at once, and you want closeness to be both right and beautiful. It mostly is. The cost is that you will not let the messy, unfinished version of yourself near it, and that is the version intimacy actually needs.",
+ bond:"You want a beautiful, working marriage and you will quietly do the parts nobody notices. Say what you are doing and what you need, or you become the invisible one in your own relationship.",
+ call:"Work where it has to function and look right: design, architecture, product, editing, curation. Ninety-five per cent is your resting state. Learn to ship at ninety-five.",
  hinge:"All three books are looking at something sitting at ninety-five per cent. Birthdays calls this the Cusp of Beauty — it must work and it must be beautiful, and you will not trade either. Destiny runs from discernment fine enough to tell good from nearly-good toward releasing things while the flaws are still visible. Relationships has you charged with Fire and Water, and the pattern repeats: people wait on you, and eventually they stop waiting.",
  tension:"Birthdays makes the discernment the gift, and it is a genuinely uncommon eye. Destiny says the world never receives the ninety-five per cent version. Both hold. Nobody is asking you to lower the standard. They are pointing out that unfinished work helps no one, however excellent it would have been.",
  strong:"You can tell good from very nearly good, and the gap matters to you, and that gap is where almost everything worthwhile lives. What you do release is better than what other people release — noticeably, in ways that are hard to name and easy to feel. You have raised the standard of every room you have worked in without ever mentioning it.",
@@ -3698,6 +3800,9 @@ const DEPTH = {
   later:"Later, if you learned to release, you are the one whose work is sought out and whose taste is trusted. If you did not, you have the best eye in the room and the smallest body of work."}},
 
 "Virgo I":{
+ sex:"You walk into disorder and end it, and that energy is here too. Particular and giving, and you notice everything. Say what you noticed rather than correcting silently, because the silent version costs you.",
+ bond:"You express love as service, and the other person may not read it as love. Tell them once, plainly, that this is the form it takes for you. Otherwise the useful things you do get filed as chores.",
+ call:"Work that fixes a mess: operations, systems, health-adjacent practice, cleaning up other people's chaos. You will be handed the disaster nobody else would touch.",
  hinge:"All three books are looking at a structure you built. Birthdays calls this the Week of System Builders — you walk into disorder and end it. Destiny runs from the ability to see a mess and finish it toward systems that serve people and get taken down when they stop. Relationships puts you charged with Fire and Air, and the same friction appears: everything works better with you around and nobody feels quite allowed to do it their own way.",
  tension:"Birthdays counts the ordering instinct as the gift and it plainly is — things run for years on what you set up. Destiny says you cannot dismantle your own work. Both hold. Nobody wants your systems gone. They want you able to end one without experiencing it as a demolition of yourself.",
  strong:"You arrive somewhere chaotic and within a month there is a way things are done, and it works, and it keeps working after you have gone. That is a rare and undervalued talent — most people can identify a mess and almost nobody can end one. There are places running smoothly today because of a fortnight of your attention years ago.",
@@ -3729,6 +3834,9 @@ const DEPTH = {
   later:"Later you build lighter and take things down without grief, and people come to you to be taught rather than sorted out. It is a much better use of the same eye."}},
 
 "Virgo II":{
+ sex:"You hold a lot in reserve and you are not fully trying to help them work you out. In private that reserve can read as absence. Let one person all the way in, once, and see what it does. The door has been shut a long time.",
+ bond:"Marriage asks you to be known, which is the specific thing you have avoided for thirty years. They do not need everything. They need to stop guessing whether they are close to you.",
+ call:"Work behind a door of your own: analysis, writing, research, deep specialty. You are at your best unwatched and at your worst being managed closely.",
  hinge:"All three books are standing outside a closed door. Birthdays calls this the Week of the Enigma — you hold a great deal in reserve and you are not trying to help anybody past it. Destiny runs from depth held back toward keeping that depth while letting the right people through. Relationships has you charged with Fire and Air, and the same slow thing happens: people sense there is more, wait a while, and stop waiting.",
  tension:"Birthdays treats the reserve as depth, and it is genuine depth rather than mystery for effect. Destiny says privacy hardens into distance so gradually that nobody notices the year it happened. Both hold. Nobody is asking you to be an open book. They are asking you to count how many people actually know you, and to be honest about the number.",
  strong:"You are not performing anything, which in a loud world is restful and rare. What you do say has been thought about. You keep confidences absolutely, you do not trade in other people's business, and the few who have been let in have found somebody with far more substance than the surface advertised.",
@@ -3760,6 +3868,9 @@ const DEPTH = {
   later:"Later, if you let two or three through, you are the one people trust with anything and there is somebody who knows you. If you did not, you are widely respected and entirely unaccompanied."}},
 
 "Leo III":{
+ sex:"People follow you and you feel the weight, and this is the one place to put it down. Warm and generous when you are not being looked to for the plan. Ask for a night where nobody needs anything from you.",
+ bond:"You end up running the relationship the way you run everything, and you are tired in a way you have not mentioned. Let them carry something real. Being permanently the strong one is its own kind of alone.",
+ call:"Work where you lead and the room looks to you: management, teaching, leading a practice, anything with your name on it. You will do the job whether or not you got the title, so get the title.",
  hinge:"All three books are looking at the same overloaded beam. Birthdays calls this the Week of Leadership — people follow, and you feel the weight of it far more than you let on. Destiny runs from the nerve to be held responsible toward leading without becoming the single point of failure. Relationships puts you charged with Water and Air, and the same discovery lands in each: everyone leans on you and nobody knows what you are worried about.",
  tension:"Birthdays makes the vision and the nerve the gift, and they are exactly that. Destiny says the same qualities have you doing everything yourself. Both hold. Nobody wants you to lead less. They want to know why nothing has ever been handed over.",
  strong:"Your sightline runs further out than anybody near you, and you soak up pressure rather than dispensing it downward, which in a commander is scarcer than vision by a wide margin. Crews beneath you sleep soundly. Entire ventures, households and firms have crossed panicky stretches intact because you shouldered the dread privately and never once distributed it.",
@@ -3791,6 +3902,9 @@ const DEPTH = {
   later:"Later, if you built people rather than a monument, you are surrounded by capable adults who learned it from you. That is the version worth having and it needs starting twenty years earlier than feels comfortable."}},
 
 "Leo–Virgo Cusp":{
+ sex:"You name the unspoken thing, and that is disarming here as everywhere. The right partner finds the honesty intimate. The wrong one feels seen through. Ask before you open the cupboard.",
+ bond:"You see the unspoken arrangement in a relationship and you say it. That is how you fix things and also how you start a fight. Deliver it as a question rather than a verdict.",
+ call:"Work where you reveal and refine at once: writing, performing, teaching, editing, criticism. You are the one who names what the room was avoiding.",
  hinge:"All three books are watching you name the thing in the room. Birthdays calls this the Cusp of Exposure — you see the unspoken arrangement and you tend to say it aloud. Destiny runs from an eye for what is actually happening toward truth told in a way that helps. Relationships has you charged with Water and Earth, and the pattern is constant: people find you clarifying and slightly dangerous, and both are correct.",
  tension:"Birthdays counts the unsparing eye as the gift, and rooms are genuinely better for it. Destiny asks what the truth was for. Both hold. Nobody wants you to start pretending. They want you to know the difference between exposure that opens something and exposure that just lands accurately on somebody.",
  strong:"You say the thing everybody has agreed not to say, and the relief when you do is real. You are the reason certain conversations finally happened. You turn the same unsparing eye on yourself, which is why it usually reads as honesty rather than cruelty, and why people forgive you for it more often than they should have to.",
@@ -3822,6 +3936,9 @@ const DEPTH = {
   later:"Later the truth comes with mercy attached and people seek you out for it rather than bracing for it. It is the same gift with the brakes fitted."}},
 
 "Leo I":{
+ sex:"Things route through you whether or not you asked, and this is where you are allowed not to be in charge. Generous and warm, and you need to be wanted rather than deferred to. Say so.",
+ bond:"You are the centre of the marriage whether or not you wanted the role. That is a job as much as a compliment. Ask who they are when you are not in the room, and let them answer.",
+ call:"Work where you hold authority and generate the warmth: leading, building a team, running a place people love. You will do it anyway. Be paid for it.",
  hinge:"All three books are watching a room defer to you. Birthdays calls this the Week of Authority — things route through you whether or not you asked. Destiny runs from a natural claim on the room toward authority that stays answerable to the people under it. Relationships puts you charged with Water and Air, and the same slow thing occurs: people stop arguing with you, and neither of you registers the date it happened.",
  tension:"Birthdays counts the steadiness as the gift, and it genuinely holds things together. Destiny counts unquestioned authority as the quiet danger. Both hold. Nobody wants you to abdicate. They want you to notice that agreement stopped being evidence some time ago.",
  strong:"Under pressure you do not wobble, and everybody near you can feel it. Decisions get made, panic does not spread, and people who would otherwise have gone under stay upright because you were in the room. That is not charisma, it is load-bearing, and there are households and workplaces still standing because of it.",
@@ -3853,6 +3970,9 @@ const DEPTH = {
   later:"Later the authority softens into something people come to rather than obey, and you become a much better version of the same man. If it never softened, you are respected and slightly avoided."}},
 
 "Leo II":{
+ sex:"Considerable force, deliberately checked. Strong and gentle with it, which is rare. In private the danger is the same as everywhere: holding back so well that the other person never feels the full weight of you.",
+ bond:"You are the steady one with the hidden strength and the marriage leans on it. What it does not see is the effort of the checking. Let them see the cost once.",
+ call:"Work where restraint is the skill: coaching, teaching, leading difficult people, mediation. Your strength is a held hand rather than a fist, and the best jobs use exactly that.",
  hinge:"All three books are describing a held hand. Birthdays calls this the Week of Balanced Strength — considerable force, deliberately checked. Destiny runs from strength that already learned restraint toward the one thing worth the whole of it. Relationships has you charged with Water and Air, and the same note recurs: reassuring to be near, and nobody has ever seen you go all in.",
  tension:"Birthdays counts the restraint as maturity, and against most people carrying your kind of force it is. Destiny says restraint held long enough becomes a way of never committing. Both stand. The instruction is not to lose control. It is to find the one thing that deserves everything and then actually give it.",
  strong:"You have real power and you do not need to demonstrate it hourly, which puts you decades ahead of most people who are built the way you are. You can be disagreed with without escalating. You can lose an argument on purpose. People feel safe around you in a way they cannot explain, and the reason is that you are visibly not using everything you have.",
@@ -3884,6 +4004,9 @@ const DEPTH = {
   later:"Later, if you spent it somewhere, you are formidable and warm and entirely at ease. If you never did, you are widely respected and privately unsure what you saved it all for."}},
 
 "Cancer III":{
+ sex:"You move people by warmth and timing rather than force, and that works here more than anywhere. You read the moment. The risk is that you get what you want and they never feel they chose it. Ask instead of steering, sometimes.",
+ bond:"You feel what they need before they say it and you meet it, and that is the whole gift of a marriage with you. What goes missing is your own wish, unspoken, building quietly for years.",
+ call:"Work where warmth sells: teaching, care, hospitality, negotiation, the persuading of a room. You will be trusted fast, so use it on something you believe in.",
  hinge:"All three books are watching the same lever. Birthdays calls this the Week of the Persuader — you move people by warmth and timing rather than argument. Destiny runs from warmth that shifts people before they have decided toward influence that was genuinely invited. Relationships puts you charged with Fire and Air, and the same discovery arrives eventually in each: they realise the conversation had already been won before they sat down.",
  tension:"Birthdays counts the persuasive warmth as the gift, and it opens doors nothing else opens. Destiny counts it as the thing that makes consent unclear. Both hold. Nobody is asking you to be cold or clumsy. They are asking whether the person agreeing with you had a real chance to disagree.",
  strong:"You get people to do the thing that is good for them when nothing else has worked. Doctors, family, the friend who will not go for help — you have moved people who were immovable, and some of them are considerably better off for it. That capacity is rare and it is worth a great deal in a life. Used for somebody else's benefit it is close to a public service.",
@@ -3915,6 +4038,9 @@ const DEPTH = {
   later:"Later, if you learned to ask, you are trusted rather than merely effective, and that is a different and better position. If you did not, you are surrounded by agreeable people and quietly unsure of all of them."}},
 
 "Cancer–Leo Cusp":{
+ sex:"A public self and a private self, both entirely real, and the private one comes out here. Whoever gets the private one has the real thing. Make sure they know which is which, because the swing is confusing from outside.",
+ bond:"You are two weathers in one marriage, and the partner who can hold both is the one. The failures happen when somebody attaches to only one version of you and tries to make it permanent.",
+ call:"Work that lets you be both, behind the scenes and on the stage, in turns. A job that demands only one of you will exhaust you.",
  hinge:"All three books are describing the swing. Birthdays calls this the Cusp of Oscillation — a public self and a private self, both entirely real. Destiny runs toward letting both exist without treating either as a betrayal. Relationships has you charged with Earth and Air, and the same complaint arrives every time: not that you change, but that nobody gets any warning.",
  tension:"Birthdays treats both selves as genuine, and they are. Destiny says you keep calling one of them the fake one, and which one it is depends on the day. Both stand. The task is not integration into some single steady person. It is announcing which one is currently in the building.",
  strong:"You can hold a room and you can sit with one person in the dark, and most people manage only one of those. The public version is not a performance — it is a real capacity, and people leave those evenings better than they arrived. The private version is where your actual thinking happens, and what you bring back from it is worth waiting for.",
@@ -3946,6 +4072,9 @@ const DEPTH = {
   later:"Later you can go quiet without anybody panicking, because by then you have told them what it is. The swing stops costing relationships and turns into something people plan around fondly."}},
 
 "Cancer I":{
+ sex:"You read the room before a word is spoken, and here that means you know what they need before they do. The cost is that you carry away everything you pick up. Say aloud what you felt, or you will hold it alone for weeks.",
+ bond:"Marriage for you is home, safety, and somebody who comes back. You will build that carefully and absorb a great deal to keep it calm. Do not absorb it silently forever. Resentment has to have a door.",
+ call:"Work where feeling is the instrument: care, food, teaching young children, rooms where people need holding. Work with no warmth in it will drain you faster than hard work ever does.",
  hinge:"All three books describe a leak. Birthdays calls this the Week of the Empath — you read a room before a word is spoken. Destiny runs from feeling what others feel toward feeling all of it without dissolving. Relationships puts you charged with Fire and Air, and the same pattern recurs: people open up to you within an hour and you go home carrying whatever they put down.",
  tension:"Birthdays treats the sensitivity as the gift, and it plainly is. Destiny says the gift is drowning you. Both hold. Nobody wants you armoured. They want you able to tell whose feeling you are having, and you currently cannot, most days.",
  strong:"You spot the one who is struggling and you cross the floor to them. No method, no training — it registers and you move. Strangers hand you things they have hauled about for a decade, then look startled at themselves for having done it. Very few adults can produce that effect and none of them can teach it.",
@@ -3977,6 +4106,9 @@ const DEPTH = {
   later:"Later you can be close to people without dissolving into them, and that is when the gift becomes usable rather than costly. You get to keep the reading and hand back the weight."}},
 
 "Cancer II":{
+ sex:"You feel deeply and you refuse the standard shape for it, here too. What you want is specific and you have not always said it, because saying it invites comparison with the ordinary version you have no interest in. Say it anyway.",
+ bond:"You will not do marriage the way it is done around you, and the right partner is relieved rather than worried. Draw the map together instead of following the one you were handed.",
+ call:"Work that lets you do it your own way: small practice, own business, unconventional hours, the niche nobody is serving. Being told the standard way makes you worse, not better.",
  hinge:"All three books are looking at your refusal. Birthdays calls this the Week of the Unconventional — deep feeling that will not take the expected shape. Destiny runs from that refusal toward strangeness that is true rather than merely contrary. Relationships has you charged with Fire and Air, and every pairing hits the same wall: you will not do the ordinary version of anything, including the ordinary version of being close.",
  tension:"Birthdays counts the sideways response as the gift, and when it is accurate it is worth ten conventional ones. Destiny says the refusal has gone automatic. Both stand. The question is not whether to conform. It is whether you are still choosing, or just reversing whatever is put in front of you.",
  strong:"Where a room is busy performing the appropriate emotion, you supply the accurate one instead, and the relief that follows is visible on faces. At funerals, in emergencies, in any gathering running on script, you break it usefully. Strangers call you peculiar for a fortnight and reliable for a decade afterwards.",
@@ -4008,6 +4140,9 @@ const DEPTH = {
   later:"Later, if you softened, you are the wise strange one people seek out. If you did not, you are simply difficult, and the difference is mostly whether anybody is still calling."}},
 
 "Gemini III":{
+ sex:"Curious, playful, and more interested in what is happening in the head than in any script. You need a partner who talks. Silence in the wrong way makes you restless, and restlessness has been read as leaving.",
+ bond:"You are always looking for something, and the looking is most of the life. A partner can feel like part of the search rather than the answer. Tell them what you are looking for, so they are not competing with a question.",
+ call:"Work that is a search: journalism, research, teaching, travel, the next question. You will be bored by anything you have mastered, so build the variation in rather than changing everything every two years.",
  hinge:"All three books are circling the same unanswered question. Birthdays calls this the Week of the Seeker. Destiny runs from real curiosity and no fear of not knowing toward an answer you are prepared to stand on. Relationships puts you charged with Water and Earth, and the identical thing happens in every pairing: fascinating to be near, impossible to settle anything with.",
  tension:"Birthdays counts the searching as the gift and it is a rare one. Destiny says the search has quietly become the destination. Both stand, and this one is uncomfortable, because landing anywhere would feel to you like a small death rather than a relief.",
  strong:"You ask the question everybody else stopped asking at twenty-two. You have no fear of not knowing, which frees you to look at things most people cannot bear to examine, and you bring back genuinely useful findings. Conversations with you change what people think is possible. Several of them date something in their life to an evening spent talking to you.",
@@ -4039,6 +4174,9 @@ const DEPTH = {
   later:"Later, if you ever planted anything, you are wise in a way that is actually usable by other people. If you did not, you are a fascinating person with a library and not much else in the room."}},
 
 "Gemini–Cancer Cusp":{
+ sex:"You sense it and you can also say it, which is disarming in private. Verbally intimate and emotionally perceptive at once, and that can be a lot. Give them a quiet moment with you rather than the beautiful explanation.",
+ bond:"You name the feeling in the room, which is a gift and can leave the other person with nothing to hold. Not everything needs the sentence. Sometimes the marriage needs you to sit down and stop describing.",
+ call:"Work where the insight and the words meet: writing, teaching, interviewing, counselling-adjacent rooms. You will be the one who finds the words for a thing nobody could name.",
  hinge:"All three books are pointing at the gap between inside and outside. Birthdays calls this the Cusp of Magic — you sense it and can also say it, which almost nobody manages. Destiny runs from a vivid interior toward putting it in a form other people can meet. Relationships has you charged with Fire and Earth, and the same puzzle repeats: people feel something enormous going on in you and cannot get to it.",
  tension:"Birthdays makes the inner world the gift and it is one. Destiny says an inner world nobody can reach is only weather. Both hold. Nobody is asking you to be less private. They are pointing out that almost nothing has ever come out.",
  strong:"You know things before there is evidence, and unlike most people who do, you can explain afterwards what you picked up. That combination is genuinely uncommon and it makes you the person others come to when something is wrong and they cannot name it. You have told people true things about their own lives that they had not admitted to themselves, gently, and been right.",
@@ -4070,6 +4208,9 @@ const DEPTH = {
   later:"Later, if you made things, you are the one people come to and there is something to show them. If you did not, the interior is still magnificent and you are the only one who has ever seen it."}},
 
 "Taurus–Gemini Cusp":{
+ sex:"Two engines, slow and fast, in one body, and which one shows up depends on the day. Patient and unhurried, or quick and curious, and the right partner likes both. Warn them the switch is real rather than a mood.",
+ bond:"You want solid ground and you also need the air moving. Marriage works if it holds both: a steady home and a changing conversation. A partner who only offers one half will lose to the other.",
+ call:"Work that uses stamina and versatility together, which is unusual. The failure is unchanelled energy. Pick one river and let everything else be a stream.",
  hinge:"All three books are watching the same two engines argue. Birthdays calls this the Cusp of Energy, slow stamina bolted to a fast rudder. Destiny runs from an unusual quantity of energy spread wide toward a channel narrow enough to be changed by it. Relationships has you charged with Fire and Water, and the same grievance turns up in every pairing: enormous with you around, exhausting to plan anything with.",
  tension:"Birthdays counts the range as the gift and it truly is. Destiny says heat with no channel is only heat. Both hold, and it stings, because narrowing means killing off five perfectly good versions of your life to keep one.",
  strong:"You have more fuel than the people around you and it does not run down. You can go long like the plodders and change direction like the quick ones, and there is almost nobody who can do both. Thrown at one problem you are close to unstoppable, and people who have seen that once will remember it for twenty years.",
@@ -4101,6 +4242,9 @@ const DEPTH = {
   later:"Later, if you ever narrowed, the accumulated energy pays out enormously and quickly. If you did not, you are the most interesting person in the room with the least to show for it."}},
 
 "Gemini I":{
+ sex:"Anything that shuts off options reads as danger to you, and that is as true in a relationship as in a job. Closeness has to be chosen freely every week or it starts to feel like a cage. Say that early rather than bolting late.",
+ bond:"You need a partner who is not frightened by the open door. Marriage here is two people who keep choosing each other, not two people locked in. Nobody has to be trapped for it to be real.",
+ call:"Work with freedom and variety built in: freelance, media, several projects, teaching, the creative portfolio. Constraint will make you leave, and the leaving will look sudden.",
  hinge:"All three books are looking at the same locked door. Birthdays calls this the Week of Freedom and means it literally — anything that shuts off options reads as danger. Destiny runs from a nose for constraint toward commitments you pick yourself. Relationships puts you charged with Water and Earth, and the same story recurs: it goes beautifully until somebody asks for something ongoing.",
  tension:"Birthdays treats the independence as your gift and it is a real one. Destiny says you will not find out what you are until you bind yourself to something. Both stand. Nobody is asking you to be caged. They are pointing out that you have never tested the difference between a cage and a choice.",
  strong:"You are nobody's property and it shows, in a good way. You cannot be bought, flattered or slowly absorbed into somebody else's plan, and in a world where most people are quietly owned by something that is rare and worth a great deal. You give other people permission to leave things that are killing them, just by having done it yourself without apology.",
@@ -4132,6 +4276,9 @@ const DEPTH = {
   later:"Later, if you chose something, you are free in a way that has weight — unowned and also not alone. If you did not, you are unattached, which turns out to be a very different thing."}},
 
 "Aries–Taurus Cusp":{
+ sex:"Drive sitting on foundations, and you want the surge to hold. Direct and sensual at once, and pressure applied without invitation reads badly here as everywhere. Ask before you push, then push.",
+ bond:"You are real strength with follow-through, which is what a marriage needs. The failure mode is power applied without invitation. Ask first and the same force becomes support rather than weight.",
+ call:"Work where strength builds something that lasts: construction, business, sport, anything with weight and a result. You can carry real load and still move, and that is rare.",
  hinge:"All three books are describing weight. Birthdays calls this the Cusp of Power — drive sitting on foundations. Destiny runs from real strength and the will to use it toward force that opens doors instead of breaking them. Relationships puts you charged with Air and Water, and the same thing surfaces every time: people rely on you enormously and are also a bit careful around you, and they will not tell you why.",
  tension:"Birthdays counts the force as the gift, and it is. Destiny counts it as the thing you apply without noticing. Both stand. Nobody is asking you to be weaker. They are asking you to find out what ordinary effort from you feels like on the receiving end, because you have genuinely never checked.",
  strong:"You carry loads other people would talk about for a year and you do not mention it. Money, family, work, a crisis that would flatten most — you pick it up and keep walking. There are people whose lives held together because you were underneath them at the right moment, and several of them have never said so out loud. You do not need them to. That is the best thing about you.",
@@ -4163,6 +4310,9 @@ const DEPTH = {
   later:"Later the strength turns into shelter, and being near you is restful rather than heavy. That version is genuinely loved rather than merely relied on, and it is available earlier than you think."}},
 
 "Taurus I":{
+ sex:"The body is the whole instrument for you: slow, sensory, present, unhurried. You are faithful and you want comfort rather than novelty. Say when the routine has gone stale, because you will keep at it out of loyalty for years.",
+ bond:"You marry for real and you build it patiently. Your risk is building a life so long that you forget to check whether you still want it. Say out loud once a season what you are building and why.",
+ call:"Work that turns intention into something you can touch: craft, food, land, building, money handled well. You will finish what other people abandon and the finish will last.",
  hinge:"All three books are watching the same hands. Birthdays calls this the Week of Manifestation — the one who makes it exist. Destiny runs from turning intention into something with weight toward choosing well what deserves building at all. Relationships has you charged with Fire and Air, and the recurring note is that people admire what you make and cannot always reach the person making it.",
  tension:"Birthdays treats the ability to finish as the whole gift. Destiny says the ability is not itself a reason. They are both right and that is the bind. Nobody wants you to build less. They want you to notice, around year two, that you stopped wanting this — and to be allowed to stop.",
  strong:"You finish. In a world of people describing what they are going to do, you produce the object, and it is solid, and it is still standing in ten years. There is no substitute for this and almost nobody has it. Whatever you have made is real in a way that most people's work simply is not, and you have not given yourself enough credit for how rare that is.",
@@ -4194,6 +4344,9 @@ const DEPTH = {
   later:"Late on, the making is chosen rather than compulsory, and the quality jumps because of it. Apprentices arrive. You turn out to have a gift for handing it on, which nobody predicted, least of all you."}},
 
 "Taurus III":{
+ sex:"It comes easily to you, which is a gift with a bill. Confident and unhurried in private and rarely challenged. What comes easy rarely gets pushed, and that includes the parts of closeness you have never had to work at.",
+ bond:"You are settled and easy company, and unforced. The marriage can drift into comfort so deep that neither of you says anything difficult. Pick one hard conversation a year and have it on purpose.",
+ call:"You will be good at almost anything you try, which is the problem. Pick the thing you are actually bad at and stay with it for a season, or your ceiling stays exactly where it was.",
  hinge:"All three books are pointing at the same ceiling. Birthdays calls this the Week of the Natural — it came easily. Destiny runs from ability you never had to work for toward the edge of it and then past. Relationships puts you charged with Fire and Air, and the pattern repeats: people are drawn to how easy you make it look and end up faintly frustrated that you will not go further.",
  tension:"Birthdays says the ease is the gift. Destiny says untested talent turns into a lid. Both true, and this one has a real cost attached, because the instruction is to go somewhere you will be visibly bad. You have organised a whole life around not doing that.",
  strong:"You make hard things look unbothered, and people relax around you because of it. You pick up in a fortnight what others grind at for a year, and you are generous with it — you will show somebody how, without any of the gatekeeping people with hard-won skills often have. There is a lightness to being near you that is genuinely restorative for people who are trying too hard.",
@@ -4225,6 +4378,9 @@ const DEPTH = {
   later:"Later, if you ever went past the easy part, you are formidable and very calm about it. If you did not, you are pleasant company with a story about what you could have done."}},
 
 "Pisces–Aries Cusp":{
+ sex:"You start again easily, including here, and you can be tender and direct in the same hour. The risk is that restarting becomes the way you avoid the difficult middle. Some things need finishing rather than reborn.",
+ bond:"You can begin a relationship from almost nothing and not turn bitter, which is a real gift. What you skip is the unglamorous middle of a long marriage, where nothing is beginning and everything is being maintained.",
+ call:"Work that resets: turnarounds, new divisions, fresh starts, founding things. Close one open thing before you start the next, or you will have a shelf of beginnings.",
  hinge:"All three books arrive at the ninth month. Birthdays calls this the Cusp of Rebirth and means the reset, over and over. Destiny runs from an instinct for beginnings toward finishing one thing before the next beginning shows up. Relationships has you charged with Earth and Fire, and the same note sounds in every pairing — brilliant for the first year, gone or bored by the third.",
  tension:"Birthdays treats the appetite for beginnings as a gift, and it is one. Destiny treats it as the thing eating your life. Both hold. Nobody is telling you to stop starting. They are telling you that the twelfth month is where the actual thing lives, and you have never been there.",
  strong:"You can walk into anything cold and be capable inside a fortnight. No ego about being a beginner, no fear of looking foolish, and a curiosity most grown people mislaid decades ago. You give people permission to change their lives simply by having changed yours four times. That is not nothing, and several people you have half forgotten still think about it.",
@@ -4256,6 +4412,9 @@ const DEPTH = {
   later:"Later you are the one with the stories, and they are genuinely good ones. Whether that is a rich life or a lonely one depends entirely on whether anybody from the early chapters is still in the room."}},
 
 "Aries II":{
+ sex:"Attention arrived whether you asked or not, and it follows you in here. You are wanted and you know it, and the temptation is to let being wanted stand in for being close. Do one unglamorous, genuinely attentive thing for them.",
+ bond:"You are noticeable and the right partner likes it. The wrong one competes with it or tries to turn it down. What your marriage needs is substance under the shine, because they will notice if it is only the shine.",
+ call:"Work in front of people: performing, presenting, leading, the visible role. You will get attention without effort, so spend the credit on work that would have deserved it anyway.",
  hinge:"All three books are looking at the same eye. Birthdays calls this the Week of the Star and means the attention arrived whether you asked or not. Destiny runs from natural presence toward work solid enough to justify it. Relationships puts you charged with Water and Earth, and the identical thing keeps happening — people are drawn to you fast and then find out how much of it was for them.",
  tension:"Birthdays says the presence is your gift. Destiny says the presence is the thing that let you get away with less. Both true. You are not being asked to dim. You are being asked whether the work stands up when nobody is looking at it, and you already know it mostly has not been tested.",
  strong:"A room brightens on your entrance and no tutor supplied that. Others exert themselves near you, gamble larger, briefly inhabit a livelier edition of themselves. Directed at somebody nobody has ever properly regarded, your notice can revise what they believe is obtainable, and you have accomplished that for strangers without ever being informed of it.",
@@ -4287,6 +4446,9 @@ const DEPTH = {
   later:"Later you can enjoy people without needing them to be impressed, and you become genuinely good company rather than a performance of it. The ones who knew you early are the ones who will tell you the truth about which it was."}},
 
 "Aries III":{
+ sex:"You go first, and you will go first here too. Direct, honest, unafraid. The trouble is the same as everywhere: going first hardens into going alone, out of pride rather than necessity. Bring them with you instead of reporting back.",
+ bond:"You open country and then report back, which leaves the partner waiting at the edge of it. Marriage asks you to bring them along rather than narrate the expedition. Stay long enough to see them arrive.",
+ call:"Work into unmapped territory: startups, exploration, first-of-its-kind efforts, the department nobody has run before. You will be far better at the first year than the tenth.",
  hinge:"All three books put you in front and then ask what happened afterwards. Birthdays calls this the Week of the Pioneer. Destiny runs from nerve and an appetite for unmapped country toward building something that outlasts your arrival. Relationships has you charged with Water and Earth, and the same complaint recurs — you were the reason it started and you were not there when it mattered.",
  tension:"Birthdays counts the nerve as the whole gift and it genuinely is. Destiny says being first counts for almost nothing next to what gets left behind. Both stand. Nobody wants you to stop going first. The question is whether anything you started is still standing without you propping it up.",
  strong:"You will walk into a situation with no map and no reassurance and begin, and you do it without needing anybody's permission. Other people's careers exist because you went first and reported back. You are not brave in the dramatic sense — you simply have a much higher tolerance for not knowing than most people, and that tolerance is worth more than talent in about half of life.",
@@ -4318,6 +4480,9 @@ const DEPTH = {
   later:"Later the nerve becomes counsel, and people come to you before they jump. Whether you have anybody near you at that point comes down to how many departures you made without a word."}},
 
 "Aries I":{
+ sex:"Unfiltered and direct, and the true thing arrives before you have calculated it. That honesty is a gift and it lands harder than you ever mean it to. Count to three before the reply, in this room especially.",
+ bond:"You say plainly what a room has agreed not to mention, and inside a marriage that can be brutal. Same words, slower. The honesty is right. The delivery is what costs you.",
+ call:"Work that rewards the clear word and the fresh start: sales, founding, competition, anything that needs nerve and speed. Your weakness is the middle of a long project, so pair with somebody who likes maintenance.",
  hinge:"All three land on the same half second. Birthdays calls this the Week of the Child and means it exactly: unfiltered, fresh, and not yet trained. Destiny runs the path from saying it first toward saying it on purpose. Relationships puts you charged with Water and Earth, and the complaint is identical every time — nobody ever wonders where they stand with you, and nobody gets asked first either.",
  tension:"Birthdays counts the directness as the reason people trust you. Destiny counts it as the thing that costs you people. Both true, which is the difficulty. Nobody wants you careful. They want the half second between the thought and the mouth to belong to you instead of to whatever you felt.",
  strong:"You begin. Everyone else is still weighing the options and you are already three paces down the road, and a good half of what you have came from precisely that. You name the thing the whole room was circling and would not touch, and you hand people back weeks of their lives. Grudges do not stick to you, which is scarcer than it sounds and makes you remarkably easy to forgive.",
@@ -4349,6 +4514,9 @@ const DEPTH = {
   later:"Later the nerve reads as steadiness. Younger people come to you for exactly the quality that used to get you in trouble, and you can hand it over now without the heat attached."}},
 
 "Taurus II":{
+ sex:"Patient, straightforward and uncomplicated, and you explain rather than explore. In private the risk is the same as in the office: you answer the question you think they should have asked. Listen first, then respond.",
+ bond:"You make difficult things ordinary, which is what a good marriage is. The trap is teaching when you were asked to listen. Answer only the question they actually asked.",
+ call:"Work where expertise is handed on: teaching, training, explaining, the expert who makes it simple. You will be superb at it and you will occasionally over-explain to a room that already understood.",
  hinge:"All three land on one act: you explaining. Birthdays calls this the Week of the Teacher and does not mean it entirely as a compliment. Destiny runs the path from holding it together toward being held. Relationships has you easy with Water, charged with Fire and Air, and the same thing surfaces in all of them — somebody feeling taught when they had wanted to be met.",
  tension:"Birthdays is right that your patience is rare and worth something. Destiny is right that it is also how you avoid ever needing anything from anybody. So telling you to explain less is useless. What you would want if you were not being useful is the harder question, and you have never answered it.",
  strong:"You will explain it a third time without a flicker, and that is a genuinely uncommon generosity. You make people feel capable instead of stupid. Whatever you have built — a skill, a house, a way of doing something — has depth in it, because you stayed long past the point where everybody else left.",
@@ -4380,6 +4548,9 @@ const DEPTH = {
   later:"Later you are the fixed point in a lot of people's lives. Your worth stops needing to be demonstrated, which is the rest you have been owed since you were about nine."}},
 
 "Gemini II":{
+ sex:"You find words for things that did not have them yet, and that is the most intimate thing you do. Naming it out loud works better for you than feeling it silently. Use the gift on what is between you, not only on the world.",
+ bond:"Language is the hinge for you, and a marriage is a shared vocabulary. You will name the thing before either of you can feel it, which helps and can get ahead of the actual living. Let some things stay unnamed for a while.",
+ call:"Work where the new word is the product: writing, branding, teaching, translation, media. You will be the one who names what everyone was circling.",
  hinge:"Language is the hinge in all three. Birthdays calls this the Week of New Language and hands you the word nobody else had. Destiny runs from naming it toward meaning it. Relationships puts you charged with Water and Earth, and every one of those pairings turns on whether the person opposite came away feeling described or feeling understood, which are not the same experience at all.",
  tension:"Birthdays treats the phrasing as the gift. Destiny asks you to trade the good version for the plain one. That is a real loss and not a trick — the plain version is less impressive, and it is the only one that arrives.",
  strong:"You cut through a stalled argument in one line and the whole room breathes out. Fast without being cruel is a far rarer pairing than fast. People bring you tangled situations because half an hour near you leaves them holding something they can act on instead of something they have to keep hauling around.",
@@ -4411,6 +4582,9 @@ const DEPTH = {
   later:"Later you get short. Sentences come down to the size of the thing, and people find you clearer than you have ever been. What you say now is what they keep."}},
 
 "Scorpio III":{
+ sex:"Magnetic, and you know exactly how the mechanism works. That is a genuine gift and it is also a lever, and here the difference matters. Want them honestly rather than reading them and then working them.",
+ bond:"You can draw anyone you decide to draw, and a marriage should not be won with the mechanism. What holds it is the part you do not charm: the plain, unglamorous truth about what you want.",
+ call:"Work at the sharp end of influence: negotiation, sales, politics, the front of a business, anything where presence closes the gap. Use it on something worth having.",
  hinge:"All three books circle the same thing and not one of them flatters you about it. Birthdays calls this the Week of Charm. Destiny runs the path from magnetism you operate at will toward being known by a few instead of admired by many. Relationships puts you easy with Water and charged with Fire and Air, and in every one of those pairings the same complaint turns up sooner or later. Three books, one finding: you are liked a great deal and known by almost nobody.",
  tension:"They flatly disagree about what to do with the charm. Birthdays files it as your gift. Destiny files it as the thing you have to put down. Both are correct and that is precisely why this is hard. Nobody is asking you to be colder. They are asking you to stop using warmth as a door you shut behind yourself.",
  strong:"You are the best in the room at making somebody feel noticed for the first time in weeks. You clock the person standing on their own and you go and get them. You remember the name nobody else remembered. That is real, it costs you something, and people carry it for years. Aimed on purpose at somebody who needs it and cannot pay you back, it is close to the best thing a person can do.",
@@ -5449,6 +5623,7 @@ function showTab(id){
   if(id === 'tab-game') renderGame();
   if(id === 'tab-matrix') renderMatrix();
   if(id === 'tab-wheel') renderWheel();
+  if(id === 'tab-cards') renderCards();
   if(id === 'tab-key') primeKey();
 }
 
@@ -5603,6 +5778,160 @@ $('wheel-list').addEventListener('click', e=>{
   $('f-month').value = p.sm; fillDays(p.sd);
   $('f-year').value = '';
   showTab('tab-read'); doRead();
+});
+
+
+/* ============================================================
+   THE CARDS — the three-card draw.
+
+   One spread off the page's OWN Major Arcana table: the same
+   twenty-two cards a birthday draws from, no second deck and no
+   second set of meanings to keep in step with the first. Three
+   positions, and the third is the only one with a verb in it.
+
+   A draw is a way of asking yourself a question properly, so it
+   asks for no birthday, reads no word you typed, stores nothing
+   and sends nothing. Draw again and you get a different spread.
+   ============================================================ */
+
+/* The three positions, in order. Situation, what holds it, and the
+   one card that tells you what to do about it. */
+const DRAW_POS = [
+  {k:'facing', t:'What you are facing'},
+  {k:'block',  t:'What is in the way'},
+  {k:'do',     t:'What to do'}
+];
+
+/* One reading per card per position, so no line has to do duty in two
+   places and the draw never just repeats the card's own line. Written
+   for this app, like everything else on the page. */
+const TAROT_DRAW = {
+  1:{facing:"You already have everything this needs. The question was never whether you are equipped. It is whether you will use it.",
+     block:"The skill is being held back to avoid the attempt, because a thing you have not started cannot go wrong.",
+     do:"Pick up the tool that is actually in your hand and use it once today, badly if that is what it takes."},
+  2:{facing:"You already know the answer and cannot yet prove it. Something in you decided a while ago.",
+     block:"You are waiting for permission or evidence before you trust what you know, and neither of them is coming.",
+     do:"Sit with it quietly and stop asking everybody else. The knowing is the information."},
+  3:{facing:"Something here is growing and wants feeding rather than fixing. Care is the work.",
+     block:"You are tending everything except the thing you actually want to grow.",
+     do:"Feed it on purpose, with time and attention and ordinary care, and let it be slower than you would like."},
+  4:{facing:"This wants a frame around it: a rule, a boundary, a decision that will hold.",
+     block:"Nobody has drawn the line, so the whole thing is being renegotiated every single day.",
+     do:"Set the rule and then live inside it. Say no once, clearly, and keep it."},
+  5:{facing:"This is about what you inherited, and the way it was always done in your house.",
+     block:"You are keeping a rule that stopped serving you years ago and calling it loyalty.",
+     do:"Sort the inherited wisdom from the habit. Keep one of them and put the other down."},
+  6:{facing:"This is a choice, not a romance. Two ways are open and you are standing in the middle of them.",
+     block:"You are trying to keep both options alive, which is exactly why nothing is moving.",
+     do:"Choose, and accept what the choosing costs. The cost is the price of the door."},
+  7:{facing:"Momentum is available. Two forces are pulling and one of them can be steered.",
+     block:"You are being pulled rather than driving it. Nobody has picked up the reins.",
+     do:"Take the reins. Choose one direction and hold the other force steady behind it."},
+  8:{facing:"This calls for patience with something wilder than the situation in front of you.",
+     block:"You are trying to force it, and the forcing is what is making it worse.",
+     do:"Use the hand, not the fist. Gentle and unbroken beats loud and quick."},
+  9:{facing:"This is a withdrawal, not a defeat. You need a quiet room to see it clearly.",
+     block:"You are hunting the answer in other people's opinions and collecting noise.",
+     do:"Go quiet for a day, then bring back one thing you can actually use."},
+  10:{facing:"Something here is turning on its own timing, and you are partway round rather than at the end.",
+      block:"You are fighting the turn instead of reading where on it you actually are.",
+      do:"Stop pushing the wheel. Work out which part of the cycle this is and act for that part."},
+  11:{facing:"This is a question of honest accounting, and you already know your own side of it.",
+      block:"There is an account you have been putting off opening, and it is colouring everything else.",
+      do:"Do the honest sum. Weigh your own case the way you weigh everybody else's."},
+  12:{facing:"This is a suspension rather than a failure. You are being held still so you can see it the other way up.",
+      block:"Nothing will move while you keep forcing the angle you are already standing at.",
+      do:"Hang there a while longer. Look at it from the other side before you move."},
+  13:{facing:"Something here has finished. This is clearance, not loss.",
+      block:"You are holding open a thing that ended, and it is taking the room the next thing needs.",
+      do:"Finish it properly. Close the door instead of leaving it ajar."},
+  14:{facing:"This is the patient mix, not the dramatic either-or.",
+      block:"You are looking for a clean decision where a slow blend is what this actually wants.",
+      do:"Pour slowly. Small amounts, regularly, and give the mix time to settle."},
+  15:{facing:"There is a want here that you have been calling a need.",
+      block:"An old appetite is doing the deciding. It is not a chain yet, but it is close.",
+      do:"Name what you call necessary and test whether it is. Loosen one link this week."},
+  16:{facing:"Something built badly is already coming down. This is the crack, not the whole collapse.",
+      block:"You are holding up a structure you know is unsound, to avoid the noise of it going.",
+      do:"Let the part that is wrong come down before it takes the rest with it."},
+  17:{facing:"There is hope in this, and it is the quiet kind that survives a wreck.",
+      block:"You want a result before you will keep pouring, and the pouring is the whole job.",
+      do:"Keep pouring while nothing shows. Do the small thing again tomorrow."},
+  18:{facing:"You are moving through country you cannot see, and instinct is what you have.",
+      block:"Something here is not as clear as it looks, and you are treating the fog as solid ground.",
+      do:"Go by feel for now, slowly, and check the ground under each step."},
+  19:{facing:"This is clearer and warmer than you are letting yourself believe.",
+      block:"You are dimming yourself to keep somebody else comfortable, and they never asked you to.",
+      do:"Be plainly visible. Say the good thing out loud and stop apologising for the warmth."},
+  20:{facing:"This is a reckoning and a call at the same time. You are being asked to answer for it and rise anyway.",
+      block:"An old verdict is doing the judging, and that court closed years ago.",
+      do:"Answer the call rather than the old verdict. Decide, then get up and act on it."},
+  21:{facing:"This is the last stretch of something that is nearly complete.",
+      block:"You keep starting the next circle before closing this one, so nothing ever finishes.",
+      do:"Close the circle properly. One finished thing beats three nearly-finished ones."},
+  22:{facing:"This is a beginning nobody has authorised, including you.",
+      block:"You are waiting for a guarantee that this kind of beginning has never once come with.",
+      do:"Step off. Take only what you can carry, and go before the courage cools."}
+};
+
+/* One line to close the draw, rotated so two draws in a row do not end
+   on the same sentence. Every one of them keeps the app's stance: this
+   is not a prediction and it never tells anybody they are finished. */
+const DRAW_CLOSE = [
+  "Nothing here is a prediction. It is the question you came in with, handed back in three parts, and only the third one asks you to do anything.",
+  "Three cards, one question. The first says where you stand, the second names what is holding it, and the third is the only one with a verb in it.",
+  "This is not a forecast. Read it as advice from a part of you that already knew, and take the third card seriously.",
+  "A draw is a way of asking yourself a question properly. The answer was never in the cards. It is in what you noticed while reading them.",
+  "Hold all three together rather than keeping the one you liked. The hard card is usually the one doing the work."
+];
+let DRAWS = 0;
+
+/* Fisher-Yates over the 22 Major Arcana, then the top three. Three
+   different cards every time: a spread that repeats a card reads as a
+   mistake rather than as a message. Takes its randomness as an argument
+   so the draw can be tested without touching the page. */
+function drawThree(rand){
+  const deck = Object.keys(TAROT).map(Number);
+  for(let i = deck.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    const t = deck[i]; deck[i] = deck[j]; deck[j] = t;
+  }
+  return deck.slice(0, 3);
+}
+
+function renderCards(){
+  const cards = drawThree(Math.random);
+  const box = $('cards-result');
+  const one = (idx, i) => {
+    const c = TAROT[idx], d = TAROT_DRAW[idx], pos = DRAW_POS[i];
+    /* The card name sits outside the .db box on purpose: the read-aloud
+       walks .dt, .db and every <p>, so a paragraph nested inside .db would
+       be spoken twice. */
+    return `<div class="dp">
+      <div class="dt">${i + 1} &middot; ${pos.t}</div>
+      <p class="dcard"><span class="dr">${c.r}</span>${c.n}</p>
+      <div class="db">${c.line} ${d[pos.k]}</div>
+    </div>`;
+  };
+  const names = cards.map(n=>TAROT[n].n);
+  const close = DRAW_CLOSE[DRAWS++ % DRAW_CLOSE.length];
+  box.innerHTML = `
+  <div class="layer">
+    <h3>Three cards <small>one spread, drawn once &mdash; the situation, what holds it, and the move</small></h3>
+    <div class="layer-body">
+      ${cards.map(one).join('')}
+      <h4>What the three say together</h4>
+      <p>${names[0]} names where you stand. ${names[1]} names what is holding it. ${names[2]} is the one with a verb in it, and that part is yours.</p>
+      <div class="pull epigram">${close}</div>
+      <p class="note">The same twenty-two cards your birthday uses, drawn fresh each time. Nothing was saved and nothing was sent. Hold your question again and press the button for a new spread.</p>
+    </div>
+  </div>`;
+  return cards;
+}
+
+$('btn-cards').addEventListener('click', ()=>{
+  renderCards();
+  $('cards-result').scrollIntoView({behavior:'smooth', block:'start'});
 });
 
 
@@ -5997,6 +6326,12 @@ function learnQualities(){
 }
 
 function learnSign(name){
+  /* The sign arrives from the <select> below, so it is DOM text by the time it
+     gets here, and both the name and the line describeSign() writes carry it
+     straight into innerHTML. Escaped at the door and again where the derived
+     line is printed \u2014 CodeQL reads the unescaped version as DOM text
+     reinterpreted as HTML. */
+  const nm = esc(name);
   const d = describeSign(name);
   const periods = PERIODS.filter(p=>p.signs.includes(name));
   const mine = PEOPLE.filter(p=>findPeriod(p.month, p.day).signs.includes(name));
@@ -6006,8 +6341,8 @@ function learnSign(name){
     <div class="form-grid" style="grid-template-columns:1fr"><div>
       <label for="g-sign">Sign</label><select id="g-sign">${opts}</select></div></div>
     <div class="lcard el-b-${d.element}" style="margin-top:18px">
-      <div class="lh"><b>${d.glyph} ${name}</b><small>${d.element} &middot; ${d.quality} &middot; ${d.season}</small></div>
-      <p class="lead">${d.line}</p>
+      <div class="lh"><b>${d.glyph} ${nm}</b><small>${d.element} &middot; ${d.quality} &middot; ${d.season}</small></div>
+      <p class="lead">${esc(d.line)}</p>
       <div class="two">
         <div><div class="dt">Its element, ${d.element}</div><div class="db">${d.element_is}</div></div>
         <div><div class="dt">Its quality, ${d.quality}</div><div class="db">${d.quality_is}</div></div>
@@ -6092,7 +6427,14 @@ function renderGame(){
 }
 
 $('game-box').addEventListener('change', e=>{
-  if(e.target.id === 'g-sign'){ LEARN = {sign:e.target.value}; renderGame(); }
+  /* Taken by position out of this file's own list of twelve rather than read
+     back out of the DOM as text. The options are generated from SIGN_NAMES()
+     in order, so it is the same sign, and a value that can only come from that
+     list cannot carry anything into the page. */
+  if(e.target.id === 'g-sign'){
+    LEARN = {sign: SIGN_NAMES()[+e.target.selectedIndex] || 'Aries'};
+    renderGame();
+  }
 });
 
 $('game-box').addEventListener('click', e=>{

@@ -8,7 +8,7 @@ or send to anyone.
 
 This is the same renderer as Studio/tools-make-guide.py, made general.
 
-    python3 tools-md-to-pdf.py KEYWORDS.md
+    python3 tools-md-to-pdf.py START-HERE.md
     python3 tools-md-to-pdf.py reference/*.md
     python3 tools-md-to-pdf.py --all          # every handover doc, in one go
     python3 tools-md-to-pdf.py --all --png    # ...and page images beside them
@@ -40,9 +40,13 @@ from reportlab.platypus import (HRFlowable, ListFlowable, ListItem,
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # The set that gets handed to people. --all rebuilds exactly these.
+#
+# KEYWORDS.md was the second entry until 5 Oct 2026. It and the rest of the
+# marketing and outreach notes at the repo root were deleted that day - this is
+# one man's private app now, with nothing to advertise. --all lists only files
+# that exist, so a missing one here is a crash rather than a skipped page.
 HANDOVER = [
     'START-HERE.md',
-    'KEYWORDS.md',
     'reference/HANDOVER-SEARCH-RESEARCH.md',
     'reference/SERIES-COUPLES.md',
     'reference/SERIES-2026-08-FOUR-EPISODES.md',

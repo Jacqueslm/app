@@ -24,8 +24,10 @@ const EXTRA_DOCS = [
   'reference/marketing-content-pack.md',
   'TurnSomeDayIntoOneday/HANDOFF.md',
   'TurnSomeDayIntoOneday/docs/GAME-SPEC.md',
-  'LeadCatch/README.md',
-  'LeadCatch/MARKETING.md',
+  // LeadCatch/README.md and LeadCatch/MARKETING.md were listed here until
+  // 5 Oct 2026, when the LeadCatch tool and the rest of the marketing material
+  // were deleted from the repo. A path that is not there would have been read
+  // as an empty document, silently.
 ];
 
 // Files too big to feed a model whole get cut off, with a note so the AI knows

@@ -94,6 +94,13 @@
   .song .d{margin:2px 0 0; color:var(--dimmer); font-size:.6875rem}
   .song.playing .t{color:var(--gold)}
   .empty{margin:14px 0 0; color:var(--dimmer); font-size:.8125rem}
+  .song .x{
+    flex:none; width:30px; height:30px; margin-left:4px; border-radius:50%;
+    border:1px solid var(--line2); background:transparent; color:var(--dimmer);
+    font:inherit; font-size:.8125rem; line-height:1; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .song .x:hover{color:var(--ink); border-color:rgba(255,255,255,.24)}
 
   .now{display:flex; flex-direction:column; gap:12px}
   .now .title{margin:0; font-family:var(--serif); font-size:1.0625rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -146,7 +153,7 @@
 
   <header>
     <h1>The Music</h1>
-    <p class="sub">Play the songs on this phone, cut a ringtone out of one, and make a cover picture for it. Nothing leaves the phone.</p>
+    <p class="sub">Play the songs on this phone, cut a ringtone out of one, and make a cover picture for it. Nothing leaves the phone, and the songs are kept here for next time.</p>
   </header>
 
   <div class="tabs" role="tablist">
@@ -160,12 +167,16 @@
     <div class="card">
       <p class="kicker">From this phone</p>
       <h2>Add your songs</h2>
-      <p class="hint">Pick audio files from the phone. They play here and are never uploaded anywhere.</p>
+      <p class="hint">Pick audio files from the phone. They play here, they are never uploaded anywhere, and the list stays here so it is waiting next time.</p>
       <label class="drop" for="audioInput">Tap to choose songs <b>(mp3, m4a, wav, ogg…)</b></label>
       <input type="file" id="audioInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac" multiple hidden>
       <ul class="list" id="playlist"></ul>
       <p class="empty" id="emptyList">No songs added yet.</p>
+      <div class="row" id="keepRow" hidden>
+        <button class="btn ghost" id="forgetBtn" type="button">Remove all from this phone</button>
+      </div>
       <p class="status" id="playerStatus" role="status" aria-live="polite"></p>
+      <p class="note">The songs are kept inside this phone's browser, so they are still here next time you open the page. That uses space on the phone — the ✕ takes any one back off.</p>
     </div>
 
     <div class="card" id="nowCard" hidden>
@@ -279,7 +290,7 @@
     </div>
   </section>
 
-  <footer>Everything here runs on this phone. The songs and pictures are not uploaded.</footer>
+  <footer>Everything here runs on this phone. The songs and pictures are not uploaded, and the songs are kept on the phone so they are here next time.</footer>
 </div>
 
 <audio id="audio" preload="metadata"></audio>
@@ -291,10 +302,14 @@
 
   var $ = function(id){ return document.getElementById(id); };
 
-  // Everything the page knows about the phone's files lives here, in memory.
-  // The object URLs point at the real files the person chose; nothing is sent
-  // to a server, so a reload forgets them, which is the honest behaviour.
-  var songs = [];        // { name, meta, url, file, duration }
+  // Every song the page knows about lives here:
+  //   { key, name, meta, url, file, duration, added }
+  // The object URLs point at files on this phone and nothing is ever sent to a
+  // server. The file is also copied into the phone's own browser storage (just
+  // below) so the list survives a reload. It used to be memory only, and a
+  // reload dropped every song, which made the page look like it had lost them.
+  var songs = [];
+  var kept = {};         // key -> true, so one file is never stored twice
   var current = -1;      // index into songs
   var ringIndex = -1;    // index the ringtone tab is working on
   var ringBuffer = null; // decoded AudioBuffer for that song
@@ -328,6 +343,120 @@
     el.className = 'status' + (isErr ? ' err' : '');
   }
 
+  // ── keeping the songs on the phone ────────────────────────────────────────
+  // A reload used to lose the list because a song was only an object URL
+  // pointing at a file the person had picked. The file is now copied into the
+  // browser's own storage on the phone as well. It is still on the device and
+  // still never uploaded; it just means the songs are waiting next time.
+  var DB_NAME = 'tsid-music';
+  var dbPromise = null;
+
+  function openDb(){
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function(resolve, reject){
+      if (!window.indexedDB) { reject(new Error('no store')); return; }
+      var req = window.indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function(){
+        var db = req.result;
+        if (!db.objectStoreNames.contains('songs')) db.createObjectStore('songs', { keyPath: 'key' });
+        if (!db.objectStoreNames.contains('info')) db.createObjectStore('info', { keyPath: 'key' });
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error || new Error('no store')); };
+    });
+    return dbPromise;
+  }
+
+  function dbPut(store, record){
+    return openDb().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(store, 'readwrite');
+        tx.objectStore(store).put(record);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ reject(tx.error || new Error('write')); };
+        tx.onabort = function(){ reject(tx.error || new Error('write')); };
+      });
+    });
+  }
+
+  function dbAll(store){
+    return openDb().then(function(db){
+      return new Promise(function(resolve, reject){
+        var out = [];
+        var req = db.transaction(store, 'readonly').objectStore(store).openCursor();
+        req.onsuccess = function(){
+          var cursor = req.result;
+          if (cursor) { out.push(cursor.value); cursor.continue(); } else resolve(out);
+        };
+        req.onerror = function(){ reject(req.error || new Error('read')); };
+      });
+    });
+  }
+
+  function dbDrop(key){
+    return openDb().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(['songs', 'info'], 'readwrite');
+        tx.objectStore('songs').delete(key);
+        tx.objectStore('info').delete(key);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ resolve(); };
+      });
+    }).catch(function(){ /* nothing was ever kept */ });
+  }
+
+  function dbDropAll(){
+    return openDb().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(['songs', 'info'], 'readwrite');
+        tx.objectStore('songs').clear();
+        tx.objectStore('info').clear();
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ resolve(); };
+      });
+    }).catch(function(){ /* nothing was ever kept */ });
+  }
+
+  function keepSong(entry){
+    if (!entry || !entry.file) return;
+    dbPut('songs', {
+      key: entry.key,
+      name: entry.name,
+      meta: entry.meta,
+      type: entry.file.type || '',
+      blob: entry.file,
+      added: entry.added || Date.now(),
+    }).catch(function(){
+      say($('playerStatus'), 'This phone would not keep the songs (the storage may be full, or the browser is in a private window). They still play now.', true);
+    });
+  }
+
+  function restoreSongs(){
+    if (!window.indexedDB) return;
+    Promise.all([dbAll('songs'), dbAll('info')]).then(function(parts){
+      var lengths = {};
+      parts[1].forEach(function(r){ if (r && r.key) lengths[r.key] = r.duration || 0; });
+      parts[0].sort(function(a, b){ return (a.added || 0) - (b.added || 0); }).forEach(function(r){
+        if (!r || !r.blob || kept[r.key]) return;
+        kept[r.key] = true;
+        songs.push({
+          key: r.key,
+          name: r.name || baseName(r.meta),
+          meta: r.meta || 'Kept on this phone',
+          url: URL.createObjectURL(r.blob),
+          file: r.blob,
+          duration: lengths[r.key] || 0,
+          added: r.added || 0,
+        });
+      });
+      if (!songs.length) return;
+      renderPlaylist();
+      renderRingtoneOptions();
+      selectSong(0, false);
+      say($('playerStatus'), songs.length + (songs.length === 1 ? ' song kept on this phone.' : ' songs kept on this phone.'));
+    }).catch(function(){ /* nothing kept yet, or this browser will not keep them */ });
+  }
+
   // ── tabs ──────────────────────────────────────────────────────────────────
   var tabs = [
     ['tab-player', 'panel-player'],
@@ -353,31 +482,48 @@
     audioInput.value = '';
   });
 
+  // The name plus the size plus when it was last changed is enough to tell one
+  // file from another, so adding the same song twice does not store it twice.
+  function fileKey(file){
+    return String(file.name || 'song') + '|' + (file.size || 0) + '|' + (file.lastModified || 0);
+  }
+
   function addFiles(files){
     var added = 0;
-    files.forEach(function(file){
+    var already = 0;
+    var stamp = Date.now();
+    files.forEach(function(file, i){
       if (!file) return;
       var looksAudio = /^audio\//.test(file.type || '') || /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i.test(file.name);
       if (!looksAudio) return;
+      var key = fileKey(file);
+      if (kept[key]) { already++; return; }
+      kept[key] = true;
       var entry = {
+        key: key,
         name: baseName(file.name),
         meta: file.name,
         url: URL.createObjectURL(file),
         file: file,
         duration: 0,
+        added: stamp + i,
       };
       // Read the length in the background so the list can show it without
       // holding the song up. Some phones report Infinity for a streamed m4a,
       // which is why it is checked rather than trusted.
       readDuration(entry);
       songs.push(entry);
+      keepSong(entry);
       added++;
     });
     if (!added){
-      say($('playerStatus'), 'Those files are not audio this phone can play.', true);
+      if (already) say($('playerStatus'), 'Those songs are already in the list.');
+      else say($('playerStatus'), 'Those files are not audio this phone can play.', true);
       return;
     }
-    say($('playerStatus'), added + (added === 1 ? ' song added.' : ' songs added.'));
+    var msg = added + (added === 1 ? ' song added.' : ' songs added.');
+    if (already) msg += ' ' + already + (already === 1 ? ' was already here.' : ' were already here.');
+    say($('playerStatus'), msg);
     renderPlaylist();
     renderRingtoneOptions();
     if (current < 0) selectSong(0, false);
@@ -388,7 +534,11 @@
     probe.preload = 'metadata';
     probe.src = entry.url;
     probe.addEventListener('loadedmetadata', function(){
-      if (isFinite(probe.duration) && probe.duration > 0) entry.duration = probe.duration;
+      if (isFinite(probe.duration) && probe.duration > 0) {
+        entry.duration = probe.duration;
+        // Only the length is written back - the song itself is already kept.
+        dbPut('info', { key: entry.key, duration: entry.duration }).catch(function(){});
+      }
       renderPlaylist();
       renderRingtoneOptions();
       if (entry === songs[ringIndex]) syncRingtoneRange();
@@ -419,12 +569,71 @@
       meta.appendChild(t);
       meta.appendChild(d);
 
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'x';
+      x.setAttribute('aria-label', 'Remove ' + s.name + ' from this phone');
+      x.textContent = '✕';
+      x.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        removeSong(i);
+      });
+
       li.appendChild(idx);
       li.appendChild(meta);
+      li.appendChild(x);
       li.addEventListener('click', function(){ selectSong(i, true); });
       list.appendChild(li);
     });
+    $('keepRow').hidden = songs.length === 0;
   }
+
+  function removeSong(i){
+    var s = songs[i];
+    if (!s) return;
+    if (i === current) {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      current = -1;
+      $('nowCard').hidden = true;
+    } else if (i < current) {
+      current--;
+    }
+    if (i === ringIndex) {
+      preview.pause();
+      preview.removeAttribute('src');
+      ringIndex = -1;
+      ringBuffer = null;
+    }
+    URL.revokeObjectURL(s.url);
+    delete kept[s.key];
+    songs.splice(i, 1);
+    dbDrop(s.key);
+    renderPlaylist();
+    renderRingtoneOptions();
+    say($('playerStatus'), 'Removed from this phone.');
+  }
+
+  $('forgetBtn').addEventListener('click', function(){
+    if (!songs.length) return;
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+    preview.pause();
+    preview.removeAttribute('src');
+    songs.forEach(function(s){ URL.revokeObjectURL(s.url); });
+    songs = [];
+    kept = {};
+    current = -1;
+    ringIndex = -1;
+    ringBuffer = null;
+    $('nowCard').hidden = true;
+    dbDropAll();
+    renderPlaylist();
+    renderRingtoneOptions();
+    say($('playerStatus'), 'All songs removed from this phone.');
+  });
 
   // ── player ────────────────────────────────────────────────────────────────
   function selectSong(i, play){
@@ -834,6 +1043,8 @@
   renderRingtoneOptions();
   setSize('square');
   paintRingLabels();
+  // Whatever was kept from last time comes back here.
+  restoreSongs();
 })();
 </script>
 </body>

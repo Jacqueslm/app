@@ -56,6 +56,7 @@
   a.card.z .mark{background:var(--gold)}
   a.card.f .mark{background:var(--lamp)}
   a.card.h .mark{background:var(--teal)}
+  a.card.m .mark{background:var(--violet)}
   .kicker{
     font-size:.625rem; letter-spacing:.14em; text-transform:uppercase;
     color:var(--dimmer); margin:0 0 7px;
@@ -63,6 +64,7 @@
   a.card.z .kicker{color:var(--gold)}
   a.card.f .kicker{color:var(--lamp)}
   a.card.h .kicker{color:var(--teal)}
+  a.card.m .kicker{color:var(--violet)}
   .name{margin:0; font-family:var(--serif); font-size:1.1875rem; font-weight:500; line-height:1.25}
   .note{margin:7px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
   .go{
@@ -102,7 +104,7 @@
   <header>
     <div>
       <h1>The Truth</h1>
-      <p class="sub" id="whoTag">Three things: the Zodiacs, the Fight, and the Herbs.</p>
+      <p class="sub" id="whoTag">Four things: the Zodiacs, the Fight, the Herbs, and the Music.</p>
     </div>
     <button class="quiet" id="signOut" hidden>Sign out</button>
   </header>
@@ -146,6 +148,14 @@
       <p class="note">The herb library — what each one is, what it is used for, and where it comes from.</p>
       <p class="go">Open <span aria-hidden="true">→</span></p>
     </a>
+
+    <a class="card m" href="/music">
+      <span class="mark" aria-hidden="true"></span>
+      <p class="kicker">The music</p>
+      <h2 class="name">The Player</h2>
+      <p class="note">Play the songs on this phone, cut a ringtone out of one, and make a cover picture for it.</p>
+      <p class="go">Open <span aria-hidden="true">→</span></p>
+    </a>
   </section>
 
   <footer id="foot">Private. Signed in only.</footer>
@@ -174,7 +184,7 @@
     locked.hidden = false;
     open.hidden = true;
     signOut.hidden = true;
-    whoTag.textContent = 'Three things: the Zodiacs, the Fight, and the Herbs.';
+    whoTag.textContent = 'Four things: the Zodiacs, the Fight, the Herbs, and the Music.';
     try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
   }
 
@@ -182,7 +192,7 @@
     locked.hidden = true;
     open.hidden = false;
     signOut.hidden = false;
-    whoTag.textContent = email ? ('Signed in as ' + email) : 'Three things: the Zodiacs, the Fight, and the Herbs.';
+    whoTag.textContent = email ? ('Signed in as ' + email) : 'Four things: the Zodiacs, the Fight, the Herbs, and the Music.';
     msg.textContent = '';
   }
 

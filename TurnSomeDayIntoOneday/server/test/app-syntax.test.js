@@ -71,7 +71,10 @@ test('the other shipped HTML pages parse too', () => {
   // than it ever did: the fight is 669 lines of game lifted out of the recovery
   // app into a page of its own, and a SyntaxError in it means the whole game is
   // dead in the browser while the page still looks like it loaded.
-  const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html'];
+  // music.html joined on 5 Oct 2026. Its whole page is one inline script - the
+  // player, the WAV cutter and the canvas cover maker - so a SyntaxError in it
+  // leaves a page that looks loaded and does nothing.
+  const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

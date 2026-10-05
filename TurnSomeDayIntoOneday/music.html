@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Music</title>
+<meta name="theme-color" content="#07060d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307060d'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23e8c07a' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='13' r='3.5' fill='%23e8c07a'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/zodiacs-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#07060d; --bg2:#0d0b1a;
+    --ink:#ece9f5; --dim:#a29cbb; --dimmer:#6f6890;
+    --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
+    --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.055);
+    --gold:#e8c07a; --violet:#a78bfa; --teal:#5fd9c4; --rose:#f0919f;
+    --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; min-height:100dvh; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    padding:calc(env(safe-area-inset-top,0px) + 22px) 18px calc(env(safe-area-inset-bottom,0px) + 34px);
+  }
+  .wrap{width:100%; max-width:560px}
+  .back{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:var(--dim); font-size:.75rem; letter-spacing:.04em; margin-bottom:22px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .back:hover{color:var(--ink)}
+  header{margin-bottom:20px}
+  h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter-spacing:.01em}
+  .sub{margin:6px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
+
+  .tabs{display:flex; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:5px; margin-bottom:20px}
+  .tab{
+    flex:1; text-align:center; padding:9px 6px; border-radius:999px; cursor:pointer;
+    background:none; border:0; color:var(--dim); font:inherit; font-size:.8125rem;
+    -webkit-tap-highlight-color:transparent; transition:background .16s ease,color .16s ease;
+  }
+  .tab[aria-selected="true"]{background:var(--card2); color:var(--ink)}
+  .tab:hover{color:var(--ink)}
+
+  .panel[hidden]{display:none !important}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    padding:18px; margin-bottom:14px;
+  }
+  h2{margin:0 0 4px; font-family:var(--serif); font-size:1.0625rem; font-weight:500}
+  .hint{margin:0 0 14px; color:var(--dim); font-size:.8125rem; line-height:1.55}
+  .kicker{font-size:.625rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dimmer); margin:0 0 8px}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    padding:12px 15px; font:inherit; font-size:.875rem; font-weight:500;
+    color:#1a1408; background:var(--gold); border:0; border-radius:11px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover{filter:brightness(1.06)}
+  .btn[disabled]{opacity:.5; cursor:default; filter:none}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:rgba(255,255,255,.24); filter:none}
+  .btn.wide{width:100%}
+  .row{display:flex; gap:9px; flex-wrap:wrap}
+  .row .btn{flex:1; min-width:120px}
+
+  .drop{
+    border:1px dashed rgba(255,255,255,.22); border-radius:14px; padding:22px 16px;
+    text-align:center; color:var(--dim); font-size:.8125rem; line-height:1.5;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .drop:hover{border-color:rgba(232,192,122,.5); color:var(--ink)}
+  .drop b{color:var(--gold); font-weight:500}
+
+  .list{list-style:none; margin:14px 0 0; padding:0; display:grid; gap:8px}
+  .song{
+    display:flex; align-items:center; gap:12px; padding:11px 13px;
+    background:var(--card2); border:1px solid var(--line2); border-radius:12px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .song:hover{border-color:var(--line)}
+  .song.playing{border-color:rgba(232,192,122,.55)}
+  .song .idx{color:var(--dimmer); font-size:.75rem; width:1.2em; text-align:right; flex:none}
+  .song .meta{min-width:0; flex:1}
+  .song .t{margin:0; font-size:.9375rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .song .d{margin:2px 0 0; color:var(--dimmer); font-size:.6875rem}
+  .song.playing .t{color:var(--gold)}
+  .empty{margin:14px 0 0; color:var(--dimmer); font-size:.8125rem}
+
+  .now{display:flex; flex-direction:column; gap:12px}
+  .now .title{margin:0; font-family:var(--serif); font-size:1.0625rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .now .artist{margin:2px 0 0; color:var(--dimmer); font-size:.75rem}
+  .seek, .slider{width:100%; -webkit-appearance:none; appearance:none; height:4px; border-radius:999px; background:rgba(255,255,255,.14); outline:none; margin:6px 0 0}
+  .seek::-webkit-slider-thumb, .slider::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--gold); cursor:pointer}
+  .seek::-moz-range-thumb, .slider::-moz-range-thumb{width:16px; height:16px; border:0; border-radius:50%; background:var(--gold); cursor:pointer}
+  .times{display:flex; justify-content:space-between; color:var(--dimmer); font-size:.6875rem; margin-top:4px}
+  .controls{display:flex; align-items:center; justify-content:center; gap:22px; margin-top:2px}
+  .round{
+    width:54px; height:54px; border-radius:50%; border:0; background:var(--gold); color:#1a1408;
+    font-size:1.25rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .round.small{width:40px; height:40px; font-size:.9375rem; background:var(--card2); color:var(--ink); border:1px solid var(--line)}
+  .round.small:hover{border-color:rgba(255,255,255,.24)}
+  .round[disabled]{opacity:.45; cursor:default}
+
+  label.f{display:block; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer); margin:0 0 7px}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; margin:0 0 13px; padding:11px 12px; font:inherit; font-size:.9375rem;
+    color:var(--ink); background:rgba(0,0,0,.28);
+    border:1px solid var(--line); border-radius:11px; outline:none;
+  }
+  input:focus, select:focus, textarea:focus{border-color:rgba(232,192,122,.55)}
+  select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%); background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%; background-size:5px 5px,5px 5px; background-repeat:no-repeat}
+  .two{display:flex; gap:10px}
+  .two > *{flex:1}
+  .val{color:var(--gold); font-size:.75rem; letter-spacing:.04em}
+  .note{margin:12px 0 0; color:var(--dimmer); font-size:.75rem; line-height:1.6}
+  .status{margin:10px 0 0; font-size:.8125rem; line-height:1.5; min-height:1.2em; color:var(--teal)}
+  .status.err{color:var(--rose)}
+  canvas.preview{width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:#000; display:block}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 13px}
+  .chip{
+    padding:7px 12px; border-radius:999px; border:1px solid var(--line); background:transparent;
+    color:var(--dim); font:inherit; font-size:.75rem; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .chip:hover{color:var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--card2); color:var(--ink); border-color:rgba(232,192,122,.45)}
+  footer{margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="/app"><span aria-hidden="true">←</span> The app</a>
+
+  <header>
+    <h1>The Music</h1>
+    <p class="sub">Play the songs on this phone, cut a ringtone out of one, and make a cover picture for it. Nothing leaves the phone.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-player" aria-selected="true" aria-controls="panel-player">Player</button>
+    <button class="tab" role="tab" id="tab-ringtone" aria-selected="false" aria-controls="panel-ringtone">Ringtone</button>
+    <button class="tab" role="tab" id="tab-thumb" aria-selected="false" aria-controls="panel-thumb">Cover</button>
+  </div>
+
+  <!-- ───────────────────────── PLAYER ───────────────────────── -->
+  <section class="panel" id="panel-player" role="tabpanel" aria-labelledby="tab-player">
+    <div class="card">
+      <p class="kicker">From this phone</p>
+      <h2>Add your songs</h2>
+      <p class="hint">Pick audio files from the phone. They play here and are never uploaded anywhere.</p>
+      <label class="drop" for="audioInput">Tap to choose songs <b>(mp3, m4a, wav, ogg…)</b></label>
+      <input type="file" id="audioInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac" multiple hidden>
+      <ul class="list" id="playlist"></ul>
+      <p class="empty" id="emptyList">No songs added yet.</p>
+      <p class="status" id="playerStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="card" id="nowCard" hidden>
+      <div class="now">
+        <div>
+          <p class="title" id="nowTitle">—</p>
+          <p class="artist" id="nowMeta"></p>
+        </div>
+        <input type="range" class="seek" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek">
+        <div class="times"><span id="tText">0:00</span><span id="dText">0:00</span></div>
+        <div class="controls">
+          <button class="round small" id="prev" aria-label="Previous">⏮</button>
+          <button class="round" id="playBtn" aria-label="Play">▶</button>
+          <button class="round small" id="next" aria-label="Next">⏭</button>
+        </div>
+      </div>
+      <p class="note" id="playerNote"></p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── RINGTONE ───────────────────────── -->
+  <section class="panel" id="panel-ringtone" role="tabpanel" aria-labelledby="tab-ringtone" hidden>
+    <div class="card">
+      <p class="kicker">Cut one out</p>
+      <h2>Ringtone maker</h2>
+      <p class="hint">Choose a song, drag the two handles to the part you want, listen to it, then save the clip. A ringtone sounds best at 15–30 seconds.</p>
+
+      <label class="f" for="ringtoneSelect">Song</label>
+      <select id="ringtoneSelect"><option value="">No songs added yet</option></select>
+
+      <label class="f" for="ringStart">Start — <span class="val" id="startVal">0:00</span></label>
+      <input type="range" class="slider" id="ringStart" min="0" max="100" value="0" step="0.1">
+
+      <label class="f" for="ringEnd">End — <span class="val" id="endVal">0:00</span></label>
+      <input type="range" class="slider" id="ringEnd" min="0" max="100" value="100" step="0.1">
+
+      <div class="chips" id="lenChips">
+        <button class="chip" data-len="15" type="button">15s</button>
+        <button class="chip" data-len="20" type="button">20s</button>
+        <button class="chip" data-len="30" type="button">30s</button>
+        <button class="chip" data-len="40" type="button">40s</button>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="previewBtn" type="button" disabled>▶ Listen</button>
+        <button class="btn" id="saveBtn" type="button" disabled>Save ringtone</button>
+      </div>
+      <p class="status" id="ringStatus" role="status" aria-live="polite"></p>
+      <p class="note">Saves a WAV file of the clip. On an Android phone you can set it as your ringtone from the file. On an iPhone it needs to be an .m4r in the Ringtone folder, so keep it as a sound for now.</p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── COVER / THUMBNAIL ───────────────────────── -->
+  <section class="panel" id="panel-thumb" role="tabpanel" aria-labelledby="tab-thumb" hidden>
+    <div class="card">
+      <p class="kicker">Make a picture</p>
+      <h2>Cover &amp; thumbnail maker</h2>
+      <p class="hint">A picture for the song — as a square, a wide YouTube image, or a tall story. Your own photo behind it, your words on top.</p>
+
+      <canvas class="preview" id="thumbCanvas" width="1080" height="1080"></canvas>
+
+      <p class="kicker" style="margin-top:16px">Shape</p>
+      <div class="chips" id="sizeChips">
+        <button class="chip" data-size="square" type="button" aria-pressed="true">Square 1:1</button>
+        <button class="chip" data-size="wide" type="button" aria-pressed="false">Wide 16:9</button>
+        <button class="chip" data-size="tall" type="button" aria-pressed="false">Tall 9:16</button>
+      </div>
+
+      <label class="f" for="thumbPhoto">Background photo (optional)</label>
+      <label class="drop" for="thumbPhoto" id="photoDrop">Tap to choose a picture <b>(jpg, png, webp)</b></label>
+      <input type="file" id="thumbPhoto" accept="image/*" hidden>
+
+      <p class="kicker" style="margin-top:16px">Backdrop</p>
+      <div class="chips" id="toneChips">
+        <button class="chip" data-tone="night" type="button" aria-pressed="true">Night</button>
+        <button class="chip" data-tone="dusk" type="button" aria-pressed="false">Dusk</button>
+        <button class="chip" data-tone="sea" type="button" aria-pressed="false">Sea</button>
+        <button class="chip" data-tone="plain" type="button" aria-pressed="false">Black</button>
+      </div>
+
+      <label class="f" for="thumbTitle">Title</label>
+      <input type="text" id="thumbTitle" value="" placeholder="Song title" maxlength="60">
+
+      <label class="f" for="thumbSub">Line under it</label>
+      <input type="text" id="thumbSub" value="" placeholder="Artist · album · year" maxlength="80">
+
+      <div class="two">
+        <div>
+          <label class="f" for="thumbPos">Words sit</label>
+          <select id="thumbPos">
+            <option value="bottom">At the bottom</option>
+            <option value="center">In the middle</option>
+            <option value="top">At the top</option>
+          </select>
+        </div>
+        <div>
+          <label class="f" for="thumbSize">Title size</label>
+          <select id="thumbSize">
+            <option value="0.09">Small</option>
+            <option value="0.12" selected>Medium</option>
+            <option value="0.16">Large</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="useNow" type="button">Use playing song</button>
+        <button class="btn" id="saveThumb" type="button">Save picture</button>
+      </div>
+      <p class="status" id="thumbStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <footer>Everything here runs on this phone. The songs and pictures are not uploaded.</footer>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+<audio id="preview" preload="none"></audio>
+
+<script>
+(function(){
+  'use strict';
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  // Everything the page knows about the phone's files lives here, in memory.
+  // The object URLs point at the real files the person chose; nothing is sent
+  // to a server, so a reload forgets them, which is the honest behaviour.
+  var songs = [];        // { name, meta, url, file, duration }
+  var current = -1;      // index into songs
+  var ringIndex = -1;    // index the ringtone tab is working on
+  var ringBuffer = null; // decoded AudioBuffer for that song
+
+  var audio = $('audio');
+  var preview = $('preview');
+
+  // ── helpers ───────────────────────────────────────────────────────────────
+  function fmt(sec){
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function baseName(name){
+    return String(name || '').replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Song';
+  }
+  function safeName(name){
+    return String(name || 'song').replace(/[^a-z0-9\-_ ]/gi, '').trim().replace(/\s+/g, '-').toLowerCase() || 'song';
+  }
+  function download(blob, filename){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+  function say(el, text, isErr){
+    el.textContent = text || '';
+    el.className = 'status' + (isErr ? ' err' : '');
+  }
+
+  // ── tabs ──────────────────────────────────────────────────────────────────
+  var tabs = [
+    ['tab-player', 'panel-player'],
+    ['tab-ringtone', 'panel-ringtone'],
+    ['tab-thumb', 'panel-thumb'],
+  ];
+  tabs.forEach(function(pair){
+    $(pair[0]).addEventListener('click', function(){
+      tabs.forEach(function(other){
+        var on = other[0] === pair[0];
+        $(other[0]).setAttribute('aria-selected', on ? 'true' : 'false');
+        $(other[1]).hidden = !on;
+      });
+      if (pair[0] === 'tab-thumb') drawThumb();
+    });
+  });
+
+  // ── adding songs ──────────────────────────────────────────────────────────
+  var audioInput = $('audioInput');
+  audioInput.addEventListener('change', function(){
+    var files = Array.prototype.slice.call(audioInput.files || []);
+    addFiles(files);
+    audioInput.value = '';
+  });
+
+  function addFiles(files){
+    var added = 0;
+    files.forEach(function(file){
+      if (!file) return;
+      var looksAudio = /^audio\//.test(file.type || '') || /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i.test(file.name);
+      if (!looksAudio) return;
+      var entry = {
+        name: baseName(file.name),
+        meta: file.name,
+        url: URL.createObjectURL(file),
+        file: file,
+        duration: 0,
+      };
+      // Read the length in the background so the list can show it without
+      // holding the song up. Some phones report Infinity for a streamed m4a,
+      // which is why it is checked rather than trusted.
+      readDuration(entry);
+      songs.push(entry);
+      added++;
+    });
+    if (!added){
+      say($('playerStatus'), 'Those files are not audio this phone can play.', true);
+      return;
+    }
+    say($('playerStatus'), added + (added === 1 ? ' song added.' : ' songs added.'));
+    renderPlaylist();
+    renderRingtoneOptions();
+    if (current < 0) selectSong(0, false);
+  }
+
+  function readDuration(entry){
+    var probe = document.createElement('audio');
+    probe.preload = 'metadata';
+    probe.src = entry.url;
+    probe.addEventListener('loadedmetadata', function(){
+      if (isFinite(probe.duration) && probe.duration > 0) entry.duration = probe.duration;
+      renderPlaylist();
+      renderRingtoneOptions();
+      if (entry === songs[ringIndex]) syncRingtoneRange();
+    });
+    probe.addEventListener('error', function(){ /* leave the length blank */ });
+  }
+
+  function renderPlaylist(){
+    var list = $('playlist');
+    list.innerHTML = '';
+    $('emptyList').hidden = songs.length > 0;
+    songs.forEach(function(s, i){
+      var li = document.createElement('li');
+      li.className = 'song' + (i === current ? ' playing' : '');
+
+      var idx = document.createElement('span');
+      idx.className = 'idx';
+      idx.textContent = i === current ? '▶' : String(i + 1);
+
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var t = document.createElement('p');
+      t.className = 't';
+      t.textContent = s.name;
+      var d = document.createElement('p');
+      d.className = 'd';
+      d.textContent = s.duration ? fmt(s.duration) : s.meta;
+      meta.appendChild(t);
+      meta.appendChild(d);
+
+      li.appendChild(idx);
+      li.appendChild(meta);
+      li.addEventListener('click', function(){ selectSong(i, true); });
+      list.appendChild(li);
+    });
+  }
+
+  // ── player ────────────────────────────────────────────────────────────────
+  function selectSong(i, play){
+    if (i < 0 || i >= songs.length) return;
+    current = i;
+    var s = songs[i];
+    audio.src = s.url;
+    $('nowCard').hidden = false;
+    $('nowTitle').textContent = s.name;
+    $('nowMeta').textContent = s.meta;
+    $('playerNote').textContent = '';
+    if (play) {
+      audio.play().catch(function(){
+        say($('playerStatus'), 'The phone would not start the song. Tap play once more.', true);
+      });
+    }
+    renderPlaylist();
+  }
+
+  $('playBtn').addEventListener('click', function(){
+    if (current < 0 && songs.length) selectSong(0, false);
+    if (audio.paused) audio.play().catch(function(){});
+    else audio.pause();
+  });
+  $('prev').addEventListener('click', function(){ step(-1); });
+  $('next').addEventListener('click', function(){ step(1); });
+  function step(dir){
+    if (!songs.length) return;
+    var n = current + dir;
+    if (n < 0) n = songs.length - 1;
+    if (n >= songs.length) n = 0;
+    selectSong(n, true);
+  }
+
+  audio.addEventListener('play', function(){ $('playBtn').textContent = '❚❚'; });
+  audio.addEventListener('pause', function(){ $('playBtn').textContent = '▶'; });
+  audio.addEventListener('ended', function(){ if (songs.length > 1) step(1); });
+  audio.addEventListener('loadedmetadata', function(){ $('dText').textContent = fmt(audio.duration); });
+  audio.addEventListener('timeupdate', function(){
+    var d = audio.duration;
+    if (isFinite(d) && d > 0) $('seek').value = String(Math.round(audio.currentTime / d * 1000));
+    $('tText').textContent = fmt(audio.currentTime);
+  });
+  audio.addEventListener('error', function(){
+    if (current >= 0) $('playerNote').textContent = 'This file would not play here. Some phones only play music bought on them.';
+  });
+  $('seek').addEventListener('input', function(){
+    var d = audio.duration;
+    if (isFinite(d) && d > 0) audio.currentTime = Number($('seek').value) / 1000 * d;
+  });
+
+  // ── ringtone ──────────────────────────────────────────────────────────────
+  function renderRingtoneOptions(){
+    var sel = $('ringtoneSelect');
+    var keep = sel.value;
+    sel.innerHTML = '';
+    if (!songs.length) {
+      var o = document.createElement('option');
+      o.value = '';
+      o.textContent = 'No songs added yet — add some on the Player tab';
+      sel.appendChild(o);
+      setRingEnabled(false);
+      return;
+    }
+    songs.forEach(function(s, i){
+      var opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = s.name + (s.duration ? '  ·  ' + fmt(s.duration) : '');
+      sel.appendChild(opt);
+    });
+    // Keep the person's choice where it still points at a song.
+    if (keep !== '' && songs[Number(keep)]) sel.value = keep;
+    if (sel.value === '') sel.value = String(Math.max(0, current));
+    chooseRingtone(Number(sel.value));
+  }
+
+  function setRingEnabled(on){
+    $('previewBtn').disabled = !on;
+    $('saveBtn').disabled = !on;
+  }
+
+  $('ringtoneSelect').addEventListener('change', function(){
+    chooseRingtone(Number($('ringtoneSelect').value));
+  });
+
+  function chooseRingtone(i){
+    ringBuffer = null;
+    if (!(i >= 0) || !songs[i]) { setRingEnabled(false); return; }
+    ringIndex = i;
+    var s = songs[i];
+    var dur = s.duration || 30;
+    var start = $('ringStart');
+    var end = $('ringEnd');
+    start.max = String(dur);
+    end.max = String(dur);
+    var keepLen = Math.min(30, dur);
+    start.value = '0';
+    end.value = String(keepLen);
+    paintRingLabels();
+    setRingEnabled(true);
+    say($('ringStatus'), 'Ready. Drag the handles to the part you want.');
+  }
+
+  function paintRingLabels(){
+    $('startVal').textContent = fmt(Number($('ringStart').value));
+    $('endVal').textContent = fmt(Number($('ringEnd').value));
+  }
+
+  function syncRingtoneRange(){
+    if (!songs[ringIndex]) return;
+    var dur = songs[ringIndex].duration;
+    if (!dur) return;
+    $('ringStart').max = String(dur);
+    $('ringEnd').max = String(dur);
+    if (Number($('ringEnd').value) > dur) $('ringEnd').value = String(dur);
+    paintRingLabels();
+  }
+
+  $('ringStart').addEventListener('input', function(){
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    if (start > end - 1) { $('ringEnd').value = String(Math.min(start + 1, Number($('ringEnd').max))); }
+    paintRingLabels();
+  });
+  $('ringEnd').addEventListener('input', function(){
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    if (end < start + 1) { $('ringStart').value = String(Math.max(0, end - 1)); }
+    paintRingLabels();
+  });
+
+  Array.prototype.forEach.call($('lenChips').querySelectorAll('.chip'), function(chip){
+    chip.addEventListener('click', function(){
+      var len = Number(chip.getAttribute('data-len'));
+      var start = Number($('ringStart').value);
+      var max = Number($('ringEnd').max);
+      var end = Math.min(start + len, max);
+      if (end - start < 1) { start = Math.max(0, end - len); $('ringStart').value = String(start); }
+      $('ringEnd').value = String(end);
+      paintRingLabels();
+      Array.prototype.forEach.call($('lenChips').querySelectorAll('.chip'), function(c){
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+      });
+    });
+  });
+
+  $('previewBtn').addEventListener('click', function(){
+    if (!songs[ringIndex]) return;
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    preview.src = songs[ringIndex].url;
+    preview.currentTime = start;
+    preview.play().catch(function(){});
+    say($('ringStatus'), 'Listening to ' + fmt(start) + '–' + fmt(end) + '.');
+  });
+  preview.addEventListener('timeupdate', function(){
+    var end = Number($('ringEnd').value);
+    if (preview.currentTime >= end) { preview.pause(); preview.currentTime = Number($('ringStart').value); }
+  });
+
+  $('saveBtn').addEventListener('click', function(){
+    var s = songs[ringIndex];
+    if (!s) return;
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    if (!s.file) { say($('ringStatus'), 'That song is no longer available. Add it again.', true); return; }
+    say($('ringStatus'), 'Cutting the clip…');
+    $('saveBtn').disabled = true;
+    decodeFile(s.file)
+      .then(function(buffer){
+        var blob = encodeWav(buffer, start, end);
+        download(blob, safeName(s.name) + '-ringtone.wav');
+        say($('ringStatus'), 'Saved ' + fmt(end - start) + ' as ' + safeName(s.name) + '-ringtone.wav');
+      })
+      .catch(function(){
+        say($('ringStatus'), 'The phone would not read that file to cut it. Try a different song.', true);
+      })
+      .then(function(){ $('saveBtn').disabled = false; });
+  });
+
+  var audioCtx = null;
+  function decodeFile(file){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return Promise.reject(new Error('no audio context'));
+    if (!audioCtx) audioCtx = new AC();
+    return file.arrayBuffer().then(function(buf){
+      return new Promise(function(resolve, reject){
+        // Older Safari only takes the callback form of decodeAudioData.
+        var r = audioCtx.decodeAudioData(buf, resolve, reject);
+        if (r && typeof r.then === 'function') r.then(resolve, reject);
+      });
+    });
+  }
+
+  // A 16-bit PCM WAV of one span of a decoded song. Written by hand because the
+  // phone's own formats (m4a, mp3) need a licence-bearing encoder to write back.
+  function encodeWav(buf, startSec, endSec){
+    var sr = buf.sampleRate;
+    var ch = Math.min(2, buf.numberOfChannels);
+    // Both ends are clamped inside the song before anything is sized. The two
+    // handles cannot exceed the length the phone reported, but that length can
+    // be shorter than what actually decoded - so a stale value must never ask
+    // for bytes that are not there, which would size the buffer negative.
+    var maxStart = Math.max(0, buf.length - 1);
+    var start = Math.max(0, Math.min(maxStart, Math.floor(startSec * sr)));
+    var end = Math.max(start + 1, Math.min(buf.length, Math.floor(endSec * sr)));
+    var frames = end - start;
+    var blockAlign = ch * 2;
+    var dataSize = frames * blockAlign;
+    var ab = new ArrayBuffer(44 + dataSize);
+    var view = new DataView(ab);
+    function str(off, s){ for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); }
+    str(0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    str(8, 'WAVE');
+    str(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, ch, true);
+    view.setUint32(24, sr, true);
+    view.setUint32(28, sr * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, 16, true);
+    str(36, 'data');
+    view.setUint32(40, dataSize, true);
+    var chans = [];
+    for (var c = 0; c < ch; c++) chans.push(buf.getChannelData(c));
+    var off = 44;
+    for (var i = 0; i < frames; i++){
+      for (var c2 = 0; c2 < ch; c2++){
+        var v = chans[c2][start + i];
+        if (v > 1) v = 1; else if (v < -1) v = -1;
+        view.setInt16(off, v < 0 ? v * 0x8000 : v * 0x7fff, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  // ── cover / thumbnail ─────────────────────────────────────────────────────
+  var canvas = $('thumbCanvas');
+  var ctx = canvas.getContext('2d');
+  var bgImage = null;
+  var sizeKey = 'square';
+  var tone = 'night';
+  var SIZES = {
+    square: { w: 1080, h: 1080 },
+    wide: { w: 1280, h: 720 },
+    tall: { w: 1080, h: 1920 },
+  };
+  var TONES = {
+    night: ['#1b1430', '#07060d'],
+    dusk: ['#4a2740', '#120a1c'],
+    sea: ['#123f43', '#06121a'],
+    plain: ['#101014', '#050507'],
+  };
+
+  function setSize(key){
+    sizeKey = key;
+    var s = SIZES[key];
+    canvas.width = s.w;
+    canvas.height = s.h;
+    Array.prototype.forEach.call($('sizeChips').querySelectorAll('.chip'), function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-size') === key ? 'true' : 'false');
+    });
+    drawThumb();
+  }
+  function setTone(key){
+    tone = key;
+    Array.prototype.forEach.call($('toneChips').querySelectorAll('.chip'), function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-tone') === key ? 'true' : 'false');
+    });
+    drawThumb();
+  }
+
+  Array.prototype.forEach.call($('sizeChips').querySelectorAll('.chip'), function(chip){
+    chip.addEventListener('click', function(){ setSize(chip.getAttribute('data-size')); });
+  });
+  Array.prototype.forEach.call($('toneChips').querySelectorAll('.chip'), function(chip){
+    chip.addEventListener('click', function(){ setTone(chip.getAttribute('data-tone')); });
+  });
+
+  $('thumbPhoto').addEventListener('change', function(){
+    var file = ($('thumbPhoto').files || [])[0];
+    $('thumbPhoto').value = '';
+    if (!file) return;
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function(){ bgImage = img; $('photoDrop').textContent = file.name; drawThumb(); };
+    img.onerror = function(){ say($('thumbStatus'), 'That picture would not open.', true); };
+    img.src = url;
+  });
+
+  ['thumbTitle', 'thumbSub', 'thumbPos', 'thumbSize'].forEach(function(id){
+    $(id).addEventListener('input', drawThumb);
+    $(id).addEventListener('change', drawThumb);
+  });
+
+  $('useNow').addEventListener('click', function(){
+    var s = songs[current];
+    if (!s) { say($('thumbStatus'), 'Add and play a song first on the Player tab.', true); return; }
+    $('thumbTitle').value = s.name;
+    $('thumbSub').value = s.meta;
+    say($('thumbStatus'), '');
+    drawThumb();
+  });
+
+  function coverDraw(image, x, y, w, h){
+    var r = Math.max(w / image.width, h / image.height);
+    var dw = image.width * r;
+    var dh = image.height * r;
+    ctx.drawImage(image, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+
+  function wrapText(text, maxWidth, font){
+    ctx.font = font;
+    var words = String(text || '').split(/\s+/).filter(Boolean);
+    var lines = [];
+    var line = '';
+    words.forEach(function(word){
+      var test = line ? line + ' ' + word : word;
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = word; }
+      else line = test;
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function drawThumb(){
+    var w = canvas.width;
+    var h = canvas.height;
+
+    if (bgImage) {
+      coverDraw(bgImage, 0, 0, w, h);
+    } else {
+      var g = ctx.createLinearGradient(0, 0, w * 0.4, h);
+      var t = TONES[tone] || TONES.night;
+      g.addColorStop(0, t[0]);
+      g.addColorStop(1, t[1]);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // A shade behind the words so they stay readable over any photo. Anchored
+    // to the side the words are on.
+    var pos = $('thumbPos').value;
+    var shade = ctx.createLinearGradient(0, pos === 'top' ? 0 : h, 0, pos === 'top' ? h * 0.5 : 0);
+    shade.addColorStop(0, 'rgba(0,0,0,.72)');
+    shade.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, 0, w, h);
+
+    var title = $('thumbTitle').value || 'Song title';
+    var sub = $('thumbSub').value || '';
+    var scale = Number($('thumbSize').value) || 0.12;
+    var titleSize = Math.round(w * scale);
+    var subSize = Math.round(w * scale * 0.34);
+    var maxWidth = w * 0.84;
+    var titleFont = '600 ' + titleSize + 'px ui-serif, Georgia, serif';
+    var lines = wrapText(title, maxWidth, titleFont);
+    var lineH = titleSize * 1.12;
+
+    var blockH = lines.length * lineH + (sub ? subSize * 2.1 : 0);
+    var top;
+    if (pos === 'top') top = h * 0.12;
+    else if (pos === 'center') top = (h - blockH) / 2;
+    else top = h - blockH - h * 0.12;
+
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+    var x = w * 0.08;
+
+    lines.forEach(function(line, i){
+      var y = top + i * lineH;
+      ctx.font = titleFont;
+      ctx.fillStyle = 'rgba(0,0,0,.5)';
+      ctx.fillText(line, x + 2, y + 3);
+      ctx.fillStyle = '#f4f0e8';
+      ctx.fillText(line, x, y);
+    });
+
+    if (sub) {
+      ctx.font = '500 ' + subSize + 'px ui-sans-serif, system-ui, sans-serif';
+      ctx.fillStyle = '#e8c07a';
+      ctx.letterSpacing = Math.round(subSize * 0.12) + 'px';
+      ctx.fillText(sub.toUpperCase(), x, top + lines.length * lineH + subSize * 0.7);
+      ctx.letterSpacing = '0px';
+    }
+  }
+
+  $('saveThumb').addEventListener('click', function(){
+    drawThumb();
+    var name = safeName($('thumbTitle').value || 'cover');
+    try {
+      canvas.toBlob(function(blob){
+        if (!blob) { say($('thumbStatus'), 'The phone would not make the picture.', true); return; }
+        download(blob, name + '-cover.png');
+        say($('thumbStatus'), 'Saved ' + name + '-cover.png');
+      }, 'image/png');
+    } catch (e) {
+      say($('thumbStatus'), 'The phone would not make the picture.', true);
+    }
+  });
+
+  // ── start ─────────────────────────────────────────────────────────────────
+  renderPlaylist();
+  renderRingtoneOptions();
+  setSize('square');
+  paintRingLabels();
+})();
+</script>
+</body>
+</html>

@@ -114,6 +114,11 @@ const OPEN_PAGES = [
   // otherwise serve the file name unguarded.
   '/herbs', '/herbs.html',
   '/tax', '/tax.html',
+  // The Music (5 Oct 2026): the player, the ringtone maker and the cover maker.
+  // Private like the rest, so it is listed here only so the request can reach
+  // the route that judges it. Both addresses, because music.html is a real file
+  // as well as a clean URL, and static would otherwise serve the name unguarded.
+  '/music', '/music.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, a letter link (/l/<token>), the

@@ -144,6 +144,12 @@ self.addEventListener('fetch', (event) => {
   // outlive the check that is supposed to be guarding it.
   if (['/fight', '/fight.html', '/game3d.html'].includes(url.pathname)) return;
 
+  // The Music joined the same door on 5 Oct 2026. It is served only to somebody
+  // signed in and on the list, so a cached copy would outlive that check and the
+  // offline fallback would hand it out unguarded. Both addresses again - the
+  // clean URL and the file name reach the same gated route.
+  if (['/music', '/music.html'].includes(url.pathname)) return;
+
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 
   if (isPage) {

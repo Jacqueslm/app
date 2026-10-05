@@ -317,6 +317,35 @@ test('the worker never caches the fight either', () => {
     'the clean URL, the file name and the ring must all be skipped by the worker');
 });
 
+test('The Music is behind the door too, at both of its addresses', () => {
+  // Added 5 Oct 2026: the phone-file player, the ringtone maker and the cover
+  // maker, built into the app. Same door as the rest, and the same reason each
+  // page needs BOTH addresses: music.html is a real file, so express.static
+  // would hand it out by name if only the clean URL were gated.
+  for (const [url, file] of [
+    ['/music', 'music.html'], ['/music.html', 'music.html'],
+  ]) {
+    assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
+    assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
+    const at = SRC.indexOf("app.get('" + url + "'");
+    assert.ok(at > -1, `the ${url} route must still be findable in server.js`);
+    const block = SRC.slice(at, at + 320);
+    assert.match(block, /isValidSession\(req\)/, `${url}: signed out gets nothing`);
+    assert.match(block, /isFriendlyRequest\(req\)/, `${url}: off the list gets nothing`);
+    assert.match(block, /res\.redirect\('\/app'\)/, `${url}: a page visit goes to the app, not JSON`);
+    assert.ok(
+      SRC.indexOf("app.get('" + url + "'") < SRC.indexOf('app.use(express.static('),
+      `${url} must be registered above static, which would serve the file itself`,
+    );
+    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', file)), `${file} must exist`);
+  }
+  // And the worker leaves both alone, for the reason it leaves /key alone: a
+  // cached copy outlives the check that let it in.
+  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
+  assert.match(SW, /\['\/music', '\/music\.html'\]\.includes\(url\.pathname\)\) return;/,
+    'both addresses must be skipped by the worker');
+});
+
 test('the worker never caches the herb library or the tax centre', () => {
   const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
   assert.match(SW, /\['\/herbs', '\/herbs\.html', '\/tax', '\/tax\.html'\]\.includes\(url\.pathname\)\) return;/,

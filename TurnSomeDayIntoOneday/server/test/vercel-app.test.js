@@ -40,11 +40,11 @@ const app = require('../vercel-app');
 const build = require('../../vercel-build');
 const vercelJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
 
-const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'fight.html', 'game3d.html'];
+const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'fight.html', 'game3d.html', 'music.html'];
 // The shell at /app and / is not in this list: it is the sign-in screen itself,
 // so it opens to everybody and holds nothing but a heading, three links and the
 // form. Everything below is behind the door.
-const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/fight', '/fight.html', '/game3d.html'];
+const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/fight', '/fight.html', '/game3d.html', '/music', '/music.html'];
 
 let server, base;
 before(async () => {
@@ -235,7 +235,7 @@ test('every gated address is rewritten into the function, file names included', 
   // the half that leaks.
   const destinations = new Map(vercelJson.rewrites.map((r) => [r.source, r.destination]));
   for (const route of ['/app', '/key', '/key.html', '/herbs', '/herbs.html', '/tax', '/tax.html',
-    '/fight', '/fight.html', '/game3d.html', '/']) {
+    '/fight', '/fight.html', '/game3d.html', '/music', '/music.html', '/']) {
     assert.equal(destinations.get(route), '/api/index.js', `${route} must reach the function`);
   }
   assert.equal(destinations.get('/api/(.*)'), '/api/index.js', 'and so must the API');

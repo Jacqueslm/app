@@ -372,6 +372,27 @@ app.get('/tax.html', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'tax.html'));
 });
 
+// The Music — the player, the ringtone maker and the cover maker, added to the
+// app on 5 Oct 2026. Private, and the same door as The Key, the herbs and the
+// fight: signed in AND on the list, or you go to /app without learning the page
+// is there. A redirect rather than requireAuth, which answers 401 JSON — right
+// for an API call, wrong for somebody opening a page.
+//
+// BOTH ADDRESSES ARE REGISTERED, for the reason the herb library's note above
+// spells out: music.html is a real file, so express.static below would hand it
+// out by name to anybody who typed it if only the clean URL were gated. Above
+// express.static, or static answers first and never reaches these routes.
+app.get('/music', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'music.html'));
+});
+app.get('/music.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'music.html'));
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 // The Key — private. Signed in AND on the allowlist, or you go to /app without

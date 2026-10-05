@@ -68,6 +68,8 @@ const PAGES = {
   '/fight': 'fight.html',
   '/fight.html': 'fight.html',
   '/game3d.html': 'game3d.html',
+  '/music': 'music.html',
+  '/music.html': 'music.html',
 };
 
 // ----------------------------------------------------------------- the door --

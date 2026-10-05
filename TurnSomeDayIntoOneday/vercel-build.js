@@ -30,7 +30,10 @@ const ROOT = __dirname;
 
 // Directories, as they sit in the repository. img/fight is the fight's own
 // pictures and audio/fight its crowd; the ring's engine is js/ring3d-three.js.
-const DIRS = ['icons', 'js', 'img/fight', 'audio/fight'];
+// audio/meditation is the meditation room's eleven tracks, played by the Music
+// page (5 Oct 2026) — they belong here rather than in the function because the
+// music player streams them straight from disk.
+const DIRS = ['icons', 'js', 'img/fight', 'audio/fight', 'audio/meditation'];
 // Loose files. Each one is either linked by a page or fetched by the browser.
 const FILES = [
   'manifest.json', 'manifest-discrete.json', 'manifest-zodiacs.json', 'sw.js',

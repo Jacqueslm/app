@@ -60,6 +60,21 @@ the door for whoever guesses it is a back door, not a way back. The tests in
 `server/test/vercel-app.test.js` hold all of this, including that the spare is
 refused for the wife's address.
 
+**The meditation room, 5 Oct 2026.** The eleven tracks in `audio/meditation/`
+(rain, ocean, night, night fade, cozy storm, deep focus, himalayan still,
+still waters, midnight lullaby, fading into the night, whispers in the forest)
+belonged to the recovery app and were referenced by nothing at all after it
+went — they were not even reachable: `vercel-build.js` copied only `audio/fight`,
+so every one of them answered 404 on the live host. They now sit in the Music
+page's Player as a card of their own, one tap each, stepping with the same
+prev/next as the person's own songs. They are deliberately **not** in the
+`songs` list: they are not the person's files, so they carry no ✕, "remove all"
+leaves them alone, and nothing is copied into the phone's storage for them.
+`vercel-build.js` gained `audio/meditation` in `DIRS`, which makes those files
+public URLs on Vercel (about 32 MB of deployment weight) — that is the trade for
+them playing at all, since a gated route cannot stream range requests the way
+the static file can.
+
 **The push rule (from CLAUDE.md, and it is the current one):** never push unless
 Jacques says push. When he does: `claude/new-session-im7bzg`, then `main`, then
 `claude/vibe-code-uwxxlk` — all three, same commit. The branch names in older

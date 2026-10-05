@@ -179,6 +179,14 @@
       <p class="note">The songs are kept inside this phone's browser, so they are still here next time you open the page. That uses space on the phone — the ✕ takes any one back off.</p>
     </div>
 
+    <div class="card">
+      <p class="kicker">The meditation room</p>
+      <h2>Eleven to settle to</h2>
+      <p class="hint">The room's own music, already here — rain, ocean, a fire in a storm, and eight more. Tap one and it plays in the player below with everything else.</p>
+      <ul class="list" id="roomList"></ul>
+      <p class="status" id="roomStatus" role="status" aria-live="polite"></p>
+    </div>
+
     <div class="card" id="nowCard" hidden>
       <div class="now">
         <div>
@@ -311,8 +319,28 @@
   var songs = [];
   var kept = {};         // key -> true, so one file is never stored twice
   var current = -1;      // index into songs
+  var roomIndex = -1;    // index into ROOM, the meditation room's own tracks
   var ringIndex = -1;    // index the ringtone tab is working on
   var ringBuffer = null; // decoded AudioBuffer for that song
+
+  // The meditation room (5 Oct 2026). These are the app's own tracks, served
+  // from /audio/meditation/, so there is nothing to choose and nothing is kept
+  // on the phone — one tap and it plays. They are listed here rather than in
+  // the songs list because they are not the person's files: they have no ✕ and
+  // "remove all" does not touch them.
+  var ROOM = [
+    ['rain', 'Rain'],
+    ['ocean', 'Ocean'],
+    ['night', 'Night'],
+    ['night-fade', 'Night Fade'],
+    ['cozy-storm', 'Cozy Storm'],
+    ['deep-focus', 'Deep Focus'],
+    ['himalayan-still', 'Himalayan Still'],
+    ['still-waters', 'Still Waters'],
+    ['midnight-lullaby', 'Midnight Lullaby'],
+    ['fading-into-the-night', 'Fading Into the Night'],
+    ['whispers-in-the-forest', 'Whispers in the Forest'],
+  ].map(function(t){ return { name: t[1], url: '/audio/meditation/' + t[0] + '.mp3' }; });
 
   var audio = $('audio');
   var preview = $('preview');
@@ -588,6 +616,54 @@
     $('keepRow').hidden = songs.length === 0;
   }
 
+  // ── the meditation room ───────────────────────────────────────────────────
+  function renderRoom(){
+    var list = $('roomList');
+    list.innerHTML = '';
+    ROOM.forEach(function(t, i){
+      var li = document.createElement('li');
+      li.className = 'song' + (i === roomIndex ? ' playing' : '');
+
+      var idx = document.createElement('span');
+      idx.className = 'idx';
+      idx.textContent = i === roomIndex ? '▶' : String(i + 1);
+
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var n = document.createElement('p');
+      n.className = 't';
+      n.textContent = t.name;
+      var d = document.createElement('p');
+      d.className = 'd';
+      d.textContent = 'The meditation room';
+      meta.appendChild(n);
+      meta.appendChild(d);
+
+      li.appendChild(idx);
+      li.appendChild(meta);
+      li.addEventListener('click', function(){ playRoom(i); });
+      list.appendChild(li);
+    });
+  }
+
+  function playRoom(i){
+    if (!(i >= 0) || !ROOM[i]) return;
+    // A room track and a chosen song are never both "on": the player is one.
+    current = -1;
+    roomIndex = i;
+    var t = ROOM[i];
+    audio.src = t.url;
+    $('nowCard').hidden = false;
+    $('nowTitle').textContent = t.name;
+    $('nowMeta').textContent = 'The meditation room';
+    $('playerNote').textContent = '';
+    audio.play().catch(function(){
+      say($('roomStatus'), 'The phone would not start it. Turn the sound up and tap once more.', true);
+    });
+    renderRoom();
+    renderPlaylist();
+  }
+
   function removeSong(i){
     var s = songs[i];
     if (!s) return;
@@ -626,6 +702,7 @@
     songs = [];
     kept = {};
     current = -1;
+    roomIndex = -1;
     ringIndex = -1;
     ringBuffer = null;
     $('nowCard').hidden = true;
@@ -639,6 +716,7 @@
   function selectSong(i, play){
     if (i < 0 || i >= songs.length) return;
     current = i;
+    roomIndex = -1;
     var s = songs[i];
     audio.src = s.url;
     $('nowCard').hidden = false;
@@ -654,13 +732,15 @@
   }
 
   $('playBtn').addEventListener('click', function(){
-    if (current < 0 && songs.length) selectSong(0, false);
+    if (current < 0 && roomIndex < 0 && songs.length) selectSong(0, false);
     if (audio.paused) audio.play().catch(function(){});
     else audio.pause();
   });
   $('prev').addEventListener('click', function(){ step(-1); });
   $('next').addEventListener('click', function(){ step(1); });
   function step(dir){
+    // Whichever list is playing is the list that steps.
+    if (roomIndex >= 0) { playRoom((roomIndex + dir + ROOM.length) % ROOM.length); return; }
     if (!songs.length) return;
     var n = current + dir;
     if (n < 0) n = songs.length - 1;
@@ -670,7 +750,9 @@
 
   audio.addEventListener('play', function(){ $('playBtn').textContent = '❚❚'; });
   audio.addEventListener('pause', function(){ $('playBtn').textContent = '▶'; });
-  audio.addEventListener('ended', function(){ if (songs.length > 1) step(1); });
+  audio.addEventListener('ended', function(){
+    if (roomIndex >= 0 ? ROOM.length > 1 : songs.length > 1) step(1);
+  });
   audio.addEventListener('loadedmetadata', function(){ $('dText').textContent = fmt(audio.duration); });
   audio.addEventListener('timeupdate', function(){
     var d = audio.duration;
@@ -678,7 +760,7 @@
     $('tText').textContent = fmt(audio.currentTime);
   });
   audio.addEventListener('error', function(){
-    if (current >= 0) $('playerNote').textContent = 'This file would not play here. Some phones only play music bought on them.';
+    if (current >= 0 || roomIndex >= 0) $('playerNote').textContent = 'This file would not play here. Some phones only play music bought on them.';
   });
   $('seek').addEventListener('input', function(){
     var d = audio.duration;
@@ -1040,6 +1122,7 @@
 
   // ── start ─────────────────────────────────────────────────────────────────
   renderPlaylist();
+  renderRoom();
   renderRingtoneOptions();
   setSize('square');
   paintRingLabels();

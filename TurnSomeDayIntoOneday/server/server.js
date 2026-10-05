@@ -999,7 +999,9 @@ app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
     return res.status(409).json({ error: 'An account with that email already exists. Sign in instead.' });
   }
   const userId = db.createUser(normalizedEmail, hashPassword(password), null);
-  try { db.setUserUtm(userId, { utm_source: 'letter', utm_medium: 'invite', utm_campaign: row.sender_type }); } catch (_) {}
+  // A line here tagged the new account as source 'letter' for the campaign
+  // report. The UTM columns and that report are gone (5 Oct 2026), so there is
+  // nothing to tag - the letter's own numbers are kept in the letters table.
   db.markLetterAccepted(req.params.token, userId);
   // Link the two Together tables if the sender already has one waiting. A
   // failure here must never cost the account that was just created.

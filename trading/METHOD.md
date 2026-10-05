@@ -6,7 +6,12 @@
   do with structure.
 - Price runs away from the candle, then comes back.
 - Times: **9:00 and 15:00 New York** (= his 8am and 2pm Central). Chart must be **1 hour**.
-- **Timeframes:** hourly = alignment, 15m and 5m = execution.
+- **Timeframes:** daily and 4h = the big picture, hourly = alignment, 15m and 5m =
+  execution.
+- **Daily and 4h are the big picture.** They say whether the market is trending or
+  in consolidation. That is the context every lower timeframe is read in — if the
+  daily and 4h disagree with the hourly, there is no alignment and no trade.
+  Confirmed 5 Oct 2026.
 - The range candle is rebuilt from the chart bars of the 9:00 and 15:00 NY hours,
   so the bot works on any timeframe that divides the hour (1h, 15m, 5m).
 - **The zones are not tied to one timeframe.** They work on **all timeframes**, like

@@ -6326,6 +6326,12 @@ function learnQualities(){
 }
 
 function learnSign(name){
+  /* The sign arrives from the <select> below, so it is DOM text by the time it
+     gets here, and both the name and the line describeSign() writes carry it
+     straight into innerHTML. Escaped at the door and again where the derived
+     line is printed \u2014 CodeQL reads the unescaped version as DOM text
+     reinterpreted as HTML. */
+  const nm = esc(name);
   const d = describeSign(name);
   const periods = PERIODS.filter(p=>p.signs.includes(name));
   const mine = PEOPLE.filter(p=>findPeriod(p.month, p.day).signs.includes(name));
@@ -6335,8 +6341,8 @@ function learnSign(name){
     <div class="form-grid" style="grid-template-columns:1fr"><div>
       <label for="g-sign">Sign</label><select id="g-sign">${opts}</select></div></div>
     <div class="lcard el-b-${d.element}" style="margin-top:18px">
-      <div class="lh"><b>${d.glyph} ${name}</b><small>${d.element} &middot; ${d.quality} &middot; ${d.season}</small></div>
-      <p class="lead">${d.line}</p>
+      <div class="lh"><b>${d.glyph} ${nm}</b><small>${d.element} &middot; ${d.quality} &middot; ${d.season}</small></div>
+      <p class="lead">${esc(d.line)}</p>
       <div class="two">
         <div><div class="dt">Its element, ${d.element}</div><div class="db">${d.element_is}</div></div>
         <div><div class="dt">Its quality, ${d.quality}</div><div class="db">${d.quality_is}</div></div>
@@ -6421,7 +6427,14 @@ function renderGame(){
 }
 
 $('game-box').addEventListener('change', e=>{
-  if(e.target.id === 'g-sign'){ LEARN = {sign:e.target.value}; renderGame(); }
+  /* Taken by position out of this file's own list of twelve rather than read
+     back out of the DOM as text. The options are generated from SIGN_NAMES()
+     in order, so it is the same sign, and a value that can only come from that
+     list cannot carry anything into the page. */
+  if(e.target.id === 'g-sign'){
+    LEARN = {sign: SIGN_NAMES()[+e.target.selectedIndex] || 'Aries'};
+    renderGame();
+  }
 });
 
 $('game-box').addEventListener('click', e=>{

@@ -123,6 +123,18 @@ MGC 5m, Jun 14 – Sep 30 2026: −858.65 / −3.43% but PF 3.007 with 40 winner
 vs 27 losers, all trades closed. Never explained. Do not trust this window;
 the 365-day figure above is the one to use.
 
+## 5. Backtester — added 6 Oct 2026 — NOT YET RUN ON REAL PRICES
+
+`trading/backtest.js` now tests the method itself: Fib 30 / 50 / 70 and Sweep,
+with the zone filter and the 4h + daily alignment filter, one row per setting
+(trades, wins, losses, win %, net, profit factor, per trade, worst dip).
+
+It has only been checked against a hand-built four-bar fixture
+(`--selftest`, passes) and a made-up random walk, which is not a result and is
+not recorded as one. A real run needs a TradingView CSV export of the chart —
+nothing in this repo has prices in it. **No win rates from it appear here until
+it has been run on real bars.**
+
 ## Not written here
 
 Not run from this machine — Pine cannot be compiled or tested here. Everything

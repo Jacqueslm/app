@@ -83,6 +83,24 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
    own speech — nothing is sent anywhere, nothing is charged, and it works with
    no signal at all, which is the whole reason it is this and not a recording. */
 .saybar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+/* ── THE THIRTY DAYS ──────────────────────────────────────────────────────────
+   A beginner course built out of the same two books, in the same voice as the
+   rest of the page. Each day teaches, then asks. The answers are checked on the
+   phone, nothing is sent anywhere, and the score lives beside the notes. */
+.prog{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+.prog .bar{height:7px;border-radius:99px;background:var(--s1);overflow:hidden;margin:8px 0 6px}
+.prog .bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+.prog b{font-size:.875rem}
+.prog span{font-size:.75rem;color:var(--tm);display:block}
+.qbox{border-top:1px solid var(--bdr);padding-top:10px;margin-top:12px}
+.qbox p.qt{font-size:.875rem;color:var(--tp);font-weight:600;line-height:1.5;margin-bottom:8px}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-size:.8125rem;line-height:1.45;padding:10px 12px;margin-bottom:6px;border-radius:11px;border:1px solid var(--bdr2);background:var(--s2);color:var(--ts);cursor:pointer}
+.opt.right{background:var(--ok);color:var(--ok-t);border-color:transparent;font-weight:600}
+.opt.wrong{background:var(--red);color:var(--red-t);border-color:transparent;font-weight:600}
+.why{font-size:.8125rem;line-height:1.5;color:var(--ts);background:var(--s1);border-radius:11px;padding:10px 12px;margin:2px 0 4px}
+.score{font-size:.8125rem;font-weight:600;margin-top:8px}
+.done{background:var(--ok);color:var(--ok-t);border-radius:11px;padding:9px 12px;font-size:.8125rem;font-weight:600;margin-top:12px}
+.dayno{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);font-weight:600}
 </style>
 </head>
 <body>
@@ -101,6 +119,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div class="tab on" data-t="az">A&#8211;Z</div>
     <div class="tab" data-t="need">By need</div>
     <div class="tab" data-t="books">From the books</div>
+    <div class="tab" data-t="course">30 days</div>
     <div class="tab" data-t="safety">Read this first</div>
     <div class="tab" data-t="mine">My notes</div>
   </div>
@@ -1024,6 +1043,351 @@ var BOOKS = [
    ["The rest of the two books","The middle of both is not transcribed here and was not read line by line. Nothing in this tab is invented to fill a gap, and the places where the copies run out are said so in the row they run out in."]]}
 ];
 
+/* ---- THIRTY DAYS -----------------------------------------------------------
+   A beginner course, built out of the same two books as the rest of the page,
+   twenty-nine days of teaching and then a test. Every claim in it is one the
+   page already makes somewhere else: the preparations, the amounts, the twenty
+   classes, the food chapter and the seasoning rows are the books' own and are
+   labelled as theirs; the safety lines on the Read this first tab are the
+   page's and day 28 walks through them.
+
+   One day is: p = the teaching, in paragraphs; bk = a line out of one of the
+   books; note = this page's own line, where it has one; q = the day's
+   questions, each with the answer and the reason it is the answer.
+
+   Nothing here is invented. Where a day has no book line under it, that is
+   because that day is the page carrying the books, not the books talking.
+--------------------------------------------------------------------------- */
+var COURSE = [
+
+{d:1, t:"What this tradition is", s:"Start here",
+ p:["Two books sit behind this whole library: African Holistic Health and Nutricide, both by Llaila O. Afrika. Every line on this page marked From the books is theirs, printed the way they give it. Everything else is this page saying plainly what a plant does.",
+    "The tradition the two books describe is far older than either of them. It puts food first and a plant second, and it treats a person as one thing, body and mind and spirit together, rather than a set of parts to be fixed one at a time.",
+    "The course is thirty days. Days 1 to 11 are the ground: how the books read a body, how they prepare a plant, and what the twenty classes of herb mean. Days 12 to 19 are food, what not to eat and how a seasoning is used as medicine. Days 20 to 23 are the shelves, one for each kind of trouble. Days 24 and 25 are vitamins and minerals. Days 26 to 28 are reading the body, the book's easy remedies, and the lines that never move. Day 29 gathers it up. Day 30 is the test.",
+    "One day at a time. Nothing here has to be bought, and no day is timed."],
+ bk:"Food is medicine and medicine is food.",
+ q:[{q:"Which two books is this library built from?", k:0, a:["African Holistic Health and Nutricide, both by Llaila O. Afrika","A hospital formulary and a pharmacy guide","Two collections with no author named","A cookbook and a herbal dictionary"], w:"Both are named on the shelves and in the From the books tab."},
+    {q:"In the tradition these books describe, which comes first?", k:1, a:["A tablet","Food","A hospital","A tincture"], w:"Food is the first medicine in this tradition. A plant is the second."},
+    {q:"How is the course laid out?", k:1, a:["All of it on one screen","Thirty days, one a day, a test on the last","Ten weeks of two sessions","A single quiz and nothing else"], w:"Twenty-nine days of teaching, then the test on day 30."}]},
+
+{d:2, t:"Read the body first", s:"The order the book works in",
+ p:["The book's order is not the one most people expect. Nothing is given until the body has been read.",
+    "The skin is the chart. The body is read in three parts, upper, middle and lower, and each part holds its organs. A change in the colour or the texture of the skin, a patch, a scratch or a bump, is read as the organ under it complaining.",
+    "Then there is pressure: two to four pounds of it, on the skin over the organ's energy field, the meridian. The book's claim is that a diseased organ answers to it. And what runs out of a body, tears and sweat and blood, is read as carrying information, with the book's own point that the rank society gives those things is not a biochemical rank.",
+    "One more of its ideas, because it is the one this course comes back to: food makes a mood. Carbohydrates for calm, proteins for alertness, fruit and vegetables to steady the energy."],
+ note:"None of the body-reading in this chapter comes with a test behind it. It is read beside a doctor, not instead of one.",
+ q:[{q:"In the book's order, what happens before anything is given?", k:2, a:["A blood test","A price is agreed","The body is read","A week of fasting"], w:"Reading the body comes first, and the treatment follows it."},
+    {q:"How is the body divided when it is read this way?", k:1, a:["Left and right","Upper, middle and lower","Front and back","Inside and outside"], w:"Three sections, each holding its own organs."},
+    {q:"How much finger pressure does the book use over an organ's field?", k:0, a:["Two to four pounds","As hard as you can","Barely touching","Ten pounds"], w:"Two to four pounds, on the meridian over the organ."}]},
+
+{d:3, t:"The doctrine of signatures", s:"Why a plant looks the way it looks",
+ p:["This is the oldest idea in the book, and the one the rest of it stands on: the sign of what a plant is for is written on the plant, in its shape, its colour, its texture, its taste and its smell. The first herbalists read a plant rather than a textbook.",
+    "The leaves say it. Lobed leaves for the lung. Wrinkled leaves for the skin. Smooth leaves for the organs inside. Complicated veins for the nerves and the circulation.",
+    "Where it grows says it too. A short plant is rich in minerals, for bone. A tall one is for breathing. A vine is for the nervous system. A flower is for the skin and the digestion. And a root steadies a nutrient and can flush the body out, which is why a red root goes to the blood and a yellow root to the bowel.",
+    "Taste and colour carry it as well: bitter closes and dries, sweet opens and moistens. The book's claim about the dangerous plants is that no herb is poisonous if it is properly combined with an antidote, and that is how a healer works with a strong plant. That is the book's claim. On this page the poisonous plants still carry their poison in their own entry, the way an old herbal did."],
+ bk:"The specific signature, or medical purpose, of an herb is written on it by its shape, colour, texture, taste and smell.",
+ q:[{q:"What is the doctrine of signatures?", k:1, a:["A plant must be signed for before you buy it","A plant's use is written on the plant itself","The oldest plant in the garden works best","Every plant has a Latin name"], w:"Shape, colour, texture, taste and smell are the sign."},
+    {q:"In this idea, what are wrinkled leaves read as being for?", k:2, a:["The lung","The blood","The skin","The bone"], w:"Lobed leaves for the lung, wrinkled leaves for the skin."},
+    {q:"Which root does the idea send to the blood?", k:0, a:["A red root","A yellow root","A long white root","Any root at all"], w:"A red root for the blood, a yellow root for the bowel."}]},
+
+{d:4, t:"How the books prepare a herb", s:"African Holistic Health, the herbs chapter",
+ p:["Tea or infusion. One teaspoon of herb per cup of water. Roots and barks are simmered for 20 to 30 minutes. Leaves and flowers go in after the pot comes off the heat, and steep for 10 to 30 minutes.",
+    "Sun tea. The herbs in water, left in the sun for several hours, so the warmth draws it out with no flame at all.",
+    "Poultice. Mixed with water, spread on a cloth, laid on the skin, which is oiled first, and covered.",
+    "Extract or tincture. The herb with alcohol, left to steep for two weeks, then strained. Salve: sixteen ounces of herb with oils and beeswax, simmered and strained. Syrup: the herb simmered with honey, grain syrup or molasses until it thickens, then stored. Liniment: the herbs with rubbing alcohol, steeped and strained, for the skin and never the inside.",
+    "There is also one method for many herbs at once, the multi-vitamin and mineral brew, which is set out in the From the books tab. One ounce of herb to twenty ounces of water, the roots and barks and seeds simmered 30 minutes, the leaves and flowers off the heat for another 30 or more, strained while warm and kept in dark glass in the refrigerator."],
+ bk:"Herbal medicine is most effective fresh, live and picked the same day.",
+ q:[{q:"Roots and barks in a tea are simmered for how long?", k:1, a:["Two minutes","20 to 30 minutes","Four hours","They are never heated"], w:"20 to 30 minutes for roots and barks; leaves and flowers go in off the heat."},
+    {q:"What is the difference between a tea and a tincture here?", k:2, a:["One is cold and one is hot","A tincture is only for the skin","A tea is water; a tincture is the herb in alcohol for two weeks","There is no difference"], w:"The extract or tincture steeps in alcohol for two weeks, then is strained."},
+    {q:"How does a poultice go on?", k:0, a:["Spread on a cloth and laid on oiled skin","Swallowed with water","Steeped for two weeks","Rubbed into the scalp"], w:"Mixed with water, on a cloth, over oiled skin, then covered."}]},
+
+{d:5, t:"Amounts, and whose amounts they are", s:"Nutricide, and the herbs chapter",
+ p:["The base line for a tea is one teaspoon of herb per cup of water. The base line for a seasoning is one eighth to one quarter of a teaspoon of a herbal spice for every four servings. Both of those are the books' figures, printed the way the books give them.",
+    "Two amounts are named plant by plant. Lobelia: one teaspoon to four cups of water. Cayenne and garlic: one eighth of a teaspoon to four cups. Lobelia is the one of those three that has killed people, and its own entry on this page says so.",
+    "On supplements the book argues that the amount printed on a label is what a healthy body needs, and that a body fighting something needs more. Its line is that the recommended dosage on the label is for stopping starvation. That is the book's claim, and it is printed here as its claim, not as this page's.",
+    "Every measurement in the From the books tab is the book's own, printed exactly as the book gives it. That is the one thing that makes printing them honest."],
+ bk:"The recommended dosage on the label is for stopping starvation.",
+ q:[{q:"What is the base line for a tea?", k:0, a:["One teaspoon of herb per cup of water","One handful per pot","One ounce per glass","There is no base line"], w:"One teaspoon to a cup, and the multi-vitamin brew uses the ratio of one ounce of herb to twenty ounces of water."},
+    {q:"Whose figures are printed in the From the books tab?", k:1, a:["This page's","The books', exactly as they give them","A pharmacy's","Nobody knows"], w:"The tab says so in its first row."},
+    {q:"Which of the book's named amounts belongs to a plant that has killed people?", k:2, a:["Chamomile","Peppermint","Lobelia","Ginger"], w:"Lobelia, one teaspoon to four cups, and its entry carries the deaths."}]},
+
+{d:6, t:"Fresh, dried, and what blunts a herb", s:"From the books",
+ p:["Fresh, picked the same day, is the strongest in the book's view. Dried is weaker, and in some cases the book says it does not act at all.",
+    "Three things the book says blunt a herb: synthetic drugs, junk food and alcohol. Its words are that the whole effect of a herb is antidoted, lessened, or not felt at all, when those are in the body.",
+    "Buying: from a herb dealer, or a health food shop, or a standard brand. The book's reason for being careful is that a weaker relative gets sold under the right name.",
+    "And one more of its lines that is worth carrying: an herb that grows in a place has adjusted to that place, and is generally good for the diseases of that environment. Read that beside the shelves this page already has, and it is the same argument as eating what grows near you."],
+ bk:"The whole effect of a herb is antidoted, lessened or not felt at all when synthetic drugs, junk food or alcohol are in the body.",
+ q:[{q:"Which does the book say is stronger?", k:2, a:["Dried, always","A capsule","Fresh, picked the same day","It does not say"], w:"Fresh is strongest; dried is weaker and sometimes the book says it does not act."},
+    {q:"Which of these does the book say blunts a herb?", k:1, a:["Cold water","Alcohol","Daylight","A metal spoon"], w:"Synthetic drugs, junk food and alcohol."},
+    {q:"Why does the book say to buy carefully?", k:0, a:["A weaker relative gets sold under the right name","Herbs expire in a week","Shops are not allowed to sell herbs","The price is always wrong"], w:"Its reason for a proper dealer or a standard brand."}]},
+
+{d:7, t:"The twenty classes, part one", s:"African Holistic Health, herb classifications",
+ p:["The book sorts herbs into twenty classes. A class is what a plant does; it is not a dose and it is not a plant's whole story. These are the first five.",
+    "Alternatives slow down the action of a curative herb, so the body is not shocked. Spikenard root, sarsaparilla root, echinacea root, garlic, ginger.",
+    "Anthelmintics remove worms from the gut. Garlic, horseradish, wild violet.",
+    "Antiperiodics reduce seizures that come from a fever or a nervous disorder. Vervain, arnica, red raspberry.",
+    "Anti-inflammatories work against inflammation in a disease state. Arnica, cayenne, garlic, chaparral. Antipyretics bring a temperature down. Eucalyptus, feverfew."],
+ q:[{q:"What does an alternative do in this list?", k:1, a:["Replaces a prescription","Slows a curative herb so the body is not shocked","Brings a fever down","Removes worms"], w:"It paces the curative herb rather than doing the curing."},
+    {q:"Which class removes worms from the gut?", k:2, a:["Antipyretics","Nervines","Anthelmintics","Diuretics"], w:"Garlic, horseradish and wild violet are the ones the book names."},
+    {q:"Which class brings a temperature down?", k:0, a:["Antipyretics","Astringents","Emollients","Stimulants"], w:"Eucalyptus and feverfew, on the book's list."}]},
+
+{d:8, t:"The twenty classes, part two", s:"Numbers six to ten",
+ p:["Antiseptics and disinfectants work against harmful bacteria. Anise, myrrh, thyme, garlic.",
+    "Astringents contract tissue and tighten skin and mucous membrane. Alum root, which the book also calls cranesbill, and witch hazel.",
+    "Bitter tonics help digestion and wake the appetite. Chamomile and dandelion.",
+    "Calmatives bring relaxation and a sense of well-being. Chamomile and valerian.",
+    "Cathartics are laxatives, for constipation. Cascara sagrada and senna. Senna is the one that is a medicine rather than a morning drink: a week at most, and its own entry carries the rest."],
+ q:[{q:"Which class tightens skin and mucous membrane?", k:2, a:["Calmatives","Cathartics","Astringents","Demulcents"], w:"Astringents: alum root, also called cranesbill, and witch hazel."},
+    {q:"Chamomile appears in which two classes here?", k:0, a:["Bitter tonics and calmatives","Cathartics and diuretics","Antiseptics and vulneraries","Nervines and stimulants"], w:"A bitter tonic for digestion and a calmative for relaxation."},
+    {q:"How long does the book's page let senna be used?", k:1, a:["Every morning forever","A week at most","One cup a year","Six months"], w:"Its entry says a week, and its own caution says the same."}]},
+
+{d:9, t:"The twenty classes, part three", s:"Numbers eleven to fifteen",
+ p:["Demulcents soothe and protect the organs inside. Licorice, marshmallow, oatmeal.",
+    "Diaphoretics raise a sweat, to carry impurities out. Ginger, sage, yarrow.",
+    "Diuretics move water and flush it out. Buchu and parsley.",
+    "Emollients soften and soothe, outside and inside. Comfrey and marshmallow. Comfrey is the herb on this page that is never taken internally, and its entry says so plainly.",
+    "Expectorants bring phlegm up out of the chest. Elecampane and mullein."],
+ q:[{q:"What does a diaphoretic do?", k:2, a:["Stops a sweat","Brings phlegm up","Raises a sweat","Tightens tissue"], w:"Ginger, sage and yarrow on the book's list."},
+    {q:"Which class soothes and protects the organs inside?", k:0, a:["Demulcents","Diuretics","Cathartics","Refrigerants"], w:"Licorice, marshmallow, oatmeal."},
+    {q:"Comfrey is in two classes, and one hard rule travels with it. Which?", k:1, a:["It is only for children","It is never taken internally","It must be boiled for an hour","It is only for burns on the feet"], w:"Its entry says never internally, and the safety tab names it for babies too."}]},
+
+{d:10, t:"The twenty classes, part four", s:"Numbers sixteen to twenty",
+ p:["Nervines relax the nervous system. Valerian and catnip.",
+    "Stimulants raise nerve reaction and energise. Coffee bean and guarana.",
+    "Refrigerants cool the body. Mints and eucalyptus.",
+    "Sedatives calm pain and anxiety. Chamomile and cramp bark.",
+    "Vulneraries heal wounds and the skin. Aloe vera and comfrey.",
+    "That is all twenty. If a plant on this page carries a class line, that line came from this list, not from the page's own opinion."],
+ q:[{q:"Which class relaxes the nervous system?", k:1, a:["Stimulants","Nervines","Refrigerants","Vulneraries"], w:"Valerian and catnip."},
+    {q:"What is a vulnerary for?", k:0, a:["Wounds and the skin","A raised sweat","Worms","Sleep"], w:"Aloe vera and comfrey."},
+    {q:"How many classes are there in the book's list?", k:2, a:["Five","Twelve","Twenty","Thirty"], w:"Twenty, and this course walked them in four days."}]},
+
+{d:11, t:"One plant, two classes — and the caution", s:"The rule under the list",
+ p:["Comfrey is a demulcent and an emollient on the book's list. It is also the herb on this page that is never taken internally, and the safety tab names it beside goldenseal for babies.",
+    "That is the whole lesson of the four days just gone. A class tells you what a plant does. It does not tell you how far to take it, how long to take it for, or who must not take it at all.",
+    "So a herb you meet in the library is read in two halves. What it does, which is the class and the old use. And the caution that travels with it, which is the line under Caution on its card, and which is never softened by how good the class sounds.",
+    "Five cautions from this shelf, as examples of the shape of them. St John's wort changes how the liver handles a long list of medicines. Ginkgo thins the blood. Senna is a week, not a habit. Comfrey is never swallowed. Lobelia has killed people."],
+ note:"A plant with a strong class and no caution printed is a plant whose caution has not been found yet. That is not the same as a plant with no caution.",
+ q:[{q:"What does a class tell you about a herb?", k:1, a:["How much to take","What it does","Who must never take it","How long to take it for"], w:"The class is the action. The caution is a separate line, and both have to be read."},
+    {q:"Which of these is never taken internally, on this page's own rule?", k:0, a:["Comfrey","Chamomile","Ginger","Valerian"], w:"Comfrey, and its entry and the safety tab both carry it."},
+    {q:"St John's wort is on this shelf for one reason above all. Which?", k:2, a:["It is expensive","It tastes bitter","It changes how the liver handles a long list of medicines","It only grows in one country"], w:"It clashes with antidepressants, birth control, blood thinners, HIV medicine and more."}]},
+
+{d:12, t:"What the books say not to eat", s:"Nutricide, the nutritional approach",
+ p:["Raw whole food: fruit, vegetables, grains and beans, eaten fresh and raw where they can be. Cooked: whole grains and lightly steamed vegetables. Green: dark green leafy vegetables, and the juice of the dark green leaves, generously.",
+    "Off the table: no dairy products, and no fried food.",
+    "The book also names what sugar is in its view. White sugar is a refined carbohydrate and the book calls it a drug, and it is the one it blames for insulin resistance and obesity. Junk food it calls processed food, synthetic additives, and a cycle it names addiction.",
+    "And there is a line about the skin that belongs on this day rather than the food days: cosmetics are absorbed the same way food is, and the book puts the two side by side. Read the jar the way you read a label."],
+ bk:"White junk foods are killing Black America, and if it is white do not trust it.",
+ q:[{q:"Which two things come off the table in the book's nutritional approach?", k:1, a:["Salt and pepper","Dairy and fried food","Fruit and grains","Water and tea"], w:"No dairy products, no fried food."},
+    {q:"What does the book call white sugar?", k:0, a:["A drug","A mineral","A herb","A protein"], w:"A refined carbohydrate it calls a drug, blamed for insulin resistance and obesity."},
+    {q:"What does the book say about what goes on the skin?", k:2, a:["It does not matter","It cannot get in","It is absorbed the way food is","Only soap counts"], w:"Read the jar the way you read a label."}]},
+
+{d:13, t:"The animals line and the drug line", s:"Where this page draws its own line",
+ p:["The book's nutritional approach says no animals, no fish and no fowl, and its own line for that is that dead food produces dead cells. It says to eat garlic fresh, raw and organically grown where it can be had.",
+    "It also says no drugs of any kind in its words: prescribed, over the counter or street. It says drugs destroy the immune system.",
+    "Here is where this page and the book part company, and it is the only place in the course where that happens.",
+    "The drug line is the book's and it is not this page's. Coming off alcohol, benzodiazepines or opioids is a doctor, and the app's own timeline page says the same thing. A prescription somebody is on is theirs and stays theirs. Nothing on this shelf, and nothing in this course, is a reason to stop anything a doctor has given you."],
+ note:"The corner of the book's diet that matters in this house is the drug line of it: no street drugs, and withdrawal is a doctor.",
+ q:[{q:"Which of the book's lines is not this page's line?", k:2, a:["Eat dark green leaves","Steam vegetables lightly","No drugs of any kind, prescribed included","Drink water in the morning"], w:"This page keeps a prescription where it belongs, with the doctor who gave it."},
+    {q:"Coming off alcohol or benzodiazepines is what?", k:1, a:["A quiet week with herbs","A doctor","A fast","Something to do alone"], w:"It can kill, and the safety tab and the app's timeline page both say the same."},
+    {q:"How does the book say to take garlic?", k:0, a:["Fresh, raw and organically grown where it can be had","Dried and powdered","Cooked into a stew","In a capsule only"], w:"That is the book's own line, in its nutritional approach."}]},
+
+{d:14, t:"Seasonings as medicine: the amounts", s:"Nutricide, seasoning for food, p339",
+ p:["About one eighth to one quarter of a teaspoon of a herbal spice for every four servings. Two together: a quarter teaspoon of each herb, and a quarter to an eighth of a teaspoon of each spice, for four servings.",
+    "The book's own examples are on the page: a quarter teaspoon of dill seed and a quarter teaspoon of dry mustard on vegetables, or a quarter teaspoon of basil and an eighth of a teaspoon of garlic powder in bean or soy patties.",
+    "Its own line about the whole idea is that you can use your seasonings as a medicine and a taste. The argument is that seasonings were the original medicaments, and that the shelf stopped being read that way.",
+    "So the seasoning rack is the first shelf in this course, not the last one. It is also the cheapest one, and the one that needs no preparation at all."],
+ bk:"You can use your seasonings as a medicine and taste.",
+ q:[{q:"How much of a herbal spice does the book use for four servings?", k:1, a:["One tablespoon","One eighth to one quarter of a teaspoon","Half a cup","A pinch, unmeasured"], w:"One eighth to one quarter of a teaspoon, which is much less than most people use."},
+    {q:"With two together, how much of each spice?", k:0, a:["A quarter to an eighth of a teaspoon","A teaspoon each","A tablespoon each","None is given"], w:"A quarter teaspoon of each herb, and a quarter to an eighth of a teaspoon of each spice, for four servings."},
+    {q:"What is the book's argument about seasonings?", k:2, a:["They are only for taste","They should be avoided","They were the original medicaments","They only work on meat"], w:"Its line is that the shelf stopped being read that way."}]},
+
+{d:15, t:"What each seasoning is for", s:"Nutricide, herb seasoning for dis-ease, p341",
+ p:["The book gives one line to each seasoning, and the From the books tab has the whole list. A few of them, so the shape is clear: allspice for digestion, gas and diabetes, as a stimulant. Anise for digestion, the liver, colic and colds. Basil for rheumatism, cramps, vomiting and mucous. Chervil for swellings, edema and gout, as a diuretic. Cinnamon for diarrhea and an upset stomach. Coriander as a stomach tonic and for joint pain. Dill for indigestion, gastritis, croup and nausea.",
+    "Fennel as a laxative, a diuretic, and for sores. Garlic for hypertension, infections, high blood pressure and worms. Ginger for nausea, cramps, edema. Horseradish for dysmenorrhea, high blood pressure, arthritis. Kelp for the thyroid and goiter. Marjoram for headaches, acidity, colds and nervousness. Mustard for gastritis, the liver, rheumatism. Oregano for colds, headaches and asthma. Paprika for sinus trouble and colds. Parsley as a diuretic. Pepper for neuralgia, which is nerve pain. Rosemary for colds, arthritis, memory and digestion. Sage for sores, wounds, depression, a sore throat. Savory for ear trouble and colds. Thyme for headaches, colds, worms, loss of appetite, diarrhea. Turmeric for fever, colds, skin problems, high blood pressure. Vanilla for digestion, gas, and soothing the nerves.",
+    "Three of those lines name a cancer, a meningitis and a poliomyelitis. Those are a hospital. The book names them, and on this page a claim that came out of the book stays the book's claim."],
+ note:"Nothing goes in an ear from that list. An ear that leaks, or that hurts a child at night with a fever, is a doctor.",
+ q:[{q:"Which seasoning does the book give for digestion, gas and diabetes?", k:0, a:["Allspice","Sage","Kelp","Paprika"], w:"Allspice, on the book's one-line-each list."},
+    {q:"Which seasoning does it name for the thyroid and goiter?", k:2, a:["Dill","Chervil","Kelp","Basil"], w:"Kelp, in the book's own words."},
+    {q:"What does the page say about an ear that leaks or hurts a child at night?", k:1, a:["Use savory","That is a doctor","Use a warm oil","Wait a week"], w:"The seasoning list has an ear line in it. The page's own rule overrides it: a leaking ear, or an ear that hurts a child with a fever, is a doctor."}]},
+
+{d:16, t:"Which seasoning goes on which food", s:"Nutricide, seasoning for food, p339",
+ p:["The book does not leave the seasonings floating. It pairs them, food by food, in a table, and the table is in the From the books tab row for row.",
+    "Asparagus: lemon juice, dry mustard, marjoram, sesame seed, pepper, thyme. Broccoli: lemon juice, pepper, caraway seed, dry mustard, nutmeg, basil, curry, oregano, garlic. Carrots: parsley, cinnamon, lemon juice, allspice, nutmeg, mint, bay leaf, caraway, dill seed, ginger, mace, thyme, marjoram. Cabbage and cauliflower get the longest row of all.",
+    "Read one line of that table and a pattern shows up: the seasoning that goes on a vegetable is usually the seasoning the book has a use for. Fennel is a diuretic and it is on the vegetables. Thyme is on the list for headaches and colds and it is on nearly everything.",
+    "And the beef row: bay leaf, basil, dry mustard, nutmeg, green pepper, sage, marjoram, onion, pepper, thyme, dill seed, oregano, caraway, garlic, parsley, rosemary, savory, turmeric, allspice, celery seed. It is the book's row. This page is not the one who put it back, and it is not this page's diet."],
+ bk:"A quarter teaspoon of dill seed and a quarter teaspoon of dry mustard on vegetables, or a quarter teaspoon of basil and an eighth of a teaspoon of garlic powder in bean or soy patties.",
+ q:[{q:"How does the book give the seasonings?", k:1, a:["One list of everything","Paired food by food, in a table","By price","By season of the year"], w:"Food by food, and the whole table is in the From the books tab."},
+    {q:"Which seasoning is on the page's list for headaches and colds, and turns up on nearly every vegetable row?", k:2, a:["Vanilla","Cinnamon","Thyme","Allspice"], w:"Thyme: headaches, colds, worms, loss of appetite, diarrhea."},
+    {q:"What is the beef row in the book's table?", k:0, a:["The book's own row, printed as the book has it","This page's suggestion","A grocery advert","A mistake that should be deleted"], w:"It is the book's row. The page prints it and does not claim it as its own diet."}]},
+
+{d:17, t:"Food as medicine", s:"Nutricide, the food medicine chart, p337-338",
+ p:["The chart is the plainest thing in either book: a compound, one line of what it does, and the foods that carry it.",
+    "Allylic sulfides dissolve cholesterol and protect against carcinogens, in garlic. Alpha-linolenic acid reduces inflammation and enhances the immune system, in flaxseed, soy products, purslane and walnut. Carotenoids fight cancer and reduce plaque, in parsley, carrots, winter squash, sweet potatoes, yams, cantaloupe, apricots, spinach, kale, turnip greens and citrus fruit.",
+    "Catechins fight gastrointestinal cancer and lower cholesterol, in tea and berries. Coumarins prevent blood clotting and help high blood pressure, in parsley and citrus fruit. Flavonoids decrease cancer, in parsley, carrots, citrus fruit, broccoli, cabbage, cucumbers, squash, yams, tomatoes, eggplant, peppers, soy products and berries.",
+    "Indoles normalise oestrogen action and help PMS, in cabbage and brussels sprouts. Isothiocyanates stimulate the liver and help blood pressure, in mustard, horseradish and radishes. Limonoids are alkalinising, in citrus fruit. Lycopene fights cancer and its progression, in tomatoes and red grapefruit.",
+    "Parsley and citrus fruit appear again and again. That is the chart's own message: the ordinary food is doing the work."],
+ note:"The chart carries on for another eight or nine rows in the book, and the scan of it garbles every name. Those are left out rather than guessed at.",
+ q:[{q:"Which compound is in garlic, for cholesterol and carcinogens?", k:0, a:["Allylic sulfides","Limonoids","Indoles","Catechins"], w:"Allylic sulfides, on the book's chart."},
+    {q:"Lycopene is in which two foods?", k:2, a:["Parsley and citrus","Tea and berries","Tomatoes and red grapefruit","Cabbage and sprouts"], w:"And its line on the chart is fighting cancer and its progression."},
+    {q:"What does the page do with the rows the scan garbles?", k:1, a:["It guesses them from the fragments","It leaves them out","It fills them from another book","It copies the fragments alone"], w:"Left out rather than guessed at, and the tab says so."}]},
+
+{d:18, t:"Blood cleansers", s:"Nutricide, p342",
+ p:["The book gives blood cleansers their own shelf, and the From the books tab carries it whole. It is a list of plants rather than a recipe.",
+    "The idea under the shelf is the spring clean: a body that has been fed badly, or that has been carrying something for a while, is helped out by plants that move water and waste through it. That is the book's idea and it is stated here as the book's.",
+    "What the page adds is the ordinary half of it. Water, food and time do most of a spring clean, and the plants on the shelf work beside that and not instead of it. Burdock, dandelion and milk thistle are the ones in the library most often named for this work, and each of their own entries carries its caution, including the one that matters most here: a liver that is struggling needs a doctor, not a tea."],
+ note:"A cleanse is not a detox, and nothing on this shelf does what a hospital does.",
+ q:[{q:"What is the idea under the blood cleansers shelf?", k:1, a:["Replacing blood","A spring clean, moving water and waste through the body","Removing a virus","Stopping a bleed"], w:"It is the book's idea, stated as the book's."},
+    {q:"Which of these is in the library for this work?", k:0, a:["Milk thistle","Vanilla","Lycopene","Paprika"], w:"Burdock, dandelion and milk thistle."},
+    {q:"What does the page add to the shelf?", k:2, a:["A stronger recipe","Nothing at all","That water, food and time do most of it","A dose for each plant"], w:"And that a liver that is struggling needs a doctor, not a tea."}]},
+
+{d:19, t:"Immune builders", s:"Nutricide, p342-343",
+ p:["The book's immune shelf is short and its figures are large. Garlic, which it calls an antibiotic and gives for parasites. Vitamin C at 25,000 to 60,000 mg, and 300 mg every two hours, for an infection, printed here exactly as the book prints it. Echinacea extract and grape seed extract for infection. Pine bark extract for colds and infection. Vitamin E up to 800 i.u. a day. Ginseng for energy. Lecithin for the nerves. Lysine at 1000 mg for infection and for herpes. Zinc and selenium.",
+    "Those are the book's numbers and they are not small ones. Every figure in that shelf is the book's own, printed as claims, which is the thing that makes printing them honest.",
+    "Two of the names on that shelf carry their own warning, and both are on the page. Goldenseal is given in the book broadly, for all types of disease, and it has harmed newborns. Yohimbe is dangerous with anything acting on serotonin or on blood pressure, and its entry says so.",
+    "And the one line that outranks the whole shelf: an infection is a doctor. Not oregano oil, not goldenseal, not garlic. A fever that will not come down, a wound going red and hot, a chest that rattles, anything yellow or green coming up."],
+ bk:"The listed dose is what a healthy body needs. A dis-ease needs more, because the body has to use its normal amount and still fight.",
+ q:[{q:"How much vitamin C does the book give for an infection?", k:1, a:["60 mg","25,000 to 60,000 mg","500 mg","It gives no figure"], w:"And 300 mg every two hours. It is the book's figure, printed as its claim."},
+    {q:"Which two names on that shelf carry their own warning on this page?", k:2, a:["Ginseng and lecithin","Vitamin E and lysine","Goldenseal and yohimbe","Zinc and selenium"], w:"Goldenseal has harmed newborns; yohimbe clashes with serotonin and blood pressure medicine."},
+    {q:"What is the one line that outranks the whole immune shelf?", k:0, a:["An infection is a doctor","Take more vitamin C","Start with garlic","Wait three days"], w:"A fever that will not come down, a hot red wound, a rattling chest, anything yellow or green."}]},
+
+{d:20, t:"Sleep and a racing mind", s:"The evening shelf",
+ p:["Six plants in this library carry sleep, and the book's short shelf names valerian, catnip, chamomile, kava, passion flower and hops. Each has its own entry here, and kava is the one to read first if the liver has had a bad time.",
+    "The library's own evening shelf adds a few the books do not: ashwagandha, which the tradition takes slowly for weeks rather than for one bad night. Lavender, three ways, the flowers in a pillow, the oil diluted on the wrists and temples, and the oil in a carrier for the skin. Lemon balm, as a nightly tea. And St John's wort, which is on this page for a heavy mood and is the herb that taught everybody to check interactions.",
+    "Two rules travel with this shelf and both are in the entries. Do not drive after a big dose of valerian, and do not take it with alcohol or sleeping tablets. Never swallow neat lavender oil. And St John's wort is read twice before it is taken at all.",
+    "The old line about a slow herb is worth carrying into every shelf in this course: some plants are for one bad night and some are for weeks. Ashwagandha and valerian are the second kind in this tradition."],
+ note:"Some plants are for one bad night and some are for weeks. Ashwagandha and valerian are the second kind in this tradition, and the evening shelf itself is the book's own: valerian, catnip, chamomile, kava, passion flower and hops.",
+ q:[{q:"Which six does the book's sleep shelf name?", k:2, a:["Ashwagandha and lavender","Ginger and thyme","Valerian, catnip, chamomile, kava, passion flower, hops","Burdock and dandelion"], w:"The library adds ashwagandha, lavender and lemon balm from other traditions."},
+    {q:"What does the library say about lavender oil?", k:0, a:["Never swallow the neat oil","Drink a spoonful at night","Rub it in the eyes","Give it to a baby"], w:"Dilute it, always, and never swallow it neat."},
+    {q:"Which of the evening shelf is the one to read first if the liver has had a bad time?", k:1, a:["Chamomile","Kava","Hops","Catnip"], w:"Its own entry carries it, and the safety tab names kava with the liver."}]},
+
+{d:21, t:"Stomach, wind and bowels", s:"Kitchen roots and the bitter tonics",
+ p:["Ginger is the single most useful kitchen root in the tradition: a slice chewed or brewed for a queasy stomach, for sickness on a boat, and for the cramping of a monthly cycle. Large amounts can thin the blood and burn the stomach, which its entry says.",
+    "Peppermint is a tea after a heavy meal, and the oil, kept well away from the eyes, rubbed on the temples for a headache across the brow. It worsens heartburn for some people, and the oil must stay off the face of a baby.",
+    "Fennel seed, chewed or brewed, was the ordinary European answer to wind and cramping. Dandelion is a bitter tonic and a diuretic both. Slippery elm coats as it goes down, which is why it turns up for a raw throat and an acid stomach, and it is taken two hours away from any medicine because it slows how the medicine is taken up.",
+    "Then the one that has to be handled like a medicine rather than a food. Senna is a strong laxative, leaf and pod, for a week at most, not in pregnancy, not for a child, and not with a bowel condition. The old herbals pair it with ginger or fennel to stop the griping."],
+ bk:"One teaspoon of herb per cup of water.",
+ q:[{q:"What does the library say about ginger in large amounts?", k:1, a:["It is harmless at any amount","It can thin the blood and burn the stomach","It stops the heart","It causes fever"], w:"That is the caution on its entry, and ginger is otherwise one of the gentlest on the shelf."},
+    {q:"Slippery elm has to be taken how?", k:0, a:["Two hours away from any medicine","With the medicine","On an empty stomach only","At night only"], w:"It slows how a medicine is taken up."},
+    {q:"How long is senna used for?", k:2, a:["Six months","Every day","A week at most","Once a year"], w:"And never in pregnancy, never for a child, never with a bowel condition."}]},
+
+{d:22, t:"Colds, throat and chest", s:"The first day of a cold",
+ p:["Elderberry is the European standby for the first day of a cold, cooked berry as syrup in autumn and tea through winter, with the flowers in a sweat tea for a fever. The caution is absolute and its entry says it: never eat the raw berries, bark or stems.",
+    "Echinacea, the North American prairie plant the Plains nations used, is taken at the very first tickle of a cold, not in the middle of one. It is avoided with autoimmune conditions and it is not for the long term.",
+    "Mullein is the cough herb: the soft leaf brewed for a cough that will not clear, and the flowers steeped in olive oil for an earache. Thyme is the kitchen one: a strong brew to gargle with for a raw throat, and a steam for a chest that is tight. Onion and garlic both turn up in the book's colds and coughs rows.",
+    "And the rule that stands over all of it. Nothing goes into an ear that is leaking or that you think may have a torn drum. An ear that hurts a child at night with a fever, a chest that hurts to breathe, or a cough that is not clearing after weeks, is a doctor."],
+ note:"Never eat elderberry raw, and never its bark or stems. Cooked berry only, as a syrup or in a tea.",
+ q:[{q:"When is echinacea taken?", k:1, a:["In the middle of a cold","At the first tickle","Every day forever","Only with a fever"], w:"And it is avoided with autoimmune conditions."},
+    {q:"What is the rule about elderberry?", k:0, a:["Never eat the raw berries, bark or stems","Eat it raw, it is stronger","Boil it for a minute and it is finished","The stems are the best part"], w:"Cooked berry only, as syrup or in a tea."},
+    {q:"What goes into a leaking ear?", k:2, a:["Warmed mullein oil","Olive oil","Nothing at all — that is a doctor","A cotton bud"], w:"An ear that leaks, or a drum you think may be torn, is a doctor's appointment."}]},
+
+{d:23, t:"Skin, joints and a spring clean", s:"Outside and inside",
+ p:["Outside: aloe vera for burns and grazes, goldenseal powder on the skin, marshmallow, witch hazel as the astringent, and oatmeal and slippery elm for a sore surface. Calendula, chickweed and comfrey leaf, in the old books, for skin eruptions and wounds, with comfrey leaf on the outside only.",
+    "Inside, for the joints: the anti-inflammatory shelf from the book's classes, arnica, cayenne, garlic and chaparral. Turmeric is on the seasoning list for its own reasons, and its entry carries the caution that it thins the blood.",
+    "For the spring clean: burdock root and dandelion are the old pair, and milk thistle the seed most often named, with each of their own cautions travelling with them.",
+    "Two things this page will not do with this shelf. It will not let a burn be treated at home when it is deep, or on a face, or bigger than a palm. And it will not let a joint that is hot, red, swollen and painful be treated at home either, because that is a joint that needs looking at."],
+ note:"Goldenseal on the skin is one thing. Goldenseal swallowed has harmed newborns, which is why it sits on the safety tab by name.",
+ q:[{q:"Which plant is the astringent of this shelf, tightening the skin?", k:1, a:["Aloe vera","Witch hazel","Oatmeal","Turmeric"], w:"The book's astringent class names witch hazel and alum root."},
+    {q:"Which pair is the old spring clean?", k:0, a:["Burdock root and dandelion","Garlic and cayenne","Arnica and thuja","Ginger and sage"], w:"With milk thistle the seed most often named, in the library."},
+    {q:"What does the page say about a joint that is hot, red, swollen and painful?", k:2, a:["Rub in cayenne","Use garlic","It needs looking at, not a poultice","Ignore it for a week"], w:"And a deep burn, a burn on a face, or one bigger than a palm is not a home job either."}]},
+
+{d:24, t:"Vitamins", s:"African Holistic Health, the vitamin and mineral guides",
+ p:["The book's framing is short and worth having: vitamins energise the body, minerals stabilise it, and vitamins are either water-soluble or oil-soluble.",
+    "Vitamin A is tissue and immunity, and short of it the skin and the sight suffer: carrots and leafy greens. B complex is metabolism, energy and mental health. Vitamin C is the glands and resistance to disease, and short of it, wounds and gums. Vitamin D draws minerals in and builds bone, and short of it, growth and energy suffer. Vitamin E is tissue health and circulation. Vitamin K is clotting and energy.",
+    "It also names the vitamins the quizzes never ask about: F, the fatty acids. T, for making blood. U, for healing a wound. P, for protecting a cell.",
+    "On which to buy, the book says plant-derived over synthetic, and whole food over processed. Its line on synthetic vitamins is that they drain the body of nutrients, alter pH and body chemistry, and work against the immune system. That is its claim and it is printed as its claim."],
+ bk:"Vitamins energise the body while minerals stabilise it.",
+ q:[{q:"In the book's framing, what do vitamins do?", k:0, a:["Energise the body","Stabilise the body","Build bone","Clot blood"], w:"Minerals stabilise it; vitamins energise it."},
+    {q:"Which vitamin does the book give for tissue and immunity, with carrots and leafy greens as its food?", k:2, a:["Vitamin K","Vitamin C","Vitamin A","Vitamin D"], w:"And short of it, the skin and the sight suffer."},
+    {q:"Which does the book prefer to buy?", k:1, a:["Synthetic, it is purer","Plant-derived and whole food","The cheapest","Whichever is on offer"], w:"Its line on the synthetic ones is that they drain the body and work against the immune system."}]},
+
+{d:25, t:"Minerals", s:"Iron, calcium, zinc, selenium",
+ p:["Minerals, in the book, are bought chelated rather than synthetic, from a health food shop in its words, and two to three times the ordinary amount when treating something.",
+    "Iron makes blood. Short of it: low mental sharpness, anemia, tiredness and headaches. Its herbs are burdock root, chamomile and fennel, and its foods are almonds, spinach and whole grains.",
+    "Calcium is bone, teeth and muscle. Short of it: soft bone, nervousness, muscle cramps and heart trouble. Its herbs are aloe root, horsetail and red clover, and its foods are broccoli, raw vegetables and leafy greens.",
+    "Zinc is cell and tissue growth, the prostate, healing wounds and burns, taste and smell, and in the book's words it is vital to enzymes. Selenium is liver function, less energy lost, protection from toxins, the prostate, and an antioxidant.",
+    "The copy of the summary in the repo cuts off in the middle of the mineral guide, at phosphorus, and that is where the From the books tab ends. There is no fuller list to put here from it, so the course stops where the book stops."],
+ bk:"Minerals stabilise the body.",
+ note:"Where the copy of the book runs out, the tab says so. Nothing is invented to fill a gap.",
+ q:[{q:"How does the book say to buy minerals?", k:1, a:["In any form","Chelated rather than synthetic","As a powder only","From a supermarket"], w:"From a health food shop in its words, and two to three times the ordinary amount when treating something."},
+    {q:"Which herbs does the book give for iron?", k:0, a:["Burdock root, chamomile and fennel","Aloe root and horsetail","Ginger and sage","Mullein and thyme"], w:"With almonds, spinach and whole grains as its foods."},
+    {q:"Where does this copy of the book stop?", k:2, a:["At the last page","At the herbs chapter","In the middle of the mineral guide, at phosphorus","At the recipes"], w:"And the tab says so, rather than inventing the rest."}]},
+
+{d:26, t:"Colour, organ and clock", s:"African Holistic Health, colours and cycles",
+ p:["In the book, each colour goes with an organ and its work. Yellow, a lemon, for the liver. Red for the heart. A plant whose colour matches what an organ produces is, in the book, medicine for that organ. The colour of the eye, the skin and the nail is read the same way, as a sign of what is going on inside.",
+    "The organ clock is the second half of it. Each organ keeps its own rhythm around the day, and the book's own example is that the liver is at its most active at one in the morning. Organs that work together suffer together: when one fails to do its part, the other wears out with it.",
+    "Then the days. Sunday, Tuesday and Thursday are the physical days, for the muscles. Monday, Wednesday and Friday are the internal days, for the organs inside and the spirit. Oils and incense work through the nose, and each oil has its own work and its own days. Metals and crystals each have their own. And its line on music is that sound goes into a person through the skin, the eyes, the ears and the food.",
+    "The zodiac, the colours, the parts of the body and the acupressure meridians are mapped onto each other in the book as well. None of this comes with a mechanism, and the page does not add one: it is here because it is in the book."],
+ note:"Colour, cycle, oil, crystal and sign, with no account of how. Stated as the book states it, and not sharpened into anything it is not.",
+ q:[{q:"Which colour goes with the liver in the book?", k:1, a:["Red","Yellow","Blue","Green"], w:"Yellow, a lemon, for the liver; red for the heart."},
+    {q:"Which organ does the book say is most active at one in the morning?", k:2, a:["The heart","The kidneys","The liver","The lungs"], w:"Its own example of the organ clock."},
+    {q:"Which days are the physical days, for the muscles?", k:0, a:["Sunday, Tuesday and Thursday","Monday, Wednesday and Friday","Saturday only","Every day"], w:"Monday, Wednesday and Friday are the internal days."}]},
+
+{d:27, t:"Easy remedies", s:"African Holistic Health, easy remedies",
+ p:["The book has a chapter of short remedies, and the From the books tab carries the whole list. Athlete's foot: garlic powder, pau d'arco powder and horseradish powder sprinkled on the feet, tea tree oil between the toes, and pau d'arco tea to drink. Chapped lips: a lotion of lavender, aloe vera, witch hazel, vegetable glycerin and beeswax. Falling hair: wild cherry bark boiled, with nettle and horsetail added.",
+    "Grey hair gets a rinse of henna and sage tea. A facial mask is equal parts wheat germ flour, honey and clay. A lotion is one ounce of vegetable glycerin, half an ounce of sage, half an ounce of aloe oil and a quarter of an ounce of a scented oil, shaken together. A foot soak is cabbage juice, lemon juice, ginger root and turpentine.",
+    "Two rows in that chapter are the book's and not this page's, and the tab says so on the row. The ringworm line mixes gunpowder, vinegar and charcoal: gunpowder is not a household ingredient and this page leaves that one in the book. And the natural contraceptives row, acacia and stone seed on a tampon or a douche, is an old practice and not a reliable contraceptive, which the stone seed entry says in its own words.",
+    "Everything else in that chapter is a kitchen job: a lotion, a mask, a rinse, a soak."],
+ note:"A blocked skin remedy is one thing. A blocked nose, an asthma attack or an inhaler is another, and nothing in this chapter stands in for one.",
+ q:[{q:"What does the book put on athlete's foot?", k:0, a:["Garlic, pau d'arco and horseradish powder, with tea tree oil","Vinegar and charcoal","Henna and sage","Wheat germ flour and clay"], w:"And pau d'arco tea to drink."},
+    {q:"Which row does this page leave in the book?", k:2, a:["The facial mask","The chapped lips lotion","The ringworm line with gunpowder in it","The hair oil"], w:"Gunpowder is not an ingredient anybody should be mixing at a kitchen table."},
+    {q:"What is the acacia and stone seed row described as?", k:1, a:["A reliable method","An old practice, not a reliable contraceptive","A modern technique","A cure for cramps"], w:"The stone seed entry says it in its own words."}]},
+
+{d:28, t:"The lines that never move", s:"Read this first, all of it, today",
+ p:["This is the day to open the Read this first tab and read the whole thing, slowly, because it is the only tab on this page that does not soften.",
+    "An infection is a doctor, not a tea. Not oregano oil, not goldenseal, not garlic. A fever that will not come down, a wound going red and hot, a chest that rattles, a tooth gone bad, anything yellow or green coming up.",
+    "Coming off alcohol or a drug is a doctor. Alcohol withdrawal can kill, and it is not something to sit out with chamomile and valerian. If you have been drinking heavily and stop, that is a doctor or a hospital, and the timeline page in the app says the same thing. Herbs do not belong in that week.",
+    "Anything you take on a prescription stays with the doctor who gave it. St John's wort alone interferes with antidepressants, birth control, blood thinners and HIV medicine. Licorice and hibiscus move blood pressure. Ginger, ginkgo, turmeric, garlic and white willow thin the blood. One question to a pharmacist is free and it is the whole of this paragraph.",
+    "Pregnancy and children. Most of the list is not for pregnancy, and a child is not a small adult for dosing. Goldenseal and comfrey root are named on that tab for babies. And kratom is not in this library at all: it is sold as a herb, it acts on the same receptors as opioids, and it is addictive.",
+    "Read that tab today, and again on any day a plant looks like a way out of something that needs a person."],
+ note:"These are the page's lines and they outrank every claim on every other tab of it.",
+ q:[{q:"What does the page say about an infection?", k:1, a:["Try oregano oil first","It is a doctor, not a tea","Wait three days","Take goldenseal"], w:"Not oregano oil, not goldenseal, not garlic."},
+    {q:"What is the rule about a prescription?", k:0, a:["It stays with the doctor who gave it","Herbs can replace it","It can be halved while taking herbs","It is not mentioned"], w:"One free question to a pharmacist covers the whole of it."},
+    {q:"Why is kratom not in this library?", k:2, a:["It is expensive","It only grows abroad","It acts on opioid receptors and is addictive","It tastes bad"], w:"People come off it with withdrawal like any opioid."}]},
+
+{d:29, t:"Keeping your own book", s:"Gathering it up",
+ p:["You have the whole library now, and the course has been through it. What is left is the habit, and the page is already built for it.",
+    "Read a plant before you use it, not after. What it does is the top of its card. The caution is the part under it, and it is never softened by how good the top sounded.",
+    "Write down what you find. Every herb card has a What your book says box at the bottom, the My notes tab collects them, and you can add a plant the two books name that is not on the shelf yet. It is kept on the phone and nothing is sent anywhere.",
+    "Use the search box before you forget a name, and use the By need tab when you know the trouble and not the plant. And read a plant out loud with the Read it to me button if that is easier than reading it on a screen, because the phone's own voice reads the whole entry, caution included.",
+    "Then the same rule the course opened with, at the end of it: food first, a plant second, and the safety tab over both of them."],
+ bk:"The spirit, the mind and the body are one. The past, the present and the future are one now.",
+ q:[{q:"Where does a herb card put what a plant does?", k:0, a:["At the top, under the name","At the bottom","Nowhere","Only in the notes"], w:"The caution is the part under it, and it is read every time."},
+    {q:"Where do your own notes live?", k:1, a:["On a server","On this phone, in the app","In an email","Nowhere"], w:"Nothing is sent anywhere."},
+    {q:"Which tab holds the lines that outrank everything else on the page?", k:2, a:["A to Z","By need","Read this first","From the books"], w:"An infection, withdrawal, a prescription, pregnancy, a child, the liver, and kratom."}]},
+
+{d:30, t:"The test", s:"Twenty questions, all thirty days", test:1,
+ p:["Twenty questions drawn from all thirty days, in the order the course ran. Sixteen is a pass.",
+    "Nothing is timed, the answers are checked on the phone, and nothing goes anywhere. Answer them all and the score appears at the bottom, with the reason for every one.",
+    "If a day is wrong, that is the day to read again. The day number is in the reason."],
+ note:"Sixteen out of twenty to pass, and you can take it as many times as you like.",
+ q:[
+  {q:"Which two books is this library built from?", k:1, a:["Two anonymous collections","African Holistic Health and Nutricide","A cookbook and a formulary","A pharmacy guide and a dictionary"], w:"Day 1."},
+  {q:"In the book's order, what comes before anything is given?", k:2, a:["A purchase","A fast","The body is read","A temperature"], w:"Day 2."},
+  {q:"The doctrine of signatures says a plant's use is written on it by what?", k:0, a:["Shape, colour, texture, taste and smell","Its Latin name","Its price","Its country of origin"], w:"Day 3."},
+  {q:"How long are roots and barks simmered for a tea?", k:1, a:["Two minutes","20 to 30 minutes","Four hours","They are never heated"], w:"Day 4."},
+  {q:"What is the base line for a tea?", k:2, a:["One ounce per cup","One handful per pot","One teaspoon of herb per cup of water","No base line"], w:"Day 5."},
+  {q:"Which three things does the book say blunt a herb?", k:0, a:["Synthetic drugs, junk food and alcohol","Cold water, salt and heat","Metal, plastic and glass","Sleep, exercise and water"], w:"Day 6."},
+  {q:"Which class brings a temperature down?", k:1, a:["Cathartics","Antipyretics","Vulneraries","Stimulants"], w:"Day 7."},
+  {q:"Which class tightens skin and mucous membrane?", k:2, a:["Emollients","Demulcents","Astringents","Nervines"], w:"Day 8."},
+  {q:"What does a diaphoretic do?", k:0, a:["Raises a sweat","Stops a sweat","Brings phlegm up","Moves water"], w:"Day 9."},
+  {q:"What is a vulnerary for?", k:1, a:["Sleep","Wounds and the skin","A fever","Worms"], w:"Day 10."},
+  {q:"Which herb on this page is never taken internally?", k:2, a:["Chamomile","Ginger","Comfrey","Valerian"], w:"Day 11."},
+  {q:"Which two things come off the table in the book's nutritional approach?", k:0, a:["Dairy and fried food","Fruit and grains","Water and tea","Herbs and spices"], w:"Day 12."},
+  {q:"Which of the book's lines does this page not keep?", k:2, a:["Eat dark green leaves","Drink water in the morning","No drugs of any kind, prescribed included","Steam vegetables lightly"], w:"Day 13. A prescription stays with the doctor who gave it."},
+  {q:"How much of a herbal spice does the book use for four servings?", k:1, a:["A tablespoon","An eighth to a quarter of a teaspoon","Half a cup","A handful"], w:"Day 14."},
+  {q:"Which seasoning does the book give for the thyroid and goiter?", k:0, a:["Kelp","Basil","Vanilla","Dill"], w:"Day 15."},
+  {q:"In the food medicine chart, lycopene is in which two foods?", k:2, a:["Parsley and citrus","Tea and berries","Tomatoes and red grapefruit","Cabbage and sprouts"], w:"Day 17."},
+  {q:"How much vitamin C does the book give for an infection?", k:1, a:["60 mg","25,000 to 60,000 mg","500 mg","It gives none"], w:"Day 19. And 300 mg every two hours, in the book's own words."},
+  {q:"When is echinacea taken?", k:0, a:["At the first tickle of a cold","In the middle of a cold","Every day","Only with a fever"], w:"Day 22."},
+  {q:"What does the page say about an infection?", k:2, a:["Try oregano oil","Give it three days","It is a doctor, not a tea","Take goldenseal"], w:"Day 28."},
+  {q:"In the book's framing, what do minerals do?", k:1, a:["Energise the body","Stabilise the body","Build the blood","Cool the body"], w:"Day 24: vitamins energise, minerals stabilise."}
+ ]}
+];
+
+/* The pass mark for day 30. */
+var EXAM_PASS = 16;
+
 /* Each section opens and shuts like a herb card does, so the page keeps one
    way of doing it — the click handler on the view already toggles by data-h. */
 function bsec(b,i){
@@ -1057,6 +1421,71 @@ function allHerbs(){
     return {n:o.n,a:'added by you',u:o.u||'',d:o.d||'',h:o.h||'',c:o.c||'',t:[],own:1,id:k};
   });
   return HERBS.map(function(h,i){ h=Object.assign({},h); h.id='h'+i; return h; }).concat(own);
+}
+
+/* ── THE THIRTY DAYS ──────────────────────────────────────────────────────────
+   Progress lives in the same store as the notes, one key a day. Nothing is
+   sent anywhere, there is no clock on it, and an answer can be changed —
+   changing it just changes the score. The test on day 30 is checked here on
+   the phone, the same way every other day is.
+--------------------------------------------------------------------------- */
+function dayRec(d){ var r=store['day:'+d]; if(!r||!r.a) return {a:[]}; return r }
+function picked(d,qi){ var r=dayRec(d); return typeof r.a[qi]==='number' ? r.a[qi] : -1 }
+function dayOf(d){ var o=null; COURSE.forEach(function(x){ if(x.d===d) o=x }); return o }
+function dayScore(d){
+  var day=dayOf(d); if(!day) return {right:0,total:0,done:false};
+  var right=0, answered=0;
+  day.q.forEach(function(q,i){ var p=picked(d,i); if(p>-1){ answered++; if(p===q.k) right++ } });
+  return {right:right, total:day.q.length, done:answered===day.q.length};
+}
+function daysDone(){ var n=0; COURSE.forEach(function(x){ if(x.d<30 && dayScore(x.d).done) n++ }); return n }
+function answer(d,qi,oi){
+  var r=dayRec(d); r.a[qi]=oi; store['day:'+d]=r; save();
+}
+
+function courseDay(day){
+  var rec=dayScore(day.d), open=openId==='d'+day.d;
+  var out='<div class="card'+(open?' open':'')+'" data-h="d'+day.d+'">'
+   +'<div class="row"><div class="row-txt"><div class="dayno">Day '+day.d+(day.test?' \u00b7 the test':' of 30')+'</div>'
+   +'<b>'+esc(day.t)+'</b><span>'+esc(day.s)+(rec.done?' &middot; '+rec.right+' of '+rec.total+' right':'')+'</span></div>'
+   +'<div class="chev">&#8250;</div></div><div class="body">';
+  (day.p||[]).forEach(function(t){ out+='<p>'+esc(t)+'</p>' });
+  if(day.bk) out+='<div class="big okbox"><b>From the books &middot; their line</b>'+esc(day.bk)+'</div>';
+  if(day.note) out+='<div class="big warnbox"><b>This page\u2019s own line</b>'+esc(day.note)+'</div>';
+  out+='<div class="lbl">'+(day.test?'The test \u00b7 twenty questions':'Day '+day.d+' quiz')+'</div>';
+  day.q.forEach(function(q,i){
+    var p=picked(day.d,i);
+    out+='<div class="qbox"><p class="qt">'+(i+1)+'. '+esc(q.q)+'</p>';
+    q.a.forEach(function(t,oi){
+      out+='<button class="opt'+(p===oi?(oi===q.k?' right':' wrong'):'')+'" data-ans="'+day.d+':'+i+':'+oi+'">'+esc(t)+'</button>';
+    });
+    if(p>-1) out+='<div class="why">'+(p===q.k?'Right. ':'The answer is \u201c'+esc(q.a[q.k])+'\u201d. ')+esc(q.w)+'</div>';
+    out+='</div>';
+  });
+  if(rec.done){
+    if(day.test){
+      var pass=rec.right>=EXAM_PASS;
+      out+='<div class="big '+(pass?'okbox':'redbox')+'"><b>'+(pass?'Passed':'Not yet')+'</b>'+rec.right+' of '+rec.total
+        +'. '+(pass?'The pass mark was '+EXAM_PASS+'. Every day of this course is now yours.':'The pass mark is '+EXAM_PASS+'. Take it again as many times as you like, and read the days the reasons point back to.')+'</div>';
+    }else{
+      out+='<div class="done">Day '+day.d+' done &middot; '+rec.right+' of '+rec.total+' right.</div>';
+    }
+  }
+  return out+'</div></div>';
+}
+
+function courseView(){
+  var done=daysDone(), t=dayScore(30);
+  var test=t.done ? 'The test: '+t.right+' of '+t.total+(t.right>=EXAM_PASS?' \u2014 passed':' \u2014 the pass mark is '+EXAM_PASS+'. Take it again whenever you like.')
+                  : 'The test is day 30. Sixteen out of twenty is a pass. More than one answer can be changed, and the test can be taken again as many times as you like.';
+  return '<div class="sec">'
+   +'<div class="prog"><b>'+done+' of 29 days done</b>'
+   +'<div class="bar"><i style="width:'+Math.round(done/29*100)+'%"></i></div>'
+   +'<span>'+test+'</span></div>'
+   +'<div class="big okbox"><b>Thirty days, beginner to the end</b>A day of teaching, a short quiz under it, and the test on the last day. Every day is built out of the two books already behind this library, and each quiz tells you why the answer is the answer. Nothing is timed, nothing is sent anywhere, and nothing here has to be bought.</div>'
+   +'<div class="sec-hd">The days</div>'
+   +COURSE.map(courseDay).join('')
+   +'</div>';
 }
 
 function render(){
@@ -1094,6 +1523,10 @@ function render(){
 
   if(tab==='books'){
     out='<div class="sec">'+BOOKS.map(bsec).join('')+'</div>';
+  }
+
+  if(tab==='course'){
+    out=courseView();
   }
 
   if(tab==='safety'){
@@ -1168,6 +1601,16 @@ function card(h){
   +'</div></div>';
 }
 
+/* An answer to a quiz question, on any day including the test. The day stays
+   open and the score under it updates where it stands. */
+document.getElementById('view').addEventListener('click',function(e){
+  var b=e.target.closest && e.target.closest('[data-ans]');
+  if(!b) return;
+  var p=b.getAttribute('data-ans').split(':');
+  answer(Number(p[0]),Number(p[1]),Number(p[2]));
+  openId='d'+p[0];
+  render();
+});
 document.getElementById('view').addEventListener('click',function(e){
   var row=e.target.closest('.row'); if(!row) return;
   var cardEl=row.closest('.card'); if(!cardEl) return;

@@ -19,6 +19,11 @@
 //
 // 2.0 goes with the app being named The Truth and the herb library getting its
 // read-aloud voice (4 Oct 2026), so an installed copy picks both up.
+//
+// 6 Oct 2026: '/data/lessons.json' came off the list below. The lesson packs and
+// the script that built them were deleted that day — the app that read them went
+// on 4 Oct and nothing has fetched this one since. The name stays at 2.0: taking
+// an entry out is not a rebuild, and the number is Jacques's to move.
 const CACHE_NAME = 'tsid-shell-v2.0';
 const SHELL_FILES = [
   '/',
@@ -37,7 +42,6 @@ const SHELL_FILES = [
   '/audio/sos-talk-clear.mp3',
   '/audio/sos-talk-male.mp3',
   '/audio/sos-talk-deep.mp3',
-  '/data/lessons.json',
   '/data/stories.json',
   '/data/audio-stories.json',
   '/icons/icon-192.png',

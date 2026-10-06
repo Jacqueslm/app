@@ -184,9 +184,9 @@ not re-walk these; do re-run the *method*, which is what actually found them:
    `FREE_CHAT_DAILY_LIMIT` and the server's `FREE_CHAT_LIMIT` are both 0 -
    Friendly went Pro-only on 24 Aug and the pricing surface never followed. It
    also undersold Pro: 30 instead of *nothing* is a better offer than 30 vs 3.
-2. **"Fourteen recovery tracks" double-counted.** `lessons.json` holds fourteen
-   tracks, two of which ARE Supporting Someone and Together - which the same
-   sentence then listed again. It is twelve recovery tracks plus those two.
+2. **"Fourteen tracks" double-counted.** The track list holds fourteen, two of
+   which ARE Supporting Someone and Together - which the same sentence then
+   listed again. It is twelve habit tracks plus those two.
 3. **Friendly was briefed on five voices.** Deep was missing from
    `SYSTEM_APP_MAP`, so she would have denied a voice users can hear.
 4. **Faith ran 30 days deep inside a 90-day program** (Jacques's own catch).
@@ -276,9 +276,9 @@ he ever wants it back.
 
 **Everything else from that pass stands:** the five stock narrators (Warm,
 Soft, Gentle, Clear, Calm male) are public domain / CC0 and cover days 1-90.
-Audio CDN = the `lesson-audio` branch; manifest = `data/lesson-audio-manifest.json`.
-Lesson text changes = regenerate (hash in filename). Known gotcha: two
-generators writing the manifest concurrently race — re-run one at the end.
+Audio CDN = the `lesson-audio` branch. Lesson text changes = regenerate (hash in
+filename). The manifest and the two lesson-audio generators went with the lesson
+files on 6 Oct 2026.
 
 ### Three new experiences (all Jacques-approved via the rule-24 flow)
 - **The Climb** (Today + Tools): back-view hiker climbs 90 carved steps up a
@@ -602,7 +602,12 @@ the person struggling (porn, alcohol, food, gambling).
   **Rule of thumb: `main` is the record, `claude/vibe-code-uwxxlk` is what runs.**
   Anything that has to actually work for Jacques — the site or Studio — belongs
   on both.
-- **Host:** Railway — REBUILT 9 Sep 2026 after the old account was deleted.
+- **Host: VERCEL, and only Vercel.** 5 Oct 2026 — Jacques: "I dont have railway
+  anymore everything run in vercel." Everything runs on the Vercel build
+  (`server/vercel-app.js` + `vercel.json`): one shared password, no accounts, no
+  database. **Do not wire anything to Railway again.** The Railway notes below
+  are the record of what was, not a queue of options.
+- ~~**Host:** Railway~~ — REBUILT 9 Sep 2026 after the old account was deleted.
   New project `prolific-expression`, service `app`, region US East. It deploys
   **`main`**, not `claude/vibe-code-uwxxlk`, and auto-deploys on every push to
   `main`. Root directory is set to `TurnSomeDayIntoOneday` in the service's

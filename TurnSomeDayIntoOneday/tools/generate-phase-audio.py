@@ -151,8 +151,14 @@ def _synth_piper(args):
 
 
 def run_pool(voice_key, jobs, out_dir, workers, init, initargs, synth):
-    manifest = json.load(open(MANIFEST, encoding='utf-8'))
-    items = manifest['items']
+    # 6 Oct 2026: the manifest that bundled the day 1-30 lesson recordings was
+    # deleted along with the lesson files. This generator is the only writer
+    # left, so a missing file starts a new one instead of stopping the run.
+    try:
+        manifest = json.load(open(MANIFEST, encoding='utf-8'))
+    except FileNotFoundError:
+        manifest = {}
+    items = manifest.setdefault('items', {})
     t0 = time.time()
     args = [(voice_key, tr, d, t, out_dir) for (tr, d, t) in jobs]
     with mp.Pool(workers, initializer=init, initargs=initargs) as pool:

@@ -492,22 +492,22 @@ Nothing is sold. One person built it and runs it.
   `backup.js`, `email.js`, `analytics.js`.
 - `img/fight/` and `audio/fight/` — the fight's art and sound. `js/ring3d-three.js`
   — three.js for the ring, loaded by `game3d.html` only.
-- `data/lessons/lesson1..13.json` → `node data/build-lessons.js` → `lessons.json`.
-  **390 lessons, ~166k words. Never hand-edit `lessons.json`.** Kept, but **no
-  page serves lessons any more** (4 Oct 2026) - the reader that used it was the
-  recovery app. Same for `data/stories.json`, `data/audio-stories.json` and the
-  lesson audio below: the files and the tools stay, the screens are gone.
-- Lesson audio: real recordings (five Piper voices, same as the SOS talk) live
-  on the repo's **`lesson-audio` branch** — never merged, served straight from
-  `raw.githubusercontent.com`, so they add zero weight to Railway builds and
-  home-install updates. The app ships only `data/lesson-audio-manifest.json`
-  mapping `"Category|day|variant"` → per-voice file paths. **If lesson text
-  changes**: `node data/build-lessons.js`, then
-  `python3 tools/generate-lesson-audio.py <voices> <out>` (file names are
-  content-hashed, unchanged lessons re-encode for free), commit the new files
-  to `lesson-audio` and the regenerated manifest to main in the same change.
-  No recording / no manifest entry = the app silently falls back to the
-  phone's own voice, so audio can never hard-break the lesson screen.
+- **The lessons are deleted (6 Oct 2026).** `data/lessons/lesson1..13.json`,
+  `data/lessons.json` and `data/build-lessons.js` are gone. No page served them
+  after 4 Oct, when the app that read them was removed, so 390 lessons of text
+  had no screen left to reach. `data/stories.json` and
+  `data/audio-stories.json` are still here.
+- **Lesson audio went with them.** `data/lesson-audio-manifest.json`,
+  `tools/generate-lesson-audio.py`, `tools/generate-pack-audio.py` and the
+  `preview/` lesson page are deleted, and the `/preview` gate in `server.js`
+  went with it — nothing read the manifest once the lesson screen was gone. The
+  recordings themselves are still on the repo's **`lesson-audio` branch**
+  (never merged, served from `raw.githubusercontent.com`, so they add zero
+  weight to Railway builds and home-install updates) and are untouched.
+- `tools/generate-phase-audio.py` writes that same manifest path, for days
+  31-90 out of `data/phases.json`. It now starts a fresh file when there is
+  none, so it still runs — and running it brings
+  `data/lesson-audio-manifest.json` back.
 - `twa/` — the Android wrapper config (see Android, below).
 - Hosted on **Railway**, auto-deploys on push. Domain `www.turnsomedayintodayone.com`.
   The apex domain without `www` serves nothing.

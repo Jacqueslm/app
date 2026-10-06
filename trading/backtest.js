@@ -306,7 +306,9 @@ function run(bars, opts) {
         const last = bars[bars.length - 1].c;
         trades.push({ points: pos.dir > 0 ? last - pos.entry : pos.entry - last });
       }
-      results[style + ' ' + lvl] = stats(trades, opts);
+      // Sweep does not use a level (METHOD.md: Sweep 30, 50 and 70 are the same
+      // trades), so its row is named once. It used to print as "sweep sweep".
+      results[style === 'sweep' ? 'sweep' : style + ' ' + lvl] = stats(trades, opts);
     }
   }
   return results;

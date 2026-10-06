@@ -58,6 +58,12 @@
 ## Testing it — `trading/backtest.js`
 
 - Added 6 Oct 2026. Node, no packages: `node trading/backtest.js prices.csv`.
+- **Prices:** `trading/fetch-prices.js` (6 Oct 2026) pulls real bars from Yahoo
+  and writes the CSV — `node trading/fetch-prices.js`. Files land in
+  `trading/data/`. First real run and its numbers are in `trading/results.md`
+  section 5.
+- A CSV export from his own TradingView chart also works as-is, and is better —
+  it has no contract rolls stitched into it. See results.md 5d.
 - It runs both entries (Fib and Sweep), all three Fib levels, and can add the two
   filters the method asks for — `--zones` (only inside a zone) and `--align` (only
   when 4h and daily agree).

@@ -345,6 +345,28 @@ test('the build copies no page, and says so if one ever appears', () => {
   }
 });
 
+test('robots.txt reaches the site root — a missing one reads as permission', () => {
+  // The file sat in the repository and reached no host: the build copied the
+  // manifests and sw.js and nothing else, so the live root answered 404 for it
+  // until 6 Oct 2026. Most crawlers read an absent robots.txt as "carry on", so
+  // the 404 was not a broken link, it was the door standing open. What was wrong
+  // was the copy, so that is what is checked — copied, byte for byte, and still
+  // saying what it says.
+  assert.ok(build.FILES.includes('robots.txt'), 'the build must copy robots.txt to the site root');
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-robots-'));
+  try {
+    build.build({ out, dirs: [], files: ['robots.txt'], quiet: true });
+    const landed = path.join(out, 'robots.txt');
+    assert.ok(fs.existsSync(landed), 'it has to land at /robots.txt, where a crawler asks');
+    const text = fs.readFileSync(landed, 'utf8');
+    assert.equal(text, fs.readFileSync(path.join(ROOT, 'robots.txt'), 'utf8'),
+      'byte for byte, so there is no second copy to drift from');
+    assert.match(text, /^Disallow: \/$/m, 'and it still shuts the door it was written to shut');
+  } finally {
+    fs.rmSync(out, { recursive: true, force: true });
+  }
+});
+
 test('the pages the function serves are the repository files, read once each', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'vercel-app.js'), 'utf8');
   assert.match(src, /const ROOT = path\.join\(__dirname, '\.\.'\)/, 'the pages come from the repository');

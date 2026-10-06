@@ -460,8 +460,8 @@ reason two conversations could disagree: one was talking about the five
 narrators (fixed), the other about the founder voice (not).
 
 **Removed:** the `jacques` entry in `VG_VOICES`, its slot in `VG_VOICE_ORDER`,
-`audio/sos-talk-jacques.mp3`, 1,150 entries from
-`data/lesson-audio-manifest.json`. Manifest now reads 1,243 × 5 voices.
+`audio/sos-talk-jacques.mp3`, and the 1,150 voice entries that were bundled
+with it. What was left read 1,243 × 5 voices.
 
 **Nobody is left stranded.** `vgVoiceKey()` and `lessonVoiceKey()` already fall
 back to Warm for an unknown key — verified in a browser, both return `warm`
@@ -1165,7 +1165,7 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 2. **`APP_UPDATE_TOKEN`** → **NO LONGER NEEDED (Aug 16): Jacques made the repo PUBLIC again at his request.** A public repo needs no token — in-app updates and the recorded voices work again with zero setup. If the repo ever goes private again, the steps are: GitHub fine-grained PAT with **Contents: read** on `Jacqueslm/app` → paste in the app's Settings → GitHub token (owner-only), or `server/.env` on a local install.
 3. **`APP_OWNER_EMAIL=turnsomedayintodayone@gmail.com`** → `server/.env` → only your email can trigger the update button (already coded; without it the update button refuses to work for everyone, by design).
 
-**RESOLVED (Aug 16):** the 2,615 lesson recordings (523 lessons × 5 public-domain Piper voices, ~2 GB, on the `lesson-audio` branch) were blocked because the repo was private. Jacques made the repo public again → `data/lesson-audio-manifest.json`'s `base` (`https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/`) now loads on phones. Recorded voices should return on the next Railway redeploy. No hosting needed.
+**RESOLVED (Aug 16):** the 2,615 lesson recordings (523 lessons × 5 public-domain Piper voices, ~2 GB, on the `lesson-audio` branch) were blocked because the repo was private. Jacques made the repo public again, so they loaded on phones again. No hosting needed. *(Aug 2026 history — the lessons themselves were deleted on 6 Oct 2026.)*
 
 ---
 
@@ -1500,11 +1500,13 @@ cleaned. He compared against the app's existing narrators and decided it does
 not sound better. **Voices stay as they are.** The five shipped narrators are
 public-domain/CC0 and licence-clean.
 
-If this is ever reopened: `Studio/narrate-lessons.mjs` batch-records all 425
-lessons through Studio's Chatterbox cloner (MIT, sellable) unattended — one
-voice per run, resume-safe, refuses the paid path. A 25-30s clean reference
-clip is the single biggest quality lever. Note: YourTTS (the quick-test route)
-is CC BY-NC-ND - never shippable in a paid app.
+If this is ever reopened: the batch recorder (`Studio/narrate-lessons.mjs`) and
+the 425-lesson file it read (`Studio/all-lessons.json`) went on 6 Oct 2026 with
+the rest of the recovery copy. The method it used is what to rebuild — Studio's
+Chatterbox cloner (MIT, sellable), unattended, one voice per run, resume-safe,
+refusing the paid path. A 25-30s clean reference clip is the single biggest
+quality lever. Note: YourTTS (the quick-test route) is CC BY-NC-ND - never
+shippable in a paid app.
 
 ## House rule 13 — the ask-me-anything bot is updated with EVERY change (Jacques, 18 Aug 2026)
 

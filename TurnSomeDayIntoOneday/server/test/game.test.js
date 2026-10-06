@@ -50,8 +50,17 @@ this.GAME_PLACES=GAME_PLACES;this.GAME_BOXERS=GAME_BOXERS;this.GAME_GLOVES=GAME_
 this.tierAt=function(b,f){S.bld={b:b,f:f||1};return gameTier();};`, ctx);
 const { GAME_FLOORS, GAME_ELEMENTS, GAME_BUILDINGS, GAME_TEMPT, GAME_BOSSES, GAME_RIDES, GAME_PLACES, GAME_BOXERS, GAME_GLOVES, tierAt } = ctx;
 
-const LESSON_TRACKS = Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'lessons.json'), 'utf8')));
-const HABIT_TRACKS = LESSON_TRACKS.filter(t => t !== 'Together'); // a couples programme, not a habit
+// 6 Oct 2026: the lesson packs, the merged lessons.json and the script that
+// built it were deleted, so the track list no longer has a file to come from.
+// It is written out here instead, and written out is the point: comparing the
+// page's buildings with the page's bosses only ever compared the page with
+// itself. 'Together' was a couples programme with no building, so it is not in
+// this list.
+const HABIT_TRACKS = [
+  'Alcohol', 'Anger & Control', 'Food / Binging', 'Gambling', 'Gaming', 'Other',
+  'Porn & Sex', 'Shopping / Spending', 'Smoking', 'Social media', 'Substances',
+  'Supporting Someone', 'Work',
+];
 
 test('every track in the app has a building, an opponent, temptation lines and two photos', () => {
   for (const t of HABIT_TRACKS) {
@@ -65,6 +74,11 @@ test('every track in the app has a building, an opponent, temptation lines and t
   }
   // (the tables come out of a separate realm, so compare as text)
   const tracks = JSON.stringify(Array.from(GAME_BUILDINGS, b => b.track).sort());
+  // The list above is what the app is meant to offer. Every name has to be a
+  // building, and the buildings have to be exactly those names — no track
+  // dropped on the quiet, and none added without a line here.
+  assert.strictEqual(tracks, JSON.stringify(HABIT_TRACKS.slice().sort()),
+    'the buildings are the habit tracks and nothing else');
   assert.strictEqual(tracks, JSON.stringify(Object.keys(GAME_BOSSES).sort()), 'buildings and bosses are the same list');
   assert.strictEqual(tracks, JSON.stringify(Object.keys(GAME_TEMPT).sort()), 'buildings and temptations are the same list');
   assert.strictEqual(new Set(GAME_BUILDINGS.map(b => b.k)).size, GAME_BUILDINGS.length, 'building keys are unique');

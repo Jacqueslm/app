@@ -129,6 +129,11 @@ var array<box> zBoxes = array.new<box>()
 var array<line> zL30 = array.new<line>()
 var array<line> zL50 = array.new<line>()
 var array<line> zL70 = array.new<line>()
+// The 30 / 50 / 70 number printed on each of the three zone lines, so the
+// level is readable off the chart without hovering. Added 6 Oct 2026.
+var array<label> zT30 = array.new<label>()
+var array<label> zT50 = array.new<label>()
+var array<label> zT70 = array.new<label>()
 var float bullTop = na
 var float bullBot = na
 var float bearTop = na
@@ -170,15 +175,24 @@ if zMssUp
     zt = zsTop.price
     zb = zd == -1 ? zLower : zd == 1 ? zsBot.price : 0
     if showZones
+        float t30u = zt - 0.3 * (zt - zb)
+        float t50u = zt - 0.5 * (zt - zb)
+        float t70u = zt - 0.7 * (zt - zb)
         zBoxes.push(box.new(zsTop.bar, zt, bar_index, zb, bgcolor=color.new(zBullCol, 88), border_color=color.new(zBullCol, 0)))
-        zL30.push(line.new(zsTop.bar, zt - 0.3 * (zt - zb), bar_index, zt - 0.3 * (zt - zb), color=color.new(zBullCol, 0)))
-        zL50.push(line.new(zsTop.bar, zt - 0.5 * (zt - zb), bar_index, zt - 0.5 * (zt - zb), color=color.new(zBullCol, 0)))
-        zL70.push(line.new(zsTop.bar, zt - 0.7 * (zt - zb), bar_index, zt - 0.7 * (zt - zb), color=color.new(zBullCol, 0)))
+        zL30.push(line.new(zsTop.bar, t30u, bar_index, t30u, color=color.new(zBullCol, 0)))
+        zL50.push(line.new(zsTop.bar, t50u, bar_index, t50u, color=color.new(zBullCol, 0)))
+        zL70.push(line.new(zsTop.bar, t70u, bar_index, t70u, color=color.new(zBullCol, 0)))
+        zT30.push(label.new(bar_index, t30u, "30", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBullCol, size=size.small))
+        zT50.push(label.new(bar_index, t50u, "50", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBullCol, size=size.small))
+        zT70.push(label.new(bar_index, t70u, "70", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBullCol, size=size.small))
         if zBoxes.size() > maxZones
             box.delete(zBoxes.shift())
             line.delete(zL30.shift())
             line.delete(zL50.shift())
             line.delete(zL70.shift())
+            label.delete(zT30.shift())
+            label.delete(zT50.shift())
+            label.delete(zT70.shift())
     bullTop := zt
     bullBot := zb
 if zMssDn
@@ -186,15 +200,24 @@ if zMssDn
     zt = zsBot.price
     zb = zd == 1 ? zUpper : zd == -1 ? zsTop.price : 0
     if showZones
+        float t30d = zt - 0.3 * (zt - zb)
+        float t50d = zt - 0.5 * (zt - zb)
+        float t70d = zt - 0.7 * (zt - zb)
         zBoxes.push(box.new(zsBot.bar, zt, bar_index, zb, bgcolor=color.new(zBearCol, 88), border_color=color.new(zBearCol, 0)))
-        zL30.push(line.new(zsBot.bar, zt - 0.3 * (zt - zb), bar_index, zt - 0.3 * (zt - zb), color=color.new(zBearCol, 0)))
-        zL50.push(line.new(zsBot.bar, zt - 0.5 * (zt - zb), bar_index, zt - 0.5 * (zt - zb), color=color.new(zBearCol, 0)))
-        zL70.push(line.new(zsBot.bar, zt - 0.7 * (zt - zb), bar_index, zt - 0.7 * (zt - zb), color=color.new(zBearCol, 0)))
+        zL30.push(line.new(zsBot.bar, t30d, bar_index, t30d, color=color.new(zBearCol, 0)))
+        zL50.push(line.new(zsBot.bar, t50d, bar_index, t50d, color=color.new(zBearCol, 0)))
+        zL70.push(line.new(zsBot.bar, t70d, bar_index, t70d, color=color.new(zBearCol, 0)))
+        zT30.push(label.new(bar_index, t30d, "30", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBearCol, size=size.small))
+        zT50.push(label.new(bar_index, t50d, "50", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBearCol, size=size.small))
+        zT70.push(label.new(bar_index, t70d, "70", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBearCol, size=size.small))
         if zBoxes.size() > maxZones
             box.delete(zBoxes.shift())
             line.delete(zL30.shift())
             line.delete(zL50.shift())
             line.delete(zL70.shift())
+            label.delete(zT30.shift())
+            label.delete(zT50.shift())
+            label.delete(zT70.shift())
     bearTop := zt
     bearBot := zb
 if showZones and zBoxes.size() > 0
@@ -206,6 +229,10 @@ if showZones and zBoxes.size() > 0
     line.set_x2(zlast30, bar_index)
     line.set_x2(zlast50, bar_index)
     line.set_x2(zlast70, bar_index)
+    // The 30 / 50 / 70 tags ride the right edge with their lines.
+    label.set_x(array.get(zT30, zT30.size() - 1), bar_index)
+    label.set_x(array.get(zT50, zT50.size() - 1), bar_index)
+    label.set_x(array.get(zT70, zT70.size() - 1), bar_index)
 
 inBull = not na(bullTop) and close <= bullTop and close >= bullBot
 inBear = not na(bearTop) and close <= bearTop and close >= bearBot

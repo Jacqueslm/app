@@ -55,6 +55,25 @@
   just a touch of the top. Not only 50.
 - The earlier "tested at 50" rule was too narrow. Dropped.
 
+## Testing it — `trading/backtest.js`
+
+- Added 6 Oct 2026. Node, no packages: `node trading/backtest.js prices.csv`.
+- It runs both entries (Fib and Sweep), all three Fib levels, and can add the two
+  filters the method asks for — `--zones` (only inside a zone) and `--align` (only
+  when 4h and daily agree).
+- It prints one row per setting — trades, wins, losses, win %, net, profit factor,
+  per trade and worst dip — so the level with the best record is measured, not
+  guessed. `--pv` and `--cost` set money per point and cost per trade.
+- Takes a TradingView CSV export as-is (any timeframe that divides the hour).
+- The zone half is the same logic as `trading/jacques-zones.pine`, so the chart
+  and the test agree about what a zone is. The 4h/daily alignment is the simple
+  version: a frame counts up when it closes above its own average. Plain, so it
+  can be argued with.
+- `node trading/backtest.js --selftest` checks the engine on a made-up 4-bar
+  fixture. It is not a result.
+- **Not yet run on real prices** — no market data lives in this repo. Until it
+  is, every number it prints is whatever is in the file it is handed.
+
 ## One bot
 
 - `Jacques TBR Zones` is one script. The zones **are** the TBR. Any second row in

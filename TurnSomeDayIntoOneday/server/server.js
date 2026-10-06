@@ -190,7 +190,8 @@ app.use((req, res, next) => {
 // being told what got opened and when. This is one man's app and there is
 // nobody to advertise it to, so the counter and the account behind it are gone.
 
-app.use('/preview', requireAuth);
+// The lesson preview page was served out of /preview and the line below gated
+// it. It went with the lesson files on 6 Oct 2026, so the gate went with it.
 
 // ─── THE PAGES ARE SHUT ──────────────────────────────────────────────────────
 // 13 Sep 2026 — the app went private first (private-app.js), then Jacques asked

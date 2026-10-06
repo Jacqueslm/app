@@ -35,8 +35,14 @@ const ROOT = __dirname;
 // music player streams them straight from disk.
 const DIRS = ['icons', 'js', 'img/fight', 'audio/fight', 'audio/meditation'];
 // Loose files. Each one is either linked by a page or fetched by the browser.
+// robots.txt is fetched by a crawler before it fetches anything else, and it is
+// the one file whose absence is not quiet: a site with none at its root reads to
+// most crawlers as "carry on", where this one says "stay out". It was eating
+// the 404 for it until 6 Oct 2026 — the file was in the repository and simply
+// never copied, so the live root answered 404 and the door stood open.
 const FILES = [
   'manifest.json', 'manifest-discrete.json', 'manifest-zodiacs.json', 'sw.js',
+  'robots.txt',
 ];
 
 function copyDir(from, to) {

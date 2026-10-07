@@ -1,0 +1,1338 @@
+require('dotenv').config();
+const path = require('path');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+
+const crypto = require('crypto');
+const db = require('./db');
+const update = require('./update');
+const emailer = require('./email');
+const push = require('./push');
+const backup = require('./backup');
+const aiChatBody = require('./ai-chat-body');
+const musicList = require('./music-list');
+const {
+  COOKIE_NAME,
+  hashPassword,
+  verifyPassword,
+  signSession,
+  verifySession,
+  // Names are load-bearing: the private-app gate further down is a wrapper
+  // around this one, and the wrapper is what every route in this file uses.
+  requireAuth: requireSession,
+  isValidSession,
+} = require('./auth');
+const {
+  TURNED_AWAY, isPrivate, appAllows, doorMiddleware,
+  PAGE_GONE, isPagePath, pageIsServed,
+} = require('./private-app');
+
+const app = express();
+// Don't advertise the framework in every response header.
+app.disable('x-powered-by');
+// Hosted deployments sit behind the platform's HTTPS proxy - trust its
+// forwarded headers so secure cookies and per-IP rate limits work correctly.
+app.set('trust proxy', 1);
+const PORT = process.env.PORT || 3000;
+// Gemini is the ONLY provider (Jacques, 17 Sep 2026: "unwire claude not going
+// to use it and use the gemini key"). The Anthropic path was removed outright
+// rather than left as a fallback, so there is exactly one place a chat can go
+// and exactly one key that can break it. Nothing here reads ANTHROPIC_API_KEY
+// any more - if the Gemini key is missing the app says so plainly instead of
+// quietly answering from somewhere else, because a silent second provider is
+// how a break hides (see the gemini-2.5-flash retirement note below).
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+// gemini-2.5-flash was retired to new callers: Google answered every single
+// chat with HTTP 404 "no longer available to new users ... use
+// models/gemini-3.6-flash". That 404 is what had Friendly canned. Overridable
+// by env so the next retirement is a Railway variable, not a redeploy.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+// Gemini counts thinking against the output budget, so it needs its own number
+// rather than borrowing another provider's. Friendly's replies are short; the
+// room is headroom, not length.
+const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
+// Friendly and The Key both read the model name from here; the request body
+// itself is built in ./ai-chat-body.js.
+// MINIMAL | LOW | MEDIUM | HIGH. LOW is the fastest setting a 3.x model will
+// actually accept - MINIMAL additionally requires thought signatures and 400s
+// without them. Overridable if Friendly ever needs to think harder.
+const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
+// The Key's Gemini reading (private page at /key, route /api/key-reading). A
+// reading is long, so it gets its own budget rather than Friendly's, and more
+// room to think than Friendly gets - a reply wants to be quick, a reading
+// wants to be right.
+const KEY_READING_MAX_TOKENS = Number(process.env.KEY_READING_MAX_TOKENS || 6000);
+const KEY_READING_THINKING_LEVEL = process.env.KEY_READING_THINKING_LEVEL || 'MEDIUM';
+
+// The Key's Gemini reading (POST /api/key-reading), for the private page at
+// /key. Mounted up here because server.js only reaches its AI code at the end
+// of the file; the route, its prompt and its gate live in their own modules so
+// they can be tested directly. It attaches its own cookieParser and
+// express.json because it mounts above the global ones - without them every
+// request would fail the gate, which would look private and be broken.
+require('./key-reading-route').mount(app, {
+  isFriendlyRequest,
+  gemini: {
+    key: GEMINI_API_KEY,
+    model: GEMINI_MODEL,
+    maxTokens: KEY_READING_MAX_TOKENS,
+    thinkingLevel: KEY_READING_THINKING_LEVEL,
+  },
+  ownerEmail: () => DIAG_OWNER_EMAIL,
+});
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// The app is free (Jacques, 8 Sep 2026). Friendly is not a paid feature, it is a
+// private one: an allowlist of emails, checked here rather than in the client so
+// nobody reaches /api/chat by calling it directly. Adding somebody is an edit to
+// FRIENDLY_EMAILS in the environment, not a deploy.
+// The daily answer ceiling, per person. 0 turns it off.
+//
+// This was 0 (no ceiling at all) until 15 Sep 2026, which meant nothing stood
+// between the AI and a runaway: one retry loop, or one session left open on a
+// shared phone, and the day's whole AI allowance is gone before anybody sees it.
+//
+// 60 is chosen to be invisible to a person and lethal to a loop. A crisis
+// conversation is the heaviest real use this app has, and the longest one seen
+// here ran to about thirty replies; /api/chat's own 20-per-5-minutes limiter
+// means a loop reaches 60 inside a quarter of an hour and stops. Two accounts
+// can therefore spend at most 120 in a day, which is the number to keep under
+// whatever the Google key's own requests-per-day allows (see chatDay, which
+// counts the day on Google's clock so the two cannot drift apart). Raising the
+// ceiling is an environment variable, not a deploy.
+const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 60);
+const FRIENDLY_EMAILS = String(process.env.FRIENDLY_EMAILS || '')
+  .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
+function isFriendlyAllowed(user) {
+  const email = user && user.email && String(user.email).toLowerCase();
+  if (!email) return false;
+  if (DIAG_OWNER_EMAIL && email === String(DIAG_OWNER_EMAIL).toLowerCase()) return true;
+  return FRIENDLY_EMAILS.includes(email);
+}
+
+// ----------------------------------------------------------------- the door --
+// 13 Sep 2026 — the app is private, not only Friendly. "Just me and wife have
+// access to it through friendly emails." ONE list doing both jobs, so there is
+// nothing new to configure and adding somebody is still the single Railway edit
+// it has always been. The rule, and why an empty list leaves the door open, is
+// in private-app.js.
+const APP_IS_PRIVATE = isPrivate(FRIENDLY_EMAILS);
+function mayComeIn(email) { return appAllows(FRIENDLY_EMAILS, email, DIAG_OWNER_EMAIL); }
+
+// Every signed-in route in this file already goes through requireAuth, so the gate
+// belongs here rather than in forty-odd call sites. Somebody still holding a
+// session from before the door closed is answered exactly like a signed-out
+// visitor — 401, and the same words — so the client shows its sign-in screen, and
+// their cookie goes with it. Signing back in is where they are told plainly why.
+function requireAuth(req, res, next) {
+  requireSession(req, res, () => {
+    if (!APP_IS_PRIVATE) return next();
+    const user = db.getUserById(req.userId);
+    if (mayComeIn(user && user.email)) return next();
+    res.clearCookie(COOKIE_NAME);
+    return res.status(401).json({ error: 'Not signed in.' });
+  });
+}
+
+app.use(express.json({ limit: '2mb' }));
+app.use(cookieParser());
+
+// A letter link is the SECOND way an account gets made in this app —
+// /api/auth/signup is the other one — so it needs the same door, checked the same
+// way: before the account exists, and before anything is written for it. Without
+// this the door would shut on the front entrance and leave the side one open,
+// which is the failure mode that is hardest to notice. It is mounted here, beside
+// the rest of the door, because middleware runs before the route it guards; the
+// route itself is registered far below. Deliberately after express.json, since it
+// has to read the email it is judging.
+app.use('/api/letter/:token/accept', doorMiddleware(mayComeIn));
+
+// HSTS: once a browser has seen this header it refuses to talk to the site over
+// plain HTTP for a year, which closes the window where a first request on a
+// hostile network could be downgraded. Railway terminates TLS in front of us
+// and every canonical URL is already https, so nothing here is reachable over
+// http anyway. Deliberately no includeSubDomains and no preload - both are
+// effectively one-way doors, and neither is needed for the apex + www we run.
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+  next();
+});
+
+// One canonical host. Every canonical tag, the sitemap and robots.txt all say
+// www, so the bare domain must send people there rather than serve a second
+// copy of the site for Google to choose between.
+//
+// This only matters once the apex points at Railway. Until then IONOS answers
+// it with a 302 on http and nothing at all on https - which is what put four
+// "page couldn't be crawled" errors in the site audit.
+//
+// 301, not 302: permanent is what transfers ranking to the www version.
+// Anything that isn't exactly the bare domain falls through untouched, so
+// localhost, Railway's own *.up.railway.app health checks and the www host
+// itself are unaffected.
+const CANONICAL_HOST = process.env.CANONICAL_HOST || 'www.turnsomedayintodayone.com';
+const APEX_HOST = CANONICAL_HOST.replace(/^www\./, '');
+
+// The Digital Asset Links exception used to sit here: /\.well-known/assetlinks.json,
+// served on both hosts because Chrome will not follow a redirect to it. It was
+// there for the Android app on the Play Store, and 5 Oct 2026 that went — the
+// listing is unpublished and this is a personal app, so there is nothing left to
+// verify. The file and the route went with it.
+
+app.use((req, res, next) => {
+  const host = String(req.headers.host || '').toLowerCase().split(':')[0];
+  if (host !== APEX_HOST) return next();
+  res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+});
+
+// ─── the pageview counter went, 5 Oct 2026 ───────────────────────────────────
+// A small block here sent a server-side pageview to Plausible for every real
+// page load - no script on the visitor's device, but still an outside company
+// being told what got opened and when. This is one man's app and there is
+// nobody to advertise it to, so the counter and the account behind it are gone.
+
+// The lesson preview page was served out of /preview and the line below gated
+// it. It went with the lesson files on 6 Oct 2026, so the gate went with it.
+
+// ─── THE PAGES ARE SHUT ──────────────────────────────────────────────────────
+// 13 Sep 2026 — the app went private first (private-app.js), then Jacques asked
+// for the same on the pages: "shut down the pages too." This is the one place
+// that decides, so no route lower down can be missed — the list of what stays
+// open, and why, is in private-app.js. Asked before every page route in this
+// file, and before express.static, so a page cannot slip out by being served as
+// a file instead of by a route.
+//
+// 410 (Gone), not 404 and not a redirect to the app: 410 is what tells a search
+// engine to drop a page rather than keep asking for it, and somebody following
+// an old link gets one plain sentence instead of a sign-in screen for an app
+// that is not theirs.
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  if (!isPagePath(req.path)) return next();
+  if (pageIsServed(req.path)) return next();
+  res.status(410).type('text/plain').send(PAGE_GONE);
+});
+
+// Every page route below reads a file off disk and hands it back. CodeQL calls
+// that out on sight (js/missing-rate-limiting), and it is right to: the path is a
+// constant chosen here and never comes from the request, so there is no way to
+// read a file the route did not name - but nothing stops somebody asking for it
+// as fast as they can send requests, and every one of those is a disk read.
+//
+// 200 in ten minutes, because a page is loaded once and then sat on. The hedges
+// that already exist upstream (the sign-in check, the allowlist) run BEFORE this
+// one, so a person who is turned away never spends a request.
+const pageLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests. Give it a moment.',
+});
+
+// The marketing landing page went with the rest of them, so the root now sends
+// everybody to the app, where a signed-in person carries on and anybody else
+// meets the app's own closed door rather than a page selling them something.
+// Registered ahead of express.static below, because static serves the app
+// folder and would otherwise answer '/' with whatever it finds there.
+app.get('/', (req, res) => {
+  res.redirect('/app');
+});
+
+// The app is three things now (4 Oct 2026). Jacques: "i dont want the app
+// nomore just parts i added the zodiac the fight and the herbs", then "strip it
+// nomore recovery app". So /app serves hub.html - a small shell holding the
+// Zodiacs, the Fight and the Herbs - and no longer the recovery app.
+//
+// The recovery app itself is gone, file and all: its page, its server routes for
+// that page, and the eighteen test files that read it were deleted in the pass
+// that followed, so nothing here may name it again. The gate in private-app.js
+// answers 410 for any page it has not been told about, which is what an old
+// bookmark to it now gets.
+app.get('/app', pageLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'hub.html'));
+});
+
+// The server/ folder must never be reachable over HTTP: it holds the source,
+// .env, and - on home installs, where DB_PATH defaults to server/data.sqlite -
+// the entire user database. express.static below serves the app root, which
+// contains this folder, so it has to be blocked ahead of it.
+app.use('/server', (req, res) => res.status(404).end());
+// The admin page is served only through the owner-gated /admin/stats route below.
+// It carries no data of its own, but static would hand out the shell to anyone.
+app.get('/admin-stats.html', (req, res) => res.status(404).end());
+// Same reason as the line above: static would hand this out to anyone.
+app.get('/key.html', (req, res) => res.status(404).end());
+
+// The two reference pages — private, and the same door as The Key.
+//
+// 15 Sep 2026. Jacques asked for the herb library and the tax centre "apart of my
+// recovery app but made private". Same rule as /key: signed in AND on the
+// allowlist, or you go to /app without learning the page is there.
+//
+// The trading game, the trading school and the Trading Desk that used to sit
+// below here were removed outright on 24 Sep 2026 — "remove the trading game
+// the desk everything about trading im done." Nothing trading is served, gated
+// or linked anywhere now. The two pages here are the ones that stayed.
+//
+// BOTH ADDRESSES ARE REGISTERED ON PURPOSE, and this is the part worth keeping.
+// Gating only the clean URL /herbs would lock the front door and leave the side
+// one open: express.static below serves herbs.html at its own .html address, so
+// anybody who typed the file name would walk straight past the check. It is the
+// same hole /game3d.html fell through in September, from the other direction.
+// Anything private that is also a real file has to be named twice here.
+//
+// Above express.static: a route registered after it is never reached, and the
+// file would be handed out to anybody who typed its name.
+//
+// Four routes rather than one loop, and the gate written out in each, because
+// the door has to be readable in the file. A test asserts signed-in,
+// on-the-list and redirect-to-/app inside every one of them, and it cannot read
+// a rule that lives in a shared helper.
+// The Fight - the last of the three, added to this same door on 4 Oct 2026.
+// Same shape as /key and /herbs, and registered for the same reason BOTH
+// addresses matter: game3d.html is a real file that express.static below would
+// hand out by name to anybody who typed it, exactly as /herbs.html would have
+// been. The page was open in September precisely because a file was not named
+// twice, which is the mistake this pair exists not to repeat.
+//
+// The route itself is new the same day: the fight became a page of its own
+// instead of a tab inside the recovery app, so its markup, its CSS and its 669
+// lines of JavaScript moved out of that app and into fight.html. The page frames
+// /game3d.html for the roof. The two are separate on purpose - the ring is a
+// self-contained 3D engine, and the game around it has no business loading
+// three.js to draw a menu.
+app.get('/fight', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'fight.html'));
+});
+app.get('/fight.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'fight.html'));
+});
+// THE THIRD ADDRESS, and the one that matters most. game3d.html was served
+// straight off disk by express.static below, because it sat on the gate's open
+// list only so the recovery app could load it in an iframe - so the full URL
+// handed the fight to anybody who typed it, signed in or not.
+//
+// That was survivable while the fight was one tab inside a gated app. It is not
+// survivable now that the fight IS the app: leaving this route out would mean
+// gating /fight while /game3d.html stayed open, which is a lock with the window
+// still up. It has to be registered above express.static or static answers
+// first, exactly as the herbs note above describes.
+app.get('/game3d.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
+});
+app.get('/herbs', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'herbs.html'));
+});
+app.get('/herbs.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'herbs.html'));
+});
+app.get('/tax', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'tax.html'));
+});
+app.get('/tax.html', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'tax.html'));
+});
+
+// The Music — the player, the ringtone maker and the cover maker, added to the
+// app on 5 Oct 2026. Private, and the same door as The Key, the herbs and the
+// fight: signed in AND on the list, or you go to /app without learning the page
+// is there. A redirect rather than requireAuth, which answers 401 JSON — right
+// for an API call, wrong for somebody opening a page.
+//
+// BOTH ADDRESSES ARE REGISTERED, for the reason the herb library's note above
+// spells out: music.html is a real file, so express.static below would hand it
+// out by name to anybody who typed it if only the clean URL were gated. Above
+// express.static, or static answers first and never reaches these routes.
+app.get('/music', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'music.html'));
+});
+app.get('/music.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'music.html'));
+});
+
+// The Music's scanner (7 Oct 2026). The page cannot list a directory over the
+// web, so it asks this instead — read fresh from disk every time, and answered
+// no-store, because a cached "here is every track" would defeat the point of
+// scanning for a new one. On Vercel the same list comes from a file the build
+// writes, which the static layer hands out before any function runs.
+app.get('/audio/meditation/list.json', (req, res) => {
+  const tracks = musicList.listFor(path.join(__dirname, '..', 'audio', 'meditation'));
+  if (!tracks) return res.status(404).json({ error: 'no music folder here' });
+  res.set('Cache-Control', 'no-store');
+  res.json(tracks);
+});
+
+app.use(express.static(path.join(__dirname, '..')));
+
+// The Key — private. Signed in AND on the allowlist, or you go to /app without
+// learning the page is there. A redirect rather than requireAuth, which answers
+// 401 JSON — right for an API call, wrong for somebody opening a page.
+app.get('/key', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'key.html'));
+});
+
+// ─── the marketing routes went, 5 Oct 2026 ───────────────────────────────────
+// Around forty clean URLs used to live here: the quizzes, the partner pages,
+// the "<app> alternative" comparisons, the symptom pages and the per-competitor
+// roundup, each with its own app.get and its own sendFile. All of them were
+// already shut at the gate (a stranger gets the 410 page, not the file), and the
+// pages themselves are deleted now. The app is one person's and it is behind a
+// sign-in; there is nothing here for a search engine to carry.
+
+
+// ─── the social bio redirects went with the pages, 5 Oct 2026 ───────────────
+// "/go/tiktok" and its four siblings used to land people on the supporter
+// page with the UTM tags baked in, so a bio link never had to be hand-built.
+// The page they pointed at is deleted, so the routes went with it.
+
+// ─── /play went with the store, 5 Oct 2026 ───────────────────────────────────
+// The counted route to the Play listing lived here. Every store button on the
+// site pointed at it rather than straight at Google so a click could be counted,
+// and so the page that sent somebody survived into Play's acquisition report.
+// The listing is unpublished and this is a personal app, so the route, the
+// counter behind it, and the buttons that used it all went together. The store
+// URL used to live in this one place instead of in 27 files; there is no URL now.
+
+// ─── the mailing list went, 5 Oct 2026 ──────────────────────────────────────
+// /unsubscribe and /api/lead lived here. Between them they were the whole of
+// the public side of this repo: a quiz or a landing page handed over an email
+// address, /api/lead wrote it into a leads table and started a five-day
+// sequence written to sell the app, and every email carried a one-click
+// unsubscribe link back into /unsubscribe. The addresses were the only reason
+// any of it existed - there is no list now, and nothing to mail.
+
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Try again in a few minutes.' },
+});
+
+const signupLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many accounts created from this network. Try again later.' },
+});
+
+// Separate bucket from login: sharing the 5-per-15-min login limiter meant a couple of
+// mistyped logins plus a password change could lock a legitimate user out for 15 minutes.
+const changePasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many password change attempts. Try again in a few minutes.' },
+});
+
+// Broad backstop across the whole auth namespace (logout, logout-all, me) -
+// the credential routes above keep their own stricter buckets, which still apply.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Try again in a few minutes.' },
+});
+app.use('/api/auth', authLimiter);
+
+// The daily chat quota is per-account; this is the per-IP burst brake so the
+// endpoint can't be hammered request-by-request inside a single day.
+const chatLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Slow down a moment — too many messages at once. Try again in a few minutes.' },
+});
+
+// Authenticated but still abusable: state sync writes a 2MB row. A generous
+// ceiling that normal use never touches, so a loop can't burn disk.
+const stateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Syncing too often — give it a moment.' },
+});
+
+// Secure comes off the request, not off NODE_ENV. The host sets NODE_ENV, and
+// if it ever stops doing so, every session cookie quietly starts going out
+// without the Secure flag - which is the sort of thing nobody notices until a
+// session leaks over a plain http link. 'trust proxy' is on above, so req.secure
+// is the real answer; the NODE_ENV check stays as a belt-and-braces fallback,
+// and plain-http localhost still gets a working cookie in development.
+function setSessionCookie(req, res, userId, sessionVersion) {
+  res.cookie(COOKIE_NAME, signSession(userId, sessionVersion), {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: !!(req && req.secure) || process.env.NODE_ENV === 'production',
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  });
+}
+
+// The day the AI answers are counted against.
+//
+// Midnight PACIFIC, not UTC (15 Sep 2026). Google's requests-per-day quota
+// resets at midnight Pacific and is counted per project, not per key - so an app
+// day that began at UTC midnight would fit two of its days inside one of
+// Google's, and the brake above would hand out the whole allowance twice as fast
+// as Google refills it. Fixing the day to Google's clock is what makes 60 a
+// number that means something. (UTC midnight is 4pm or 5pm the previous day in
+// California, so this is also the friendlier boundary: nobody's late night is
+// split in half by it.)
+function chatDay() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
+}
+
+// A credential is either a real password (8+ chars) or a 4-6 digit PIN.
+function validCredential(cred) {
+  return typeof cred === 'string' && (cred.length >= 8 || /^\d{4,6}$/.test(cred));
+}
+
+app.post('/api/auth/signup', signupLimiter, (req, res) => {
+  const { email, password, phone } = req.body || {};
+  if (!email || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  if (!validCredential(password)) {
+    return res.status(400).json({ error: 'Use a password of at least 8 characters, or a 4-6 digit PIN.' });
+  }
+  const normalizedEmail = email.trim().toLowerCase();
+  // The door, before anything else this route does — private-app.js explains why.
+  if (!mayComeIn(normalizedEmail)) {
+    return res.status(403).json({ error: TURNED_AWAY });
+  }
+  if (db.getUserByEmail(normalizedEmail)) {
+    return res.status(409).json({ error: 'An account with that email already exists.' });
+  }
+  const cleanPhone = typeof phone === 'string' ? phone.trim().slice(0, 30) : '';
+  const userId = db.createUser(normalizedEmail, hashPassword(password), cleanPhone || null);
+  setSessionCookie(req, res, userId);
+  res.status(201).json({ email: normalizedEmail });
+  // After the response - a slow or failed email must never slow down signup.
+  const user = db.getUserById(userId);
+  if (user) {
+    const w = emailer.welcomeEmail();
+    emailer.sendSequenceEmail(user, 'transactional', 1, w.subject, w.text).catch(() => {});
+  }
+});
+
+// Same rate as login: this endpoint sends real mail on every valid hit.
+const forgotLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many reset requests. Try again later.' },
+});
+
+app.post('/api/auth/forgot', forgotLimiter, async (req, res) => {
+  const { email: rawEmail } = req.body || {};
+  const normalizedEmail = (rawEmail || '').trim().toLowerCase();
+  // Identical response whether or not the account exists - this endpoint must
+  // never confirm who has an account with a recovery app.
+  const reply = { ok: true, message: 'If that email has an account, a reset link is on its way.' };
+  if (!EMAIL_RE.test(normalizedEmail)) return res.json(reply);
+  const user = db.getUserByEmail(normalizedEmail);
+  if (!user) return res.json(reply);
+  const token = crypto.randomBytes(32).toString('hex');
+  db.createPasswordReset(token, user.id, new Date(Date.now() + 60 * 60 * 1000).toISOString());
+  const msg = emailer.passwordResetEmail(token);
+  // No sequence guard (users may legitimately request several resets) and
+  // force:true - account access must work even for unsubscribed users.
+  emailer.sendEmail({ to: user.email, subject: msg.subject, text: msg.text, force: true }).catch(() => {});
+  res.json(reply);
+});
+
+app.post('/api/auth/reset', (req, res) => {
+  const { token, newPassword } = req.body || {};
+  if (typeof token !== 'string' || !token) {
+    return res.status(400).json({ error: 'Missing reset token.' });
+  }
+  if (!validCredential(newPassword)) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters (or a 4-6 digit PIN).' });
+  }
+  const row = db.consumePasswordReset(token);
+  if (!row) {
+    return res.status(400).json({ error: 'This reset link is invalid or has expired. Request a new one from the login screen.' });
+  }
+  db.updatePassword(row.user_id, hashPassword(newPassword));
+  // A password reset means the old credential may be compromised - kill every
+  // existing session everywhere.
+  db.bumpSessionVersion(row.user_id);
+  res.json({ ok: true });
+});
+
+app.post('/api/auth/login', loginLimiter, (req, res) => {
+  const { email, password } = req.body || {};
+  const normalizedEmail = (email || '').trim().toLowerCase();
+  // Checked BEFORE the password, so somebody who is not on the list gets one
+  // answer whether or not that account exists — the same care /api/auth/forgot
+  // takes about never confirming who has an account with a recovery app.
+  if (!mayComeIn(normalizedEmail)) {
+    return res.status(403).json({ error: TURNED_AWAY });
+  }
+  const user = db.getUserByEmail(normalizedEmail);
+  if (!user || !verifyPassword(password || '', user.password_hash)) {
+    return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
+  }
+  setSessionCookie(req, res, user.id, user.session_version || 1);
+  res.json({ email: user.email });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  res.clearCookie(COOKIE_NAME);
+  res.json({ ok: true });
+});
+
+// Signs the account out everywhere EXCEPT this device: the version bump kills every
+// existing token, then this device immediately gets a fresh cookie at the new version.
+app.post('/api/auth/logout-all', requireAuth, (req, res) => {
+  const newVersion = db.bumpSessionVersion(req.userId);
+  setSessionCookie(req, res, req.userId, newVersion);
+  res.json({ ok: true });
+});
+
+app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  const user = db.getUserById(req.userId);
+  if (!user || !verifyPassword(currentPassword || '', user.password_hash)) {
+    return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+  if (!validCredential(newPassword)) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters (or a 4-6 digit PIN).' });
+  }
+  db.updatePassword(req.userId, hashPassword(newPassword));
+  // Someone changing their password often does it because another device or
+  // person may have access - so invalidate every existing session, then
+  // immediately re-cookie this device at the new version (same as logout-all).
+  const newVersion = db.bumpSessionVersion(req.userId);
+  setSessionCookie(req, res, req.userId, newVersion);
+  res.json({ ok: true });
+});
+
+app.get('/api/auth/me', requireAuth, (req, res) => {
+  const user = db.getUserById(req.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  // isOwner lets the client skip owner-only calls (update check, diagnostics)
+  // for everyone else, instead of probing them and logging 403s in every
+  // regular user's console.
+  res.json({ email: user.email, isOwner: !!(DIAG_OWNER_EMAIL && user.email === DIAG_OWNER_EMAIL),
+    reminderWindow: db.getReminderWindow(req.userId) });
+});
+
+// The reminder window as its own setting: written only on an explicit change,
+// adopted by every device at boot, read by the push scheduler ahead of the
+// state blob - so no stale sync can reset it.
+app.post('/api/reminder-window', requireAuth, (req, res) => {
+  const s = Number(req.body?.start), e = Number(req.body?.end);
+  if (!Number.isInteger(s) || !Number.isInteger(e) || s < 0 || s > 23 || e < 0 || e > 23) {
+    return res.status(400).json({ error: 'Hours must be 0-23.' });
+  }
+  db.setReminderWindow(req.userId, s, e);
+  res.json({ ok: true });
+});
+
+app.get('/api/state', requireAuth, (req, res) => {
+  const stateJson = db.getState(req.userId);
+  res.json({ state: stateJson || null });
+});
+
+app.put('/api/state', stateLimiter, requireAuth, (req, res) => {
+  let { state } = req.body || {};
+  if (typeof state !== 'string') {
+    return res.status(400).json({ error: 'state must be a JSON string.' });
+  }
+  // Nova conversations are never persisted. Current clients don't send them,
+  // but a stale cached client still might - enforce the promise server-side.
+  try {
+    const parsed = JSON.parse(state);
+    if (parsed && typeof parsed === 'object' && 'chatHistory' in parsed) {
+      delete parsed.chatHistory;
+      state = JSON.stringify(parsed);
+    }
+  } catch (_) { /* not valid JSON - store as-is, same as before */ }
+  db.saveState(req.userId, state);
+  res.json({ ok: true });
+});
+
+app.use('/api/update', requireAuth, update.router);
+
+// Server error stacks are internals, not user data - owner-only, and it fails
+// CLOSED: with APP_OWNER_EMAIL unset nobody reads the error log (the old
+// behavior leaked stacks to any signed-in user when the env var was missing).
+const DIAG_OWNER_EMAIL = (process.env.APP_OWNER_EMAIL || '').trim().toLowerCase();
+app.get('/api/diagnostics', requireAuth, (req, res) => {
+  if (!DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Diagnostics are unavailable: APP_OWNER_EMAIL is not configured.' });
+  }
+  const user = db.getUserById(req.userId);
+  if (!user || user.email !== DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Only the app owner can view diagnostics.' });
+  }
+  res.json({ errors: db.getRecentErrors(50) });
+});
+// Same owner gate as reading them. Clearing is not undoable, which is fine -
+// the log is a scratchpad for whatever broke most recently, not a record.
+app.post('/api/diagnostics/clear', requireAuth, (req, res) => {
+  if (!DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Diagnostics are unavailable: APP_OWNER_EMAIL is not configured.' });
+  }
+  const user = db.getUserById(req.userId);
+  if (!user || user.email !== DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Only the app owner can clear diagnostics.' });
+  }
+  const cleared = db.clearErrors();
+  res.json({ ok: true, cleared });
+});
+
+// The purchase failures happening inside phones were invisible from here -
+// every diagnosis ran on screenshots Jacques had to take himself, and on
+// 27 Aug he said he is done doing that. So the app now reports them: signed-in
+// users only, capped fields, and it lands in the same owner-only error log the
+// diagnostics screen already reads. Writing is deliberately not owner-gated -
+// the failures worth seeing are other people's.
+// The log only holds the last 200 rows, so an app stuck in a retry loop - or
+// anybody signed in who felt like it - could push the real failures out of the
+// window before they were ever read. A handful an hour is all a genuine break
+// needs.
+const diagReportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many reports.' },
+});
+app.post('/api/diagnostics/report', requireAuth, diagReportLimiter, (req, res) => {
+  const b = req.body || {};
+  const message = String(b.message || '').slice(0, 300);
+  const detail = String(b.detail || '').slice(0, 600);
+  if (!message) return res.status(400).json({ error: 'Nothing to report.' });
+  try { db.logError('client', message, detail); } catch (_) {}
+  res.json({ ok: true });
+});
+
+// ─── BACKUPS ─────────────────────────────────────────────────────────────────
+// Owner only, same gate as diagnostics. The download is the point of the whole
+// feature: a copy of the database in Jacques's own hands, off this machine, in
+// one tap - so a lost volume is an inconvenience rather than the end of the app.
+function ownerOnly(req, res) {
+  if (!DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Backups are unavailable: APP_OWNER_EMAIL is not configured.' });
+    return false;
+  }
+  const user = db.getUserById(req.userId);
+  if (!user || user.email !== DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Only the app owner can touch backups.' });
+    return false;
+  }
+  return true;
+}
+app.get('/api/backup/status', requireAuth, (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  const snaps = backup.listSnapshots();
+  res.json({
+    keep: backup.SNAPSHOT_KEEP,
+    emailMaxMb: Math.round(backup.EMAIL_MAX_BYTES / 1048576),
+    emailedTo: DIAG_OWNER_EMAIL || null,
+    snapshots: snaps.map((s) => ({ name: s.name, mb: +(s.bytes / 1048576).toFixed(2), at: s.at })),
+  });
+});
+app.post('/api/backup/run', requireAuth, async (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  try {
+    const r = await backup.runBackup(emailer, DIAG_OWNER_EMAIL);
+    res.json({
+      ok: true,
+      name: r.snapshot.name,
+      mb: +(r.snapshot.bytes / 1048576).toFixed(2),
+      emailed: !!r.mail.ok,
+      emailProblem: r.mail.ok ? null : (r.mail.skipped || r.mail.error || `status ${r.mail.status}`),
+    });
+  } catch (err) {
+    try { db.logError('backup', `manual backup failed: ${err.message}`, err.stack); } catch (_) {}
+    res.status(500).json({ error: err.message });
+  }
+});
+// Restoring is owner-only like the rest of these, and the process exits when it
+// is done on purpose: the open database handle still points at the file that was
+// just swapped out, so only a fresh boot picks up the restored one. The host
+// starts it straight back up.
+app.post(
+  '/api/backup/restore',
+  express.raw({ type: 'application/octet-stream', limit: '128mb' }),
+  requireAuth,
+  (req, res) => {
+    if (!ownerOnly(req, res)) return;
+    let out;
+    try {
+      out = backup.restoreFromBuffer(req.body);
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    // Deliberately not db.logError here: that handle is pointed at the database
+    // that was just replaced, so anything written now goes nowhere.
+    console.log(`Database restored: ${out.users} accounts, ${out.bytes} bytes. Restarting.`);
+    res.json({ ok: true, users: out.users, replaced: out.replaced });
+    // Exit non-zero on purpose. A clean exit reads to the host as "this job is
+    // finished" and it does not start the app again - which on 9 Sep took the
+    // site down after a restore and left it showing 502. A failure exit is what
+    // makes the host boot it back up, which is the whole point of exiting here.
+    setTimeout(() => process.exit(1), 500);
+  }
+);
+app.get('/api/backup/download', requireAuth, (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  const snaps = backup.listSnapshots();
+  if (!snaps.length) return res.status(404).json({ error: 'No backup yet. Run one first.' });
+  res.download(snaps[0].path, snaps[0].name);
+});
+
+// Funnel numbers are business data, so unlike diagnostics this gate has no
+// open fallback: with APP_OWNER_EMAIL unset, nobody gets in.
+function isOwnerRequest(req) {
+  const token = req.cookies && req.cookies[COOKIE_NAME];
+  const payload = token && verifySession(token);
+  const userId = req.userId || (payload && payload.userId);
+  if (!userId) return false;
+  const user = db.getUserById(userId);
+  return !!(user && user.email === DIAG_OWNER_EMAIL);
+}
+
+/* Who may see The Key. isValidSession() only says the cookie is good — it does
+   NOT set req.userId, only requireAuth does — so this reads the payload the
+   same way isOwnerRequest above does. */
+function isFriendlyRequest(req) {
+  const token = req.cookies && req.cookies[COOKIE_NAME];
+  const payload = token && verifySession(token);
+  const userId = req.userId || (payload && payload.userId);
+  if (!userId) return false;
+  return isFriendlyAllowed(db.getUserById(userId));
+}
+
+function requireOwner(req, res) {
+  if (!DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Admin stats are unavailable: APP_OWNER_EMAIL is not configured.' });
+    return false;
+  }
+  if (!isOwnerRequest(req)) {
+    res.status(403).json({ error: 'Only the app owner can view stats.' });
+    return false;
+  }
+  return true;
+}
+app.get('/api/admin/stats', requireAuth, (req, res) => {
+  if (!requireOwner(req, res)) return;
+  res.json(db.getAdminStats({ freeChatLimit: 0, windowDays: 30 }));
+});
+// A page route, not an API one: requireAuth would render its JSON error as the
+// page body, so a logged-out visit is sent to the app to sign in instead, and a
+// signed-in non-owner gets a sentence rather than a JSON blob.
+app.get('/admin/stats', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!DIAG_OWNER_EMAIL || !isOwnerRequest(req)) {
+    return res.status(403).type('text/plain').send('Only the app owner can view stats.');
+  }
+  res.sendFile(path.join(__dirname, '..', 'admin-stats.html'));
+});
+
+// ─── Couple link: two accounts, one Together table ───────────────────────────
+// The link carries ONLY the shared Together progress and a nudge - by design
+// there is no way to see a partner's clock, journal, slips, or anything else.
+function coupleStatusFor(userId) {
+  const row = db.coupleRowFor(userId);
+  if (!row) return { linked: false, pending: false };
+  if (!row.user_b) return { linked: false, pending: true, code: row.code, togetherDone: row.together_done };
+  const partner = db.couplePartnerOf(userId);
+  return {
+    linked: true,
+    pending: false,
+    partnerName: (partner && partner.name) || 'your partner',
+    togetherDone: row.together_done,
+    nudgeAt: row.nudge_at || null,
+    nudgeFromPartner: !!(row.nudge_from && row.nudge_from !== userId),
+  };
+}
+app.get('/api/couple', requireAuth, (req, res) => {
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/create', requireAuth, (req, res) => {
+  db.createCoupleLink(req.userId, (req.body && req.body.name) || '');
+  res.json(coupleStatusFor(req.userId));
+});
+// Six characters is a code a partner can read off a screen, not a password, so
+// the guessing has to be stopped at the door rather than by the code's length.
+const coupleJoinLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many code attempts. Try again in a little while.' },
+});
+app.post('/api/couple/join', requireAuth, coupleJoinLimiter, (req, res) => {
+  const out = db.joinCoupleLink(req.userId, req.body && req.body.code, (req.body && req.body.name) || '');
+  if (out.error) {
+    const msg = {
+      'already-linked': "You're already linked. Unlink first if this is a new start.",
+      'bad-code': "That code doesn't match anything. Check it with your partner - letters only, no zeros.",
+      'code-used': 'That code has already been used.',
+      'own-code': "That's your own code - your partner enters it on their phone.",
+    }[out.error];
+    return res.status(400).json({ error: msg });
+  }
+  const partner = db.couplePartnerOf(req.userId);
+  if (partner) {
+    push.sendToUser(partner.id, {
+      title: 'You two are linked',
+      body: `${(req.body && req.body.name) || 'Your partner'} joined your Together table. Ten minutes a day - same table, both phones.`,
+      url: '/app',
+    }).catch(() => {});
+  }
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/unlink', requireAuth, (req, res) => {
+  db.unlinkCouple(req.userId);
+  res.json({ ok: true });
+});
+app.post('/api/couple/done', requireAuth, (req, res) => {
+  const d = db.setCoupleTogetherDone(req.userId, req.body && req.body.day);
+  if (d === null) return res.status(400).json({ error: 'Not linked.' });
+  res.json({ togetherDone: d });
+});
+const coupleNudgeLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 6, standardHeaders: true, legacyHeaders: false });
+app.post('/api/couple/nudge', requireAuth, coupleNudgeLimiter, (req, res) => {
+  const row = db.setCoupleNudge(req.userId);
+  if (!row) return res.status(400).json({ error: 'Not linked yet.' });
+  const partner = db.couplePartnerOf(req.userId);
+  const me = row.user_a === req.userId ? row.name_a : row.name_b;
+  if (partner) {
+    push.sendToUser(partner.id, {
+      title: 'Ten minutes at the table?',
+      body: `${me || 'Your partner'} is asking for today's ten minutes together - when you're both ready.`,
+      url: '/app',
+    }).catch(() => {});
+  }
+  res.json({ ok: true });
+});
+
+// ─── The letter is the invitation ────────────────────────────────────────────
+// Nobody installs a recovery app because a friend asked them to. They open a
+// letter because somebody they love wrote it. So the share link carries the
+// letter, and the account offer only appears after it has been read.
+//
+// Privacy shape: the sender's account is never exposed through the token, the
+// letter body never leaves the row, and the recipient stays anonymous until the
+// moment they choose to make an account. Tokens are 128-bit and expire.
+const letterCreateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'That is a lot of letters in one hour. Try again shortly.' },
+});
+
+function letterOrigin(req) {
+  const env = (process.env.PUBLIC_ORIGIN || '').replace(/\/$/, '');
+  if (env) return env;
+  const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0].trim();
+  return `${proto}://${req.get('host')}`;
+}
+
+app.post('/api/letter/share', letterCreateLimiter, requireAuth, (req, res) => {
+  const { body, senderType, senderName, recipientName } = req.body || {};
+  const text = typeof body === 'string' ? body.trim() : '';
+  if (text.length < 40) {
+    return res.status(400).json({ error: 'There is not enough of the letter here to send yet.' });
+  }
+  const side = ['recovering', 'partner', 'both'].includes(senderType) ? senderType : 'recovering';
+  const token = crypto.randomBytes(16).toString('hex');
+  const row = db.createLetter(req.userId, token, side, senderName, recipientName, text);
+  res.status(201).json({
+    url: `${letterOrigin(req)}/l/${row.token}`,
+    token: row.token,
+    expiresAt: row.expires_at,
+    expiresInDays: db.LETTER_TTL_DAYS,
+  });
+});
+
+// Revoking is one call and it is absolute: a letter shared in a moment of
+// courage has to be retractable in a moment of regret.
+app.post('/api/letter/revoke', requireAuth, (req, res) => {
+  res.json({ revoked: db.revokeLetters(req.userId) });
+});
+
+// The reader's endpoint. Public by necessity - the recipient has no account
+// yet, that is the entire point - so it returns only what the page renders and
+// nothing that identifies the sender's account.
+app.get('/api/letter/:token', (req, res) => {
+  const row = db.getLetterByToken(req.params.token);
+  if (!row) return res.status(404).json({ error: 'gone' });
+  db.markLetterOpened(req.params.token);
+  res.json({
+    body: row.body,
+    senderName: row.sender_name,
+    recipientName: row.recipient_name,
+    senderType: row.sender_type,
+    youAre: db.LETTER_OPPOSITE[row.sender_type] || 'partner',
+    alreadyJoined: !!row.accepted_at,
+  });
+});
+
+// One tap: the account is created on the opposite side of whoever wrote the
+// letter, and if the sender has a Together table open, the two are linked on
+// the spot. No code to type, no second screen.
+app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
+  const row = db.getLetterByToken(req.params.token);
+  if (!row) return res.status(404).json({ error: 'This letter is no longer available.' });
+  if (row.accepted_at) return res.status(409).json({ error: 'This letter has already been used to start an account.' });
+  const { email, password, name } = req.body || {};
+  if (!email || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  if (!validCredential(password)) {
+    return res.status(400).json({ error: 'Use a password of at least 8 characters, or a 4-6 digit PIN.' });
+  }
+  const normalizedEmail = email.trim().toLowerCase();
+  if (db.getUserByEmail(normalizedEmail)) {
+    return res.status(409).json({ error: 'An account with that email already exists. Sign in instead.' });
+  }
+  const userId = db.createUser(normalizedEmail, hashPassword(password), null);
+  // A line here tagged the new account as source 'letter' for the campaign
+  // report. The UTM columns and that report are gone (5 Oct 2026), so there is
+  // nothing to tag - the letter's own numbers are kept in the letters table.
+  db.markLetterAccepted(req.params.token, userId);
+  // Link the two Together tables if the sender already has one waiting. A
+  // failure here must never cost the account that was just created.
+  try {
+    const link = db.createCoupleLink(row.user_id, row.sender_name || '');
+    if (link && !link.user_b) db.joinCoupleLink(userId, link.code, String(name || '').slice(0, 40));
+  } catch (_) {}
+  setSessionCookie(req, res, userId);
+  const youAre = db.LETTER_OPPOSITE[row.sender_type] || 'partner';
+  res.status(201).json({ email: normalizedEmail, youAre, senderName: row.sender_name });
+  try {
+    push.sendToUser(row.user_id, {
+      title: 'They read your letter',
+      body: `${String(name || '').slice(0, 40) || 'They'} opened it and made an account. You are not carrying this alone now.`,
+      url: '/app',
+    }).catch(() => {});
+  } catch (_) {}
+  const user = db.getUserById(userId);
+  if (user) {
+    const w = emailer.welcomeEmail();
+    emailer.sendSequenceEmail(user, 'transactional', 1, w.subject, w.text).catch(() => {});
+  }
+});
+
+// The reader's page. Short URL on purpose - it gets pasted into a text message.
+app.get('/l/:token', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'letter.html'));
+});
+
+app.get('/api/account/export', requireAuth, (req, res) => {
+  const user = db.getUserById(req.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  const stateJson = db.getState(req.userId);
+  res.json({
+    email: user.email,
+    created_at: user.created_at,
+    state: stateJson ? JSON.parse(stateJson) : null,
+  });
+});
+
+app.delete('/api/account', requireAuth, async (req, res) => {
+  const { password } = req.body || {};
+  const user = db.getUserById(req.userId);
+  if (!user || !verifyPassword(password || '', user.password_hash)) {
+    return res.status(401).json({ error: 'Incorrect password.' });
+  }
+  db.deleteUser(req.userId);
+  res.clearCookie(COOKIE_NAME);
+  res.json({ ok: true });
+});
+
+function getOrigin(req) {
+  return req.headers.origin || `${req.protocol}://${req.get('host')}`;
+}
+
+// Public on purpose: the landing page asks this while logged out. It publishes
+// only what the pricing surfaces are allowed to show, and showCount is decided
+// server-side so the app and the landing page can never disagree about when the
+// remaining number becomes visible.
+// Google Play requires a privacy policy reachable without signing in. The text
+// is the same words as the in-app overlay - one policy, three places.
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'privacy.html'));
+});
+// Play requires the account-deletion instructions to be reachable from the
+// store listing, which means without signing in - a signed-out visitor is
+// exactly the person who cannot find the in-app button.
+app.get('/delete-account', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'delete-account.html'));
+});
+
+// ─── WEB PUSH ────────────────────────────────────────────────────────────────
+// The public key is not a secret - the browser needs it to build a subscription
+// - so this is readable without a session, same as any site's push key.
+app.get('/api/push/key', (req, res) => {
+  try {
+    res.json({ key: push.publicKey() });
+  } catch (err) {
+    res.status(503).json({ error: 'Push is not available on this server.' });
+  }
+});
+
+app.post('/api/push/subscribe', requireAuth, (req, res) => {
+  const sub = req.body || {};
+  if (!sub.endpoint || !sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+    return res.status(400).json({ error: 'A complete push subscription is required.' });
+  }
+  try {
+    db.savePushSubscription(req.userId, sub);
+    res.json({ ok: true });
+  } catch (err) {
+    try { db.logError('push-subscribe', err.message, err.stack); } catch (_) {}
+    res.status(500).json({ error: 'Could not save the subscription.' });
+  }
+});
+
+app.post('/api/push/unsubscribe', requireAuth, (req, res) => {
+  const { endpoint } = req.body || {};
+  if (endpoint) db.deletePushSubscription(endpoint);
+  res.json({ ok: true });
+});
+
+// Lets someone prove to themselves that reminders will actually arrive, which
+// is the whole reason a person turns notifications on and then doubts them.
+app.post('/api/push/test', requireAuth, async (req, res) => {
+  try {
+    const sent = await push.sendToUser(req.userId, {
+      title: 'Reminders are on',
+      body: "That's what your daily lesson reminder will look like — even with the app closed.",
+      url: '/app',
+      tag: 'push-test',
+    });
+    res.json({ ok: sent > 0, sent });
+  } catch (err) {
+    try { db.logError('push-test', err.message, err.stack); } catch (_) {}
+    res.status(500).json({ error: 'Could not send a test notification.' });
+  }
+});
+
+// Today's chat usage so the client can show a live "X of N left" meter for
+// Pro (Free is counted on the client already). Cheap authed read; the count is
+// the same server-side number the cap is enforced against, so it never drifts.
+app.get('/api/chat/usage', requireAuth, (req, res) => {
+  const user = db.getUserById(req.userId);
+  const used = db.getChatCount(req.userId, chatDay());
+  res.json({
+    allowed: isFriendlyAllowed(user),
+    used,
+    limit: CHAT_LIMIT,                       // 0 = no cap
+    remaining: CHAT_LIMIT > 0 ? Math.max(0, CHAT_LIMIT - used) : null,
+  });
+});
+
+// Does this account get Friendly at all? The app asks once on load and hides
+// the tab, the toolkit row and the search entry when the answer is no.
+app.get('/api/friendly/access', requireAuth, (req, res) => {
+  res.json({ allowed: isFriendlyAllowed(db.getUserById(req.userId)) });
+});
+
+// Config health for the AI, with no secrets in it - booleans and a model name
+// only. This exists because the two ways Friendly goes quiet (no key on the
+// server, or APP_OWNER_EMAIL unset so the owner-only error never reaches
+// anyone) are both INVISIBLE from the app: the chat just falls back to canned
+// replies and the diagnostics panel 403s. Signed-in only; open it in a phone
+// browser to see in one line which of the two it is.
+app.get('/api/ai-status', requireAuth, (req, res) => {
+  const provider = GEMINI_API_KEY ? 'gemini' : 'none';
+  const user = db.getUserById(req.userId);
+  res.json({
+    provider,
+    keyConfigured: !!GEMINI_API_KEY,
+    model: GEMINI_API_KEY ? GEMINI_MODEL : null,
+    ownerEmailConfigured: !!DIAG_OWNER_EMAIL,
+    youAreOwner: !!(DIAG_OWNER_EMAIL && user && user.email === DIAG_OWNER_EMAIL),
+  });
+});
+
+app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    // No key on the server. This used to return a bare 503 and nothing else,
+    // which is the one AI failure the app could not show anybody: the client
+    // silently drops to canned replies, the chat counter never moves, and
+    // because nothing was logged, Profile > Diagnostics stayed empty too. Log
+    // it, and tell the owner in the chat itself.
+    const why = 'No AI key on the server (GEMINI_API_KEY is unset).';
+    try { db.logError('ai-chat', why); } catch (_) {}
+    const body = { error: 'AI chat is not available on this server right now.' };
+    try {
+      const u = db.getUserById(req.userId);
+      if (DIAG_OWNER_EMAIL && u && u.email === DIAG_OWNER_EMAIL) body.ownerError = why;
+    } catch (_) {}
+    return res.status(503).json(body);
+  }
+
+  const { system, messages } = req.body || {};
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: 'messages array is required.' });
+  }
+
+  // Server-side daily limit for signed-in users. Only the server's own allowlist can
+  // bypass this - never a client-reported flag, which the client fully controls.
+  const user = db.getUserById(req.userId);
+  if (!isFriendlyAllowed(user)) {
+    return res.status(403).json({ error: 'Not available on this account.' });
+  }
+  const used = db.getChatCount(req.userId, chatDay());
+  if (CHAT_LIMIT > 0 && used >= CHAT_LIMIT) {
+    return res.status(429).json({ error: `That is today's ${CHAT_LIMIT} chats. It resets tomorrow.` });
+  }
+
+  try {
+    let res2, data, geminiEmptyReason = '';
+    if (GEMINI_API_KEY) {
+      const gemUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+      // The body itself lives in ./ai-chat-body.js - it decides what leaves the
+      // phone, so it is the one piece of this route that has to be
+      // testable without a model to answer.
+      const gemBody = (withThinkingOff) => aiChatBody.buildBody({
+        model: GEMINI_MODEL,
+        system,
+        messages,
+        maxTokens: GEMINI_MAX_TOKENS,
+        thinkingLevel: GEMINI_THINKING_LEVEL,
+        withThinkingOff,
+      });
+      const gemHeaders = {
+        // The key goes in x-goog-api-key. Without it Google answers every call
+        // with 403 "Method doesn't allow unregistered callers", the request
+        // never reaches a model, and the app quietly falls back to its canned
+        // replies. Header, not ?key=, so the secret stays out of URLs, proxy
+        // logs and error messages.
+        'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY,
+      };
+      let gemRes = await fetch(gemUrl, { method: 'POST', headers: gemHeaders, body: gemBody(true) });
+      if (gemRes.status === 400) {
+        // Retry without thinkingConfig on ANY 400, not just one that says the
+        // word "thinking". Google's answer here is the generic "Request
+        // contains an invalid argument" - the useful part is buried in
+        // error.details, and matching on the top-line message meant the retry
+        // never fired and every chat died on the only optional field we send.
+        const probe = await gemRes.clone().json().catch(() => null);
+        const msg = (probe && probe.error && probe.error.message) || 'no message';
+        const det = probe && probe.error && probe.error.details
+          ? ` details: ${JSON.stringify(probe.error.details).slice(0, 400)}` : '';
+        try { db.logError('ai-chat', `400 with thinkingConfig, retrying without it: ${msg}${det}`); } catch (_) {}
+        gemRes = await fetch(gemUrl, { method: 'POST', headers: gemHeaders, body: gemBody(false) });
+      }
+      const gd = await gemRes.json();
+      if (gemRes.ok) {
+        const cand = (gd.candidates && gd.candidates[0]) || null;
+        const parts = (cand && cand.content && cand.content.parts) || [];
+        const text = parts.map((p) => p.text || '').join('').trim();
+        if (!text) {
+          // A 200 with no words in it is still a failure - it just used to be
+          // an invisible one. Say why (MAX_TOKENS, SAFETY, RECITATION...) so it
+          // lands in diagnostics and in the owner's chat like any other break.
+          const reason = (cand && cand.finishReason)
+            || (gd.promptFeedback && gd.promptFeedback.blockReason)
+            || 'no reason given';
+          geminiEmptyReason = `Gemini returned an empty answer (finishReason: ${reason}).`;
+        }
+        // Same shape the client already parses (data.content[0].text).
+        data = { content: [{ type: 'text', text }] };
+      } else {
+        data = gd;
+      }
+      res2 = gemRes;
+    }
+    // Only spend the user's daily quota on a response that actually succeeded - a bad server
+    // config or a transient provider outage shouldn't cost them one of their free chats.
+    if (res2.ok && geminiEmptyReason) {
+      // 200, but no words came back. Don't charge a chat for silence, and
+      // report it exactly like a hard failure - this is the shape of break
+      // that hid the longest precisely because it looked like success.
+      try { db.logError('ai-chat', geminiEmptyReason); } catch (_) {}
+      try {
+        const u = db.getUserById(req.userId);
+        if (DIAG_OWNER_EMAIL && u && u.email === DIAG_OWNER_EMAIL) {
+          data = Object.assign({}, data, { ownerError: geminiEmptyReason });
+        }
+      } catch (_) {}
+      return res.status(502).json(data);
+    }
+    if (res2.ok) {
+      db.incrementChatCount(req.userId, chatDay());
+    } else {
+      // A failing key/model here degrades every chat into the client's canned
+      // fallback with no visible symptom except repetitive replies - put the
+      // real reason where Profile diagnostics can show it.
+      const eobj = (data && data.error) || null;
+      const edet = eobj && eobj.details ? ` | ${JSON.stringify(eobj.details).slice(0, 400)}` : '';
+      const why = `HTTP ${res2.status}: ${(eobj && (eobj.message || eobj.status)) || 'unknown error'}${edet}`;
+      try { db.logError('ai-chat', why); } catch (_) {}
+      // Hand the reason straight back to the OWNER so a broken key shows up in
+      // the chat itself instead of only in a diagnostics list nobody thinks to
+      // open. Never to anyone else - provider errors can echo config details.
+      try {
+        const u = db.getUserById(req.userId);
+        if (DIAG_OWNER_EMAIL && u && u.email === DIAG_OWNER_EMAIL) {
+          data = Object.assign({}, data, { ownerError: why });
+        }
+      } catch (_) {}
+    }
+    res.status(res2.status).json(data);
+  } catch (err) {
+    try { db.logError('ai-chat', 'Failed to reach the AI provider', err && err.message); } catch (_) {}
+    res.status(502).json({ error: 'Failed to reach the AI provider.' });
+  }
+});
+
+// Anything that reaches here escaped every route's own try/catch - log it so
+// it shows up in Profile diagnostics instead of vanishing silently.
+app.use((err, req, res, next) => {
+  // Malformed JSON in a request body is a client mistake, not a server fault - answer 400
+  // and keep it out of the user-visible diagnostics log so real server errors stand out.
+  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    if (res.headersSent) return next(err);
+    return res.status(400).json({ error: 'Invalid JSON in request body.' });
+  }
+  try { db.logError('http', err.message, err.stack); } catch (_) {}
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Something went wrong on the server.' });
+});
+process.on('uncaughtException', (err) => {
+  try { db.logError('uncaughtException', err.message, err.stack); } catch (_) {}
+  console.error('Uncaught exception:', err);
+});
+process.on('unhandledRejection', (err) => {
+  try { db.logError('unhandledRejection', err?.message || String(err), err?.stack); } catch (_) {}
+  console.error('Unhandled rejection:', err);
+});
+
+// emailer.startScheduler() is gone with the marketing sequences - there is no
+// hourly pass left to run. Push reminders still have one.
+push.startScheduler();
+backup.startBackupScheduler(emailer, DIAG_OWNER_EMAIL, (scope, msg, detail) => db.logError(scope, msg, detail));
+
+app.listen(PORT, () => {
+  console.log(`Turn Someday Into Day One server running on http://localhost:${PORT}`);
+});

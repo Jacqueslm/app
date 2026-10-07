@@ -1,0 +1,99 @@
+# Generated source bundles - regenerate with tools-export-source.py
+*-source-code.txt
+*-source-code.zip
+buffer-cards/
+
+# Android signing keys. A keystore in git history is a keystore that is public
+# forever, even after a later delete. Never commit one.
+*.keystore
+*.jks
+*.p12
+TurnSomeDayIntoOneday/twa/android-upload.keystore
+TurnSomeDayIntoOneday/twa/*.keystore
+# Bubblewrap build output and its downloaded toolchain
+TurnSomeDayIntoOneday/twa/app/
+TurnSomeDayIntoOneday/twa/build/
+TurnSomeDayIntoOneday/twa/.gradle/
+TurnSomeDayIntoOneday/twa/*.aab
+TurnSomeDayIntoOneday/twa/*.apk
+TurnSomeDayIntoOneday/twa/*.idsig
+
+# (A line here ignored reference/watch-report.md, the output of the
+# competitor-watch script. Both went on 5 Oct 2026 with the reference library.)
+
+# Python bytecode caches — never useful in the repo
+__pycache__/
+*.pyc
+
+# Page images built by tools-md-to-pdf.py --png. Regenerate them, don't commit
+# them — 95 PNGs of documents that are already in the repo as markdown.
+*-pages/
+
+# NO VIDEO FILES IN THIS REPO (rule, 27 Aug 2026). All 39 were purged from
+# tracking - talking heads, AI pieces, samples, the whole library, 246 MB.
+# Jacques keeps them in his own file and on social media; they are handed to
+# him in chat instead.
+#
+# UPDATED 31 Aug 2026 - "we dont push videos no more only music" (Jacques).
+# MUSIC AND AUDIO STAY: content/score/, TurnSomeDayIntoOneday/audio/.
+# The RENDER TOOLING STAYS: tools/render-film.js, prep-still.py, make-film.py.
+# EVERYTHING ELSE ABOUT A VIDEO IS HANDED OVER IN CHAT, NOT COMMITTED - the
+# .mp4, the *-source.html, and the stills. This REPLACES the 27 Aug line that
+# kept sources and stills here so pieces could be rebuilt from the repo.
+# Already-tracked files are NOT affected by the line below; it only stops a
+# future session committing a NEW source by accident, the same way the video
+# extensions have since 27 Aug.
+content/*-source.html
+content/a18/
+content/a19/
+content/binge-night/
+content/couple/
+content/film-engine/
+content/food/
+content/library/
+content/pills/
+content/supporter-husband/
+content/worry/
+content/endcard-template.html
+*.mp4
+*.mov
+*.webm
+*.m4v
+*.avi
+*.mkv
+
+# The user database and its backups. These hold real people's journals,
+# cravings and emails; a database committed once is in the history forever,
+# even after a later delete. Running the server locally creates both.
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+TurnSomeDayIntoOneday/server/backups/
+
+# Studio's own files for a home install. Hosted, they sit beside DB_PATH (the
+# volume) instead - see TurnSomeDayIntoOneday/server/studio/locations.js. Same
+# reason as the line above: data.sqlite is real accounts, media/ is real clips
+# and .env is real API keys. None of it belongs in git.
+TurnSomeDayIntoOneday/server/studio/data.sqlite
+TurnSomeDayIntoOneday/server/studio/media/
+TurnSomeDayIntoOneday/server/studio/backups/
+TurnSomeDayIntoOneday/server/studio/model-cache/
+TurnSomeDayIntoOneday/server/studio/.env
+TurnSomeDayIntoOneday/server/studio/update-state.json
+
+# the three.js source package the Mixamo workshop imports — fetched with npm pack, not kept in git
+TurnSomeDayIntoOneday/tools/mixamo/three/
+
+# Node dependencies — npm install fetches these on every machine
+node_modules/
+
+# Left behind by The Key's installer (private/install.js in the Zodiac repo), which
+# keeps a .bak beside every file it edits. robots.txt.bak would be readable at the
+# site root, so they stay out of git.
+*.bak
+
+
+# Vercel build output - regenerate with the build command (node vercel-build.js).
+# Only public assets land here; a page in this folder is a page served to the world.
+TurnSomeDayIntoOneday/webroot/

@@ -1,0 +1,211 @@
+// The filenames never change, so every audio rebuild needs a new cache name
+// here, or existing installs keep the old audio and pair it with the new
+// caption timings, drifting further out with every step.
+//
+// WHEN A VOICE IS ADDED, ADD ITS SOS FILE BELOW AND BUMP THE CACHE NAME.
+// Deep shipped on 27 Aug 2026 and this list was not updated, so five of the six
+// voices were available offline and Deep was not. "Talk me through it" is the
+// crisis walkthrough - free, always, and needed precisely when the signal is
+// gone. Anyone who chose Deep had the one voice that goes silent offline.
+// Fixed 28 Aug; the cache name now tracks APP_VERSION in the page /app serves -
+// hub.html - so the two cannot drift apart unnoticed again.
+//
+// Taken back to 5.0 on 20 Sep 2026 and to 2.0 on 4 Oct 2026, at Jacques's word —
+// the number is his to pick and it is not a mistake, and it is not a step
+// backwards either: it only has to be a name no install has cached yet. It still
+// has to match APP_VERSION exactly, so do not "correct" it upward on sight. The
+// name is new to every install, so each phone builds the cache fresh and drops
+// the old one at activate, exactly as it does on any other bump.
+//
+// 2.0 goes with the app being named The Truth and the herb library getting its
+// read-aloud voice (4 Oct 2026), so an installed copy picks both up.
+//
+// 6 Oct 2026: '/data/lessons.json' came off the list below. The lesson packs and
+// the script that built them were deleted that day — the app that read them went
+// on 4 Oct and nothing has fetched this one since. The name stayed at 2.0 there:
+// taking an entry out is not a rebuild, and the number is Jacques's to move.
+//
+// 7 Oct 2026: the shell's home screen was rebuilt (four doors, one line each,
+// and a plainer way in) and then given a "Forgot your password?" option, so the
+// name moved to 2.1 and on to 2.2 WITH it. This is the case the number exists
+// for: without the bump an installed phone keeps being served the old /app out
+// of its precached copy and sees nothing new at all.
+const CACHE_NAME = 'tsid-shell-v2.2';
+const SHELL_FILES = [
+  '/',
+  '/app',
+  // The roof fight. It is the only app page loaded in an iframe, and the only
+  // one whose address carries a query string (?boss=…&fighter=…&floor=…). The
+  // page fallback below ends at '/app', so with this line missing and no
+  // signal, the fight frame came up as the app's home screen — the ring went
+  // missing at the bell. Precached, ignoreSearch finds it offline.
+  '/game3d.html',
+  '/manifest.json',
+  '/manifest-discrete.json',
+  '/audio/sos-talk-warm.mp3',
+  '/audio/sos-talk-soft.mp3',
+  '/audio/sos-talk-gentle.mp3',
+  '/audio/sos-talk-clear.mp3',
+  '/audio/sos-talk-male.mp3',
+  '/audio/sos-talk-deep.mp3',
+  '/data/stories.json',
+  '/data/audio-stories.json',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/icon-discrete-192.png',
+  '/icons/icon-discrete-512.png',
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    // Tolerant precache: addAll is all-or-nothing, so one renamed or missing
+    // file used to fail the entire install - no registration, offline support
+    // silently gone. Each file is fetched independently instead; anything that
+    // fails here is picked up online later by the fetch handler's caching.
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(SHELL_FILES.map((f) => cache.add(f)))
+    ).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+// ─── WEB PUSH ────────────────────────────────────────────────────────────────
+// This is what lets a reminder arrive with the app fully closed: the push
+// service wakes the service worker, and the worker shows the notification.
+// A push with no readable payload still shows something rather than nothing -
+// some services send an empty wake-up, and a silent no-op would look broken.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) { data = {}; }
+  const title = data.title || 'The Truth';
+  const options = {
+    body: data.body || 'Your daily lesson is ready.',
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-192.png',
+    // A tag means a second reminder replaces the first instead of stacking up
+    // into a wall of identical notifications on a phone left untouched.
+    tag: data.tag || 'daily-lesson',
+    renotify: true,
+    data: { url: data.url || '/app' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Tapping the notification focuses the app if it is already open anywhere,
+// rather than stacking a second copy of it.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/app';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes('/app') && 'focus' in client) return client.focus();
+      }
+      return self.clients.openWindow ? self.clients.openWindow(target) : undefined;
+    })
+  );
+});
+
+// Never cache API calls - auth, chat, and state must always hit the network so the app's
+// own online/offline handling (e.g. Nova's local fallback) stays in control of that behavior.
+//
+// Pages (HTML) are network-first so app updates show up on the very next load;
+// the cached copy is only a fallback for offline. Static assets stay
+// cache-first for speed.
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'GET' || url.pathname.startsWith('/api/')) return;
+  // Cross-origin requests (the lesson-audio CDN) are left to the browser: its
+  // HTTP cache handles them, and copying multi-megabyte recordings into the
+  // shell cache would burn the storage quota for no gain.
+  if (url.origin !== location.origin) return;
+
+  // /play used to be bypassed here: it was a server-side redirect off to
+  // Google, and answering a navigation with a redirected response from inside a
+  // worker breaks for installed users only. The route went with the store on
+  // 5 Oct 2026, so the bypass went too.
+
+  // The Key is private: /key sends anyone not signed in and on the allowlist
+  // back to /app. Caching a 200 response for /key would put the page in the
+  // shell cache, and the offline fallback below would then hand it out with no
+  // check at all. Like /play, it never enters the worker.
+  if (url.pathname === '/key' || url.pathname === '/key.html') return;
+
+  // The herb library and the tax centre (15 Sep 2026) are the same kind of page
+  // again: served only to somebody signed in and on the list. A cached copy would
+  // outlive that check, and the offline fallback would hand it out unguarded.
+  // All four addresses, because both the clean URL and the file name reach them.
+  //
+  // The trading game, the trading school and the Trading Desk were the same
+  // shape and had their own lines here; all three went on 24 Sep 2026 with the
+  // pages themselves, so their lines went too.
+  if (['/herbs', '/herbs.html', '/tax', '/tax.html'].includes(url.pathname)) return;
+
+  // The Fight joined the same door on 4 Oct 2026, when the app became three
+  // things and this became one of them. Both addresses again - the clean URL and
+  // the file name reach the same gated route, so a cached copy of either would
+  // outlive the check that is supposed to be guarding it.
+  if (['/fight', '/fight.html', '/game3d.html'].includes(url.pathname)) return;
+
+  // The Music joined the same door on 5 Oct 2026. It is served only to somebody
+  // signed in and on the list, so a cached copy would outlive that check and the
+  // offline fallback would hand it out unguarded. Both addresses again - the
+  // clean URL and the file name reach the same gated route.
+  if (['/music', '/music.html'].includes(url.pathname)) return;
+
+  // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
+  // Its whole point is that it is read fresh - a cached "here is every track"
+  // would never contain the next one - so it is left to the browser, which is
+  // already told to skip its cache for it. It is not precached either: it is
+  // not shell, and holding it would only work against the scan.
+  if (url.pathname === '/audio/meditation/list.json') return;
+
+  const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
+
+  if (isPage) {
+    // Network-first so updates appear on the next load. Offline, fall back to
+    // the cached copy - and because a navigation often carries a query string
+    // (e.g. /app?join=1) that won't exact-match the cached '/app', ignoreSearch
+    // is used, with '/app' and '/' as last resorts. Without this, an offline
+    // PWA launch with any query string got a blank error page - stranding a
+    // user the app is otherwise fully able to serve offline.
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => {
+          if (res.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
+          return res;
+        })
+        .catch(() =>
+          caches.match(event.request, { ignoreSearch: true })
+            .then((c) => c || caches.match('/app'))
+            .then((c) => c || caches.match('/'))
+        )
+    );
+    return;
+  }
+
+  // Static assets: cache-first for speed, revalidating in the background.
+  // Audio elements fetch with Range headers and get 206 partials back;
+  // cache.put() rejects those, so only full 200 responses are stored (the MP3
+  // itself is already precached whole above). ignoreSearch/ignoreVary aren't
+  // needed here, but a Range request must still match the cached full copy -
+  // Cache.match ignores request headers, so it does.
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const network = fetch(event.request)
+        .then((res) => {
+          if (res.ok && res.status === 200) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
+          return res;
+        })
+        .catch(() => cached);
+      return cached || network;
+    })
+  );
+});

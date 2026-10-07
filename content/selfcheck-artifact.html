@@ -1,0 +1,208 @@
+<title>Ten Honest Questions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Karla:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F4F2F7; --surface:#FFFFFF; --edge:#E2DEEA;
+  --ink:#191725; --muted:#6B6480; --accent:#2E7D55; --accent-soft:#DFF3E7;
+  --violet:#5A4FC4; --rail:#E6E2F0;
+}
+:root:not([data-theme="light"]){ }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#100F18; --surface:#1A1826; --edge:#2A2739;
+    --ink:#EFECF6; --muted:#9A93AD; --accent:#7EE8A2; --accent-soft:#17301F;
+    --violet:#8B80E8; --rail:#262336;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#100F18; --surface:#1A1826; --edge:#2A2739;
+  --ink:#EFECF6; --muted:#9A93AD; --accent:#7EE8A2; --accent-soft:#17301F;
+  --violet:#8B80E8; --rail:#262336;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:Karla, "Helvetica Neue", Arial, sans-serif;
+  min-height:100dvh; display:flex; flex-direction:column; align-items:center;
+  padding:0 20px 48px;
+}
+.wrap{width:100%; max-width:560px; display:flex; flex-direction:column; gap:0}
+
+/* progress rail encodes real position: ten questions, ten segments */
+.rail{display:flex; gap:4px; padding:26px 0 34px}
+.seg{height:3px; flex:1; background:var(--rail); border-radius:2px; transition:background .45s ease}
+.seg.done{background:var(--accent)}
+.seg.now{background:var(--violet)}
+
+.eyebrow{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+}
+h1{
+  font-family:"Instrument Serif", Georgia, serif; font-weight:400;
+  font-size:clamp(38px,8vw,54px); line-height:1.08; margin:14px 0 0;
+  text-wrap:balance; letter-spacing:-.01em;
+}
+.lede{font-size:17px; line-height:1.65; color:var(--muted); margin:20px 0 0; max-width:46ch}
+.note{
+  margin-top:26px; padding:14px 16px; border:1px solid var(--edge); border-radius:12px;
+  background:var(--surface); font-size:14px; line-height:1.6; color:var(--muted);
+}
+.note b{color:var(--ink); font-weight:700}
+
+button{font:inherit; cursor:pointer; border:none; background:none; color:inherit}
+.begin{
+  margin-top:28px; width:100%; padding:18px 20px; border-radius:14px;
+  background:var(--ink); color:var(--ground); font-weight:700; font-size:17px;
+  transition:transform .16s ease, opacity .16s ease;
+}
+.begin:hover{transform:translateY(-1px)}
+.begin:focus-visible, .ans:focus-visible, .again:focus-visible{outline:2px solid var(--violet); outline-offset:3px}
+
+/* question stage */
+.stage{display:none; flex-direction:column; min-height:56vh}
+.count{font-family:"JetBrains Mono", monospace; font-size:13px; color:var(--muted); letter-spacing:.08em}
+.q{
+  font-family:"Instrument Serif", Georgia, serif; font-weight:400;
+  font-size:clamp(30px,6.6vw,42px); line-height:1.22; margin:18px 0 0;
+  text-wrap:balance; min-height:3.4em;
+}
+.answers{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:auto; padding-top:34px}
+.ans{
+  padding:20px 16px; border-radius:14px; border:1px solid var(--edge);
+  background:var(--surface); font-weight:700; font-size:17px;
+  transition:border-color .16s ease, transform .16s ease, background .16s ease;
+}
+.ans:hover{transform:translateY(-2px); border-color:var(--violet)}
+.ans[data-v="yes"]:hover{background:var(--accent-soft)}
+.back{margin-top:16px; font-size:14px; color:var(--muted); text-decoration:underline; align-self:flex-start}
+
+/* result */
+.result{display:none; flex-direction:column}
+.tally{
+  font-family:"Instrument Serif", Georgia, serif; font-size:clamp(64px,16vw,104px);
+  line-height:1; margin:6px 0 0; font-variant-numeric:tabular-nums;
+}
+.tally span{font-size:.34em; color:var(--muted); font-family:Karla, sans-serif; font-weight:500}
+.verdict{font-size:20px; line-height:1.5; margin:18px 0 0; font-weight:700; text-wrap:balance}
+.body{font-size:17px; line-height:1.68; color:var(--muted); margin:14px 0 0}
+.cta{
+  display:block; margin-top:26px; padding:18px 20px; border-radius:14px; text-align:center;
+  background:var(--accent); color:#0B1A11; font-weight:700; font-size:17px; text-decoration:none;
+}
+:root:not([data-theme="light"]) .cta{color:#0B1A11}
+.again{margin-top:14px; font-size:15px; color:var(--muted); text-decoration:underline; align-self:center}
+.fine{margin-top:30px; font-size:13px; line-height:1.6; color:var(--muted); border-top:1px solid var(--edge); padding-top:18px}
+
+.fade{animation:rise .38s ease both}
+@keyframes rise{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .fade{animation:none} .begin:hover,.ans:hover{transform:none} .seg{transition:none}
+}
+</style>
+
+<div class="wrap">
+  <div class="rail" id="rail" hidden></div>
+
+  <section id="intro">
+    <p class="eyebrow">For the one holding it together</p>
+    <h1>Ten honest questions, and nobody sees the answers.</h1>
+    <p class="lede">You've spent a long time watching someone else's habit. This asks about
+      yours — the thing you reach for when the house finally goes quiet. Not a diagnosis.
+      Not a label. Ten questions, answered yes or no, in about two minutes.</p>
+    <div class="note"><b>Nothing here leaves your phone.</b> No account, no email, no
+      analytics on your answers. Close the tab and it's gone.</div>
+    <button class="begin" id="begin">Start the ten questions</button>
+  </section>
+
+  <section class="stage" id="stage">
+    <p class="count" id="count">01 / 10</p>
+    <p class="q" id="q"></p>
+    <div class="answers">
+      <button class="ans" data-v="yes">Yes</button>
+      <button class="ans" data-v="no">No</button>
+    </div>
+    <button class="back" id="back" hidden>← previous question</button>
+  </section>
+
+  <section class="result" id="result">
+    <p class="eyebrow">What you answered</p>
+    <p class="tally"><span id="tallyN">0</span><span> of 10 yes</span></p>
+    <p class="verdict" id="verdict"></p>
+    <p class="body" id="detail"></p>
+    <a class="cta" href="https://www.turnsomedayintodayone.com" target="_blank" rel="noopener">Open the free app</a>
+    <button class="again" id="again">Take it again</button>
+    <p class="fine">This is not a medical test and it does not diagnose anything. It's ten
+      questions people in recovery tend to recognise. If any answer worries you, talk to
+      someone who knows you. In the US you can call or text <b>988</b> any time — free,
+      confidential, 24/7.</p>
+  </section>
+</div>
+
+<script>
+const QS = [
+  'Is there a habit you hide, downplay, or feel the need to explain away?',
+  "Do you get restless or irritable when you can't do it?",
+  "Have you promised yourself you'd cut back — and didn't?",
+  'Does it regularly eat time you meant to spend on something else?',
+  'Do you reach for it to escape stress, boredom, or hard feelings?',
+  'Has anyone ever expressed concern about it?',
+  'Do you feel guilt or emptiness afterward?',
+  'Is it quietly affecting your sleep, money, health, or work?',
+  'Do you defend it more than you question it?',
+  'Would giving it up for one week feel genuinely scary?'
+];
+const intro = document.getElementById('intro');
+const stage = document.getElementById('stage');
+const result = document.getElementById('result');
+const rail = document.getElementById('rail');
+const qEl = document.getElementById('q');
+const countEl = document.getElementById('count');
+const backEl = document.getElementById('back');
+let answers = [], i = 0;
+
+for (let s = 0; s < QS.length; s++) { const d = document.createElement('div'); d.className = 'seg'; rail.appendChild(d); }
+
+function paintRail(){
+  [...rail.children].forEach((seg, n) => {
+    seg.className = 'seg' + (n < answers.length ? ' done' : n === answers.length ? ' now' : '');
+  });
+}
+function show(el){ [intro, stage, result].forEach(s => s.style.display = 'none'); el.style.display = 'flex'; }
+function render(){
+  if (i >= QS.length) return finish();
+  rail.hidden = false; paintRail();
+  countEl.textContent = String(i + 1).padStart(2, '0') + ' / 10';
+  qEl.textContent = QS[i];
+  qEl.classList.remove('fade'); void qEl.offsetWidth; qEl.classList.add('fade');
+  backEl.hidden = i === 0;
+  show(stage);
+}
+function finish(){
+  const yes = answers.filter(Boolean).length;
+  document.getElementById('tallyN').textContent = yes;
+  paintRail();
+  let v, d;
+  if (yes <= 2) {
+    v = 'Nothing here is shouting.';
+    d = 'A yes or two is ordinary — most people could say the same about coffee or their phone. Worth remembering you asked, though. People who never ask are the ones it sneaks up on.';
+  } else if (yes <= 5) {
+    v = "There's a pattern here worth naming out loud.";
+    d = 'Half of these landed. That is not a verdict, but it is a pattern — and patterns are much easier to change while they are still small. The app has a private journal and a section written for people carrying somebody else, which is where most people start.';
+  } else {
+    v = 'This is worth taking seriously — for your sake, not theirs.';
+    d = 'Six or more is the range where people usually say, out loud, that something has been running them for a while. You have spent a long time keeping an eye on someone else. This one is yours. You do not have to have a name for it to start doing something about it.';
+  }
+  document.getElementById('verdict').textContent = v;
+  document.getElementById('detail').textContent = d;
+  show(result); result.classList.add('fade');
+}
+document.getElementById('begin').onclick = () => { answers = []; i = 0; render(); };
+document.querySelectorAll('.ans').forEach(b => b.onclick = () => {
+  answers[i] = b.dataset.v === 'yes'; i++; render();
+});
+backEl.onclick = () => { if (i > 0) { i--; answers.length = i; render(); } };
+document.getElementById('again').onclick = () => { answers = []; i = 0; rail.hidden = true; show(intro); };
+</script>

@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Music</title>
+<meta name="theme-color" content="#07060d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307060d'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23e8c07a' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='13' r='3.5' fill='%23e8c07a'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/zodiacs-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#07060d; --bg2:#0d0b1a;
+    --ink:#ece9f5; --dim:#a29cbb; --dimmer:#6f6890;
+    --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
+    --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.055);
+    --gold:#e8c07a; --violet:#a78bfa; --teal:#5fd9c4; --rose:#f0919f;
+    --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; min-height:100dvh; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    padding:calc(env(safe-area-inset-top,0px) + 22px) 18px calc(env(safe-area-inset-bottom,0px) + 34px);
+  }
+  .wrap{width:100%; max-width:560px}
+  .back{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:var(--dim); font-size:.75rem; letter-spacing:.04em; margin-bottom:22px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .back:hover{color:var(--ink)}
+  header{margin-bottom:20px}
+  h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter-spacing:.01em}
+  .sub{margin:6px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
+
+  .tabs{display:flex; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:5px; margin-bottom:20px}
+  .tab{
+    flex:1; text-align:center; padding:9px 6px; border-radius:999px; cursor:pointer;
+    background:none; border:0; color:var(--dim); font:inherit; font-size:.8125rem;
+    -webkit-tap-highlight-color:transparent; transition:background .16s ease,color .16s ease;
+  }
+  .tab[aria-selected="true"]{background:var(--card2); color:var(--ink)}
+  .tab:hover{color:var(--ink)}
+
+  .panel[hidden]{display:none !important}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    padding:18px; margin-bottom:14px;
+  }
+  h2{margin:0 0 4px; font-family:var(--serif); font-size:1.0625rem; font-weight:500}
+  .hint{margin:0 0 14px; color:var(--dim); font-size:.8125rem; line-height:1.55}
+  .kicker{font-size:.625rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dimmer); margin:0 0 8px}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    padding:12px 15px; font:inherit; font-size:.875rem; font-weight:500;
+    color:#1a1408; background:var(--gold); border:0; border-radius:11px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover{filter:brightness(1.06)}
+  .btn[disabled]{opacity:.5; cursor:default; filter:none}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:rgba(255,255,255,.24); filter:none}
+  .btn.wide{width:100%}
+  .row{display:flex; gap:9px; flex-wrap:wrap}
+  .row .btn{flex:1; min-width:120px}
+
+  .drop{
+    border:1px dashed rgba(255,255,255,.22); border-radius:14px; padding:22px 16px;
+    text-align:center; color:var(--dim); font-size:.8125rem; line-height:1.5;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .drop:hover{border-color:rgba(232,192,122,.5); color:var(--ink)}
+  .drop b{color:var(--gold); font-weight:500}
+
+  .list{list-style:none; margin:14px 0 0; padding:0; display:grid; gap:8px}
+  .song{
+    display:flex; align-items:center; gap:12px; padding:11px 13px;
+    background:var(--card2); border:1px solid var(--line2); border-radius:12px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .song:hover{border-color:var(--line)}
+  .song.playing{border-color:rgba(232,192,122,.55)}
+  .song .idx{color:var(--dimmer); font-size:.75rem; width:1.2em; text-align:right; flex:none}
+  .song .meta{min-width:0; flex:1}
+  .song .t{margin:0; font-size:.9375rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .song .d{margin:2px 0 0; color:var(--dimmer); font-size:.6875rem}
+  .song.playing .t{color:var(--gold)}
+  .empty{margin:14px 0 0; color:var(--dimmer); font-size:.8125rem}
+  .song .x{
+    flex:none; width:30px; height:30px; margin-left:4px; border-radius:50%;
+    border:1px solid var(--line2); background:transparent; color:var(--dimmer);
+    font:inherit; font-size:.8125rem; line-height:1; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .song .x:hover{color:var(--ink); border-color:rgba(255,255,255,.24)}
+  .song .x.plus{color:var(--gold); border-color:rgba(232,192,122,.35)}
+
+  .now{display:flex; flex-direction:column; gap:12px}
+  .now .title{margin:0; font-family:var(--serif); font-size:1.0625rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .now .artist{margin:2px 0 0; color:var(--dimmer); font-size:.75rem}
+  .seek, .slider{width:100%; -webkit-appearance:none; appearance:none; height:4px; border-radius:999px; background:rgba(255,255,255,.14); outline:none; margin:6px 0 0}
+  .seek::-webkit-slider-thumb, .slider::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--gold); cursor:pointer}
+  .seek::-moz-range-thumb, .slider::-moz-range-thumb{width:16px; height:16px; border:0; border-radius:50%; background:var(--gold); cursor:pointer}
+  .times{display:flex; justify-content:space-between; color:var(--dimmer); font-size:.6875rem; margin-top:4px}
+  .controls{display:flex; align-items:center; justify-content:center; gap:22px; margin-top:2px}
+  .round{
+    width:54px; height:54px; border-radius:50%; border:0; background:var(--gold); color:#1a1408;
+    font-size:1.25rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .round.small{width:40px; height:40px; font-size:.9375rem; background:var(--card2); color:var(--ink); border:1px solid var(--line)}
+  .round.small:hover{border-color:rgba(255,255,255,.24)}
+  .round[disabled]{opacity:.45; cursor:default}
+
+  label.f{display:block; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer); margin:0 0 7px}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; margin:0 0 13px; padding:11px 12px; font:inherit; font-size:.9375rem;
+    color:var(--ink); background:rgba(0,0,0,.28);
+    border:1px solid var(--line); border-radius:11px; outline:none;
+  }
+  input:focus, select:focus, textarea:focus{border-color:rgba(232,192,122,.55)}
+  select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%); background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%; background-size:5px 5px,5px 5px; background-repeat:no-repeat}
+  .two{display:flex; gap:10px}
+  .two > *{flex:1}
+  .val{color:var(--gold); font-size:.75rem; letter-spacing:.04em}
+  .note{margin:12px 0 0; color:var(--dimmer); font-size:.75rem; line-height:1.6}
+  .status{margin:10px 0 0; font-size:.8125rem; line-height:1.5; min-height:1.2em; color:var(--teal)}
+  .status.err{color:var(--rose)}
+  canvas.preview{width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:#000; display:block}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 13px}
+  .chip{
+    padding:7px 12px; border-radius:999px; border:1px solid var(--line); background:transparent;
+    color:var(--dim); font:inherit; font-size:.75rem; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .chip:hover{color:var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--card2); color:var(--ink); border-color:rgba(232,192,122,.45)}
+  footer{margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="/app"><span aria-hidden="true">←</span> The app</a>
+
+  <header>
+    <h1>The Music</h1>
+    <p class="sub">Play the songs on this phone, cut a ringtone out of one, and make a cover picture for it. Nothing leaves the phone, and the songs are kept here for next time.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-player" aria-selected="true" aria-controls="panel-player">Player</button>
+    <button class="tab" role="tab" id="tab-ringtone" aria-selected="false" aria-controls="panel-ringtone">Ringtone</button>
+    <button class="tab" role="tab" id="tab-thumb" aria-selected="false" aria-controls="panel-thumb">Cover</button>
+  </div>
+
+  <!-- ───────────────────────── PLAYER ───────────────────────── -->
+  <section class="panel" id="panel-player" role="tabpanel" aria-labelledby="tab-player">
+    <div class="card">
+      <p class="kicker">From this phone</p>
+      <h2>Add your songs</h2>
+      <p class="hint">Pick audio files from the phone. They play here, they are never uploaded anywhere, and the list stays here so it is waiting next time.</p>
+      <label class="drop" for="audioInput">Tap to choose songs <b>(mp3, m4a, wav, ogg…)</b></label>
+      <input type="file" id="audioInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac" multiple hidden>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost wide" id="scanBtn" type="button">Scan for new music</button>
+      </div>
+      <ul class="list" id="playlist"></ul>
+      <p class="empty" id="emptyList">No songs added yet.</p>
+      <div class="row" id="keepRow" hidden>
+        <button class="btn ghost" id="forgetBtn" type="button">Remove all from this phone</button>
+      </div>
+      <p class="status" id="playerStatus" role="status" aria-live="polite"></p>
+      <p class="note">The songs are kept inside this phone's browser, so they are still here next time you open the page. That uses space on the phone — the ✕ takes any one back off.</p>
+    </div>
+
+    <div class="card">
+      <p class="kicker">Your own lists</p>
+      <h2>Playlists</h2>
+      <p class="hint">Name a list, tap it, then tap <b>+</b> on any song to put it in. The same song can go in as many times as you like — it plays every time it comes round.</p>
+      <div class="chips" id="listChips"></div>
+      <div class="two">
+        <input type="text" id="listName" placeholder="Name a new playlist" maxlength="30" style="margin-bottom:0">
+        <button class="btn" id="makeList" type="button">Make it</button>
+      </div>
+      <div class="row" id="listRow" style="margin-top:12px" hidden>
+        <button class="btn ghost" id="delList" type="button">Delete this list</button>
+      </div>
+      <p class="status" id="listStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="card">
+      <p class="kicker">The meditation room</p>
+      <h2 id="roomTitle">Eleven to settle to</h2>
+      <p class="hint">The room's own music, already here — rain, ocean, a fire in a storm, and eight more. Tap one and it plays in the player below with everything else.</p>
+      <ul class="list" id="roomList"></ul>
+      <p class="status" id="roomStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="card" id="nowCard" hidden>
+      <div class="now">
+        <div>
+          <p class="title" id="nowTitle">—</p>
+          <p class="artist" id="nowMeta"></p>
+        </div>
+        <input type="range" class="seek" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek">
+        <div class="times"><span id="tText">0:00</span><span id="dText">0:00</span></div>
+        <div class="controls">
+          <button class="round small" id="prev" aria-label="Previous">⏮</button>
+          <button class="round" id="playBtn" aria-label="Play">▶</button>
+          <button class="round small" id="next" aria-label="Next">⏭</button>
+        </div>
+      </div>
+      <p class="note" id="playerNote"></p>
+    </div>
+
+    <div class="card">
+      <p class="kicker">Going from one song to the next</p>
+      <h2>Fade between them</h2>
+      <p class="hint">Fade the end of a song into the start of the next one so it does not jump. Off means the next song starts the moment this one ends. The choice is kept on the phone.</p>
+      <div class="chips" id="fadeChips">
+        <button class="chip" data-fade="0" type="button" aria-pressed="true">Off</button>
+        <button class="chip" data-fade="3" type="button" aria-pressed="false">3 sec</button>
+        <button class="chip" data-fade="5" type="button" aria-pressed="false">5 sec</button>
+        <button class="chip" data-fade="10" type="button" aria-pressed="false">10 sec</button>
+      </div>
+      <p class="status" id="fadeStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── RINGTONE ───────────────────────── -->
+  <section class="panel" id="panel-ringtone" role="tabpanel" aria-labelledby="tab-ringtone" hidden>
+    <div class="card">
+      <p class="kicker">Cut one out</p>
+      <h2>Ringtone maker</h2>
+      <p class="hint">Choose a song, drag the two handles to the part you want, listen to it, then save the clip. A ringtone sounds best at 15–30 seconds.</p>
+
+      <label class="f" for="ringtoneSelect">Song</label>
+      <select id="ringtoneSelect"><option value="">No songs added yet</option></select>
+
+      <label class="f" for="ringStart">Start — <span class="val" id="startVal">0:00</span></label>
+      <input type="range" class="slider" id="ringStart" min="0" max="100" value="0" step="0.1">
+
+      <label class="f" for="ringEnd">End — <span class="val" id="endVal">0:00</span></label>
+      <input type="range" class="slider" id="ringEnd" min="0" max="100" value="100" step="0.1">
+
+      <div class="chips" id="lenChips">
+        <button class="chip" data-len="15" type="button">15s</button>
+        <button class="chip" data-len="20" type="button">20s</button>
+        <button class="chip" data-len="30" type="button">30s</button>
+        <button class="chip" data-len="40" type="button">40s</button>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="previewBtn" type="button" disabled>▶ Listen</button>
+        <button class="btn" id="saveBtn" type="button" disabled>Save ringtone</button>
+      </div>
+      <p class="status" id="ringStatus" role="status" aria-live="polite"></p>
+      <p class="note">Saves a WAV file of the clip. On an Android phone you can set it as your ringtone from the file. On an iPhone it needs to be an .m4r in the Ringtone folder, so keep it as a sound for now.</p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── COVER / THUMBNAIL ───────────────────────── -->
+  <section class="panel" id="panel-thumb" role="tabpanel" aria-labelledby="tab-thumb" hidden>
+    <div class="card">
+      <p class="kicker">Make a picture</p>
+      <h2>Cover &amp; thumbnail maker</h2>
+      <p class="hint">A picture for the song — as a square, a wide YouTube image, or a tall story. Your own photo behind it, your words on top.</p>
+
+      <canvas class="preview" id="thumbCanvas" width="1080" height="1080"></canvas>
+
+      <p class="kicker" style="margin-top:16px">Shape</p>
+      <div class="chips" id="sizeChips">
+        <button class="chip" data-size="square" type="button" aria-pressed="true">Square 1:1</button>
+        <button class="chip" data-size="wide" type="button" aria-pressed="false">Wide 16:9</button>
+        <button class="chip" data-size="tall" type="button" aria-pressed="false">Tall 9:16</button>
+      </div>
+
+      <label class="f" for="thumbPhoto">Background photo (optional)</label>
+      <label class="drop" for="thumbPhoto" id="photoDrop">Tap to choose a picture <b>(jpg, png, webp)</b></label>
+      <input type="file" id="thumbPhoto" accept="image/*" hidden>
+
+      <p class="kicker" style="margin-top:16px">Backdrop</p>
+      <div class="chips" id="toneChips">
+        <button class="chip" data-tone="night" type="button" aria-pressed="true">Night</button>
+        <button class="chip" data-tone="dusk" type="button" aria-pressed="false">Dusk</button>
+        <button class="chip" data-tone="sea" type="button" aria-pressed="false">Sea</button>
+        <button class="chip" data-tone="plain" type="button" aria-pressed="false">Black</button>
+      </div>
+
+      <label class="f" for="thumbTitle">Title</label>
+      <input type="text" id="thumbTitle" value="" placeholder="Song title" maxlength="60">
+
+      <label class="f" for="thumbSub">Line under it</label>
+      <input type="text" id="thumbSub" value="" placeholder="Artist · album · year" maxlength="80">
+
+      <div class="two">
+        <div>
+          <label class="f" for="thumbPos">Words sit</label>
+          <select id="thumbPos">
+            <option value="bottom">At the bottom</option>
+            <option value="center">In the middle</option>
+            <option value="top">At the top</option>
+          </select>
+        </div>
+        <div>
+          <label class="f" for="thumbSize">Title size</label>
+          <select id="thumbSize">
+            <option value="0.09">Small</option>
+            <option value="0.12" selected>Medium</option>
+            <option value="0.16">Large</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="useNow" type="button">Use playing song</button>
+        <button class="btn" id="saveThumb" type="button">Save picture</button>
+      </div>
+      <p class="status" id="thumbStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <footer>Everything here runs on this phone. The songs and pictures are not uploaded, and the songs are kept on the phone so they are here next time.</footer>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+<audio id="xfade" preload="none"></audio>
+<audio id="preview" preload="none"></audio>
+
+<script>
+(function(){
+  'use strict';
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  // Every song the page knows about lives here:
+  //   { key, name, meta, url, file, duration, added }
+  // The object URLs point at files on this phone and nothing is ever sent to a
+  // server. The file is also copied into the phone's own browser storage (just
+  // below) so the list survives a reload. It used to be memory only, and a
+  // reload dropped every song, which made the page look like it had lost them.
+  var songs = [];
+  var kept = {};         // key -> true, so one file is never stored twice
+  var current = -1;      // index into songs
+  var roomIndex = -1;    // index into ROOM, the meditation room's own tracks
+  var ringIndex = -1;    // index the ringtone tab is working on
+  var ringBuffer = null; // decoded AudioBuffer for that song
+
+  // The meditation room (5 Oct 2026). These are the app's own tracks, served
+  // from /audio/meditation/, so there is nothing to choose and nothing is kept
+  // on the phone — one tap and it plays. They are listed here rather than in
+  // the songs list because they are not the person's files: they have no ✕ and
+  // "remove all" does not touch them.
+  var ROOM = [
+    ['rain', 'Rain'],
+    ['ocean', 'Ocean'],
+    ['night', 'Night'],
+    ['night-fade', 'Night Fade'],
+    ['cozy-storm', 'Cozy Storm'],
+    ['deep-focus', 'Deep Focus'],
+    ['himalayan-still', 'Himalayan Still'],
+    ['still-waters', 'Still Waters'],
+    ['midnight-lullaby', 'Midnight Lullaby'],
+    ['fading-into-the-night', 'Fading Into the Night'],
+    ['whispers-in-the-forest', 'Whispers in the Forest'],
+  ].map(function(t){ return { name: t[1], url: '/audio/meditation/' + t[0] + '.mp3', file: t[0] + '.mp3' }; });
+
+  var audio = $('audio');
+  var preview = $('preview');
+
+  // ── helpers ───────────────────────────────────────────────────────────────
+  function fmt(sec){
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function baseName(name){
+    return String(name || '').replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Song';
+  }
+  function safeName(name){
+    return String(name || 'song').replace(/[^a-z0-9\-_ ]/gi, '').trim().replace(/\s+/g, '-').toLowerCase() || 'song';
+  }
+  function download(blob, filename){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+  function say(el, text, isErr){
+    el.textContent = text || '';
+    el.className = 'status' + (isErr ? ' err' : '');
+  }
+
+  // ── keeping the songs on the phone ────────────────────────────────────────
+  // A reload used to lose the list because a song was only an object URL
+  // pointing at a file the person had picked. The file is now copied into the
+  // browser's own storage on the phone as well. It is still on the device and
+  // still never uploaded; it just means the songs are waiting next time.
+  var DB_NAME = 'tsid-music';
+  var dbPromise = null;
+
+  function openDb(){
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function(resolve, reject){
+      if (!window.indexedDB) { reject(new Error('no store')); return; }
+      var req = window.indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function(){
+        var db = req.result;
+        if (!db.objectStoreNames.contains('songs')) db.createObjectStore('songs', { keyPath: 'key' });
+        if (!db.objectStoreNames.contains('info')) db.createObjectStore('info', { keyPath: 'key' });
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error || new Error('no store')); };
+    });
+    return dbPromise;
+  }
+
+  function dbPut(store, record){
+    return openDb().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(store, 'readwrite');
+        tx.objectStore(store).put(record);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ reject(tx.error || new Error('write')); };
+        tx.onabort = function(){ reject(tx.error || new Error('write')); };
+      });
+    });
+  }
+
+  function dbAll(store){
+    return openDb().then(function(db){
+      return new Promise(function(resolve, reject){
+        var out = [];
+        var req = db.transaction(store, 'readonly').objectStore(store).openCursor();
+        req.onsuccess = function(){
+          var cursor = req.result;
+          if (cursor) { out.push(cursor.value); cursor.continue(); } else resolve(out);
+        };
+        req.onerror = function(){ reject(req.error || new Error('read')); };
+      });
+    });
+  }
+
+  function dbGet(store, key){
+    return openDb().then(function(db){
+      return new Promise(function(resolve, reject){
+        var req = db.transaction(store, 'readonly').objectStore(store).get(key);
+        req.onsuccess = function(){ resolve(req.result || null); };
+        req.onerror = function(){ reject(req.error || new Error('read')); };
+      });
+    });
+  }
+
+  function dbDrop(key){
+    return openDb().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(['songs', 'info'], 'readwrite');
+        tx.objectStore('songs').delete(key);
+        tx.objectStore('info').delete(key);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ resolve(); };
+      });
+    }).catch(function(){ /* nothing was ever kept */ });
+  }
+
+  function dbDropAll(){
+    return openDb().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(['songs', 'info'], 'readwrite');
+        tx.objectStore('songs').clear();
+        tx.objectStore('info').clear();
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ resolve(); };
+      });
+    }).catch(function(){ /* nothing was ever kept */ });
+  }
+
+  function keepSong(entry){
+    if (!entry || !entry.file) return;
+    dbPut('songs', {
+      key: entry.key,
+      name: entry.name,
+      meta: entry.meta,
+      type: entry.file.type || '',
+      blob: entry.file,
+      added: entry.added || Date.now(),
+    }).catch(function(){
+      say($('playerStatus'), 'This phone would not keep the songs (the storage may be full, or the browser is in a private window). They still play now.', true);
+    });
+  }
+
+  function restoreSongs(){
+    if (!window.indexedDB) { listsResolved = true; return; }
+    Promise.all([dbAll('songs'), dbAll('info')]).then(function(parts){
+      var lengths = {};
+      parts[1].forEach(function(r){ if (r && r.key) lengths[r.key] = r.duration || 0; });
+      parts[0].sort(function(a, b){ return (a.added || 0) - (b.added || 0); }).forEach(function(r){
+        if (!r || !r.blob || kept[r.key]) return;
+        kept[r.key] = true;
+        songs.push({
+          key: r.key,
+          name: r.name || baseName(r.meta),
+          meta: r.meta || 'Kept on this phone',
+          url: URL.createObjectURL(r.blob),
+          file: r.blob,
+          duration: lengths[r.key] || 0,
+          added: r.added || 0,
+        });
+      });
+      // The playlists can only be pointed at real songs once those songs are
+      // back, so they are resolved here and never before.
+      resolveLists();
+      listsResolved = true;
+      renderPlaylist();
+      renderRingtoneOptions();
+      if (songs.length) {
+        selectSong(0, false);
+        say($('playerStatus'), songs.length + (songs.length === 1 ? ' song kept on this phone.' : ' songs kept on this phone.'));
+      }
+    }).catch(function(){ /* nothing kept yet, or this browser will not keep them */ });
+  }
+
+  // ── playlists ─────────────────────────────────────────────────────────────────
+  // 7 Oct 2026, Jacques: "add the option to make playlist and the option to add
+  // a song again like a filter so i want add the same songs".
+  //
+  // A playlist is a NAME plus an ORDER OF KEYS, and the same key can sit in it
+  // as many times as he likes — one song, played three times round, is a
+  // playlist like any other. The songs themselves live in the library (and in
+  // the phone's own storage) exactly once; a list is only a pointer at them.
+  //
+  // The list on screen is either All songs (the library) or one playlist, and
+  // it is what the player steps through — view() is the single answer to "what
+  // is playing from": the list, Next, the cross-fade and the cover maker all
+  // ask it rather than each keeping their own idea.
+  var lists = [];          // [{ name, items:[song, …] }] — a song may repeat
+  var viewList = -1;       // what the screen shows: -1 = All songs, else a playlist
+  var listDefs = [];       // the raw form it is kept in: [{ name, keys:[…] }]
+  var LISTS_KEY = 'tsid-music-lists';
+  // False until the songs are back from storage. Writing a list before that
+  // would replace its kept keys with nothing and lose it for good, so no save
+  // happens until resolveLists has had the real songs to point at.
+  var listsResolved = false;
+
+  // What the player plays from: one playlist, or everything on the phone.
+  function view(){
+    return (viewList >= 0 && lists[viewList]) ? lists[viewList].items : songs;
+  }
+  function songByKey(key){
+    for (var i = 0; i < songs.length; i++) if (songs[i].key === key) return songs[i];
+    return null;
+  }
+
+  function loadListDefs(){
+    try {
+      var raw = window.localStorage.getItem(LISTS_KEY);
+      listDefs = raw ? (JSON.parse(raw) || []) : [];
+    } catch(e){ listDefs = []; }
+    if (!Array.isArray(listDefs)) listDefs = [];
+  }
+
+  // Point every key at the song it names. A key with no song behind it (the
+  // song was taken off the phone) drops out of the list — a pointer at nothing
+  // would be a row that never plays.
+  function resolveLists(){
+    var out = [];
+    listDefs.forEach(function(d){
+      if (!d) return;
+      var items = [];
+      (Array.isArray(d.keys) ? d.keys : []).forEach(function(k){
+        var s = songByKey(k);
+        if (s) items.push(s);
+      });
+      out.push({ name: String(d.name || 'List'), items: items });
+    });
+    lists = out;
+    if (viewList >= lists.length) viewList = -1;
+    renderListChips();
+    renderPlaylist();
+  }
+
+  function saveLists(){
+    if (!listsResolved) return;
+    listDefs = lists.map(function(l){
+      return { name: l.name, keys: l.items.map(function(s){ return s.key; }) };
+    });
+    try { window.localStorage.setItem(LISTS_KEY, JSON.stringify(listDefs)); } catch(e){ /* private window */ }
+  }
+
+  function makeList(name){
+    name = String(name || '').trim();
+    if (!name) return 'Give the list a name first.';
+    for (var i = 0; i < lists.length; i++){
+      if (lists[i].name.toLowerCase() === name.toLowerCase()) return 'You already have a list called that.';
+    }
+    lists.push({ name: name, items: [] });
+    saveLists();
+    renderListChips();
+    return null;
+  }
+
+  function deleteList(i){
+    if (!lists[i]) return;
+    lists.splice(i, 1);
+    if (viewList === i) viewList = -1;
+    else if (viewList > i) viewList--;
+    saveLists();
+    renderListChips();
+    renderPlaylist();
+  }
+
+  // The heart of the request: the same song goes in again and again, and every
+  // copy plays when its turn comes round.
+  function addToList(song){
+    if (viewList < 0 || !lists[viewList]) return 'Tap a playlist below first, then tap + to add songs to it.';
+    lists[viewList].items.push(song);
+    saveLists();
+    renderPlaylist();
+    return null;
+  }
+
+  function takeOutOfList(at){
+    if (viewList < 0 || !lists[viewList]) return;
+    lists[viewList].items.splice(at, 1);
+    if (at < current) current--;
+    if (current >= lists[viewList].items.length) current = lists[viewList].items.length - 1;
+    saveLists();
+    renderPlaylist();
+  }
+
+  // A song taken off the phone leaves every list with it — a list entry points
+  // at the song, and the song is what was deleted.
+  function dropSongFromLists(song){
+    var touched = false;
+    lists.forEach(function(l){
+      var stays = [];
+      l.items.forEach(function(s){ if (s !== song) stays.push(s); else touched = true; });
+      l.items = stays;
+    });
+    if (touched) saveLists();
+  }
+
+  function setView(i){
+    if (i === viewList || (i >= 0 && !lists[i])) return;
+    var playing = (roomIndex < 0 && current >= 0) ? view()[current] : null;
+    // The song fading in as the next one was aimed at the old list.
+    if (typeof crossStop === 'function') crossStop();
+    viewList = i;
+    var arr = view();
+    current = playing ? arr.indexOf(playing) : -1;
+    renderListChips();
+    renderPlaylist();
+    say($('listStatus'), viewList < 0
+      ? 'Showing all your songs.'
+      : 'Now showing “' + lists[viewList].name + '” — tap + on songs to add them.');
+  }
+
+  function addToPlaylist(song){
+    var err = addToList(song);
+    if (err) { say($('listStatus'), err, true); return; }
+    say($('listStatus'), 'Added ' + song.name + ' to ' + lists[viewList].name + '.');
+  }
+
+  // ── tabs ──────────────────────────────────────────────────────────────────
+  var tabs = [
+    ['tab-player', 'panel-player'],
+    ['tab-ringtone', 'panel-ringtone'],
+    ['tab-thumb', 'panel-thumb'],
+  ];
+  tabs.forEach(function(pair){
+    $(pair[0]).addEventListener('click', function(){
+      tabs.forEach(function(other){
+        var on = other[0] === pair[0];
+        $(other[0]).setAttribute('aria-selected', on ? 'true' : 'false');
+        $(other[1]).hidden = !on;
+      });
+      if (pair[0] === 'tab-thumb') drawThumb();
+    });
+  });
+
+  // ── adding songs ──────────────────────────────────────────────────────────
+  var audioInput = $('audioInput');
+  audioInput.addEventListener('change', function(){
+    var files = Array.prototype.slice.call(audioInput.files || []);
+    addFiles(files);
+    audioInput.value = '';
+  });
+
+  // The name plus the size plus when it was last changed is enough to tell one
+  // file from another, so adding the same song twice does not store it twice.
+  function fileKey(file){
+    return String(file.name || 'song') + '|' + (file.size || 0) + '|' + (file.lastModified || 0);
+  }
+
+  function addFiles(files){
+    var added = 0;
+    var already = 0;
+    var stamp = Date.now();
+    files.forEach(function(file, i){
+      if (!file) return;
+      var looksAudio = /^audio\//.test(file.type || '') || /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i.test(file.name);
+      if (!looksAudio) return;
+      var key = fileKey(file);
+      if (kept[key]) { already++; return; }
+      kept[key] = true;
+      var entry = {
+        key: key,
+        name: baseName(file.name),
+        meta: file.name,
+        url: URL.createObjectURL(file),
+        file: file,
+        duration: 0,
+        added: stamp + i,
+      };
+      // Read the length in the background so the list can show it without
+      // holding the song up. Some phones report Infinity for a streamed m4a,
+      // which is why it is checked rather than trusted.
+      readDuration(entry);
+      songs.push(entry);
+      keepSong(entry);
+      added++;
+    });
+    if (!added){
+      if (already) say($('playerStatus'), 'Those songs are already in the list.');
+      else say($('playerStatus'), 'Those files are not audio this phone can play.', true);
+      return;
+    }
+    var msg = added + (added === 1 ? ' song added.' : ' songs added.');
+    if (already) msg += ' ' + already + (already === 1 ? ' was already here.' : ' were already here.');
+    if (viewList >= 0) msg += ' They are in All songs — tap that to see them.';
+    say($('playerStatus'), msg);
+    renderPlaylist();
+    renderRingtoneOptions();
+    if (current < 0) selectSong(0, false);
+  }
+
+  function readDuration(entry){
+    var probe = document.createElement('audio');
+    probe.preload = 'metadata';
+    probe.src = entry.url;
+    probe.addEventListener('loadedmetadata', function(){
+      if (isFinite(probe.duration) && probe.duration > 0) {
+        entry.duration = probe.duration;
+        // Only the length is written back - the song itself is already kept.
+        dbPut('info', { key: entry.key, duration: entry.duration }).catch(function(){});
+      }
+      renderPlaylist();
+      renderRingtoneOptions();
+      if (entry === songs[ringIndex]) syncRingtoneRange();
+    });
+    probe.addEventListener('error', function(){ /* leave the length blank */ });
+  }
+
+  function renderPlaylist(){
+    var arr = view();
+    var list = $('playlist');
+    list.innerHTML = '';
+    $('emptyList').hidden = arr.length > 0;
+    if (!arr.length) {
+      $('emptyList').textContent = viewList < 0
+        ? 'No songs added yet.'
+        : 'This list is empty — tap + on a song to put it in.';
+    }
+    arr.forEach(function(s, i){
+      var li = document.createElement('li');
+      li.className = 'song' + (i === current && roomIndex < 0 ? ' playing' : '');
+
+      var idx = document.createElement('span');
+      idx.className = 'idx';
+      idx.textContent = (i === current && roomIndex < 0) ? '▶' : String(i + 1);
+
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var t = document.createElement('p');
+      t.className = 't';
+      t.textContent = s.name;
+      var d = document.createElement('p');
+      d.className = 'd';
+      d.textContent = s.duration ? fmt(s.duration) : s.meta;
+      meta.appendChild(t);
+      meta.appendChild(d);
+
+      // + puts this song in the list showing. The same song may already be in
+      // it — that is the point of it, so there is no check to pass.
+      var plus = document.createElement('button');
+      plus.type = 'button';
+      plus.className = 'x plus';
+      plus.setAttribute('aria-label', 'Add ' + s.name + ' to a playlist');
+      plus.textContent = '+';
+      plus.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        addToPlaylist(s);
+      });
+
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'x';
+      x.setAttribute('aria-label', viewList < 0
+        ? 'Remove ' + s.name + ' from this phone'
+        : 'Take ' + s.name + ' out of this list');
+      x.textContent = '✕';
+      x.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        removeSong(i);
+      });
+
+      li.appendChild(idx);
+      li.appendChild(meta);
+      li.appendChild(plus);
+      li.appendChild(x);
+      li.addEventListener('click', function(){ selectSong(i, true); });
+      list.appendChild(li);
+    });
+    $('keepRow').hidden = songs.length === 0 || viewList >= 0;
+  }
+
+  // The row of lists above the playlists card: All songs is always first, and
+  // whichever one is lit is what the list below is showing.
+  function renderListChips(){
+    var row = $('listChips');
+    if (!row) return;
+    row.innerHTML = '';
+    var opts = [{ i: -1, name: 'All songs' }];
+    lists.forEach(function(l, i){ opts.push({ i: i, name: l.name }); });
+    opts.forEach(function(o){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = o.name;
+      b.setAttribute('aria-pressed', o.i === viewList ? 'true' : 'false');
+      b.addEventListener('click', function(){ setView(o.i); });
+      row.appendChild(b);
+    });
+    var del = $('listRow');
+    if (del) del.hidden = viewList < 0;
+  }
+
+  // ── the meditation room ───────────────────────────────────────────────────
+  function renderRoom(){
+    var list = $('roomList');
+    list.innerHTML = '';
+    ROOM.forEach(function(t, i){
+      var li = document.createElement('li');
+      li.className = 'song' + (i === roomIndex ? ' playing' : '');
+
+      var idx = document.createElement('span');
+      idx.className = 'idx';
+      idx.textContent = i === roomIndex ? '▶' : String(i + 1);
+
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var n = document.createElement('p');
+      n.className = 't';
+      n.textContent = t.name;
+      var d = document.createElement('p');
+      d.className = 'd';
+      d.textContent = 'The meditation room';
+      meta.appendChild(n);
+      meta.appendChild(d);
+
+      li.appendChild(idx);
+      li.appendChild(meta);
+      li.addEventListener('click', function(){ playRoom(i); });
+      list.appendChild(li);
+    });
+  }
+
+  function playRoom(i){
+    if (!(i >= 0) || !ROOM[i]) return;
+    // A room track and a chosen song are never both "on": the player is one.
+    current = -1;
+    roomIndex = i;
+    if (typeof crossStop === 'function') crossStop();
+    var t = ROOM[i];
+    audio.src = t.url;
+    $('nowCard').hidden = false;
+    $('nowTitle').textContent = t.name;
+    $('nowMeta').textContent = 'The meditation room';
+    $('playerNote').textContent = '';
+    audio.play().catch(function(){
+      say($('roomStatus'), 'The phone would not start it. Turn the sound up and tap once more.', true);
+    });
+    renderRoom();
+    renderPlaylist();
+  }
+
+  function removeSong(i){
+    // One row out of one list — the song itself stays on the phone.
+    if (viewList >= 0) {
+      var listName = lists[viewList] ? lists[viewList].name : 'the list';
+      if (typeof crossStop === 'function') crossStop();
+      takeOutOfList(i);
+      say($('playerStatus'), 'Taken out of ' + listName + '. The song is still on the phone.');
+      return;
+    }
+    var s = songs[i];
+    if (!s) return;
+    if (typeof crossStop === 'function') crossStop();
+    if (i === current) {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      current = -1;
+      $('nowCard').hidden = true;
+    } else if (i < current) {
+      current--;
+    }
+    if (i === ringIndex) {
+      preview.pause();
+      preview.removeAttribute('src');
+      ringIndex = -1;
+      ringBuffer = null;
+    }
+    URL.revokeObjectURL(s.url);
+    delete kept[s.key];
+    songs.splice(i, 1);
+    dropSongFromLists(s);
+    dbDrop(s.key);
+    renderPlaylist();
+    renderRingtoneOptions();
+    say($('playerStatus'), 'Removed from this phone.');
+  }
+
+  $('forgetBtn').addEventListener('click', function(){
+    if (!songs.length) return;
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+    preview.pause();
+    preview.removeAttribute('src');
+    songs.forEach(function(s){ URL.revokeObjectURL(s.url); });
+    songs = [];
+    kept = {};
+    current = -1;
+    roomIndex = -1;
+    ringIndex = -1;
+    ringBuffer = null;
+    // The lists were only pointing at those songs, so they go too — an empty
+    // "All songs" with three playlists full of nothing would look broken.
+    lists = [];
+    listDefs = [];
+    viewList = -1;
+    listsResolved = true;
+    if (typeof crossStop === 'function') crossStop();
+    $('nowCard').hidden = true;
+    dbDropAll();
+    saveLists();
+    renderListChips();
+    renderPlaylist();
+    renderRingtoneOptions();
+    say($('playerStatus'), 'All songs removed from this phone.');
+  });
+
+  // ── player ────────────────────────────────────────────────────────────────
+  function selectSong(i, play){
+    if (i < 0 || i >= view().length) return;
+    var s = view()[i];
+    current = i;
+    roomIndex = -1;
+    if (typeof crossStop === 'function') crossStop();
+    audio.src = s.url;
+    $('nowCard').hidden = false;
+    $('nowTitle').textContent = s.name;
+    $('nowMeta').textContent = s.meta;
+    $('playerNote').textContent = '';
+    if (play) {
+      audio.play().catch(function(){
+        say($('playerStatus'), 'The phone would not start the song. Tap play once more.', true);
+      });
+    }
+    renderPlaylist();
+  }
+
+  $('playBtn').addEventListener('click', function(){
+    if (current < 0 && roomIndex < 0 && view().length) selectSong(0, false);
+    if (audio.paused) audio.play().catch(function(){});
+    else audio.pause();
+  });
+  $('prev').addEventListener('click', function(){ step(-1); });
+  $('next').addEventListener('click', function(){ step(1); });
+  function step(dir){
+    // Whichever list is playing is the list that steps.
+    if (roomIndex >= 0) { playRoom((roomIndex + dir + ROOM.length) % ROOM.length); return; }
+    var arr = view();
+    if (!arr.length) return;
+    var n = current + dir;
+    if (n < 0) n = arr.length - 1;
+    if (n >= arr.length) n = 0;
+    selectSong(n, true);
+  }
+
+  // What comes after the song playing — asked by Next and by the cross-fade,
+  // which needs to know what it is bringing up before the song ends.
+  function nextTrack(){
+    if (roomIndex >= 0) return ROOM.length > 1 ? ROOM[(roomIndex + 1) % ROOM.length] : null;
+    var arr = view();
+    if (arr.length < 2 || current < 0) return null;
+    var n = current + 1;
+    if (n >= arr.length) n = 0;
+    return arr[n] || null;
+  }
+
+  // The cross-fade hands over mid-song, so the player is told which track is
+  // now playing without anything being started or stopped.
+  function advanceIndex(){
+    if (roomIndex >= 0) roomIndex = (roomIndex + 1) % ROOM.length;
+    else {
+      var arr = view();
+      if (arr.length) { current++; if (current >= arr.length) current = 0; }
+    }
+    var t = roomIndex >= 0 ? ROOM[roomIndex] : view()[current];
+    if (t) {
+      $('nowTitle').textContent = t.name;
+      $('nowMeta').textContent = roomIndex >= 0 ? 'The meditation room' : t.meta;
+      $('playerNote').textContent = '';
+    }
+  }
+
+  // Both <audio> elements carry every listener, and each one checks it is the
+  // element actually playing before it touches anything: the other is only ever
+  // the next song coming up, and its timeupdate must not move the seek bar.
+  var onPlay, onPause, onEnded;
+  audio.addEventListener('play', onPlay = function(){ if (this !== audio) return; startFade(); $('playBtn').textContent = '❚❚'; });
+  audio.addEventListener('pause', onPause = function(){ if (this !== audio) return; $('playBtn').textContent = '▶'; stopFade(); if (!audio.ended) crossStop(); if (!fadeSec) audio.volume = 1; syncGain(); });
+  audio.addEventListener('ended', onEnded = function(){ if (this !== audio) return; if (crossOn) { if (!crossSwap()) step(1); } else if (roomIndex >= 0 ? ROOM.length > 1 : view().length > 1) step(1); else { stopFade(); audio.volume = 1; } syncGain(); });
+
+  function onMeta(){ if (this !== audio) return; $('dText').textContent = fmt(audio.duration); }
+  function onTick(){
+    if (this !== audio) return;
+    var d = audio.duration;
+    if (isFinite(d) && d > 0) $('seek').value = String(Math.round(audio.currentTime / d * 1000));
+    $('tText').textContent = fmt(audio.currentTime);
+  }
+  function onMediaError(){
+    // The next song failing to load must not kill the music: drop the fade that
+    // was being built and let the song playing end the normal way.
+    if (this !== audio) { if (crossOn) crossStop(); return; }
+    if (current >= 0 || roomIndex >= 0) $('playerNote').textContent = 'This file would not play here. Some phones only play music bought on them.';
+  }
+  function bindPlayer(el){
+    if (!el || el === audio) return;
+    el.addEventListener('play', onPlay);
+    el.addEventListener('pause', onPause);
+    el.addEventListener('ended', onEnded);
+    el.addEventListener('loadedmetadata', onMeta);
+    el.addEventListener('timeupdate', onTick);
+    el.addEventListener('error', onMediaError);
+  }
+  bindPlayer($('xfade'));
+  audio.addEventListener('loadedmetadata', onMeta);
+  audio.addEventListener('timeupdate', onTick);
+  audio.addEventListener('error', onMediaError);
+  $('seek').addEventListener('input', function(){
+    var d = audio.duration;
+    if (isFinite(d) && d > 0) audio.currentTime = Number($('seek').value) / 1000 * d;
+  });
+
+  // ── fade between songs ────────────────────────────────────────────────────
+  // 5 Oct 2026, rebuilt 7 Oct 2026. There are two <audio> elements now: as the
+  // song playing comes down, the next one comes up on the other element, so the
+  // join is a real cross-fade with no silence in the middle. The one-element
+  // version had to go all the way to silence and start the next song from
+  // nothing, which heard as a dead patch in the middle of the music.
+  //
+  // A phone that ignores audio.volume (the iPhone) gets the same numbers into
+  // a Web Audio gain instead — made only after a real tap, and attached only
+  // once the audio engine is actually running, so a browser that refuses it
+  // keeps the old way rather than going silent.
+  //
+  // Off, 3, 5 or 10 seconds, and the choice is kept on the phone.
+  var FADE_KEY = 'tsid-music-fade';
+  var fadeSec = 0;
+  var fadeTimer = null;
+  var crossOn = false;   // the other element has the next song, coming up
+  var crossVol = 0;      // how far up the other element has been brought
+  var gains = {};        // element id -> GainNode, once a Web Audio graph exists
+  var actx = null;
+
+  // The element that is NOT the player — the one the next song is loaded onto.
+  function xfEl(){
+    try { return document.getElementById(audio && audio.id === 'audio' ? 'xfade' : 'audio'); }
+    catch(e){ return null; }
+  }
+
+  function attachGain(el){
+    if (!actx || !el || gains[el.id] || actx.state !== 'running') return;
+    var src;
+    try { src = actx.createMediaElementSource(el); } catch(e){ return; }
+    var g = actx.createGain();
+    g.gain.value = (el === audio ? audio.volume : crossVol);
+    try { el.volume = 1; } catch(e){}
+    src.connect(g);
+    g.connect(actx.destination);
+    gains[el.id] = g;
+  }
+
+  function ensureAudio(){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      if (!actx) actx = new AC();
+      var running = function(){ attachGain(audio); attachGain(xfEl()); };
+      if (actx.state === 'running') running();
+      else if (actx.resume) {
+        var p = actx.resume();
+        if (p && typeof p.then === 'function') p.then(running, function(){});
+      }
+    } catch(e){ actx = null; }
+  }
+
+  // Whatever the fade just worked out for the song playing also goes into the
+  // gain, and with the graph attached the element's own volume is pinned at 1 —
+  // otherwise the two would multiply and the fade would dip twice as fast as
+  // was asked for.
+  function syncGain(){
+    var g = gains[audio && audio.id];
+    if (!g) return;
+    try { g.gain.value = audio.volume; audio.volume = 1; } catch(e){}
+  }
+
+  function setCrossVol(v){
+    if (!(v >= 0)) v = 0; else if (v > 1) v = 1;
+    crossVol = v;
+    var x = xfEl();
+    if (!x) return;
+    var g = gains[x.id];
+    try { if (g) { g.gain.value = v; x.volume = 1; } else x.volume = v; } catch(e){}
+  }
+
+  function crossStop(){
+    if (!crossOn) return;
+    crossOn = false;
+    try {
+      var x = xfEl();
+      if (x) { x.pause(); x.removeAttribute('src'); x.load(); }
+    } catch(e){ /* nothing was under way */ }
+    setCrossVol(0);
+  }
+
+  function crossBegin(){
+    if (crossOn) return;
+    var nx = (typeof nextTrack === 'function') ? nextTrack() : null;
+    if (!nx || !nx.url) return;
+    var x = xfEl();
+    if (!x) return;
+    try {
+      x.src = nx.url;
+      setCrossVol(0);
+      var p = x.play();
+      if (p && typeof p.catch === 'function') p.catch(function(){ crossStop(); });
+      crossOn = true;
+    } catch(e){ crossStop(); }
+  }
+
+  function crossSwap(){
+    // The song playing has just ended with the next one already up to volume on
+    // the other element: hand over rather than starting that song again from 0.
+    var x = xfEl();
+    if (!x) { crossOn = false; return false; }
+    var old = audio;
+    audio = x;
+    crossOn = false;
+    setCrossVol(0);
+    try { old.pause(); old.removeAttribute('src'); old.load(); } catch(e){}
+    try { $('dText').textContent = fmt(audio.duration); } catch(e){}
+    try { $('playBtn').textContent = '❚❚'; } catch(e){}
+    if (typeof advanceIndex === 'function') advanceIndex();
+    startFade();
+    if (typeof renderPlaylist === 'function') renderPlaylist();
+    if (typeof renderRoom === 'function') renderRoom();
+    return true;
+  }
+
+  function fadeTick(){
+    var d = audio.duration;
+    if (!(fadeSec > 0) || !isFinite(d) || d <= 0){ audio.volume = 1; crossStop(); syncGain(); return; }
+    var left = d - audio.currentTime;
+    if (left <= fadeSec) audio.volume = Math.max(0, left / fadeSec);
+    else if (audio.currentTime < fadeSec) audio.volume = Math.min(1, audio.currentTime / fadeSec);
+    else audio.volume = 1;
+    // The other element comes up as this one comes down — one complements the
+    // other exactly, so the two together never dip below the level asked for.
+    if (crossOn) {
+      if (left > fadeSec) crossStop();          // they seeked backwards out of it
+      else setCrossVol(1 - audio.volume);
+    } else if (left > 0 && left <= fadeSec) {
+      crossBegin();
+      if (crossOn) setCrossVol(1 - audio.volume);
+    }
+    syncGain();
+  }
+  function startFade(){
+    if (fadeTimer) return;
+    fadeTimer = setInterval(fadeTick, 80);
+    fadeTick();
+  }
+  function stopFade(){
+    if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
+  }
+
+  var fadeChips = $('fadeChips').querySelectorAll('.chip');
+  function setFade(sec, tell){
+    fadeSec = Number(sec) || 0;
+    Array.prototype.forEach.call(fadeChips, function(c){
+      c.setAttribute('aria-pressed', Number(c.getAttribute('data-fade')) === fadeSec ? 'true' : 'false');
+    });
+    if (!fadeSec){ stopFade(); crossStop(); audio.volume = 1; syncGain(); }
+    else if (!audio.paused) startFade();
+    try { window.localStorage.setItem(FADE_KEY, String(fadeSec)); } catch(e){ /* private window */ }
+    if (tell) say($('fadeStatus'), fadeSec
+      ? 'Fading the end of one song into the start of the next, over ' + fadeSec + ' seconds.'
+      : 'Fade off — the next song starts straight away.');
+  }
+  Array.prototype.forEach.call(fadeChips, function(c){
+    c.addEventListener('click', function(){ setFade(c.getAttribute('data-fade'), true); });
+  });
+  /* The chips are painted from here rather than trusted to the markup, so the
+     setting and the row can never disagree about which one is on. */
+  var startFadeChoice = 0;
+  try {
+    var keptFade = window.localStorage.getItem(FADE_KEY);
+    if (keptFade !== null) startFadeChoice = keptFade;
+  } catch(e){ /* nothing kept, the default stands */ }
+  setFade(startFadeChoice, false);
+
+  // ── ringtone ──────────────────────────────────────────────────────────────
+  function renderRingtoneOptions(){
+    var sel = $('ringtoneSelect');
+    var keep = sel.value;
+    sel.innerHTML = '';
+    if (!songs.length) {
+      var o = document.createElement('option');
+      o.value = '';
+      o.textContent = 'No songs added yet — add some on the Player tab';
+      sel.appendChild(o);
+      setRingEnabled(false);
+      return;
+    }
+    songs.forEach(function(s, i){
+      var opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = s.name + (s.duration ? '  ·  ' + fmt(s.duration) : '');
+      sel.appendChild(opt);
+    });
+    // Keep the person's choice where it still points at a song.
+    if (keep !== '' && songs[Number(keep)]) sel.value = keep;
+    if (sel.value === '') sel.value = String(Math.max(0, current));
+    chooseRingtone(Number(sel.value));
+  }
+
+  function setRingEnabled(on){
+    $('previewBtn').disabled = !on;
+    $('saveBtn').disabled = !on;
+  }
+
+  $('ringtoneSelect').addEventListener('change', function(){
+    chooseRingtone(Number($('ringtoneSelect').value));
+  });
+
+  function chooseRingtone(i){
+    ringBuffer = null;
+    if (!(i >= 0) || !songs[i]) { setRingEnabled(false); return; }
+    ringIndex = i;
+    var s = songs[i];
+    var dur = s.duration || 30;
+    var start = $('ringStart');
+    var end = $('ringEnd');
+    start.max = String(dur);
+    end.max = String(dur);
+    var keepLen = Math.min(30, dur);
+    start.value = '0';
+    end.value = String(keepLen);
+    paintRingLabels();
+    setRingEnabled(true);
+    say($('ringStatus'), 'Ready. Drag the handles to the part you want.');
+  }
+
+  function paintRingLabels(){
+    $('startVal').textContent = fmt(Number($('ringStart').value));
+    $('endVal').textContent = fmt(Number($('ringEnd').value));
+  }
+
+  function syncRingtoneRange(){
+    if (!songs[ringIndex]) return;
+    var dur = songs[ringIndex].duration;
+    if (!dur) return;
+    $('ringStart').max = String(dur);
+    $('ringEnd').max = String(dur);
+    if (Number($('ringEnd').value) > dur) $('ringEnd').value = String(dur);
+    paintRingLabels();
+  }
+
+  $('ringStart').addEventListener('input', function(){
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    if (start > end - 1) { $('ringEnd').value = String(Math.min(start + 1, Number($('ringEnd').max))); }
+    paintRingLabels();
+  });
+  $('ringEnd').addEventListener('input', function(){
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    if (end < start + 1) { $('ringStart').value = String(Math.max(0, end - 1)); }
+    paintRingLabels();
+  });
+
+  Array.prototype.forEach.call($('lenChips').querySelectorAll('.chip'), function(chip){
+    chip.addEventListener('click', function(){
+      var len = Number(chip.getAttribute('data-len'));
+      var start = Number($('ringStart').value);
+      var max = Number($('ringEnd').max);
+      var end = Math.min(start + len, max);
+      if (end - start < 1) { start = Math.max(0, end - len); $('ringStart').value = String(start); }
+      $('ringEnd').value = String(end);
+      paintRingLabels();
+      Array.prototype.forEach.call($('lenChips').querySelectorAll('.chip'), function(c){
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+      });
+    });
+  });
+
+  $('previewBtn').addEventListener('click', function(){
+    if (!songs[ringIndex]) return;
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    preview.src = songs[ringIndex].url;
+    preview.currentTime = start;
+    preview.play().catch(function(){});
+    say($('ringStatus'), 'Listening to ' + fmt(start) + '–' + fmt(end) + '.');
+  });
+  preview.addEventListener('timeupdate', function(){
+    var end = Number($('ringEnd').value);
+    if (preview.currentTime >= end) { preview.pause(); preview.currentTime = Number($('ringStart').value); }
+  });
+
+  $('saveBtn').addEventListener('click', function(){
+    var s = songs[ringIndex];
+    if (!s) return;
+    var start = Number($('ringStart').value);
+    var end = Number($('ringEnd').value);
+    if (!s.file) { say($('ringStatus'), 'That song is no longer available. Add it again.', true); return; }
+    say($('ringStatus'), 'Cutting the clip…');
+    $('saveBtn').disabled = true;
+    decodeFile(s.file)
+      .then(function(buffer){
+        var blob = encodeWav(buffer, start, end);
+        download(blob, safeName(s.name) + '-ringtone.wav');
+        say($('ringStatus'), 'Saved ' + fmt(end - start) + ' as ' + safeName(s.name) + '-ringtone.wav');
+      })
+      .catch(function(){
+        say($('ringStatus'), 'The phone would not read that file to cut it. Try a different song.', true);
+      })
+      .then(function(){ $('saveBtn').disabled = false; });
+  });
+
+  var audioCtx = null;
+  function decodeFile(file){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return Promise.reject(new Error('no audio context'));
+    if (!audioCtx) audioCtx = new AC();
+    return file.arrayBuffer().then(function(buf){
+      return new Promise(function(resolve, reject){
+        // Older Safari only takes the callback form of decodeAudioData.
+        var r = audioCtx.decodeAudioData(buf, resolve, reject);
+        if (r && typeof r.then === 'function') r.then(resolve, reject);
+      });
+    });
+  }
+
+  // A 16-bit PCM WAV of one span of a decoded song. Written by hand because the
+  // phone's own formats (m4a, mp3) need a licence-bearing encoder to write back.
+  function encodeWav(buf, startSec, endSec){
+    var sr = buf.sampleRate;
+    var ch = Math.min(2, buf.numberOfChannels);
+    // Both ends are clamped inside the song before anything is sized. The two
+    // handles cannot exceed the length the phone reported, but that length can
+    // be shorter than what actually decoded - so a stale value must never ask
+    // for bytes that are not there, which would size the buffer negative.
+    var maxStart = Math.max(0, buf.length - 1);
+    var start = Math.max(0, Math.min(maxStart, Math.floor(startSec * sr)));
+    var end = Math.max(start + 1, Math.min(buf.length, Math.floor(endSec * sr)));
+    var frames = end - start;
+    var blockAlign = ch * 2;
+    var dataSize = frames * blockAlign;
+    var ab = new ArrayBuffer(44 + dataSize);
+    var view = new DataView(ab);
+    function str(off, s){ for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); }
+    str(0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    str(8, 'WAVE');
+    str(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, ch, true);
+    view.setUint32(24, sr, true);
+    view.setUint32(28, sr * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, 16, true);
+    str(36, 'data');
+    view.setUint32(40, dataSize, true);
+    var chans = [];
+    for (var c = 0; c < ch; c++) chans.push(buf.getChannelData(c));
+    var off = 44;
+    for (var i = 0; i < frames; i++){
+      for (var c2 = 0; c2 < ch; c2++){
+        var v = chans[c2][start + i];
+        if (v > 1) v = 1; else if (v < -1) v = -1;
+        view.setInt16(off, v < 0 ? v * 0x8000 : v * 0x7fff, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  // ── cover / thumbnail ─────────────────────────────────────────────────────
+  var canvas = $('thumbCanvas');
+  var ctx = canvas.getContext('2d');
+  var bgImage = null;
+  var sizeKey = 'square';
+  var tone = 'night';
+  var SIZES = {
+    square: { w: 1080, h: 1080 },
+    wide: { w: 1280, h: 720 },
+    tall: { w: 1080, h: 1920 },
+  };
+  var TONES = {
+    night: ['#1b1430', '#07060d'],
+    dusk: ['#4a2740', '#120a1c'],
+    sea: ['#123f43', '#06121a'],
+    plain: ['#101014', '#050507'],
+  };
+
+  function setSize(key){
+    sizeKey = key;
+    var s = SIZES[key];
+    canvas.width = s.w;
+    canvas.height = s.h;
+    Array.prototype.forEach.call($('sizeChips').querySelectorAll('.chip'), function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-size') === key ? 'true' : 'false');
+    });
+    drawThumb();
+  }
+  function setTone(key){
+    tone = key;
+    Array.prototype.forEach.call($('toneChips').querySelectorAll('.chip'), function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-tone') === key ? 'true' : 'false');
+    });
+    drawThumb();
+  }
+
+  Array.prototype.forEach.call($('sizeChips').querySelectorAll('.chip'), function(chip){
+    chip.addEventListener('click', function(){ setSize(chip.getAttribute('data-size')); });
+  });
+  Array.prototype.forEach.call($('toneChips').querySelectorAll('.chip'), function(chip){
+    chip.addEventListener('click', function(){ setTone(chip.getAttribute('data-tone')); });
+  });
+
+  $('thumbPhoto').addEventListener('change', function(){
+    var file = ($('thumbPhoto').files || [])[0];
+    $('thumbPhoto').value = '';
+    if (!file) return;
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function(){ bgImage = img; $('photoDrop').textContent = file.name; drawThumb(); };
+    img.onerror = function(){ say($('thumbStatus'), 'That picture would not open.', true); };
+    img.src = url;
+  });
+
+  ['thumbTitle', 'thumbSub', 'thumbPos', 'thumbSize'].forEach(function(id){
+    $(id).addEventListener('input', drawThumb);
+    $(id).addEventListener('change', drawThumb);
+  });
+
+  $('useNow').addEventListener('click', function(){
+    var s = songs[current];
+    if (!s) { say($('thumbStatus'), 'Add and play a song first on the Player tab.', true); return; }
+    $('thumbTitle').value = s.name;
+    $('thumbSub').value = s.meta;
+    say($('thumbStatus'), '');
+    drawThumb();
+  });
+
+  function coverDraw(image, x, y, w, h){
+    var r = Math.max(w / image.width, h / image.height);
+    var dw = image.width * r;
+    var dh = image.height * r;
+    ctx.drawImage(image, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+
+  function wrapText(text, maxWidth, font){
+    ctx.font = font;
+    var words = String(text || '').split(/\s+/).filter(Boolean);
+    var lines = [];
+    var line = '';
+    words.forEach(function(word){
+      var test = line ? line + ' ' + word : word;
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = word; }
+      else line = test;
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function drawThumb(){
+    var w = canvas.width;
+    var h = canvas.height;
+
+    if (bgImage) {
+      coverDraw(bgImage, 0, 0, w, h);
+    } else {
+      var g = ctx.createLinearGradient(0, 0, w * 0.4, h);
+      var t = TONES[tone] || TONES.night;
+      g.addColorStop(0, t[0]);
+      g.addColorStop(1, t[1]);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // A shade behind the words so they stay readable over any photo. Anchored
+    // to the side the words are on.
+    var pos = $('thumbPos').value;
+    var shade = ctx.createLinearGradient(0, pos === 'top' ? 0 : h, 0, pos === 'top' ? h * 0.5 : 0);
+    shade.addColorStop(0, 'rgba(0,0,0,.72)');
+    shade.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, 0, w, h);
+
+    var title = $('thumbTitle').value || 'Song title';
+    var sub = $('thumbSub').value || '';
+    var scale = Number($('thumbSize').value) || 0.12;
+    var titleSize = Math.round(w * scale);
+    var subSize = Math.round(w * scale * 0.34);
+    var maxWidth = w * 0.84;
+    var titleFont = '600 ' + titleSize + 'px ui-serif, Georgia, serif';
+    var lines = wrapText(title, maxWidth, titleFont);
+    var lineH = titleSize * 1.12;
+
+    var blockH = lines.length * lineH + (sub ? subSize * 2.1 : 0);
+    var top;
+    if (pos === 'top') top = h * 0.12;
+    else if (pos === 'center') top = (h - blockH) / 2;
+    else top = h - blockH - h * 0.12;
+
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+    var x = w * 0.08;
+
+    lines.forEach(function(line, i){
+      var y = top + i * lineH;
+      ctx.font = titleFont;
+      ctx.fillStyle = 'rgba(0,0,0,.5)';
+      ctx.fillText(line, x + 2, y + 3);
+      ctx.fillStyle = '#f4f0e8';
+      ctx.fillText(line, x, y);
+    });
+
+    if (sub) {
+      ctx.font = '500 ' + subSize + 'px ui-sans-serif, system-ui, sans-serif';
+      ctx.fillStyle = '#e8c07a';
+      ctx.letterSpacing = Math.round(subSize * 0.12) + 'px';
+      ctx.fillText(sub.toUpperCase(), x, top + lines.length * lineH + subSize * 0.7);
+      ctx.letterSpacing = '0px';
+    }
+  }
+
+  $('saveThumb').addEventListener('click', function(){
+    drawThumb();
+    var name = safeName($('thumbTitle').value || 'cover');
+    try {
+      canvas.toBlob(function(blob){
+        if (!blob) { say($('thumbStatus'), 'The phone would not make the picture.', true); return; }
+        download(blob, name + '-cover.png');
+        say($('thumbStatus'), 'Saved ' + name + '-cover.png');
+      }, 'image/png');
+    } catch (e) {
+      say($('thumbStatus'), 'The phone would not make the picture.', true);
+    }
+  });
+
+  // ── the playlists card's buttons ──────────────────────────────────────────
+  $('makeList').addEventListener('click', function(){
+    var name = ($('listName').value || '').trim();
+    var err = makeList(name);
+    if (err) { say($('listStatus'), err, true); return; }
+    $('listName').value = '';
+    setView(lists.length - 1);
+    say($('listStatus'), 'Made “' + name + '”. Now tap + on songs to put them in.');
+  });
+  $('listName').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') $('makeList').click();
+  });
+  $('delList').addEventListener('click', function(){
+    if (viewList < 0 || !lists[viewList]) return;
+    var name = lists[viewList].name;
+    if (window.confirm && !window.confirm('Delete the playlist “' + name + '”? The songs stay on the phone.')) return;
+    deleteList(viewList);
+    say($('listStatus'), 'Deleted “' + name + '”. The songs are still here.');
+  });
+
+  // ── scanning for new music ──────────────────────────────────────────────────
+  // 7 Oct 2026, Jacques: "a scanner i can scan for new music". Two kinds of new
+  // music exist: a track added to the app's own room (the page cannot list a
+  // web address by itself, so it asks the server for the folder's contents),
+  // and songs dropped into a folder on this phone since they were last added.
+  // The scan looks in both.
+  var AUDIO_FILE = /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i;
+  var DIR_KEY = 'music-folder';   // the folder last scanned, kept on this phone
+
+  function titleWords(s){
+    return String(s).replace(/[_-]+/g, ' ').replace(/\b[a-z]/g, function(c){ return c.toUpperCase(); });
+  }
+
+  function scanRoomMusic(){
+    // The timestamp is there so the answer is read fresh: a list cached from
+    // yesterday would never contain today's new track.
+    return fetch('/audio/meditation/list.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function(res){ if (!res.ok) throw new Error('no list'); return res.json(); })
+      .then(function(names){
+        var added = 0;
+        if (Array.isArray(names)) names.forEach(function(file){
+          var name = String(file || '');
+          if (!AUDIO_FILE.test(name)) return;
+          for (var i = 0; i < ROOM.length; i++) if (ROOM[i].file === name) return;
+          ROOM.push({ name: titleWords(name.replace(/\.[^.]+$/, '')), url: '/audio/meditation/' + name, file: name });
+          added++;
+        });
+        if (added) {
+          renderRoom();
+          var h = $('roomTitle');
+          if (h) h.textContent = ROOM.length + ' to settle to';
+        }
+        return added;
+      });
+  }
+
+  // Walk a folder the phone has been allowed to look inside. No "for await"
+  // here on purpose: it would be a syntax error on an older phone and a syntax
+  // error kills the whole page, not just the scan.
+  function readDirFiles(dir, depth){
+    var found = [];
+    depth = depth || 0;
+    var it;
+    try { it = dir.values(); } catch(e){ return Promise.resolve(found); }
+    return new Promise(function(resolve){
+      (function step(){
+        it.next().then(function(r){
+          if (r.done) { resolve(found); return; }
+          var e = r.value;
+          if (e && e.kind === 'file' && AUDIO_FILE.test(e.name)) {
+            e.getFile().then(function(f){ found.push(f); step(); }, function(){ step(); });
+          } else if (e && e.kind === 'directory' && depth < 4 && found.length < 400) {
+            readDirFiles(e, depth + 1).then(function(more){
+              found.push.apply(found, more);
+              step();
+            }, function(){ step(); });
+          } else step();
+        }, function(){ resolve(found); });
+      })();
+    });
+  }
+
+  function pickStoredDir(){
+    return dbGet('info', DIR_KEY).then(function(rec){
+      var handle = rec && rec.handle;
+      if (!handle) return window.showDirectoryPicker({ id: 'tsid-music', mode: 'read' });
+      return handle.queryPermission({ mode: 'read' }) === 'granted'
+        ? handle
+        : handle.requestPermission({ mode: 'read' }).then(function(){ return handle; });
+    });
+  }
+
+  function scanPhoneFolder(){
+    // -1: this browser cannot look through a folder at all (Safari, Firefox).
+    // -2: the folder was not chosen this time. Neither is an error.
+    if (typeof window.showDirectoryPicker !== 'function') return Promise.resolve(-1);
+    return pickStoredDir().then(function(handle){
+      if (!handle) return -2;
+      dbPut('info', { key: DIR_KEY, handle: handle }).catch(function(){});
+      return readDirFiles(handle, 0).then(function(files){
+        if (!files.length) return 0;
+        var before = songs.length;
+        addFiles(files);
+        return songs.length - before;
+      });
+    }).catch(function(){ return -2; });
+  }
+
+  $('scanBtn').addEventListener('click', function(){
+    var btn = $('scanBtn');
+    btn.disabled = true;
+    say($('playerStatus'), 'Scanning for new music…');
+    scanPhoneFolder().then(function(phone){
+      return scanRoomMusic().then(function(room){
+        var parts = [];
+        if (phone > 0) parts.push(phone + (phone === 1 ? ' new song' : ' new songs') + ' from your folder');
+        if (room > 0) parts.push(room + (room === 1 ? ' new track' : ' new tracks') + ' for the room');
+        var msg;
+        if (parts.length) msg = 'Found ' + parts.join(' and ') + '.';
+        else if (phone === -1) msg = 'Nothing new in the room\u2019s music. This browser cannot look through a folder on the phone — use “Tap to choose songs” instead.';
+        else msg = 'Nothing new — everything is already here.';
+        say($('playerStatus'), msg);
+        btn.disabled = false;
+      });
+    }).catch(function(){
+      say($('playerStatus'), 'The scan could not finish. Try it once more.', true);
+      btn.disabled = false;
+    });
+  });
+
+  // ── start ─────────────────────────────────────────────────────────────────
+  loadListDefs();
+  resolveLists();   // chips and all, against whatever is back so far; the
+                     // songs re-resolve the lists again when they are restored
+  renderPlaylist();
+  renderRoom();
+  renderRingtoneOptions();
+  setSize('square');
+  paintRingLabels();
+  // Whatever was kept from last time comes back here.
+  restoreSongs();
+  // One real tap is what lets the audio engine start — after that the fade can
+  // go through a gain on a phone that ignores audio.volume.
+  document.addEventListener('click', function(){ ensureAudio(); }, true);
+})();
+</script>
+</body>
+</html>

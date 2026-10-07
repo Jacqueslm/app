@@ -1,0 +1,16 @@
+{
+  "name": "your-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Your AI — a private chat assistant that knows your business files. Runs locally on your machine, like Studio.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

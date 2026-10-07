@@ -1,0 +1,89 @@
+// Every AI in this app writes in English.
+//
+// Jacques, 15 Sep 2026: "I'm not Chinese" — one of the four prompts came back
+// in another language, and the reason was that none of them had ever been told
+// which language to write in. Four separate prompts, four separate chances to
+// drift, so the rule is pinned in all four here rather than in one.
+//
+// This is a prompt test, not a model test: it cannot prove the model obeys. It
+// proves the instruction is in the bytes that actually get sent, which is the
+// half that is ours.
+const test = require('node:test');
+const assert = require('node:assert');
+const fs = require('fs');
+const vm = require('vm');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..', '..');
+const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
+const BACKSLASH = String.fromCharCode(92);
+
+// The ask boxes hold their instructions in one array literal, so the test reads
+// the array rather than grepping the page — what is asserted is what the page
+// evaluates, not what looks like it is there.
+function arrayLiteral(src, at) {
+  const open = src.indexOf('[', at);
+  let depth = 0, quote = null;
+  for (let i = open; i < src.length; i++) {
+    const ch = src[i];
+    if (quote) {
+      if (ch === BACKSLASH) { i++; continue; }
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") { quote = ch; continue; }
+    if (ch === '[') depth++;
+    if (ch === ']') { depth--; if (depth === 0) return src.slice(open, i + 1); }
+  }
+  return null;
+}
+
+function askRules(file, varName) {
+  const name = varName || 'ASK_SYS';
+  const h = read(file);
+  const at = h.indexOf('var ' + name + '=');
+  assert.ok(at > -1, `${file} declares ${name}`);
+  const literal = arrayLiteral(h, at);
+  assert.ok(literal, `${file} ${name} literal is closed`);
+  const ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext('this.S = ' + literal + ';', ctx);
+  assert.ok(Array.isArray(ctx.S), `${file} ${name} is an array`);
+  return ctx.S.join('\n');
+}
+
+// Friendly was the first of the four prompts this file checked. It went on
+// 4 Oct 2026 with the rest of the recovery app: "i dont need friendly its my
+// personal app." The rule below is the one that still has a prompt to guard.
+
+test('The Key reading is told to answer in English', () => {
+  const sys = require('../key-reading.js').systemPrompt();
+  assert.match(sys, /plain English/);
+  assert.match(sys, /HARD RULES/, 'and the hard rules are still in the same prompt');
+});
+
+// The herb library carried a second box until 4 Oct 2026, when Friendly came
+// off the page: "take a friendly off the herbs and add voice to herbs." Its
+// read-aloud voice has no prompt to guard, so the tax centre's box is what is
+// left here.
+test('the reference ask box is told to answer in English', () => {
+  const rules = askRules('tax.html');
+  assert.match(rules, /- In English, always\./, 'tax.html carries the rule as its own bullet');
+});
+
+// The Trading Desk assistant was the fifth prompt checked here, from 17 Sep to
+// 24 Sep 2026. It went with the desk: "remove the trading game the desk
+// everything about trading im done." Friendly was the fourth and went on
+// 4 Oct 2026 with the recovery app. What is left is The Key and the two
+// reference ask boxes below.
+
+test('the pages keep the rules that were there before the language rule', () => {
+  // A prompt is one string in one place: rewording it is how a safety line goes
+  // missing without anybody noticing. These are the ones that must survive.
+  assert.match(askRules('tax.html'), /never invent a number/i, 'tax box still refuses to invent a figure');
+
+  const sys = require('../key-reading.js').systemPrompt();
+  assert.match(sys, /No medical claims/, 'the reading still makes no medical claims');
+  assert.match(sys, /never tell somebody they are finished/i, 'and never tells anybody they are finished');
+  assert.match(sys, /"she" or "her"/, 'and still has the no-pronouns rule for a supporter');
+});

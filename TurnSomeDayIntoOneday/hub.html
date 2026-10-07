@@ -17,10 +17,10 @@
     --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
     --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.055);
     --gold:#e8c07a; --violet:#a78bfa; --teal:#5fd9c4; --rose:#f0919f;
-    --lamp:#f2a93b; --ring:#e24b4a;
+    --lamp:#f2a93b;
     --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
     --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    --r:16px;
+    --r:18px;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -31,88 +31,107 @@
     padding:calc(env(safe-area-inset-top,0px) + 26px) 18px calc(env(safe-area-inset-bottom,0px) + 30px);
   }
   .wrap{width:100%; max-width:520px}
-  header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:26px}
-  h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter-spacing:.01em}
-  .sub{margin:6px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
+
+  /* ── the top: one mark, one name, and the way out ─────────────────────── */
+  header{display:flex; align-items:center; gap:11px; margin-bottom:22px}
+  .mark{width:30px; height:30px; flex:0 0 30px; color:var(--gold)}
+  .mark svg{width:100%; height:100%; display:block}
+  header .names{flex:1 1 auto; min-width:0}
+  h1{margin:0; font-family:var(--serif); font-size:1.3125rem; font-weight:500; letter-spacing:.01em; line-height:1.15}
+  .who{margin:3px 0 0; color:var(--dimmer); font-size:.75rem; line-height:1.4; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .quiet{
-    background:none; border:1px solid var(--line); color:var(--dim);
-    font:inherit; font-size:.75rem; padding:7px 12px; border-radius:999px; cursor:pointer;
+    flex:0 0 auto; background:none; border:1px solid var(--line); color:var(--dim);
+    font:inherit; font-size:.75rem; padding:8px 13px; border-radius:999px; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
   }
-  .quiet:hover{color:var(--ink); border-color:var(--line)}
-  .cards{display:grid; gap:12px}
+  .quiet:hover{color:var(--ink)}
+
+  /* ── the four doors ───────────────────────────────────────────────────── */
+  .cards{display:grid; gap:11px}
   a.card{
-    display:block; text-decoration:none; color:inherit;
+    --accent:var(--gold); --tint:rgba(232,192,122,.13);
+    display:flex; align-items:center; gap:14px;
+    text-decoration:none; color:inherit;
     background:var(--card); border:1px solid var(--line); border-radius:var(--r);
-    padding:18px 18px 17px; position:relative; overflow:hidden;
+    padding:16px 15px 16px 15px;
     transition:background .16s ease, border-color .16s ease, transform .16s ease;
     -webkit-tap-highlight-color:transparent;
   }
   a.card:hover{background:var(--card2); border-color:rgba(255,255,255,.18); transform:translateY(-1px)}
-  a.card:active{transform:translateY(0)}
-  a.card .mark{
-    position:absolute; left:0; top:0; bottom:0; width:3px;
+  a.card:active{transform:translateY(0) scale(.995)}
+  a.card.z{--accent:var(--gold);   --tint:rgba(232,192,122,.13)}
+  a.card.f{--accent:var(--lamp);   --tint:rgba(242,169,59,.13)}
+  a.card.h{--accent:var(--teal);   --tint:rgba(95,217,196,.13)}
+  a.card.m{--accent:var(--violet); --tint:rgba(167,139,250,.13)}
+  .glyph{
+    flex:0 0 44px; width:44px; height:44px; border-radius:13px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--accent); background:var(--tint);
   }
-  a.card.z .mark{background:var(--gold)}
-  a.card.f .mark{background:var(--lamp)}
-  a.card.h .mark{background:var(--teal)}
-  a.card.m .mark{background:var(--violet)}
-  .kicker{
-    font-size:.625rem; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--dimmer); margin:0 0 7px;
-  }
-  a.card.z .kicker{color:var(--gold)}
-  a.card.f .kicker{color:var(--lamp)}
-  a.card.h .kicker{color:var(--teal)}
-  a.card.m .kicker{color:var(--violet)}
-  .name{margin:0; font-family:var(--serif); font-size:1.1875rem; font-weight:500; line-height:1.25}
-  .note{margin:7px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
-  .go{
-    margin-top:13px; font-size:.75rem; color:var(--dim);
-    display:flex; align-items:center; gap:6px;
-  }
-  a.card:hover .go{color:var(--ink)}
-  form{margin:0}
+  .glyph svg{width:23px; height:23px; display:block; fill:none; stroke:currentColor;
+    stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+  .txt{flex:1 1 auto; min-width:0}
+  .name{margin:0; font-family:var(--serif); font-size:1.0625rem; font-weight:500; line-height:1.25}
+  .note{margin:4px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.45}
+  .chev{flex:0 0 auto; color:var(--dimmer); display:flex; transition:transform .16s ease, color .16s ease}
+  .chev svg{width:17px; height:17px; display:block; fill:none; stroke:currentColor;
+    stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  a.card:hover .chev{color:var(--accent); transform:translateX(2px)}
+
+  /* ── the way in ───────────────────────────────────────────────────────── */
   .lock{
     background:var(--card); border:1px solid var(--line); border-radius:var(--r);
-    padding:20px 18px;
+    padding:24px 20px 22px;
   }
+  .lock h2{margin:0; font-family:var(--serif); font-size:1.25rem; font-weight:500}
+  .lock .lede{margin:7px 0 20px; color:var(--dim); font-size:.8125rem; line-height:1.5}
   label{display:block; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer); margin:0 0 7px}
   input{
-    width:100%; margin:0 0 14px; padding:12px 13px; font:inherit; font-size:1rem;
+    width:100%; margin:0 0 15px; padding:14px 14px; font:inherit; font-size:1rem;
     color:var(--ink); background:rgba(0,0,0,.28);
-    border:1px solid var(--line); border-radius:11px; outline:none;
+    border:1px solid var(--line); border-radius:12px; outline:none;
   }
-  input:focus{border-color:rgba(232,192,122,.55)}
+  input:focus{border-color:rgba(232,192,122,.55); background:rgba(0,0,0,.4)}
   .go-btn{
-    width:100%; padding:13px 14px; font:inherit; font-size:.9375rem; font-weight:500;
-    color:#1a1408; background:var(--gold); border:0; border-radius:11px; cursor:pointer;
+    width:100%; padding:15px 14px; font:inherit; font-size:.9375rem; font-weight:600;
+    color:#1a1408; background:var(--gold); border:0; border-radius:12px; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
   }
-  .go-btn[disabled]{opacity:.55; cursor:default}
-  .msg{margin:13px 0 0; font-size:.8125rem; line-height:1.5; min-height:1.2em; color:var(--rose)}
+  .go-btn:active{transform:translateY(1px)}
+  .go-btn[disabled]{opacity:.55; cursor:default; transform:none}
+  .msg{margin:14px 0 0; font-size:.8125rem; line-height:1.5; min-height:1.2em; color:var(--rose)}
   .msg.ok{color:var(--teal)}
+  .fine{margin:16px 0 0; color:var(--dimmer); font-size:.75rem; line-height:1.55; text-align:center}
+
   footer{
-    margin-top:26px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center;
+    margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center;
   }
   [hidden]{display:none !important}
+  @media (prefers-reduced-motion:reduce){
+    a.card, .chev{transition:none}
+    a.card:hover{transform:none}
+    a.card:hover .chev{transform:none}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header>
-    <div>
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="21" r="13.5" stroke="currentColor" stroke-width="1.8"/><circle cx="20" cy="7.5" r="2.9" fill="currentColor"/></svg></span>
+    <div class="names">
       <h1>The Truth</h1>
-      <p class="sub" id="whoTag">Four things: the Zodiacs, the Fight, the Herbs, and the Music.</p>
+      <p class="who" id="whoTag">Four doors. That is the whole app.</p>
     </div>
     <button class="quiet" id="signOut" hidden>Sign out</button>
   </header>
 
-  <!-- Locked: the three pages are private, so this is the way in. It is the
+  <!-- Locked: the four pages are private, so this is the way in. It is the
        only screen shown until the server says who you are. -->
   <section id="locked" hidden>
     <form class="lock" id="lockForm" autocomplete="on">
+      <h2>Sign in</h2>
+      <p class="lede">This app is private. Nothing here is public, and nothing is shared.</p>
       <label for="email">Email</label>
       <input id="email" name="email" type="email" autocapitalize="none" autocorrect="off"
              autocomplete="username" inputmode="email" required>
@@ -120,41 +139,46 @@
       <input id="password" name="password" type="password" autocomplete="current-password" required>
       <button class="go-btn" id="lockBtn" type="submit">Unlock</button>
       <p class="msg" id="lockMsg" role="status" aria-live="polite"></p>
+      <p class="fine">Open it on this phone and it stays open.</p>
     </form>
   </section>
 
-  <!-- Open: the whole app, now. -->
+  <!-- Open: the four doors, now. -->
   <section id="open" class="cards" hidden>
     <a class="card z" href="/key">
-      <span class="mark" aria-hidden="true"></span>
-      <p class="kicker">The Key</p>
-      <h2 class="name">The Zodiacs</h2>
-      <p class="note">Every birthday read in full — the day itself, the week it sits in, the life it points to, and what happens when two people meet.</p>
-      <p class="go">Open <span aria-hidden="true">→</span></p>
+      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12.6" r="7.4"/><circle cx="12" cy="5.2" r="1.7" fill="currentColor" stroke="none"/></svg></span>
+      <span class="txt">
+        <h2 class="name">The Zodiacs</h2>
+        <p class="note">Any birthday, read in full.</p>
+      </span>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
 
     <a class="card f" href="/fight">
-      <span class="mark" aria-hidden="true"></span>
-      <p class="kicker">On the roof</p>
-      <h2 class="name">The Fight</h2>
-      <p class="note">The Fight of Your Life — the ring, sixty-second rounds, real boxing rules.</p>
-      <p class="go">Open <span aria-hidden="true">→</span></p>
+      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.2a5.5 5.5 0 0 0-5.5 5.5V12L5 15h14l-1.5-3V8.7A5.5 5.5 0 0 0 12 3.2Z"/><path d="M9.8 17.6a2.2 2.2 0 0 0 4.4 0"/></svg></span>
+      <span class="txt">
+        <h2 class="name">The Fight</h2>
+        <p class="note">The bell, the rounds, the roof.</p>
+      </span>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
 
     <a class="card h" href="/herbs">
-      <span class="mark" aria-hidden="true"></span>
-      <p class="kicker">The library</p>
-      <h2 class="name">The Herbs</h2>
-      <p class="note">The herb library — what each one is, what it is used for, and where it comes from.</p>
-      <p class="go">Open <span aria-hidden="true">→</span></p>
+      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 19.5c0-8.4 5.3-13.4 15-14.4.9 9.5-4.4 14.4-12.4 14.4H4.5Z"/><path d="M4.5 19.5c3-4.4 6.2-7.2 10.2-9.4"/></svg></span>
+      <span class="txt">
+        <h2 class="name">The Herbs</h2>
+        <p class="note">The whole library, and the books behind it.</p>
+      </span>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
 
     <a class="card m" href="/music">
-      <span class="mark" aria-hidden="true"></span>
-      <p class="kicker">The music</p>
-      <h2 class="name">The Player</h2>
-      <p class="note">Play the songs on this phone, cut a ringtone out of one, and make a cover picture for it.</p>
-      <p class="go">Open <span aria-hidden="true">→</span></p>
+      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg></span>
+      <span class="txt">
+        <h2 class="name">The Player</h2>
+        <p class="note">Your songs, ringtones, and cover art.</p>
+      </span>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
   </section>
 
@@ -168,7 +192,7 @@
   // The shell's version. sw.js keeps its cache name in step with this, and
   // sw-version.test.js fails if the two drift apart — the cache name is what
   // decides whether an installed phone ever repopulates its copy.
-  const APP_VERSION='2.0';
+  const APP_VERSION='2.1';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');
@@ -184,7 +208,7 @@
     locked.hidden = false;
     open.hidden = true;
     signOut.hidden = true;
-    whoTag.textContent = 'Four things: the Zodiacs, the Fight, the Herbs, and the Music.';
+    whoTag.textContent = 'Four doors. That is the whole app.';
     try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
   }
 
@@ -192,13 +216,13 @@
     locked.hidden = true;
     open.hidden = false;
     signOut.hidden = false;
-    whoTag.textContent = email ? ('Signed in as ' + email) : 'Four things: the Zodiacs, the Fight, the Herbs, and the Music.';
+    whoTag.textContent = email ? ('Signed in as ' + email) : 'Signed in.';
     msg.textContent = '';
   }
 
   // Who am I? /api/auth/me is 401 when signed out and carries the email when
   // not, so this single call decides which of the two screens is shown. It is
-  // also the only check that matters — the three pages re-check on the server
+  // also the only check that matters — the four pages re-check on the server
   // for themselves, so faking a 200 here would still leave nothing to open.
   function who(){
     return fetch('/api/auth/me', { credentials: 'same-origin' })

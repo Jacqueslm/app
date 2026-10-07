@@ -154,6 +154,13 @@ self.addEventListener('fetch', (event) => {
   // clean URL and the file name reach the same gated route.
   if (['/music', '/music.html'].includes(url.pathname)) return;
 
+  // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
+  // Its whole point is that it is read fresh - a cached "here is every track"
+  // would never contain the next one - so it is left to the browser, which is
+  // already told to skip its cache for it. It is not precached either: it is
+  // not shell, and holding it would only work against the scan.
+  if (url.pathname === '/audio/meditation/list.json') return;
+
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 
   if (isPage) {

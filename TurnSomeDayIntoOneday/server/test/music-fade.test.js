@@ -192,3 +192,178 @@ test('the setting is written once, under its own key, and never sent anywhere', 
   assert.ok(!/https?:\/\//.test(block), 'nothing here talks to a server');
   assert.ok(!/[^a-zA-Z]fetch\(/.test(block), 'and nothing is fetched');
 });
+
+/* ==================================================== the cross-fade, 7 Oct */
+// Rebuilt the day after it shipped: one element has to go all the way to
+// silence and start the next song from nothing, which heard as a dead patch in
+// the middle of the music. There are two elements now — the next song comes up
+// on the second one exactly as the first comes down, and when the first ends
+// the second takes over without its song being restarted.
+
+function fakeEl(id) {
+  return {
+    id, src: '', duration: 100, currentTime: 0, volume: 1, paused: false, ended: false,
+    plays: 0,
+    play() { this.paused = false; this.plays += 1; return { catch() {} }; },
+    pause() { this.paused = true; },
+    removeAttribute(k) { if (k === 'src') this.src = ''; },
+    load() {},
+  };
+}
+
+function xharness() {
+  const chips = [0, 3, 5, 10].map((n) => {
+    const chip = {
+      _a: { 'data-fade': String(n), 'aria-pressed': 'false' }, _l: {},
+      getAttribute(k) { return this._a[k]; },
+      setAttribute(k, v) { this._a[k] = String(v); },
+      addEventListener(t, fn) { this._l[t] = fn; },
+    };
+    return chip;
+  });
+  const els = { audio: fakeEl('audio'), xfade: fakeEl('xfade') };
+  const said = [];
+  let timer = null;
+  let nextValue = null;
+  let advances = 0;
+  const counts = { render: 0, room: 0, stepped: 0 };
+  const ctx = {
+    Math, Number, Array, String, Object, JSON, console, isFinite,
+    audio: els.audio,
+    say(el, text) { said.push(String(text || '')); },
+    $() { return { querySelectorAll() { return chips; }, textContent: '' }; },
+    document: {
+      getElementById(id) { return id === 'audio' ? els.audio : id === 'xfade' ? els.xfade : null; },
+    },
+    window: {
+      localStorage: {
+        getItem: (k) => (Object.prototype.hasOwnProperty.call({}, k) ? '' : null),
+        setItem() {},
+      },
+    },
+    setInterval(fn) { timer = fn; return 7; },
+    clearInterval() { timer = null; },
+    nextTrack() { return nextValue; },
+    advanceIndex() { advances += 1; },
+    renderPlaylist() { counts.render += 1; },
+    renderRoom() { counts.room += 1; },
+    step() { counts.stepped += 1; },
+    fmt(n) { return String(n); },
+    Promise,
+  };
+  vm.createContext(ctx);
+  vm.runInContext(blockSource(), ctx, { filename: 'music-crossfade.js' });
+  return {
+    ctx, els, said, chips,
+    run: (expr) => vm.runInContext(expr, ctx),
+    el: (id) => els[id],
+    press: (sec) => chips.find((c) => Number(c.getAttribute('data-fade')) === sec)._l.click(),
+    tick: () => { if (timer) timer(); },
+    hasTimer: () => timer !== null,
+    next: (track) => { nextValue = track; },
+    advances: () => advances,
+    counts,
+    installGain() {
+      const made = [];
+      ctx.window.AudioContext = class {
+        constructor() { this.state = 'running'; this.destination = {}; }
+        resume() { this.state = 'running'; return Promise.resolve(); }
+        createMediaElementSource() { return { connect() {} }; }
+        createGain() { const g = { gain: { value: 1 }, connect() {} }; made.push(g); return g; }
+      };
+      ctx.madeGains = made;
+    },
+  };
+}
+
+test('the next song comes up while this one comes down — no silence in the middle', () => {
+  const h = xharness();
+  h.press(10);
+  h.next({ name: 'B', url: '/audio/meditation/b.mp3' });
+  h.el('audio').duration = 100;
+  h.el('audio').currentTime = 95;
+  h.run('fadeTick()');
+  assert.strictEqual(h.run('crossOn'), true, 'the second element joins in before the end');
+  assert.strictEqual(h.el('xfade').src, '/audio/meditation/b.mp3', 'with the next song loaded');
+  assert.ok(h.el('xfade').plays >= 1, 'and playing');
+  assert.strictEqual(h.el('audio').volume, 0.5, 'the song playing comes down over its last ten seconds');
+  assert.strictEqual(h.run('crossVol'), 0.5, 'the next song comes up by exactly as much');
+  assert.strictEqual(h.el('audio').volume + h.run('crossVol'), 1,
+    'so between them the level never dips below what was asked for');
+});
+
+test('when the song ends, the second element takes over instead of restarting', () => {
+  const h = xharness();
+  h.press(10);
+  h.next({ name: 'B', url: '/audio/meditation/b.mp3' });
+  h.el('audio').currentTime = 96;
+  h.run('fadeTick()');
+  assert.strictEqual(h.run('crossOn'), true, 'the cross-fade is under way');
+  const reached = h.el('xfade').currentTime;
+  assert.strictEqual(h.run('crossSwap()'), true);
+  assert.strictEqual(h.run('audio'), h.el('xfade'), 'the element holding the next song is now the player');
+  assert.strictEqual(h.el('xfade').paused, false, 'and that song carries on from where it had reached');
+  assert.strictEqual(h.el('xfade').currentTime, reached, 'not thrown back to the start');
+  assert.strictEqual(h.el('audio').paused, true, 'the finished element is stopped');
+  assert.strictEqual(h.el('audio').src, '', 'and emptied, ready to carry the song after next');
+  assert.strictEqual(h.run('crossOn'), false);
+  assert.strictEqual(h.advances(), 1, 'the player was told which track is now on');
+  assert.strictEqual(h.hasTimer(), true, 'and the fade keeps running on the new player');
+});
+
+test('seeking back out of the last seconds cancels the other song', () => {
+  const h = xharness();
+  h.press(10);
+  h.next({ name: 'B', url: '/audio/meditation/b.mp3' });
+  h.el('audio').currentTime = 95;
+  h.run('fadeTick()');
+  assert.strictEqual(h.run('crossOn'), true);
+  h.el('audio').currentTime = 50;
+  h.run('fadeTick()');
+  assert.strictEqual(h.run('crossOn'), false, 'the fade is no longer under way');
+  assert.strictEqual(h.el('xfade').paused, true, 'the other element is stopped');
+  assert.strictEqual(h.el('xfade').src, '', 'and emptied');
+});
+
+test('with the fade off, one song at a time — the second element never joins in', () => {
+  const h = xharness();
+  h.press(0);
+  h.next({ name: 'B', url: '/audio/meditation/b.mp3' });
+  h.el('audio').currentTime = 99;
+  h.run('fadeTick()');
+  assert.strictEqual(h.run('crossOn'), false);
+  assert.strictEqual(h.el('xfade').plays, 0, 'nothing was started on the other element');
+  assert.strictEqual(h.el('audio').volume, 1, 'and nothing is turned down');
+});
+
+test('a single song has nothing to fade into, and is left alone', () => {
+  const h = xharness();
+  h.press(10);
+  h.next(null);                     // the last song in the list
+  h.el('audio').duration = 100;
+  h.el('audio').currentTime = 99;
+  h.run('fadeTick()');
+  assert.strictEqual(h.run('crossOn'), false, 'no cross-fade begins');
+  assert.strictEqual(h.el('xfade').plays, 0);
+  assert.ok(h.el('audio').volume < 1, 'but the song itself still comes down to its end');
+});
+
+test('a phone that takes a gain gets the same numbers, with the element pinned at 1', () => {
+  // The iPhone ignores audio.volume entirely, which is why the fade read as
+  // "not working" there. The same numbers go into a Web Audio gain instead —
+  // and the element is pinned at 1, so the two can never multiply and dip
+  // twice as fast as asked.
+  const h = xharness();
+  h.installGain();
+  h.run('ensureAudio()');
+  assert.ok(h.run('gains["audio"]') && h.run('gains["xfade"]'), 'both elements are through the gain');
+  h.press(10);
+  h.next({ name: 'B', url: '/audio/meditation/b.mp3' });
+  h.el('audio').duration = 100;
+  h.el('audio').currentTime = 95;
+  h.run('fadeTick()');
+  assert.strictEqual(h.run('gains["audio"].gain.value'), 0.5, 'the gain carries the fade-out');
+  assert.strictEqual(h.el('audio').volume, 1, 'the element itself is pinned at 1');
+  assert.strictEqual(h.run('gains["xfade"].gain.value'), 0.5, 'and the fade-in goes into its gain too');
+  assert.strictEqual(h.el('xfade').volume, 1, 'pinned at 1 as well');
+});

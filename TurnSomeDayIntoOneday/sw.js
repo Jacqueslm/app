@@ -22,9 +22,14 @@
 //
 // 6 Oct 2026: '/data/lessons.json' came off the list below. The lesson packs and
 // the script that built them were deleted that day — the app that read them went
-// on 4 Oct and nothing has fetched this one since. The name stays at 2.0: taking
-// an entry out is not a rebuild, and the number is Jacques's to move.
-const CACHE_NAME = 'tsid-shell-v2.0';
+// on 4 Oct and nothing has fetched this one since. The name stayed at 2.0 there:
+// taking an entry out is not a rebuild, and the number is Jacques's to move.
+//
+// 7 Oct 2026: the shell's home screen was rebuilt (four doors, one line each,
+// and a plainer way in), so the name moved to 2.1 WITH it. This is the case the
+// number exists for: without the bump an installed phone keeps being served the
+// old /app out of its precached copy and sees nothing new at all.
+const CACHE_NAME = 'tsid-shell-v2.1';
 const SHELL_FILES = [
   '/',
   '/app',

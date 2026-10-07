@@ -11,6 +11,7 @@ const emailer = require('./email');
 const push = require('./push');
 const backup = require('./backup');
 const aiChatBody = require('./ai-chat-body');
+const musicList = require('./music-list');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -366,6 +367,18 @@ app.get('/music.html', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'music.html'));
+});
+
+// The Music's scanner (7 Oct 2026). The page cannot list a directory over the
+// web, so it asks this instead — read fresh from disk every time, and answered
+// no-store, because a cached "here is every track" would defeat the point of
+// scanning for a new one. On Vercel the same list comes from a file the build
+// writes, which the static layer hands out before any function runs.
+app.get('/audio/meditation/list.json', (req, res) => {
+  const tracks = musicList.listFor(path.join(__dirname, '..', 'audio', 'meditation'));
+  if (!tracks) return res.status(404).json({ error: 'no music folder here' });
+  res.set('Cache-Control', 'no-store');
+  res.json(tracks);
 });
 
 app.use(express.static(path.join(__dirname, '..')));

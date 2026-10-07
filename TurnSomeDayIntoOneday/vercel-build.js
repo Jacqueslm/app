@@ -25,6 +25,7 @@
 // it.
 const fs = require('fs');
 const path = require('path');
+const { listFor } = require('./server/music-list');
 
 const ROOT = __dirname;
 
@@ -95,6 +96,18 @@ function build(opts) {
     if (!fs.existsSync(from)) continue;
     fs.copyFileSync(from, path.join(out, file));
     copied.push(file);
+  }
+
+  // The Music page's scanner asks what is in the meditation folder, because a
+  // web address cannot list one (7 Oct 2026). It is written fresh on every
+  // build, so a track added to the folder reaches the next scan without
+  // anybody editing a list by hand — and it lands here, beside the tracks it
+  // describes, where the static layer hands it out before any code runs.
+  const medOut = path.join(out, 'audio', 'meditation');
+  if (fs.existsSync(medOut)) {
+    const tracks = listFor(medOut) || [];
+    fs.writeFileSync(path.join(medOut, 'list.json'), `${JSON.stringify(tracks, null, 2)}\n`);
+    copied.push('audio/meditation/list.json');
   }
 
   checkNoPages(out);

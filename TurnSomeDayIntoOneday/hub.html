@@ -101,7 +101,17 @@
   .go-btn[disabled]{opacity:.55; cursor:default; transform:none}
   .msg{margin:14px 0 0; font-size:.8125rem; line-height:1.5; min-height:1.2em; color:var(--rose)}
   .msg.ok{color:var(--teal)}
-  .fine{margin:16px 0 0; color:var(--dimmer); font-size:.75rem; line-height:1.55; text-align:center}
+  .msg.note{color:var(--dim)}
+  /* The one quiet action under the Unlock button. A button, not a link, so it
+     is a real tap target on a phone rather than two words of small text. */
+  .linkish{
+    display:block; width:100%; margin:0; padding:11px 4px 9px;
+    background:none; border:0; color:var(--dim); font:inherit; font-size:.8125rem;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .linkish:hover{color:var(--ink)}
+  .linkish[disabled]{opacity:.55; cursor:default}
+  .fine{margin:10px 0 0; color:var(--dimmer); font-size:.75rem; line-height:1.55; text-align:center}
 
   footer{
     margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center;
@@ -139,6 +149,7 @@
       <input id="password" name="password" type="password" autocomplete="current-password" required>
       <button class="go-btn" id="lockBtn" type="submit">Unlock</button>
       <p class="msg" id="lockMsg" role="status" aria-live="polite"></p>
+      <button class="linkish" id="forgotBtn" type="button">Forgot your password?</button>
       <p class="fine">Open it on this phone and it stays open.</p>
     </form>
   </section>
@@ -192,7 +203,7 @@
   // The shell's version. sw.js keeps its cache name in step with this, and
   // sw-version.test.js fails if the two drift apart — the cache name is what
   // decides whether an installed phone ever repopulates its copy.
-  const APP_VERSION='2.1';
+  const APP_VERSION='2.2';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');
@@ -203,6 +214,7 @@
   var whoTag = document.getElementById('whoTag');
   var emailEl = document.getElementById('email');
   var passEl  = document.getElementById('password');
+  var forgot = document.getElementById('forgotBtn');
 
   function showLocked(){
     locked.hidden = false;
@@ -267,6 +279,62 @@
       msg.textContent = 'Could not reach the server. Check your connection.';
     })
     .then(function(){ btn.disabled = false; });
+  });
+
+  // "Forgot your password?" - the answer depends on which build is serving the
+  // page, so the server is asked rather than the page deciding. The accounts
+  // build (server.js) sends a real one-time link; the build the app actually
+  // runs on has one shared word for the house and no accounts, and answers 404 -
+  // there the honest answer is the spare word, which opens the same door.
+  // Nothing here says "we emailed you" unless the server said so first.
+  forgot.addEventListener('click', function(){
+    var email = (emailEl.value || '').trim();
+    if (!email) {
+      msg.className = 'msg';
+      msg.textContent = 'Type your email above first, then tap it again.';
+      try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
+      return;
+    }
+
+    forgot.disabled = true;
+    msg.className = 'msg';
+    msg.textContent = 'Asking\u2026';
+
+    fetch('/api/auth/forgot', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    })
+    .then(function(r){
+      // Not always JSON: the accounts build answers in JSON, the other answers
+      // a plain 404, so the text is read first and parsed only if it parses.
+      return r.text().then(function(t){
+        var d = null;
+        try { d = JSON.parse(t); } catch (e) { d = null; }
+        return { status: r.status, d: d };
+      });
+    })
+    .then(function(out){
+      if (out.status === 200 && out.d && out.d.message) {
+        msg.className = 'msg ok';
+        msg.textContent = out.d.message;
+        return;
+      }
+      if (out.status === 404) {
+        msg.className = 'msg note';
+        msg.textContent = 'There are no accounts here, so there is no link to email. '
+          + 'A spare word opens the same door \u2014 put that in the password box instead.';
+        return;
+      }
+      msg.className = 'msg';
+      msg.textContent = (out.d && out.d.error) || 'That did not go through. Try again in a moment.';
+    })
+    .catch(function(){
+      msg.className = 'msg';
+      msg.textContent = 'Could not reach the server. Check your connection.';
+    })
+    .then(function(){ forgot.disabled = false; });
   });
 
   signOut.addEventListener('click', function(){

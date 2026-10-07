@@ -102,6 +102,44 @@ test('the sign-in screen itself holds nothing private', async () => {
   }
 });
 
+// --------------------------------------------- a forgotten word, 7 Oct 2026 --
+// Jacques: "add forgot my password sign in option". On the accounts build that
+// option emails a one-time link. THIS build has no accounts and no database, so
+// there is nowhere to keep a token and nothing to send — and the page must not
+// promise a link it cannot send. So the button asks /api/auth/forgot either way
+// and reads the answer: 200 means a link really is on its way, a 404 means the
+// honest answer is the spare word. What makes the page's spare-word sentence
+// correct on this host is the 404 below, which is what these tests hold still.
+
+test('the sign-in screen carries the way back for a forgotten word', async () => {
+  const res = await get('/app');
+  assert.equal(res.status, 200);
+  const html = await res.text();
+  assert.match(html, /id="forgotBtn"/, 'the sign-in screen must offer it');
+  assert.match(html, />Forgot your password\?</, 'in the words the reset page points at');
+  // A plain button inside the form with no type submits it, which would try to
+  // sign in with nothing and print "Both fields, please" instead.
+  assert.match(html, /<button class="linkish" id="forgotBtn" type="button">/,
+    'and it must not submit the sign-in form when tapped');
+});
+
+test('a forgotten word here is a 404, not a link that was never sent', async () => {
+  const res = await fetch(base + '/api/auth/forgot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'jacques@example.com' }),
+  });
+  assert.equal(res.status, 404, 'no accounts means no reset by email');
+  const body = await res.text();
+  assert.doesNotMatch(body, /on its way|"message"/, 'and nothing that reads like a link was sent');
+  // The page turns that 404 into the sentence that is true here: one shared
+  // word, and a second one kept away from the phone.
+  const hub = fs.readFileSync(path.join(ROOT, 'hub.html'), 'utf8');
+  assert.match(hub, /A spare word opens the same door/, 'the page says what actually works');
+  assert.doesNotMatch(hub, /link is on its way/,
+    'and never claims a link was sent on its own account — that comes from the server');
+});
+
 test('the wrong password gets nothing, and no cookie', async () => {
   const { res, cookie, body } = await signIn('jacques@example.com', 'not-the-password');
   assert.equal(res.status, 401);

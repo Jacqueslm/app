@@ -26,10 +26,11 @@
 // taking an entry out is not a rebuild, and the number is Jacques's to move.
 //
 // 7 Oct 2026: the shell's home screen was rebuilt (four doors, one line each,
-// and a plainer way in), so the name moved to 2.1 WITH it. This is the case the
-// number exists for: without the bump an installed phone keeps being served the
-// old /app out of its precached copy and sees nothing new at all.
-const CACHE_NAME = 'tsid-shell-v2.1';
+// and a plainer way in) and then given a "Forgot your password?" option, so the
+// name moved to 2.1 and on to 2.2 WITH it. This is the case the number exists
+// for: without the bump an installed phone keeps being served the old /app out
+// of its precached copy and sees nothing new at all.
+const CACHE_NAME = 'tsid-shell-v2.2';
 const SHELL_FILES = [
   '/',
   '/app',

@@ -189,3 +189,50 @@ test('the herb library: its own safety lines are still on the page', () => {
   assert.match(html, /Coming off alcohol or a drug/);
   assert.match(html, /Ask a pharmacist before you add a herb/);
 });
+
+// The read-aloud is not only for a herb: the rest of the page reads out loud too,
+// in the same on-device voice and with the same pair of buttons.
+test('the herb library: the book sections read out loud as well', () => {
+  const p = loadPage();
+  p.sandbox.tab = 'books';
+  p.sandbox.openId = 'bk0';
+  p.sandbox.render();
+  const html = p.els.get('view').innerHTML;
+  assert.match(html, /data-say="bk0"/, 'the open book section carries its own read button');
+  assert.match(html, /Read it to me/);
+  assert.equal(p.said.length, 0, 'drawing it does not start reading');
+  p.sandbox.say('bk0');
+  assert.equal(p.said.length, 1, 'one press, one reading');
+  const text = p.said[0].text;
+  assert.ok(text.indexOf(p.sandbox.BOOKS[0].h) === 0, 'it starts by naming the section');
+  assert.doesNotMatch(text, /<[^>]*>/, 'and no HTML tag is read out loud');
+});
+
+test('the herb library: each day of the thirty days reads out loud', () => {
+  const p = loadPage();
+  p.sandbox.tab = 'course';
+  p.sandbox.openId = 'd1';
+  p.sandbox.render();
+  const html = p.els.get('view').innerHTML;
+  assert.match(html, /data-say="d1"/, 'the open day carries its own read button');
+  p.sandbox.say('d1');
+  assert.equal(p.said.length, 1, 'one press, one reading');
+  assert.match(p.said[0].text, /^Day 1\./, 'it starts by naming the day');
+  // The teaching is read; the quiz is not, because reading the questions and
+  // answers out would spoil the thing the day is there to ask.
+  const day1 = p.sandbox.COURSE.filter((d) => d.d === 1)[0];
+  assert.ok(day1 && day1.q.length, 'day 1 still has its quiz');
+  assert.ok(p.said[0].text.indexOf(day1.q[0].q) === -1, 'the quiz question stays on the screen');
+});
+
+test('the herb library: the safety tab can be read out loud', () => {
+  const p = loadPage();
+  p.sandbox.tab = 'safety';
+  p.sandbox.render();
+  const html = p.els.get('view').innerHTML;
+  assert.match(html, /data-say="safety"/, 'the safety tab carries a read button');
+  p.sandbox.say('safety');
+  assert.equal(p.said.length, 1, 'one press, one reading');
+  assert.match(p.said[0].text, /An infection is a doctor, not a tea/, 'the first safety line is read');
+  assert.match(p.said[0].text, /Ask a pharmacist before you add a herb/, 'and the pharmacist line comes through too');
+});

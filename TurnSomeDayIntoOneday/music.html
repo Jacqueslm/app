@@ -143,6 +143,7 @@
   }
   .chip:hover{color:var(--ink)}
   .chip[aria-pressed="true"]{background:var(--card2); color:var(--ink); border-color:rgba(232,192,122,.45)}
+  .chip.list-target{border-color:rgba(232,192,122,.5); color:var(--ink)}
   footer{margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center}
   [hidden]{display:none !important}
 </style>
@@ -186,7 +187,7 @@
     <div class="card">
       <p class="kicker">Your own lists</p>
       <h2>Playlists</h2>
-      <p class="hint">Name a list, tap it, then tap <b>+</b> on any song to put it in. The same song can go in as many times as you like — it plays every time it comes round.</p>
+      <p class="hint">Name a list and tap <b>Make it</b>, then tap <b>+</b> on any song to put it in — it stays on the songs while you do. Tap a list's name to hear just that list. The same song can go in as many times as you like — it plays every time it comes round.</p>
       <div class="chips" id="listChips"></div>
       <div class="two">
         <input type="text" id="listName" placeholder="Name a new playlist" maxlength="30" style="margin-bottom:0">
@@ -234,6 +235,24 @@
         <button class="chip" data-fade="10" type="button" aria-pressed="false">10 sec</button>
       </div>
       <p class="status" id="fadeStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="card">
+      <p class="kicker">How it plays through</p>
+      <h2>Shuffle and repeat</h2>
+      <p class="hint">Shuffle plays them in a different order each time. Repeat all starts the whole list again when the last song ends; Repeat one plays the same song round and round. The lock screen shows what is playing and carries play, pause and next, so the music can carry on with the screen off.</p>
+      <p class="kicker">Shuffle</p>
+      <div class="chips" id="shuffleChips">
+        <button class="chip" data-shuffle="0" type="button" aria-pressed="true">Off</button>
+        <button class="chip" data-shuffle="1" type="button" aria-pressed="false">On</button>
+      </div>
+      <p class="kicker">Repeat</p>
+      <div class="chips" id="repeatChips">
+        <button class="chip" data-repeat="off" type="button" aria-pressed="false">Off</button>
+        <button class="chip" data-repeat="all" type="button" aria-pressed="true">All</button>
+        <button class="chip" data-repeat="one" type="button" aria-pressed="false">One</button>
+      </div>
+      <p class="status" id="modeStatus" role="status" aria-live="polite"></p>
     </div>
   </section>
 
@@ -548,6 +567,11 @@
   // ask it rather than each keeping their own idea.
   var lists = [];          // [{ name, items:[song, …] }] — a song may repeat
   var viewList = -1;       // what the screen shows: -1 = All songs, else a playlist
+  // 8 Oct 2026: the + only worked while a playlist was the thing on screen —
+  // but a playlist on screen means its own songs and nothing else, so on a new
+  // list there was no song to tap + on. Now the + fills the list you made or
+  // last opened (targetList), so All songs can stay on screen while you fill it.
+  var targetList = -1;     // where + puts a song when All songs is showing
   var listDefs = [];       // the raw form it is kept in: [{ name, keys:[…] }]
   var LISTS_KEY = 'tsid-music-lists';
   // False until the songs are back from storage. Writing a list before that
@@ -607,6 +631,7 @@
       if (lists[i].name.toLowerCase() === name.toLowerCase()) return 'You already have a list called that.';
     }
     lists.push({ name: name, items: [] });
+    targetList = lists.length - 1;   // the new list is the one + fills
     saveLists();
     renderListChips();
     return null;
@@ -617,16 +642,23 @@
     lists.splice(i, 1);
     if (viewList === i) viewList = -1;
     else if (viewList > i) viewList--;
+    if (targetList === i) targetList = -1;
+    else if (targetList > i) targetList--;
     saveLists();
     renderListChips();
     renderPlaylist();
   }
 
   // The heart of the request: the same song goes in again and again, and every
-  // copy plays when its turn comes round.
+  // copy plays when its turn comes round. On a playlist that list is the one
+  // on screen; on All songs it is the list the + is pointed at.
+  function listForAdd(){
+    return viewList >= 0 ? viewList : targetList;
+  }
   function addToList(song){
-    if (viewList < 0 || !lists[viewList]) return 'Tap a playlist below first, then tap + to add songs to it.';
-    lists[viewList].items.push(song);
+    var i = listForAdd();
+    if (i < 0 || !lists[i]) return 'Tap a playlist below first, then tap + to add songs to it.';
+    lists[i].items.push(song);
     saveLists();
     renderPlaylist();
     return null;
@@ -658,20 +690,25 @@
     var playing = (roomIndex < 0 && current >= 0) ? view()[current] : null;
     // The song fading in as the next one was aimed at the old list.
     if (typeof crossStop === 'function') crossStop();
+    // A shuffle path belongs to the list it was walked in.
+    history = [];
+    played = {};
     viewList = i;
+    if (i >= 0) targetList = i;   // the list last opened is the one + fills
     var arr = view();
     current = playing ? arr.indexOf(playing) : -1;
     renderListChips();
     renderPlaylist();
     say($('listStatus'), viewList < 0
       ? 'Showing all your songs.'
-      : 'Now showing “' + lists[viewList].name + '” — tap + on songs to add them.');
+      : 'Now showing “' + lists[viewList].name + '”. Tap All songs to put more songs in it.');
   }
 
   function addToPlaylist(song){
+    var i = listForAdd();
     var err = addToList(song);
     if (err) { say($('listStatus'), err, true); return; }
-    say($('listStatus'), 'Added ' + song.name + ' to ' + lists[viewList].name + '.');
+    say($('listStatus'), 'Added ' + song.name + ' to ' + lists[i].name + '.');
   }
 
   // ── tabs ──────────────────────────────────────────────────────────────────
@@ -772,7 +809,7 @@
     if (!arr.length) {
       $('emptyList').textContent = viewList < 0
         ? 'No songs added yet.'
-        : 'This list is empty — tap + on a song to put it in.';
+        : 'This list is empty — tap All songs, then + on a song to put it in.';
     }
     arr.forEach(function(s, i){
       var li = document.createElement('li');
@@ -793,18 +830,8 @@
       meta.appendChild(t);
       meta.appendChild(d);
 
-      // + puts this song in the list showing. The same song may already be in
-      // it — that is the point of it, so there is no check to pass.
-      var plus = document.createElement('button');
-      plus.type = 'button';
-      plus.className = 'x plus';
-      plus.setAttribute('aria-label', 'Add ' + s.name + ' to a playlist');
-      plus.textContent = '+';
-      plus.addEventListener('click', function(ev){
-        ev.stopPropagation();
-        addToPlaylist(s);
-      });
-
+      // The ✕ goes on every row: on a list it takes the row out, on All songs
+      // it takes the song off the phone.
       var x = document.createElement('button');
       x.type = 'button';
       x.className = 'x';
@@ -819,7 +846,23 @@
 
       li.appendChild(idx);
       li.appendChild(meta);
-      li.appendChild(plus);
+      // + puts this song in the list the + is pointed at. The same song may
+      // already be in it — that is the point of it, so there is no check to
+      // pass. There is no + at all until a list exists to put songs in, so the
+      // page never offers a button that can only refuse.
+      var addTo = listForAdd();
+      if (addTo >= 0 && lists[addTo]) {
+        var plus = document.createElement('button');
+        plus.type = 'button';
+        plus.className = 'x plus';
+        plus.setAttribute('aria-label', 'Add ' + s.name + ' to ' + lists[addTo].name);
+        plus.textContent = '+';
+        plus.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          addToPlaylist(s);
+        });
+        li.appendChild(plus);
+      }
       li.appendChild(x);
       li.addEventListener('click', function(){ selectSong(i, true); });
       list.appendChild(li);
@@ -841,6 +884,9 @@
       b.className = 'chip';
       b.textContent = o.name;
       b.setAttribute('aria-pressed', o.i === viewList ? 'true' : 'false');
+      // While All songs is showing, the list the + fills is ringed so it is
+      // obvious where a song is about to land.
+      if (o.i >= 0 && o.i === targetList && o.i !== viewList) b.classList.add('list-target');
       b.addEventListener('click', function(){ setView(o.i); });
       row.appendChild(b);
     });
@@ -890,6 +936,7 @@
     $('nowTitle').textContent = t.name;
     $('nowMeta').textContent = 'The meditation room';
     $('playerNote').textContent = '';
+    mediaSessionSetup();
     audio.play().catch(function(){
       say($('roomStatus'), 'The phone would not start it. Turn the sound up and tap once more.', true);
     });
@@ -953,6 +1000,7 @@
     lists = [];
     listDefs = [];
     viewList = -1;
+    targetList = -1;
     listsResolved = true;
     if (typeof crossStop === 'function') crossStop();
     $('nowCard').hidden = true;
@@ -976,6 +1024,8 @@
     $('nowTitle').textContent = s.name;
     $('nowMeta').textContent = s.meta;
     $('playerNote').textContent = '';
+    // The lock screen follows the song from here on.
+    mediaSessionSetup();
     if (play) {
       audio.play().catch(function(){
         say($('playerStatus'), 'The phone would not start the song. Tap play once more.', true);
@@ -992,40 +1042,59 @@
   $('prev').addEventListener('click', function(){ step(-1); });
   $('next').addEventListener('click', function(){ step(1); });
   function step(dir){
-    // Whichever list is playing is the list that steps.
-    if (roomIndex >= 0) { playRoom((roomIndex + dir + ROOM.length) % ROOM.length); return; }
+    // Whichever list is playing is the list that steps — and when shuffle is on
+    // it is the shuffle that decides where, not the order of the rows.
+    if (roomIndex >= 0){
+      var r = stepIndex(dir, roomIndex);
+      if (r >= 0) playRoom(r);
+      return;
+    }
     var arr = view();
     if (!arr.length) return;
-    var n = current + dir;
-    if (n < 0) n = arr.length - 1;
-    if (n >= arr.length) n = 0;
-    selectSong(n, true);
+    var n = current < 0 ? (dir > 0 ? 0 : arr.length - 1) : stepIndex(dir, current);
+    if (n >= 0) selectSong(n, true);
   }
 
-  // What comes after the song playing — asked by Next and by the cross-fade,
-  // which needs to know what it is bringing up before the song ends.
+  // What comes after the song playing — asked by the cross-fade, which needs to
+  // know what it is bringing up before the song ends. Next asks stepIndex instead.
   function nextTrack(){
-    if (roomIndex >= 0) return ROOM.length > 1 ? ROOM[(roomIndex + 1) % ROOM.length] : null;
-    var arr = view();
-    if (arr.length < 2 || current < 0) return null;
-    var n = current + 1;
-    if (n >= arr.length) n = 0;
-    return arr[n] || null;
+    // The song the cross-fade brings up. With shuffle on it is chosen here, and
+    // the index is remembered, so the hand-over moves the player onto the very
+    // song that was loaded rather than a second, different one.
+    var arr = arrFor();
+    if (arr.length < 2 || (roomIndex < 0 && current < 0)) return null;
+    if (pendingIndex >= 0 && pendingIndex < arr.length && pendingRoom === (roomIndex >= 0)) return arr[pendingIndex];
+    var i = autoNextIndex();
+    if (i < 0) return null;
+    pendingIndex = i;
+    pendingRoom = roomIndex >= 0;
+    return arr[i] || null;
   }
 
   // The cross-fade hands over mid-song, so the player is told which track is
   // now playing without anything being started or stopped.
   function advanceIndex(){
-    if (roomIndex >= 0) roomIndex = (roomIndex + 1) % ROOM.length;
-    else {
+    // The cross-fade has already loaded one particular song — shuffle may have
+    // chosen it — so the player is told which one that was rather than counting
+    // forward and landing somewhere else.
+    if (roomIndex >= 0){
+      roomIndex = (pendingRoom && pendingIndex >= 0 && pendingIndex < ROOM.length)
+        ? pendingIndex : (roomIndex + 1) % ROOM.length;
+    } else {
       var arr = view();
-      if (arr.length) { current++; if (current >= arr.length) current = 0; }
+      if (arr.length) {
+        current = (pendingIndex >= 0 && pendingIndex < arr.length) ? pendingIndex : current + 1;
+        if (current >= arr.length) current = 0;
+      }
     }
+    pendingIndex = -1;
+    pendingRoom = false;
     var t = roomIndex >= 0 ? ROOM[roomIndex] : view()[current];
     if (t) {
       $('nowTitle').textContent = t.name;
       $('nowMeta').textContent = roomIndex >= 0 ? 'The meditation room' : t.meta;
       $('playerNote').textContent = '';
+      mediaSessionSetup();
     }
   }
 
@@ -1033,9 +1102,9 @@
   // element actually playing before it touches anything: the other is only ever
   // the next song coming up, and its timeupdate must not move the seek bar.
   var onPlay, onPause, onEnded;
-  audio.addEventListener('play', onPlay = function(){ if (this !== audio) return; startFade(); $('playBtn').textContent = '❚❚'; });
-  audio.addEventListener('pause', onPause = function(){ if (this !== audio) return; $('playBtn').textContent = '▶'; stopFade(); if (!audio.ended) crossStop(); if (!fadeSec) audio.volume = 1; syncGain(); });
-  audio.addEventListener('ended', onEnded = function(){ if (this !== audio) return; if (crossOn) { if (!crossSwap()) step(1); } else if (roomIndex >= 0 ? ROOM.length > 1 : view().length > 1) step(1); else { stopFade(); audio.volume = 1; } syncGain(); });
+  audio.addEventListener('play', onPlay = function(){ if (this !== audio) return; startFade(); $('playBtn').textContent = '❚❚'; mediaPlaying(true); mediaSessionSetup(); });
+  audio.addEventListener('pause', onPause = function(){ if (this !== audio) return; $('playBtn').textContent = '▶'; stopFade(); if (!audio.ended) crossStop(); if (!fadeSec) audio.volume = 1; syncGain(); mediaPlaying(false); });
+  audio.addEventListener('ended', onEnded = function(){ if (this !== audio) return; if (crossOn) { if (!crossSwap()) step(1); } else { var n = autoNextIndex(); if (n >= 0) goTo(n); else { stopFade(); audio.volume = 1; } } syncGain(); });
 
   function onMeta(){ if (this !== audio) return; $('dText').textContent = fmt(audio.duration); }
   function onTick(){
@@ -1067,6 +1136,180 @@
     var d = audio.duration;
     if (isFinite(d) && d > 0) audio.currentTime = Number($('seek').value) / 1000 * d;
   });
+
+  // ── shuffle and repeat ────────────────────────────────────────────────────
+  // 8 Oct 2026, Jacques: "add shuffle and repeat and make sure it plays when
+  // screen is off".
+  //
+  // Shuffle plays the list in a different order each time and keeps the path it
+  // has taken, so Prev walks back down it rather than jumping somewhere new.
+  // Repeat is off, all or one: off finishes the list and stops, all starts it
+  // again, and one plays the same song round. Both choices are kept on the
+  // phone, under their own keys, away from the songs and away from the fade.
+  var SHUFFLE_KEY = 'tsid-music-shuffle';
+  var REPEAT_KEY = 'tsid-music-repeat';
+  var shuffleOn = false;
+  var repeatMode = 'all';
+  var history = [];        // what shuffle has played, so Prev can walk back
+  var played = {};         // with repeat off and shuffle on: who has had a turn
+  var pendingIndex = -1;   // the song the cross-fade has loaded and will hand to
+  var pendingRoom = false; // whether that song is the room's or the person's
+
+  function arrFor(){
+    return roomIndex >= 0 ? ROOM : view();
+  }
+  function nowIndex(){
+    return roomIndex >= 0 ? roomIndex : current;
+  }
+  function goTo(i){
+    if (roomIndex >= 0) playRoom(i);
+    else selectSong(i, true);
+  }
+
+  // Shuffle is a bag, not a dice roll: every song comes up once before any song
+  // comes up twice, and never the one already playing. played is what has been
+  // drawn in this pass; when the bag has nothing left in it, it is filled again.
+  // Repeat off reads that same bag to know when the list has run out.
+  function pickShuffle(arr, from){
+    var pool = [];
+    var i;
+    for (i = 0; i < arr.length; i++) if (i !== from && !played[i]) pool.push(i);
+    if (!pool.length){
+      played = {};
+      for (i = 0; i < arr.length; i++) if (i !== from) pool.push(i);
+    }
+    if (!pool.length) return from;   // a list of one has nowhere else to go
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function stepIndex(dir, from){
+    var arr = arrFor();
+    if (!arr.length) return -1;
+    if (!(from >= 0) || from >= arr.length) from = 0;
+    if (shuffleOn && dir > 0 && arr.length > 1){
+      history.push(from);
+      if (history.length > 200) history.shift();   // only the path back matters
+      played[from] = true;                         // out of the bag, its turn is had
+      return pickShuffle(arr, from);
+    }
+    if (shuffleOn && dir < 0 && history.length) return history.pop();
+    var n = from + dir;
+    if (n < 0) n = arr.length - 1;
+    if (n >= arr.length) n = 0;
+    return n;
+  }
+
+  // What plays when this song ends by itself. -1 means nothing does: this was
+  // the last of the list and the setting is not to start it again.
+  function autoNextIndex(){
+    var arr = arrFor();
+    var from = nowIndex();
+    if (!arr.length || from < 0) return -1;
+    if (repeatMode === 'one') return from;
+    if (arr.length < 2) return repeatMode === 'all' ? from : -1;
+    if (repeatMode === 'off'){
+      // With the order moving, the list has "run out" once every song has had
+      // its turn — the honest reading of off when shuffle is on.
+      if (shuffleOn){
+        played[from] = true;
+        if (Object.keys(played).length >= arr.length) return -1;
+      } else if (from >= arr.length - 1) return -1;
+    }
+    return stepIndex(1, from);
+  }
+
+  var shuffleChips = $('shuffleChips').querySelectorAll('.chip');
+  var repeatChips = $('repeatChips').querySelectorAll('.chip');
+
+  function setShuffle(on, tell){
+    shuffleOn = !!on;
+    history = [];
+    played = {};
+    Array.prototype.forEach.call(shuffleChips, function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-shuffle') === (shuffleOn ? '1' : '0') ? 'true' : 'false');
+    });
+    try { window.localStorage.setItem(SHUFFLE_KEY, shuffleOn ? '1' : '0'); } catch(e){ /* private window */ }
+    if (tell) say($('modeStatus'), shuffleOn
+      ? 'Shuffle on \u2014 the order changes each time round.'
+      : 'Shuffle off \u2014 they play in the order they are listed.');
+  }
+
+  function setRepeat(mode, tell){
+    repeatMode = (mode === 'off' || mode === 'one') ? mode : 'all';
+    Array.prototype.forEach.call(repeatChips, function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-repeat') === repeatMode ? 'true' : 'false');
+    });
+    try { window.localStorage.setItem(REPEAT_KEY, repeatMode); } catch(e){ /* private window */ }
+    if (tell) say($('modeStatus'), repeatMode === 'off'
+      ? 'Repeat off \u2014 the music stops when the list runs out.'
+      : (repeatMode === 'one'
+        ? 'Repeat one \u2014 this song comes round again.'
+        : 'Repeat all \u2014 the list starts again at the end.'));
+  }
+
+  Array.prototype.forEach.call(shuffleChips, function(c){
+    c.addEventListener('click', function(){ setShuffle(c.getAttribute('data-shuffle') === '1', true); });
+  });
+  Array.prototype.forEach.call(repeatChips, function(c){
+    c.addEventListener('click', function(){ setRepeat(c.getAttribute('data-repeat'), true); });
+  });
+
+  /* Painted from the setting, so the row and the choice can never disagree. */
+  var startShuffle = false;
+  var startRepeat = 'all';
+  try { startShuffle = window.localStorage.getItem(SHUFFLE_KEY) === '1'; } catch(e){ /* nothing kept */ }
+  try { var keptRepeat = window.localStorage.getItem(REPEAT_KEY); if (keptRepeat) startRepeat = keptRepeat; } catch(e){ /* nothing kept */ }
+  setShuffle(startShuffle, false);
+  setRepeat(startRepeat, false);
+
+  // ── playing with the screen off ───────────────────────────────────────────
+  // The lock screen is told what is playing (the Media Session), so the phone
+  // shows the song with play, pause, back and next on it and keeps the sound
+  // alive while the screen is off. Nothing on this page stops the sound when it
+  // is put away — there is no "hidden" handler anywhere — and the fade's Web
+  // Audio graph is built only once a fade is actually chosen, because sending
+  // the sound through Web Audio is what silences it on an iPhone when the
+  // screen locks.
+  function nowTrack(){
+    if (roomIndex >= 0) return ROOM[roomIndex] || null;
+    var arr = view();
+    return (current >= 0 && arr[current]) ? arr[current] : null;
+  }
+  function nowAlbum(){
+    if (roomIndex >= 0) return 'The meditation room';
+    return (viewList >= 0 && lists[viewList]) ? lists[viewList].name : 'All songs';
+  }
+  function mediaSessionSetup(){
+    if (!navigator.mediaSession) return;
+    try {
+      var t = nowTrack();
+      if (!t || !t.name) return;
+      if (window.MediaMetadata){
+        navigator.mediaSession.metadata = new window.MediaMetadata({
+          title: t.name,
+          artist: roomIndex >= 0 ? 'The meditation room' : (t.meta || 'The Music'),
+          album: nowAlbum(),
+          artwork: [
+            { src: 'icons/zodiacs-192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'icons/zodiacs-512.png', sizes: '512x512', type: 'image/png' },
+          ],
+        });
+      }
+      var handlers = {
+        play: function(){ if (audio.paused) audio.play().catch(function(){}); },
+        pause: function(){ audio.pause(); },
+        nexttrack: function(){ step(1); },
+        previoustrack: function(){ step(-1); },
+        seekto: function(d){ if (d && isFinite(d.seekTime)) audio.currentTime = d.seekTime; },
+      };
+      Object.keys(handlers).forEach(function(k){
+        try { navigator.mediaSession.setActionHandler(k, handlers[k]); } catch(e){ /* not this phone */ }
+      });
+    } catch(e){ /* an older phone without any of it */ }
+  }
+  function mediaPlaying(on){
+    try { if (navigator.mediaSession) navigator.mediaSession.playbackState = on ? 'playing' : 'paused'; } catch(e){ /* not this phone */ }
+  }
 
   // ── fade between songs ────────────────────────────────────────────────────
   // 5 Oct 2026, rebuilt 7 Oct 2026. There are two <audio> elements now: as the
@@ -1141,6 +1384,10 @@
   }
 
   function crossStop(){
+    // Whatever the cross-fade had lined up is no longer coming: the pick it made
+    // (shuffle may have chosen it) must never be handed over later.
+    pendingIndex = -1;
+    pendingRoom = false;
     if (!crossOn) return;
     crossOn = false;
     try {
@@ -1225,7 +1472,12 @@
       : 'Fade off — the next song starts straight away.');
   }
   Array.prototype.forEach.call(fadeChips, function(c){
-    c.addEventListener('click', function(){ setFade(c.getAttribute('data-fade'), true); });
+    c.addEventListener('click', function(){
+      // Asking for the fade is what asks for the gain it needs on a phone that
+      // ignores audio.volume — and a real tap is the only moment it can be made.
+      ensureAudio();
+      setFade(c.getAttribute('data-fade'), true);
+    });
   });
   /* The chips are painted from here rather than trusted to the markup, so the
      setting and the row can never disagree about which one is on. */
@@ -1595,8 +1847,12 @@
     var err = makeList(name);
     if (err) { say($('listStatus'), err, true); return; }
     $('listName').value = '';
-    setView(lists.length - 1);
-    say($('listStatus'), 'Made “' + name + '”. Now tap + on songs to put them in.');
+    // Back to All songs, so the songs are on screen with a + on each row and
+    // the new list is what they go into. (Making a list used to jump straight
+    // to the new, empty list — and then there was nothing to tap + on.)
+    if (viewList >= 0) setView(-1);
+    renderListChips();
+    say($('listStatus'), 'Made “' + name + '”. Tap + on the songs you want in it, then tap its name to hear it.');
   });
   $('listName').addEventListener('keydown', function(e){
     if (e.key === 'Enter') $('makeList').click();
@@ -1730,9 +1986,11 @@
   paintRingLabels();
   // Whatever was kept from last time comes back here.
   restoreSongs();
-  // One real tap is what lets the audio engine start — after that the fade can
-  // go through a gain on a phone that ignores audio.volume.
-  document.addEventListener('click', function(){ ensureAudio(); }, true);
+  // One real tap is what lets the audio engine start, and it is only used once a
+  // fade has actually been chosen: the gain is what the fade needs on a phone
+  // that ignores audio.volume, and it is also what stops the sound on an iPhone
+  // when the screen locks — so a player with no fade on never gets one.
+  document.addEventListener('click', function(){ if (fadeSec > 0) ensureAudio(); }, true);
 })();
 </script>
 </body>

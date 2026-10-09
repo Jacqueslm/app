@@ -413,13 +413,20 @@ test('the trainer page is the app\'s own file, and the door leads to it', async 
       assert.strictEqual(cold.status, 302, `${url}: signed out must be redirected, not served`);
       assert.strictEqual(cold.location, '/app', `${url}: and sent to the app`);
       // A marker that is on the page and nowhere else: the redirect must carry
-      // none of it.
-      assert.ok(!cold.body.includes('Coach Log') && !cold.body.includes('restAdd'),
+      // none of it. Both were re-picked on 9 Oct 2026 when the page was rebuilt
+      // onto the by-10 home regimen - the title it used to carry ('Coach Log')
+      // is gone, and a marker that is no longer on the page proves nothing.
+      assert.ok(!cold.body.includes('The Trainer') && !cold.body.includes('restAdd'),
         `${url}: no part of the page may come back with the redirect`);
 
       const warm = await get(url, true);
       assert.strictEqual(warm.status, 200, `${url}: signed in and on the list gets the page`);
       assert.ok(warm.body.length > 20000, `${url}: and it is the whole page, not a stub`);
+      // Both markers must really be on the page, or the check above would pass
+      // on a page that carries neither of them.
+      for (const marker of ['The Trainer', 'restAdd']) {
+        assert.ok(warm.body.includes(marker), `${url}: the page must still carry "${marker}"`);
+      }
       assert.equal(warm.body, fs.readFileSync(path.join(ROOT, 'trainer.html'), 'utf8'),
         `${url}: the repository's own file, byte for byte`);
     }

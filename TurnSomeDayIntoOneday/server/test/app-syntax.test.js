@@ -76,7 +76,10 @@ test('the other shipped HTML pages parse too', () => {
   // leaves a page that looks loaded and does nothing.
   // trainer.html joined on 9 Oct 2026: one inline script holding the whole gym
   // page - the plan, the logging, the rest timer and the charts - so a
-  // SyntaxError in it leaves a page that looks loaded and does nothing.
+  // SyntaxError in it leaves a page that looks loaded and does nothing. It was
+  // rebuilt the same day onto the by-10 home regimen (three lifts, two cardio,
+  // a stretch day, ten seconds between moves), and the player for the lifts and
+  // the cardio runner are now the largest part of that one script.
   const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html', 'trainer.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {

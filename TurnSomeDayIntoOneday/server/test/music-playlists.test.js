@@ -227,9 +227,56 @@ test('switching lists keeps playing what was playing, when it is in both', () =>
   assert.strictEqual(h.run('current'), 0, 'the same song is now first of the list');
   h.run('setView(-1)');
   assert.strictEqual(h.run('current'), 1, 'and back on All songs it is where it was');
+});/* ------------------------------------------- making a list must not hide the songs */
+// 8 Oct 2026, Jacques: "how do you add music to playlist its doesn't look right".
+// It did not: making a list jumped straight onto the new, empty list, so the
+// songs were off screen and the + the page kept pointing at had nothing to sit
+// on. The + now fills the list you made or opened, and All songs stays put.
+
+test('a list made on All songs takes the + and leaves every song on screen', () => {
+  const a = { key: 'a', name: 'A' };
+  const b = { key: 'b', name: 'B' };
+  const h = harness({}, [a, b]);
+  h.run('listsResolved = true');
+  assert.strictEqual(h.run('viewList'), -1, 'the page starts on All songs');
+  assert.strictEqual(h.run('makeList("Mix")'), null);
+  assert.strictEqual(h.run('viewList'), -1, 'making a list does not hide the songs');
+  assert.strictEqual(h.run('view().length'), 2, 'both songs are still there to put in it');
+  assert.strictEqual(h.run('addToList(songs[0])'), null, 'and the + works right there');
+  assert.strictEqual(h.run('lists[0].items.length'), 1);
+  assert.strictEqual(h.run('lists[0].items[0] === songs[0]'), true);
+  assert.deepStrictEqual(JSON.parse(h.stored['tsid-music-lists'])[0].keys, ['a'],
+    'and the song is kept in the list');
+});
+
+test('opening a list points the + at it, even after going back to All songs', () => {
+  const h = harness({}, [{ key: 'a', name: 'A' }]);
+  h.run('listsResolved = true');
+  h.run('makeList("One")');
+  h.run('makeList("Two")');    // Two is where + would land now
+  h.run('setView(0)');          // opening One makes One the one + fills
+  h.run('setView(-1)');
+  assert.strictEqual(h.run('targetList'), 0, 'the list last opened is the one + fills');
+  h.run('addToList(songs[0])');
+  assert.strictEqual(h.run('lists[0].items.length'), 1);
+  assert.strictEqual(h.run('lists[1].items.length'), 0, 'the other list is untouched');
+});
+
+test('deleting the list the + was pointed at leaves it pointed at nothing', () => {
+  const h = harness({}, [{ key: 'a', name: 'A' }]);
+  h.run('listsResolved = true');
+  h.run('makeList("One")');
+  h.run('deleteList(0)');
+  assert.strictEqual(h.run('targetList'), -1);
+  assert.match(String(h.run('addToList(songs[0])')), /Tap a playlist below first/,
+    'with no list left, the + says what to do instead of filling a ghost');
 });
 
 /* -------------------------------------------------------------- the page itself */
+test('the + is only drawn once there is a list for it to fill', () => {
+  assert.match(PAGE, /var addTo = listForAdd\(\);/, 'the row asks where + would put the song');
+  assert.match(PAGE, /if \(addTo >= 0 && lists\[addTo\]\)/, 'and draws the + only when there is an answer');
+});
 
 test('the playlists card is on the player, with the buttons the tests assume', () => {
   for (const id of ['listChips', 'listName', 'makeList', 'listRow', 'delList', 'listStatus']) {

@@ -138,7 +138,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 
    The entries make claims — what a plant does, how it is taken, what it is
    taken with, and the caution that travels with it. This page is private,
-   between two people, built from books they own, and the public app’s caution does not govern it (15 Sep 2026). An open herb can be read out loud by the phone itself.
+   between two people, built from books they own, and the public app’s caution does not govern it (15 Sep 2026). Every shelf here can be read out loud by the phone itself — an open herb, the book sections, the thirty days and the safety tab.
 
    The second rule is the one that matters for this house: nothing here tells
    somebody they are finished, and nothing here talks somebody out of a doctor.
@@ -1392,12 +1392,14 @@ var EXAM_PASS = 16;
    way of doing it — the click handler on the view already toggles by data-h. */
 function bsec(b,i){
   var id='bk'+i, open=openId===id;
+  SAY_TEXT[id]=bsecText(b);
   var out='<div class="card'+(open?' open':'')+'" data-h="'+id+'">'
    +'<div class="row"><div class="row-txt"><b>'+esc(b.h)+'</b>'
    +(b.s?'<span>'+esc(b.s)+'</span>':'')+'</div><div class="chev">&#8250;</div></div>'
    +'<div class="body">';
   (b.rows||[]).forEach(function(r){ out+='<p><b>'+esc(r[0])+'</b> &mdash; '+esc(r[1])+'</p>' });
   if(b.note) out+='<div class="big '+(b.noteCls||'warnbox')+'">'+b.note+'</div>';
+  out+=saybarHTML(id);
   out+='</div></div>';
   return out;
 }
@@ -1445,6 +1447,7 @@ function answer(d,qi,oi){
 
 function courseDay(day){
   var rec=dayScore(day.d), open=openId==='d'+day.d;
+  SAY_TEXT['d'+day.d]=daySayText(day);
   var out='<div class="card'+(open?' open':'')+'" data-h="d'+day.d+'">'
    +'<div class="row"><div class="row-txt"><div class="dayno">Day '+day.d+(day.test?' \u00b7 the test':' of 30')+'</div>'
    +'<b>'+esc(day.t)+'</b><span>'+esc(day.s)+(rec.done?' &middot; '+rec.right+' of '+rec.total+' right':'')+'</span></div>'
@@ -1452,6 +1455,7 @@ function courseDay(day){
   (day.p||[]).forEach(function(t){ out+='<p>'+esc(t)+'</p>' });
   if(day.bk) out+='<div class="big okbox"><b>From the books &middot; their line</b>'+esc(day.bk)+'</div>';
   if(day.note) out+='<div class="big warnbox"><b>This page\u2019s own line</b>'+esc(day.note)+'</div>';
+  out+=saybarHTML('d'+day.d);
   out+='<div class="lbl">'+(day.test?'The test \u00b7 twenty questions':'Day '+day.d+' quiz')+'</div>';
   day.q.forEach(function(q,i){
     var p=picked(day.d,i);
@@ -1530,15 +1534,10 @@ function render(){
   }
 
   if(tab==='safety'){
-    out=
-    '<div class="sec">'
-    +'<div class="big redbox"><b>An infection is a doctor, not a tea</b>Nothing in this library treats an infection. Not oregano oil, not goldenseal, not garlic. A fever that will not come down, a wound going red and hot, a chest that rattles, a tooth gone bad, anything yellow or green coming up — that is a doctor today, not a herb.</div>'
-    +'<div class="big warnbox"><b>Coming off alcohol or a drug</b>Alcohol withdrawal can kill. It is not something to sit out with chamomile and valerian. If you have been drinking heavily and stop, that is a doctor or a hospital, and the timeline page in the app says the same thing. Herbs do not belong in that week.</div>'
-    +'<div class="big warnbox"><b>If you take any medication</b>St John\u2019s wort alone interferes with antidepressants, birth control, blood thinners and HIV medicine. Licorice and hibiscus move blood pressure. Ginger, ginkgo, turmeric, garlic and white willow all thin the blood. Ask a pharmacist before you add a herb to what you already take — one question, free, in any chemist.</div>'
-    +'<div class="big warnbox"><b>Kratom is not in this library</b>It is sold as a herb. It acts on the same receptors as opioids and it is addictive — people come off it with withdrawal like any opioid. It has no place here.</div>'
-    +'<div class="big warnbox"><b>Pregnancy and children</b>Most of this list is not for pregnancy. Raspberry leaf is the one people talk about, and even that is a midwife\u2019s call. Children are not small adults for dosing — a few of these are genuinely dangerous for a baby, goldenseal and comfrey root especially.</div>'
-    +'<div class="big warnbox"><b>Liver</b>Comfrey is never taken internally. Kava and several cleanse brews put strain on a liver that is already tired. If you have been hard on your body and you want to clean it up, food and water and time do that. A tea does not.</div>'
-    +'<div class="big okbox"><b>What this page is</b>What these plants do, and what the two books say they do. The claims are made here plainly, because this is a private shelf for two people and their own books (15 Sep 2026). What still holds is at the top of this tab: an infection, withdrawal, a chest that hurts to breathe or a bleed that will not stop is a doctor.'
+    SAY_TEXT['safety']=safetySayText();
+    out='<div class="sec">'
+    +SAFETY_BOXES.map(function(x){ return '<div class="big '+x.cls+'"><b>'+x.h+'</b>'+x.b+'</div>' }).join('')
+    +saybarHTML('safety')
     +'</div>';
   }
 
@@ -1593,9 +1592,7 @@ function card(h){
   +(h.h?'<div class="lbl">How it is traditionally taken</div><p>'+esc(h.h)+'</p>':'')
   +(h.c?'<div class="lbl">Caution</div><p>'+esc(h.c)+'</p>':'')
   +(h.bk?'<div class="lbl">From the books</div><p>'+esc(h.bk)+'</p>':'')
-  +'<div class="lbl">Read aloud</div>'
-  +'<div class="saybar"><button class="txtbtn" data-say="'+esc(h.id)+'">Read it to me</button>'
-  +'<button class="txtbtn" data-saystop="1" hidden>Stop</button></div>'
+  +saybarHTML(h.id)
   +'<div class="lbl">What your book says</div>'
   +'<div class="note"><textarea data-note="'+esc(h.id)+'" placeholder="As you read, put it here — the page and the words.">'+esc(noteOf(h.id))+'</textarea><div class="saved">Saved on this phone as you type. Nothing is sent anywhere.</div></div>'
   +'</div></div>';
@@ -1646,6 +1643,55 @@ document.querySelectorAll('.tab').forEach(function(el){
    voice of its own the button says so instead of doing nothing.
 --------------------------------------------------------------------------- */
 var SAY_BUSY=null;
+
+/* The same on-device voice reads the rest of the page too — the book sections,
+   the thirty days and the safety tab — so the whole library can be listened to,
+   not only one herb at a time. Ids that are not herbs register their plain text
+   here when the page draws them; say() reads it back word for word. */
+var SAY_TEXT={};
+
+/* The safety tab, said as well as shown. One source for both, so the spoken
+   version can never drift from the written one. */
+var SAFETY_BOXES=[
+ {cls:'redbox',h:'An infection is a doctor, not a tea',b:'Nothing in this library treats an infection. Not oregano oil, not goldenseal, not garlic. A fever that will not come down, a wound going red and hot, a chest that rattles, a tooth gone bad, anything yellow or green coming up — that is a doctor today, not a herb.'},
+ {cls:'warnbox',h:'Coming off alcohol or a drug',b:'Alcohol withdrawal can kill. It is not something to sit out with chamomile and valerian. If you have been drinking heavily and stop, that is a doctor or a hospital, and the timeline page in the app says the same thing. Herbs do not belong in that week.'},
+ {cls:'warnbox',h:'If you take any medication',b:'St John\u2019s wort alone interferes with antidepressants, birth control, blood thinners and HIV medicine. Licorice and hibiscus move blood pressure. Ginger, ginkgo, turmeric, garlic and white willow all thin the blood. Ask a pharmacist before you add a herb to what you already take — one question, free, in any chemist.'},
+ {cls:'warnbox',h:'Kratom is not in this library',b:'It is sold as a herb. It acts on the same receptors as opioids and it is addictive — people come off it with withdrawal like any opioid. It has no place here.'},
+ {cls:'warnbox',h:'Pregnancy and children',b:'Most of this list is not for pregnancy. Raspberry leaf is the one people talk about, and even that is a midwife\u2019s call. Children are not small adults for dosing — a few of these are genuinely dangerous for a baby, goldenseal and comfrey root especially.'},
+ {cls:'warnbox',h:'Liver',b:'Comfrey is never taken internally. Kava and several cleanse brews put strain on a liver that is already tired. If you have been hard on your body and you want to clean it up, food and water and time do that. A tea does not.'},
+ {cls:'okbox',h:'What this page is',b:'What these plants do, and what the two books say they do. The claims are made here plainly, because this is a private shelf for two people and their own books (15 Sep 2026). What still holds is at the top of this tab: an infection, withdrawal, a chest that hurts to breathe or a bleed that will not stop is a doctor.'}
+];
+
+/* The read-aloud buttons, built once so every shelf carries the same pair. */
+function saybarHTML(id){
+  return '<div class="lbl">Read aloud</div>'
+   +'<div class="saybar"><button class="txtbtn" data-say="'+esc(id)+'">Read it to me</button>'
+   +'<button class="txtbtn" data-saystop="1" hidden>Stop</button></div>';
+}
+/* A book section, word for word as the card shows it (the note is HTML, so its
+   tags come off before it is spoken). */
+function bsecText(b){
+  var s=b.h?b.h+'. ':' ';
+  if(b.s) s+=b.s+'. ';
+  (b.rows||[]).forEach(function(r){ s+=r[0]+'. '+r[1]+'. ' });
+  if(b.note) s+=String(b.note).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()+' ';
+  return s;
+}
+/* A day of the thirty: the teaching, the book line and this page's own line.
+   The quiz is left to the eye — reading the answers out would spoil it. */
+function daySayText(day){
+  var s='Day '+day.d+'. '+(day.t?day.t+'. ':'')+(day.s?day.s+'. ':'');
+  (day.p||[]).forEach(function(t){ s+=t+' ' });
+  if(day.bk) s+='From the books, their line. '+day.bk+' ';
+  if(day.note) s+='This page\u2019s own line. '+day.note+' ';
+  return s;
+}
+function safetySayText(){
+  var s='Read this first. ';
+  SAFETY_BOXES.forEach(function(x){ s+=x.h+'. '+x.b+' ' });
+  return s;
+}
+
 function speechOK(){
   return typeof speechSynthesis!=='undefined' && typeof SpeechSynthesisUtterance!=='undefined';
 }
@@ -1671,13 +1717,17 @@ function sayText(h){
   return s;
 }
 function say(id){
-  var h=null;
-  allHerbs().forEach(function(x){ if(x.id===id) h=x });
-  if(!h) return;
+  var text=SAY_TEXT[id];
+  if(text==null){
+    var h=null;
+    allHerbs().forEach(function(x){ if(x.id===id) h=x });
+    if(!h) return;
+    text=sayText(h);
+  }
   if(!speechOK()){ sayLabel('This phone has no voice'); return; }
   if(SAY_BUSY===id){ sayStop(); return; }
   try{ speechSynthesis.cancel() }catch(e){}
-  var u=new SpeechSynthesisUtterance(sayText(h));
+  var u=new SpeechSynthesisUtterance(text);
   u.onend=function(){ if(SAY_BUSY===id) sayStop() };
   u.onerror=function(){ if(SAY_BUSY===id) sayStop() };
   SAY_BUSY=id;

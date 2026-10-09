@@ -119,6 +119,11 @@ const OPEN_PAGES = [
   // the route that judges it. Both addresses, because music.html is a real file
   // as well as a clean URL, and static would otherwise serve the name unguarded.
   '/music', '/music.html',
+  // The Trainer (9 Oct 2026): the gym page, asked for as "a private page"
+  // inside the app. Listed for the same reason as all of the above — this only
+  // lets the request REACH the gated route in server.js; the door itself is
+  // there. Both addresses, because trainer.html is a real file too.
+  '/trainer', '/trainer.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, and a letter link (/l/<token>).

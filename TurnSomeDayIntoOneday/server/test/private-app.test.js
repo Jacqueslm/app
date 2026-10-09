@@ -355,6 +355,88 @@ test('The Music is behind the door too, at both of its addresses', () => {
     'both addresses must be skipped by the worker');
 });
 
+test('the Trainer is behind the door too, at both of its addresses', () => {
+  // Added 9 Oct 2026: the gym page, asked for as "a private page" inside the
+  // app. Same door as the rest, and the same reason each page needs BOTH
+  // addresses - trainer.html is a real file, so express.static would hand it
+  // out by name if only the clean URL were gated.
+  for (const [url, file] of [
+    ['/trainer', 'trainer.html'], ['/trainer.html', 'trainer.html'],
+  ]) {
+    assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
+    assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
+    const at = SRC.indexOf("app.get('" + url + "'");
+    assert.ok(at > -1, `the ${url} route must still be findable in server.js`);
+    const block = SRC.slice(at, at + 320);
+    assert.match(block, /isValidSession\(req\)/, `${url}: signed out gets nothing`);
+    assert.match(block, /isFriendlyRequest\(req\)/, `${url}: off the list gets nothing`);
+    assert.match(block, /res\.redirect\('\/app'\)/, `${url}: a page visit goes to the app, not JSON`);
+    assert.ok(
+      SRC.indexOf("app.get('" + url + "'") < SRC.indexOf('app.use(express.static('),
+      `${url} must be registered above static, which would serve the file itself`,
+    );
+    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', file)), `${file} must exist`);
+  }
+  // And the worker leaves both alone, for the reason it leaves /key alone: a
+  // cached copy outlives the check that let it in, and the offline fallback
+  // below would then hand it out with no check at all.
+  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
+  assert.match(SW, /\['\/trainer', '\/trainer\.html'\]\.includes\(url\.pathname\)\) return;/,
+    'both addresses must be skipped by the worker');
+});
+
+test('the trainer page is the app\'s own file, and the door leads to it', async () => {
+  // Read as text, the tests above prove the routes exist. This one makes the
+  // request, because the failure they cannot see is express.static answering
+  // first and handing the page to somebody who typed the file name.
+  const express = require('express');
+  const ROOT = path.join(__dirname, '..', '..');
+  const app = express();
+  const gate = (file) => (req, res) => {
+    if (req.get('x-signed-in') !== 'yes') return res.redirect('/app');
+    res.sendFile(path.join(ROOT, file));
+  };
+  for (const url of ['/trainer', '/trainer.html']) app.get(url, gate('trainer.html'));
+  app.use(express.static(ROOT));
+  app.get('/app', (req, res) => res.type('text/plain').send('the app'));
+
+  const server = app.listen(0);
+  await new Promise((done) => server.once('listening', done));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const get = (p, signedIn) => fetch(base + p, {
+    redirect: 'manual',
+    headers: signedIn ? { 'x-signed-in': 'yes' } : {},
+  }).then(async (r) => ({ status: r.status, location: r.headers.get('location'), body: await r.text() }));
+  try {
+    for (const url of ['/trainer', '/trainer.html']) {
+      const cold = await get(url);
+      assert.strictEqual(cold.status, 302, `${url}: signed out must be redirected, not served`);
+      assert.strictEqual(cold.location, '/app', `${url}: and sent to the app`);
+      // A marker that is on the page and nowhere else: the redirect must carry
+      // none of it.
+      assert.ok(!cold.body.includes('Coach Log') && !cold.body.includes('restAdd'),
+        `${url}: no part of the page may come back with the redirect`);
+
+      const warm = await get(url, true);
+      assert.strictEqual(warm.status, 200, `${url}: signed in and on the list gets the page`);
+      assert.ok(warm.body.length > 20000, `${url}: and it is the whole page, not a stub`);
+      assert.equal(warm.body, fs.readFileSync(path.join(ROOT, 'trainer.html'), 'utf8'),
+        `${url}: the repository's own file, byte for byte`);
+    }
+  } finally {
+    server.close();
+  }
+});
+
+// The home screen is the only way in, so a page added without a door to it is a
+// page nobody can reach. This is the check that the door was added with it.
+test('the app\'s home screen has a door to the trainer', () => {
+  const HUB = fs.readFileSync(path.join(__dirname, '..', '..', 'hub.html'), 'utf8');
+  assert.match(HUB, /<a class="card t" href="\/trainer">/, 'the fifth door must be on the home screen');
+  assert.match(HUB, /Five doors\. That is the whole app\./, 'and the shell must count it');
+  assert.doesNotMatch(HUB, /Four doors/, 'nothing may still say four');
+});
+
 test('the worker never caches the herb library or the tax centre', () => {
   const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
   assert.match(SW, /\['\/herbs', '\/herbs\.html', '\/tax', '\/tax\.html'\]\.includes\(url\.pathname\)\) return;/,

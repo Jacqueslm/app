@@ -35,7 +35,7 @@
 // copies of "four doors" in the shell went with it. The name moved to 2.3 for
 // the same reason as the bump above - the shell changed, so an installed phone
 // has to rebuild it or it never sees the new door.
-const CACHE_NAME = 'tsid-shell-v2.3';
+const CACHE_NAME = 'tsid-shell-v2.4';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -166,8 +166,8 @@ self.addEventListener('fetch', (event) => {
   if (['/music', '/music.html'].includes(url.pathname)) return;
 
   // The Trainer joined the same door on 9 Oct 2026: it is served only to
-  // somebody signed in and on the list (it holds her plan, her weights and her
-  // own notes), so a cached copy would outlive that check and the offline
+  // somebody signed in and on the list (it holds the plan, every weight lifted
+  // and every note written), so a cached copy would outlive that check and the offline
   // fallback below would hand it out unguarded. Both addresses again.
   //
   // This is the one page here whose offline story is worth saying out loud: it

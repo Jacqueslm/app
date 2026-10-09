@@ -3,6 +3,18 @@
 // The range candle (TBR) is the scalp play. The zones are the bigger-move layer.
 // Zone identification adapted from "DTFX Algo Zones [LuxAlgo]"
 // (CC BY-NC-SA 4.0, (c) LuxAlgo).
+// 9 Oct 2026 — clean chart, loud alerts.
+// The drawing and the signal were fighting each other on screen. Three things
+// went: the box fills (the fill is what buried whatever sat behind it - candles,
+// other boxes), the 30 and 70 lines on every range candle (nothing trades them -
+// see `f` below, the entry only ever uses the chosen Level), and the two spare
+// 30/50/70 numbers per zone (nine of them stacked at the right edge of three
+// zones read as noise). The zone lines all stay: METHOD.md says price can test a
+// zone anywhere in it, so 30/50/70 there is information, not decoration.
+//
+// The signal logic is untouched, deliberately, so trading/backtest.js still
+// agrees with the chart about what a trade is. What changed is what gets drawn,
+// and what the alert says - the alert now carries what the chart used to.
 strategy("Jacques TBR Zones", overlay=true, initial_capital=25000, commission_type=strategy.commission.cash_per_contract, commission_value=0.39, slippage=1, max_boxes_count=500, max_lines_count=500)
 sty = input.string("Fib", "Entry", options=["Fib", "Sweep"])
 lvl = input.string("50", "Level", options=["30", "50", "70"])
@@ -46,12 +58,8 @@ else
 
 var box abox = na
 var line aline = na
-var line a30 = na
-var line a70 = na
 var box bbox = na
 var line bline = na
-var line b30 = na
-var line b70 = na
 var float atop = 0.0
 var float abot = 0.0
 var int atim = 0
@@ -72,13 +80,12 @@ if newHour and doneHour == 9
     if hasa
         box.delete(abox)
         line.delete(aline)
-        line.delete(a30)
-        line.delete(a70)
     hasa := true
-    abox := box.new(atim, atop, time, abot, xloc=xloc.bar_time)
+    // Outline only. The colour is set on the next bars; the fill starts clear so
+    // an untouched candle never hides what is behind it.
+    abox := box.new(atim, atop, time, abot, xloc=xloc.bar_time, bgcolor=color.new(color.gray, 100))
+    // One line, at the level being traded.
     aline := line.new(atim, atop - f * (atop - abot), time, atop - f * (atop - abot), xloc=xloc.bar_time)
-    a30 := line.new(atim, atop - 0.3 * (atop - abot), time, atop - 0.3 * (atop - abot), xloc=xloc.bar_time)
-    a70 := line.new(atim, atop - 0.7 * (atop - abot), time, atop - 0.7 * (atop - abot), xloc=xloc.bar_time)
 if newHour and doneHour == 15
     btop := doneHi
     bbot := doneLo
@@ -87,41 +94,30 @@ if newHour and doneHour == 15
     if hasb
         box.delete(bbox)
         line.delete(bline)
-        line.delete(b30)
-        line.delete(b70)
     hasb := true
-    bbox := box.new(btim, btop, time, bbot, xloc=xloc.bar_time)
+    bbox := box.new(btim, btop, time, bbot, xloc=xloc.bar_time, bgcolor=color.new(color.gray, 100))
     bline := line.new(btim, btop - f * (btop - bbot), time, btop - f * (btop - bbot), xloc=xloc.bar_time)
-    b30 := line.new(btim, btop - 0.3 * (btop - bbot), time, btop - 0.3 * (btop - bbot), xloc=xloc.bar_time)
-    b70 := line.new(btim, btop - 0.7 * (btop - bbot), time, btop - 0.7 * (btop - bbot), xloc=xloc.bar_time)
 if hasa
     abox.set_right(time)
     aline.set_x2(time)
-    a30.set_x2(time)
-    a70.set_x2(time)
     if not alive and (close > atop or close < abot)
         alive := true
         aup := close > atop
     ca = alive ? (aup ? color.blue : color.orange) : color.gray
-    abox.set_bgcolor(color.new(ca, 90))
+    // The colour rides the outline and the level line - the fill stays clear.
+    abox.set_bgcolor(color.new(ca, 100))
     abox.set_border_color(color.new(ca, 0))
     aline.set_color(ca)
-    a30.set_color(ca)
-    a70.set_color(ca)
 if hasb
     bbox.set_right(time)
     bline.set_x2(time)
-    b30.set_x2(time)
-    b70.set_x2(time)
     if not blive and (close > btop or close < bbot)
         blive := true
         bup := close > btop
     cb = blive ? (bup ? color.blue : color.orange) : color.gray
-    bbox.set_bgcolor(color.new(cb, 90))
+    bbox.set_bgcolor(color.new(cb, 100))
     bbox.set_border_color(color.new(cb, 0))
     bline.set_color(cb)
-    b30.set_color(cb)
-    b70.set_color(cb)
 
 // Zones: swing structure, break of structure and change of character, the
 // same identification the DTFX Algo Zones indicator uses.
@@ -129,11 +125,11 @@ var array<box> zBoxes = array.new<box>()
 var array<line> zL30 = array.new<line>()
 var array<line> zL50 = array.new<line>()
 var array<line> zL70 = array.new<line>()
-// The 30 / 50 / 70 number printed on each of the three zone lines, so the
-// level is readable off the chart without hovering. Added 6 Oct 2026.
-var array<label> zT30 = array.new<label>()
-var array<label> zT50 = array.new<label>()
-var array<label> zT70 = array.new<label>()
+// The level number printed on the zone's traded line, so it is readable off the
+// chart without hovering. Added 6 Oct 2026 as three tags per zone - so up to nine
+// numbers down the right edge of three zones at once. Cut to the one line being
+// traded on 9 Oct 2026.
+var array<label> zTags = array.new<label>()
 var float bullTop = na
 var float bullBot = na
 var float bearTop = na
@@ -178,21 +174,17 @@ if zMssUp
         float t30u = zt - 0.3 * (zt - zb)
         float t50u = zt - 0.5 * (zt - zb)
         float t70u = zt - 0.7 * (zt - zb)
-        zBoxes.push(box.new(zsTop.bar, zt, bar_index, zb, bgcolor=color.new(zBullCol, 88), border_color=color.new(zBullCol, 0)))
+        zBoxes.push(box.new(zsTop.bar, zt, bar_index, zb, bgcolor=color.new(zBullCol, 100), border_color=color.new(zBullCol, 0)))
         zL30.push(line.new(zsTop.bar, t30u, bar_index, t30u, color=color.new(zBullCol, 0)))
         zL50.push(line.new(zsTop.bar, t50u, bar_index, t50u, color=color.new(zBullCol, 0)))
         zL70.push(line.new(zsTop.bar, t70u, bar_index, t70u, color=color.new(zBullCol, 0)))
-        zT30.push(label.new(bar_index, t30u, "30", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBullCol, size=size.small))
-        zT50.push(label.new(bar_index, t50u, "50", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBullCol, size=size.small))
-        zT70.push(label.new(bar_index, t70u, "70", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBullCol, size=size.small))
+        zTags.push(label.new(bar_index, zt - f * (zt - zb), lvl, style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBullCol, size=size.small))
         if zBoxes.size() > maxZones
             box.delete(zBoxes.shift())
             line.delete(zL30.shift())
             line.delete(zL50.shift())
             line.delete(zL70.shift())
-            label.delete(zT30.shift())
-            label.delete(zT50.shift())
-            label.delete(zT70.shift())
+            label.delete(zTags.shift())
     bullTop := zt
     bullBot := zb
 if zMssDn
@@ -203,21 +195,17 @@ if zMssDn
         float t30d = zt - 0.3 * (zt - zb)
         float t50d = zt - 0.5 * (zt - zb)
         float t70d = zt - 0.7 * (zt - zb)
-        zBoxes.push(box.new(zsBot.bar, zt, bar_index, zb, bgcolor=color.new(zBearCol, 88), border_color=color.new(zBearCol, 0)))
+        zBoxes.push(box.new(zsBot.bar, zt, bar_index, zb, bgcolor=color.new(zBearCol, 100), border_color=color.new(zBearCol, 0)))
         zL30.push(line.new(zsBot.bar, t30d, bar_index, t30d, color=color.new(zBearCol, 0)))
         zL50.push(line.new(zsBot.bar, t50d, bar_index, t50d, color=color.new(zBearCol, 0)))
         zL70.push(line.new(zsBot.bar, t70d, bar_index, t70d, color=color.new(zBearCol, 0)))
-        zT30.push(label.new(bar_index, t30d, "30", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBearCol, size=size.small))
-        zT50.push(label.new(bar_index, t50d, "50", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBearCol, size=size.small))
-        zT70.push(label.new(bar_index, t70d, "70", style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBearCol, size=size.small))
+        zTags.push(label.new(bar_index, zt - f * (zt - zb), lvl, style=label.style_label_left, color=color.new(color.white, 100), textcolor=zBearCol, size=size.small))
         if zBoxes.size() > maxZones
             box.delete(zBoxes.shift())
             line.delete(zL30.shift())
             line.delete(zL50.shift())
             line.delete(zL70.shift())
-            label.delete(zT30.shift())
-            label.delete(zT50.shift())
-            label.delete(zT70.shift())
+            label.delete(zTags.shift())
     bearTop := zt
     bearBot := zb
 if showZones and zBoxes.size() > 0
@@ -229,10 +217,8 @@ if showZones and zBoxes.size() > 0
     line.set_x2(zlast30, bar_index)
     line.set_x2(zlast50, bar_index)
     line.set_x2(zlast70, bar_index)
-    // The 30 / 50 / 70 tags ride the right edge with their lines.
-    label.set_x(array.get(zT30, zT30.size() - 1), bar_index)
-    label.set_x(array.get(zT50, zT50.size() - 1), bar_index)
-    label.set_x(array.get(zT70, zT70.size() - 1), bar_index)
+    // The traded-level tag rides the right edge with its line.
+    label.set_x(array.get(zTags, zTags.size() - 1), bar_index)
 
 inBull = not na(bullTop) and close <= bullTop and close >= bullBot
 inBear = not na(bearTop) and close <= bearTop and close >= bearBot
@@ -268,16 +254,20 @@ if longs and nyok and have1 and tim1 != lz and (lfib or lswp) and zOKlong and st
     lstp := bot1
     lz := tim1
     strategy.entry("long", strategy.long, comment=sty + " " + lvl)
-    alert("long " + sty + " " + lvl)
+    // The chart no longer spells the trade out, so the notification does. Which
+    // candle (9:00 or 15:00), where the line is, and where it ends either way.
+    string lmsg = "LONG " + sty + " " + lvl + " - " + str.format_time(tim1, "HH:mm", "America/New_York") + " range " + str.tostring(bot1, format.mintick) + " to " + str.tostring(top1, format.mintick) + " - level " + str.tostring(fl, format.mintick) + " - out above " + str.tostring(top1, format.mintick) + " or below " + str.tostring(bot1, format.mintick)
+    alert(lmsg)
 if strategy.position_size > 0 and (close > ltg or close < lstp)
     strategy.close("long", comment="out of range")
-    alert("out of range")
+    alert("Long closed, out of range at " + str.tostring(close, format.mintick))
 if shorts and nyok and have2 and tim2 != sz and (sfib or sswp) and zOKshort and strategy.position_size == 0
     stg := bot2
     sstp := top2
     sz := tim2
     strategy.entry("short", strategy.short, comment=sty + " " + lvl)
-    alert("short " + sty + " " + lvl)
+    string smsg = "SHORT " + sty + " " + lvl + " - " + str.format_time(tim2, "HH:mm", "America/New_York") + " range " + str.tostring(top2, format.mintick) + " to " + str.tostring(bot2, format.mintick) + " - level " + str.tostring(fs, format.mintick) + " - out below " + str.tostring(bot2, format.mintick) + " or above " + str.tostring(top2, format.mintick)
+    alert(smsg)
 if strategy.position_size < 0 and (close < stg or close > sstp)
     strategy.close("short", comment="out of range")
-    alert("out of range")
+    alert("Short closed, out of range at " + str.tostring(close, format.mintick))

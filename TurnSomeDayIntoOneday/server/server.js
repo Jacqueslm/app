@@ -369,6 +369,32 @@ app.get('/music.html', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'music.html'));
 });
 
+// The Trainer — the gym page, added 9 Oct 2026. Jacques asked for it "inside
+// the recovery app as a private page", so it is the same door as The Key, the
+// herbs, the fight and the Music: signed in AND on the list, or you go to /app
+// without learning the page is there. A redirect rather than requireAuth, which
+// answers 401 JSON — right for an API call, wrong for somebody opening a page.
+//
+// BOTH ADDRESSES ARE REGISTERED, for the reason the herb library's note above
+// spells out: trainer.html is a real file, so express.static below would hand it
+// out by name to anybody who typed it if only the clean URL were gated. Above
+// express.static, or static answers first and never reaches these routes.
+//
+// It carries no server of its own on purpose. The plan, the weights and her
+// measurements are kept in the page's own storage on the phone that opened it,
+// so nothing here reads or writes any of it and there is no second copy of her
+// numbers anywhere.
+app.get('/trainer', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trainer.html'));
+});
+app.get('/trainer.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trainer.html'));
+});
+
 // The Music's scanner (7 Oct 2026). The page cannot list a directory over the
 // web, so it asks this instead — read fresh from disk every time, and answered
 // no-store, because a cached "here is every track" would defeat the point of

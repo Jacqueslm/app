@@ -82,6 +82,10 @@ const PAGES = {
   '/game3d.html': 'game3d.html',
   '/music': 'music.html',
   '/music.html': 'music.html',
+  // The Trainer, 9 Oct 2026: the gym page, behind the same door as the rest.
+  // Both addresses, for the reason the comment above gives twice over.
+  '/trainer': 'trainer.html',
+  '/trainer.html': 'trainer.html',
 };
 
 // ----------------------------------------------------------------- the door --

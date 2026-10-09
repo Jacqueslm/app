@@ -74,7 +74,10 @@ test('the other shipped HTML pages parse too', () => {
   // music.html joined on 5 Oct 2026. Its whole page is one inline script - the
   // player, the WAV cutter and the canvas cover maker - so a SyntaxError in it
   // leaves a page that looks loaded and does nothing.
-  const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html'];
+  // trainer.html joined on 9 Oct 2026: one inline script holding the whole gym
+  // page - the plan, the logging, the rest timer and the charts - so a
+  // SyntaxError in it leaves a page that looks loaded and does nothing.
+  const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html', 'trainer.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

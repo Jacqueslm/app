@@ -45,11 +45,11 @@ const app = require('../vercel-app');
 const build = require('../../vercel-build');
 const vercelJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
 
-const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'fight.html', 'game3d.html', 'music.html'];
+const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'fight.html', 'game3d.html', 'music.html', 'trainer.html'];
 // The shell at /app and / is not in this list: it is the sign-in screen itself,
 // so it opens to everybody and holds nothing but a heading, three links and the
 // form. Everything below is behind the door.
-const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/fight', '/fight.html', '/game3d.html', '/music', '/music.html'];
+const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/fight', '/fight.html', '/game3d.html', '/music', '/music.html', '/trainer', '/trainer.html'];
 
 let server, base;
 before(async () => {
@@ -339,7 +339,7 @@ test('every gated address is rewritten into the function, file names included', 
   // the half that leaks.
   const destinations = new Map(vercelJson.rewrites.map((r) => [r.source, r.destination]));
   for (const route of ['/app', '/key', '/key.html', '/herbs', '/herbs.html', '/tax', '/tax.html',
-    '/fight', '/fight.html', '/game3d.html', '/music', '/music.html', '/']) {
+    '/fight', '/fight.html', '/game3d.html', '/music', '/music.html', '/trainer', '/trainer.html', '/']) {
     assert.equal(destinations.get(route), '/api/index.js', `${route} must reach the function`);
   }
   assert.equal(destinations.get('/api/(.*)'), '/api/index.js', 'and so must the API');
@@ -349,7 +349,7 @@ test('the pages travel inside the function, because they are not files out there
   const included = vercelJson.functions['api/index.js'].includeFiles;
   // A list here is rejected outright by Vercel: "Invalid request:
   // functions.api/index.js.includeFiles should be string." — a real error, from
-  // the first import attempt on 4 Oct 2026. It takes one glob, so the six pages
+  // the first import attempt on 4 Oct 2026. It takes one glob, so the pages
   // are named in a brace expansion and the test reads them back out of it.
   assert.equal(typeof included, 'string', 'includeFiles is a string to Vercel, not a list');
   assert.match(included, /\.html$/, 'a glob that does not end in .html matches no page');

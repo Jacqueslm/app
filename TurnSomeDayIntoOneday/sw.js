@@ -30,7 +30,12 @@
 // name moved to 2.1 and on to 2.2 WITH it. This is the case the number exists
 // for: without the bump an installed phone keeps being served the old /app out
 // of its precached copy and sees nothing new at all.
-const CACHE_NAME = 'tsid-shell-v2.2';
+//
+// 9 Oct 2026: the home screen gained the Trainer, its fifth door, and the two
+// copies of "four doors" in the shell went with it. The name moved to 2.3 for
+// the same reason as the bump above - the shell changed, so an installed phone
+// has to rebuild it or it never sees the new door.
+const CACHE_NAME = 'tsid-shell-v2.3';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -159,6 +164,17 @@ self.addEventListener('fetch', (event) => {
   // offline fallback would hand it out unguarded. Both addresses again - the
   // clean URL and the file name reach the same gated route.
   if (['/music', '/music.html'].includes(url.pathname)) return;
+
+  // The Trainer joined the same door on 9 Oct 2026: it is served only to
+  // somebody signed in and on the list (it holds her plan, her weights and her
+  // own notes), so a cached copy would outlive that check and the offline
+  // fallback below would hand it out unguarded. Both addresses again.
+  //
+  // This is the one page here whose offline story is worth saying out loud: it
+  // does NOT open with no signal, by design. It is a private page first, and a
+  // copy kept in the shell cache is exactly what would let somebody else on
+  // this browser read it.
+  if (['/trainer', '/trainer.html'].includes(url.pathname)) return;
 
   // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
   // Its whole point is that it is read fresh - a cached "here is every track"

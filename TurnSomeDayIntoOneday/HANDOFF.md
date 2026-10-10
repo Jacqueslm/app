@@ -6,15 +6,24 @@
 Jacques named it on 4 Oct 2026 ("name the app the truth"); that is the name on
 the phone (the home-screen name), the browser tab, the shell heading and
 `manifest.json`. `/app` serves `hub.html`, a small
-shell holding four cards: the Zodiacs (`/key`), the Herbs (`/herbs`), the
-Player (`/music`) and the Trainer (`/trainer`).
+shell holding three cards: the Zodiacs (`/key`), the Herbs (`/herbs`) and the
+Player (`/music`).
 
 **The Fight is deleted — 10 Oct 2026.** Jacques: "delete the fight from
 everywhere." The door, the pages, the 3D ring, its art and sound, its routes,
 its lines in the gate, the worker and the build, its spec and its tests were all
 removed the same day, and its own record here was stripped with them. The shell
-is **four doors** now and the cache name moved to `tsid-shell-v2.5` with that,
+went to four doors with it and the cache name moved to `tsid-shell-v2.5`,
 or an installed phone keeps a door that is not there. **Do not rebuild it.**
+
+**The Trainer is deleted — 10 Oct 2026.** Jacques: "Ddelete the trainer." The
+same day, the same way: the door came off the shell, the page
+(`trainer.html`), its two routes, its lines in the gate, the worker, the Vercel
+rewrites and the build's file list all went, and its tests with them. The plan,
+the weights and the notes it held were in that page's own storage on the phone,
+so nothing else was holding a copy. The shell is **three doors** now and the
+cache name moved to `tsid-shell-v2.6` with that, for the same reason as every
+bump before it. **Do not rebuild it.**
 
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
@@ -46,7 +55,7 @@ identically — both gate every private page). Vercel checks the filesystem
 before it runs any rewrite, so the private pages are deliberately **not**
 static files there: `vercel.json` builds into `webroot/`, `vercel-build.js`
 copies only assets into it and refuses to finish if a `.html` ever lands
-there, and the six pages travel inside the `api/index.js` function
+there, and the pages travel inside the `api/index.js` function
 (`includeFiles` is one brace-expansion glob — Vercel rejects a list). The door
 is `APP_PASSWORD` plus the `FRIENDLY_EMAILS` allowlist; the AI routes proxy
 Gemini with `GEMINI_API_KEY` held server-side. The Railway host below is kept
@@ -90,8 +99,8 @@ entries below are out of date.
 
 ## What this is
 
-**Four doors and nothing else, free and private.** The Zodiacs (`/key`), the
-Herb Library (`/herbs`), the Player (`/music`) and the Trainer (`/trainer`),
+**Three doors and nothing else, free and private.** The Zodiacs (`/key`), the
+Herb Library (`/herbs`) and the Player (`/music`),
 reached from the shell at `/app`, plus a reference page for tax, the policy
 pages the store requires, a letter link and the owner's stats page. The day counter, the lesson
 programs, the journal, the SOS tools, the weeklies, the live rooms and the AI
@@ -100,9 +109,9 @@ Nothing is sold. One person built it and runs it.
 
 ## Shape of it
 
-- `hub.html` — the shell at `/app`: four cards, the sign-in form and the door.
-- `music.html` (the Player) and `trainer.html` (the gym) — added 5 and 9 Oct
-  2026, behind the same door as the rest.
+- `hub.html` — the shell at `/app`: three cards, the sign-in form and the door.
+- `music.html` (the Player) — added 5 Oct 2026, behind the same door as the rest.
+  (`trainer.html`, the gym, was added 9 Oct 2026 and deleted on 10 Oct 2026.)
 - `key.html` (The Zodiacs), `herbs.html` (the Herb Library), `tax.html` — the
   private reference pages. `letter.html`, `admin-stats.html`, `privacy.html`,
   `delete-account.html` — the plumbing and the policy pages.

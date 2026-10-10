@@ -250,8 +250,8 @@ test('the herb library and the tax centre are behind the door too', () => {
 // worker's line for them. All three went on 10 Oct 2026 with the fight itself -
 // "delete the fight from everywhere". The pages, their routes, their folder of
 // pictures and their line in the worker all came out on the same day, so there
-// is nothing left for them to guard; the herbs, the Music and the Trainer below
-// are the same shape and are still checked the same way.
+// is nothing left for them to guard; the herbs and the Music below are the same
+// shape and are still checked the same way.
 
 test('The Music is behind the door too, at both of its addresses', () => {
   // Added 5 Oct 2026: the phone-file player, the ringtone maker and the cover
@@ -282,98 +282,36 @@ test('The Music is behind the door too, at both of its addresses', () => {
     'both addresses must be skipped by the worker');
 });
 
-test('the Trainer is behind the door too, at both of its addresses', () => {
-  // Added 9 Oct 2026: the gym page, asked for as "a private page" inside the
-  // app. Same door as the rest, and the same reason each page needs BOTH
-  // addresses - trainer.html is a real file, so express.static would hand it
-  // out by name if only the clean URL were gated.
-  for (const [url, file] of [
-    ['/trainer', 'trainer.html'], ['/trainer.html', 'trainer.html'],
-  ]) {
-    assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
-    assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
-    const at = SRC.indexOf("app.get('" + url + "'");
-    assert.ok(at > -1, `the ${url} route must still be findable in server.js`);
-    const block = SRC.slice(at, at + 320);
-    assert.match(block, /isValidSession\(req\)/, `${url}: signed out gets nothing`);
-    assert.match(block, /isFriendlyRequest\(req\)/, `${url}: off the list gets nothing`);
-    assert.match(block, /res\.redirect\('\/app'\)/, `${url}: a page visit goes to the app, not JSON`);
-    assert.ok(
-      SRC.indexOf("app.get('" + url + "'") < SRC.indexOf('app.use(express.static('),
-      `${url} must be registered above static, which would serve the file itself`,
-    );
-    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', file)), `${file} must exist`);
-  }
-  // And the worker leaves both alone, for the reason it leaves /key alone: a
-  // cached copy outlives the check that let it in, and the offline fallback
-  // below would then hand it out with no check at all.
-  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
-  assert.match(SW, /\['\/trainer', '\/trainer\.html'\]\.includes\(url\.pathname\)\) return;/,
-    'both addresses must be skipped by the worker');
-});
+// The Trainer had two tests here, from 9 Oct 2026: its addresses behind the
+// door, and the same addresses exercised over HTTP so express.static could not
+// answer first. Both went on 10 Oct 2026 with the page itself - "Ddelete the
+// trainer" - along with its routes, its lines in the gate and the worker, and
+// its door. There is nothing left for them to guard.
 
-test('the trainer page is the app\'s own file, and the door leads to it', async () => {
-  // Read as text, the tests above prove the routes exist. This one makes the
-  // request, because the failure they cannot see is express.static answering
-  // first and handing the page to somebody who typed the file name.
-  const express = require('express');
-  const ROOT = path.join(__dirname, '..', '..');
-  const app = express();
-  const gate = (file) => (req, res) => {
-    if (req.get('x-signed-in') !== 'yes') return res.redirect('/app');
-    res.sendFile(path.join(ROOT, file));
-  };
-  for (const url of ['/trainer', '/trainer.html']) app.get(url, gate('trainer.html'));
-  app.use(express.static(ROOT));
-  app.get('/app', (req, res) => res.type('text/plain').send('the app'));
-
-  const server = app.listen(0);
-  await new Promise((done) => server.once('listening', done));
-  const base = `http://127.0.0.1:${server.address().port}`;
-  const get = (p, signedIn) => fetch(base + p, {
-    redirect: 'manual',
-    headers: signedIn ? { 'x-signed-in': 'yes' } : {},
-  }).then(async (r) => ({ status: r.status, location: r.headers.get('location'), body: await r.text() }));
-  try {
-    for (const url of ['/trainer', '/trainer.html']) {
-      const cold = await get(url);
-      assert.strictEqual(cold.status, 302, `${url}: signed out must be redirected, not served`);
-      assert.strictEqual(cold.location, '/app', `${url}: and sent to the app`);
-      // A marker that is on the page and nowhere else: the redirect must carry
-      // none of it. Both were re-picked on 9 Oct 2026 when the page was rebuilt
-      // onto the by-10 home regimen - the title it used to carry ('Coach Log')
-      // is gone, and a marker that is no longer on the page proves nothing.
-      assert.ok(!cold.body.includes('The Trainer') && !cold.body.includes('restAdd'),
-        `${url}: no part of the page may come back with the redirect`);
-
-      const warm = await get(url, true);
-      assert.strictEqual(warm.status, 200, `${url}: signed in and on the list gets the page`);
-      assert.ok(warm.body.length > 20000, `${url}: and it is the whole page, not a stub`);
-      // Both markers must really be on the page, or the check above would pass
-      // on a page that carries neither of them.
-      for (const marker of ['The Trainer', 'restAdd']) {
-        assert.ok(warm.body.includes(marker), `${url}: the page must still carry "${marker}"`);
-      }
-      assert.equal(warm.body, fs.readFileSync(path.join(ROOT, 'trainer.html'), 'utf8'),
-        `${url}: the repository's own file, byte for byte`);
-    }
-  } finally {
-    server.close();
-  }
-});
-
-// The home screen is the only way in, so a page added without a door to it is a
-// page nobody can reach. This is the check that the door was added with it.
-test('the app\'s home screen has a door to the trainer', () => {
+// The home screen is the only way in, so a door removed without the shell's own
+// count changing is an app that tells the person something untrue about itself.
+// This test was the one that proved the trainer's door was there, from 9 Oct
+// 2026 until 10 Oct 2026, when the trainer came off the app - "Ddelete the
+// trainer". It now does the opposite job, the way the fight's line above it did
+// after the fight went: it keeps the door from creeping back.
+test('the trainer has no way back onto the home screen', () => {
   const HUB = fs.readFileSync(path.join(__dirname, '..', '..', 'hub.html'), 'utf8');
-  assert.match(HUB, /<a class="card t" href="\/trainer">/, 'the fourth door must be on the home screen');
-  assert.match(HUB, /Four doors\. That is the whole app\./, 'and the shell must count it');
-  assert.doesNotMatch(HUB, /Five doors/, 'nothing may still say five');
-  // The Fight was the second door until 10 Oct 2026, when the whole thing came
-  // off the app - "delete the fight from everywhere". Its card, its colour and
-  // its page went that day; this is the line that keeps a door from creeping
-  // back onto a shell that is four doors now.
+  assert.doesNotMatch(HUB, /href="\/trainer"/, 'the trainer must have no door on the home screen');
+  assert.doesNotMatch(HUB, /The Trainer/, 'and the shell must not name it either');
+  assert.match(HUB, /Three doors\. That is the whole app\./, 'the shell must count the three that are left');
+  assert.doesNotMatch(HUB, /Four doors/, 'nothing may still say four');
+  assert.doesNotMatch(HUB, /Five doors/, 'nor five');
+  // The Fight was one of those doors until 10 Oct 2026, when the whole thing
+  // came off the app - "delete the fight from everywhere" - and the Trainer was
+  // another until the same day. Their cards, their colours and their pages went
+  // that day; these are the lines that keep a door from creeping back onto a
+  // shell that is three doors now.
   assert.doesNotMatch(HUB, /href="\/fight"/, 'the fight must have no door on the home screen');
+  // A page that is gone takes its file with it: a door is only honest if there
+  // is something behind it.
+  for (const file of ['trainer.html', 'fight.html']) {
+    assert.ok(!fs.existsSync(path.join(__dirname, '..', '..', file)), `${file} must be gone from the repository`);
+  }
 });
 
 test('the worker never caches the herb library or the tax centre', () => {

@@ -62,6 +62,12 @@ const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
 const KEY_READING_MAX_TOKENS = Number(process.env.KEY_READING_MAX_TOKENS || 6000);
 const KEY_READING_THINKING_LEVEL = process.env.KEY_READING_THINKING_LEVEL || 'MEDIUM';
 const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 60);
+// Google's "high demand" no is worth asking again, but not forever: two more
+// asks, a second apart, then it is reported for what it is. Set either to 0 to
+// turn the waiting off without touching the code.
+const BUSY_RETRIES = Number(process.env.GEMINI_BUSY_RETRIES || 2);
+const BUSY_WAIT_MS = Number(process.env.GEMINI_BUSY_WAIT_MS || 1000);
+const BUSY_STATUSES = new Set([429, 503]);
 
 const FRIENDLY_EMAILS = String(process.env.FRIENDLY_EMAILS || '')
   .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
@@ -176,20 +182,55 @@ function page(name) {
 async function gemini({ key, model, body }) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
   const headers = { 'Content-Type': 'application/json', 'x-goog-api-key': key };
-  let r = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  const post = (b) => fetch(url, { method: 'POST', headers, body: JSON.stringify(b) });
+
+  // "This model is currently experiencing high demand" is not a verdict, it is
+  // a queue. It was refusing one reading in three on 10 Oct 2026, measured
+  // through this very route — two readings came back whole and the third was
+  // this — and it is the kind of no that changes if you simply ask again a
+  // moment later. Until then it went straight to the phone as "the reading
+  // could not be written just now", which reads like a dead key and is not one.
+  // A no like that is worth two more asks; a no like "the key is wrong" is not,
+  // and is deliberately not retried below.
+  let r = await post(body);
+  for (let n = 0; n < BUSY_RETRIES && BUSY_STATUSES.has(r.status); n += 1) {
+    await new Promise((done) => setTimeout(done, BUSY_WAIT_MS * (n + 1)));
+    r = await post(body);
+  }
+
   // A 3.x model rejects the other generation's thinking field with a bare 400
   // that names nothing - the trap that had Friendly canned in August. Ask again
   // without it rather than reporting an error nobody can act on.
   if (r.status === 400) {
     const retry = JSON.parse(JSON.stringify(body));
     if (retry.generationConfig) delete retry.generationConfig.thinkingConfig;
-    r = await fetch(url, { method: 'POST', headers, body: JSON.stringify(retry) });
+    r = await post(retry);
   }
   const data = await r.json().catch(() => null);
   const cand = (data && data.candidates && data.candidates[0]) || null;
   const text = ((cand && cand.content && cand.content.parts) || [])
     .map((p) => p.text || '').join('').trim();
   return { ok: r.ok, status: r.status, text, data, candidate: cand };
+}
+
+// Why Google refused, in Google's own words.
+//
+// This is the one thing the Railway build does and this build did not
+// (server/key-reading-route.js:114 writes the same line). Without it a refused
+// reading is the same four words every time — "The reading could not be written
+// just now" — and there is no way from a phone to tell a dead key from an
+// exhausted free quota from a model that has been retired. That is exactly the
+// state this host was found in on 10 Oct 2026.
+//
+// Handing it back is safe for the reason the whole host is safe: there are no
+// accounts here, so the only people who can reach this line are the ones who
+// already passed the password AND the allowlist. Google's error text quotes
+// neither the key nor its value — the key travels in a header, never in the URL
+// or the body — and the tests hold both of those.
+function providerReason(out) {
+  const e = (out && out.data && out.data.error) || null;
+  const said = (e && (e.message || e.status)) || 'no reason given';
+  return 'HTTP ' + ((out && out.status) || '?') + ': ' + said;
 }
 
 // The daily ceiling, per person. In memory, so it is per instance and it resets
@@ -344,11 +385,29 @@ function buildApp() {
           ),
         },
       });
-      if (!out.ok) return res.status(502).json({ error: 'The reading could not be written just now.' });
-      if (!out.text) return res.status(502).json({ error: 'The reading came back empty. Try again in a moment.' });
+      if (!out.ok) {
+        return res.status(502).json({
+          error: 'The reading could not be written just now.',
+          ownerError: providerReason(out),
+        });
+      }
+      if (!out.text) {
+        // A 200 with no words in it is still a failure, and the quiet kind:
+        // nothing in it says why. The reason is in the finish reason.
+        const why = (out.candidate && out.candidate.finishReason)
+          || (out.data && out.data.promptFeedback && out.data.promptFeedback.blockReason)
+          || 'no reason given';
+        return res.status(502).json({
+          error: 'The reading came back empty. Try again in a moment.',
+          ownerError: 'Gemini returned an empty reading (finishReason: ' + why + ').',
+        });
+      }
       res.json({ text: out.text, model: GEMINI_MODEL });
-    } catch (_) {
-      res.status(502).json({ error: 'The reading could not be written just now.' });
+    } catch (err) {
+      res.status(502).json({
+        error: 'The reading could not be written just now.',
+        ownerError: 'Could not reach Google: ' + ((err && err.message) || 'unknown error'),
+      });
     }
   });
 
@@ -363,6 +422,7 @@ module.exports = buildApp();
 module.exports.buildApp = buildApp;
 module.exports.spareWords = spareWords;
 module.exports.doorConfigured = doorConfigured;
+module.exports.providerReason = providerReason;
 module.exports.readSession = readSession;
 module.exports.issue = issue;
 module.exports.PAGES = PAGES;

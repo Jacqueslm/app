@@ -7203,10 +7203,20 @@ if(!applyHash()) todayLoad();
       const text = data && data.text;
       if(!text) throw said('The AI answered with nothing. Press it again.');
       out.innerHTML = render(text);
-      /* The voice reads whatever is on the key screen, and this is now part
-         of it — so an in-progress reading has to be stopped rather than left
-         halfway through a page that changed underneath it. */
-      if(typeof stopSpeaking === 'function') stopSpeaking();
+      /* Read the answer out loud, at the answer.
+
+         Jacques, 10 Oct 2026: "It reads the reading, but never the AI's
+         answer ... when AI gives an answer let it read it to me." The line
+         that used to be here stopped the voice instead. It was right in kind
+         — the page really had changed underneath the reading — and wrong in
+         what it did about it: the answer is the last thing on the Key, so
+         stopping meant going back to the top of forty-odd paragraphs to hear
+         it. The player can begin at any line, so it now begins at this one.
+
+         Falling back to stopping, so an answer is never read out over a
+         reading that is still going if the player is not there to do it. */
+      const readIt = typeof speakTheAnswer === 'function' && speakTheAnswer();
+      if(!readIt && typeof stopSpeaking === 'function') stopSpeaking();
     }catch(err){
       /* Only wording written here reaches the screen. A thrown browser
          error says things like "Failed to fetch", which tells somebody
@@ -7557,6 +7567,25 @@ if(!applyHash()) todayLoad();
     else rpStart(0, 0);
   }
 
+  /* Read the answer, at the answer.
+
+     Jacques, 10 Oct 2026: "It reads the reading, but never the AI's answer ...
+     when AI gives an answer let it read it to me." Both halves are the same
+     fault. The answer is a block on the Key like any other, so the queue
+     already holds it - it is simply the last thing there, below forty
+     paragraphs of reading that nobody wants said again. So this starts the
+     reading at the answer instead of at the top.
+
+     Returns false when there is no answer on screen, so the caller can go on
+     doing what it did before rather than assuming a reading happened. */
+  function rpAnswer(){
+    var q = rpQueue();
+    for(var i = 0; i < q.length; i += 1){
+      if(q[i].el.closest && q[i].el.closest('.ai-out')){ rpStart(i, 0); return true; }
+    }
+    return false;
+  }
+
   /* -------------------------------------------------------------- the install */
   var installEvent = null;
   function rpStandalone(){
@@ -7667,6 +7696,7 @@ if(!applyHash()) todayLoad();
   /* --- replace the page's reader, by assignment, from the outside ---------- */
   window.speakReading = rpPressed;   // Read it to me / Pause / Continue
   window.stopSpeaking = rpStop;      // Stop, the voice picker, a tab switch, unload
+  window.speakTheAnswer = rpAnswer;  // the AI's answer, read where it lands
 
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rpWire);
   else rpWire();

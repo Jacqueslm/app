@@ -85,10 +85,8 @@ const PAGES = {
   '/tax.html': 'tax.html',
   '/music': 'music.html',
   '/music.html': 'music.html',
-  // The Trainer, 9 Oct 2026: the gym page, behind the same door as the rest.
-  // Both addresses, for the reason the comment above gives twice over.
-  '/trainer': 'trainer.html',
-  '/trainer.html': 'trainer.html',
+  // The Trainer's two addresses were here from 9 Oct 2026 and came off on
+  // 10 Oct 2026 with the page itself - "Ddelete the trainer".
 };
 
 // ----------------------------------------------------------------- the door --

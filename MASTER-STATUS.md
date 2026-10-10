@@ -1,8 +1,10 @@
 # MASTER STATUS — every request, one place
 
-> **4 Oct 2026 — the Day One app is three pages now, and half of this log is
-> about the app it used to be.** `/app` serves `hub.html` (the Zodiacs, the
-> Herbs, the Player, the Trainer). **The Fight of Your Life was deleted on
+> **4 Oct 2026 — the Day One app is a shell of pages now, and half of this log is
+> about the app it used to be.** `/app` serves `hub.html`, three doors: the
+> Zodiacs, the Herbs and the Player. **The Trainer was deleted on 10 Oct 2026** —
+> "Ddelete the trainer": its door, its page, its routes and its tests all went
+> that day, so nothing below about `trainer.html` applies. **The Fight of Your Life was deleted on
 > 10 Oct 2026** — "delete the fight from everywhere": its page, the 3D ring, its
 > art and sound, its routes and its tests all went that day. **The recovery app is
 > deleted** — the one big page that held it,
@@ -1128,7 +1130,7 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 
 ## 🛣 LANE SPLIT (two AI sessions, agreed Aug 16 2026)
 
-- **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (its one big page, since deleted), `server/`, `data/`, and the app's files. This was MY lane; the pages that replaced it are `hub.html`, `key.html`, `herbs.html`, `tax.html`, `music.html` and `trainer.html`. The fight was one of them until 10 Oct 2026, when it was deleted outright.
+- **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (its one big page, since deleted), `server/`, `data/`, and the app's files. This was MY lane; the pages that replaced it are `hub.html`, `key.html`, `herbs.html`, `tax.html` and `music.html`. The fight and the trainer were two of them until 10 Oct 2026, when both were deleted outright.
 - **Studio AI (the other session):** `Studio/`, `reference/`, and `START-HERE.md`. That is THEIR lane.
 - Neither touches the other's lane unless Jacques says otherwise. The other session touched the app's page once (7 string swaps + 2 hints in the "Other" copy, commit `6f56112`) — already merged cleanly into my push `c20f262`. No collision. Do NOT re-edit each other's work.
 

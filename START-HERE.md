@@ -4,9 +4,12 @@ Orientation for Jacques and for any Claude session picking this up. Chat history
 does NOT carry between sessions — this repo is the shared memory. Read this first.
 
 > **10 Oct 2026 — read this before acting on anything below.** The Day One app is
-> four doors and nothing else: `/app` serves `hub.html`, a shell with cards for
-> the Zodiacs (`/key`), the Herbs (`/herbs`), the Player (`/music`) and the
-> Trainer (`/trainer`). **The Fight is deleted** — "delete the fight from
+> three doors and nothing else: `/app` serves `hub.html`, a shell with cards for
+> the Zodiacs (`/key`), the Herbs (`/herbs`) and the Player (`/music`). **The
+> Trainer is deleted** — "Ddelete the trainer": its door, its page, its routes,
+> its gate and service-worker lines and its tests all went on 10 Oct 2026, so
+> any instruction below that names `trainer.html` or `/trainer` is dead too.
+> **The Fight is deleted** — "delete the fight from
 > everywhere": its door, its page, the 3D ring, its art and sound, its routes,
 > its gate and service-worker lines, its spec and its tests all went on 10 Oct
 > 2026, so nothing below that describes working on it applies either. **The
@@ -565,12 +568,12 @@ were completed. Do not let that lapse unclaimed.
 
 Three separate apps in one repo (kept fully separate on disk):
 
-- **`TurnSomeDayIntoOneday/`** — four doors and nothing else: the Zodiacs, the
-  Herb Library, the Player and the Trainer, in a shell at `/app`. A web app
+- **`TurnSomeDayIntoOneday/`** — three doors and nothing else: the Zodiacs, the
+  Herb Library and the Player, in a shell at `/app`. A web app
   (Node/Express server + `hub.html` / `key.html` / `herbs.html` / `tax.html` /
-  `music.html` / `trainer.html` front end) wrapped as an Android TWA for the Play
+  `music.html` front end) wrapped as an Android TWA for the Play
   Store. The recovery app that used to live here was deleted on 4 Oct 2026, and
-  the Fight of Your Life on 10 Oct 2026.
+  the Fight of Your Life and the Trainer on 10 Oct 2026.
 - **`Studio/`** — an AI music-video / content-creation tool (separate product;
   used here to produce marketing videos: teleprompter, webcam recorder, AI scenes).
 - **`YourAI/`** — Jacques's private chat assistant (built 10 Sep 2026). Runs
@@ -1382,7 +1385,7 @@ that opens `https://www.turnsomedayintodayone.com/app?src=play`. So:
 
 | Change | Play impact |
 |---|---|
-| Anything in a shipped page (`hub.html`, `key.html`, `herbs.html`, `tax.html`, `music.html`, `trainer.html`), `server/`, lessons, audio, Studio | **None.** Ships with the Railway deploy. No .aab, no review, no clock reset. |
+| Anything in a shipped page (`hub.html`, `key.html`, `herbs.html`, `tax.html`, `music.html`), `server/`, lessons, audio, Studio | **None.** Ships with the Railway deploy. No .aab, no review, no clock reset. |
 | A **web API** the page calls (wake lock, push, camera, notifications) | **None for the .aab** — the browser handles it, Android sees no new permission. |
 | Anything in `TurnSomeDayIntoOneday/twa/` — package name, icon, splash, target SDK, `startUrl` | **New .aab required.** Bump `appVersionCode`, `bubblewrap build`, re-upload. |
 | Anything that **collects new user data** | **No .aab, but the Data safety form must be updated BEFORE it ships.** |

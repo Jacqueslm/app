@@ -72,13 +72,11 @@ test('the other shipped HTML pages parse too', () => {
   // music.html joined on 5 Oct 2026. Its whole page is one inline script - the
   // player, the WAV cutter and the canvas cover maker - so a SyntaxError in it
   // leaves a page that looks loaded and does nothing.
-  // trainer.html joined on 9 Oct 2026: one inline script holding the whole gym
-  // page - the plan, the logging, the rest timer and the charts - so a
-  // SyntaxError in it leaves a page that looks loaded and does nothing. It was
-  // rebuilt the same day onto the by-10 home regimen (three lifts, two cardio,
-  // a stretch day, ten seconds between moves), and the player for the lifts and
-  // the cardio runner are now the largest part of that one script.
-  const pages = ['key.html', 'herbs.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html', 'trainer.html'];
+  // trainer.html was on this list from 9 Oct 2026 until 10 Oct 2026, when the
+  // trainer came off the app altogether - "Ddelete the trainer" - and the file
+  // went with it. It is left out of the list below rather than kept as a name
+  // the loop would silently skip.
+  const pages = ['key.html', 'herbs.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

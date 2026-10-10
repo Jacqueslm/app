@@ -41,7 +41,12 @@
 // "five doors" went with it and the name moved to 2.5 for the same reason as
 // every bump above: an installed phone has to rebuild the shell or it keeps
 // seeing a door that is no longer there.
-const CACHE_NAME = 'tsid-shell-v2.5';
+//
+// 10 Oct 2026, later the same day: the Trainer went the same way - Jacques:
+// "Ddelete the trainer". Its door came off the shell, so the two copies of
+// "four doors" went with it and the name moved to 2.6. Same reason again: a
+// phone that keeps its old shell keeps a door that leads nowhere.
+const CACHE_NAME = 'tsid-shell-v2.6';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -159,16 +164,9 @@ self.addEventListener('fetch', (event) => {
   // clean URL and the file name reach the same gated route.
   if (['/music', '/music.html'].includes(url.pathname)) return;
 
-  // The Trainer joined the same door on 9 Oct 2026: it is served only to
-  // somebody signed in and on the list (it holds the plan, every weight lifted
-  // and every note written), so a cached copy would outlive that check and the offline
-  // fallback below would hand it out unguarded. Both addresses again.
-  //
-  // This is the one page here whose offline story is worth saying out loud: it
-  // does NOT open with no signal, by design. It is a private page first, and a
-  // copy kept in the shell cache is exactly what would let somebody else on
-  // this browser read it.
-  if (['/trainer', '/trainer.html'].includes(url.pathname)) return;
+  // The Trainer had the same line here from 9 Oct 2026. It went on 10 Oct 2026,
+  // the same day as its page, its routes and its door - "Ddelete the trainer" -
+  // so the line went with them: the worker no longer has a page to skip.
 
   // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
   // Its whole point is that it is read fresh - a cached "here is every track"

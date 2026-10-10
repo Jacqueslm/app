@@ -309,10 +309,11 @@ history anyway — hosting is settled (see CLAUDE.md).
 
 **4 Oct 2026 — the numbers below changed.** The app is a shell of pages now and
 the recovery app's 1MB page is deleted. The pages that ship, measured on disk:
-`hub.html` 10KB, `tax.html` 38KB, `herbs.html` 191KB, `music.html` 87KB,
-`trainer.html` 85KB, and **`key.html` 1.38MB** — the Zodiacs page is the biggest
+`hub.html` 10KB, `tax.html` 38KB, `herbs.html` 191KB, `music.html` 87KB, and
+**`key.html` 1.38MB** — the Zodiacs page is the biggest
 thing served now, larger than the page that was deleted. (`fight.html` 86KB and
-`game3d.html` 156KB were the fight; both were deleted on 10 Oct 2026.) So a bandwidth
+`game3d.html` 156KB were the fight, and `trainer.html` 85KB was the gym; all
+three were deleted on 10 Oct 2026.) So a bandwidth
 argument that rested on the old file has to be re-made on these numbers, not on
 the old one.
 

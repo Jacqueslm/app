@@ -65,5 +65,11 @@ Standing instructions. These override default behaviour and repo conventions.
   everywhere." It came off the app whole that day: the door on the shell, its
   page, the 3D ring, its art and sound, its routes, the gate and service-worker
   lines for it, its spec (`docs/GAME-SPEC.md`), the tools that built its cast,
-  and its tests. The shell is **four doors** now, and the service-worker cache
-  name moved to `tsid-shell-v2.5` with it. **Do not rebuild it.**
+  and its tests. The shell went to four doors with it, and the service-worker
+  cache name moved to `tsid-shell-v2.5`. **Do not rebuild it.**
+- **The Trainer is deleted — 10 Oct 2026.** His words: "Ddelete the trainer."
+  It came off whole the same day: the door on the shell, `trainer.html`, its two
+  routes, the gate and service-worker lines for it, its Vercel rewrites and
+  build entry, and its tests. The shell is **three doors** now, and the
+  service-worker cache name moved to `tsid-shell-v2.6` with it. **Do not
+  rebuild it.**

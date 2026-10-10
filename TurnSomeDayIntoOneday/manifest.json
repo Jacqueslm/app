@@ -1,7 +1,7 @@
 {
   "name": "The Truth",
   "short_name": "The Truth",
-  "description": "The Truth: the Zodiacs, the Fight and the Herbs. Private, and nothing else.",
+  "description": "The Truth: the Zodiacs, the Herbs, the Player and the Trainer. Private, and nothing else.",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",

@@ -239,10 +239,13 @@ app.get('/', (req, res) => {
   res.redirect('/app');
 });
 
-// The app is three things now (4 Oct 2026). Jacques: "i dont want the app
+// The app is what the shell holds (4 Oct 2026). Jacques: "i dont want the app
 // nomore just parts i added the zodiac the fight and the herbs", then "strip it
 // nomore recovery app". So /app serves hub.html - a small shell holding the
-// Zodiacs, the Fight and the Herbs - and no longer the recovery app.
+// Zodiacs, the Herbs, the Player and the Trainer - and no longer the recovery
+// app. The Fight was one of those doors until 10 Oct 2026, when he said "delete
+// the fight from everywhere": its door, its page, its ring and its routes all
+// went that day.
 //
 // The recovery app itself is gone, file and all: its page, its server routes for
 // that page, and the eighteen test files that read it were deleted in the pass
@@ -279,7 +282,7 @@ app.get('/key.html', (req, res) => res.status(404).end());
 // Gating only the clean URL /herbs would lock the front door and leave the side
 // one open: express.static below serves herbs.html at its own .html address, so
 // anybody who typed the file name would walk straight past the check. It is the
-// same hole /game3d.html fell through in September, from the other direction.
+// same hole a private page fell through in September, from the other direction.
 // Anything private that is also a real file has to be named twice here.
 //
 // Above express.static: a route registered after it is never reached, and the
@@ -289,44 +292,6 @@ app.get('/key.html', (req, res) => res.status(404).end());
 // the door has to be readable in the file. A test asserts signed-in,
 // on-the-list and redirect-to-/app inside every one of them, and it cannot read
 // a rule that lives in a shared helper.
-// The Fight - the last of the three, added to this same door on 4 Oct 2026.
-// Same shape as /key and /herbs, and registered for the same reason BOTH
-// addresses matter: game3d.html is a real file that express.static below would
-// hand out by name to anybody who typed it, exactly as /herbs.html would have
-// been. The page was open in September precisely because a file was not named
-// twice, which is the mistake this pair exists not to repeat.
-//
-// The route itself is new the same day: the fight became a page of its own
-// instead of a tab inside the recovery app, so its markup, its CSS and its 669
-// lines of JavaScript moved out of that app and into fight.html. The page frames
-// /game3d.html for the roof. The two are separate on purpose - the ring is a
-// self-contained 3D engine, and the game around it has no business loading
-// three.js to draw a menu.
-app.get('/fight', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'fight.html'));
-});
-app.get('/fight.html', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'fight.html'));
-});
-// THE THIRD ADDRESS, and the one that matters most. game3d.html was served
-// straight off disk by express.static below, because it sat on the gate's open
-// list only so the recovery app could load it in an iframe - so the full URL
-// handed the fight to anybody who typed it, signed in or not.
-//
-// That was survivable while the fight was one tab inside a gated app. It is not
-// survivable now that the fight IS the app: leaving this route out would mean
-// gating /fight while /game3d.html stayed open, which is a lock with the window
-// still up. It has to be registered above express.static or static answers
-// first, exactly as the herbs note above describes.
-app.get('/game3d.html', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
-});
 app.get('/herbs', (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
@@ -349,8 +314,8 @@ app.get('/tax.html', (req, res) => {
 });
 
 // The Music — the player, the ringtone maker and the cover maker, added to the
-// app on 5 Oct 2026. Private, and the same door as The Key, the herbs and the
-// fight: signed in AND on the list, or you go to /app without learning the page
+// app on 5 Oct 2026. Private, and the same door as The Key and the herbs:
+// signed in AND on the list, or you go to /app without learning the page
 // is there. A redirect rather than requireAuth, which answers 401 JSON — right
 // for an API call, wrong for somebody opening a page.
 //
@@ -371,7 +336,7 @@ app.get('/music.html', pageLimiter, (req, res) => {
 
 // The Trainer — the gym page, added 9 Oct 2026. Jacques asked for it "inside
 // the recovery app as a private page", so it is the same door as The Key, the
-// herbs, the fight and the Music: signed in AND on the list, or you go to /app
+// herbs and the Music: signed in AND on the list, or you go to /app
 // without learning the page is there. A redirect rather than requireAuth, which
 // answers 401 JSON — right for an API call, wrong for somebody opening a page.
 //

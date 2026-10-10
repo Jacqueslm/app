@@ -83,9 +83,6 @@ const PAGES = {
   '/herbs.html': 'herbs.html',
   '/tax': 'tax.html',
   '/tax.html': 'tax.html',
-  '/fight': 'fight.html',
-  '/fight.html': 'fight.html',
-  '/game3d.html': 'game3d.html',
   '/music': 'music.html',
   '/music.html': 'music.html',
   // The Trainer, 9 Oct 2026: the gym page, behind the same door as the rest.

@@ -169,7 +169,7 @@ test('the marketing pages are gone', () => {
 test('the app, the policy pages and the letter links stay open', () => {
   for (const p of ['/', '/app', '/key', '/admin/stats',
     '/privacy', '/privacy.html', '/delete-account', '/delete-account.html',
-    '/letter.html', '/game3d.html', '/l/abc123',
+    '/letter.html', '/l/abc123',
     '/api/state', '/api/auth/login']) {
     assert.strictEqual(pageIsServed(p), true, `${p} must stay open`);
   }
@@ -245,86 +245,13 @@ test('the herb library and the tax centre are behind the door too', () => {
   }
 });
 
-test('the fight is behind the door too, at all three of its addresses', () => {
-  // Added 4 Oct 2026, when the app became three things and the fight was one of
-  // them. The reason this needs its own test rather than a line in the list above
-  // is the third address: /game3d.html is a REAL FILE, and it sat on the open
-  // list only so the recovery app could frame it. express.static below served it
-  // straight off disk to anybody who typed the name, signed in or not — so the
-  // fight was readable by URL while every test that read the route list passed.
-  for (const url of ['/fight', '/fight.html', '/game3d.html']) {
-    assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
-    assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
-    const at = SRC.indexOf("app.get('" + url + "'");
-    assert.ok(at > -1, `the ${url} route must still be findable in server.js`);
-    const block = SRC.slice(at, at + 320);
-    assert.match(block, /isValidSession\(req\)/, `${url}: signed out gets nothing`);
-    assert.match(block, /isFriendlyRequest\(req\)/, `${url}: off the list gets nothing`);
-    assert.match(block, /res\.redirect\('\/app'\)/, `${url}: a page visit goes to the app, not JSON`);
-    assert.ok(
-      SRC.indexOf("app.get('" + url + "'") < SRC.indexOf('app.use(express.static('),
-      `${url} must be registered above static, which would serve the file itself`,
-    );
-  }
-});
-
-test('the fight, exercised over HTTP, is never served cold from disk', async () => {
-  // The test above reads server.js as text and cannot see whether express.static
-  // answers first. This one registers the real routes in the order server.js
-  // does — gated route, then static — and makes the request, because "nothing
-  // came back" is the only proof that the file is not being handed out.
-  const express = require('express');
-  const rateLimit = require('express-rate-limit');
-  const ROOT = path.join(__dirname, '..', '..');
-  // The same page limiter server.js puts in front of these routes, for the same
-  // reason it is there: a handler that reads a file off disk is a disk read
-  // anybody can ask for in a loop. Mirrored here rather than left out so the
-  // test exercises the shape that actually ships.
-  const pageLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false });
-  const app = express();
-  const gate = (file) => (req, res) => {
-    if (req.get('x-signed-in') !== 'yes') return res.redirect('/app');
-    res.sendFile(path.join(ROOT, file));
-  };
-  for (const url of ['/fight', '/fight.html', '/game3d.html']) app.get(url, pageLimiter, gate('game3d.html'));
-  app.use(express.static(ROOT));
-  app.get('/app', (req, res) => res.type('text/plain').send('the app'));
-
-  const server = app.listen(0);
-  await new Promise((done) => server.once('listening', done));
-  const base = `http://127.0.0.1:${server.address().port}`;
-  const get = (p, signedIn) => fetch(base + p, {
-    redirect: 'manual',
-    headers: signedIn ? { 'x-signed-in': 'yes' } : {},
-  }).then(async (r) => ({ status: r.status, location: r.headers.get('location'), body: await r.text() }));
-  try {
-    for (const url of ['/fight', '/fight.html', '/game3d.html']) {
-      const cold = await get(url);
-      assert.strictEqual(cold.status, 302, `${url}: signed out must be redirected, not served`);
-      assert.strictEqual(cold.location, '/app', `${url}: and sent to the app`);
-      assert.ok(!cold.body.includes('ring3d-three'), `${url}: no part of the game may come back`);
-
-      const warm = await get(url, true);
-      assert.strictEqual(warm.status, 200, `${url}: signed in and on the list gets the game`);
-    }
-  } finally {
-    server.close();
-  }
-});
-
-test('the worker never caches the fight either', () => {
-  // The same rule as The Key and the herb library: a cached copy of a gated page
-  // outlives the check that let it in, and the offline fallback then hands it out
-  // with no check at all. All three addresses reach the same gated route now -
-  // the clean URL, the file name, and game3d.html, which is a real file the
-  // fight's page frames and which the gate covers for itself.
-  //
-  // The ring is still there offline: it is precached by name at install, which
-  // happens from inside the app as somebody already signed in.
-  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
-  assert.match(SW, /\['\/fight', '\/fight\.html', '\/game3d\.html'\]\.includes\(url\.pathname\)\) return;/,
-    'the clean URL, the file name and the ring must all be skipped by the worker');
-});
+// The Fight had three tests here: its three addresses behind the door, the same
+// three exercised over HTTP so express.static could not answer first, and the
+// worker's line for them. All three went on 10 Oct 2026 with the fight itself -
+// "delete the fight from everywhere". The pages, their routes, their folder of
+// pictures and their line in the worker all came out on the same day, so there
+// is nothing left for them to guard; the herbs, the Music and the Trainer below
+// are the same shape and are still checked the same way.
 
 test('The Music is behind the door too, at both of its addresses', () => {
   // Added 5 Oct 2026: the phone-file player, the ringtone maker and the cover
@@ -439,9 +366,14 @@ test('the trainer page is the app\'s own file, and the door leads to it', async 
 // page nobody can reach. This is the check that the door was added with it.
 test('the app\'s home screen has a door to the trainer', () => {
   const HUB = fs.readFileSync(path.join(__dirname, '..', '..', 'hub.html'), 'utf8');
-  assert.match(HUB, /<a class="card t" href="\/trainer">/, 'the fifth door must be on the home screen');
-  assert.match(HUB, /Five doors\. That is the whole app\./, 'and the shell must count it');
-  assert.doesNotMatch(HUB, /Four doors/, 'nothing may still say four');
+  assert.match(HUB, /<a class="card t" href="\/trainer">/, 'the fourth door must be on the home screen');
+  assert.match(HUB, /Four doors\. That is the whole app\./, 'and the shell must count it');
+  assert.doesNotMatch(HUB, /Five doors/, 'nothing may still say five');
+  // The Fight was the second door until 10 Oct 2026, when the whole thing came
+  // off the app - "delete the fight from everywhere". Its card, its colour and
+  // its page went that day; this is the line that keeps a door from creeping
+  // back onto a shell that is four doors now.
+  assert.doesNotMatch(HUB, /href="\/fight"/, 'the fight must have no door on the home screen');
 });
 
 test('the worker never caches the herb library or the tax centre', () => {
@@ -507,7 +439,7 @@ test('a signed-out request for a private reference page never gets the file', as
 
 test('assets are never judged — the app on the phone needs all of them', () => {
   for (const p of ['/sw.js', '/manifest.json', '/icons/icon-192.png',
-    '/js/ring3d-three.js', '/audio/sos.mp3', '/robots.txt',
+    '/icons/icon-512.png', '/audio/sos.mp3', '/robots.txt',
     '/index.css']) {
     assert.strictEqual(isPagePath(p), false, `${p} is not a page`);
     assert.strictEqual(pageIsServed(p), true);

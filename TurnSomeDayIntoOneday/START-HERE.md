@@ -301,16 +301,18 @@ that day off each provider's own pricing page or docs, not off blogs.
 
 Three things a host must do, and they are why most of these fail: **not sleep**
 (the hourly email scheduler needs it), **keep a disk** (the SQLite database
-lives there), and **carry real bandwidth** (the app ships 63MB of images and 3D
-models in `img/` and 37MB of audio in `audio/`; the 3D ring alone is
-`game3d.html` at 156KB plus `js/ring3d-three.js` at 832KB, fetched once per
-fight).
+lives there), and **carry real bandwidth**, which used to be the big one. The app
+ships the icons, the six SOS recordings and the meditation room's tracks; the
+fight's 63MB of art and models in `img/fight` and its 
+`js/ring3d-three.js` went with the fight on 10 Oct 2026. This whole section is
+history anyway — hosting is settled (see CLAUDE.md).
 
-**4 Oct 2026 — the numbers below changed.** The app is three pages now and the
-recovery app's 1MB page is deleted. The pages that ship, measured on disk:
-`hub.html` 10KB, `fight.html` 86KB, `game3d.html` 156KB, `tax.html` 38KB,
-`herbs.html` 191KB, and **`key.html` 1.38MB** — the Zodiacs page is the biggest
-thing served now, larger than the page that was deleted. So a bandwidth
+**4 Oct 2026 — the numbers below changed.** The app is a shell of pages now and
+the recovery app's 1MB page is deleted. The pages that ship, measured on disk:
+`hub.html` 10KB, `tax.html` 38KB, `herbs.html` 191KB, `music.html` 87KB,
+`trainer.html` 85KB, and **`key.html` 1.38MB** — the Zodiacs page is the biggest
+thing served now, larger than the page that was deleted. (`fight.html` 86KB and
+`game3d.html` 156KB were the fight; both were deleted on 10 Oct 2026.) So a bandwidth
 argument that rested on the old file has to be re-made on these numbers, not on
 the old one.
 
@@ -335,8 +337,8 @@ moves, and the table above is history rather than a list of options to work
 through. Do not raise it again, do not run the bandwidth sums for him, and do
 not price hosts at him. Only revisit if HE brings it up. The one number that was
 wrong here is already corrected above (the app's pages are `hub.html` 10KB,
-`fight.html` 86KB, `key.html` 1.38MB — the 1MB file this row was written about is
-deleted).
+`key.html` 1.38MB, `music.html` 87KB — the 1MB file this row was written about is
+deleted, and so is the fight's 156KB ring it was counted with).
 
 The lasting good that came out of the first round: the database had no backup at
 all, and now has one (see the backup section above).

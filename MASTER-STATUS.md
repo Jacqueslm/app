@@ -1302,8 +1302,12 @@ commit dies with the container; that is how the 18 Aug marketing batch was lost.
   No video work goes in: not the .mp4, not the source, not the stills.
 - **Music and audio still go in**, exactly as before: `content/score/`,
   `TurnSomeDayIntoOneday/audio/`, anything else uploaded here.
-- **`tools/render-film.js`, `tools/prep-still.py` and `tools/make-film.py` stay**
-  — they are tooling, not video work, and every future piece needs them.
+- **The film tools stayed until 10 Oct 2026, and then went.** Jacques: "delete
+  those too." `tools/render-film.js`, `tools/prep-still.py`, `tools/make-film.py`,
+  `tools/make-talk.py` and `tools/setup-video-tools.sh` were deleted that day, so
+  nothing in this repo makes a video any more and any command below that calls
+  one of them cannot be run. Every finished piece still exists on his own drive
+  and on the feeds — it is only the machinery here that is gone.
 - **Sources are handed over in chat**, the same way finished .mp4s are. Jacques
   keeps them in his own file alongside the videos they build.
 
@@ -1792,7 +1796,7 @@ markdown file to find a caption is the thing this rule exists to stop.
 **No more flat Ken Burns.** Every new piece uses three things, all free, all
 local, all proven in this container:
 
-1. **Parallax.** `python3 tools/prep-still.py <still.jpg>` writes
+1. **Parallax.** `prep-still.py` (deleted 10 Oct 2026) wrote
    `<name>-up.jpg` (upscaled plate) and `<name>-cut.png` (subject on
    transparency). The source moves those two layers at *different speeds*. That
    difference is the depth - the picture stops sliding around as one sheet.

@@ -617,7 +617,9 @@ GREEN: `It's free. Link in bio.`
 
 **Score:** `content/score/the-last-breath.mp3` at 0.85.
 
-**Build:** `python3 tools/make-film.py content/supporter-husband/spec.json content/supporter-husband/husband-supporting.mp4`
+**Build:** *(the film tools were deleted on 10 Oct 2026 — "delete those too" — so
+this command cannot be run any more)*
+`python3 tools/make-film.py content/supporter-husband/spec.json content/supporter-husband/husband-supporting.mp4`
 
 **Caption for the post:**
 > He is not the one drinking. He still lost the evenings, the sleep, and the

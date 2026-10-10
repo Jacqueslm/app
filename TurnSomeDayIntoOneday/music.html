@@ -136,6 +136,20 @@
   .status.err{color:var(--rose)}
   canvas.preview{width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:#000; display:block}
   .chips{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 13px}
+
+  /* The numbered manual on the player. A real numbered list in the markup, so
+     the count is the browser's job rather than something typed by hand. */
+  ol.steps{counter-reset:s; list-style:none; margin:0; padding:0; display:grid; gap:10px}
+  ol.steps li{position:relative; padding-left:31px; color:var(--dim); font-size:.8125rem; line-height:1.55}
+  ol.steps li b{color:var(--ink); font-weight:500}
+  /* The player is the page's own card, so it is marked as one. */
+  #nowCard{border-color:rgba(232,192,122,.28)}
+  ol.steps li::before{
+    counter-increment:s; content:counter(s);
+    position:absolute; left:0; top:0; width:21px; height:21px; border-radius:50%;
+    background:var(--card2); border:1px solid var(--line); color:var(--gold);
+    font-size:.6875rem; display:flex; align-items:center; justify-content:center;
+  }
   .chip{
     padding:7px 12px; border-radius:999px; border:1px solid var(--line); background:transparent;
     color:var(--dim); font:inherit; font-size:.75rem; cursor:pointer;
@@ -166,6 +180,47 @@
 
   <!-- ───────────────────────── PLAYER ───────────────────────── -->
   <section class="panel" id="panel-player" role="tabpanel" aria-labelledby="tab-player">
+
+    <!-- The player sits first, and it never disappears. It used to be the
+         fourth card down, so the songs had to be scrolled past to reach the
+         controls, and it was hidden until something played — which read as the
+         page having no player at all. It is always on screen now, and with
+         nothing playing it says so. -->
+    <div class="card" id="nowCard">
+      <p class="kicker">Playing now</p>
+      <div class="now">
+        <div>
+          <p class="title" id="nowTitle">Nothing playing yet</p>
+          <p class="artist" id="nowMeta">Pick a song from the list, or a track in the room.</p>
+        </div>
+        <input type="range" class="seek" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek">
+        <div class="times"><span id="tText">0:00</span><span id="dText">0:00</span></div>
+        <div class="controls">
+          <button class="round small" id="prev" aria-label="Previous">⏮</button>
+          <button class="round" id="playBtn" aria-label="Play">▶</button>
+          <button class="round small" id="next" aria-label="Next">⏭</button>
+        </div>
+      </div>
+      <p class="note" id="playerNote"></p>
+    </div>
+
+    <!-- The manual (10 Oct 2026). Jacques: "add how music is loaded". One card,
+         in order, in plain words: the page had said how the songs are KEPT and
+         never how they get here in the first place. -->
+    <div class="card">
+      <p class="kicker">The manual</p>
+      <h2>How your music gets here</h2>
+      <p class="hint">All of it happens on this phone. Nothing is uploaded, and nothing is sent anywhere.</p>
+      <ol class="steps">
+        <li><b>Tap “Tap to choose songs”</b> and pick the files already on the phone. Any of the usual kinds — mp3, m4a, wav, ogg — and as many as you like at once.</li>
+        <li><b>Or tap “Scan for new music”.</b> That looks in your music folder and in the meditation room, and adds only what is not here yet.</li>
+        <li><b>They land in “All songs”</b> and are kept on this phone, so the list is waiting the next time you open the page.</li>
+        <li><b>Tap any row to play it.</b> The player at the top follows whatever you pick. A song you add today lands at the top of the list — the <b>Order</b> chips flip that round.</li>
+        <li><b>To take one off, tap the ✕</b> on its row. On a playlist the ✕ takes only the row out — the song itself stays on the phone.</li>
+        <li><b>To make a playlist,</b> name one under “Playlists”, then tap + on any song. The same song can go in as many times as you like.</li>
+      </ol>
+    </div>
+
     <div class="card">
       <p class="kicker">From this phone</p>
       <h2>Add your songs</h2>
@@ -175,13 +230,19 @@
       <div class="row" style="margin-top:12px">
         <button class="btn ghost wide" id="scanBtn" type="button">Scan for new music</button>
       </div>
+      <div id="sortRow">
+        <p class="kicker" style="margin-top:16px">Order</p>
+        <div class="chips" id="sortChips">
+          <button class="chip" data-sort="new" type="button" aria-pressed="true">Newest first</button>
+          <button class="chip" data-sort="old" type="button" aria-pressed="false">Oldest first</button>
+        </div>
+      </div>
       <ul class="list" id="playlist"></ul>
       <p class="empty" id="emptyList">No songs added yet.</p>
       <div class="row" id="keepRow" hidden>
         <button class="btn ghost" id="forgetBtn" type="button">Remove all from this phone</button>
       </div>
       <p class="status" id="playerStatus" role="status" aria-live="polite"></p>
-      <p class="note">The songs are kept inside this phone's browser, so they are still here next time you open the page. That uses space on the phone — the ✕ takes any one back off.</p>
     </div>
 
     <div class="card">
@@ -207,52 +268,39 @@
       <p class="status" id="roomStatus" role="status" aria-live="polite"></p>
     </div>
 
-    <div class="card" id="nowCard" hidden>
-      <div class="now">
-        <div>
-          <p class="title" id="nowTitle">—</p>
-          <p class="artist" id="nowMeta"></p>
-        </div>
-        <input type="range" class="seek" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek">
-        <div class="times"><span id="tText">0:00</span><span id="dText">0:00</span></div>
-        <div class="controls">
-          <button class="round small" id="prev" aria-label="Previous">⏮</button>
-          <button class="round" id="playBtn" aria-label="Play">▶</button>
-          <button class="round small" id="next" aria-label="Next">⏭</button>
-        </div>
-      </div>
-      <p class="note" id="playerNote"></p>
-    </div>
-
+    <!-- One card for how it plays through (10 Oct 2026). The fade, the shuffle
+         and the repeat were three cards holding the same three settings, and
+         the player they belong to was somewhere above them. -->
     <div class="card">
-      <p class="kicker">Going from one song to the next</p>
-      <h2>Fade between them</h2>
-      <p class="hint">Fade the end of a song into the start of the next one so it does not jump. Off means the next song starts the moment this one ends. The choice is kept on the phone.</p>
+      <p class="kicker">How it plays through</p>
+      <h2>Fade, shuffle and repeat</h2>
+      <p class="hint">The lock screen shows what is playing and carries play, pause and next, so the music carries on with the screen off.</p>
+
+      <p class="kicker">Fade between songs</p>
       <div class="chips" id="fadeChips">
         <button class="chip" data-fade="0" type="button" aria-pressed="true">Off</button>
         <button class="chip" data-fade="3" type="button" aria-pressed="false">3 sec</button>
         <button class="chip" data-fade="5" type="button" aria-pressed="false">5 sec</button>
         <button class="chip" data-fade="10" type="button" aria-pressed="false">10 sec</button>
       </div>
-      <p class="status" id="fadeStatus" role="status" aria-live="polite"></p>
-    </div>
+      <p class="hint">Off means the next song starts the moment this one ends. The choice is kept on the phone.</p>
 
-    <div class="card">
-      <p class="kicker">How it plays through</p>
-      <h2>Shuffle and repeat</h2>
-      <p class="hint">Shuffle plays them in a different order each time. Repeat all starts the whole list again when the last song ends; Repeat one plays the same song round and round. The lock screen shows what is playing and carries play, pause and next, so the music can carry on with the screen off.</p>
       <p class="kicker">Shuffle</p>
       <div class="chips" id="shuffleChips">
         <button class="chip" data-shuffle="0" type="button" aria-pressed="true">Off</button>
         <button class="chip" data-shuffle="1" type="button" aria-pressed="false">On</button>
       </div>
+
       <p class="kicker">Repeat</p>
       <div class="chips" id="repeatChips">
         <button class="chip" data-repeat="off" type="button" aria-pressed="false">Off</button>
         <button class="chip" data-repeat="all" type="button" aria-pressed="true">All</button>
         <button class="chip" data-repeat="one" type="button" aria-pressed="false">One</button>
       </div>
-      <p class="status" id="modeStatus" role="status" aria-live="polite"></p>
+      <p class="hint">Shuffle plays them in a different order each time. Repeat all starts the whole list again after the last song; Repeat one plays the same song round and round.</p>
+
+      <p class="status" id="fadeStatus" role="status" aria-live="polite"></p>
+      <p class="status" id="modeStatus" role="status" aria-live="polite" style="margin-top:4px"></p>
     </div>
   </section>
 
@@ -539,6 +587,10 @@
           added: r.added || 0,
         });
       });
+      // The order he last chose is put back before anything is drawn: the songs
+      // come out of storage oldest first, which is not necessarily how he wants
+      // to see them.
+      sortRows();
       // The playlists can only be pointed at real songs once those songs are
       // back, so they are resolved here and never before.
       resolveLists();
@@ -779,6 +831,7 @@
     if (already) msg += ' ' + already + (already === 1 ? ' was already here.' : ' were already here.');
     if (viewList >= 0) msg += ' They are in All songs — tap that to see them.';
     say($('playerStatus'), msg);
+    sortRows();
     renderPlaylist();
     renderRingtoneOptions();
     if (current < 0) selectSong(0, false);
@@ -800,6 +853,53 @@
     });
     probe.addEventListener('error', function(){ /* leave the length blank */ });
   }
+
+  // ── the order of the list ───────────────────────────────────────────────
+  // 10 Oct 2026, Jacques: “add how music is loaded new … oldest”. The songs came
+  // back oldest first, so a file added today sat at the very bottom of the list
+  // with the player under it. The order is a choice now, newest first is how it
+  // starts, and the choice is kept on the phone like the fade and the shuffle.
+  // A playlist keeps its own order — that order is the whole point of a list —
+  // so this only ever moves the songs themselves.
+  var SORT_KEY = 'tsid-music-sort';
+  var sortNew = true;
+
+  function loadSort(){
+    try { sortNew = window.localStorage.getItem(SORT_KEY) !== 'old'; }
+    catch(e){ sortNew = true; }
+  }
+
+  function sortRows(){
+    // The index means “which row is playing”, so the song is remembered on its
+    // own and found again: moving the rows without it would leave the mark on
+    // whatever happened to land in that slot.
+    var was = (roomIndex < 0 && current >= 0) ? view()[current] : null;
+    songs.sort(function(a, b){
+      var byAge = (a.added || 0) - (b.added || 0);
+      return sortNew ? -byAge : byAge;
+    });
+    if (was) current = view().indexOf(was);
+  }
+
+  function renderSortChips(){
+    var row = $('sortChips');
+    if (!row) return;
+    var want = sortNew ? 'new' : 'old';
+    Array.prototype.forEach.call(row.querySelectorAll('.chip'), function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-sort') === want ? 'true' : 'false');
+    });
+  }
+
+  Array.prototype.forEach.call($('sortChips').querySelectorAll('.chip'), function(c){
+    c.addEventListener('click', function(){
+      sortNew = c.getAttribute('data-sort') === 'new';
+      try { window.localStorage.setItem(SORT_KEY, sortNew ? 'new' : 'old'); } catch(e){ /* private window */ }
+      sortRows();
+      renderSortChips();
+      renderPlaylist();
+      say($('playerStatus'), sortNew ? 'Newest songs first.' : 'Oldest songs first.');
+    });
+  });
 
   function renderPlaylist(){
     var arr = view();
@@ -826,7 +926,10 @@
       t.textContent = s.name;
       var d = document.createElement('p');
       d.className = 'd';
-      d.textContent = s.duration ? fmt(s.duration) : s.meta;
+      // One line, one meaning: the length when the phone has told us, and where
+      // the song is when it has not. It used to fall back to the raw file name,
+      // so half the list read as times and half as “track_-_final_v2.mp3”.
+      d.textContent = s.duration ? fmt(s.duration) : 'On this phone';
       meta.appendChild(t);
       meta.appendChild(d);
 
@@ -868,6 +971,10 @@
       list.appendChild(li);
     });
     $('keepRow').hidden = songs.length === 0 || viewList >= 0;
+    // The order only applies to All songs — a playlist is its own order, so the
+    // chips are not offered while one of those is the thing on screen.
+    var sortRow = $('sortRow');
+    if (sortRow) sortRow.hidden = viewList >= 0;
   }
 
   // The row of lists above the playlists card: All songs is always first, and
@@ -961,7 +1068,7 @@
       audio.removeAttribute('src');
       audio.load();
       current = -1;
-      $('nowCard').hidden = true;
+      showNowEmpty();
     } else if (i < current) {
       current--;
     }
@@ -1003,7 +1110,7 @@
     targetList = -1;
     listsResolved = true;
     if (typeof crossStop === 'function') crossStop();
-    $('nowCard').hidden = true;
+    showNowEmpty();
     dbDropAll();
     saveLists();
     renderListChips();
@@ -1013,6 +1120,16 @@
   });
 
   // ── player ────────────────────────────────────────────────────────────────
+  // The player is the first thing on the page, so it does not come and go: with
+  // nothing playing it says that rather than disappearing.
+  function showNowEmpty(){
+    $('nowTitle').textContent = 'Nothing playing yet';
+    $('nowMeta').textContent = view().length
+      ? 'Pick a song from the list, or a track in the room.'
+      : 'Add a song below, or tap a track in the room.';
+    $('playerNote').textContent = '';
+  }
+
   function selectSong(i, play){
     if (i < 0 || i >= view().length) return;
     var s = view()[i];
@@ -1976,10 +2093,12 @@
   });
 
   // ── start ─────────────────────────────────────────────────────────────────
+  loadSort();
   loadListDefs();
   resolveLists();   // chips and all, against whatever is back so far; the
                      // songs re-resolve the lists again when they are restored
   renderPlaylist();
+  renderSortChips();
   renderRoom();
   renderRingtoneOptions();
   setSize('square');

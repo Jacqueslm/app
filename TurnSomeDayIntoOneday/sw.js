@@ -35,16 +35,16 @@
 // copies of "four doors" in the shell went with it. The name moved to 2.3 for
 // the same reason as the bump above - the shell changed, so an installed phone
 // has to rebuild it or it never sees the new door.
-const CACHE_NAME = 'tsid-shell-v2.4';
+//
+// 10 Oct 2026: the Fight came off the app altogether - Jacques: "delete the
+// fight from everywhere". Its door went from the shell, so the two copies of
+// "five doors" went with it and the name moved to 2.5 for the same reason as
+// every bump above: an installed phone has to rebuild the shell or it keeps
+// seeing a door that is no longer there.
+const CACHE_NAME = 'tsid-shell-v2.5';
 const SHELL_FILES = [
   '/',
   '/app',
-  // The roof fight. It is the only app page loaded in an iframe, and the only
-  // one whose address carries a query string (?boss=…&fighter=…&floor=…). The
-  // page fallback below ends at '/app', so with this line missing and no
-  // signal, the fight frame came up as the app's home screen — the ring went
-  // missing at the bell. Precached, ignoreSearch finds it offline.
-  '/game3d.html',
   '/manifest.json',
   '/manifest-discrete.json',
   '/audio/sos-talk-warm.mp3',
@@ -152,12 +152,6 @@ self.addEventListener('fetch', (event) => {
   // shape and had their own lines here; all three went on 24 Sep 2026 with the
   // pages themselves, so their lines went too.
   if (['/herbs', '/herbs.html', '/tax', '/tax.html'].includes(url.pathname)) return;
-
-  // The Fight joined the same door on 4 Oct 2026, when the app became three
-  // things and this became one of them. Both addresses again - the clean URL and
-  // the file name reach the same gated route, so a cached copy of either would
-  // outlive the check that is supposed to be guarding it.
-  if (['/fight', '/fight.html', '/game3d.html'].includes(url.pathname)) return;
 
   // The Music joined the same door on 5 Oct 2026. It is served only to somebody
   // signed in and on the list, so a cached copy would outlive that check and the

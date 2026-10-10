@@ -32,8 +32,7 @@ Standing instructions. These override default behaviour and repo conventions.
 
 - **Free tier (as of 1 Sep 2026):** everything except two things. Day counter,
   SOS set, breathing, "Talk me through it", journal, weekly reports, analytics,
-  **every lesson day 1–90 on every track**, the Spiritual Path, Together, and
-  **The Fight of Your Life, the game — every building, every roof**.
+  **every lesson day 1–90 on every track**, the Spiritual Path, and Together.
 - **Pro is exactly two things: Friendly and the live rooms.** Friendly is the
   one feature with a real per-message bill, so free gets zero chats, not three.
   Never advertise a lesson day as paid — that was removed and the copy went
@@ -62,14 +61,9 @@ Standing instructions. These override default behaviour and repo conventions.
   reviewed. Researched 31 Aug; changing it was the wrong call.
 - **The boxing game is removed.** He rejected it three times. Recoverable at
   commit `5623c870` if he ever asks, but do not suggest it.
-- The Fight tab (was "Game", renamed 6 Sep) opens The Fight of Your Life (code still says 2AM/tower). The Climb is on Today under the lesson and in Tools, not on the fight screen; a finished lesson takes the step by itself.
-- **The Fight of Your Life (rebuilt 6 Sep 2026, spec in docs/GAME-SPEC.md):** every
-  floor spins a wheel onto one of three shows (Who Wants to Recover, Wheel of
-  Your Addictions, Time to Heal), 12 floors, then a Punch-Out style fight on the
-  roof against the addiction's shadow, by name. No clock anywhere in the app;
-  the one exception, settled 6 Sep, is the 3D fight itself, which runs real
-  boxing rules with a sixty-second round clock (`tools/ring3d/`). Nothing
-  invented: every card and puzzle reads the person's own app data. Photos in
-  img/fight, sound in audio/fight (Piper deep male, same as SOS). Boxers 1-2
-  talk in single words; feints and the switch arrive later. A 3D proof exists;
-  real fighters come from Mixamo when Jacques pulls them.
+- **The Fight is deleted — 10 Oct 2026.** His words: "delete the fight from
+  everywhere." It came off the app whole that day: the door on the shell, its
+  page, the 3D ring, its art and sound, its routes, the gate and service-worker
+  lines for it, its spec (`docs/GAME-SPEC.md`), the tools that built its cast,
+  and its tests. The shell is **four doors** now, and the service-worker cache
+  name moved to `tsid-shell-v2.5` with it. **Do not rebuild it.**

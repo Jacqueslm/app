@@ -4,7 +4,7 @@
   "outputDirectory": "webroot",
   "functions": {
     "api/index.js": {
-      "includeFiles": "{hub,key,herbs,tax,fight,game3d,music,trainer}.html"
+      "includeFiles": "{hub,key,herbs,tax,music,trainer}.html"
     }
   },
   "rewrites": [
@@ -16,9 +16,6 @@
     { "source": "/herbs.html", "destination": "/api/index.js" },
     { "source": "/tax", "destination": "/api/index.js" },
     { "source": "/tax.html", "destination": "/api/index.js" },
-    { "source": "/fight", "destination": "/api/index.js" },
-    { "source": "/fight.html", "destination": "/api/index.js" },
-    { "source": "/game3d.html", "destination": "/api/index.js" },
     { "source": "/music", "destination": "/api/index.js" },
     { "source": "/music.html", "destination": "/api/index.js" },
     { "source": "/trainer", "destination": "/api/index.js" },

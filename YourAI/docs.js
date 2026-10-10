@@ -23,9 +23,10 @@ const REPO_ROOT = path.join(__dirname, '..');
 // A path that is not there is not an error here - it is read as an empty
 // document, silently - so leaving one in would make the assistant quietly
 // worse rather than fail.
+// GAME-SPEC.md was the second entry here and went on 10 Oct 2026, with the
+// Fight of Your Life itself - "delete the fight from everywhere".
 const EXTRA_DOCS = [
   'TurnSomeDayIntoOneday/HANDOFF.md',
-  'TurnSomeDayIntoOneday/docs/GAME-SPEC.md',
 ];
 
 // Files too big to feed a model whole get cut off, with a note so the AI knows

@@ -85,6 +85,9 @@ Two sessions built videos on the same day and collided twice. A15, A16 and A17
 were each claimed by two different pieces before anyone noticed.
 
 **Taken as of 27 Aug:** A1–A17 and A9b, plus **A18** and **A19** reserved below.
+**Taken as of 10 Oct 2026:** A1–A22 built, A23–A30 never used, A31–A34 reserved
+(the section at the end of this file), **A35 spent** — built and then deleted;
+the number is not free again. The next one is A36.
 
 **A18 — "He said he'd wait up."** · supporter side · 8s Cause & Effect · BUILT
 Door → kitchen table. *He said he'd wait up. / He always does.*
@@ -1379,3 +1382,4 @@ bright, so they ghosted across the tag line and the fault finally showed.
 with it only because their content had already faded by then — that was luck,
 not design. Any future piece with something bright still on screen at 5.7s needs
 this or it will ghost.
+

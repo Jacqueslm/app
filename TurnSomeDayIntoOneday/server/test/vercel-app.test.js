@@ -292,6 +292,161 @@ test('with no key on the server it says so plainly, and never hands out a key', 
   }
 });
 
+test('a refused reading says why, in Google\'s own words, and still never says the key', async () => {
+  // 10 Oct 2026. This host could refuse every single reading and say only "the
+  // reading could not be written just now", which is not a sentence anybody can
+  // act on from a phone — a dead key, an exhausted free quota and a retired
+  // model all read identically. The Railway build hands the owner Google's own
+  // words (server/key-reading-route.js:114) and key.html already prints them in
+  // brackets. This build threw them away, so the same break was fixable on one
+  // host and invisible on the other.
+  //
+  // Google is faked rather than called: what is being tested is what this route
+  // does with a refusal, and a real refusal needs a key and a quota no test has.
+  const savedKey = process.env.GEMINI_API_KEY;
+  // The fake still looks like a key, so "the key never appears in the answer"
+  // is a claim about the code and not a tautology about the fixture.
+  process.env.GEMINI_API_KEY = 'AIzaSyFAKE-for-these-tests-only-000000000';
+  const modulePath = require.resolve('../vercel-app');
+  delete require.cache[modulePath];
+
+  const realFetch = global.fetch;
+  let asked = 0;
+  global.fetch = (url, opts) => {
+    if (String(url).includes('generativelanguage.googleapis.com')) {
+      asked += 1;
+      return Promise.resolve(new Response(JSON.stringify({
+        error: {
+          code: 400,
+          message: 'API key not valid. Please pass a valid API key.',
+          status: 'INVALID_ARGUMENT',
+        },
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } }));
+    }
+    // The test's own calls to the spare port have to keep working while the
+    // provider is faked, or the fixture would break the thing it is measuring.
+    return realFetch(url, opts);
+  };
+
+  let spare, spareServer, spareBase;
+  try {
+    spare = require('../vercel-app');
+    spareServer = spare.listen(0);
+    await new Promise((r) => spareServer.once('listening', r));
+    spareBase = `http://127.0.0.1:${spareServer.address().port}`;
+
+    const login = await fetch(`${spareBase}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'jacques@example.com', password: 'let-me-in' }),
+    });
+    const cookies = typeof login.headers.getSetCookie === 'function'
+      ? login.headers.getSetCookie()
+      : [login.headers.get('set-cookie')].filter(Boolean);
+    const cookie = cookies[0].split(';')[0];
+
+    const res = await fetch(`${spareBase}/api/key-reading`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie },
+      body: JSON.stringify({ who: 'Somebody', message: 'THEIR READING' }),
+    });
+    assert.equal(res.status, 502);
+    const body = await res.json();
+    assert.equal(body.error, 'The reading could not be written just now.',
+      'the sentence on the page is unchanged — this adds the reason beside it');
+    assert.match(body.ownerError || '', /API key not valid/,
+      'the owner is told what Google actually said, so the fix is a step not a guess');
+    const text = JSON.stringify(body);
+    assert.doesNotMatch(text, /AIza/, 'and the key itself never comes back');
+    assert.doesNotMatch(text, /GEMINI_API_KEY/, 'nor the name of the setting it lives in');
+    assert.equal(asked, 2, 'the bare-400 retry still happens before it gives up');
+  } finally {
+    global.fetch = realFetch;
+    if (spareServer) spareServer.close();
+    if (savedKey === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = savedKey;
+    delete require.cache[modulePath];
+  }
+});
+
+test('a busy Google is asked again, and the reading lands instead of the excuse', async () => {
+  // Measured through this very route on 10 Oct 2026, with a key that answers
+  // 200 when asked directly: two readings came back whole and the third came
+  // back "HTTP 503: This model is currently experiencing high demand". Nothing
+  // was wrong. It was a queue, and the app was handing the queue to the phone
+  // as a failure — the one reading in three that a person would remember.
+  //
+  // Asking again is the whole fix, so this is the test that keeps it: a busy
+  // no must not reach the screen while a second ask would have answered.
+  const savedKey = process.env.GEMINI_API_KEY;
+  const savedWait = process.env.GEMINI_BUSY_WAIT_MS;
+  process.env.GEMINI_API_KEY = 'AIzaSyFAKE-for-these-tests-only-000000000';
+  // The wait is real time in the runner. One millisecond keeps the property
+  // being tested (it does wait, then it asks again) without making every test
+  // run sit through three seconds of nothing.
+  process.env.GEMINI_BUSY_WAIT_MS = '1';
+  const modulePath = require.resolve('../vercel-app');
+  delete require.cache[modulePath];
+
+  const realFetch = global.fetch;
+  let asked = 0;
+  global.fetch = (url, opts) => {
+    if (!String(url).includes('generativelanguage.googleapis.com')) return realFetch(url, opts);
+    asked += 1;
+    const json = (status, payload) => Promise.resolve(new Response(
+      JSON.stringify(payload), { status, headers: { 'Content-Type': 'application/json' } }));
+    if (asked === 1) {
+      return json(503, {
+        error: {
+          code: 503,
+          message: 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.',
+          status: 'UNAVAILABLE',
+        },
+      });
+    }
+    return json(200, {
+      candidates: [{ content: { parts: [{ text: 'A reading, at last.' }] }, finishReason: 'STOP' }],
+    });
+  };
+
+  let spare, spareServer, spareBase;
+  try {
+    spare = require('../vercel-app');
+    spareServer = spare.listen(0);
+    await new Promise((r) => spareServer.once('listening', r));
+    spareBase = `http://127.0.0.1:${spareServer.address().port}`;
+
+    const login = await fetch(`${spareBase}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'jacques@example.com', password: 'let-me-in' }),
+    });
+    const cookies = typeof login.headers.getSetCookie === 'function'
+      ? login.headers.getSetCookie()
+      : [login.headers.get('set-cookie')].filter(Boolean);
+    const cookie = cookies[0].split(';')[0];
+
+    const res = await fetch(`${spareBase}/api/key-reading`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie },
+      body: JSON.stringify({ who: 'Somebody', message: 'THEIR READING' }),
+    });
+    assert.equal(res.status, 200, 'the second ask is what the person sees, not the first no');
+    const body = await res.json();
+    assert.equal(body.text, 'A reading, at last.');
+    assert.ok(!body.ownerError, 'and there is nothing to apologise for');
+    assert.equal(asked, 2, 'a busy no is asked again, once');
+  } finally {
+    global.fetch = realFetch;
+    if (spareServer) spareServer.close();
+    if (savedKey === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = savedKey;
+    if (savedWait === undefined) delete process.env.GEMINI_BUSY_WAIT_MS;
+    else process.env.GEMINI_BUSY_WAIT_MS = savedWait;
+    delete require.cache[modulePath];
+  }
+});
+
 test('the chat route answers in the shape the page already reads', () => {
   // The tax page reads data.content[0].text. This is the same contract the
   // Railway server keeps, so the page did not have to change for the move — and

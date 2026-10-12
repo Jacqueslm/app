@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Trainer</title>
+<meta name="theme-color" content="#07060d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307060d'/%3E%3Cpath d='M12 32h6M46 32h6M20 24h6v16h-6zM38 24h6v16h-6zM26 32h12' fill='none' stroke='%23f0919f' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/zodiacs-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#07060d; --ink:#ece9f5; --dim:#a29cbb; --dimmer:#6f6890;
+    --line:rgba(255,255,255,.10); --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.055);
+    --rose:#f0919f; --teal:#5fd9c4; --gold:#e8c07a;
+    --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:18px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; min-height:100dvh; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    padding:calc(env(safe-area-inset-top,0px) + 24px) 18px calc(env(safe-area-inset-bottom,0px) + 30px);
+  }
+  .wrap{width:100%; max-width:520px}
+  .hdr{display:flex; align-items:center; gap:13px; margin-bottom:20px}
+  .back{
+    flex:0 0 38px; width:38px; height:38px; border-radius:12px; display:flex;
+    align-items:center; justify-content:center; text-decoration:none;
+    color:var(--dim); background:var(--card); border:1px solid var(--line); font-size:1.0625rem;
+  }
+  .back:hover{color:var(--ink)}
+  h1{margin:0; font-family:var(--serif); font-size:1.3125rem; font-weight:500; line-height:1.15}
+  .hdr p{margin:3px 0 0; color:var(--dimmer); font-size:.75rem}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:17px 16px; margin:0 0 12px}
+  .card h2{margin:0 0 7px; font-family:var(--serif); font-size:1.0625rem; font-weight:500}
+  .card p{margin:0 0 10px; color:var(--dim); font-size:.8438rem; line-height:1.6}
+  .card p:last-child{margin-bottom:0}
+  .lead{border-color:rgba(240,145,159,.35); background:rgba(240,145,159,.06)}
+  .lead h2{color:var(--rose)}
+  label{display:block; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer); margin:0 0 6px}
+  input[type=text], input[type=number], input[type=date], textarea{
+    width:100%; margin:0 0 15px; padding:13px 14px; font:inherit; font-size:1rem; color:var(--ink);
+    background:rgba(0,0,0,.28); border:1px solid var(--line); border-radius:12px; outline:none;
+  }
+  textarea{min-height:74px; resize:vertical; line-height:1.5}
+  input:focus, textarea:focus{border-color:rgba(240,145,159,.55); background:rgba(0,0,0,.4)}
+  input[type=date]{color-scheme:dark}
+  .picks{display:grid; gap:8px; margin:0 0 15px}
+  .pick{display:flex; align-items:center; gap:11px; font-size:.9375rem; color:var(--ink); background:rgba(0,0,0,.2); border:1px solid var(--line); border-radius:12px; padding:12px 13px; cursor:pointer}
+  .pick input{width:19px; height:19px; margin:0; accent-color:var(--rose); flex:0 0 auto}
+  .row{display:flex; gap:10px; margin-top:4px}
+  .btn{
+    flex:1 1 auto; padding:15px 14px; font:inherit; font-size:.9375rem; font-weight:600;
+    color:#200b0f; background:var(--rose); border:0; border-radius:12px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn.quiet{background:none; border:1px solid var(--line); color:var(--dim); font-weight:500; flex:0 0 auto; padding:15px 18px}
+  .btn:active{transform:translateY(1px)}
+  .saved{margin:12px 0 0; color:var(--teal); font-size:.8125rem; min-height:1.2em}
+  .fine{margin:10px 0 24px; color:var(--dimmer); font-size:.75rem; line-height:1.6}
+  footer{margin-top:22px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <a class="back" href="/app" title="Back to the app">&#8592;</a>
+    <div>
+      <h1>The Trainer</h1>
+      <p>Your information first</p>
+    </div>
+  </header>
+
+  <!--
+    Step one, and only step one. Jacques, 11 Oct 2026: "then create the trainer
+    we will be slowly so start off with just basic input information that's it".
+
+    So this page asks and keeps, and plans nothing. When the plan is built it is
+    built out of these answers, and until then there is nothing here that tells
+    anybody to do anything — which is also why there is no exercise on it yet.
+
+    Everything typed here stays on this phone, in this browser. Nothing is sent
+    anywhere, there is no account and no server behind the form, and the page
+    works with no signal.
+  -->
+  <div class="card lead">
+    <h2>Step one: your information</h2>
+    <p>This page asks and keeps. There is no plan on it yet &mdash; the plan gets built out of these answers, and it comes next.</p>
+    <p>Everything here stays on this phone and nothing is sent anywhere. You can change any answer at any time, and clearing it clears all of it.</p>
+  </div>
+
+  <form class="card" id="intake" autocomplete="off">
+    <h2>You</h2>
+
+    <label for="name">What to call you</label>
+    <input id="name" name="name" type="text" placeholder="A name or just an initial" autocapitalize="words">
+
+    <label for="age">Age</label>
+    <input id="age" name="age" type="number" inputmode="numeric" min="1" max="120" placeholder="Years">
+
+    <label for="build">Height and weight</label>
+    <input id="build" name="build" type="text" placeholder="As you know them &mdash; nothing here is weighed or judged">
+
+    <label for="days">Days a week you can train</label>
+    <input id="days" name="days" type="number" inputmode="numeric" min="1" max="7" placeholder="1 to 7">
+
+    <label for="when">The time of day that actually works</label>
+    <input id="when" name="when" type="text" placeholder="Before work, after the school run, at night">
+
+    <h2 style="margin-top:20px">What you have at home</h2>
+    <p>Tick what is in the house. Anything not ticked is simply not used.</p>
+    <div class="picks" id="kit">
+      <label class="pick"><input type="checkbox" data-kit="Dumbbells"><span>Dumbbells</span></label>
+      <label class="pick"><input type="checkbox" data-kit="A pull-up bar"><span>A pull-up bar</span></label>
+      <label class="pick"><input type="checkbox" data-kit="Push-up bars"><span>Push-up bars</span></label>
+      <label class="pick"><input type="checkbox" data-kit="A bench or a chair"><span>A bench or a chair</span></label>
+      <label class="pick"><input type="checkbox" data-kit="A band"><span>A band</span></label>
+      <label class="pick"><input type="checkbox" data-kit="Floor space"><span>Floor space</span></label>
+      <label class="pick"><input type="checkbox" data-kit="Nothing yet"><span>Nothing yet</span></label>
+    </div>
+
+    <h2 style="margin-top:20px">What you want out of it</h2>
+    <div class="picks" id="want">
+      <label class="pick"><input type="checkbox" data-want="Stronger"><span>Stronger</span></label>
+      <label class="pick"><input type="checkbox" data-want="Breathing"><span>Breathing easier</span></label>
+      <label class="pick"><input type="checkbox" data-want="Moving better"><span>Moving better</span></label>
+      <label class="pick"><input type="checkbox" data-want="Sleep"><span>Sleeping</span></label>
+      <label class="pick"><input type="checkbox" data-want="All of it"><span>All of it</span></label>
+    </div>
+
+    <label for="hurts">Anything that hurts</label>
+    <textarea id="hurts" name="hurts" placeholder="A knee, a back, a shoulder &mdash; as you would say it out loud"></textarea>
+
+    <label for="rules">Anything a doctor has told you not to do</label>
+    <textarea id="rules" name="rules" placeholder="A lift to avoid, a movement, a limit"></textarea>
+
+    <label for="dayone">Day one</label>
+    <input id="dayone" name="dayone" type="date">
+
+    <div class="row">
+      <button class="btn" id="saveBtn" type="submit">Save it</button>
+      <button class="btn quiet" id="clearBtn" type="button">Clear</button>
+    </div>
+    <p class="saved" id="savedLine" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="card">
+    <h2>Before anything gets planned</h2>
+    <p>Nothing here is a workout yet, and when there is one, two lines outrank it.</p>
+    <p>A doctor's rule wins over this page, always. If a doctor has said no to a lift or a movement, that is the answer here, and nothing on this page changes it.</p>
+    <p>If there is a heart condition, blood pressure, a pregnancy, a recent operation or a back that has gone recently, ask a doctor before starting anything &mdash; and if any of it is already being looked at or medicated, that stays exactly as it is.</p>
+    <p>And stop, on the day, if there is chest pain, or dizziness, or something sharp rather than a muscle working. That is not pushing on.</p>
+  </div>
+
+  <footer>
+    The Trainer &mdash; private.<br>
+    Step one of it: your information. The plan comes next.
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* One key, one object, on this phone. The same shape as the herb library's
+     notes: nothing is sent anywhere, and a browser that has been cleared starts
+     again from empty rather than from somebody else's answers. */
+  var KEY = 'tsid_trainer_intake_v1';
+
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
+  catch (e) { store = {}; }
+
+  var KIT = 'kit', WANT = 'want';
+  var el = function(id){ return document.getElementById(id); };
+
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
+    stamp();
+  }
+
+  function stamp(){
+    var line = el('savedLine');
+    if (!line) return;
+    var any = Object.keys(store).length > 0;
+    line.textContent = any
+      ? 'Saved on this phone. Nothing was sent anywhere.'
+      : 'Nothing filled in yet.';
+  }
+
+  function text(id){
+    var box = el(id);
+    return box && typeof box.value === 'string' ? box.value.trim() : '';
+  }
+
+  function ticks(attr){
+    var out = [];
+    var boxes = document.querySelectorAll('input[' + attr + ']');
+    Array.prototype.forEach.call(boxes, function(b){
+      if (b.checked) out.push(b.getAttribute(attr));
+    });
+    return out;
+  }
+
+  function check(attr, value){
+    var boxes = document.querySelectorAll('input[' + attr + ']');
+    Array.prototype.forEach.call(boxes, function(b){
+      b.checked = value.indexOf(b.getAttribute(attr)) > -1;
+    });
+  }
+
+  /* What is on the page, as the object that gets kept. Every field is optional:
+     a half-filled form is a half-filled form, not an error. */
+  function read(){
+    var o = {};
+    ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
+      var v = text(k);
+      if (v) o[k] = v;
+    });
+    var kit = ticks('data-kit');
+    if (kit.length) o[KIT] = kit;
+    var want = ticks('data-want');
+    if (want.length) o[WANT] = want;
+    return o;
+  }
+
+  /* Put what was kept back on the page. Called once, on open: reading it back is
+     the only thing this page does with the answers so far. */
+  function fill(o){
+    ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
+      var box = el(k);
+      if (box && o[k] != null) box.value = String(o[k]);
+    });
+    check('data-kit', o[KIT] || []);
+    check('data-want', o[WANT] || []);
+  }
+
+  function clearAll(){
+    store = {};
+    try { localStorage.removeItem(KEY); } catch(e){}
+    ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
+      var box = el(k);
+      if (box) box.value = '';
+    });
+    check('data-kit', []);
+    check('data-want', []);
+    stamp();
+  }
+
+  fill(store);
+  stamp();
+
+  var form = el('intake');
+  if (form && form.addEventListener) {
+    form.addEventListener('submit', function(ev){
+      if (ev && ev.preventDefault) ev.preventDefault();
+      store = read();
+      save();
+    });
+    /* Typing saves too, so a half-finished form survives a closed tab. There is
+       no save button to forget on a phone. */
+    form.addEventListener('input', function(){
+      store = read();
+      try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
+    });
+    form.addEventListener('change', function(){
+      store = read();
+      try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
+    });
+  }
+
+  var clearBtn = el('clearBtn');
+  if (clearBtn && clearBtn.addEventListener) {
+    clearBtn.addEventListener('click', function(){ clearAll(); });
+  }
+
+  /* The page's own surface, so a check can drive it the same way a thumb does.
+     Nothing else is on window. */
+  window.TRAINER = { KEY: KEY, read: read, saved: function(){ return store; }, clear: clearAll };
+})();
+</script>
+</body>
+</html>

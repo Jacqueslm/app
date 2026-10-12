@@ -74,9 +74,11 @@ test('the other shipped HTML pages parse too', () => {
   // leaves a page that looks loaded and does nothing.
   // trainer.html was on this list from 9 Oct 2026 until 10 Oct 2026, when the
   // trainer came off the app altogether - "Ddelete the trainer" - and the file
-  // went with it. It is left out of the list below rather than kept as a name
-  // the loop would silently skip.
-  const pages = ['key.html', 'herbs.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html'];
+  // went with it. It came back on 11 Oct 2026 as a smaller page of the same name
+  // - "start off with just basic input information that's it" - so it is back on
+  // the list: it keeps what you type on the phone, and a SyntaxError in the
+  // script that does the keeping leaves a form that looks fine and saves nothing.
+  const pages = ['key.html', 'herbs.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html', 'trainer.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

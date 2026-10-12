@@ -242,10 +242,11 @@ app.get('/', (req, res) => {
 // The app is what the shell holds (4 Oct 2026). Jacques: "i dont want the app
 // nomore just parts i added the zodiac the fight and the herbs", then "strip it
 // nomore recovery app". So /app serves hub.html - a small shell holding the
-// Zodiacs, the Herbs and the Player - and no longer the recovery app. Two of
-// the doors it once held are gone. The Fight went on 10 Oct 2026 ("delete the
-// fight from everywhere") and the Trainer on the same day ("Ddelete the
-// trainer"): their doors, their pages and their routes all went with them.
+// Zodiacs, the Herbs, the Player and, since 11 Oct 2026, the Trainer again -
+// and no longer the recovery app. One of the doors it once held is gone for
+// good: The Fight went on 10 Oct 2026, "delete the fight from everywhere". The
+// Trainer went the same day, "Ddelete the trainer", and came back the next as a
+// smaller page of its own (see the /trainer routes below).
 //
 // The recovery app itself is gone, file and all: its page, its server routes for
 // that page, and the eighteen test files that read it were deleted in the pass
@@ -334,9 +335,25 @@ app.get('/music.html', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'music.html'));
 });
 
-// The Trainer had the same pair of routes here from 9 Oct 2026. They went on
-// 10 Oct 2026 with the page itself - Jacques: "Ddelete the trainer" - so there
-// is nothing left to serve and nothing to gate.
+// The Trainer - back on the app on 11 Oct 2026. Jacques: "then create the
+// trainer we will be slowly so start off with just basic input information
+// that's it." It had a pair of routes here from 9 Oct 2026 and they went the
+// next day with the page; these are that pair again, behind a smaller page.
+//
+// Same door as The Music above, for the same reason: trainer.html is a real
+// file, so express.static below would hand it out by name if only the clean URL
+// were gated. Signed in AND on the list, or you go to /app without learning the
+// page is there.
+app.get('/trainer', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trainer.html'));
+});
+app.get('/trainer.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trainer.html'));
+});
 
 // The Music's scanner (7 Oct 2026). The page cannot list a directory over the
 // web, so it asks this instead — read fresh from disk every time, and answered

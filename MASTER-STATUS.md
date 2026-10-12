@@ -1,10 +1,13 @@
 # MASTER STATUS — every request, one place
 
 > **4 Oct 2026 — the Day One app is a shell of pages now, and half of this log is
-> about the app it used to be.** `/app` serves `hub.html`, three doors: the
-> Zodiacs, the Herbs and the Player. **The Trainer was deleted on 10 Oct 2026** —
-> "Ddelete the trainer": its door, its page, its routes and its tests all went
-> that day, so nothing below about `trainer.html` applies. **The Fight of Your Life was deleted on
+> about the app it used to be.** `/app` serves `hub.html`, four doors: the
+> Zodiacs, the Herbs, the Player and the Trainer. **The Trainer came back on
+> 11 Oct 2026** — "create the trainer we will be slowly so start off with just
+> basic input information that's it": its door, page, routes, gate and
+> service-worker lines and its tests all returned that day, so the entries below
+> about `trainer.html` describe the larger page that was deleted on 10 Oct, not
+> the intake page on the app now. **The Fight of Your Life was deleted on
 > 10 Oct 2026** — "delete the fight from everywhere": its page, the 3D ring, its
 > art and sound, its routes and its tests all went that day. **The recovery app is
 > deleted** — the one big page that held it,

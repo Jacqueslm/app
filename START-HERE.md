@@ -3,12 +3,16 @@
 Orientation for Jacques and for any Claude session picking this up. Chat history
 does NOT carry between sessions — this repo is the shared memory. Read this first.
 
-> **10 Oct 2026 — read this before acting on anything below.** The Day One app is
-> three doors and nothing else: `/app` serves `hub.html`, a shell with cards for
-> the Zodiacs (`/key`), the Herbs (`/herbs`) and the Player (`/music`). **The
-> Trainer is deleted** — "Ddelete the trainer": its door, its page, its routes,
-> its gate and service-worker lines and its tests all went on 10 Oct 2026, so
-> any instruction below that names `trainer.html` or `/trainer` is dead too.
+> **11 Oct 2026 — read this before acting on anything below.** The Day One app is
+> four doors and nothing else: `/app` serves `hub.html`, a shell with cards for
+> the Zodiacs (`/key`), the Herbs (`/herbs`), the Player (`/music`) and the
+> Trainer (`/trainer`). **The Trainer was deleted on 10 Oct 2026** — "Ddelete the
+> trainer" — **and came back on 11 Oct 2026** as a smaller page: "create the
+> trainer we will be slowly so start off with just basic input information that's
+> it". Its door, page, routes, gate and service-worker lines and tests all
+> returned that day. It asks for the basic information and keeps it on the phone;
+> it plans nothing yet on purpose. Any instruction below that describes a
+> training plan on it is describing the larger page that was deleted.
 > **The Fight is deleted** — "delete the fight from
 > everywhere": its door, its page, the 3D ring, its art and sound, its routes,
 > its gate and service-worker lines, its spec and its tests all went on 10 Oct
@@ -568,10 +572,10 @@ were completed. Do not let that lapse unclaimed.
 
 Three separate apps in one repo (kept fully separate on disk):
 
-- **`TurnSomeDayIntoOneday/`** — three doors and nothing else: the Zodiacs, the
-  Herb Library and the Player, in a shell at `/app`. A web app
+- **`TurnSomeDayIntoOneday/`** — four doors and nothing else: the Zodiacs, the
+  Herb Library, the Player and the Trainer, in a shell at `/app`. A web app
   (Node/Express server + `hub.html` / `key.html` / `herbs.html` / `tax.html` /
-  `music.html` front end) wrapped as an Android TWA for the Play
+  `music.html` / `trainer.html` front end) wrapped as an Android TWA for the Play
   Store. The recovery app that used to live here was deleted on 4 Oct 2026, and
   the Fight of Your Life and the Trainer on 10 Oct 2026.
 - **`Studio/`** — an AI music-video / content-creation tool (separate product;

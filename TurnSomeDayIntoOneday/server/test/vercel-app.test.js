@@ -45,16 +45,22 @@ const app = require('../vercel-app');
 const build = require('../../vercel-build');
 const vercelJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
 
-const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'music.html'];
+const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'music.html', 'trainer.html'];
 // fight.html and game3d.html were in both lists until 10 Oct 2026, when the
-// fight came off the app altogether - "delete the fight from everywhere" - and
-// trainer.html came out of both the same day, on "Ddelete the trainer". A page
+// fight came off the app altogether - "delete the fight from everywhere". A page
 // that is gone cannot leak, so it is left out of the lists rather than named.
+//
+// trainer.html came out of both lists on 10 Oct 2026 too, on "Ddelete the
+// trainer", and came back on 11 Oct 2026 with the smaller page of the same name
+// - "start off with just basic input information that's it". It is behind the
+// door like the rest, so both of its addresses are back in the gated list here
+// and its file is back in PAGE_FILES above.
 //
 // The shell at /app and / is not in this list: it is the sign-in screen itself,
 // so it opens to everybody and holds nothing but a heading, the doors and the
 // form. Everything below is behind the door.
-const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/music', '/music.html'];
+const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/music', '/music.html',
+  '/trainer', '/trainer.html'];
 
 let server, base;
 before(async () => {
@@ -499,7 +505,7 @@ test('every gated address is rewritten into the function, file names included', 
   // the half that leaks.
   const destinations = new Map(vercelJson.rewrites.map((r) => [r.source, r.destination]));
   for (const route of ['/app', '/key', '/key.html', '/herbs', '/herbs.html', '/tax', '/tax.html',
-    '/music', '/music.html', '/']) {
+    '/music', '/music.html', '/trainer', '/trainer.html', '/']) {
     assert.equal(destinations.get(route), '/api/index.js', `${route} must reach the function`);
   }
   assert.equal(destinations.get('/api/(.*)'), '/api/index.js', 'and so must the API');

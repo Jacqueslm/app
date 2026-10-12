@@ -16,14 +16,19 @@ removed the same day, and its own record here was stripped with them. The shell
 went to four doors with it and the cache name moved to `tsid-shell-v2.5`,
 or an installed phone keeps a door that is not there. **Do not rebuild it.**
 
-**The Trainer is deleted — 10 Oct 2026.** Jacques: "Ddelete the trainer." The
-same day, the same way: the door came off the shell, the page
-(`trainer.html`), its two routes, its lines in the gate, the worker, the Vercel
-rewrites and the build's file list all went, and its tests with them. The plan,
-the weights and the notes it held were in that page's own storage on the phone,
-so nothing else was holding a copy. The shell is **three doors** now and the
-cache name moved to `tsid-shell-v2.6` with that, for the same reason as every
-bump before it. **Do not rebuild it.**
+**The Trainer is back — 11 Oct 2026.** It was deleted on 10 Oct ("Ddelete the
+trainer": the door, the page, its two routes, its lines in the gate, the worker,
+the Vercel rewrites and the build's file list all went, with its tests), and it
+returned the next day, smaller: "then create the trainer we will be slowly so
+start off with just basic input information that's it." So the page
+(`trainer.html`) asks for the basic information — name, age, height and weight,
+days a week, what time of day, what is in the house, what you want out of it,
+anything that hurts, anything a doctor has ruled out, and day one — keeps it on
+the phone (`localStorage`, key `tsid_trainer_intake_v1`), sends nothing
+anywhere and **plans nothing yet**. There is no exercise, no plan and no session
+on it on purpose; that is the next step, deliberately one at a time. The door is
+back on the shell, so the shell is **four doors** again and the cache name moved
+to `tsid-shell-v2.7` with it, for the same reason as every bump before it.
 
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
@@ -99,8 +104,8 @@ entries below are out of date.
 
 ## What this is
 
-**Three doors and nothing else, free and private.** The Zodiacs (`/key`), the
-Herb Library (`/herbs`) and the Player (`/music`),
+**Four doors and nothing else, free and private.** The Zodiacs (`/key`), the
+Herb Library (`/herbs`), the Player (`/music`) and the Trainer (`/trainer`),
 reached from the shell at `/app`, plus a reference page for tax, the policy
 pages the store requires, a letter link and the owner's stats page. The day counter, the lesson
 programs, the journal, the SOS tools, the weeklies, the live rooms and the AI

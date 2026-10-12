@@ -61,6 +61,7 @@
   a.card.z{--accent:var(--gold);   --tint:rgba(232,192,122,.13)}
   a.card.h{--accent:var(--teal);   --tint:rgba(95,217,196,.13)}
   a.card.m{--accent:var(--violet); --tint:rgba(167,139,250,.13)}
+  a.card.t{--accent:var(--rose);   --tint:rgba(240,145,159,.13)}
   .glyph{
     flex:0 0 44px; width:44px; height:44px; border-radius:13px;
     display:flex; align-items:center; justify-content:center;
@@ -129,7 +130,7 @@
     <span class="mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="21" r="13.5" stroke="currentColor" stroke-width="1.8"/><circle cx="20" cy="7.5" r="2.9" fill="currentColor"/></svg></span>
     <div class="names">
       <h1>The Truth</h1>
-      <p class="who" id="whoTag">Three doors. That is the whole app.</p>
+      <p class="who" id="whoTag">Four doors. That is the whole app.</p>
     </div>
     <button class="quiet" id="signOut" hidden>Sign out</button>
   </header>
@@ -181,6 +182,20 @@
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
 
+    <!-- The Trainer's door came back on 11 Oct 2026, the day after it came off
+         - Jacques: "create the trainer we will be slowly so start off with just
+         basic input information that's it". The note under it says what the
+         page is actually for right now, which is asking and keeping; the plan
+         arrives when it arrives. -->
+    <a class="card t" href="/trainer">
+      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9v6M20 9v6M7.5 7v10M16.5 7v10M7.5 12h9"/></svg></span>
+      <span class="txt">
+        <h2 class="name">The Trainer</h2>
+        <p class="note">Your information first. The plan comes next.</p>
+      </span>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
+    </a>
+
   </section>
 
   <footer id="foot">Private. Signed in only.</footer>
@@ -193,7 +208,7 @@
   // The shell's version. sw.js keeps its cache name in step with this, and
   // sw-version.test.js fails if the two drift apart — the cache name is what
   // decides whether an installed phone ever repopulates its copy.
-  const APP_VERSION='2.6';
+  const APP_VERSION='2.7';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');
@@ -210,7 +225,7 @@
     locked.hidden = false;
     open.hidden = true;
     signOut.hidden = true;
-    whoTag.textContent = 'Three doors. That is the whole app.';
+    whoTag.textContent = 'Four doors. That is the whole app.';
     try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
   }
 

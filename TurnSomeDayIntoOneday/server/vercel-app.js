@@ -85,8 +85,12 @@ const PAGES = {
   '/tax.html': 'tax.html',
   '/music': 'music.html',
   '/music.html': 'music.html',
-  // The Trainer's two addresses were here from 9 Oct 2026 and came off on
-  // 10 Oct 2026 with the page itself - "Ddelete the trainer".
+  // The Trainer's two addresses were here from 9 Oct 2026, came off on 10 Oct
+  // with the page itself - "Ddelete the trainer" - and came back on 11 Oct 2026
+  // with a smaller page behind them: "start off with just basic input
+  // information that's it".
+  '/trainer': 'trainer.html',
+  '/trainer.html': 'trainer.html',
 };
 
 // ----------------------------------------------------------------- the door --

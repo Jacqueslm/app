@@ -105,9 +105,14 @@ const OPEN_PAGES = [
   // the route that judges it. Both addresses, because music.html is a real file
   // as well as a clean URL, and static would otherwise serve the name unguarded.
   '/music', '/music.html',
-  // The Trainer sat here from 9 Oct 2026. Its two addresses came off on 10 Oct
-  // 2026 with the page itself - "Ddelete the trainer" - because a page that is
-  // not in the repository has nothing left for the gate to hand to its route.
+  // The Trainer (9 Oct 2026; back on the app 11 Oct 2026). It came off on
+  // 10 Oct - "Ddelete the trainer" - and returned the next day as a smaller
+  // page: Jacques, "create the trainer we will be slowly so start off with just
+  // basic input information that's it". Private like the rest, so it is listed
+  // here only so the request can reach the route that judges it, and both
+  // addresses are named, because trainer.html is a real file as well as a clean
+  // URL and static would otherwise serve the file name unguarded.
+  '/trainer', '/trainer.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, and a letter link (/l/<token>).

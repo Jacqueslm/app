@@ -4,7 +4,7 @@
 // Vercel hands a request to a file before any code of ours runs ("precedence is
 // given to the filesystem prior to rewrites being applied", from Vercel's own
 // vercel.json docs). That is the whole problem with moving The Truth there: if
-// herbs.html, key.html, tax.html, music.html and hub.html sit in
+// herbs.html, key.html, tax.html, music.html, trainer.html and hub.html sit in
 // the deployment as files, then /herbs.html and its siblings are readable by
 // anybody who types the name, password or no password. The gate only works if
 // the pages are not files.

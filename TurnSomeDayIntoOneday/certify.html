@@ -117,6 +117,12 @@
   .btn.quiet{background:none; border:1px solid var(--line); color:var(--dim); font-weight:500}
   .btn.row{display:flex; gap:10px; margin-top:10px}
   .btn.row > button{flex:1 1 auto}
+  /* The plant cards a lesson names (13 Oct 2026): each is a door onto that
+     herb's own card in the library, so the row reads as a shelf of names. */
+  .plantcards{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 2px}
+  .plantcard{display:inline-block; padding:9px 13px; font-size:.8125rem; font-weight:600; color:var(--gold);
+    background:rgba(232,192,122,.08); border:1px solid rgba(232,192,122,.32); border-radius:999px; text-decoration:none}
+  .plantcard:hover{background:rgba(232,192,122,.16)}
   .tickline{margin:10px 0 0; font-size:.8125rem; color:var(--good); min-height:1.1em}
 
   ol.plan{margin:0; padding-left:20px; color:var(--dim); font-size:.8438rem; line-height:1.7}
@@ -1291,6 +1297,246 @@ var FIT_DAYS = [
     {q:"What does the certificate record?",a:["A credential","Ninety lessons, the quiz after each, two block tests and the ultimate examination","A licence","A degree"],k:1,w:"Nothing more, and nothing less."}]}
 ];
 
+/* ========================================================================
+   GOING DEEPER
+
+   13 OCT 2026, at Jacques's word: "link them and deepen them." Every lesson of
+   both tracks stands on ground that is also taught at length elsewhere in the
+   app - the ninety herbalist days on the Herb Library's sixty days and its
+   plant cards, the ninety trainer days on the Trainer and its by-10 regimen.
+   So each lesson now carries one more paragraph, a layer a student would
+   otherwise have to go and find, and the door to where that ground lives.
+
+   The paragraph is the page's own voice, the same as the rest of the teaching.
+   The link is the Herb Library or the Trainer, and it opens the exact tab or
+   day the lesson leans on, through the deep links both pages now read. Nothing
+   here is sent anywhere: a link is a plain navigation, and the library and the
+   Trainer keep their own copies, on the phone.
+   ======================================================================== */
+
+var GO_DEEPER = {
+  herbalist: {
+    1:{p:"The library keeps the same two books at its desk; its first day names them, and its From the books tab prints their lines in their own voice.",to:"/herbs#d1"},
+    2:{p:"A careful student can tell, on any card, which sentence is the book's and which is the page's - open one and try.",to:"/herbs#d1"},
+    3:{p:"The library walks the skin chart, the three parts and the two-to-four pounds of pressure line by line, and keeps the page's own note that none of it carries a test.",to:"/herbs#d2"},
+    4:{p:"The signatures are set out plant by plant, with the leafy, the wrinkled and the vine reads kept as the tradition's, not as rules.",to:"/herbs#d3"},
+    5:{p:"Every card in the library is filed under its botanical name, which is the habit this day is really teaching.",to:"/herbs#az"},
+    6:{p:"The library's preparation day gives the same part-decides-the-preparation rule with the books' own measures beside it.",to:"/herbs#d4"},
+    7:{p:"Each look-alike named here has its own card, and the library's Read this first tab is the page that keeps you out of trouble.",to:"/herbs#safety"},
+    8:{p:"Quality is judged with the senses on every card, and the library's own keeping note adds the date and the dark glass.",to:"/herbs#az"},
+    9:{p:"The library's preparation day holds the infusion and the decoction side by side, minutes and all.",to:"/herbs#d4"},
+    10:{p:"Sun tea and syrup sit on the same day in the library, with the honey caution printed beside them.",to:"/herbs#d4"},
+    11:{p:"The library's preparation day carries the salve, the poultice and the liniment, and its safety tab carries the never-inside rule.",to:"/herbs#d4"},
+    12:{p:"The tincture, its menstrum and its two weeks are on the library's preparation day; the ratios are the day after it.",to:"/herbs#d4"},
+    13:{p:"A bottle without its ratio cannot be dosed - the library's amounts day prints the books' own figures as theirs.",to:"/herbs#d5"},
+    14:{p:"The twenty classes begin in the library's seventh day and run across four, each with the book's own plant list.",to:"/herbs#d7"},
+    15:{p:"Classes six to ten are the library's eighth day, senna's one-week rule included.",to:"/herbs#d8"},
+    16:{p:"Classes eleven to fifteen are the library's ninth day, and comfrey's never-internally rule is on its card.",to:"/herbs#d9",cards:["Comfrey"]},
+    17:{p:"The last five classes close the library's run; where a card names a class, that class came from this list.",to:"/herbs#d10"},
+    18:{p:"The library's eleventh day is this exact lesson - one plant, two classes, and the caution under the list.",to:"/herbs#d11"},
+    19:{p:"Energetics is the shorthand the plant cards are written in; open any card and read its action in that light.",to:"/herbs#az"},
+    20:{p:"The Male and Female principles are the library's own day on the chart, in the books' words.",to:"/herbs#d41"},
+    21:{p:"Vitamins, and the food medicine chart row for row, are the library's own day.",to:"/herbs#d24"},
+    22:{p:"The minerals follow it, with the seasoning rows and the blood-test caution this course keeps.",to:"/herbs#d25"},
+    23:{p:"The library's food-first days make the same argument about the plate against the bottle.",to:"/herbs#d12"},
+    24:{p:"The library's pages on the glands keep each book claim in the book's voice, the way this day does.",to:"/herbs#az"},
+    25:{p:"A card is read in two halves - open a plant and read its caution as quickly as its use, which is this day's habit.",to:"/herbs#az"},
+    26:{p:"All five kitchen herbs have cards, and garlic's blood-thinning line sits on its own.",to:"/herbs#az",cards:["Garlic"]},
+    27:{p:"Echinacea, licorice, marshmallow, yarrow and sage are all in the library, licorice's pressure caution with them.",to:"/herbs#az",cards:["Echinacea","Licorice","Marshmallow","Yarrow","Sage"]},
+    28:{p:"The library carries valerian, catnip, fennel, dandelion and kelp, with kelp's iodine line printed plainly.",to:"/herbs#az",cards:["Valerian","Catnip","Fennel","Dandelion","Kelp"]},
+    29:{p:"Aloe, comfrey, witch hazel, senna and pau d'arco are the library's five with the sharpest limits - read them there.",to:"/herbs#az",cards:["Aloe","Comfrey","Witch hazel","Senna","Pau d'arco"]},
+    30:{p:"Gymnema, bilberry, guggul, chickweed and goldenseal are all in the library, goldenseal's standing caution included.",to:"/herbs#az",cards:["Gymnema","Bilberry","Guggul","Chickweed","Goldenseal"]},
+    31:{p:"The books' plate is set out at length in the library's own food days.",to:"/herbs#d12"},
+    32:{p:"White sugar, in the books' own words, is a whole day in the library, and the library keeps their claim as their claim.",to:"/herbs#d30"},
+    33:{p:"The sugar craving remedy - the six names and the yeast line - is the library's own day, each plant with its card.",to:"/herbs#d31"},
+    34:{p:"What the book means by mucus is the library's own pair of days, printed as the book's account.",to:"/herbs#d32"},
+    35:{p:"This is the line the library's Read this first tab keeps above every claim: nothing on the shelf answers an infection.",to:"/herbs#safety"},
+    36:{p:"The book's food-combining laws are the library's own day, with the page's own caveat beside them.",to:"/herbs#d34"},
+    37:{p:"The twenty-four hour cycle is the library's own day, and its morning-fruit idea is kept as an experiment there too.",to:"/herbs#d35"},
+    38:{p:"White flour, salt and the brush are three of the library's own days from the book.",to:"/herbs#d39"},
+    39:{p:"What blunts a herb - the books' three, and the page's own two additions - is the library's own day.",to:"/herbs#d6"},
+    40:{p:"The library's Read this first tab is this day's whole content in seven lines, and it outranks every claim on the page.",to:"/herbs#safety"},
+    41:{p:"Every contraindication named here belongs to a plant with its own card and its own caution line.",to:"/herbs#safety"},
+    42:{p:"The library keeps pregnancy, feeding and children in the same place this course does - at the top, beside the clinician.",to:"/herbs#safety"},
+    43:{p:"St John's wort and ginkgo each carry their interaction line on their own card in the library.",to:"/herbs#safety",cards:["St John\u2019s wort","Ginkgo"]},
+    44:{p:"Sugar, pressure and the liver are four cards to read in full: gymnema, bilberry, licorice and comfrey among them.",to:"/herbs#safety",cards:["Gymnema","Bilberry","Licorice","Comfrey"]},
+    45:{p:"Lobelia's deaths, comfrey's liver burden, senna's one week and goldenseal's accumulation are all on the library's cards.",to:"/herbs#safety",cards:["Lobelia","Comfrey","Senna","Goldenseal"]},
+    46:{p:"The library's safety tab reads allergy and emergency the same way, and chamomile sits near ragweed on its own card.",to:"/herbs#safety",cards:["Chamomile"]},
+    47:{p:"Buy by botanical name and ask for the batch - the library's own note on quality says the same.",to:"/herbs#az"},
+    48:{p:"The library's plant cards are the intake's other half: everything a case needs about a plant, in one place.",to:"/herbs#az"},
+    49:{p:"The library's Read this first tab is the referral list this day is asking you to keep by heart.",to:"/herbs#safety"},
+    50:{p:"The library's own notes are where a protocol's before and after live; the plant card is the other half.",to:"/herbs#az"},
+    51:{p:"Your case notes sit beside the library's cards - the reason, the result and the decision, written down.",to:"/herbs#az"},
+    52:{p:"A case is kept with the name left off so it can be learned from; the library's cards model the same restraint.",to:"/herbs#az"},
+    53:{p:"The library's cards state what a plant does and the caution in two halves, which is a scope statement in miniature.",to:"/herbs#az"},
+    54:{p:"The library's safety tab is the red-flag list; read it again today rather than tomorrow.",to:"/herbs#safety"},
+    55:{p:"Consent and confidentiality are older than the cards; the library's note on personal entries says the same.",to:"/herbs#az"},
+    56:{p:"The library's cards never claim to cure a disease; that restraint is this day's rule applied to a whole shelf.",to:"/herbs#safety"},
+    57:{p:"The certificate on this page is a record of study, and the library says the same about its own sources.",to:"/herbs#az"},
+    58:{p:"The library's day on food and place is this day's sourcing argument, in the book's own words.",to:"/herbs#d56"},
+    59:{p:"The library keeps what is known and what is claimed apart on every card; that habit is this day's skill.",to:"/herbs#az"},
+    60:{p:"The library's sixty days cover this ground; open it beside this block test and let the two read together.",to:"/herbs#course"},
+    61:{p:"The library's own day on the stomach and bowels names the same herbs, chamomile and marshmallow among them.",to:"/herbs#d21",cards:["Chamomile","Marshmallow"]},
+    62:{p:"The liver and the blood are the library's own day, and comfrey's never-swallowed rule is on its card.",to:"/herbs#d18",cards:["Comfrey"]},
+    63:{p:"The library's own day on colds, the throat and the chest is this ground at length.",to:"/herbs#d22"},
+    64:{p:"Sleep and a racing mind is the library's own day, and the nervines' cards carry the same caveat.",to:"/herbs#d20"},
+    65:{p:"The library's own day on the immune ground keeps the whole large claim in the book's voice, as this day does.",to:"/herbs#d19"},
+    66:{p:"The library carries buchu, parsley and dandelion leaf, and its safety tab keeps the red flags.",to:"/herbs#az",cards:["Buchu","Parsley","Dandelion"]},
+    67:{p:"The library's own day on the skin and joints sets the external rule and the changed-mole warning side by side.",to:"/herbs#d23"},
+    68:{p:"The library's Read this first tab is this day's emergency list; the heart's ground is a clinician's, both pages say.",to:"/herbs#safety"},
+    69:{p:"The library's own day on the skin and joints covers the anti-inflammatories, outside and in.",to:"/herbs#d23"},
+    70:{p:"Kelp's iodine line and gymnema's sugar ground are both on the library's cards, with the blood-test caution.",to:"/herbs#az",cards:["Kelp","Gymnema"]},
+    71:{p:"The library's own day on women's cycles is this ground at length, kept beside a clinician.",to:"/herbs#d28"},
+    72:{p:"The library's cards and the safety tab are read together for the same reason this day is kept.",to:"/herbs#safety"},
+    73:{p:"The library's cards carry the same lower-dose, watch-closer note for an older body, on their own terms.",to:"/herbs#safety"},
+    74:{p:"A simple before a compound is the library's own method too: one plant, read whole, before any blend.",to:"/herbs#az"},
+    75:{p:"The library's amounts day is where the drops and the ratio live together; a card's preparation line is the other half.",to:"/herbs#d5"},
+    76:{p:"The whole consultation is sketched in the library's own lines on scope, consent and the record.",to:"/herbs#az"},
+    77:{p:"The chronic case is the library's long ground too: the sleep, the food and the movement before the plant.",to:"/herbs#az"},
+    78:{p:"The library's own plate - its food days and its Deep story tab - is this day's medicine at length.",to:"/herbs#d57"},
+    79:{p:"The library's own day on food and place is the seasonal idea in the book's words.",to:"/herbs#d56"},
+    80:{p:"Your own notes are the third half of every card; the library's My notes tab is built for exactly this.",to:"/herbs#d29"},
+    81:{p:"The library keeps the books' voice and the page's apart on every line, which is the first thing to pass on.",to:"/herbs#az"},
+    82:{p:"The library's network is the shelf and the books; a practice's network is the people - both are named, not assumed.",to:"/herbs#az"},
+    83:{p:"St John's wort, ginkgo, comfrey and kava are the library's four most-scrutinised cards.",to:"/herbs#safety",cards:["St John\u2019s wort","Ginkgo","Comfrey","Kava"]},
+    84:{p:"Every card names its part and its caution; a label that cannot be checked is a packet the library would not stock.",to:"/herbs#az"},
+    85:{p:"The library is free and private; this day's questions start where a practice does, in money and time.",to:"/herbs#az"},
+    86:{p:"The library's own risk lines are kept plain rather than hidden; a practice keeps them as honest as a card.",to:"/herbs#az"},
+    87:{p:"The library's cards are the start of the reading, not the end of it - this day names what comes next.",to:"/herbs#az"},
+    88:{p:"Read a whole card aloud, caution included, as the library's read-aloud button does; it is the best check there is.",to:"/herbs#safety"},
+    89:{p:"The library's Read this first tab is the seven lines to take into the examination; the plant cards are the rest.",to:"/herbs#safety"},
+    90:{p:"The library's sixty days and this track cover the same ground from two sides; the certificate records the second, the library keeps the first.",to:"/herbs#course"}
+  },
+  fitness: {
+    1:{p:"The Trainer's intake asks the same first question this day does - who is safe to train - before it plans anything.",to:"/trainer"},
+    2:{p:"The Trainer's scope is the same: it asks, keeps and plans, and sends a medical question to a doctor.",to:"/trainer"},
+    3:{p:"The Trainer holds the by-10 regimen itself; open it and see the three lifting days, two cardio days and one stretch day.",to:"/trainer"},
+    4:{p:"The Trainer's intake ticks the kit in the house; anything not ticked is simply not used.",to:"/trainer"},
+    5:{p:"The six patterns are the vocabulary the Trainer's own days are written in.",to:"/trainer"},
+    6:{p:"The Trainer's workout days name the muscles each move works, in the same plain language.",to:"/trainer"},
+    7:{p:"The Trainer is organised by the six patterns, one day each on A, B and C.",to:"/trainer"},
+    8:{p:"The Trainer's short rests are the same design choice - ten seconds, kept deliberately.",to:"/trainer"},
+    9:{p:"The Trainer asks how the last session felt, which is how an acute response is noticed early.",to:"/trainer"},
+    10:{p:"The Trainer's log is where the chronic adaptations show up, week against week.",to:"/trainer"},
+    11:{p:"Effort, not a monitor, is what the Trainer's cardio days ask you to read.",to:"/trainer"},
+    12:{p:"The ten seconds is about one good breath, which is why the Trainer paces the rest aloud.",to:"/trainer"},
+    13:{p:"The Trainer's technique notes are cues about where the load sits, not about willpower.",to:"/trainer"},
+    14:{p:"The squat is the Trainer's first pattern; its A day opens with the goblet squat.",to:"/trainer"},
+    15:{p:"The hinge is the pattern the Trainer's A day teaches after the row.",to:"/trainer"},
+    16:{p:"The push is the Trainer's floor press and push-up, and the push-up bars give it four ways.",to:"/trainer"},
+    17:{p:"The pull is the Trainer's row and pull-up; the bar's hanging hold is the regression it starts you on.",to:"/trainer"},
+    18:{p:"The lunge, the carry and the calf are the Trainer's C day and its finishing work.",to:"/trainer"},
+    19:{p:"The trunk work is the Trainer's planks and hanging raises, not sit-ups.",to:"/trainer"},
+    20:{p:"The Trainer counts the warm-up as part of the session rather than a preamble to skip.",to:"/trainer"},
+    21:{p:"Bracing is the Trainer's first technique note: a braced trunk, hips hinging, spine neutral.",to:"/trainer"},
+    22:{p:"The Trainer's safety note is the same: a failing rep is ended, not rescued.",to:"/trainer"},
+    23:{p:"The Trainer's intake is a screening form: it asks the readiness questions before it plans.",to:"/trainer"},
+    24:{p:"The Trainer's list of questions is where clearance is sorted; a doctor's answer outranks the plan.",to:"/trainer"},
+    25:{p:"The Trainer keeps a baseline before it plans, so progress has something to beat.",to:"/trainer"},
+    26:{p:"The Trainer asks for measurements as a trend rather than a verdict, in the same tone.",to:"/trainer"},
+    27:{p:"The Trainer's food notes stay general and send the rest to a dietitian, as this day says.",to:"/trainer"},
+    28:{p:"Water, sleep and the rest day are part of the Trainer's plan rather than a break from it.",to:"/trainer"},
+    29:{p:"The Trainer writes progression as movement first, then reps, then rounds, then load.",to:"/trainer"},
+    30:{p:"The Trainer's full week - A, cardio, B, cardio, C, stretch, rest - is this block's ground applied.",to:"/trainer"},
+    31:{p:"FITT-VP is answered on the face of the Trainer's plan, six answers in plain sight.",to:"/trainer"},
+    32:{p:"The Trainer keeps volume moderate on purpose; a heavier week carries fewer rounds.",to:"/trainer"},
+    33:{p:"The Trainer builds a lighter week into the block, which is this day's periodisation in practice.",to:"/trainer"},
+    34:{p:"The Trainer's rotations are the by-10's own unit; one pass through the day's list.",to:"/trainer"},
+    35:{p:"The Trainer has exactly two levels, beginner and advanced, and one step between them.",to:"/trainer"},
+    36:{p:"The Trainer paces the ten seconds; it is the design rather than a target to beat.",to:"/trainer"},
+    37:{p:"The Trainer's Full Body A is this day's list in order, dumbbell goblet squat first.",to:"/trainer"},
+    38:{p:"The Trainer's Full Body B is pull-led, the pull-up early while the grip is fresh.",to:"/trainer"},
+    39:{p:"The Trainer's Full Body C is the legs and trunk day, ending with the mountain climber.",to:"/trainer"},
+    40:{p:"The Trainer's progression order is what its plan asks you to log: movement, reps, rounds, load.",to:"/trainer"},
+    41:{p:"The Trainer offers a regression for every move, as this day's rule requires.",to:"/trainer"},
+    42:{p:"The Trainer's cardio is the five choices; open the app and pick the one you will keep.",to:"/trainer"},
+    43:{p:"Plyometrics is the one cardio that keeps the by-10 cycle, which is why the Trainer paces it that way.",to:"/trainer"},
+    44:{p:"Kickboxing is paced on minutes with a bell a move, and the Trainer marks the change for you.",to:"/trainer"},
+    45:{p:"Sweat step is the low-impact choice and the easiest to follow in the Trainer's list.",to:"/trainer"},
+    46:{p:"Jump rope is the cheapest of the five and the least forgiving; the Trainer's cues start with the landing.",to:"/trainer"},
+    47:{p:"Dancing is the fifth choice, and the Trainer leaves its intensity to the talk test.",to:"/trainer"},
+    48:{p:"The stretch day is the Trainer's sixth day: twelve holds, thirty seconds, one round.",to:"/trainer"},
+    49:{p:"Mobility is range under control; the Trainer's lifting days are the half a stretch cannot give.",to:"/trainer"},
+    50:{p:"The talk test is the Trainer's cardio ruler, and its plan is written at the middle of it.",to:"/trainer"},
+    51:{p:"The Trainer keeps the effort scale ahead of the formula, for a body on a heart-rate medicine.",to:"/trainer"},
+    52:{p:"The Trainer builds a lighter week in rather than expecting one to be earned.",to:"/trainer"},
+    53:{p:"The Trainer's log is where a plateau shows as a plan still followed but no longer moving.",to:"/trainer"},
+    54:{p:"The Trainer's intake asks age and limits, which is where an older client's plan begins.",to:"/trainer"},
+    55:{p:"The Trainer asks for a doctor's answer where an athlete is already training elsewhere.",to:"/trainer"},
+    56:{p:"The Trainer asks before it plans, and a pregnancy's answer is the clinician's rather than the page's.",to:"/trainer"},
+    57:{p:"The Trainer's screening questions are the clinician's ground; the exercise stays the trainer's.",to:"/trainer"},
+    58:{p:"The Trainer's red-flag rule is the same: chest pain or faintness stops the session, now.",to:"/trainer"},
+    59:{p:"The Trainer is where the coached session lives: a check-in, a warm-up, the list, a cool-down and two sentences.",to:"/trainer"},
+    60:{p:"The Trainer's own week is this block's ground; its plan is the sixty days put into a schedule.",to:"/trainer"},
+    61:{p:"The Trainer's group strength pages are the room's half; its list is the same six patterns.",to:"/trainer"},
+    62:{p:"A class is designed rather than improvised - the Trainer's plan shows the same shape, for one.",to:"/trainer"},
+    63:{p:"Cue before the change is the Trainer's habit too; it counts the ten seconds so the room knows what is next.",to:"/trainer"},
+    64:{p:"Choreography is a planned sequence; the Trainer's by-10 list is one, in its plainest form.",to:"/trainer"},
+    65:{p:"Music sets the clock; the Trainer's own counting is the tempo when there is no bell.",to:"/trainer"},
+    66:{p:"Multi-level teaching is the Trainer's levels applied to a room: a lower, a main and a higher option.",to:"/trainer"},
+    67:{p:"The Trainer's setup is the same five minutes: kit counted, space marked, a route kept open.",to:"/trainer"},
+    68:{p:"Watching the room is the same skill as watching a client, scaled up.",to:"/trainer"},
+    69:{p:"A class's management is the Trainer's plan at a larger size; the corrections stay quiet at every size.",to:"/trainer"},
+    70:{p:"Adherence is the Trainer's whole bet: the plan that is still followed is the plan that works.",to:"/trainer"},
+    71:{p:"The Trainer asks what you want before it plans, which is behavioural change in one sentence.",to:"/trainer"},
+    72:{p:"The Trainer is the by-10 in a room of one; its count is the same ten seconds a class would count aloud.",to:"/trainer"},
+    73:{p:"Plyo and kickboxing are the same moves in a group as in the Trainer's own list.",to:"/trainer"},
+    74:{p:"A group strength class uses the Trainer's kit - dumbbells and a floor - and its six patterns.",to:"/trainer"},
+    75:{p:"A room adds risks the Trainer's one-to-one plan does not; the design answers them, as here.",to:"/trainer"},
+    76:{p:"The Trainer's safety rule is the floor of all of it; CPR and an AED are the certification's own requirement.",to:"/trainer"},
+    77:{p:"The Trainer's ethics are the same scope rule from its first page: ask, coach, refer.",to:"/trainer"},
+    78:{p:"The Trainer's consent is the same: what is suggested, the risks, the alternatives, and the right to stop.",to:"/trainer"},
+    79:{p:"What the Trainer keeps about you is yours; a record is for the plan and nothing else.",to:"/trainer"},
+    80:{p:"The Trainer is free and private; this day's questions are about the business that follows it.",to:"/trainer"},
+    81:{p:"Honest marketing describes the Trainer's own plan and promises no result it cannot keep.",to:"/trainer"},
+    82:{p:"The Trainer claims no credential it does not hold; a certificate of completion says exactly that.",to:"/trainer"},
+    83:{p:"The Trainer's risks are why insurance exists; the plan, the record and the referral are the rest.",to:"/trainer"},
+    84:{p:"The Trainer's regimen keeps being current by the same habit: study does not end at the certificate.",to:"/trainer"},
+    85:{p:"The Trainer's certificate is a record of study and says so, exactly as this day describes.",to:"/trainer"},
+    86:{p:"A network around a practice is this day's work; the Trainer is the tool the client takes home.",to:"/trainer"},
+    87:{p:"A ninety-day plan is the Trainer's by-10 written out over three blocks with a lighter week between.",to:"/trainer"},
+    88:{p:"The Trainer's own week - A, cardio, B, cardio, C, stretch, rest - is this day's sample week in the app.",to:"/trainer"},
+    89:{p:"Coaching a session aloud is the Trainer's whole method; its count is the one thing that changes the load.",to:"/trainer"},
+    90:{p:"The Trainer is the practice; this track is the credential beside it, and the certificate records the second.",to:"/trainer"}
+  }
+};
+
+// The words on the door each lesson opens. The track says which room, and the
+// address says which part of it - a course day, the safety tab, the cards, or
+// the Trainer.
+function libLabel(tid, to){
+  if (tid === "fitness") return "The Trainer - the by-10 regimen";
+  var m = String(to).match(/#d(\d+)/);
+  if (m) return "Herb Library - day " + m[1];
+  if (String(to).indexOf("#safety") > -1) return "Herb Library - Read this first";
+  if (String(to).indexOf("#course") > -1) return "Herb Library - the sixty days";
+  return "Herb Library - the plant cards";
+}
+
+// A plant name, turned into the address the Herb Library opens a card at
+// (13 Oct 2026). The library does the same to its own names, so a lesson that
+// names garlic and a card called Garlic meet at /herbs#p-garlic. Letters and
+// numbers only, everything else a hyphen - the same rule on both pages.
+function plantSlug(s){
+  return String(s == null ? "" : s).toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+// One lesson's deeper layer, or null where the page has none. Read by the day
+// view and exposed for the checks, so the link and the paragraph can be verified
+// without a browser. Where the lesson names plants, each one carries its own door
+// into that exact card - the plant cards, not only the shelf they sit on.
+function deeperFor(tid, d){
+  var all = GO_DEEPER[tid];
+  var entry = all ? all[String(d)] : null;
+  if (!entry) return null;
+  var cards = (entry.cards || []).map(function(n){
+    var s = plantSlug(n);
+    return { name:n, slug:s, to:"/herbs#p-" + s };
+  });
+  return { p:entry.p, to:entry.to, label:libLabel(tid, entry.to), cards:cards };
+}
+
 /* ---------- how a track is judged ---------- */
 
 var TOTAL = 90;
@@ -1310,6 +1556,7 @@ var TRACKS = [
     glyph:"<svg viewBox=\"0 0 24 24\"><path d=\"M4.5 19.5c0-8.4 5.3-13.4 15-14.4.9 9.5-4.4 14.4-12.4 14.4H4.5Z\"/><path d=\"M4.5 19.5c3-4.4 6.2-7.2 10.2-9.4\"/></svg>",
     days:HERB_DAYS,
     note:"Ninety days of study in clinical herbalism, built on the tradition the two source books describe and on the ground the American Herbalists Guild asks for.",
+    lib:{ href:"/herbs", name:"The Herb Library", note:"The sixty-day course, the plant cards and the two books behind every one of these ninety days." },
     law:"The American Herbalists Guild Registered Herbalist (RH) is a voluntary, peer-reviewed credential with its own education and clinical requirements. No US state licenses herbalists. This certificate records study completed here; it is not AHG registration and it is not a licence."
   },
   {
@@ -1320,6 +1567,7 @@ var TRACKS = [
     glyph:"<svg viewBox=\"0 0 24 24\"><path d=\"M4 9v6M20 9v6M7.5 7v10M16.5 7v10M7.5 12h9\"/></svg>",
     days:FIT_DAYS,
     note:"Ninety days of study in personal and group fitness instruction. The practical spine is the home regimen in the Trainer - the by-10 cycle - and the rest is the standard ground every entry-level certification tests.",
+    lib:{ href:"/trainer", name:"The Trainer", note:"Enter your information, then work the by-10 regimen this whole track is built on." },
     law:"The industry's credentials (NASM, ACE, ACSM, NSCA, ISSA, AFAA and NETA) each set their own exam, require current adult CPR/AED, and require continuing education to renew. This certificate records study completed here; it is not one of those credentials and it is not a licence."
   }
 ];
@@ -1333,6 +1581,38 @@ function track(id){
 
 var LS = "tsid_certify_v1";
 var INTAKE = "tsid_trainer_intake_v1";
+
+/* ---------- the cross progress bridge ----------
+   The Herb Library keeps its sixty days under its own key, on the same phone,
+   and it writes a small summary of them beside them (tsid_herb_progress_v1).
+   This page reads that summary, so the ninety-day track can say where the
+   library has actually got to - and the library reads this page's store the
+   same way. Two islands became one road: a student's work on either side shows
+   on both. Nothing is sent anywhere; it is one phone reading its own shelf.
+   An absent or damaged summary is not an error here - it is simply a library
+   nobody has started, which is what the first day of every course is. */
+var HERB_BRIDGE = "tsid_herb_progress_v1";
+var HERB_TOTAL = 59;
+
+function herbBridge(){
+  var s = null;
+  try { s = JSON.parse(localStorage.getItem(HERB_BRIDGE) || "null"); } catch(e){ s = null; }
+  var out = { done:0, total:HERB_TOTAL, passed:false };
+  if (s && typeof s === "object"){
+    out.done = Number(s.done) > 0 ? Number(s.done) : 0;
+    out.total = Number(s.total) > 0 ? Number(s.total) : HERB_TOTAL;
+    out.passed = !!s.passed;
+    if (out.done > out.total) out.done = out.total;
+  }
+  return out;
+}
+
+function herbBridgeLine(){
+  var b = herbBridge();
+  if (b.done <= 0) return "The Herb Library's own progress: nothing started yet - its plant cards and its sixty days are open beside this track.";
+  return "The Herb Library's own progress: " + b.done + " of " + b.total + " days done"
+    + (b.passed ? ", and its day-60 test passed." : ".");
+}
 
 function blankTrack(){ return { days:{}, tests:{}, exam:null }; }
 
@@ -1535,6 +1815,20 @@ function renderTrack(v, t){
   out += "<button class=\"btn\" id=\"toCert\">Open the certificate</button>";
   out += "<p class=\"fine\">" + esc(certStatus(t.id)) + "</p>";
 
+  // The track's way into the library it is built on (13 Oct 2026): the Herb
+  // Library for the herbalist, the Trainer for the trainer. The lessons link
+  // one by one; this is the same door, for the track as a whole. On the
+  // herbalist track it also carries the cross progress bridge - where the
+  // library's own sixty days have actually got to (13 Oct 2026).
+  if (t.lib){
+    var bridge = t.id === "herbalist" ? herbBridgeLine() : "";
+    out += "<a class=\"card " + t.cls + "\" style=\"margin-top:14px;text-decoration:none;color:inherit\" href=\"" + esc(t.lib.href) + "\">"
+         +   "<div class=\"rowtop\"><span class=\"txt\"><h2 class=\"tname\">" + esc(t.lib.name) + "</h2><p class=\"tsub\">" + esc(t.lib.note) + "</p>"
+         +   (bridge ? "<p class=\"tsub\">" + esc(bridge) + "</p>" : "")
+         +   "</span></div>"
+         + "</a>";
+  }
+
   out += "<div class=\"card\" style=\"margin-top:16px\"><h2>What this is, and what it is not</h2><p>" + esc(t.law) + "</p></div>";
 
   v.innerHTML = out;
@@ -1589,6 +1883,26 @@ function renderDay(v, d){
   // the link to it (13 Oct 2026) - the same door the header's seal opens.
   out += "<p class=\"fine\">Day " + day.d + " of " + TOTAL + " in " + esc(t.name) + ". The certificate is written at the end of the ninety." + (rec && rec.passed ? " This day is done." : "") + "</p>";
   out += "<button class=\"btn quiet noprint\" id=\"dayCert\">Open the certificate</button>";
+
+  // The deeper layer, and the doors to where this ground is taught at length
+  // (13 Oct 2026). One more paragraph the lesson would otherwise send a student
+  // to find, the Herb Library or the Trainer beside it, and - where the lesson
+  // names plants - a link onto each plant's own card, so the lesson lands on the
+  // exact card and not only on the shelf (Jacques, "link to plant cards").
+  var deeper = deeperFor(t.id, day.d);
+  if (deeper){
+    out += "<div class=\"card\" style=\"margin-top:14px\"><h2>Going deeper</h2>"
+         +   "<p>" + esc(deeper.p) + "</p>";
+    if (deeper.cards.length){
+      out += "<p class=\"kicker\">The plant cards this lesson names</p><div class=\"plantcards\">";
+      deeper.cards.forEach(function(c){
+        out += "<a class=\"plantcard noprint\" href=\"" + esc(c.to) + "\">" + esc(c.name) + "</a>";
+      });
+      out += "</div>";
+    }
+    out += "<a class=\"btn quiet noprint\" style=\"display:block;text-align:center;text-decoration:none\" href=\"" + esc(deeper.to) + "\">" + esc(deeper.label) + "</a>"
+         + "</div>";
+  }
   v.innerHTML = out;
 
   wireQuiz(v, day.q, function(right,total){
@@ -1966,8 +2280,42 @@ id("certlink").addEventListener("click", function(){
   if (view.track && !view.cert) go({ cert:view.track, track:null, day:null, test:null, exam:false });
 });
 
+/* ---------- the deep link ---------- */
+// A link from the Herb Library or the Trainer back into a lesson lands here:
+// #herbalist, #fitness, #herbalist/12, or ?track=herbalist&day=12. The hash is
+// the shape the app uses elsewhere, and the query is the shape a shared link
+// travels in. Both are read once at boot; anything unrecognised leaves the home
+// screen as it was.
+function parseDeepLink(){
+  var hash = "", search = "";
+  try { hash = String((window.location && window.location.hash) || ""); } catch(e){}
+  try { search = String((window.location && window.location.search) || ""); } catch(e){}
+  var tid = "", day = 0;
+  var m = hash.replace(/^#/, "").match(/^([a-z]+)(?:\/(\d+))?$/i);
+  if (m){ tid = m[1]; if (m[2]) day = Number(m[2]); }
+  if (!tid && search){
+    search.replace(/^\?/, "").split("&").forEach(function(kv){
+      var p = kv.split("=");
+      if (p[0] === "track") tid = decodeURIComponent(p[1] || "");
+      if (p[0] === "day") day = Number(decodeURIComponent(p[1] || ""));
+    });
+  }
+  return { track: tid, day: day };
+}
+function bootLink(){
+  var dl = parseDeepLink();
+  if (!dl.track || !track(dl.track)) return false;
+  if (dl.day >= 1 && dl.day <= TOTAL){
+    go({ track:dl.track, day:dl.day, test:null, exam:false, cert:null });
+  } else {
+    go({ track:dl.track, day:null, test:null, exam:false, cert:null });
+  }
+  return true;
+}
+
 state = load();
 render();
+bootLink();
 
 /* The page's own surface, so a check can drive it the way a thumb does. */
 window.CERTIFY = {
@@ -1976,7 +2324,10 @@ window.CERTIFY = {
   blocks: BLOCKS, PASS_TEST: PASS_TEST, PASS_DAY: PASS_DAY, TOTAL: TOTAL,
   render: render, go: go, save: save,
   certStatus: certStatus, certFilename: certFilename,
-  drawCert: drawCert, exportCert: exportCert, reload: reloadPage
+  drawCert: drawCert, exportCert: exportCert, reload: reloadPage,
+  GO_DEEPER: GO_DEEPER, deeperFor: deeperFor, libLabel: libLabel, plantSlug: plantSlug,
+  herbBridge: herbBridge, herbBridgeLine: herbBridgeLine,
+  parseDeepLink: parseDeepLink, bootLink: bootLink
 };
 })();
 </script>

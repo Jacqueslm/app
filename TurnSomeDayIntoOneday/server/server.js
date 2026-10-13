@@ -579,6 +579,17 @@ const forgotLimiter = rateLimit({
 app.post('/api/auth/forgot', forgotLimiter, async (req, res) => {
   const { email: rawEmail } = req.body || {};
   const normalizedEmail = (rawEmail || '').trim().toLowerCase();
+  // With no way to send mail there is no link for ANY account, so the usual
+  // "check your inbox" would be a flat lie to everybody who asks. Saying so
+  // reveals nothing about who has an account (it is true for everyone), and it
+  // names the one thing that fixes it. 13 Oct 2026: this is what the option on
+  // the sign-in screen reads when RESEND_API_KEY is unset.
+  if (!emailer.isConfigured()) {
+    return res.status(503).json({
+      error: 'Password reset by email is not set up on this server yet, '
+        + 'so no link can be sent. Set RESEND_API_KEY and try again.',
+    });
+  }
   // Identical response whether or not the account exists - this endpoint must
   // never confirm who has an account with a recovery app.
   const reply = { ok: true, message: 'If that email has an account, a reset link is on its way.' };

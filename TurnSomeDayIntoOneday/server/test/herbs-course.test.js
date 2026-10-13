@@ -39,7 +39,8 @@ function inlineScript(file) {
   return out;
 }
 
-function loadPage(file) {
+function loadPage(file, seeded) {
+  const mem = seeded || {};
   const els = new Map();
   const mk = (id) => ({
     id, value: '', textContent: '', innerHTML: '', disabled: false,
@@ -64,7 +65,11 @@ function loadPage(file) {
     document: doc, console,
     setTimeout, clearTimeout, setInterval, clearInterval,
     Math, JSON, Date, Object, Array, String, Number, Boolean, RegExp, Error, Promise, Map, Set, Intl,
-    localStorage: { getItem() { return null }, setItem() {}, removeItem() {} },
+    localStorage: {
+      getItem(k) { return k in mem ? mem[k] : null },
+      setItem(k, v) { mem[k] = String(v) },
+      removeItem(k) { delete mem[k] },
+    },
     fetch: async () => ({ status: 200, ok: true, json: async () => ({ content: [] }) }),
     scrollTo() {}, matchMedia: () => ({ matches: false, addEventListener() {} }),
     navigator: { userAgent: 'node' },
@@ -73,7 +78,7 @@ function loadPage(file) {
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(inlineScript(file), sandbox, { filename: file });
-  return { sandbox, els };
+  return { sandbox, els, store: mem };
 }
 
 test('the herb library: the 60 days tab also renders all ten supplied source lessons separately', () => {
@@ -359,4 +364,130 @@ test('the herb library: the new days are the books\u2019 material, not invented'
   for (const n of [51, 52, 58]) {
     assert.match(JSON.stringify(d(n)), /"note":"/, `day ${n} marks its own line`);
   }
+});
+
+// 13 Oct 2026, at Jacques's word "link them and deepen them": the library and the
+// Certification were two islands. The course now opens the ninety-day
+// Certification, and a link from the Certification lands on the exact tab and
+// day it names - #d12 on the course, #safety on the lines that outrank it.
+test('the herb library links out to the Certification and reads a deep link', () => {
+  const html = fs.readFileSync(path.join(ROOT, 'herbs.html'), 'utf8');
+  assert.match(html, /href="\/certify#herbalist"/, 'the course links to the ninety-day Certification');
+
+  const p = loadPage('herbs.html');
+  // A completion link from a course-lesson opens the tab and the day it names.
+  p.sandbox.window.location = { hash: '#d12', search: '' };
+  p.sandbox.applyDeepLink();
+  assert.strictEqual(p.sandbox.tab, 'course', 'a course-day link opens the 60 days tab');
+  assert.strictEqual(p.sandbox.openId, 'd12', 'and the day it names');
+
+  // The safety tab, the plant cards and the rest are reachable the same way.
+  p.sandbox.window.location = { hash: '#safety', search: '' };
+  p.sandbox.applyDeepLink();
+  assert.strictEqual(p.sandbox.tab, 'safety', 'the read-first tab is a real address');
+  assert.strictEqual(p.sandbox.openId, null, 'and opens no card of its own');
+
+  // The query shape a shared link travels in works too.
+  p.sandbox.window.location = { hash: '', search: '?tab=course&day=30' };
+  p.sandbox.applyDeepLink();
+  assert.strictEqual(p.sandbox.tab, 'course');
+  assert.strictEqual(p.sandbox.openId, 'd30');
+});
+
+// 13 Oct 2026, at Jacques's next word: "link to plant cards add cross progress
+// bridge". The lessons no longer stop at the shelf - a lesson that names garlic
+// opens the garlic card - and the two pages report each other's progress.
+//
+// Guarded here, the two quiet failures: an address that lands on the wrong card
+// (or on none, blanking the shelf), and a bridge that reads a key nothing writes
+// so progress never actually crosses.
+test('the herb library: a plant has its own address, and a lesson can land on it', () => {
+  const p = loadPage('herbs.html');
+  const s = p.sandbox;
+  assert.strictEqual(s.plantSlug('Marshmallow root'), 'marshmallow-root', 'the slug rule');
+  assert.strictEqual(s.plantSlug("St John\u2019s wort"), 'st-john-s-wort', 'and it matches the Certification\u2019s');
+
+  // An exact name, and a name a lesson gives in passing, both resolve.
+  assert.ok(s.findPlant('Garlic'), 'an exact name resolves to a card');
+  assert.ok(s.findPlant('Marshmallow'), 'a shortened name resolves to the full card');
+  assert.ok(s.findPlant('Aloe'), 'and so does aloe');
+  assert.strictEqual(s.findPlant('nothing here'), null, 'a name the library does not have resolves to nothing');
+
+  // Every plant card carries its own address, so a link can land on it.
+  assert.match(s.card({ n: 'Garlic', u: 'x' }), /id="p-garlic"/);
+
+  // #p-<slug> opens the A-Z shelf on that card.
+  s.window.location = { hash: '#p-garlic', search: '' };
+  s.applyDeepLink();
+  assert.strictEqual(s.tab, 'az', 'a plant link opens the A-Z tab');
+  assert.ok(s.openId, 'and opens a card');
+
+  // ?plant=<name> is the same address in the shape a shared link travels in.
+  s.window.location = { hash: '', search: '?plant=marshmallow' };
+  s.applyDeepLink();
+  assert.strictEqual(s.tab, 'az');
+  assert.ok(s.openId, 'the query shape opens the card too');
+
+  // A name the library does not have leaves the A-Z shelf open rather than blank.
+  s.window.location = { hash: '#p-nonesuch', search: '' };
+  s.applyDeepLink();
+  assert.strictEqual(s.tab, 'az');
+  assert.strictEqual(s.openId, null, 'nothing is opened for a name that is not here');
+});
+
+test('the herb library: every plant the Certification links to resolves to a card here', () => {
+  // This is the cross-page half of "link to plant cards": the Certification's own
+  // GO_DEEPER names the plants, and every one of those names has to open a card
+  // on this page. A mistyped or renamed plant would otherwise send a student to
+  // the shelf and not the plant.
+  const cert = fs.readFileSync(path.join(ROOT, 'certify.html'), 'utf8');
+  const m = cert.match(/var GO_DEEPER = (\{[\s\S]*?\n\});/);
+  assert.ok(m, 'the Certification keeps its deeper layers in GO_DEEPER');
+  const deeper = new Function('return ' + m[1])();
+  const p = loadPage('herbs.html');
+  const s = p.sandbox;
+  let links = 0;
+  for (const tid of Object.keys(deeper)) {
+    for (const d of Object.keys(deeper[tid])) {
+      for (const name of (deeper[tid][d].cards || [])) {
+        links++;
+        assert.ok(s.findPlant(name), `the Certification links "${name}" but the library has no such card`);
+      }
+    }
+  }
+  assert.ok(links >= 30, `the Certification links its plants (${links} found)`);
+});
+
+test('the herb library: the course shows the Certification progress beside its own', () => {
+  const p = loadPage('herbs.html', {
+    tsid_certify_v1: JSON.stringify({ name: '', tracks: { herbalist: {
+      days: { 1: { passed: true }, 2: { passed: true }, 3: { passed: true } }, tests: {}, exam: null,
+    } } }),
+  });
+  const s = p.sandbox;
+  const c = s.certProgress();
+  assert.strictEqual(c.done, 3, 'three passed days are read from the Certification store');
+  assert.strictEqual(c.total, 90);
+  assert.match(s.certBridgeText(), /3 of 90 days done/);
+
+  s.tab = 'course';
+  s.render();
+  const view = p.els.get('view').innerHTML;
+  assert.match(view, /Cross progress &middot; the Certification/, 'the bridge is on the course view');
+  assert.match(view, /3 of 90 days done/, 'and reports the Certification\u2019s own numbers');
+
+  // An untouched Certification reads as not started, never as an error.
+  const q = loadPage('herbs.html');
+  assert.match(q.sandbox.certBridgeText(), /has not been started yet/);
+});
+
+test('the herb library: saving a day writes the progress the Certification reads', () => {
+  const p = loadPage('herbs.html');
+  const s = p.sandbox;
+  const day = s.COURSE.filter((d) => d.d === 2)[0];
+  day.q.forEach((q, i) => s.answer(2, i, q.k));
+  const written = JSON.parse(s.localStorage.getItem('tsid_herb_progress_v1'));
+  assert.strictEqual(written.done, 1, 'the day is counted');
+  assert.strictEqual(written.total, 59, 'against the fifty-nine teaching days');
+  assert.strictEqual(written.passed, false, 'and the test is not claimed until it is passed');
 });

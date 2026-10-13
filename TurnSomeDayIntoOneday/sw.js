@@ -52,7 +52,13 @@
 // door is on the shell again, so the two copies of "four doors" changed with it
 // and the name moves to 2.7 for the reason above: a shell that never rebuilds
 // never grows the new door.
-const CACHE_NAME = 'tsid-shell-v2.8';
+//
+// 13 Oct 2026: the sign-in screen got its "Forgot your password?" option back,
+// this time wired to a real one-time link (Jacques asked for a way back rather
+// than none). The shell changed again, so the name moves to 3.0 for the same
+// reason as every bump above: an installed phone has to rebuild the shell or it
+// keeps being served the old sign-in screen without the option on it.
+const CACHE_NAME = 'tsid-shell-v3.0';
 const SHELL_FILES = [
   '/',
   '/app',

@@ -225,7 +225,12 @@
   // The shell's version. sw.js keeps its cache name in step with this, and
   // sw-version.test.js fails if the two drift apart — the cache name is what
   // decides whether an installed phone ever repopulates its copy.
-  const APP_VERSION='2.8';
+  //
+  // 13 Oct 2026: the sign-in screen got the way back for a forgotten password -
+  // Jacques asked for a real one by email rather than nothing at all. The shell
+  // changed, so the name moves to 3.0 WITH it, or an installed phone keeps being
+  // served the old copy out of its cache and the option never appears.
+  const APP_VERSION='3.0';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');
@@ -305,10 +310,11 @@
 
   // "Forgot your password?" - the answer depends on which build is serving the
   // page, so the server is asked rather than the page deciding. The accounts
-  // build (server.js) sends a real one-time link; the build the app actually
-  // runs on has one shared word for the house and no accounts, and answers 404 -
-  // there the honest answer is the spare word, which opens the same door.
-  // Nothing here says "we emailed you" unless the server said so first.
+  // build (server.js) sends a real one-time link; the build the app runs on has
+  // no accounts and no database, so there is nowhere to keep a token and
+  // nothing to send - it answers 404, and there the honest answer is the spare
+  // word, which opens the same door. Nothing here says "we emailed you" unless
+  // the server said so first.
   forgot.addEventListener('click', function(){
     var email = (emailEl.value || '').trim();
     if (!email) {

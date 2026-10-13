@@ -118,14 +118,16 @@ test('the sign-in screen itself holds nothing private', async () => {
   }
 });
 
-// --------------------------------------------- a forgotten word, 7 Oct 2026 --
-// Jacques: "add forgot my password sign in option". On the accounts build that
-// option emails a one-time link. THIS build has no accounts and no database, so
-// there is nowhere to keep a token and nothing to send — and the page must not
-// promise a link it cannot send. So the button asks /api/auth/forgot either way
-// and reads the answer: 200 means a link really is on its way, a 404 means the
-// honest answer is the spare word. What makes the page's spare-word sentence
-// correct on this host is the 404 below, which is what these tests hold still.
+// --------------------------------------------- a forgotten word, 13 Oct 2026 --
+// Jacques asked for a real way back — "or lets a user set a new password" —
+// after the option had been taken off the sign-in screen altogether. On the
+// accounts build (server.js) it emails a one-time link. THIS build has no
+// accounts and no database, so there is nowhere to keep a token and nothing to
+// send — and the page must not promise a link it cannot send. So the button
+// asks /api/auth/forgot either way and reads the answer: 200 means a link
+// really is on its way, a 404 means the honest answer is the spare word. What
+// makes the page's spare-word sentence correct on this host is the 404 below,
+// which is what these two tests hold still.
 
 test('the sign-in screen carries the way back for a forgotten word', async () => {
   const res = await get('/app');
@@ -137,6 +139,7 @@ test('the sign-in screen carries the way back for a forgotten word', async () =>
   // sign in with nothing and print "Both fields, please" instead.
   assert.match(html, /<button class="linkish" id="forgotBtn" type="button">/,
     'and it must not submit the sign-in form when tapped');
+  assert.match(html, /fetch\('\/api\/auth\/forgot'/, 'and it must ask the server rather than decide for itself');
 });
 
 test('a forgotten word here is a 404, not a link that was never sent', async () => {

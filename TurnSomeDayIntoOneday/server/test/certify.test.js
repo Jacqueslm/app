@@ -418,3 +418,138 @@ test('the lesson, the score and the name stay on the phone', () => {
   assert.doesNotMatch(HTML, /XMLHttpRequest/);
   assert.match(HTML, /Nothing is sent anywhere|nothing is sent anywhere/);
 });
+
+// 13 Oct 2026. Jacques: "link them and deepen them." Two failures this guards
+// against, neither of which throws: a lesson left without its deeper layer (a
+// day of GO_DEEPER lost in an edit), and a door that points at nothing real (a
+// mistyped tab or day, so the library opens on its ordinary A-Z instead of the
+// ground the lesson leaned on).
+test('every lesson is deepened, and linked into the library it stands on', () => {
+  const { sandbox, byId } = load();
+  const C = sandbox.window.CERTIFY;
+  for (const id of ['herbalist', 'fitness']) {
+    for (let d = 1; d <= 90; d++) {
+      const g = C.deeperFor(id, d);
+      assert.ok(g, `${id} day ${d}: no deeper layer`);
+      assert.ok(typeof g.p === 'string' && g.p.trim().length > 20,
+        `${id} day ${d}: the deeper paragraph is too thin to be one`);
+      assert.match(g.to, /^\/(herbs|trainer)/, `${id} day ${d}: the door goes nowhere real`);
+    }
+  }
+  // The door names the exact place: a course day, the safety tab, the cards, or
+  // the Trainer.
+  assert.equal(C.deeperFor('herbalist', 2).label, 'Herb Library - day 1');
+  assert.match(C.deeperFor('herbalist', 40).label, /Read this first/);
+  assert.match(C.deeperFor('herbalist', 40).to, /#safety/);
+  assert.equal(C.deeperFor('fitness', 12).to, '/trainer');
+  assert.match(C.deeperFor('fitness', 12).label, /Trainer/);
+
+  // And the lesson view shows both, on the page itself.
+  C.go({ track: 'herbalist', day: 2, test: null, exam: false, cert: null });
+  const day = byId('view').innerHTML;
+  assert.match(day, /Going deeper/, 'the lesson carries the deeper layer');
+  assert.match(day, /href="\/herbs#d1"/, 'and the door into the library');
+  assert.match(day, /Herb Library - day 1/, 'naming where it lands');
+
+  // The track offers the same door for the whole track.
+  C.go({ track: 'fitness', day: null, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /href="\/trainer"/, 'the trainer track opens the Trainer');
+  C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /href="\/herbs"/, 'and the herbalist track opens the library');
+});
+
+test('a link from the library or the Trainer opens the lesson it names', () => {
+  const { sandbox, byId } = load();
+  const C = sandbox.window.CERTIFY;
+  // The hash shape the app uses, and the query shape a shared link travels in.
+  sandbox.location = { hash: '#herbalist/12', search: '' };
+  const dl = C.parseDeepLink();
+  assert.equal(dl.track, 'herbalist');
+  assert.equal(dl.day, 12);
+  C.bootLink();
+  assert.match(byId('view').innerHTML, /Day 12 of 90 in The Herbalist/);
+
+  sandbox.location = { hash: '', search: '?track=fitness&day=30' };
+  const d2 = C.parseDeepLink();
+  assert.equal(d2.track, 'fitness');
+  assert.equal(d2.day, 30);
+  C.bootLink();
+  assert.match(byId('view').innerHTML, /Day 30 of 90 in The Trainer/);
+
+  // An address that names nothing leaves the home screen as it was.
+  sandbox.location = { hash: '#nonsense', search: '' };
+  assert.equal(C.bootLink(), false);
+});
+
+// 13 Oct 2026, at Jacques's next word: "link to plant cards add cross progress
+// bridge". A lesson that names a plant now opens that plant's own card, and the
+// two pages report each other's progress. Guarded here: a lesson that names
+// plants but links none, a plant-card address the library cannot resolve, and a
+// bridge that reads a key nothing writes.
+test('every plant a lesson names gets a link onto its own card', () => {
+  const { sandbox, byId } = load();
+  const C = sandbox.window.CERTIFY;
+  // The slug is made the same way the library makes it, so the two meet.
+  assert.equal(C.plantSlug('St John\u2019s wort'), 'st-john-s-wort');
+  assert.equal(C.plantSlug('Pau d\u2019arco'), 'pau-d-arco');
+
+  // The lessons that name plants carry a card link for each of them.
+  const wanted = {
+    16: ['comfrey'],
+    26: ['garlic'],
+    27: ['echinacea', 'licorice', 'marshmallow', 'yarrow', 'sage'],
+    28: ['valerian', 'catnip', 'fennel', 'dandelion', 'kelp'],
+    29: ['aloe', 'comfrey', 'witch-hazel', 'senna', 'pau-d-arco'],
+    30: ['gymnema', 'bilberry', 'guggul', 'chickweed', 'goldenseal'],
+    43: ['st-john-s-wort', 'ginkgo'],
+    83: ['st-john-s-wort', 'ginkgo', 'comfrey', 'kava'],
+  };
+  for (const d of Object.keys(wanted)) {
+    const g = C.deeperFor('herbalist', Number(d));
+    const slugs = g.cards.map((c) => c.slug);
+    for (const s of wanted[d]) assert.ok(slugs.includes(s), `day ${d} links the ${s} card`);
+    for (const c of g.cards) assert.equal(c.to, '/herbs#p-' + c.slug, 'each card is addressed by its slug');
+  }
+  // A lesson that names no plant carries no plant links, and every plant link
+  // is a door into the library.
+  assert.equal(C.deeperFor('herbalist', 1).cards.length, 0);
+  assert.equal(C.deeperFor('fitness', 12).cards.length, 0);
+
+  // And the lesson view draws them, as doors onto the cards.
+  C.go({ track: 'herbalist', day: 27, test: null, exam: false, cert: null });
+  const day = byId('view').innerHTML;
+  assert.match(day, /The plant cards this lesson names/);
+  assert.match(day, /href="\/herbs#p-echinacea"/);
+  assert.match(day, /href="\/herbs#p-licorice"/);
+  assert.match(day, /href="\/herbs#p-marshmallow"/);
+});
+
+test('the herbalist track carries the Herb Library cross progress bridge', () => {
+  const { sandbox, byId, store } = load();
+  const C = sandbox.window.CERTIFY;
+  // Nothing written yet: the library reads as unstarted, not as an error.
+  assert.equal(C.herbBridge().done, 0);
+  assert.match(C.herbBridgeLine(), /nothing started yet/);
+
+  // What the library writes beside its store is what this page reads.
+  store.tsid_herb_progress_v1 = JSON.stringify({ done: 7, total: 59, passed: false });
+  assert.equal(C.herbBridge().done, 7);
+  assert.match(C.herbBridgeLine(), /7 of 59 days done/);
+
+  // On the track itself, and the passed test is named when it is passed.
+  C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /7 of 59 days done/);
+  store.tsid_herb_progress_v1 = JSON.stringify({ done: 59, total: 59, passed: true });
+  C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /day-60 test passed/);
+
+  // A damaged summary is a library nobody has started, never a thrown page.
+  store.tsid_herb_progress_v1 = '{not json';
+  assert.equal(C.herbBridge().done, 0);
+  C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /nothing started yet/);
+
+  // The trainer track has no library behind it, so it carries no bridge.
+  C.go({ track: 'fitness', day: null, test: null, exam: false, cert: null });
+  assert.doesNotMatch(byId('view').innerHTML, /Herb Library's own progress/);
+});

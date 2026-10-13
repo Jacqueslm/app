@@ -2294,7 +2294,68 @@ var store={};
 try{ store=JSON.parse(localStorage.getItem(KEY)||'{}')||{} }catch(e){ store={} }
 var tab='az', openId=null, q='';
 
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)) }catch(e){} }
+/* ── THE CROSS PROGRESS BRIDGE ───────────────────────────────────────────────
+   Two pages, one phone, two halves of the same study (13 Oct 2026). The
+   Certification keeps its ninety days under tsid_certify_v1; this library keeps
+   its sixty under tsid_herb_notes_v1. Neither needs the other to work, so each
+   writes a small summary of its own progress beside its store and reads the
+   other's - so the course can say where the ninety days have got to, and the
+   Certification can say where these sixty have. Nothing is sent anywhere; it is
+   one phone reading its own two shelves.
+*/
+var BRIDGE_KEY='tsid_herb_progress_v1';
+var CERT_KEY='tsid_certify_v1';
+var HERB_DAYS_TOTAL=59;
+
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(store)) }catch(e){}
+  try{
+    var t=dayScore(60);
+    localStorage.setItem(BRIDGE_KEY, JSON.stringify({
+      done:daysDone(), total:HERB_DAYS_TOTAL, passed:!!(t.done && t.right>=EXAM_PASS)
+    }));
+  }catch(e){}
+}
+
+/* Where the ninety-day Certification has got to, read from its own store. */
+function certProgress(){
+  var s=null;
+  try{ s=JSON.parse(localStorage.getItem(CERT_KEY)||'null') }catch(e){ s=null }
+  if(!s || !s.tracks || !s.tracks.herbalist) return null;
+  var days=s.tracks.herbalist.days||{}, n=0;
+  for(var d=1; d<=90; d++){ var r=days[String(d)]; if(r && r.passed) n++; }
+  var ex=s.tracks.herbalist.exam;
+  return { done:n, total:90, earned:!!(ex && ex.passed) };
+}
+
+/* One line, so the two pages can never disagree about what "so far" means. */
+function certBridgeText(){
+  var c=certProgress();
+  if(!c) return 'The ninety-day Certification beside this library has not been started yet. Its lessons link onto these plant cards one at a time, and this library\u2019s own days count where you left off.';
+  if(c.earned) return 'The ninety-day Certification beside this library is complete \u2014 its certificate has been earned.';
+  return 'In the ninety-day Certification beside this library: '+c.done+' of '+c.total+' days done. Each of its lessons links back onto these plant cards.';
+}
+
+/* ── A PLANT'S OWN ADDRESS ───────────────────────────────────────────────────
+   A lesson on the Certification that names garlic links to /herbs#p-garlic,
+   and that address has to land on the garlic card (13 Oct 2026, "link to plant
+   cards"). The slug is the name with letters and numbers left and everything
+   else a hyphen, made the same way on both pages, so the two meet. A name the
+   library does not have resolves to nothing and the library opens as usual.
+*/
+function plantSlug(s){
+  return String(s==null?'':s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+/* The card a slug names. An exact match first, then a name the slug is the
+   opening of - so "marshmallow" finds "Marshmallow root" and "aloe" finds
+   "Aloe vera", which is how a lesson names a plant in passing. */
+function findPlant(s){
+  var want=plantSlug(s), list=allHerbs();
+  for(var i=0;i<list.length;i++) if(plantSlug(list[i].n)===want) return list[i].id;
+  for(var j=0;j<list.length;j++) if(plantSlug(list[j].n).indexOf(want+'-')===0) return list[j].id;
+  return null;
+}
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}) }
 function mineList(){ return Object.keys(store).filter(function(k){ return k.indexOf('herb:')===0 }) }
 function noteOf(id){ var v=store['herb:'+id]; return v&&v.note?String(v.note):'' }
@@ -2372,6 +2433,8 @@ function courseView(){
    +'<div class="bar"><i style="width:'+Math.round(done/59*100)+'%"></i></div>'
    +'<span>'+test+'</span></div>'
    +'<div class="big okbox"><b>Sixty days, beginner to the end</b>A day of teaching, a quiz under it, and the test on the last day. Every day is built out of the two books already behind this library, and each quiz tells you why the answer is the answer. Nothing is timed, nothing is sent anywhere, and nothing here has to be bought.</div>'
+   +'<a href="/certify#herbalist" style="display:block;margin:14px 0 0;padding:13px 14px;border:1px solid rgba(255,255,255,.14);border-radius:14px;color:inherit;text-decoration:none;font-size:.875rem;line-height:1.5"><b>Ninety days, and a certificate.</b> The Certification teaches this same ground at length \u2014 ninety days of clinical herbalism, a quiz after every lesson, and a certificate at the end. Each of its lessons links back onto these plant cards.</a>'
+   +'<div class="big okbox" style="margin-top:12px"><b>Cross progress &middot; the Certification</b>'+certBridgeText()+'</div>'
    +'<div class="sec-hd">The days</div>'
    +COURSE.map(courseDay).join('')
    +'<div class="sec-hd">Additional lessons · your lived experience</div>'
@@ -2484,7 +2547,9 @@ function match(h){
 
 function card(h){
   var open=openId===h.id;
-  return '<div class="card'+(open?' open':'')+'" data-h="'+esc(h.id)+'">'
+  /* Every plant carries its own address, so a link from the Certification can
+     land on this card rather than only on the shelf it sits in (13 Oct 2026). */
+  return '<div class="card'+(open?' open':'')+'" id="p-'+esc(plantSlug(h.n))+'" data-h="'+esc(h.id)+'">'
   +'<div class="row"><div class="row-txt"><b>'+esc(h.n)+'</b><span>'+esc(h.u)
   +(h.a&&h.a!=='added by you'?' &middot; '+esc(h.a):'')+(h.own?' <span class="pill">yours</span>':'')
   +'</span></div><div class="chev">&#8250;</div></div>'
@@ -2661,6 +2726,48 @@ document.getElementById('view').addEventListener('click',function(e){
 });
 
 
+/* ── THE DEEP LINK ─────────────────────────────────────────────────────────────
+   A link from the Certification lands here: #course, #d12, #safety, #az,
+   #books, #need, #meal, #deep, or ?tab=course&day=12. The hash opens the tab
+   and the day; the query is the shape a shared link travels in. Read once at
+   boot, so an unknown address leaves the library on its ordinary A–Z tab.
+--------------------------------------------------------------------------- */
+function applyDeepLink(){
+  var hash="", search="";
+  try{ hash=String((window.location&&window.location.hash)||'') }catch(e){}
+  try{ search=String((window.location&&window.location.search)||'') }catch(e){}
+  var h=hash.replace(/^#/,''), d=0, plant='';
+  if(search){
+    search.replace(/^\?/,'').split('&').forEach(function(kv){
+      var p=kv.split('=');
+      if(p[0]==='tab') tab=decodeURIComponent(p[1]||'');
+      if(p[0]==='day') d=Number(decodeURIComponent(p[1]||''));
+      if(p[0]==='plant') plant=decodeURIComponent(p[1]||'');
+    });
+  }
+  if(h){
+    var m=h.match(/^d(\d+)$/), mp=h.match(/^p-(.+)$/);
+    if(mp){ plant=mp[1]; }
+    else if(m){ tab='course'; openId='d'+m[1]; }
+    else if(['az','need','books','course','meal','deep','safety','mine'].indexOf(h)>-1){ tab=h; openId=null; }
+  }
+  /* A plant's own address (13 Oct 2026): /herbs#p-garlic, or ?plant=garlic,
+     opens the A-Z tab on that card. A name the library does not have leaves the
+     A-Z tab open as usual rather than blanking the page. */
+  if(plant){
+    var pid=findPlant(plant);
+    tab='az';
+    openId=pid;
+  }
+  if(d){ tab='course'; openId='d'+d; }
+  if(d||h){
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(x){
+      x.classList.toggle('on',x.getAttribute('data-t')===tab);
+    });
+  }
+}
+
+applyDeepLink();
 render();
 </script>
 </body>

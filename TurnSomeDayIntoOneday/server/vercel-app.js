@@ -35,6 +35,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const aiChatBody = require('./ai-chat-body');
 const keyReading = require('./key-reading');
+const catalogRoutes = require('./catalog-routes');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -91,6 +92,12 @@ const PAGES = {
   // information that's it".
   '/trainer': 'trainer.html',
   '/trainer.html': 'trainer.html',
+  // The Certification joined on 12 Oct 2026: the two ninety-day trainings and
+  // the two certificates. Both addresses again, for the reason every entry in
+  // this table has two - the clean URL and the file name both reach the file,
+  // and a gate on one of them is a gate with a window open beside it.
+  '/certify': 'certify.html',
+  '/certify.html': 'certify.html',
 };
 
 // ----------------------------------------------------------------- the door --
@@ -259,6 +266,10 @@ function buildApp() {
     windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
     message: { error: 'Too many tries. Wait a few minutes.' },
   });
+  const catalogLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+    message: { error: 'Too many catalog searches. Wait a little and try again.' },
+  });
 
   // --- signing in. The page (hub.html) posts the same shape it always has, so
   // it did not have to change when the accounts went: an email and a password.
@@ -328,6 +339,17 @@ function buildApp() {
     if (route === '/app') continue;
     app.get(route, gated(file));
   }
+
+  // Public catalog metadata only; require the same signed-in allowlist as /music.
+  catalogRoutes.mount(app, {
+    limiter: catalogLimiter,
+    authorize(req, res, next) {
+      const who = readSession(req);
+      if (!who || !allowed(who.email)) return res.status(401).json({ error: 'Not signed in.' });
+      next();
+    },
+    tmdbToken: process.env.TMDB_READ_ACCESS_TOKEN,
+  });
 
   // --- the AI. The tax page's ask box. Same request and same reply shape as
   // Railway, so the pages did not change: {system, messages} in,

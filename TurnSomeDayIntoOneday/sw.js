@@ -52,7 +52,7 @@
 // door is on the shell again, so the two copies of "four doors" changed with it
 // and the name moves to 2.7 for the reason above: a shell that never rebuilds
 // never grows the new door.
-const CACHE_NAME = 'tsid-shell-v2.7';
+const CACHE_NAME = 'tsid-shell-v2.8';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -175,6 +175,12 @@ self.addEventListener('fetch', (event) => {
   // check that let it in, and the offline fallback would hand it out unguarded.
   // Both addresses again, the clean URL and the file name.
   if (['/trainer', '/trainer.html'].includes(url.pathname)) return;
+
+  // The Certification joined on 12 Oct 2026, for the reason every private page
+  // above is in this list: a cached copy would outlive the check that let it in,
+  // and the offline fallback would hand it out unguarded. Both addresses again,
+  // the clean URL and the file name.
+  if (['/certify', '/certify.html'].includes(url.pathname)) return;
 
   // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
   // Its whole point is that it is read fresh - a cached "here is every track"

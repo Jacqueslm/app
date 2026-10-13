@@ -12,6 +12,7 @@ const push = require('./push');
 const backup = require('./backup');
 const aiChatBody = require('./ai-chat-body');
 const musicList = require('./music-list');
+const catalogRoutes = require('./catalog-routes');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -136,6 +137,23 @@ function requireAuth(req, res, next) {
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+
+// Catalog lookups return public metadata only. Keep these same-origin and behind
+// the Music page's own signed-in/allowlist gate, with a modest per-IP limit.
+const catalogLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many catalog searches. Wait a little and try again.' },
+});
+catalogRoutes.mount(app, {
+  limiter: catalogLimiter,
+  authorize(req, res, next) {
+    if (!isValidSession(req) || !isFriendlyRequest(req)) {
+      return res.status(401).json({ error: 'Not signed in.' });
+    }
+    next();
+  },
+  tmdbToken: process.env.TMDB_READ_ACCESS_TOKEN,
+});
 
 // A letter link is the SECOND way an account gets made in this app —
 // /api/auth/signup is the other one — so it needs the same door, checked the same
@@ -353,6 +371,27 @@ app.get('/trainer.html', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'trainer.html'));
+});
+
+// The Certification - added 12 Oct 2026. Jacques: two ninety-day trainings, a
+// quiz after every lesson, a test after day thirty and after day sixty, and an
+// ultimate examination that writes a certificate for each track. The two tracks
+// are the herbalist and the trainer, and the trainer's practical spine is the
+// by-10 programme from the Trainer app.
+//
+// Same door as The Trainer above, for the same reason: certify.html is a real
+// file, so express.static below would hand it out by name if only the clean URL
+// were gated. Signed in AND on the list, or you go to /app without learning the
+// page is there.
+app.get('/certify', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'certify.html'));
+});
+app.get('/certify.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'certify.html'));
 });
 
 // The Music's scanner (7 Oct 2026). The page cannot list a directory over the

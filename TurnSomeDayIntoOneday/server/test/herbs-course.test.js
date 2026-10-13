@@ -248,6 +248,41 @@ test('the herb library: the test scores, passes, and can be taken again', () => 
   assert.match(p.els.get('view').innerHTML, /Passed/, 'and the page says that too');
 });
 
+test('the herb library: the course header reports the day-60 test, not day 30', () => {
+  // The progress line above the days says "The test: …", but it was reading
+  // dayScore(30) — a leftover from when the exam was day 30 and the course was
+  // thirty days. Day 30 is an ordinary teaching day now, with only four
+  // questions, so the header could report a four-question "test". The header is
+  // what a person reads before the days themselves, so it is pinned here.
+  const p = loadPage('herbs.html');
+  const s = p.sandbox;
+  const exam = s.COURSE.filter((d) => d.d === 60)[0];
+  const day30 = s.COURSE.filter((d) => d.d === 30)[0];
+  assert.strictEqual(exam.q.length, 30, 'the test is thirty questions');
+  assert.notStrictEqual(day30.q.length, exam.q.length,
+    'day 30 is not the exam, so the header cannot be right by reading it');
+
+  // Twenty-six right, four wrong: all thirty answered, above the pass mark.
+  exam.q.forEach((q, i) => s.answer(60, i, i < 26 ? q.k : (q.k + 1) % q.a.length));
+  s.tab = 'course';
+  s.render();
+  let view = p.els.get('view').innerHTML;
+  assert.match(view, /The test: 26 of 30 \u2014 passed/, 'the header carries the exam score');
+  assert.doesNotMatch(view, /The test is day 60/, 'and not the not-yet-taken line');
+
+  // Answering day 30 does not change it — the header is the exam's, not day 30's.
+  day30.q.forEach((q, i) => s.answer(30, i, q.k));
+  s.render();
+  view = p.els.get('view').innerHTML;
+  assert.match(view, /The test: 26 of 30 \u2014 passed/, 'still the exam once day 30 is answered');
+
+  // Below the pass mark, the header says so with the exam's own numbers.
+  exam.q.forEach((q, i) => s.answer(60, i, i < 23 ? q.k : (q.k + 1) % q.a.length));
+  s.render();
+  view = p.els.get('view').innerHTML;
+  assert.match(view, /The test: 23 of 30 \u2014 the pass mark is 24/, 'and reports a fail honestly');
+});
+
 test('the herb library: the lines that never move are taught in the last week', () => {
   const p = loadPage('herbs.html');
   const day = p.sandbox.COURSE.filter((d) => d.d === 28)[0];

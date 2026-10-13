@@ -74,7 +74,7 @@
     <a class="back" href="/app" title="Back to the app">&#8592;</a>
     <div>
       <h1>The Trainer</h1>
-      <p>Your information first</p>
+      <p>For the people you train</p>
     </div>
   </header>
 
@@ -86,36 +86,44 @@
     built out of these answers, and until then there is nothing here that tells
     anybody to do anything — which is also why there is no exercise on it yet.
 
+    13 Oct 2026, and who it is for. Jacques: "its for my clients ... rewrite it
+    for my people I'll put they information in". So this page is written for the
+    person holding the phone, about somebody else — the coach, not the trainee.
+    Every question asks about "them", never about the reader, because the reader
+    here is the one asking the questions. That is the whole of the change: the
+    fields and the words around them, not the machinery underneath, which still
+    keeps one person's answers on this phone and sends nothing.
+
     Everything typed here stays on this phone, in this browser. Nothing is sent
     anywhere, there is no account and no server behind the form, and the page
-    works with no signal.
+    works with no signal. One person is held at a time; Clear starts the next.
   -->
   <div class="card lead">
-    <h2>Step one: your information</h2>
-    <p>This page asks and keeps. There is no plan on it yet &mdash; the plan gets built out of these answers, and it comes next.</p>
+    <h2>Step one: their information</h2>
+    <p>This page is for the people you train. You fill it in for one of them, and it keeps what you type. There is no plan on it yet &mdash; the plan gets built out of these answers, and it comes next.</p>
     <p>Everything here stays on this phone and nothing is sent anywhere. You can change any answer at any time, and clearing it clears all of it.</p>
   </div>
 
   <form class="card" id="intake" autocomplete="off">
-    <h2>You</h2>
+    <h2>The person you're training</h2>
 
-    <label for="name">What to call you</label>
+    <label for="name">What to call them</label>
     <input id="name" name="name" type="text" placeholder="A name or just an initial" autocapitalize="words">
 
-    <label for="age">Age</label>
+    <label for="age">Their age</label>
     <input id="age" name="age" type="number" inputmode="numeric" min="1" max="120" placeholder="Years">
 
     <label for="build">Height and weight</label>
     <input id="build" name="build" type="text" placeholder="As you know them &mdash; nothing here is weighed or judged">
 
-    <label for="days">Days a week you can train</label>
+    <label for="days">Days a week they can train</label>
     <input id="days" name="days" type="number" inputmode="numeric" min="1" max="7" placeholder="1 to 7">
 
-    <label for="when">The time of day that actually works</label>
+    <label for="when">The time of day that actually works for them</label>
     <input id="when" name="when" type="text" placeholder="Before work, after the school run, at night">
 
-    <h2 style="margin-top:20px">What you have at home</h2>
-    <p>Tick what is in the house. Anything not ticked is simply not used.</p>
+    <h2 style="margin-top:20px">What they have at home</h2>
+    <p>Tick what is in their house. Anything not ticked is simply not used.</p>
     <div class="picks" id="kit">
       <label class="pick"><input type="checkbox" data-kit="Dumbbells"><span>Dumbbells</span></label>
       <label class="pick"><input type="checkbox" data-kit="A pull-up bar"><span>A pull-up bar</span></label>
@@ -126,7 +134,7 @@
       <label class="pick"><input type="checkbox" data-kit="Nothing yet"><span>Nothing yet</span></label>
     </div>
 
-    <h2 style="margin-top:20px">What you want out of it</h2>
+    <h2 style="margin-top:20px">What they want out of it</h2>
     <div class="picks" id="want">
       <label class="pick"><input type="checkbox" data-want="Stronger"><span>Stronger</span></label>
       <label class="pick"><input type="checkbox" data-want="Breathing"><span>Breathing easier</span></label>
@@ -136,9 +144,9 @@
     </div>
 
     <label for="hurts">Anything that hurts</label>
-    <textarea id="hurts" name="hurts" placeholder="A knee, a back, a shoulder &mdash; as you would say it out loud"></textarea>
+    <textarea id="hurts" name="hurts" placeholder="A knee, a back, a shoulder &mdash; exactly as they would say it out loud"></textarea>
 
-    <label for="rules">Anything a doctor has told you not to do</label>
+    <label for="rules">Anything a doctor has told them not to do</label>
     <textarea id="rules" name="rules" placeholder="A lift to avoid, a movement, a limit"></textarea>
 
     <label for="dayone">Day one</label>
@@ -161,7 +169,7 @@
 
   <footer>
     The Trainer &mdash; private.<br>
-    Step one of it: your information. The plan comes next.
+    Step one of it: their information, one person at a time. The plan comes next.
   </footer>
 </div>
 

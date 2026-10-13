@@ -113,6 +113,12 @@ const OPEN_PAGES = [
   // addresses are named, because trainer.html is a real file as well as a clean
   // URL and static would otherwise serve the file name unguarded.
   '/trainer', '/trainer.html',
+  // The Certification (12 Oct 2026): the two ninety-day trainings and the two
+  // certificates. Private like the rest, so it is listed here only so the
+  // request can reach the route that judges it. Both addresses, because
+  // certify.html is a real file as well as a clean URL, and static would
+  // otherwise serve the file name unguarded.
+  '/certify', '/certify.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, and a letter link (/l/<token>).

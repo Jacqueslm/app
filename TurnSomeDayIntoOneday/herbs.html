@@ -2313,7 +2313,7 @@ function allHerbs(){
 /* ── THE THIRTY DAYS ──────────────────────────────────────────────────────────
    Progress lives in the same store as the notes, one key a day. Nothing is
    sent anywhere, there is no clock on it, and an answer can be changed —
-   changing it just changes the score. The test on day 30 is checked here on
+   changing it just changes the score. The test on day 60 is checked here on
    the phone, the same way every other day is.
 --------------------------------------------------------------------------- */
 function dayRec(d){ var r=store['day:'+d]; if(!r||!r.a) return {a:[]}; return r }
@@ -2364,7 +2364,7 @@ function courseDay(day){
 }
 
 function courseView(){
-  var done=daysDone(), t=dayScore(30);
+  var done=daysDone(), t=dayScore(60);
   var test=t.done ? 'The test: '+t.right+' of '+t.total+(t.right>=EXAM_PASS?' \u2014 passed':' \u2014 the pass mark is '+EXAM_PASS+'. Take it again whenever you like.')
                   : 'The test is day 60. Twenty-four out of thirty is a pass. More than one answer can be changed, and the test can be taken again as many times as you like.';
   return '<div class="sec">'

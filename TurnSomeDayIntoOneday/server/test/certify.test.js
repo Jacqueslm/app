@@ -1,0 +1,420 @@
+// The Certification — 12 Oct 2026.
+//
+// Jacques: "make each training 90 days test after 30 quiz after every lesson and
+// an ultimate quiz to acquire an certificate for both parts", and then, on what
+// the fitness track is built from: "My by 10 program in the trainer app and
+// mixed with the standard accreditation information."
+//
+// Two things can go wrong quietly here and neither makes a sound: a track that
+// is not actually ninety days (a chunk of lessons lost in an edit), and a quiz
+// question whose right answer points at an option that is not there. Both are
+// read straight off the page's own arrays, which is the only way to catch them —
+// the page renders correctly either way.
+//
+// Run:  cd TurnSomeDayIntoOneday/server && npm test
+const { test } = require('node:test');
+const assert = require('node:assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+const ROOT = path.join(__dirname, '..', '..');
+const PAGE = path.join(ROOT, 'certify.html');
+const HTML = fs.readFileSync(PAGE, 'utf8');
+
+// The lessons are literal arrays in the page's inline script. Read the literal
+// and evaluate just that, so a broken half of the page cannot hide behind a
+// render that never runs in a test.
+function literal(name) {
+  const m = HTML.match(new RegExp('var ' + name + ' = \\[([\\s\\S]*?)\\n\\];'));
+  assert.ok(m, name + ' must be a literal array in certify.html');
+  return new Function('return [' + m[1] + ']')();
+}
+
+const HERB = literal('HERB_DAYS');
+const FIT = literal('FIT_DAYS');
+
+test('both tracks are ninety days, numbered one to ninety', () => {
+  for (const [name, days] of [['herbalist', HERB], ['trainer', FIT]]) {
+    assert.equal(days.length, 90, name + ' must be ninety days');
+    days.forEach((d, i) => {
+      assert.equal(d.d, i + 1, `${name}: the day at index ${i} must be numbered ${i + 1}`);
+    });
+  }
+});
+
+test('every lesson carries a title, a subject, teaching and a quiz', () => {
+  for (const [name, days] of [['herbalist', HERB], ['trainer', FIT]]) {
+    for (const d of days) {
+      assert.ok(typeof d.t === 'string' && d.t.trim(), `${name} day ${d.d}: no title`);
+      assert.ok(typeof d.s === 'string' && d.s.trim(), `${name} day ${d.d}: no subject line`);
+      assert.ok(Array.isArray(d.p) && d.p.length > 0, `${name} day ${d.d}: no teaching`);
+      d.p.forEach((p) => assert.ok(typeof p === 'string' && p.trim(),
+        `${name} day ${d.d}: an empty teaching paragraph`));
+      assert.ok(Array.isArray(d.q), `${name} day ${d.d}: no quiz`);
+      assert.equal(d.q.length, 3, `${name} day ${d.d}: the quiz is three questions`);
+    }
+  }
+});
+
+test('every quiz question has one right answer among three or four options', () => {
+  // The quiet failure: an option dropped in an edit leaves k pointing past the
+  // end, and the page then paints "right" on the wrong line — or on nothing.
+  for (const [name, days] of [['herbalist', HERB], ['trainer', FIT]]) {
+    for (const d of days) {
+      d.q.forEach((q, qi) => {
+        const at = `${name} day ${d.d} question ${qi + 1}`;
+        assert.ok(typeof q.q === 'string' && q.q.trim(), `${at}: no question text`);
+        assert.ok(Array.isArray(q.a), `${at}: no options`);
+        assert.ok(q.a.length === 3 || q.a.length === 4, `${at}: ${q.a.length} options, not three or four`);
+        q.a.forEach((a) => assert.ok(typeof a === 'string' && a.trim(), `${at}: an empty option`));
+        assert.ok(Number.isInteger(q.k) && q.k >= 0 && q.k < q.a.length,
+          `${at}: the right answer (${q.k}) is not one of the options`);
+        assert.ok(typeof q.w === 'string' && q.w.trim(), `${at}: no reason given with the answer`);
+      });
+    }
+  }
+});
+
+test('a test sits after day thirty and after day sixty, and an exam at the end', () => {
+  // The shape Jacques asked for, asserted rather than assumed.
+  assert.match(HTML, /name:"Block Test One",\s*covers:"Days 1 to 30"/);
+  assert.match(HTML, /name:"Block Test Two",\s*covers:"Days 31 to 60"/);
+  assert.match(HTML, /The Ultimate Examination/);
+  // A block test is one question from every day of its block; the examination is
+  // drawn from all ninety. Both are built from the lessons' own quizzes.
+  assert.match(HTML, /function blockQuestions\(id,b\)\{/);
+  assert.match(HTML, /out\.push\(\{ day:day\.d, q:day\.q\[0\] \}\)/);
+  assert.match(HTML, /for \(var d=1; d<=TOTAL; d\+=3\)/);
+  assert.match(HTML, /out\.push\(\{ day:day\.d, q:day\.q\[1\] \}\)/);
+  // And the passing marks are stated once, at the top.
+  assert.match(HTML, /var PASS_DAY = 2;/);
+  assert.match(HTML, /var PASS_TEST = 24;/);
+});
+
+test('the exam unlocks only on the two passed tests and all ninety days', () => {
+  assert.match(HTML, /function examUnlocked\(id\)\{/);
+  assert.match(HTML, /testPassed\(id,30\) && testPassed\(id,60\)/);
+  assert.match(HTML, /blockDone\(id,BLOCKS\[0\]\) && blockDone\(id,BLOCKS\[1\]\)/);
+});
+
+test('a certificate is written, and says honestly what it is not', () => {
+  assert.match(HTML, /Certificate of Completion/);
+  assert.match(HTML, /function renderCert\(/);
+  // The two honesty sentences carry the real credentials, so nobody mistakes
+  // this page's record of study for one of them.
+  assert.match(HTML, /American Herbalists Guild Registered Herbalist/);
+  assert.match(HTML, /No US state licenses herbalists/);
+  assert.match(HTML, /NASM, ACE, ACSM, NSCA, ISSA, AFAA and NETA/);
+  assert.match(HTML, /it is not one of those credentials and it is not a licence/);
+});
+
+test('the trainer track is built on the by-10 programme from the Trainer app', () => {
+  // "My by 10 program in the trainer app." Its numbers and its kit have to be
+  // the ones the Trainer actually uses, or the track is a different programme
+  // wearing its name.
+  assert.match(HTML, /by-10/);
+  assert.match(HTML, /ten seconds of rest/i);
+  assert.match(HTML, /Three lifting days, two cardio days, one stretch day/);
+  assert.match(HTML, /three rounds, ten repetitions, eight rotations, a thirty-second last move, twenty minutes of cardio/i);
+  assert.match(HTML, /five rounds, twelve repetitions, ten rotations, a sixty-second last move, thirty minutes of cardio/i);
+  assert.match(HTML, /Plyometrics, jump rope, kickboxing, sweat step and dancing/);
+  // And the accreditation ground beside it.
+  assert.match(HTML, /FITT-VP/);
+  assert.match(HTML, /AFAA-CGFI/);
+  assert.match(HTML, /CPR and AED/);
+});
+
+// The source checks above read the page. This one RUNS its script in a small
+// sandbox, because the failure they cannot see is a typo in the engine itself -
+// a name that does not exist, a function called before it is defined - which
+// leaves a page that renders nothing at all while every string test still passes.
+// Point and click needs a real DOM, so the surface is driven instead: the same
+// window.CERTIFY the page exposes, walked from the home screen into a track and
+// into a day.
+// opts.canvas swaps document.createElement('canvas') for a recording stand-in,
+// which is what lets the export be checked without a browser: the page draws,
+// and the drawing is read back, so the name and the honest line have to be on
+// it. Every node the page makes is remembered either way, so the download the
+// export performs can be looked at too.
+function load(opts) {
+  const o = opts || {};
+  const made = [];    // every node the page creates
+  const drawn = [];   // every canvas it draws on
+  const blocks = [...HTML.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
+    .filter((m) => !/\bsrc=/.test(m[1])).map((m) => m[2]);
+  assert.ok(blocks.length > 0, 'the page must carry its own script');
+
+  function element(tag) {
+    return {
+      tag: tag || '_new',
+      innerHTML: '', textContent: '', value: '', hidden: false, disabled: false,
+      className: '', style: {}, attrs: {}, href: '', download: '', clicked: false,
+      classList: { add() {}, remove() {} },
+      getAttribute: () => null,
+      setAttribute() {}, removeAttribute() {}, focus() {}, closest: () => null,
+      querySelectorAll: () => [], querySelector: () => null,
+      appendChild() {}, remove() {},
+      addEventListener() {},
+      click() { this.clicked = true; },
+    };
+  }
+  function canvasEl() {
+    const calls = [];
+    const ctx = {
+      font: '', fillStyle: '', strokeStyle: '', lineWidth: 1, textAlign: '',
+      fillRect() {}, strokeRect() {},
+      beginPath() {}, arc() {}, moveTo() {}, lineTo() {}, stroke() {}, closePath() {}, fill() {},
+      fillText: (text, x, y) => { calls.push(['fillText', String(text), x, y]); },
+      measureText: (text) => ({ width: String(text).length * 12 }),
+      createLinearGradient: () => ({ addColorStop() {} }),
+    };
+    const c = {
+      tag: 'canvas', width: 0, height: 0,
+      getContext: () => ctx, toDataURL: () => 'data:image/png;base64,AAAA',
+    };
+    drawn.push({ canvas: c, ctx, calls });
+    return c;
+  }
+  const els = new Map();
+  const byId = (n) => {
+    if (!els.has(n)) els.set(n, element(n));
+    return els.get(n);
+  };
+  const doc = {
+    getElementById: byId,
+    querySelectorAll: () => [],
+    querySelector: () => null,
+    addEventListener() {},
+    createElement: (tag) => {
+      const el = o.canvas && tag === 'canvas' ? canvasEl() : element(tag);
+      made.push(el);
+      return el;
+    },
+    body: element('body'), documentElement: element('html'), readyState: 'complete',
+  };
+  const store = {};
+  const sandbox = {
+    document: doc, console,
+    setTimeout, clearTimeout, setInterval, clearInterval,
+    Math, JSON, Date, Object, Array, String, Number, Boolean, RegExp, Error, Promise, Map, Set, Intl,
+    localStorage: {
+      getItem: (k) => (k in store ? store[k] : null),
+      setItem: (k, v) => { store[k] = String(v); },
+      removeItem: (k) => { delete store[k]; },
+    },
+    location: { href: '/certify' },
+    sent: 0,
+    printed: 0,
+    print() { sandbox.printed += 1; },
+    fetch: async () => { sandbox.sent += 1; return { ok: true, status: 200, json: async () => ({}) }; },
+    scrollTo() {}, matchMedia: () => ({ matches: false, addEventListener() {} }),
+    navigator: { userAgent: 'node' },
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(blocks[0], sandbox, { filename: 'certify.html' });
+  return { sandbox, els, store, byId, made, drawn };
+}
+
+test('the page script runs, and its two tracks are drivable', () => {
+  const { sandbox, store } = load();
+  const C = sandbox.window.CERTIFY;
+  assert.ok(C, 'the page must expose its own surface');
+  assert.equal(C.TRACKS.length, 2, 'two trainings');
+  assert.equal(C.days('herbalist').length, 90);
+  assert.equal(C.days('fitness').length, 90);
+  assert.equal(C.blocks.length, 2, 'a test after day thirty and after day sixty');
+  assert.equal(C.PASS_TEST, 24);
+  assert.equal(C.PASS_DAY, 2);
+
+  // Walk it the way a thumb does: home -> track -> day, and save the score the
+  // way the quiz does. A thrown error here means the page is blank in a browser.
+  C.go({ track: 'herbalist' });
+  C.go({ day: 1 });
+  assert.ok(sandbox.sent === 0, 'nothing was fetched: the page is entirely on the phone');
+});
+
+test('a passed day is remembered, and a passed exam earns the certificate', () => {
+  const { sandbox, store } = load();
+  const C = sandbox.window.CERTIFY;
+  // The page's own state object, written the way wireQuiz writes it when a quiz
+  // is passed. Then saved and read back, which is what survives a closed tab.
+  C.state.tracks.herbalist.days['1'] = { right: 3, total: 3, passed: true, on: '2026-10-12' };
+  C.save();
+  assert.ok(/tsid_certify_v1/.test(JSON.stringify(store)) || 'tsid_certify_v1' in store,
+    'the day is kept under the page\'s own key');
+  const saved = JSON.parse(store.tsid_certify_v1);
+  assert.equal(saved.tracks.herbalist.days['1'].passed, true);
+
+  // And the examination and the certificate both render, in the order a person
+  // reaches them: into the track, then the exam, then the certificate.
+  C.go({ track: 'herbalist' });
+  C.go({ exam: true });
+  C.go({ cert: 'herbalist' });
+});
+
+// 13 Oct 2026. Jacques: "link lessons to certificate, add reload, export
+// certificate." The three quiet failures that came with those words:
+//
+//   1. the certificate reachable only at the very end, which leaves the one
+//      thing the whole track is for with no way in from a lesson it is built
+//      out of;
+//   2. a page that paints a certificate for work nobody has done, which is the
+//      single dishonest thing this page could do;
+//   3. an export that silently does nothing on a phone - an image never drawn,
+//      a name never on it, or a download with no file behind it.
+
+test('every lesson and every test carries the way to the certificate', () => {
+  // The seal has to be in the page's own markup, not only in its script: the
+  // script wires it up by id at boot, so a header without it is a thrown page.
+  assert.match(HTML, /id="certlink"/);
+  assert.match(HTML, /id=\\"dayCert\\"/, 'and the lesson footer is drawn with it');
+  const { sandbox, byId: look } = load();
+  const P = sandbox.window.CERTIFY;
+
+  // The header's seal is on every lesson, and it says what is done so far.
+  P.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  assert.ok(!look('certlink').hidden, 'the track carries the seal');
+  assert.match(String(look('certlink').title), /0 of 90 days done so far/);
+  P.go({ day: 1, test: null, exam: false, cert: null });
+  assert.ok(!look('certlink').hidden, 'and a lesson carries it too');
+  assert.match(look('view').innerHTML, /id="dayCert"/, 'the lesson links to the certificate');
+  assert.match(look('view').innerHTML, /Day 1 of 90 in The Herbalist/,
+    'and says where the lesson sits in the ninety');
+  P.go({ day: null, test: 1 });
+  assert.ok(!look('certlink').hidden, 'and a block test carries it');
+  assert.match(look('view').innerHTML, /Block Test One/, 'which is the test that really rendered');
+  P.go({ test: null, exam: true });
+  assert.ok(!look('certlink').hidden, 'and the examination carries it');
+  assert.match(look('view').innerHTML, /The Ultimate Examination/);
+
+  // The track's own button is there from day one, not only at the end.
+  P.go({ track: 'herbalist', exam: false, day: null, test: null, cert: null });
+  const track = look('view').innerHTML;
+  assert.match(track, /id="toCert"/, 'the track links to the certificate from the start');
+  assert.match(track, /Day 1 of 90|Days 1 to 30/, 'and it is the track that rendered');
+  assert.match(track, /Not yet earned\. Still owed: 90 lessons, Block Test One, Block Test Two and the Ultimate Examination\./,
+    'and says plainly what is still owed');
+
+  // On the certificate itself there is nowhere for the seal to go.
+  P.go({ cert: 'herbalist', track: null, day: null, test: null, exam: false });
+  assert.ok(look('certlink').hidden, 'the seal is not shown on the certificate');
+});
+
+test('a certificate is not painted before the examination is passed', () => {
+  const { sandbox, byId, store } = load();
+  const C = sandbox.window.CERTIFY;
+  // What the view is built out of has to be built properly: a stray </div> in a
+  // string like this one does not throw, it just eats the next section.
+  const balanced = (html) => {
+    const open = (html.match(/<(div|p|span|button)\b/g) || []).length;
+    const close = (html.match(/<\/(div|p|span|button)>/g) || []).length;
+    assert.equal(open, close, `the certificate markup nests: ${open} tags opened, ${close} closed`);
+  };
+
+  C.go({ cert: 'herbalist', track: null, day: null, test: null, exam: false });
+  const early = byId('view').innerHTML;
+  assert.match(early, /Not yet earned/, 'the view says so in the open');
+  assert.match(early, /Still owed:/);
+  assert.doesNotMatch(early, /awarded to/, 'and it does not award itself anything');
+  assert.doesNotMatch(early, /id="image"/, 'with no image to export before it is earned');
+  assert.doesNotMatch(early, /id="print"/, 'and nothing to print either');
+  assert.match(early, /id="reload"/, 'but the reload is there');
+  assert.match(early, /id="backTrack"/, 'and the way back to the lessons is there');
+  assert.match(early, /What this certificate records/);
+  assert.match(early, /0 of 90 done/);
+  assert.match(early, /not yet taken/);
+  balanced(early);
+
+  // The record is the page's own store, not a story about it.
+  C.state.tracks.herbalist.days['1'] = { right: 3, total: 3, passed: true, on: '2026-10-13' };
+  C.state.tracks.herbalist.days['2'] = { right: 2, total: 3, passed: true, on: '2026-10-13' };
+  C.save();
+  C.go({ cert: 'herbalist', track: null, day: null, test: null, exam: false });
+  assert.match(byId('view').innerHTML, /2 of 90 done/);
+  assert.ok(store.tsid_certify_v1, 'and it is the same record the page keeps');
+
+  // Earned: the certificate, and the two ways out of it.
+  C.state.tracks.herbalist.exam = { right: 27, total: 30, passed: true, on: '2026-10-13' };
+  C.go({ cert: 'herbalist', track: null, day: null, test: null, exam: false });
+  const earned = byId('view').innerHTML;
+  assert.match(earned, /awarded to/);
+  assert.match(earned, /Ultimate Examination 27 of 30/);
+  assert.match(earned, /id="print"/, 'an earned certificate can be printed');
+  assert.match(earned, /id="image"/, 'and saved as an image');
+  assert.match(earned, /id="reload"/);
+  assert.match(earned, /Back to the lessons/);
+  assert.doesNotMatch(earned, /Not yet earned/);
+  balanced(earned);
+});
+
+test('the export draws the certificate here, name, record and honest line on it', () => {
+  const { sandbox, made, drawn } = load({ canvas: true });
+  const C = sandbox.window.CERTIFY;
+  assert.equal(C.certFilename('herbalist', '2026-10-13'), 'certificate-herbalist-2026-10-13.png');
+  assert.equal(C.certFilename('fitness', '2026-10-13'), 'certificate-fitness-2026-10-13.png');
+
+  const fitness = C.TRACKS[1];
+  const how = C.exportCert(fitness, 'Jacques', { right: 28, total: 30, on: '2026-10-13' });
+  assert.equal(how, 'saved', 'the image is drawn and handed to the browser');
+  assert.equal(sandbox.sent, 0, 'nothing was fetched to make it');
+  assert.equal(sandbox.printed, 0, 'and the print dialog was not needed');
+
+  const canvas = drawn[drawn.length - 1];
+  assert.equal(canvas.canvas.width, 1600, 'a certificate-shaped canvas');
+  assert.equal(canvas.canvas.height, 1132);
+  const text = canvas.calls.filter((c) => c[0] === 'fillText').map((c) => c[1]).join(' ');
+  assert.match(text, /THE TRUTH/, 'the seal line');
+  assert.match(text, /CERTIFICATE OF COMPLETION/);
+  assert.match(text, /The Trainer/, 'the track it is for');
+  assert.match(text, /Jacques/, 'the name it is written for');
+  assert.match(text, /awarded to/);
+  assert.match(text, /Ultimate Examination 28 of 30/);
+  // The honest line has to travel on the image, not just on the page: a picture
+  // of a certificate goes further than the page does.
+  assert.match(text, /it is not one of those credentials and it is not a licence/);
+
+  const link = made.filter((m) => m.tag === 'a').pop();
+  assert.ok(link, 'the export makes a download link');
+  assert.equal(link.download, 'certificate-fitness-2026-10-13.png');
+  assert.match(link.href, /^data:image\/png/);
+  assert.ok(link.clicked, 'and clicks it, which is what saves the file');
+});
+
+test('with no canvas to draw on, the export falls back to printing rather than dying', () => {
+  const { sandbox } = load();          // no canvas in this sandbox
+  const C = sandbox.window.CERTIFY;
+  assert.equal(C.drawCert(C.TRACKS[0], 'Jacques', { right: 0, total: 0, on: '2026-10-13' }), null);
+  assert.equal(C.exportCert(C.TRACKS[0], 'Jacques', { right: 0, total: 0, on: '2026-10-13' }), 'print');
+  assert.equal(sandbox.printed, 1, 'the print dialog is the way out, where Save as PDF lives');
+  assert.equal(C.exportCert(C.TRACKS[0], 'Jacques', { right: 0, total: 0, on: '2026-10-13' }), 'print');
+});
+
+test('the reload reads the store again rather than throwing', () => {
+  const { sandbox, byId, store } = load();
+  const C = sandbox.window.CERTIFY;
+  assert.match(HTML, /function reloadPage\(\)/);
+  assert.match(HTML, /window\.location\.reload/);
+  assert.match(HTML, /id=\\"reload\\"/);
+  // A record written by another visit is picked up by the reload, which is the
+  // part of it that matters on this page.
+  store.tsid_certify_v1 = JSON.stringify({
+    name: 'Jacques', tracks: { herbalist: { days: { 1: { right: 3, total: 3, passed: true, on: '2026-10-13' } }, tests: {}, exam: null } },
+  });
+  C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  C.reload();
+  assert.match(byId('view').innerHTML, /Certificate earned|1 of 90 days/);
+  assert.ok(sandbox.sent === 0, 'the reload asks the phone, not a server');
+});
+
+test('the lesson, the score and the name stay on the phone', () => {
+  // This page is private and offline-first like the pages around it: one key in
+  // local storage, and nothing sent anywhere.
+  assert.match(HTML, /var LS = "tsid_certify_v1";/);
+  assert.match(HTML, /localStorage\.setItem\(LS/);
+  assert.doesNotMatch(HTML, /fetch\(/, 'nothing on this page goes to a server');
+  assert.doesNotMatch(HTML, /XMLHttpRequest/);
+  assert.match(HTML, /Nothing is sent anywhere|nothing is sent anywhere/);
+});

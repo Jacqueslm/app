@@ -5,6 +5,12 @@
 // ask for the basic information and keep it. Nothing is planned, nothing is
 // prescribed, and nothing leaves the phone.
 //
+// 13 Oct 2026, who it is for. Jacques: "its for my clients ... rewrite it for my
+// people I'll put they information in". The page had been written to the person
+// being trained ("What to call you"); it is actually filled in by the coach, for
+// one of the people he trains. The first test below is the one that holds that:
+// the questions ask about "them" and never about the reader.
+//
 // That last part is the claim the page makes in its own words ("Everything here
 // stays on this phone and nothing is sent anywhere"), so it is checked here
 // rather than left to a comment: no fetch, no XMLHttpRequest, no form action,
@@ -127,7 +133,13 @@ function loadPage(storage) {
 test('the trainer page is the intake, and says what it is', () => {
   const html = fs.readFileSync(PAGE, 'utf8');
   assert.match(html, /<h1>The Trainer<\/h1>/, 'the page names itself');
-  assert.match(html, /Step one: your information/, 'and says which step it is');
+  assert.match(html, /Step one: their information/, 'and says which step it is');
+  // Written for the coach holding the phone, not the person being trained —
+  // 13 Oct 2026. The fields ask about "them"; there is no field addressed to the
+  // reader about themselves.
+  assert.match(html, /What to call them/, 'the fields ask about the person being trained');
+  assert.doesNotMatch(html, /What to call you/, 'and none of them ask the reader about themselves');
+  assert.match(html, /For the people you train/, 'the page says who it is for');
   assert.match(html, /There is no plan on it yet/,
     'and says plainly that nothing is planned yet, rather than looking finished');
   // Every field the step is for is on the page.

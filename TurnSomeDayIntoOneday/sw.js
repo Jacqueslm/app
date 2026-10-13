@@ -58,7 +58,12 @@
 // than none). The shell changed again, so the name moves to 3.0 for the same
 // reason as every bump above: an installed phone has to rebuild the shell or it
 // keeps being served the old sign-in screen without the option on it.
-const CACHE_NAME = 'tsid-shell-v3.0';
+//
+// 3.1, the same day, with the Trainer's card in the shell: its note now says the
+// Trainer is for the people Jacques trains, rather than talking to the trainee.
+// One line of a card is still a change to the shell, and the rule is unchanged -
+// an installed phone that never rebuilds is a phone that keeps the old words.
+const CACHE_NAME = 'tsid-shell-v3.1';
 const SHELL_FILES = [
   '/',
   '/app',

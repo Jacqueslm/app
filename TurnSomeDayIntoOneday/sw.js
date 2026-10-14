@@ -63,7 +63,13 @@
 // Trainer is for the people Jacques trains, rather than talking to the trainee.
 // One line of a card is still a change to the shell, and the rule is unchanged -
 // an installed phone that never rebuilds is a phone that keeps the old words.
-const CACHE_NAME = 'tsid-shell-v3.1';
+//
+// 14 Oct 2026, and the same card a third time: it said the plan came next, and
+// the by-10 programme is on the Trainer now ("on the trainer add the by 10
+// program"). The line under "The Trainer" changed, so the name moves to 3.2 with
+// it for exactly the reason above: a phone that keeps its old shell keeps a card
+// that says the programme is still coming.
+const CACHE_NAME = 'tsid-shell-v3.2';
 const SHELL_FILES = [
   '/',
   '/app',

@@ -137,6 +137,26 @@
   canvas.preview{width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:#000; display:block}
   .chips{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 13px}
 
+  /* The manual, behind a drop-down since 14 Oct 2026. Jacques: "put the manual
+     on a drop down menu". It was an open card sitting between the player and the
+     songs, so the list of songs started below the fold on a phone. The same
+     words are one tap away now, and it is a <details> rather than a script, so
+     it opens with no JavaScript at all and there is no state to keep. */
+  details.fold{padding:0}
+  details.fold > summary{
+    list-style:none; cursor:pointer; padding:16px 18px;
+    display:flex; align-items:baseline; gap:10px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  details.fold > summary::-webkit-details-marker{display:none}
+  details.fold > summary::after{content:"▾"; margin-left:auto; color:var(--gold); font-size:.6875rem}
+  details.fold[open] > summary::after{content:"▴"}
+  details.fold > summary .kicker{margin:0}
+  details.fold > summary .foldTitle{font-family:var(--serif); font-size:1.0625rem; color:var(--ink)}
+  details.fold > summary:hover .foldTitle{color:var(--gold)}
+  details.fold > *:not(summary){margin-left:18px; margin-right:18px}
+  details.fold > *:last-child{margin-bottom:18px}
+
   /* The numbered manual on the player. A real numbered list in the markup, so
      the count is the browser's job rather than something typed by hand. */
   ol.steps{counter-reset:s; list-style:none; margin:0; padding:0; display:grid; gap:10px}
@@ -651,22 +671,26 @@
       <p class="note" id="playerNote"></p>
     </div>
 
-    <!-- The manual (10 Oct 2026). Jacques: "add how music is loaded". One card,
-         in order, in plain words: the page had said how the songs are KEPT and
-         never how they get here in the first place. -->
-    <div class="card">
-      <p class="kicker">The manual</p>
-      <h2>How your music gets here</h2>
+    <!-- The manual (10 Oct 2026), behind a drop-down from 14 Oct 2026 —
+         Jacques: "put the manual on a drop down menu". One card, in order, in
+         plain words: the page had said how the songs are KEPT and never how
+         they get here in the first place. The words are unchanged; only the
+         card they sit in is folded away until it is asked for. -->
+    <details class="card fold" id="manual">
+      <summary>
+        <span class="kicker">The manual</span>
+        <span class="foldTitle">How your music gets here</span>
+      </summary>
       <p class="hint">All of it happens on this phone. Nothing is uploaded, and nothing is sent anywhere.</p>
       <ol class="steps">
         <li><b>Tap “Tap to choose songs”</b> and pick the files already on the phone. Any of the usual kinds — mp3, m4a, wav, ogg — and as many as you like at once.</li>
-        <li><b>Or tap “Scan for new music”.</b> That looks in your music folder and in the meditation room, and adds only what is not here yet.</li>
+        <li><b>Or tap “Scan for new music”.</b> It looks in two folders only — your <b>Music</b> folder and your <b>Download</b> folder — and in the meditation room, and it adds only what is not here yet. The same song in both folders is added once.</li>
         <li><b>They land in “All songs”</b> and are kept on this phone, so the list is waiting the next time you open the page.</li>
         <li><b>Tap any row to play it.</b> The player at the top follows whatever you pick. A song you add today lands at the top of the list — the <b>Order</b> chips flip that round.</li>
         <li><b>To take one off, tap the ✕</b> on its row. On a playlist the ✕ takes only the row out — the song itself stays on the phone.</li>
         <li><b>To make a playlist,</b> name one under “Playlists”, then tap + on any song. The same song can go in as many times as you like.</li>
       </ol>
-    </div>
+    </details>
 
     <div class="card">
       <p class="kicker">From this phone</p>
@@ -674,9 +698,15 @@
       <p class="hint">Pick audio files from the phone. They play here, they are never uploaded anywhere, and the list stays here so it is waiting next time.</p>
       <label class="drop" for="audioInput">Tap to choose songs <b>(mp3, m4a, wav, ogg…)</b></label>
       <input type="file" id="audioInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac" multiple hidden>
+      <!-- The scan's own folder button (14 Oct 2026). A phone has no way to be
+           handed a folder handle, but a folder chooser on a file input works
+           there, and it is how "Scan for new music" reaches his Music folder on
+           the handset at all. Kept hidden: the scan button presses it. -->
+      <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
       <div class="row" style="margin-top:12px">
         <button class="btn ghost wide" id="scanBtn" type="button">Scan for new music</button>
       </div>
+      <p class="note" id="scanNote">Looks in your <b>Music</b> folder and your <b>Download</b> folder, and in the meditation room — nowhere else.</p>
       <div id="sortRow">
         <p class="kicker" style="margin-top:16px">Order</p>
         <div class="chips" id="sortChips">
@@ -1505,10 +1535,15 @@
 
   // The name plus the size plus when it was last changed is enough to tell one
   // file from another, so adding the same song twice does not store it twice.
+  // The same file picked by hand, scanned from a folder, or scanned again next
+  // week all carry the same key, and it is what a song is kept on the phone as.
   function fileKey(file){
     return String(file.name || 'song') + '|' + (file.size || 0) + '|' + (file.lastModified || 0);
   }
 
+  // Gives back what it did - how many songs were added and how many were
+  // already here - so the scan can say one sentence about the whole run rather
+  // than the page writing two messages over each other.
   function addFiles(files){
     var added = 0;
     var already = 0;
@@ -1517,8 +1552,10 @@
       if (!file) return;
       var looksAudio = /^audio\//.test(file.type || '') || /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i.test(file.name);
       if (!looksAudio) return;
+      // The same file, or the same song arriving as a second copy: either way it
+      // is a song he already has, and it is not added again.
+      if (sameSong(file)) { already++; return; }
       var key = fileKey(file);
-      if (kept[key]) { already++; return; }
       kept[key] = true;
       var entry = {
         key: key,
@@ -1540,7 +1577,7 @@
     if (!added){
       if (already) say($('playerStatus'), 'Those songs are already in the list.');
       else say($('playerStatus'), 'Those files are not audio this phone can play.', true);
-      return;
+      return { added: 0, already: already };
     }
     var msg = added + (added === 1 ? ' song added.' : ' songs added.');
     if (already) msg += ' ' + already + (already === 1 ? ' was already here.' : ' were already here.');
@@ -1550,6 +1587,7 @@
     renderPlaylist();
     renderRingtoneOptions();
     if (current < 0) selectSong(0, false);
+    return { added: added, already: already };
   }
 
   function readDuration(entry){
@@ -2703,8 +2741,73 @@
   // web address by itself, so it asks the server for the folder's contents),
   // and songs dropped into a folder on this phone since they were last added.
   // The scan looks in both.
+  //
+  // 14 Oct 2026, and which folders it is allowed to look in. Jacques: "scan
+  // folder doesnt work scan set up only to scan only music folder or download
+  // and make sure it doesnt pick up the song twice". Three things were wrong:
+  //
+  //   1. it would open anywhere. Whatever folder was chosen got walked, so a
+  //      scan could be pointed at the whole phone. It looks in two folders now
+  //      and only two - Music and Download - and a folder that is neither is
+  //      refused by name rather than walked;
+  //   2. on a phone it could never work at all. The directory picker it used is
+  //      a computer's API (Safari, Firefox and every Android browser lack it),
+  //      which is the "doesnt work" he was looking at. A phone gets the folder
+  //      chooser on a file input instead, which the handset does have, so the
+  //      scan reaches the Music folder there as well;
+  //   3. the same song could land in the list twice - once from Music and once
+  //      from Download, two copies of one track with two dates on them. A file
+  //      is now checked against what is already in the list by its name as well
+  //      as by its exact key, so a second copy of a song he already has counts
+  //      as one he already has.
   var AUDIO_FILE = /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i;
   var DIR_KEY = 'music-folder';   // the folder last scanned, kept on this phone
+  // The two folders the scan is for, and only those two. "My Music" is the same
+  // folder as "Music" on some phones and "Download" is "Downloads" elsewhere,
+  // which is why it is a test rather than a list of exact names.
+  var MUSIC_FOLDER = /(music|download)/i;
+  var NO_FOLDER = 'This browser cannot look through a folder on the phone — use “Tap to choose songs” instead.';
+  var WRONG_FOLDER = 'The scan looks in your Music folder and your Download folder, and nowhere else — that was another folder, so nothing was added.';
+  var NOTHING_CHOSEN = 'Nothing was chosen, so nothing changed.';
+  var SCAN_NOTE = 'Looks in your Music folder and your Download folder, and in the meditation room — nowhere else.';
+  // The caveat for the one case the rule cannot be checked in. A phone browser
+  // that shows a folder chooser hands every file over with its path, and the
+  // path is how the folder is named and checked. Chrome for Android shows the
+  // ordinary file chooser instead (folder selection is listed for it well after
+  // this was written), so the songs arrive with no path on them and there is
+  // nothing to check the folder against. They are still added - they are the
+  // files he just picked - and the line under the button says plainly that the
+  // folder could not be named, rather than quietly pretending it was checked.
+  var UNNAMED_FOLDER = 'This browser handed the songs over as files rather than as a folder, so the scan could not tell which folder they came from. It only ever reads Music and Download; for a file from anywhere else, use “Tap to choose songs” above.';
+
+  // The folder that was picked, read from the files themselves: a folder chooser
+  // hands over each file with its whole path, so the first part of the first
+  // path is the folder it came out of.
+  function folderNameOf(files){
+    var first = files && files[0];
+    var rel = first && (first.webkitRelativePath || '');
+    return rel ? String(rel).split('/')[0] : '';
+  }
+
+  // Is this song already in the list? The exact file first - its name, its size
+  // and the moment it was last changed, which is what a song's key is. Then the
+  // song itself: the Music copy and the Download copy of one track arrive with
+  // two dates and often two sizes, and they are still one song, so the name is
+  // the second answer. A second copy is counted as already here rather than
+  // added again.
+  function sameSong(file){
+    if (!file) return true;
+    if (kept[fileKey(file)]) return true;
+    var name = String(file.name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!name) return false;
+    for (var i = 0; i < songs.length; i++){
+      var s = songs[i];
+      if (!s) continue;
+      var had = String(s.meta || s.name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      if (had && had === name) return true;
+    }
+    return false;
+  }
 
   function titleWords(s){
     return String(s).replace(/[_-]+/g, ' ').replace(/\b[a-z]/g, function(c){ return c.toUpperCase(); });
@@ -2759,30 +2862,105 @@
     });
   }
 
+  // The folder chooser, started in Music rather than wherever it was left last
+  // time. A browser that will not take the starting folder says so by refusing
+  // the call, and only then is it asked again without one - a closed dialog is
+  // not re-opened, because a dialog he shut is an answer.
+  function askForFolder(){
+    function pick(opts){ return window.showDirectoryPicker(opts); }
+    try {
+      return pick({ id: 'tsid-music', mode: 'read', startIn: 'music' })
+        .catch(function(err){
+          if (err && err.name === 'TypeError') return pick({ id: 'tsid-music', mode: 'read' });
+          throw err;
+        });
+    } catch (e) {
+      return pick({ id: 'tsid-music', mode: 'read' });
+    }
+  }
+
   function pickStoredDir(){
     return dbGet('info', DIR_KEY).then(function(rec){
       var handle = rec && rec.handle;
-      if (!handle) return window.showDirectoryPicker({ id: 'tsid-music', mode: 'read' });
-      return handle.queryPermission({ mode: 'read' }) === 'granted'
-        ? handle
-        : handle.requestPermission({ mode: 'read' }).then(function(){ return handle; });
+      // No folder kept yet, or a folder kept from before this rule: ask.
+      if (!handle || !MUSIC_FOLDER.test(handle.name || '')) return askForFolder();
+      // A kept handle can outlive its permission, so it is asked for rather than
+      // assumed - and if the phone will not give it back, the chooser opens.
+      return handle.queryPermission({ mode: 'read' }).then(function(state){
+        if (state === 'granted') return handle;
+        return handle.requestPermission({ mode: 'read' }).then(function(gave){
+          return gave === 'granted' ? handle : askForFolder();
+        });
+      });
     });
   }
 
+  // What the folder half of the scan gives back: how many songs were added, how
+  // many were already here, which folder was read, and the one line to say if
+  // nothing could be read at all.
+  function noFolder(note){ return { added: 0, already: 0, folder: '', note: note }; }
+
   function scanPhoneFolder(){
-    // -1: this browser cannot look through a folder at all (Safari, Firefox).
-    // -2: the folder was not chosen this time. Neither is an error.
-    if (typeof window.showDirectoryPicker !== 'function') return Promise.resolve(-1);
-    return pickStoredDir().then(function(handle){
-      if (!handle) return -2;
-      dbPut('info', { key: DIR_KEY, handle: handle }).catch(function(){});
-      return readDirFiles(handle, 0).then(function(files){
-        if (!files.length) return 0;
-        var before = songs.length;
-        addFiles(files);
-        return songs.length - before;
-      });
-    }).catch(function(){ return -2; });
+    // A computer: the directory picker, which can be asked for once and then
+    // remembered, and which starts in Music.
+    if (typeof window.showDirectoryPicker === 'function') {
+      return pickStoredDir().then(function(handle){
+        if (!handle) return noFolder(NOTHING_CHOSEN);
+        var name = String(handle.name || '');
+        if (!MUSIC_FOLDER.test(name)) return noFolder(WRONG_FOLDER);
+        dbPut('info', { key: DIR_KEY, handle: handle }).catch(function(){});
+        return readDirFiles(handle, 0).then(function(files){
+          var got = addFiles(files);
+          return { added: got.added, already: got.already, folder: name,
+                   note: got.added ? '' : 'Nothing new in your ' + name + ' folder.' };
+        });
+      }).catch(function(){ return noFolder(NOTHING_CHOSEN); });
+    }
+    // A phone: the folder chooser on a file input, which is the only way this
+    // page can be shown a folder there at all.
+    var input = $('folderInput');
+    if (!input || !('webkitdirectory' in input)) return Promise.resolve(noFolder(NO_FOLDER));
+    return pickFolderInput(input);
+  }
+
+  // The folder chooser on the file input. A chosen folder arrives as its whole
+  // contents at once, each file carrying its path, so the folder that was picked
+  // can be named and checked before a single song is added.
+  function pickFolderInput(input){
+    return new Promise(function(resolve){
+      var done = false;
+      function finish(out){
+        if (done) return;
+        done = true;
+        input.removeEventListener('change', onChange);
+        input.removeEventListener('cancel', onCancel);
+        if (window.removeEventListener) window.removeEventListener('focus', onFocus);
+        resolve(out);
+      }
+      function onChange(){
+        var files = Array.prototype.slice.call(input.files || []);
+        input.value = '';
+        if (!files.length) { finish(noFolder(NOTHING_CHOSEN)); return; }
+        var name = folderNameOf(files);
+        if (name && !MUSIC_FOLDER.test(name)) { finish(noFolder(WRONG_FOLDER)); return; }
+        var got = addFiles(files);
+        finish({ added: got.added, already: got.already, folder: name,
+                 unnamed: !name,
+                 note: got.added ? '' : 'Nothing new in that folder — it is all here already.' });
+      }
+      function onCancel(){ finish(noFolder(NOTHING_CHOSEN)); }
+      // Back at the page with no answer is a chooser that was shut. Not every
+      // browser fires the event above, so this is the net under it.
+      function onFocus(){
+        setTimeout(function(){
+          if (!input.files || !input.files.length) finish(noFolder(NOTHING_CHOSEN));
+        }, 900);
+      }
+      input.addEventListener('change', onChange);
+      input.addEventListener('cancel', onCancel);
+      if (window.addEventListener) window.addEventListener('focus', onFocus);
+      input.click();
+    });
   }
 
   $('scanBtn').addEventListener('click', function(){
@@ -2792,13 +2970,21 @@
     scanPhoneFolder().then(function(phone){
       return scanRoomMusic().then(function(room){
         var parts = [];
-        if (phone > 0) parts.push(phone + (phone === 1 ? ' new song' : ' new songs') + ' from your folder');
+        if (phone.added > 0) {
+          parts.push(phone.added + (phone.added === 1 ? ' new song' : ' new songs') +
+            (phone.folder ? ' from your ' + phone.folder + ' folder' : ' from your folder'));
+        } else if (phone.already > 0) {
+          parts.push(phone.already + (phone.already === 1 ? ' song was' : ' songs were') + ' already here');
+        }
         if (room > 0) parts.push(room + (room === 1 ? ' new track' : ' new tracks') + ' for the room');
-        var msg;
-        if (parts.length) msg = 'Found ' + parts.join(' and ') + '.';
-        else if (phone === -1) msg = 'Nothing new in the room\u2019s music. This browser cannot look through a folder on the phone — use “Tap to choose songs” instead.';
-        else msg = 'Nothing new — everything is already here.';
+        var msg = parts.length ? 'Found ' + parts.join(' and ') + '.'
+          : (phone.note || 'Nothing new — everything is already here.');
         say($('playerStatus'), msg);
+        // The line under the button is where the two-folder rule is explained,
+        // so a scan that could not check a folder says so there - the one-line
+        // status above it stays one line.
+        var note = $('scanNote');
+        if (note) note.textContent = phone.unnamed ? UNNAMED_FOLDER : SCAN_NOTE;
         btn.disabled = false;
       });
     }).catch(function(){

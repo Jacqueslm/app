@@ -82,6 +82,13 @@ TurnSomeDayIntoOneday/server/studio/model-cache/
 TurnSomeDayIntoOneday/server/studio/.env
 TurnSomeDayIntoOneday/server/studio/update-state.json
 
+# The workspace's own environment files, at the repo root. Real API keys and
+# passwords live in these, the same as studio/.env above - and unlike that one
+# they were never listed, so git offered to commit them with every change.
+# .env.local wins over .env and has the same job, so it is ignored too.
+.env
+.env.local
+
 # the three.js source package the Mixamo workshop imports — fetched with npm pack, not kept in git
 TurnSomeDayIntoOneday/tools/mixamo/three/
 

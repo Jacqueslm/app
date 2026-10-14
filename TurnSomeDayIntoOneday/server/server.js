@@ -12,6 +12,7 @@ const push = require('./push');
 const backup = require('./backup');
 const aiChatBody = require('./ai-chat-body');
 const musicList = require('./music-list');
+const catalogRoutes = require('./catalog-routes');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -137,6 +138,23 @@ function requireAuth(req, res, next) {
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 
+// Catalog lookups return public metadata only. Keep these same-origin and behind
+// the Music page's own signed-in/allowlist gate, with a modest per-IP limit.
+const catalogLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many catalog searches. Wait a little and try again.' },
+});
+catalogRoutes.mount(app, {
+  limiter: catalogLimiter,
+  authorize(req, res, next) {
+    if (!isValidSession(req) || !isFriendlyRequest(req)) {
+      return res.status(401).json({ error: 'Not signed in.' });
+    }
+    next();
+  },
+  tmdbToken: process.env.TMDB_READ_ACCESS_TOKEN,
+});
+
 // A letter link is the SECOND way an account gets made in this app —
 // /api/auth/signup is the other one — so it needs the same door, checked the same
 // way: before the account exists, and before anything is written for it. Without
@@ -239,10 +257,14 @@ app.get('/', (req, res) => {
   res.redirect('/app');
 });
 
-// The app is three things now (4 Oct 2026). Jacques: "i dont want the app
+// The app is what the shell holds (4 Oct 2026). Jacques: "i dont want the app
 // nomore just parts i added the zodiac the fight and the herbs", then "strip it
 // nomore recovery app". So /app serves hub.html - a small shell holding the
-// Zodiacs, the Fight and the Herbs - and no longer the recovery app.
+// Zodiacs, the Herbs, the Player and, since 11 Oct 2026, the Trainer again -
+// and no longer the recovery app. One of the doors it once held is gone for
+// good: The Fight went on 10 Oct 2026, "delete the fight from everywhere". The
+// Trainer went the same day, "Ddelete the trainer", and came back the next as a
+// smaller page of its own (see the /trainer routes below).
 //
 // The recovery app itself is gone, file and all: its page, its server routes for
 // that page, and the eighteen test files that read it were deleted in the pass
@@ -279,7 +301,7 @@ app.get('/key.html', (req, res) => res.status(404).end());
 // Gating only the clean URL /herbs would lock the front door and leave the side
 // one open: express.static below serves herbs.html at its own .html address, so
 // anybody who typed the file name would walk straight past the check. It is the
-// same hole /game3d.html fell through in September, from the other direction.
+// same hole a private page fell through in September, from the other direction.
 // Anything private that is also a real file has to be named twice here.
 //
 // Above express.static: a route registered after it is never reached, and the
@@ -289,44 +311,6 @@ app.get('/key.html', (req, res) => res.status(404).end());
 // the door has to be readable in the file. A test asserts signed-in,
 // on-the-list and redirect-to-/app inside every one of them, and it cannot read
 // a rule that lives in a shared helper.
-// The Fight - the last of the three, added to this same door on 4 Oct 2026.
-// Same shape as /key and /herbs, and registered for the same reason BOTH
-// addresses matter: game3d.html is a real file that express.static below would
-// hand out by name to anybody who typed it, exactly as /herbs.html would have
-// been. The page was open in September precisely because a file was not named
-// twice, which is the mistake this pair exists not to repeat.
-//
-// The route itself is new the same day: the fight became a page of its own
-// instead of a tab inside the recovery app, so its markup, its CSS and its 669
-// lines of JavaScript moved out of that app and into fight.html. The page frames
-// /game3d.html for the roof. The two are separate on purpose - the ring is a
-// self-contained 3D engine, and the game around it has no business loading
-// three.js to draw a menu.
-app.get('/fight', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'fight.html'));
-});
-app.get('/fight.html', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'fight.html'));
-});
-// THE THIRD ADDRESS, and the one that matters most. game3d.html was served
-// straight off disk by express.static below, because it sat on the gate's open
-// list only so the recovery app could load it in an iframe - so the full URL
-// handed the fight to anybody who typed it, signed in or not.
-//
-// That was survivable while the fight was one tab inside a gated app. It is not
-// survivable now that the fight IS the app: leaving this route out would mean
-// gating /fight while /game3d.html stayed open, which is a lock with the window
-// still up. It has to be registered above express.static or static answers
-// first, exactly as the herbs note above describes.
-app.get('/game3d.html', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'game3d.html'));
-});
 app.get('/herbs', (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
@@ -349,8 +333,8 @@ app.get('/tax.html', (req, res) => {
 });
 
 // The Music — the player, the ringtone maker and the cover maker, added to the
-// app on 5 Oct 2026. Private, and the same door as The Key, the herbs and the
-// fight: signed in AND on the list, or you go to /app without learning the page
+// app on 5 Oct 2026. Private, and the same door as The Key and the herbs:
+// signed in AND on the list, or you go to /app without learning the page
 // is there. A redirect rather than requireAuth, which answers 401 JSON — right
 // for an API call, wrong for somebody opening a page.
 //
@@ -367,6 +351,47 @@ app.get('/music.html', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'music.html'));
+});
+
+// The Trainer - back on the app on 11 Oct 2026. Jacques: "then create the
+// trainer we will be slowly so start off with just basic input information
+// that's it." It had a pair of routes here from 9 Oct 2026 and they went the
+// next day with the page; these are that pair again, behind a smaller page.
+//
+// Same door as The Music above, for the same reason: trainer.html is a real
+// file, so express.static below would hand it out by name if only the clean URL
+// were gated. Signed in AND on the list, or you go to /app without learning the
+// page is there.
+app.get('/trainer', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trainer.html'));
+});
+app.get('/trainer.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'trainer.html'));
+});
+
+// The Certification - added 12 Oct 2026. Jacques: two ninety-day trainings, a
+// quiz after every lesson, a test after day thirty and after day sixty, and an
+// ultimate examination that writes a certificate for each track. The two tracks
+// are the herbalist and the trainer, and the trainer's practical spine is the
+// by-10 programme from the Trainer app.
+//
+// Same door as The Trainer above, for the same reason: certify.html is a real
+// file, so express.static below would hand it out by name if only the clean URL
+// were gated. Signed in AND on the list, or you go to /app without learning the
+// page is there.
+app.get('/certify', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'certify.html'));
+});
+app.get('/certify.html', pageLimiter, (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!isFriendlyRequest(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'certify.html'));
 });
 
 // The Music's scanner (7 Oct 2026). The page cannot list a directory over the
@@ -554,6 +579,17 @@ const forgotLimiter = rateLimit({
 app.post('/api/auth/forgot', forgotLimiter, async (req, res) => {
   const { email: rawEmail } = req.body || {};
   const normalizedEmail = (rawEmail || '').trim().toLowerCase();
+  // With no way to send mail there is no link for ANY account, so the usual
+  // "check your inbox" would be a flat lie to everybody who asks. Saying so
+  // reveals nothing about who has an account (it is true for everyone), and it
+  // names the one thing that fixes it. 13 Oct 2026: this is what the option on
+  // the sign-in screen reads when RESEND_API_KEY is unset.
+  if (!emailer.isConfigured()) {
+    return res.status(503).json({
+      error: 'Password reset by email is not set up on this server yet, '
+        + 'so no link can be sent. Set RESEND_API_KEY and try again.',
+    });
+  }
   // Identical response whether or not the account exists - this endpoint must
   // never confirm who has an account with a recovery app.
   const reply = { ok: true, message: 'If that email has an account, a reset link is on its way.' };

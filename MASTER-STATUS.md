@@ -1,8 +1,16 @@
 # MASTER STATUS — every request, one place
 
-> **4 Oct 2026 — the Day One app is three pages now, and half of this log is
-> about the app it used to be.** `/app` serves `hub.html` (the Zodiacs, the Fight,
-> the Herbs). **The recovery app is deleted** — the one big page that held it,
+> **4 Oct 2026 — the Day One app is a shell of pages now, and half of this log is
+> about the app it used to be.** `/app` serves `hub.html`, four doors: the
+> Zodiacs, the Herbs, the Player and the Trainer. **The Trainer came back on
+> 11 Oct 2026** — "create the trainer we will be slowly so start off with just
+> basic input information that's it": its door, page, routes, gate and
+> service-worker lines and its tests all returned that day, so the entries below
+> about `trainer.html` describe the larger page that was deleted on 10 Oct, not
+> the intake page on the app now. **The Fight of Your Life was deleted on
+> 10 Oct 2026** — "delete the fight from everywhere": its page, the 3D ring, its
+> art and sound, its routes and its tests all went that day. **The recovery app is
+> deleted** — the one big page that held it,
 > its server routes and the eighteen test files that read it — so every entry
 > below that describes editing the app's page is a dated record of work done
 > while it existed (it is in git before that date), and the live rules further
@@ -1125,7 +1133,7 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 
 ## 🛣 LANE SPLIT (two AI sessions, agreed Aug 16 2026)
 
-- **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (its one big page, since deleted), `server/`, `data/`, and the app's files. This was MY lane; the three pages that replaced it are `hub.html`, `fight.html`, `key.html`, `herbs.html` and `tax.html`.
+- **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (its one big page, since deleted), `server/`, `data/`, and the app's files. This was MY lane; the pages that replaced it are `hub.html`, `key.html`, `herbs.html`, `tax.html` and `music.html`. The fight and the trainer were two of them until 10 Oct 2026, when both were deleted outright.
 - **Studio AI (the other session):** `Studio/`, `reference/`, and `START-HERE.md`. That is THEIR lane.
 - Neither touches the other's lane unless Jacques says otherwise. The other session touched the app's page once (7 string swaps + 2 hints in the "Other" copy, commit `6f56112`) — already merged cleanly into my push `c20f262`. No collision. Do NOT re-edit each other's work.
 
@@ -1299,8 +1307,12 @@ commit dies with the container; that is how the 18 Aug marketing batch was lost.
   No video work goes in: not the .mp4, not the source, not the stills.
 - **Music and audio still go in**, exactly as before: `content/score/`,
   `TurnSomeDayIntoOneday/audio/`, anything else uploaded here.
-- **`tools/render-film.js`, `tools/prep-still.py` and `tools/make-film.py` stay**
-  — they are tooling, not video work, and every future piece needs them.
+- **The film tools stayed until 10 Oct 2026, and then went.** Jacques: "delete
+  those too." `tools/render-film.js`, `tools/prep-still.py`, `tools/make-film.py`,
+  `tools/make-talk.py` and `tools/setup-video-tools.sh` were deleted that day, so
+  nothing in this repo makes a video any more and any command below that calls
+  one of them cannot be run. Every finished piece still exists on his own drive
+  and on the feeds — it is only the machinery here that is gone.
 - **Sources are handed over in chat**, the same way finished .mp4s are. Jacques
   keeps them in his own file alongside the videos they build.
 
@@ -1789,7 +1801,7 @@ markdown file to find a caption is the thing this rule exists to stop.
 **No more flat Ken Burns.** Every new piece uses three things, all free, all
 local, all proven in this container:
 
-1. **Parallax.** `python3 tools/prep-still.py <still.jpg>` writes
+1. **Parallax.** `prep-still.py` (deleted 10 Oct 2026) wrote
    `<name>-up.jpg` (upscaled plate) and `<name>-cut.png` (subject on
    transparency). The source moves those two layers at *different speeds*. That
    difference is the depth - the picture stops sliding around as one sheet.

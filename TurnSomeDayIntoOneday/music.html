@@ -40,9 +40,9 @@
   h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter-spacing:.01em}
   .sub{margin:6px 0 0; color:var(--dim); font-size:.8125rem; line-height:1.5}
 
-  .tabs{display:flex; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:5px; margin-bottom:20px}
+  .tabs{display:flex; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:5px; margin-bottom:20px; overflow-x:auto}
   .tab{
-    flex:1; text-align:center; padding:9px 6px; border-radius:999px; cursor:pointer;
+    flex:1 0 auto; text-align:center; padding:9px 10px; border-radius:999px; cursor:pointer;
     background:none; border:0; color:var(--dim); font:inherit; font-size:.8125rem;
     -webkit-tap-highlight-color:transparent; transition:background .16s ease,color .16s ease;
   }
@@ -136,6 +136,40 @@
   .status.err{color:var(--rose)}
   canvas.preview{width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:#000; display:block}
   .chips{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 13px}
+
+  /* The manual, behind a drop-down since 14 Oct 2026. Jacques: "put the manual
+     on a drop down menu". It was an open card sitting between the player and the
+     songs, so the list of songs started below the fold on a phone. The same
+     words are one tap away now, and it is a <details> rather than a script, so
+     it opens with no JavaScript at all and there is no state to keep. */
+  details.fold{padding:0}
+  details.fold > summary{
+    list-style:none; cursor:pointer; padding:16px 18px;
+    display:flex; align-items:baseline; gap:10px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  details.fold > summary::-webkit-details-marker{display:none}
+  details.fold > summary::after{content:"▾"; margin-left:auto; color:var(--gold); font-size:.6875rem}
+  details.fold[open] > summary::after{content:"▴"}
+  details.fold > summary .kicker{margin:0}
+  details.fold > summary .foldTitle{font-family:var(--serif); font-size:1.0625rem; color:var(--ink)}
+  details.fold > summary:hover .foldTitle{color:var(--gold)}
+  details.fold > *:not(summary){margin-left:18px; margin-right:18px}
+  details.fold > *:last-child{margin-bottom:18px}
+
+  /* The numbered manual on the player. A real numbered list in the markup, so
+     the count is the browser's job rather than something typed by hand. */
+  ol.steps{counter-reset:s; list-style:none; margin:0; padding:0; display:grid; gap:10px}
+  ol.steps li{position:relative; padding-left:31px; color:var(--dim); font-size:.8125rem; line-height:1.55}
+  ol.steps li b{color:var(--ink); font-weight:500}
+  /* The player is the page's own card, so it is marked as one. */
+  #nowCard{border-color:rgba(232,192,122,.28)}
+  ol.steps li::before{
+    counter-increment:s; content:counter(s);
+    position:absolute; left:0; top:0; width:21px; height:21px; border-radius:50%;
+    background:var(--card2); border:1px solid var(--line); color:var(--gold);
+    font-size:.6875rem; display:flex; align-items:center; justify-content:center;
+  }
   .chip{
     padding:7px 12px; border-radius:999px; border:1px solid var(--line); background:transparent;
     color:var(--dim); font:inherit; font-size:.75rem; cursor:pointer;
@@ -144,6 +178,452 @@
   .chip:hover{color:var(--ink)}
   .chip[aria-pressed="true"]{background:var(--card2); color:var(--ink); border-color:rgba(232,192,122,.45)}
   .chip.list-target{border-color:rgba(232,192,122,.5); color:var(--ink)}
+  .wrap:has(#panel-discover:not([hidden])){max-width:1120px}
+  #panel-discover .card{padding:clamp(18px,4vw,38px); border-color:rgba(255,255,255,.12); background:linear-gradient(145deg,rgba(22,25,34,.98),rgba(11,12,18,.98))}
+  .catalog-hero{position:relative; overflow:hidden; padding:clamp(25px,6vw,58px); margin:-2px -2px 24px; min-height:260px; display:flex; align-items:flex-end; border-radius:18px; background:radial-gradient(ellipse at 75% 28%,rgba(159,107,67,.38),transparent 38%),linear-gradient(115deg,#131821 0%,#25221f 52%,#10151d 100%); border:1px solid rgba(255,255,255,.09)}
+  .catalog-hero:after{content:""; position:absolute; width:300px; height:300px; border-radius:50%; right:8%; top:-58%; border:1px solid rgba(232,192,122,.18); box-shadow:0 0 0 28px rgba(232,192,122,.025),0 0 0 58px rgba(232,192,122,.025),0 0 75px rgba(232,192,122,.12)}
+  .catalog-hero-copy{position:relative; z-index:1; max-width:650px}
+  .catalog-hero .kicker{color:#e8c07a}
+  .catalog-hero h2{font-size:clamp(2rem,5vw,3.55rem); line-height:1.03; max-width:620px; letter-spacing:-.035em}
+  .catalog-hero p:last-child{max-width:510px; margin:12px 0 0; color:#c6c1c3; line-height:1.65; font-size:.94rem}
+  .catalog-tools{display:grid; grid-template-columns:minmax(155px,.7fr) minmax(220px,2fr) auto; gap:10px; align-items:end}
+  .catalog-tools label.f{margin-bottom:8px}
+  .catalog-tools input,.catalog-tools select{margin:0; height:47px}
+  .catalog-tools .btn{height:47px; min-width:160px}
+  .discover-toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:24px 0 9px}
+  .discover-toolbar h3{margin:0; font-family:var(--serif); font-size:1.15rem; font-weight:500}
+  .discover-results{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:15px; margin-top:14px}
+  .discover-result{min-width:0; overflow:hidden; border-radius:13px; border:1px solid var(--line2); background:#11131a; transition:transform .18s ease,border-color .18s ease}
+  .discover-result:hover{transform:translateY(-3px); border-color:rgba(232,192,122,.4)}
+  .discover-poster{display:block; width:100%; aspect-ratio:2/3; object-fit:cover; background:linear-gradient(150deg,#34343c,#14161e 58%,#332b24)}
+  .discover-poster-placeholder{display:flex; align-items:center; justify-content:center; color:rgba(232,192,122,.7); font-size:2.4rem; aspect-ratio:2/3; background:radial-gradient(ellipse at 50% 30%,#51483f,#20222a 57%,#12141a)}
+  .discover-result .result-copy{padding:12px; min-width:0}
+  .discover-result h3{margin:0; font-size:.94rem; font-weight:550; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .discover-result p{margin:5px 0 0; color:var(--dim); font-size:.74rem; line-height:1.48; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .discover-links{display:flex; gap:7px; flex-wrap:wrap; margin-top:11px}
+  .discover-link{display:inline-flex; align-items:center; justify-content:center; padding:7px 9px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--gold); font:inherit; font-size:.72rem; text-decoration:none; cursor:pointer}
+  .discover-link:hover{border-color:rgba(232,192,122,.45)}
+  .discover-link[disabled]{opacity:.6; cursor:default}
+  .discover-link.saved{border-color:rgba(95,217,196,.35); color:var(--teal)}
+  .discover-provider-options{flex-basis:100%; padding:10px 0 0; color:var(--dim); font-size:.75rem; line-height:1.5}
+  .discover-provider-options p{margin:0 0 6px}
+  .discover-provider-options .provider-heading{color:var(--ink); font-weight:500}
+  @media(max-width:650px){.catalog-tools{grid-template-columns:1fr}.catalog-tools .btn{width:100%}.discover-results{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.catalog-hero{min-height:225px}.discover-links .discover-link{font-size:.68rem}}
+  @media(max-width:390px){.discover-results{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){.discover-result{transition:none}}
+  .discover-empty{padding:26px 14px; text-align:center; color:var(--dim); border:1px dashed var(--line); border-radius:12px; grid-column:1/-1}
+  .discover-provider-options{flex-basis:100%; padding:10px 0 0; color:var(--dim); font-size:.75rem; line-height:1.5}
+  .discover-provider-options p{margin:0 0 6px}
+  .discover-provider-options .provider-heading{color:var(--ink); font-weight:500}
+  .discover-saved{color:var(--teal)!important}
+  #panel-discover .note a{color:var(--gold)}
+  #panel-discover .catalogSearch-note{margin:12px 0 0}
+  .discover-result .discover-link{min-height:32px}
+  .discover-result .result-copy .discover-provider-options{padding-top:12px}
+  .catalog-hero .kicker{letter-spacing:.18em}
+  .discover-toolbar .chip[aria-pressed="true"]{border-color:rgba(95,217,196,.45);color:var(--teal)}
+  @media(max-width:650px){.discover-toolbar{align-items:flex-start;flex-direction:column}}
+  @media(min-width:651px){#panel-discover .catalog-tools{margin-bottom:14px}}
+  @media(max-width:650px){#panel-discover .catalog-tools{margin-bottom:14px}}
+  .discover-result .discover-poster{border-bottom:1px solid var(--line2)}
+  .catalog-tools select{cursor:pointer}
+  .catalog-hero .kicker{margin-bottom:12px}
+  .discover-toolbar .row{gap:7px}
+  .discover-toolbar .chip{white-space:nowrap}
+  @media(max-width:430px){.discover-toolbar .row{width:100%}.discover-toolbar .chip{flex:1;padding-inline:8px}}
+  .discover-results[aria-busy="true"]{opacity:.58}
+  .discover-link:focus-visible,.catalog-hero button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  .discover-result .result-copy .discover-meta{min-height:1.2em}
+  .catalog-results-label{color:var(--dim);font-size:.75rem}
+  @media(min-width:900px){.discover-results{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
+  .discover-result .discover-copy{display:flex;flex-direction:column;height:100%}
+  .discover-result .discover-actions{margin-top:auto}
+  .discover-result .discover-description{min-height:3.1em}
+  .discover-result .discover-title{letter-spacing:.005em}
+  .discover-result .discover-meta{color:#9d9aa6}
+  .discover-result .discover-save{color:#c9c1af}
+  .discover-result .discover-save:hover{color:var(--teal)}
+  .discover-result .discover-save.saved{color:var(--teal);border-color:rgba(95,217,196,.4)}
+  .catalog-status-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  @media(max-width:480px){.catalog-status-row{align-items:flex-start;flex-direction:column}}
+  .discover-results .discover-empty{font-size:.85rem;line-height:1.6}
+  .discover-result .discover-provider-options a{margin-top:6px}
+  .catalog-hero .catalog-hero-copy{animation:catalog-arrive .55s ease-out both}
+  @keyframes catalog-arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @media(prefers-reduced-motion:reduce){.catalog-hero .catalog-hero-copy{animation:none}}
+  .discover-result .discover-description{color:#aaa6b0}
+  .catalog-hero h2{font-weight:500}
+  .catalog-hero p:last-child{font-size:.9rem}
+  .discover-result .discover-actions{display:flex; flex-wrap:wrap; gap:7px}
+  .discover-result .discover-links{gap:7px}
+  .discover-result .discover-links .discover-link{flex:1}
+  .discover-result .discover-provider-options .discover-link{flex:0 0 auto}
+  .discover-result .discover-provider-options{border-top:1px solid var(--line2);margin-top:10px}
+  .discover-result .discover-provider-options .provider-heading{margin-bottom:8px}
+  .discover-result .discover-provider-options p:not(.provider-heading){display:block;-webkit-line-clamp:unset}
+  .discover-result .result-copy h3{line-height:1.3}
+  .discover-result .discover-poster-placeholder{height:auto}
+  .discover-result .discover-year{color:#d4b783}
+  .discover-toolbar .chip{font-size:.72rem}
+  .catalog-tools .btn{white-space:nowrap}
+  #panel-discover .kicker{font-size:.65rem}
+  .discover-results .discover-result{box-shadow:0 12px 28px rgba(0,0,0,.13)}
+  .discover-result .discover-poster{color:transparent}
+  .discover-result .discover-link[aria-pressed="true"]{color:var(--teal);border-color:rgba(95,217,196,.4)}
+  @media(min-width:651px){#panel-discover .catalogSearch-note{margin-top:11px}}
+  @media(max-width:650px){#panel-discover .catalogSearch-note{font-size:.72rem}}
+  .discover-result .discover-links .discover-link{min-width:0}
+  .discover-toolbar .chip{background:rgba(255,255,255,.025)}
+  .discover-toolbar .chip[aria-pressed="true"]{background:rgba(95,217,196,.08)}
+  .discover-result .discover-save[aria-pressed="true"]{border-color:rgba(95,217,196,.4);color:var(--teal)}
+  .discover-result .discover-save[aria-pressed="false"]{color:var(--dim)}
+  .discover-result .discover-save[aria-pressed="false"]:hover{color:var(--teal)}
+  #panel-discover .discover-results{scroll-margin-top:20px}
+  .discover-result .result-copy .discover-description{margin-top:7px}
+  .discover-result .discover-provider-options .provider-heading{font-size:.78rem}
+  .catalog-hero .catalog-hero-copy{max-width:680px}
+  .catalog-tools .catalog-search-term{min-width:0}
+  .discover-result .discover-actions .discover-link{flex:1 1 auto}
+  @media(max-width:650px){#panel-discover .card{padding:14px}}
+  .discover-result .discover-poster-placeholder span{font-family:var(--serif)}
+  .discover-result .discover-poster{background-color:#18191f}
+  .catalog-hero{isolation:isolate}
+  .discover-toolbar .row{flex-wrap:wrap}
+  @media(max-width:420px){.catalog-hero{padding:22px}}
+  .discover-results .discover-result{align-self:start}
+  .discover-result .discover-links{width:100%}
+  .discover-result .discover-copy{padding:12px}
+  .discover-result .discover-copy h3{font-size:.94rem}
+  .discover-result .discover-copy p{margin-top:5px}
+  .discover-result .discover-save{background:rgba(255,255,255,.02)}
+  .discover-result .discover-provider-options{width:100%}
+  @media(max-width:650px){.discover-result .discover-poster{aspect-ratio:2/3}}
+  #panel-discover .catalogType{font-size:.9rem}
+  .catalog-hero h2{max-width:590px}
+  .catalog-hero .catalog-hero-copy{width:100%}
+  @media(max-width:650px){.discover-result .discover-link{padding:7px 8px}}
+  .discover-result .discover-source{font-size:.68rem;color:var(--dimmer)}
+  .discover-result .discover-meta{margin-top:5px}
+  .discover-results .discover-poster-placeholder{min-height:150px}
+  .discover-results .discover-result img{display:block}
+  .discover-results .discover-result h3{overflow-wrap:anywhere}
+  .discover-results .discover-result a:focus-visible,.discover-results button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .catalog-hero .catalog-hero-copy{position:relative}
+  .discover-results .discover-result .discover-links{margin-top:12px}
+  .discover-results .discover-result .discover-description{line-height:1.55}
+  #catalogStatus{min-height:1.3em}
+  .discover-results .discover-poster-placeholder span{font-size:2.5rem}
+  .discover-results .discover-result .discover-provider-options p{line-height:1.5}
+  @media(min-width:651px){.discover-results{gap:16px}}
+  .discover-results .discover-result{contain:layout style}
+  .discover-toolbar .chip{transition:color .16s ease,border-color .16s ease,background .16s ease}
+  .discover-result .discover-link{transition:border-color .16s ease,color .16s ease}
+  .catalog-hero:after{pointer-events:none}
+  .discover-results .discover-result .discover-year{font-variant-numeric:tabular-nums}
+  .catalog-tools input:focus,.catalog-tools select:focus{box-shadow:0 0 0 3px rgba(232,192,122,.08)}
+  .discover-results .discover-result .discover-poster{object-position:center 25%}
+  .discover-results .discover-result .discover-save{font-weight:500}
+  .discover-results .discover-result .discover-description{margin-bottom:0}
+  .discover-results .discover-result .discover-source{margin-top:7px}
+  .discover-results .discover-empty{margin:0}
+  .discover-toolbar .chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  #panel-discover .discover-toolbar h3{color:var(--ink)}
+  .discover-results .discover-result .discover-links button{font-family:var(--sans)}
+  .catalog-hero h2{color:#f3eee7}
+  .catalog-hero .catalog-hero-copy{z-index:2}
+  #panel-discover .catalog-results-label{margin:0}
+  .discover-results .discover-result .discover-description{color:#b2adb7}
+  .discover-results .discover-result .discover-save.saved{color:var(--teal)}
+  .discover-results .discover-result .discover-save:not(.saved):hover{border-color:rgba(95,217,196,.35)}
+  .discover-results .discover-result .discover-provider-options a{white-space:normal}
+  .discover-results .discover-result .discover-actions{margin-top:10px}
+  .catalog-tools .catalog-search-term{margin-bottom:0}
+  @media(max-width:650px){#panel-discover .discover-toolbar{margin-top:20px}}
+  .discover-results .discover-result .discover-copy{gap:0}
+  .discover-results .discover-result .discover-links{align-items:center}
+  .discover-results .discover-result .discover-link{line-height:1.2}
+  .catalog-hero .catalog-hero-copy .hint{color:#c6c1c3}
+  .discover-results .discover-result .discover-provider-options .provider-heading{color:#f1ede5}
+  .discover-results .discover-result .discover-poster-placeholder{color:#e8c07a}
+  .discover-results .discover-result .discover-meta{font-size:.7rem}
+  .discover-results .discover-result .discover-links{display:flex}
+  .catalog-tools .btn{font-weight:600}
+  #panel-discover .catalog-hero{margin-bottom:26px}
+  .discover-results .discover-result .discover-save{cursor:pointer}
+  .discover-results .discover-result .discover-save:hover{color:var(--teal)}
+  .discover-results .discover-result .discover-poster{object-fit:cover}
+  .discover-results .discover-result .discover-poster-placeholder{border-bottom:1px solid var(--line2)}
+  .discover-results .discover-result .discover-title{font-weight:550}
+  .discover-results .discover-result .discover-description{font-size:.74rem}
+  .discover-results .discover-result .discover-links .discover-link{min-height:34px}
+  .discover-results .discover-result .discover-provider-options{box-sizing:border-box}
+  .catalog-hero .catalog-hero-copy .kicker{margin-top:0}
+  #panel-discover .catalog-tools .f{display:block}
+  .discover-toolbar .row{margin:0}
+  .discover-results .discover-result .discover-source{letter-spacing:.03em}
+  .discover-results .discover-result .discover-poster-placeholder span{opacity:.8}
+  .discover-results .discover-result .discover-description{-webkit-box-orient:vertical}
+  #panel-discover .discover-toolbar{padding-top:4px}
+  .discover-results .discover-result .discover-links .discover-link:hover{background:rgba(255,255,255,.03)}
+  #panel-discover .catalog-hero p:last-child{margin-top:13px}
+  .discover-results .discover-result .discover-poster{width:100%}
+  .catalog-hero .catalog-hero-copy .kicker{color:#e8c07a}
+  .discover-results .discover-result .discover-links{flex-wrap:wrap}
+  .discover-results .discover-result .discover-description{display:-webkit-box}
+  #panel-discover .catalog-tools{gap:10px}
+  .discover-results .discover-result .discover-actions .discover-link{flex:1 1 auto}
+  @media(max-width:650px){.discover-results .discover-result .discover-links{gap:6px}}
+  .catalog-hero .catalog-hero-copy .hint{max-width:520px}
+  .discover-results .discover-result .discover-meta{color:#b4a689}
+  .discover-results .discover-result .discover-source{color:#817c88}
+  .discover-results .discover-result .discover-copy h3{color:#f1ede5}
+  .discover-results .discover-result .discover-poster-placeholder span{transform:translateY(-2px)}
+  #panel-discover .catalog-tools .f{color:#9993a6}
+  .discover-results .discover-result .discover-links .discover-link{white-space:nowrap}
+  .discover-results .discover-result .discover-provider-options{background:linear-gradient(180deg,rgba(255,255,255,.025),transparent)}
+  @media(max-width:650px){.discover-results .discover-result .discover-links .discover-link{flex:1}}
+  .discover-results .discover-result .discover-provider-options .discover-link{flex:0 1 auto}
+  #panel-discover .catalog-hero:after{z-index:-1}
+  .discover-results .discover-result .discover-meta{line-height:1.35}
+  .discover-results .discover-result .discover-description{min-height:3.3em}
+  .discover-results .discover-result .discover-copy{min-height:190px}
+  .discover-results .discover-result .discover-links{margin-top:auto;padding-top:11px}
+  .discover-results .discover-result .discover-provider-options{clear:both}
+  .discover-results .discover-result .discover-save[aria-pressed="true"]{background:rgba(95,217,196,.07)}
+  #panel-discover .catalog-hero{border-radius:18px}
+  .discover-results .discover-result .discover-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .catalog-tools .catalog-search-term:focus{border-color:rgba(232,192,122,.65)}
+  .catalog-tools select:focus{border-color:rgba(232,192,122,.65)}
+  #panel-discover .catalog-hero .catalog-hero-copy{max-width:660px}
+  @media(max-width:650px){.discover-results .discover-result .discover-copy{min-height:210px}}
+  .discover-results .discover-result .discover-links .discover-link{border-radius:9px}
+  .discover-results .discover-result .discover-save{border-radius:9px}
+  .discover-results .discover-result .discover-provider-options .discover-link{border-radius:9px}
+  .catalog-results-label{font-size:.76rem}
+  .discover-results .discover-result .discover-description{overflow-wrap:anywhere}
+  .discover-results .discover-result .discover-meta{overflow-wrap:anywhere}
+  #panel-discover .catalog-hero{box-shadow:inset 0 -50px 90px rgba(0,0,0,.15)}
+  .discover-results .discover-result:hover .discover-poster{filter:saturate(1.05)}
+  .catalog-hero .catalog-hero-copy{animation:catalog-arrive .55s ease-out both}
+  @media(prefers-reduced-motion:reduce){.catalog-hero .catalog-hero-copy{animation:none}}
+  .discover-results .discover-result .discover-actions{display:flex;gap:7px}
+  .discover-results .discover-result .discover-actions .discover-link{flex:1}
+  .discover-results .discover-result .discover-actions .discover-save{flex:0 0 auto}
+  #panel-discover .discover-toolbar .chip[aria-pressed="true"]{color:var(--teal)}
+  .discover-results .discover-result .discover-provider-options{display:block}
+  .discover-results .discover-result .discover-provider-options .provider-heading{display:block}
+  .discover-results .discover-result .discover-source{display:block}
+  .discover-results .discover-result .discover-year{font-weight:600}
+  .discover-results .discover-result .discover-poster-placeholder{font-family:var(--serif)}
+  .catalog-results-label{letter-spacing:.02em}
+  @media(max-width:650px){.catalog-tools{gap:8px}}
+  .catalog-hero .catalog-hero-copy .hint{line-height:1.65}
+  .discover-results .discover-result .discover-copy .discover-links{align-self:stretch}
+  .discover-results .discover-result .discover-poster{border-radius:12px 12px 0 0}
+  .discover-results .discover-result .discover-poster-placeholder{border-radius:12px 12px 0 0}
+  #panel-discover .catalog-hero .kicker{font-weight:600}
+  .discover-results .discover-result .discover-save.saved{font-weight:600}
+  .discover-results .discover-result .discover-description{color:#a9a4af}
+  .discover-results .discover-result .discover-link{background-color:rgba(255,255,255,.015)}
+  .catalog-hero .catalog-hero-copy .hint{font-size:.91rem}
+  .discover-results .discover-result .discover-links .discover-link{overflow:hidden;text-overflow:ellipsis}
+  .discover-results .discover-result .discover-provider-options .discover-link{overflow:visible}
+  #panel-discover .catalogStatus{font-size:.82rem}
+  .discover-results .discover-result .discover-meta{font-variant-numeric:tabular-nums}
+  .catalog-hero .catalog-hero-copy .kicker{font-size:.68rem}
+  .discover-results .discover-result .discover-poster-placeholder span{display:block}
+  .discover-results .discover-result .discover-provider-options{color:#b7b2bc}
+  #panel-discover .discoverSearchInput{min-width:0}
+  .discover-results .discover-result .discover-source{font-weight:500}
+  .discover-results .discover-result .discover-poster{aspect-ratio:2/3}
+  #panel-discover .catalog-hero h2{margin-bottom:0}
+  .discover-results .discover-result .discover-copy{padding:12px}
+  .discover-results .discover-result .discover-links{padding-bottom:1px}
+  .discover-results .discover-result .discover-poster-placeholder{background-image:radial-gradient(ellipse at 50% 28%,#594d40,#25252d 55%,#11131a)}
+  #panel-discover .catalog-tools .btn{box-shadow:0 8px 22px rgba(232,192,122,.12)}
+  .discover-results .discover-result .discover-title{font-family:var(--sans)}
+  .discover-results .discover-result .discover-meta{color:#b6a988}
+  .discover-results .discover-result .discover-description{font-weight:400}
+  .discover-results .discover-result .discover-source{opacity:.85}
+  .discover-results .discover-result .discover-links .discover-link{font-weight:550}
+  .discover-results .discover-result .discover-save{letter-spacing:.01em}
+  .discover-results .discover-result .discover-provider-options{border-radius:0 0 10px 10px}
+  #panel-discover .catalog-tools label.f{font-size:.65rem}
+  .catalog-hero .catalog-hero-copy{max-width:680px}
+  .discover-results .discover-result .discover-meta{display:block}
+  @media(max-width:650px){#panel-discover .catalog-hero{margin-inline:0}}
+  .discover-results .discover-result .discover-links a{max-width:100%}
+  .discover-results .discover-result .discover-poster-placeholder span{color:rgba(232,192,122,.8)}
+  .discover-results .discover-result .discover-copy p{overflow-wrap:break-word}
+  .discover-results .discover-result .discover-link:active{transform:translateY(1px)}
+  #panel-discover .catalog-hero .hint{margin-bottom:0}
+  .discover-results .discover-result .discover-save{white-space:nowrap}
+  .discover-results .discover-result .discover-description{margin-top:8px}
+  .discover-results .discover-result .discover-provider-options p:last-of-type{margin-bottom:9px}
+  .discover-results .discover-result .discover-source{margin-bottom:0}
+  #panel-discover .catalog-hero .catalog-hero-copy{width:auto}
+  .discover-results .discover-result .discover-links .discover-link{min-height:35px}
+  .discover-results .discover-result .discover-poster-placeholder{display:flex}
+  .discover-results .discover-result .discover-poster-placeholder span{align-self:center}
+  .discover-results .discover-result .discover-title{line-height:1.35}
+  .catalog-tools .catalog-search-term{width:100%}
+  .discover-results .discover-result .discover-links button{appearance:none}
+  .discover-results .discover-result .discover-links a{appearance:none}
+  .catalog-hero .catalog-hero-copy .hint{color:#c7c2c9}
+  .discover-results .discover-result .discover-link{color:#e8c07a}
+  .discover-results .discover-result .discover-save.saved{color:#5fd9c4}
+  .discover-results .discover-result .discover-provider-options .discover-link{color:#e8c07a}
+  .discover-results .discover-result .discover-provider-options p{display:block}
+  .catalog-hero .catalog-hero-copy .kicker{margin-bottom:10px}
+  .discover-results .discover-result .discover-copy .discover-description{min-height:3.2em}
+  .discover-results .discover-result .discover-links{flex-direction:row}
+  .discover-results .discover-result .discover-links .discover-link{flex:1 1 44%}
+  .discover-results .discover-result .discover-provider-options .discover-link{flex:0 0 auto}
+  .discover-results .discover-result .discover-provider-options{padding:10px 12px 12px}
+  .discover-results .discover-result .discover-provider-options p{margin-top:0}
+  .discover-results .discover-result .discover-provider-options .provider-heading{margin-top:2px}
+  #panel-discover .catalog-hero{background-color:#171921}
+  .discover-results .discover-result img{max-height:340px}
+  .discover-results .discover-result .discover-meta{min-height:1.3em}
+  .discover-results .discover-result .discover-source{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .discover-results .discover-result .discover-links{align-content:flex-start}
+  .discover-results .discover-result .discover-description{-webkit-line-clamp:4}
+  .discover-results .discover-result .discover-copy{overflow:hidden}
+  #panel-discover .catalog-hero{min-height:250px}
+  .discover-results .discover-result .discover-title{font-weight:600}
+  .discover-results .discover-result .discover-poster-placeholder{height:auto}
+  .discover-results .discover-result .discover-save[aria-pressed="true"]{background:rgba(95,217,196,.08)}
+  @media(max-width:650px){#panel-discover .catalog-hero{min-height:225px}}
+  .discover-results .discover-result .discover-provider-options .discover-link{margin-top:2px}
+  .discover-results .discover-result .discover-provider-options .provider-heading{color:#f3eee7}
+  .discover-results .discover-result .discover-provider-options p{white-space:normal}
+  .discover-results .discover-result .discover-links .discover-link{border:1px solid rgba(255,255,255,.14)}
+  .discover-results .discover-result .discover-links .discover-link:hover{border-color:rgba(232,192,122,.42)}
+  .catalog-hero .catalog-hero-copy .hint{max-width:540px}
+  .discover-results .discover-result .discover-source{margin-top:8px}
+  .discover-results .discover-result .discover-description{display:-webkit-box;overflow:hidden}
+  .discover-results .discover-result .discover-copy{min-height:192px}
+  .discover-results .discover-result .discover-links{margin-top:12px}
+  @media(max-width:650px){.discover-results .discover-result .discover-copy{min-height:205px}}
+  .discover-results .discover-result .discover-poster-placeholder{width:100%}
+  #panel-discover .catalog-hero .kicker{letter-spacing:.16em}
+  .discover-results .discover-result .discover-provider-options .provider-heading{font-weight:600}
+  .discover-results .discover-result .discover-meta{font-size:.7rem}
+  .discover-results .discover-result .discover-links .discover-link{font-size:.7rem}
+  .discover-results .discover-result .discover-save{font-size:.7rem}
+  .discover-results .discover-result .discover-source{font-size:.68rem}
+  #panel-discover .catalog-tools select{background-color:#11131a}
+  .discover-results .discover-result .discover-poster-placeholder span{line-height:1}
+  .discover-results .discover-result{background-color:#11131a}
+  .catalog-hero:after{opacity:.9}
+  .discover-results .discover-result .discover-poster{color:#fff}
+  .discover-results .discover-result .discover-actions{padding-top:10px}
+  .catalog-hero .catalog-hero-copy .hint{font-size:.92rem}
+  .discover-results .discover-result .discover-description{line-height:1.5}
+  .discover-results .discover-result .discover-title{letter-spacing:0}
+  .discover-results .discover-result .discover-poster-placeholder{background-size:cover}
+  .catalog-hero .catalog-hero-copy .kicker{font-weight:600}
+  .discover-results .discover-result .discover-provider-options{border-top:1px solid rgba(255,255,255,.08)}
+  #panel-discover .catalog-tools .catalog-search-term{color:var(--ink)}
+  .discover-results .discover-result .discover-meta{font-variant-numeric:tabular-nums}
+  .discover-results .discover-result .discover-links .discover-link{flex:1 1 auto}
+  .discover-results .discover-result .discover-links .discover-save{flex:0 0 auto}
+  @media(max-width:390px){.discover-results .discover-result .discover-links .discover-link{flex:1 1 100%}}
+  .discover-results .discover-empty a{color:var(--gold)}
+  #panel-discover .catalog-hero .catalog-hero-copy{animation:catalog-arrive .5s ease-out both}
+  .discover-results .discover-result .discover-year{font-weight:600}
+  .discover-results .discover-result .discover-poster{transition:filter .2s ease}
+  .discover-results .discover-result .discover-save{border:1px solid var(--line)}
+  .discover-results .discover-result .discover-poster-placeholder{border-bottom:1px solid rgba(255,255,255,.06)}
+  .catalog-hero h2{letter-spacing:-.03em}
+  .discover-results .discover-result .discover-links button{font-weight:550}
+  .discover-results .discover-result .discover-provider-options .discover-link{background:rgba(255,255,255,.02)}
+  #panel-discover .catalog-hero .catalog-hero-copy .hint{color:#c7c2c9}
+  .discover-results .discover-result .discover-description{color:#a9a4af}
+  .discover-results .discover-result .discover-meta{color:#b6a988}
+  .discover-results .discover-result .discover-source{color:#817c88}
+  @media(max-width:650px){.discover-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:390px){.discover-results{grid-template-columns:1fr}}
+  .discover-results .discover-result .discover-links a{word-break:break-word}
+  #panel-discover .catalog-hero .catalog-hero-copy{z-index:1}
+  .discover-results .discover-result .discover-link:focus-visible{outline-offset:2px}
+  .discover-results .discover-result .discover-poster-placeholder span{font-size:2.4rem}
+  .discover-results .discover-result .discover-source{margin-bottom:0}
+  #panel-discover .catalog-hero .catalog-hero-copy{width:100%}
+  .discover-results .discover-result .discover-copy{display:flex;flex-direction:column}
+  .discover-results .discover-result .discover-description{min-height:3.2em}
+  .catalog-hero .catalog-hero-copy .hint{max-width:520px}
+  .discover-results .discover-result .discover-poster{object-position:center 25%}
+  .catalog-tools .catalog-search-term{font-size:.92rem}
+  .discover-results .discover-result .discover-save{cursor:pointer}
+  .discover-results .discover-result .discover-save:hover{color:var(--teal)}
+  .discover-results .discover-result .discover-provider-options .provider-heading{font-size:.78rem}
+  .discover-results .discover-result .discover-provider-options p:last-of-type{margin-bottom:9px}
+  .discover-results .discover-result .discover-poster-placeholder{font-family:var(--serif)}
+  #panel-discover .catalog-hero .catalog-hero-copy .kicker{color:#e8c07a}
+  .catalog-tools .catalog-search-term:focus{box-shadow:0 0 0 3px rgba(232,192,122,.08)}
+  .discover-results .discover-result .discover-links .discover-link{min-height:34px}
+  .discover-results .discover-result .discover-meta{line-height:1.4}
+  .discover-results .discover-result .discover-title{font-weight:600}
+  .discover-results .discover-result .discover-provider-options p{display:block}
+  .discover-results .discover-result .discover-poster-placeholder{min-height:150px}
+  #panel-discover .catalog-tools{margin-bottom:0}
+  .catalog-hero .catalog-hero-copy .hint{line-height:1.6}
+  .discover-results .discover-result:hover{border-color:rgba(232,192,122,.4)}
+  .catalog-hero:after{pointer-events:none}
+  #panel-discover .catalog-hero{isolation:isolate}
+  .discover-results .discover-result .discover-provider-options{margin-top:12px}
+  .discover-results .discover-result .discover-links{width:100%}
+  .discover-results .discover-result .discover-description{margin-bottom:0}
+  .discover-results .discover-result .discover-meta{display:block}
+  .discover-results .discover-result .discover-source{letter-spacing:.02em}
+  .discover-results .discover-result .discover-year{font-variant-numeric:tabular-nums}
+  .discover-results .discover-result .discover-actions{display:flex;gap:7px}
+  .discover-results .discover-result .discover-actions .discover-link{flex:1}
+  .discover-results .discover-result .discover-actions .discover-save{flex:0 0 auto}
+  .discover-results .discover-result .discover-provider-options .discover-link{flex:0 1 auto}
+  .discover-results .discover-result .discover-links .discover-link{border-radius:9px}
+  .discover-results .discover-result .discover-provider-options .discover-link{border-radius:9px}
+  .discover-results .discover-result .discover-save{border-radius:9px}
+  .discover-results .discover-result .discover-description{-webkit-line-clamp:4}
+  .discover-results .discover-result .discover-copy{min-height:192px}
+  @media(max-width:650px){.discover-results .discover-result .discover-copy{min-height:205px}}
+  .discover-results .discover-result img{display:block}
+  .discover-results .discover-result .discover-poster{width:100%;aspect-ratio:2/3;object-fit:cover}
+  .discover-results .discover-result .discover-poster-placeholder{display:flex;align-items:center;justify-content:center;aspect-ratio:2/3}
+  .discover-results .discover-result .discover-poster-placeholder span{color:rgba(232,192,122,.8)}
+  .discover-results .discover-result .discover-description{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical}
+  #panel-discover .catalog-hero{box-shadow:inset 0 -50px 90px rgba(0,0,0,.15)}
+  .discover-toolbar .chip{background:rgba(255,255,255,.025)}
+  .discover-toolbar .chip[aria-pressed="true"]{background:rgba(95,217,196,.08)}
+  .discover-results .discover-result .discover-save[aria-pressed="true"]{background:rgba(95,217,196,.08)}
+  @media(max-width:650px){#panel-discover .card{padding:14px}}
+  @media(prefers-reduced-motion:reduce){.discover-result,.discover-poster{transition:none}}
+  .discover-results .discover-result .discover-meta{font-size:.7rem}
+  .discover-results .discover-result .discover-source{font-size:.68rem}
+  .discover-results .discover-result .discover-title{font-size:.94rem}
+  .discover-results .discover-result .discover-description{font-size:.74rem}
+  .discover-results .discover-result .discover-links .discover-link{font-size:.7rem}
+  .catalog-hero .catalog-hero-copy .hint{font-size:.92rem}
+  #panel-discover .catalog-tools .btn{font-weight:600}
+  .discover-results .discover-result .discover-provider-options{box-sizing:border-box}
+  #panel-discover .discover-toolbar .chip[aria-pressed="true"]{color:var(--teal)}
+  .catalog-hero .catalog-hero-copy .kicker{font-size:.68rem}
+  .discover-results .discover-result .discover-links{align-items:center}
+  .discover-results .discover-result .discover-links .discover-link{white-space:nowrap}
+  @media(max-width:650px){.catalog-tools{grid-template-columns:1fr}}
+  .discover-results .discover-result .discover-copy h3{line-height:1.35}
+  .catalog-results-label{color:var(--dim);font-size:.76rem}
+  .discover-results .discover-empty{padding:26px 14px;text-align:center;color:var(--dim);border:1px dashed var(--line);border-radius:12px;grid-column:1/-1}
+  #panel-discover .note a{color:var(--gold)}
+  .discover-result .discover-save.saved{color:var(--teal)}
+  @media(max-width:650px){.discover-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:390px){.discover-results{grid-template-columns:1fr}}
+  .discover-results[aria-busy="true"]{opacity:.58}
+  .discover-results .discover-result .discover-poster-placeholder span{font-family:var(--serif)}
+  .catalog-hero .catalog-hero-copy{animation:catalog-arrive .55s ease-out both}
+  @keyframes catalog-arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @media(prefers-reduced-motion:reduce){.catalog-hero .catalog-hero-copy{animation:none}}
   footer{margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center}
   [hidden]{display:none !important}
 </style>
@@ -162,18 +642,77 @@
     <button class="tab" role="tab" id="tab-player" aria-selected="true" aria-controls="panel-player">Player</button>
     <button class="tab" role="tab" id="tab-ringtone" aria-selected="false" aria-controls="panel-ringtone">Ringtone</button>
     <button class="tab" role="tab" id="tab-thumb" aria-selected="false" aria-controls="panel-thumb">Cover</button>
+    <button class="tab" role="tab" id="tab-discover" aria-selected="false" aria-controls="panel-discover">Discover</button>
   </div>
 
   <!-- ───────────────────────── PLAYER ───────────────────────── -->
   <section class="panel" id="panel-player" role="tabpanel" aria-labelledby="tab-player">
+
+    <!-- The player sits first, and it never disappears. It used to be the
+         fourth card down, so the songs had to be scrolled past to reach the
+         controls, and it was hidden until something played — which read as the
+         page having no player at all. It is always on screen now, and with
+         nothing playing it says so. -->
+    <div class="card" id="nowCard">
+      <p class="kicker">Playing now</p>
+      <div class="now">
+        <div>
+          <p class="title" id="nowTitle">Nothing playing yet</p>
+          <p class="artist" id="nowMeta">Pick a song from the list, or a track in the room.</p>
+        </div>
+        <input type="range" class="seek" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek">
+        <div class="times"><span id="tText">0:00</span><span id="dText">0:00</span></div>
+        <div class="controls">
+          <button class="round small" id="prev" aria-label="Previous">⏮</button>
+          <button class="round" id="playBtn" aria-label="Play">▶</button>
+          <button class="round small" id="next" aria-label="Next">⏭</button>
+        </div>
+      </div>
+      <p class="note" id="playerNote"></p>
+    </div>
+
+    <!-- The manual (10 Oct 2026), behind a drop-down from 14 Oct 2026 —
+         Jacques: "put the manual on a drop down menu". One card, in order, in
+         plain words: the page had said how the songs are KEPT and never how
+         they get here in the first place. The words are unchanged; only the
+         card they sit in is folded away until it is asked for. -->
+    <details class="card fold" id="manual">
+      <summary>
+        <span class="kicker">The manual</span>
+        <span class="foldTitle">How your music gets here</span>
+      </summary>
+      <p class="hint">All of it happens on this phone. Nothing is uploaded, and nothing is sent anywhere.</p>
+      <ol class="steps">
+        <li><b>Tap “Tap to choose songs”</b> and pick the files already on the phone. Any of the usual kinds — mp3, m4a, wav, ogg — and as many as you like at once.</li>
+        <li><b>Or tap “Scan for new music”.</b> It looks in two folders only — your <b>Music</b> folder and your <b>Download</b> folder — and in the meditation room, and it adds only what is not here yet. The same song in both folders is added once.</li>
+        <li><b>They land in “All songs”</b> and are kept on this phone, so the list is waiting the next time you open the page.</li>
+        <li><b>Tap any row to play it.</b> The player at the top follows whatever you pick. A song you add today lands at the top of the list — the <b>Order</b> chips flip that round.</li>
+        <li><b>To take one off, tap the ✕</b> on its row. On a playlist the ✕ takes only the row out — the song itself stays on the phone.</li>
+        <li><b>To make a playlist,</b> name one under “Playlists”, then tap + on any song. The same song can go in as many times as you like.</li>
+      </ol>
+    </details>
+
     <div class="card">
       <p class="kicker">From this phone</p>
       <h2>Add your songs</h2>
       <p class="hint">Pick audio files from the phone. They play here, they are never uploaded anywhere, and the list stays here so it is waiting next time.</p>
       <label class="drop" for="audioInput">Tap to choose songs <b>(mp3, m4a, wav, ogg…)</b></label>
       <input type="file" id="audioInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac" multiple hidden>
+      <!-- The scan's own folder button (14 Oct 2026). A phone has no way to be
+           handed a folder handle, but a folder chooser on a file input works
+           there, and it is how "Scan for new music" reaches his Music folder on
+           the handset at all. Kept hidden: the scan button presses it. -->
+      <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
       <div class="row" style="margin-top:12px">
         <button class="btn ghost wide" id="scanBtn" type="button">Scan for new music</button>
+      </div>
+      <p class="note" id="scanNote">Looks in your <b>Music</b> folder and your <b>Download</b> folder, and in the meditation room — nowhere else.</p>
+      <div id="sortRow">
+        <p class="kicker" style="margin-top:16px">Order</p>
+        <div class="chips" id="sortChips">
+          <button class="chip" data-sort="new" type="button" aria-pressed="true">Newest first</button>
+          <button class="chip" data-sort="old" type="button" aria-pressed="false">Oldest first</button>
+        </div>
       </div>
       <ul class="list" id="playlist"></ul>
       <p class="empty" id="emptyList">No songs added yet.</p>
@@ -181,7 +720,6 @@
         <button class="btn ghost" id="forgetBtn" type="button">Remove all from this phone</button>
       </div>
       <p class="status" id="playerStatus" role="status" aria-live="polite"></p>
-      <p class="note">The songs are kept inside this phone's browser, so they are still here next time you open the page. That uses space on the phone — the ✕ takes any one back off.</p>
     </div>
 
     <div class="card">
@@ -207,52 +745,39 @@
       <p class="status" id="roomStatus" role="status" aria-live="polite"></p>
     </div>
 
-    <div class="card" id="nowCard" hidden>
-      <div class="now">
-        <div>
-          <p class="title" id="nowTitle">—</p>
-          <p class="artist" id="nowMeta"></p>
-        </div>
-        <input type="range" class="seek" id="seek" min="0" max="1000" value="0" step="1" aria-label="Seek">
-        <div class="times"><span id="tText">0:00</span><span id="dText">0:00</span></div>
-        <div class="controls">
-          <button class="round small" id="prev" aria-label="Previous">⏮</button>
-          <button class="round" id="playBtn" aria-label="Play">▶</button>
-          <button class="round small" id="next" aria-label="Next">⏭</button>
-        </div>
-      </div>
-      <p class="note" id="playerNote"></p>
-    </div>
-
+    <!-- One card for how it plays through (10 Oct 2026). The fade, the shuffle
+         and the repeat were three cards holding the same three settings, and
+         the player they belong to was somewhere above them. -->
     <div class="card">
-      <p class="kicker">Going from one song to the next</p>
-      <h2>Fade between them</h2>
-      <p class="hint">Fade the end of a song into the start of the next one so it does not jump. Off means the next song starts the moment this one ends. The choice is kept on the phone.</p>
+      <p class="kicker">How it plays through</p>
+      <h2>Fade, shuffle and repeat</h2>
+      <p class="hint">The lock screen shows what is playing and carries play, pause and next, so the music carries on with the screen off.</p>
+
+      <p class="kicker">Fade between songs</p>
       <div class="chips" id="fadeChips">
         <button class="chip" data-fade="0" type="button" aria-pressed="true">Off</button>
         <button class="chip" data-fade="3" type="button" aria-pressed="false">3 sec</button>
         <button class="chip" data-fade="5" type="button" aria-pressed="false">5 sec</button>
         <button class="chip" data-fade="10" type="button" aria-pressed="false">10 sec</button>
       </div>
-      <p class="status" id="fadeStatus" role="status" aria-live="polite"></p>
-    </div>
+      <p class="hint">Off means the next song starts the moment this one ends. The choice is kept on the phone.</p>
 
-    <div class="card">
-      <p class="kicker">How it plays through</p>
-      <h2>Shuffle and repeat</h2>
-      <p class="hint">Shuffle plays them in a different order each time. Repeat all starts the whole list again when the last song ends; Repeat one plays the same song round and round. The lock screen shows what is playing and carries play, pause and next, so the music can carry on with the screen off.</p>
       <p class="kicker">Shuffle</p>
       <div class="chips" id="shuffleChips">
         <button class="chip" data-shuffle="0" type="button" aria-pressed="true">Off</button>
         <button class="chip" data-shuffle="1" type="button" aria-pressed="false">On</button>
       </div>
+
       <p class="kicker">Repeat</p>
       <div class="chips" id="repeatChips">
         <button class="chip" data-repeat="off" type="button" aria-pressed="false">Off</button>
         <button class="chip" data-repeat="all" type="button" aria-pressed="true">All</button>
         <button class="chip" data-repeat="one" type="button" aria-pressed="false">One</button>
       </div>
-      <p class="status" id="modeStatus" role="status" aria-live="polite"></p>
+      <p class="hint">Shuffle plays them in a different order each time. Repeat all starts the whole list again after the last song; Repeat one plays the same song round and round.</p>
+
+      <p class="status" id="fadeStatus" role="status" aria-live="polite"></p>
+      <p class="status" id="modeStatus" role="status" aria-live="polite" style="margin-top:4px"></p>
     </div>
   </section>
 
@@ -349,7 +874,37 @@
     </div>
   </section>
 
-  <footer>Everything here runs on this phone. The songs and pictures are not uploaded, and the songs are kept on the phone so they are here next time.</footer>
+  <section class="panel" id="panel-discover" role="tabpanel" aria-labelledby="tab-discover" hidden>
+    <div class="card">
+      <div class="catalog-hero">
+        <div class="catalog-hero-copy">
+          <p class="kicker">A better way to find your next watch</p>
+          <h2>One search.<br>More ways to watch.</h2>
+          <p class="hint">Explore films and series, then see where they’re available in the US. Save titles for later and jump to licensed watch listings.</p>
+        </div>
+      </div>
+      <div class="catalog-tools">
+        <div><label class="f" for="catalogType">Browse</label><select id="catalogType"><option value="movies">Movies</option><option value="tv">Series</option><option value="music">Music</option></select></div>
+        <div><label class="f" for="catalogTerm">Search titles</label><input class="catalog-search-term" type="text" id="catalogTerm" maxlength="100" placeholder="What are you in the mood for?" autocomplete="off"></div>
+        <button class="btn" id="catalogSearch" type="button">Find titles</button>
+      </div>
+      <div class="row" id="moviePagination" style="margin-top:10px" hidden>
+        <button class="btn ghost" id="moviePrev" type="button">Previous page</button>
+        <span id="moviePageText" class="note" style="flex:1;text-align:center"></span>
+        <button class="btn ghost" id="movieNext" type="button">Next page</button>
+      </div>
+      <div class="catalog-status-row"><p class="status" id="catalogStatus" role="status" aria-live="polite"></p></div>
+      <div class="discover-toolbar">
+        <h3 id="catalogHeading">Popular discoveries</h3>
+        <div class="row"><button class="chip" id="showSearchResults" type="button" aria-pressed="true">Search results</button><button class="chip" id="showSavedTitles" type="button" aria-pressed="false">My list <span id="savedCount">0</span></button></div>
+      </div>
+      <div class="discover-results" id="catalogResults"></div>
+      <p class="note catalogSearch-note">Movie and series metadata uses TMDb. US availability is powered by JustWatch. These are legal listings—not streams—and availability can change. <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">TMDb terms and attribution</a>.</p>
+      <p class="note">This product uses the TMDb API but is not endorsed or certified by TMDb. Availability powered by JustWatch. Poster artwork is served by TMDb.</p>
+    </div>
+  </section>
+
+  <footer>The local player keeps your own songs on this phone. Catalog search shares your search term with Apple or TMDb and links to official listings; it never downloads music or movies.</footer>
 </div>
 
 <audio id="audio" preload="metadata"></audio>
@@ -539,6 +1094,10 @@
           added: r.added || 0,
         });
       });
+      // The order he last chose is put back before anything is drawn: the songs
+      // come out of storage oldest first, which is not necessarily how he wants
+      // to see them.
+      sortRows();
       // The playlists can only be pointed at real songs once those songs are
       // back, so they are resolved here and never before.
       resolveLists();
@@ -716,6 +1275,7 @@
     ['tab-player', 'panel-player'],
     ['tab-ringtone', 'panel-ringtone'],
     ['tab-thumb', 'panel-thumb'],
+    ['tab-discover', 'panel-discover'],
   ];
   tabs.forEach(function(pair){
     $(pair[0]).addEventListener('click', function(){
@@ -725,7 +1285,244 @@
         $(other[1]).hidden = !on;
       });
       if (pair[0] === 'tab-thumb') drawThumb();
+      if (pair[0] === 'tab-discover') $('catalogTerm').focus();
     });
+  });
+
+  // ── catalog discovery (metadata only; no media is downloaded) ─────────────
+  var catalogSearch = $('catalogSearch');
+  var catalogTerm = $('catalogTerm');
+  var catalogType = $('catalogType');
+  var catalogResults = $('catalogResults');
+  var catalogStatus = $('catalogStatus');
+  var moviePagination = $('moviePagination');
+  var moviePrev = $('moviePrev');
+  var movieNext = $('movieNext');
+  var moviePageText = $('moviePageText');
+  var moviePage = 1;
+  var moviePages = 1;
+
+  function catalogText(tag, text, className){
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    node.textContent = text || '';
+    return node;
+  }
+
+  var catalogHeading = $('catalogHeading');
+  var showSearchResults = $('showSearchResults');
+  var showSavedTitles = $('showSavedTitles');
+  var savedCount = $('savedCount');
+  var currentResults = [];
+  var viewingSaved = false;
+  var savedTitles = [];
+  try { savedTitles = JSON.parse(localStorage.getItem('tsid-watchlist') || '[]'); } catch (_) { savedTitles = []; }
+  if (!Array.isArray(savedTitles)) savedTitles = [];
+
+  function updateSavedCount(){ savedCount.textContent = String(savedTitles.length); }
+  function isSaved(item){ return savedTitles.some(function(saved){ return saved.key === item.key; }); }
+  function toggleSaved(item){
+    if (isSaved(item)) savedTitles = savedTitles.filter(function(saved){ return saved.key !== item.key; });
+    else savedTitles.unshift(item);
+    try { localStorage.setItem('tsid-watchlist', JSON.stringify(savedTitles)); } catch (_) {}
+    updateSavedCount();
+    if (viewingSaved) renderCatalogResults(savedTitles, 'saved');
+    else renderCatalogResults(currentResults, catalogType.value);
+  }
+
+  function renderCatalogResults(results, type){
+    catalogResults.textContent = '';
+    moviePagination.hidden = type === 'music' || type === 'saved' || moviePages <= 1;
+    if (!moviePagination.hidden) {
+      moviePageText.textContent = 'Page ' + moviePage + ' of ' + moviePages;
+      moviePrev.disabled = moviePage <= 1;
+      movieNext.disabled = moviePage >= moviePages;
+    }
+    if (!results.length) {
+      catalogResults.appendChild(catalogText('p', type === 'saved' ? 'Your list is empty. Save a film or series to keep it close.' : 'Nothing here yet. Search a title to get started.', 'discover-empty'));
+      return;
+    }
+    results.forEach(function(item){
+      var kind = type === 'saved' ? (item.kind || item.type || 'movies') : type;
+      var card = catalogText('article', '', 'discover-result');
+      var poster = item.posterUrl ? document.createElement('img') : catalogText('div', '', 'discover-poster-placeholder');
+      if (item.posterUrl) {
+        poster.className = 'discover-poster';
+        poster.src = item.posterUrl;
+        poster.alt = '';
+        poster.loading = 'lazy';
+        poster.referrerPolicy = 'no-referrer';
+        poster.onerror = function(){ poster.replaceWith(catalogText('div', '✦', 'discover-poster-placeholder')); };
+      } else poster.appendChild(catalogText('span', '✦'));
+      card.appendChild(poster);
+      var copy = catalogText('div', '', 'result-copy discover-copy');
+      copy.appendChild(catalogText('h3', item.title, 'discover-title'));
+      copy.appendChild(catalogText('p', [kind === 'tv' ? 'Series' : kind === 'music' ? 'Music' : 'Film', item.year, item.source].filter(Boolean).join(' · '), 'discover-meta'));
+      copy.appendChild(catalogText('p', item.detail || '', 'discover-description'));
+      var links = catalogText('div', '', 'discover-links');
+      var main = document.createElement('a');
+      main.className = 'discover-link';
+      main.href = item.url;
+      main.target = '_blank';
+      main.rel = 'noopener noreferrer';
+      main.textContent = kind === 'music' ? 'Apple Music' : 'Title details';
+      links.appendChild(main);
+      if (kind !== 'music') {
+        var watch = document.createElement('button');
+        watch.className = 'discover-link';
+        watch.type = 'button';
+        watch.textContent = 'Where to watch';
+        watch.addEventListener('click', function(){ showMovieProviders(item, watch, links); });
+        links.appendChild(watch);
+      }
+      var save = document.createElement('button');
+      var alreadySaved = isSaved(item);
+      save.className = 'discover-link discover-save' + (alreadySaved ? ' saved' : '');
+      save.type = 'button';
+      save.setAttribute('aria-pressed', alreadySaved ? 'true' : 'false');
+      save.textContent = alreadySaved ? 'Saved ✓' : '+ My list';
+      save.addEventListener('click', function(){ toggleSaved(item); });
+      links.appendChild(save);
+      copy.appendChild(links);
+      card.appendChild(copy);
+      catalogResults.appendChild(card);
+    });
+  }
+  updateSavedCount();
+
+  function showMovieProviders(item, button, links){
+    button.disabled = true;
+    button.textContent = 'Checking US options…';
+    var providerKind = item.kind || item.type || catalogType.value;
+    fetch('/api/catalog/' + (providerKind === 'tv' ? 'tv' : 'movies') + '/' + encodeURIComponent(item.id) + '/providers', {
+      credentials: 'same-origin', cache: 'no-store'
+    }).then(function(response){
+      return response.json().then(function(data){
+        if (!response.ok) throw new Error(data.error || 'Watch options are unavailable.');
+        return data;
+      });
+    }).then(function(data){
+      var panel = catalogText('div', '', 'discover-provider-options');
+      var heading = catalogText('p', 'United States watch options', 'provider-heading');
+      panel.appendChild(heading);
+      if (data.groups && data.groups.length) {
+        data.groups.forEach(function(group){
+          panel.appendChild(catalogText('p', group.label + ': ' + group.providers.join(', ')));
+        });
+      } else {
+        panel.appendChild(catalogText('p', 'No US providers are currently listed.'));
+      }
+      if (data.url) {
+        var link = document.createElement('a');
+        link.href = data.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.className = 'discover-link';
+        link.textContent = 'Open legal watch listings';
+        panel.appendChild(link);
+      }
+      links.appendChild(panel);
+      button.textContent = 'Refresh US options';
+      button.disabled = false;
+    }).catch(function(error){
+      button.textContent = error.message || 'Options unavailable';
+      button.disabled = false;
+    });
+  }
+
+  function runCatalogSearch(page){
+    var term = (catalogTerm.value || '').trim();
+    var type = catalogType.value;
+    page = page || 1;
+    if (!term) { say(catalogStatus, 'Type a title first.', true); return; }
+    catalogSearch.disabled = true;
+    catalogResults.textContent = '';
+    catalogResults.setAttribute('aria-busy', 'true');
+    say(catalogStatus, 'Searching ' + (type === 'music' ? 'music' : type === 'tv' ? 'series' : 'movie') + ' catalog…');
+    fetch('/api/catalog/' + (type === 'music' ? 'music' : type) + '?term=' + encodeURIComponent(term)
+      + (type === 'music' ? '' : '&page=' + page), {
+      credentials: 'same-origin', cache: 'no-store'
+    }).then(function(response){
+      return response.json().then(function(data){
+        if (!response.ok) throw new Error(data.error || 'Catalog search failed.');
+        return data;
+      });
+    }).then(function(data){
+      var results = Array.isArray(data.results) ? data.results : [];
+      if (type === 'movies' || type === 'tv') {
+        moviePage = data.page || page;
+        moviePages = data.totalPages || 1;
+      } else {
+        moviePage = 1;
+        moviePages = 1;
+      }
+      currentResults = results.map(function(item){ return Object.assign({}, item, { kind: type }); });
+      catalogHeading.textContent = type === 'movies' ? 'Films for your watchlist' : type === 'tv' ? 'Series for your watchlist' : 'Music for the moment';
+      viewingSaved = false;
+      showSearchResults.setAttribute('aria-pressed', 'true');
+      showSavedTitles.setAttribute('aria-pressed', 'false');
+      renderCatalogResults(currentResults, type);
+      var found = type === 'movies' ? (data.totalResults || results.length) : results.length;
+      say(catalogStatus, found ? found + ' result' + (found === 1 ? '' : 's') + ' found.' : 'No matches found. Try another search.');
+    }).catch(function(err){
+      say(catalogStatus, err.message || 'The catalog could not be reached. Try again shortly.', true);
+    }).then(function(){ catalogSearch.disabled = false; catalogResults.setAttribute('aria-busy', 'false'); });
+  }
+  function browsePopular(){
+    var type = catalogType.value;
+    if (type === 'music') {
+      catalogHeading.textContent = 'Music catalog';
+      catalogResults.textContent = '';
+      catalogResults.appendChild(catalogText('p', 'Search a song or artist to explore Apple Music.', 'discover-empty'));
+      return;
+    }
+    catalogSearch.disabled = true;
+    catalogResults.setAttribute('aria-busy', 'true');
+    say(catalogStatus, 'Loading popular ' + (type === 'tv' ? 'series' : 'films') + '…');
+    fetch('/api/catalog/browse/' + type + '?page=1', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function(response){ return response.json().then(function(data){
+        if (!response.ok) throw new Error(data.error || 'Catalog browse failed.');
+        return data;
+      }); })
+      .then(function(data){
+        currentResults = (Array.isArray(data.results) ? data.results : []).map(function(item){ return Object.assign({}, item, { kind: type }); });
+        moviePage = data.page || 1;
+        moviePages = data.totalPages || 1;
+        catalogHeading.textContent = type === 'tv' ? 'Popular series' : 'Popular films';
+        viewingSaved = false;
+        showSearchResults.setAttribute('aria-pressed', 'true');
+        showSavedTitles.setAttribute('aria-pressed', 'false');
+        renderCatalogResults(currentResults, type);
+        say(catalogStatus, 'Popular picks, refreshed from TMDb.');
+      })
+      .catch(function(error){ say(catalogStatus, error.message || 'Popular titles are unavailable.', true); })
+      .then(function(){ catalogSearch.disabled = false; catalogResults.setAttribute('aria-busy', 'false'); });
+  }
+  catalogSearch.addEventListener('click', function(){ runCatalogSearch(1); });
+  catalogTerm.addEventListener('keydown', function(event){ if (event.key === 'Enter') runCatalogSearch(1); });
+  moviePrev.addEventListener('click', function(){ if (moviePage > 1) runCatalogSearch(moviePage - 1); });
+  movieNext.addEventListener('click', function(){ if (moviePage < moviePages) runCatalogSearch(moviePage + 1); });
+  catalogType.addEventListener('change', function(){
+    moviePagination.hidden = true;
+    currentResults = [];
+    catalogHeading.textContent = catalogType.value === 'music' ? 'Music for the moment' : 'Popular discoveries';
+    say(catalogStatus, 'Choose a title to find legal US watch options.');
+    browsePopular();
+  });
+  browsePopular();
+  showSearchResults.addEventListener('click', function(){
+    viewingSaved = false;
+    showSearchResults.setAttribute('aria-pressed', 'true');
+    showSavedTitles.setAttribute('aria-pressed', 'false');
+    catalogHeading.textContent = currentResults.length ? 'Your search results' : 'Search to find your next watch';
+    renderCatalogResults(currentResults, catalogType.value);
+  });
+  showSavedTitles.addEventListener('click', function(){
+    viewingSaved = true;
+    showSearchResults.setAttribute('aria-pressed', 'false');
+    showSavedTitles.setAttribute('aria-pressed', 'true');
+    catalogHeading.textContent = 'Saved for later';
+    renderCatalogResults(savedTitles, 'saved');
   });
 
   // ── adding songs ──────────────────────────────────────────────────────────
@@ -738,10 +1535,15 @@
 
   // The name plus the size plus when it was last changed is enough to tell one
   // file from another, so adding the same song twice does not store it twice.
+  // The same file picked by hand, scanned from a folder, or scanned again next
+  // week all carry the same key, and it is what a song is kept on the phone as.
   function fileKey(file){
     return String(file.name || 'song') + '|' + (file.size || 0) + '|' + (file.lastModified || 0);
   }
 
+  // Gives back what it did - how many songs were added and how many were
+  // already here - so the scan can say one sentence about the whole run rather
+  // than the page writing two messages over each other.
   function addFiles(files){
     var added = 0;
     var already = 0;
@@ -750,8 +1552,10 @@
       if (!file) return;
       var looksAudio = /^audio\//.test(file.type || '') || /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i.test(file.name);
       if (!looksAudio) return;
+      // The same file, or the same song arriving as a second copy: either way it
+      // is a song he already has, and it is not added again.
+      if (sameSong(file)) { already++; return; }
       var key = fileKey(file);
-      if (kept[key]) { already++; return; }
       kept[key] = true;
       var entry = {
         key: key,
@@ -773,15 +1577,17 @@
     if (!added){
       if (already) say($('playerStatus'), 'Those songs are already in the list.');
       else say($('playerStatus'), 'Those files are not audio this phone can play.', true);
-      return;
+      return { added: 0, already: already };
     }
     var msg = added + (added === 1 ? ' song added.' : ' songs added.');
     if (already) msg += ' ' + already + (already === 1 ? ' was already here.' : ' were already here.');
     if (viewList >= 0) msg += ' They are in All songs — tap that to see them.';
     say($('playerStatus'), msg);
+    sortRows();
     renderPlaylist();
     renderRingtoneOptions();
     if (current < 0) selectSong(0, false);
+    return { added: added, already: already };
   }
 
   function readDuration(entry){
@@ -800,6 +1606,53 @@
     });
     probe.addEventListener('error', function(){ /* leave the length blank */ });
   }
+
+  // ── the order of the list ───────────────────────────────────────────────
+  // 10 Oct 2026, Jacques: “add how music is loaded new … oldest”. The songs came
+  // back oldest first, so a file added today sat at the very bottom of the list
+  // with the player under it. The order is a choice now, newest first is how it
+  // starts, and the choice is kept on the phone like the fade and the shuffle.
+  // A playlist keeps its own order — that order is the whole point of a list —
+  // so this only ever moves the songs themselves.
+  var SORT_KEY = 'tsid-music-sort';
+  var sortNew = true;
+
+  function loadSort(){
+    try { sortNew = window.localStorage.getItem(SORT_KEY) !== 'old'; }
+    catch(e){ sortNew = true; }
+  }
+
+  function sortRows(){
+    // The index means “which row is playing”, so the song is remembered on its
+    // own and found again: moving the rows without it would leave the mark on
+    // whatever happened to land in that slot.
+    var was = (roomIndex < 0 && current >= 0) ? view()[current] : null;
+    songs.sort(function(a, b){
+      var byAge = (a.added || 0) - (b.added || 0);
+      return sortNew ? -byAge : byAge;
+    });
+    if (was) current = view().indexOf(was);
+  }
+
+  function renderSortChips(){
+    var row = $('sortChips');
+    if (!row) return;
+    var want = sortNew ? 'new' : 'old';
+    Array.prototype.forEach.call(row.querySelectorAll('.chip'), function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-sort') === want ? 'true' : 'false');
+    });
+  }
+
+  Array.prototype.forEach.call($('sortChips').querySelectorAll('.chip'), function(c){
+    c.addEventListener('click', function(){
+      sortNew = c.getAttribute('data-sort') === 'new';
+      try { window.localStorage.setItem(SORT_KEY, sortNew ? 'new' : 'old'); } catch(e){ /* private window */ }
+      sortRows();
+      renderSortChips();
+      renderPlaylist();
+      say($('playerStatus'), sortNew ? 'Newest songs first.' : 'Oldest songs first.');
+    });
+  });
 
   function renderPlaylist(){
     var arr = view();
@@ -826,7 +1679,10 @@
       t.textContent = s.name;
       var d = document.createElement('p');
       d.className = 'd';
-      d.textContent = s.duration ? fmt(s.duration) : s.meta;
+      // One line, one meaning: the length when the phone has told us, and where
+      // the song is when it has not. It used to fall back to the raw file name,
+      // so half the list read as times and half as “track_-_final_v2.mp3”.
+      d.textContent = s.duration ? fmt(s.duration) : 'On this phone';
       meta.appendChild(t);
       meta.appendChild(d);
 
@@ -868,6 +1724,10 @@
       list.appendChild(li);
     });
     $('keepRow').hidden = songs.length === 0 || viewList >= 0;
+    // The order only applies to All songs — a playlist is its own order, so the
+    // chips are not offered while one of those is the thing on screen.
+    var sortRow = $('sortRow');
+    if (sortRow) sortRow.hidden = viewList >= 0;
   }
 
   // The row of lists above the playlists card: All songs is always first, and
@@ -961,7 +1821,7 @@
       audio.removeAttribute('src');
       audio.load();
       current = -1;
-      $('nowCard').hidden = true;
+      showNowEmpty();
     } else if (i < current) {
       current--;
     }
@@ -1003,7 +1863,7 @@
     targetList = -1;
     listsResolved = true;
     if (typeof crossStop === 'function') crossStop();
-    $('nowCard').hidden = true;
+    showNowEmpty();
     dbDropAll();
     saveLists();
     renderListChips();
@@ -1013,6 +1873,16 @@
   });
 
   // ── player ────────────────────────────────────────────────────────────────
+  // The player is the first thing on the page, so it does not come and go: with
+  // nothing playing it says that rather than disappearing.
+  function showNowEmpty(){
+    $('nowTitle').textContent = 'Nothing playing yet';
+    $('nowMeta').textContent = view().length
+      ? 'Pick a song from the list, or a track in the room.'
+      : 'Add a song below, or tap a track in the room.';
+    $('playerNote').textContent = '';
+  }
+
   function selectSong(i, play){
     if (i < 0 || i >= view().length) return;
     var s = view()[i];
@@ -1871,8 +2741,73 @@
   // web address by itself, so it asks the server for the folder's contents),
   // and songs dropped into a folder on this phone since they were last added.
   // The scan looks in both.
+  //
+  // 14 Oct 2026, and which folders it is allowed to look in. Jacques: "scan
+  // folder doesnt work scan set up only to scan only music folder or download
+  // and make sure it doesnt pick up the song twice". Three things were wrong:
+  //
+  //   1. it would open anywhere. Whatever folder was chosen got walked, so a
+  //      scan could be pointed at the whole phone. It looks in two folders now
+  //      and only two - Music and Download - and a folder that is neither is
+  //      refused by name rather than walked;
+  //   2. on a phone it could never work at all. The directory picker it used is
+  //      a computer's API (Safari, Firefox and every Android browser lack it),
+  //      which is the "doesnt work" he was looking at. A phone gets the folder
+  //      chooser on a file input instead, which the handset does have, so the
+  //      scan reaches the Music folder there as well;
+  //   3. the same song could land in the list twice - once from Music and once
+  //      from Download, two copies of one track with two dates on them. A file
+  //      is now checked against what is already in the list by its name as well
+  //      as by its exact key, so a second copy of a song he already has counts
+  //      as one he already has.
   var AUDIO_FILE = /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba)$/i;
   var DIR_KEY = 'music-folder';   // the folder last scanned, kept on this phone
+  // The two folders the scan is for, and only those two. "My Music" is the same
+  // folder as "Music" on some phones and "Download" is "Downloads" elsewhere,
+  // which is why it is a test rather than a list of exact names.
+  var MUSIC_FOLDER = /(music|download)/i;
+  var NO_FOLDER = 'This browser cannot look through a folder on the phone — use “Tap to choose songs” instead.';
+  var WRONG_FOLDER = 'The scan looks in your Music folder and your Download folder, and nowhere else — that was another folder, so nothing was added.';
+  var NOTHING_CHOSEN = 'Nothing was chosen, so nothing changed.';
+  var SCAN_NOTE = 'Looks in your Music folder and your Download folder, and in the meditation room — nowhere else.';
+  // The caveat for the one case the rule cannot be checked in. A phone browser
+  // that shows a folder chooser hands every file over with its path, and the
+  // path is how the folder is named and checked. Chrome for Android shows the
+  // ordinary file chooser instead (folder selection is listed for it well after
+  // this was written), so the songs arrive with no path on them and there is
+  // nothing to check the folder against. They are still added - they are the
+  // files he just picked - and the line under the button says plainly that the
+  // folder could not be named, rather than quietly pretending it was checked.
+  var UNNAMED_FOLDER = 'This browser handed the songs over as files rather than as a folder, so the scan could not tell which folder they came from. It only ever reads Music and Download; for a file from anywhere else, use “Tap to choose songs” above.';
+
+  // The folder that was picked, read from the files themselves: a folder chooser
+  // hands over each file with its whole path, so the first part of the first
+  // path is the folder it came out of.
+  function folderNameOf(files){
+    var first = files && files[0];
+    var rel = first && (first.webkitRelativePath || '');
+    return rel ? String(rel).split('/')[0] : '';
+  }
+
+  // Is this song already in the list? The exact file first - its name, its size
+  // and the moment it was last changed, which is what a song's key is. Then the
+  // song itself: the Music copy and the Download copy of one track arrive with
+  // two dates and often two sizes, and they are still one song, so the name is
+  // the second answer. A second copy is counted as already here rather than
+  // added again.
+  function sameSong(file){
+    if (!file) return true;
+    if (kept[fileKey(file)]) return true;
+    var name = String(file.name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!name) return false;
+    for (var i = 0; i < songs.length; i++){
+      var s = songs[i];
+      if (!s) continue;
+      var had = String(s.meta || s.name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      if (had && had === name) return true;
+    }
+    return false;
+  }
 
   function titleWords(s){
     return String(s).replace(/[_-]+/g, ' ').replace(/\b[a-z]/g, function(c){ return c.toUpperCase(); });
@@ -1927,30 +2862,105 @@
     });
   }
 
+  // The folder chooser, started in Music rather than wherever it was left last
+  // time. A browser that will not take the starting folder says so by refusing
+  // the call, and only then is it asked again without one - a closed dialog is
+  // not re-opened, because a dialog he shut is an answer.
+  function askForFolder(){
+    function pick(opts){ return window.showDirectoryPicker(opts); }
+    try {
+      return pick({ id: 'tsid-music', mode: 'read', startIn: 'music' })
+        .catch(function(err){
+          if (err && err.name === 'TypeError') return pick({ id: 'tsid-music', mode: 'read' });
+          throw err;
+        });
+    } catch (e) {
+      return pick({ id: 'tsid-music', mode: 'read' });
+    }
+  }
+
   function pickStoredDir(){
     return dbGet('info', DIR_KEY).then(function(rec){
       var handle = rec && rec.handle;
-      if (!handle) return window.showDirectoryPicker({ id: 'tsid-music', mode: 'read' });
-      return handle.queryPermission({ mode: 'read' }) === 'granted'
-        ? handle
-        : handle.requestPermission({ mode: 'read' }).then(function(){ return handle; });
+      // No folder kept yet, or a folder kept from before this rule: ask.
+      if (!handle || !MUSIC_FOLDER.test(handle.name || '')) return askForFolder();
+      // A kept handle can outlive its permission, so it is asked for rather than
+      // assumed - and if the phone will not give it back, the chooser opens.
+      return handle.queryPermission({ mode: 'read' }).then(function(state){
+        if (state === 'granted') return handle;
+        return handle.requestPermission({ mode: 'read' }).then(function(gave){
+          return gave === 'granted' ? handle : askForFolder();
+        });
+      });
     });
   }
 
+  // What the folder half of the scan gives back: how many songs were added, how
+  // many were already here, which folder was read, and the one line to say if
+  // nothing could be read at all.
+  function noFolder(note){ return { added: 0, already: 0, folder: '', note: note }; }
+
   function scanPhoneFolder(){
-    // -1: this browser cannot look through a folder at all (Safari, Firefox).
-    // -2: the folder was not chosen this time. Neither is an error.
-    if (typeof window.showDirectoryPicker !== 'function') return Promise.resolve(-1);
-    return pickStoredDir().then(function(handle){
-      if (!handle) return -2;
-      dbPut('info', { key: DIR_KEY, handle: handle }).catch(function(){});
-      return readDirFiles(handle, 0).then(function(files){
-        if (!files.length) return 0;
-        var before = songs.length;
-        addFiles(files);
-        return songs.length - before;
-      });
-    }).catch(function(){ return -2; });
+    // A computer: the directory picker, which can be asked for once and then
+    // remembered, and which starts in Music.
+    if (typeof window.showDirectoryPicker === 'function') {
+      return pickStoredDir().then(function(handle){
+        if (!handle) return noFolder(NOTHING_CHOSEN);
+        var name = String(handle.name || '');
+        if (!MUSIC_FOLDER.test(name)) return noFolder(WRONG_FOLDER);
+        dbPut('info', { key: DIR_KEY, handle: handle }).catch(function(){});
+        return readDirFiles(handle, 0).then(function(files){
+          var got = addFiles(files);
+          return { added: got.added, already: got.already, folder: name,
+                   note: got.added ? '' : 'Nothing new in your ' + name + ' folder.' };
+        });
+      }).catch(function(){ return noFolder(NOTHING_CHOSEN); });
+    }
+    // A phone: the folder chooser on a file input, which is the only way this
+    // page can be shown a folder there at all.
+    var input = $('folderInput');
+    if (!input || !('webkitdirectory' in input)) return Promise.resolve(noFolder(NO_FOLDER));
+    return pickFolderInput(input);
+  }
+
+  // The folder chooser on the file input. A chosen folder arrives as its whole
+  // contents at once, each file carrying its path, so the folder that was picked
+  // can be named and checked before a single song is added.
+  function pickFolderInput(input){
+    return new Promise(function(resolve){
+      var done = false;
+      function finish(out){
+        if (done) return;
+        done = true;
+        input.removeEventListener('change', onChange);
+        input.removeEventListener('cancel', onCancel);
+        if (window.removeEventListener) window.removeEventListener('focus', onFocus);
+        resolve(out);
+      }
+      function onChange(){
+        var files = Array.prototype.slice.call(input.files || []);
+        input.value = '';
+        if (!files.length) { finish(noFolder(NOTHING_CHOSEN)); return; }
+        var name = folderNameOf(files);
+        if (name && !MUSIC_FOLDER.test(name)) { finish(noFolder(WRONG_FOLDER)); return; }
+        var got = addFiles(files);
+        finish({ added: got.added, already: got.already, folder: name,
+                 unnamed: !name,
+                 note: got.added ? '' : 'Nothing new in that folder — it is all here already.' });
+      }
+      function onCancel(){ finish(noFolder(NOTHING_CHOSEN)); }
+      // Back at the page with no answer is a chooser that was shut. Not every
+      // browser fires the event above, so this is the net under it.
+      function onFocus(){
+        setTimeout(function(){
+          if (!input.files || !input.files.length) finish(noFolder(NOTHING_CHOSEN));
+        }, 900);
+      }
+      input.addEventListener('change', onChange);
+      input.addEventListener('cancel', onCancel);
+      if (window.addEventListener) window.addEventListener('focus', onFocus);
+      input.click();
+    });
   }
 
   $('scanBtn').addEventListener('click', function(){
@@ -1960,13 +2970,21 @@
     scanPhoneFolder().then(function(phone){
       return scanRoomMusic().then(function(room){
         var parts = [];
-        if (phone > 0) parts.push(phone + (phone === 1 ? ' new song' : ' new songs') + ' from your folder');
+        if (phone.added > 0) {
+          parts.push(phone.added + (phone.added === 1 ? ' new song' : ' new songs') +
+            (phone.folder ? ' from your ' + phone.folder + ' folder' : ' from your folder'));
+        } else if (phone.already > 0) {
+          parts.push(phone.already + (phone.already === 1 ? ' song was' : ' songs were') + ' already here');
+        }
         if (room > 0) parts.push(room + (room === 1 ? ' new track' : ' new tracks') + ' for the room');
-        var msg;
-        if (parts.length) msg = 'Found ' + parts.join(' and ') + '.';
-        else if (phone === -1) msg = 'Nothing new in the room\u2019s music. This browser cannot look through a folder on the phone — use “Tap to choose songs” instead.';
-        else msg = 'Nothing new — everything is already here.';
+        var msg = parts.length ? 'Found ' + parts.join(' and ') + '.'
+          : (phone.note || 'Nothing new — everything is already here.');
         say($('playerStatus'), msg);
+        // The line under the button is where the two-folder rule is explained,
+        // so a scan that could not check a folder says so there - the one-line
+        // status above it stays one line.
+        var note = $('scanNote');
+        if (note) note.textContent = phone.unnamed ? UNNAMED_FOLDER : SCAN_NOTE;
         btn.disabled = false;
       });
     }).catch(function(){
@@ -1976,10 +2994,12 @@
   });
 
   // ── start ─────────────────────────────────────────────────────────────────
+  loadSort();
   loadListDefs();
   resolveLists();   // chips and all, against whatever is back so far; the
                      // songs re-resolve the lists again when they are restored
   renderPlaylist();
+  renderSortChips();
   renderRoom();
   renderRingtoneOptions();
   setSize('square');

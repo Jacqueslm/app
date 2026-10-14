@@ -26,8 +26,14 @@ const EMAIL_REPLY_TO = process.env.EMAIL_REPLY_TO || 'turnsomedayintodayone@gmai
 const APP_URL = (process.env.APP_URL || 'https://www.turnsomedayintodayone.com').replace(/\/$/, '');
 const DRY_RUN = process.env.EMAIL_DRY_RUN === '1';
 
+// "Could a real message leave this server right now?" DRY_RUN counts as yes: it
+// is the mode the tests run in, where a send is treated as successful, so a
+// caller must behave exactly as it would with a key present. The password reset
+// asks this before it tells somebody a link is on its way - an unset
+// RESEND_API_KEY used to leave the app saying "a reset link is on its way"
+// while every send was skipped in silence.
 function isConfigured() {
-  return Boolean(RESEND_API_KEY);
+  return Boolean(RESEND_API_KEY) || DRY_RUN;
 }
 
 // Every send funnels through here, and there is no longer an opt-out to honour:

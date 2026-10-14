@@ -429,6 +429,62 @@ test('where the browser offers a real install, that is what is used', () => {
   assert.strictEqual(p.noteText(), '', 'and no note, because nothing needed explaining');
 });
 
+/* --------------------------------------------------- reading the AI's answer */
+
+test('the AI\'s answer is read at the answer, not from the top of the reading', () => {
+  // Jacques, 10 Oct 2026: "It reads the reading, but never the AI's answer ...
+  // when AI gives an answer let it read it to me." The answer is a block on the
+  // Key like any other, so the queue already held it — it was simply the last
+  // thing there, under forty-odd paragraphs, and the code that used to run when
+  // it landed stopped the voice rather than saying it.
+  const p = loadPlayer({ blocks: [
+    { text: 'The reading, paragraph one.' },
+    { text: 'The reading, paragraph two.' },
+    { text: 'The AI\'s answer.' },
+  ] });
+
+  // The answer as the page really holds it: a paragraph inside the answer block.
+  const doc = p.sandbox.document;
+  const out = doc.createElement('div');
+  out.classList.add('ai-out');
+  const line = doc.createElement('p');
+  line.textContent = 'The AI\'s answer.';
+  out.appendChild(line);
+  p.blocks[2].el = line;
+
+  assert.strictEqual(typeof p.sandbox.speakTheAnswer, 'function',
+    'the Key has to have a way to ask for the answer');
+
+  p.speak();
+  assert.strictEqual(p.spoken[0].text, 'The reading, paragraph one.',
+    'Read it to me still starts at the top');
+
+  assert.strictEqual(p.sandbox.speakTheAnswer(), true, 'there is an answer to read');
+  assert.strictEqual(p.spoken[p.spoken.length - 1].text, 'The AI\'s answer.',
+    'and the voice begins at the answer, not at paragraph one again');
+  assert.strictEqual(p.line(), 'line 3 of 3', 'the bar says which line it is on');
+  assert.strictEqual(p.mainLabel(), 'Pause', 'with the reading under way');
+});
+
+test('with no answer on screen it says so, so the caller can fall back', () => {
+  const p = loadPlayer({ blocks: [{ text: 'Just the reading, and nothing else.' }] });
+  assert.strictEqual(p.sandbox.speakTheAnswer(), false,
+    'nothing to read means nothing is started');
+  assert.strictEqual(p.spoken.length, 0);
+});
+
+test('the Key hands its answer to the voice the moment it lands', () => {
+  // The other half of the same fault, and the half a stub DOM cannot see: the
+  // page's own ask() has to ask for it. A player nothing calls is a player that
+  // changes nothing.
+  const at = PAGE.indexOf('out.innerHTML = render(text);');
+  assert.ok(at > -1, 'the answer still renders where it did');
+  const after = PAGE.slice(at, at + 1600);
+  assert.match(after, /speakTheAnswer\(\)/, 'the answer is asked for by name');
+  assert.match(after, /if\(!readIt && typeof stopSpeaking === 'function'\) stopSpeaking\(\)/,
+    'and stopping is the fallback for when the player is not there, not the whole behaviour');
+});
+
 /* ------------------------------------------------- the page stays private */
 
 test('the offline cache still refuses the private page', () => {

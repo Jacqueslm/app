@@ -4,15 +4,14 @@
 // Vercel hands a request to a file before any code of ours runs ("precedence is
 // given to the filesystem prior to rewrites being applied", from Vercel's own
 // vercel.json docs). That is the whole problem with moving The Truth there: if
-// herbs.html, key.html, tax.html, fight.html, game3d.html and hub.html sit in
-// the deployment as files, then /herbs.html and its four siblings are readable
-// by anybody who types the name, password or no password. The gate only works
-// if the pages are not files.
+// herbs.html, key.html, tax.html, music.html, trainer.html and hub.html sit in
+// the deployment as files, then /herbs.html and its siblings are readable by
+// anybody who types the name, password or no password. The gate only works if
+// the pages are not files.
 //
 // So the deployment's static output is this folder, webroot, and the build step
 // below fills it with the things that are genuinely public — the icons, the
-// ring's three.js, the fight's photos and crowd, the manifests — and with
-// nothing else. Every .html file is left out on purpose. The private pages are
+// manifests, the meditation room's tracks — and with nothing else. Every .html file is left out on purpose. The private pages are
 // reached through the function (api/index.js), which reads them out of the
 // repository and checks the password first.
 //
@@ -29,12 +28,14 @@ const { listFor } = require('./server/music-list');
 
 const ROOT = __dirname;
 
-// Directories, as they sit in the repository. img/fight is the fight's own
-// pictures and audio/fight its crowd; the ring's engine is js/ring3d-three.js.
-// audio/meditation is the meditation room's eleven tracks, played by the Music
-// page (5 Oct 2026) — they belong here rather than in the function because the
-// music player streams them straight from disk.
-const DIRS = ['icons', 'js', 'img/fight', 'audio/fight', 'audio/meditation'];
+// Directories, as they sit in the repository. audio/meditation is the
+// meditation room's eleven tracks, played by the Music page (5 Oct 2026) —
+// they belong here rather than in the function because the music player streams
+// them straight from disk. 'js' and the two 'fight' folders went on 10 Oct 2026
+// with the fight itself: img/fight and audio/fight were its pictures and its
+// crowd, and js/ring3d-three.js was the ring's engine, which no other page
+// loads.
+const DIRS = ['icons', 'audio/meditation'];
 // Loose files. Each one is either linked by a page or fetched by the browser.
 // robots.txt is fetched by a crawler before it fetches anything else, and it is
 // the one file whose absence is not quiet: a site with none at its root reads to

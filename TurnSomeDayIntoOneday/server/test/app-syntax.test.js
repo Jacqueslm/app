@@ -14,7 +14,7 @@ const { execFileSync } = require('child_process');
 
 // 4 Oct 2026: this read the recovery app's page, which is deleted. hub.html is
 // the app now, and it brings its own inline script, so the same guard moves with
-// it. fight.html joined through the second test below.
+// it.
 const APP = path.join(__dirname, '..', '..', 'hub.html');
 
 // Only real JavaScript. A <script type="application/ld+json"> block holds
@@ -61,20 +61,28 @@ test('the other shipped HTML pages parse too', () => {
   // a SyntaxError in it leaves the page looking private and doing nothing.
   // herbs.html and tax.html joined on 15 Sep 2026, when the ask box put a live
   // AI in them; their scripts are now the longest of the reference pages.
-  // game3d.html joined on 16 Sep 2026. It is the ring - the fighters, the
-  // referee, the round clock and the whole fight - and it was the one shipped page
-  // this check did not look at, which is how three faults reached a real fight.
   // trading-school.html and desk.html were on this list too until 24 Sep 2026,
   // when they were deleted with everything else trading: "remove the trading
   // game the desk everything about trading im done."
-  // fight.html joined on 4 Oct 2026, and it is the reason this list matters more
-  // than it ever did: the fight is 669 lines of game lifted out of the recovery
-  // app into a page of its own, and a SyntaxError in it means the whole game is
-  // dead in the browser while the page still looks like it loaded.
+  // game3d.html joined on 16 Sep 2026 and fight.html on 4 Oct 2026, the ring and
+  // the game around it; both came off this list on 10 Oct 2026 with the fight
+  // itself - "delete the fight from everywhere". The rule they are here for has
+  // not gone anywhere: hub.html above is the shell, and a SyntaxError in it
+  // leaves an app that looks loaded and does nothing.
   // music.html joined on 5 Oct 2026. Its whole page is one inline script - the
   // player, the WAV cutter and the canvas cover maker - so a SyntaxError in it
   // leaves a page that looks loaded and does nothing.
-  const pages = ['fight.html', 'key.html', 'herbs.html', 'game3d.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html'];
+  // trainer.html was on this list from 9 Oct 2026 until 10 Oct 2026, when the
+  // trainer came off the app altogether - "Ddelete the trainer" - and the file
+  // went with it. It came back on 11 Oct 2026 as a smaller page of the same name
+  // - "start off with just basic input information that's it" - so it is back on
+  // the list: it keeps what you type on the phone, and a SyntaxError in the
+  // script that does the keeping leaves a form that looks fine and saves nothing.
+  // certify.html joined on 12 Oct 2026. Its whole page is one inline script - the
+  // two ninety-day tracks, the quizzes, the tests and the certificate - so a
+  // SyntaxError in it leaves a page that looks loaded and does nothing, which is
+  // exactly the failure this list was written for.
+  const pages = ['key.html', 'herbs.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html', 'trainer.html', 'certify.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

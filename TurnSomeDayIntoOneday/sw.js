@@ -30,16 +30,49 @@
 // name moved to 2.1 and on to 2.2 WITH it. This is the case the number exists
 // for: without the bump an installed phone keeps being served the old /app out
 // of its precached copy and sees nothing new at all.
-const CACHE_NAME = 'tsid-shell-v2.2';
+//
+// 9 Oct 2026: the home screen gained the Trainer, its fifth door, and the two
+// copies of "four doors" in the shell went with it. The name moved to 2.3 for
+// the same reason as the bump above - the shell changed, so an installed phone
+// has to rebuild it or it never sees the new door.
+//
+// 10 Oct 2026: the Fight came off the app altogether - Jacques: "delete the
+// fight from everywhere". Its door went from the shell, so the two copies of
+// "five doors" went with it and the name moved to 2.5 for the same reason as
+// every bump above: an installed phone has to rebuild the shell or it keeps
+// seeing a door that is no longer there.
+//
+// 10 Oct 2026, later the same day: the Trainer went the same way - Jacques:
+// "Ddelete the trainer". Its door came off the shell, so the two copies of
+// "four doors" went with it and the name moved to 2.6. Same reason again: a
+// phone that keeps its old shell keeps a door that leads nowhere.
+//
+// 11 Oct 2026: the Trainer came back, smaller - Jacques: "create the trainer we
+// will be slowly so start off with just basic input information that's it". Its
+// door is on the shell again, so the two copies of "four doors" changed with it
+// and the name moves to 2.7 for the reason above: a shell that never rebuilds
+// never grows the new door.
+//
+// 13 Oct 2026: the sign-in screen got its "Forgot your password?" option back,
+// this time wired to a real one-time link (Jacques asked for a way back rather
+// than none). The shell changed again, so the name moves to 3.0 for the same
+// reason as every bump above: an installed phone has to rebuild the shell or it
+// keeps being served the old sign-in screen without the option on it.
+//
+// 3.1, the same day, with the Trainer's card in the shell: its note now says the
+// Trainer is for the people Jacques trains, rather than talking to the trainee.
+// One line of a card is still a change to the shell, and the rule is unchanged -
+// an installed phone that never rebuilds is a phone that keeps the old words.
+//
+// 14 Oct 2026, and the same card a third time: it said the plan came next, and
+// the by-10 programme is on the Trainer now ("on the trainer add the by 10
+// program"). The line under "The Trainer" changed, so the name moves to 3.2 with
+// it for exactly the reason above: a phone that keeps its old shell keeps a card
+// that says the programme is still coming.
+const CACHE_NAME = 'tsid-shell-v3.2';
 const SHELL_FILES = [
   '/',
   '/app',
-  // The roof fight. It is the only app page loaded in an iframe, and the only
-  // one whose address carries a query string (?boss=…&fighter=…&floor=…). The
-  // page fallback below ends at '/app', so with this line missing and no
-  // signal, the fight frame came up as the app's home screen — the ring went
-  // missing at the bell. Precached, ignoreSearch finds it offline.
-  '/game3d.html',
   '/manifest.json',
   '/manifest-discrete.json',
   '/audio/sos-talk-warm.mp3',
@@ -148,17 +181,23 @@ self.addEventListener('fetch', (event) => {
   // pages themselves, so their lines went too.
   if (['/herbs', '/herbs.html', '/tax', '/tax.html'].includes(url.pathname)) return;
 
-  // The Fight joined the same door on 4 Oct 2026, when the app became three
-  // things and this became one of them. Both addresses again - the clean URL and
-  // the file name reach the same gated route, so a cached copy of either would
-  // outlive the check that is supposed to be guarding it.
-  if (['/fight', '/fight.html', '/game3d.html'].includes(url.pathname)) return;
-
   // The Music joined the same door on 5 Oct 2026. It is served only to somebody
   // signed in and on the list, so a cached copy would outlive that check and the
   // offline fallback would hand it out unguarded. Both addresses again - the
   // clean URL and the file name reach the same gated route.
   if (['/music', '/music.html'].includes(url.pathname)) return;
+
+  // The Trainer is back on the app as of 11 Oct 2026, so its line is back with
+  // it, for the reason it had one from 9 Oct: a cached copy would outlive the
+  // check that let it in, and the offline fallback would hand it out unguarded.
+  // Both addresses again, the clean URL and the file name.
+  if (['/trainer', '/trainer.html'].includes(url.pathname)) return;
+
+  // The Certification joined on 12 Oct 2026, for the reason every private page
+  // above is in this list: a cached copy would outlive the check that let it in,
+  // and the offline fallback would hand it out unguarded. Both addresses again,
+  // the clean URL and the file name.
+  if (['/certify', '/certify.html'].includes(url.pathname)) return;
 
   // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
   // Its whole point is that it is read fresh - a cached "here is every track"

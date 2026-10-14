@@ -42,6 +42,41 @@ still comes first on the page and the safety card still outranks the programme.
 The Trainer's card in the shell changed with it (it said the plan came next), so
 the cache name moved to `tsid-shell-v3.2`.
 
+**The cards on the Key are a reading, not a draw — 14 Oct 2026.** Jacques:
+"why the cards don't read like a tarot reading it's short and it should be read
+like a professional tarot reader and they should only be chosen based on
+birthday relationships and destiny by asking a few key questions and what a
+person is going through or what they are seeking." Both halves of that were
+true. The tab dealt three cards at random for nobody in particular with one line
+under each — about 120 words in total, one line less than the card's own entry
+in the birthday table, and answerable by pressing the button again. It is a
+session now. **Five questions** come first (whose reading, what it is about,
+what you are going through, what you are seeking, and a second birthday when the
+reading is about two people), every one of them a dropdown, because this page
+has never read what somebody typed. The birthday gives the **personality and
+soul card** by the method Mary K. Greer publishes (day + month + the full year
+as numbers, reduced by digit sum, with 19 keeping its whole chain 19-10-1), the
+**personal year number**, and — for two people — the **card the two birthdays
+make between them** (both birth cards added, cut back by twenty-two). The spread
+is dealt from a shuffle **seeded by the birthday and the answers**, so the same
+question deals the same reading, a changed answer changes the cards, and the
+significator is always on the table; the old `Math.random()` draw is gone. A
+reading is an opening that names the question in the querent's own words, a full
+paragraph on each of the three positions, a synthesis that reads the three
+together, the destiny layer read against the question, and a close that hands
+the question back — around 800 to 950 words. Each answer in the four `ASK_*`
+tables carries four things (its label, its opening line, a sentence said against
+each card, and the question it hands back), because an answer that changes
+nothing is decoration. **The month and the day start unchosen** — a dropdown
+defaulting to the first of January would deal a reading for a birthday nobody
+gave, and there is a test for it. `server/test/key-tarot.test.js` runs the
+page's own `renderCards()` against a stand-in screen, so a reading missing a
+part of itself, or gone short again, fails the suite. Nothing is stored, nothing
+is sent, no card predicts, no card says a person is finished, and no reading
+uses a pronoun for somebody who is not in the room. **No version bump:**
+`key.html` is never cached — `sw.js` skips `/key` before any handler can answer
+it — so the shell did not move.
+
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
 to me** button instead, which reads the entry out loud with the phone's own

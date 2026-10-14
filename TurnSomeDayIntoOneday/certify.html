@@ -125,6 +125,15 @@
   .plantcard:hover{background:rgba(232,192,122,.16)}
   .tickline{margin:10px 0 0; font-size:.8125rem; color:var(--good); min-height:1.1em}
 
+  /* Read aloud (13 Oct 2026): the phone's own voice reads a lesson, the way the
+     Herb Library reads a plant and The Key reads a reading. */
+  .sayrow{display:flex; align-items:center; gap:10px; margin:12px 0 2px}
+  .saysaid{margin:0; flex:0 0 auto; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer)}
+  .saybtn{flex:1 1 auto; padding:13px 14px; font:inherit; font-size:.875rem; font-weight:600; color:var(--gold);
+    background:rgba(232,192,122,.08); border:1px solid rgba(232,192,122,.32); border-radius:12px; cursor:pointer}
+  .saybtn:hover{background:rgba(232,192,122,.16)}
+  .saybtn.stop{flex:0 0 auto; color:var(--dim); background:none; border-color:var(--line)}
+
   ol.plan{margin:0; padding-left:20px; color:var(--dim); font-size:.8438rem; line-height:1.7}
 
   .cert{position:relative; text-align:center; padding:28px 20px 26px; border:1px solid rgba(232,192,122,.5); border-radius:var(--r);
@@ -1712,6 +1721,9 @@ var view = { at:"home", track:null, day:null, test:null, exam:false, cert:null }
 var picks = {};   // question index -> chosen option, for the view being answered
 
 function go(next){
+  // Leaving a lesson ends its reading, so the voice never carries into the next
+  // screen over the top of a different day.
+  sayStop();
   for (var k in next) if (Object.prototype.hasOwnProperty.call(next,k)) view[k] = next[k];
   picks = {};
   render();
@@ -1863,6 +1875,58 @@ function dayRows(t, from, to){
   return out + "</div>";
 }
 
+/* ── THE VOICE ────────────────────────────────────────────────────────────────
+   The phone reads the lesson out loud, with the voice already on it.
+
+   speechSynthesis is built into the browser, so nothing leaves the phone,
+   nothing is charged, there is no key and no server, and it works with no
+   signal — the same voice the Herb Library uses on a plant and The Key uses on
+   a reading. It reads only the lesson card as it stands on this page: the day's
+   title, its subject line and the teaching paragraphs. The quiz is left to the
+   eye, because reading the answers out loud would spoil it.
+
+   13 Oct 2026, from Jacques: "have the lessons all the lessons on both programs
+   to read it to me like everything else". Both tracks come through here — this
+   is the one place a lesson is drawn — so every lesson on both is read. If the
+   phone has no voice of its own, the button says so instead of doing nothing.
+─────────────────────────────────────────────────────────────────────────── */
+var SAYING = false;
+function speechOK(){
+  return typeof speechSynthesis !== "undefined" && typeof SpeechSynthesisUtterance !== "undefined";
+}
+function sayStop(){
+  if (speechOK()){ try{ speechSynthesis.cancel(); }catch(e){} }
+  SAYING = false;
+  var b = id("sayBtn"); if (b) b.textContent = "Read it to me";
+  var s = id("sayStop"); if (s) s.hidden = true;
+}
+/* The lesson, word for word, in the order the card shows it. */
+function sayText(day){
+  var s = day.t + ". ";
+  if (day.s) s += day.s + ". ";
+  (day.p || []).forEach(function(p){ s += p + " " });
+  return s;
+}
+function sayLesson(){
+  sayStop();
+  var t = track(view.track);
+  var day = (t && view.day) ? t.days[view.day-1] : null;
+  if (!day) return;
+  if (!speechOK()){ var b = id("sayBtn"); if (b) b.textContent = "This phone has no voice"; return; }
+  // The lesson card, and the "Going deeper" paragraph under it when this day has
+  // one — everything the page shows of the lesson, and none of the quiz.
+  var text = sayText(day);
+  var deeper = deeperFor(t.id, day.d);
+  if (deeper && deeper.p) text += "Going deeper. " + deeper.p + " ";
+  var u = new SpeechSynthesisUtterance(text);
+  u.onend = function(){ if (SAYING) sayStop(); };
+  u.onerror = function(){ if (SAYING) sayStop(); };
+  SAYING = true;
+  var btn = id("sayBtn"); if (btn) btn.textContent = "Stop";
+  var st = id("sayStop"); if (st) st.hidden = false;
+  try{ speechSynthesis.speak(u); }catch(e){ sayStop() }
+}
+
 /* -- one lesson and its quiz -- */
 function renderDay(v, d){
   var t = track(view.track);
@@ -1874,6 +1938,14 @@ function renderDay(v, d){
   out += "<div class=\"card\"><h2>" + esc(day.t) + "</h2>";
   (day.p || []).forEach(function(p){ out += "<p>" + esc(p) + "</p>"; });
   out += "</div>";
+  // Read aloud (13 Oct 2026): the same voice the Herb Library reads a plant
+  // with reads this lesson — the title, the subject and the teaching, and it
+  // stops before the quiz, which is left to the eye.
+  out += "<div class=\"sayrow noprint\">"
+       +   "<p class=\"saysaid\">Read aloud</p>"
+       +   "<button class=\"saybtn\" id=\"sayBtn\">Read it to me</button>"
+       +   "<button class=\"saybtn stop\" id=\"sayStop\" hidden>Stop</button>"
+       + "</div>";
   out += "<p class=\"kicker\">The day's quiz</p>";
   out += quizHtml(day.q);
   out += "<button class=\"btn\" id=\"submit\">Check the answers</button>";
@@ -1904,6 +1976,9 @@ function renderDay(v, d){
          + "</div>";
   }
   v.innerHTML = out;
+
+  id("sayBtn").addEventListener("click", sayLesson);
+  id("sayStop").addEventListener("click", sayStop);
 
   wireQuiz(v, day.q, function(right,total){
     var r = get(t.id);
@@ -2327,6 +2402,7 @@ window.CERTIFY = {
   drawCert: drawCert, exportCert: exportCert, reload: reloadPage,
   GO_DEEPER: GO_DEEPER, deeperFor: deeperFor, libLabel: libLabel, plantSlug: plantSlug,
   herbBridge: herbBridge, herbBridgeLine: herbBridgeLine,
+  sayLesson: sayLesson, sayText: sayText, sayStop: sayStop, speechOK: speechOK,
   parseDeepLink: parseDeepLink, bootLink: bootLink
 };
 })();

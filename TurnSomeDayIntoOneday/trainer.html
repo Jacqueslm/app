@@ -328,6 +328,72 @@
   var KIT = 'kit', WANT = 'want';
   var el = function(id){ return document.getElementById(id); };
 
+  /* ── THE VOICE ─────────────────────────────────────────────────────────────
+     Jacques, 15 Oct 2026: "the read it to me doesn't work here ... the whole app
+     not just specific sections." The Trainer was the page with none at all —
+     the intake, the safety card and the whole by-10 programme were for the eye
+     only. This reads the page as it stands: every card in order, the field
+     labels with them, and the controls never, because a button is not a word. */
+  var SAYING = false;
+  function speechOK(){
+    return typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
+  }
+  function sayStop(){
+    if (speechOK()){ try { speechSynthesis.cancel(); } catch(e){} }
+    SAYING = false;
+    var b = el('sayBtn'); if (b) b.textContent = 'Read it to me';
+    var s = el('sayStop'); if (s) s.hidden = true;
+  }
+  /* Everything the page says, in the order it says it. */
+  function sayText(){
+    var wrap = document.querySelector('.wrap');
+    if (!wrap) return '';
+    var out = [];
+    var mine = /(^|\s)(noprint|sayrow|row)(\s|$)/;
+    var walk = function(e){
+      var kids = e.children, deeper = false;
+      for (var i = 0; i < kids.length; i++){
+        var c = kids[i];
+        if (c.id === 'sayRow') continue;
+        if (mine.test(c.className || '') && c.id !== 'intake') continue;
+        if (/^(BUTTON|INPUT|SELECT|TEXTAREA|OPTION|SCRIPT|STYLE)$/.test(c.tagName)) continue;
+        if (!(c.textContent || '').trim()) continue;
+        if (/^(DIV|P|LI|UL|OL|H2|H3|H4|TABLE|TR|TD|TH|SECTION|ARTICLE|FORM|LABEL|HEADER)$/.test(c.tagName)){ deeper = true; walk(c); }
+      }
+      if (!deeper){
+        var t = (e.textContent || '').replace(/\s+/g, ' ').trim();
+        if (t.length > 1) out.push(t);
+      }
+    };
+    walk(wrap);
+    return out.join('. ');
+  }
+  function say(){
+    if (SAYING){ sayStop(); return; }
+    if (!speechOK()){ var b0 = el('sayBtn'); if (b0) b0.textContent = 'This phone has no voice'; return; }
+    var text = sayText();
+    if (!text){ var b1 = el('sayBtn'); if (b1) b1.textContent = 'Nothing here to read yet'; return; }
+    sayStop();
+    var u = new SpeechSynthesisUtterance(text);
+    u.onend = function(){ if (SAYING) sayStop(); };
+    u.onerror = function(){ if (SAYING) sayStop(); };
+    SAYING = true;
+    var b = el('sayBtn'); if (b) b.textContent = 'Stop';
+    var s = el('sayStop'); if (s) s.hidden = false;
+    try { speechSynthesis.speak(u); } catch(e){ sayStop() }
+  }
+  function mountSay(){
+    var hdr = document.querySelector('.hdr');
+    if (!hdr || el('sayRow')) return;
+    hdr.insertAdjacentHTML('afterend',
+      '<div class="row noprint" id="sayRow">'
+      + '<button class="btn quiet" id="sayBtn">Read it to me</button>'
+      + '<button class="btn quiet" id="sayStop" hidden>Stop</button>'
+      + '</div>');
+    var b = el('sayBtn'); if (b) b.addEventListener('click', say);
+    var s = el('sayStop'); if (s) s.addEventListener('click', sayStop);
+  }
+
   function save(){
     try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
     stamp();
@@ -428,9 +494,12 @@
     clearBtn.addEventListener('click', function(){ clearAll(); });
   }
 
+  mountSay();
+
   /* The page's own surface, so a check can drive it the same way a thumb does.
      Nothing else is on window. */
-  window.TRAINER = { KEY: KEY, read: read, saved: function(){ return store; }, clear: clearAll };
+  window.TRAINER = { KEY: KEY, read: read, saved: function(){ return store; }, clear: clearAll,
+                     sayText: sayText, say: say };
 })();
 </script>
 </body>

@@ -61,8 +61,39 @@ test('the voice reads whichever tab is open, and its own words', () => {
   for (const panel of ['panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel']) {
     assert.ok(root[1].includes(`'${panel}'`), `${panel} is missing from the read map`);
   }
-  // The birthday reading is the one screen with two versions of itself.
-  assert.match(BLOCK, /simple-box/, 'the short version has to be readable too');
+  // The birthday reading is everything the page drew into #result — the crest
+  // and the day layer live outside #reading-full, so the root cannot be that.
+  assert.match(BLOCK, /panel-read'\)\{[\s\S]*?getElementById\('result'\)/,
+    'the reading tab must be read from #result, crest and all');
+});
+
+// Jacques, 15 Oct 2026: "the read it to me doesn't work here ... the whole app
+// not just specific sections." It was a whitelist of class names, and a
+// whitelist can only ever hold the sections whoever wrote it remembered: the
+// three-books block, both pull blocks, the strengths and weaknesses under the
+// day's name and the crest's own chips were none of them in it, so a reading
+// was read with holes in it and the button still looked like it had worked.
+test('the reading is read whole, not in the sections somebody listed', () => {
+  // It walks the screen. No list of classes to fall behind the page.
+  assert.match(BLOCK, /querySelectorAll\(\'\*\'\)|harvest\(/, 'the reader must walk the screen');
+  assert.ok(!/'h2, h3, h4,/.test(BLOCK),
+    'the class whitelist is what skipped whole sections — it must not come back');
+  // The sections it used to skip are not held back by name anywhere.
+  const skip = BLOCK.match(/const SKIP = '([^']*)'/);
+  assert.ok(skip, 'the reader must name what it leaves out, in one place');
+  for (const cls of ['.pull', '.books', '.tags', '.chip', '.epigram', '.db', '.legend']) {
+    assert.ok(!skip[1].includes(cls), `${cls} is a section of a reading, not a hedge — it must be read`);
+  }
+  // And the four things it does leave out are the four that are not reading.
+  for (const cls of ['.disclaim', '.note', '.tools', '.voicebar', '[hidden]']) {
+    assert.ok(skip[1].includes(cls), `${cls} must stay out of the read`);
+  }
+  // The short version and the long one are never both read.
+  assert.match(BLOCK, /\[hidden\]/, 'a hidden layer has to be dropped, or both versions get read');
+  // Inline children are part of their sentence, and the pieces are spaced, or a
+  // label against its value comes out as one word to a voice.
+  assert.match(BLOCK, /const BLOCKTAG/, 'the reader must know a block from a sentence');
+  assert.match(BLOCK, /const words = function/, 'and join the pieces of a line with spaces');
 });
 
 test('the bar it mounts is the same bar, not a second design', () => {

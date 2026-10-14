@@ -1752,12 +1752,15 @@ function setCertLink(){
 function render(){
   setCertLink();
   var v = id("view");
-  if (view.cert) return renderCert(v, view.cert);
-  if (view.day) return renderDay(v, view.day);
-  if (view.test) return renderTest(v, view.test, false);
-  if (view.exam) return renderExam(v);
-  if (view.track) return renderTrack(v, track(view.track));
-  return renderHome(v);
+  if (view.cert) renderCert(v, view.cert);
+  else if (view.day) renderDay(v, view.day);
+  else if (view.test) renderTest(v, view.test, false);
+  else if (view.exam) renderExam(v);
+  else if (view.track) renderTrack(v, track(view.track));
+  else renderHome(v);
+  /* The voice bar goes on after the screen is drawn, so it lands under whatever
+     this screen turned out to be. */
+  mountScreenSay();
 }
 
 /* -- home -- */
@@ -1899,6 +1902,11 @@ function sayStop(){
   SAYING = false;
   var b = id("sayBtn"); if (b) b.textContent = "Read it to me";
   var s = id("sayStop"); if (s) s.hidden = true;
+  /* The bar under the screens that have no lesson on them — Jacques, 15 Oct
+     2026: "the read it to me doesn't work here ... the whole app not just
+     specific sections." */
+  var sb = id("screenSayBtn"); if (sb) sb.textContent = "Read it to me";
+  var ss = id("screenSayStop"); if (ss) ss.hidden = true;
 }
 /* The lesson, word for word, in the order the card shows it. */
 function sayText(day){
@@ -1925,6 +1933,76 @@ function sayLesson(){
   var btn = id("sayBtn"); if (btn) btn.textContent = "Stop";
   var st = id("sayStop"); if (st) st.hidden = false;
   try{ speechSynthesis.speak(u); }catch(e){ sayStop() }
+}
+
+/* ── THE VOICE ON THE OTHER SCREENS ──────────────────────────────────────────
+   The lesson carried a Read it to me button and the other four screens carried
+   none, so on the home page, a track, a test and the certificate the reading
+   had no voice at all. This bar is mounted once under whatever screen has words
+   on it and reads that screen.
+
+   Two screens are left out on purpose and they are the quiz ones. A test and
+   the examination are made of questions with their answers underneath — read
+   aloud, the answers arrive before the reader has decided anything, which is
+   the whole exercise gone. The lesson keeps the button it already had, because
+   that one reads the teaching and stops at the quiz by design.
+─────────────────────────────────────────────────────────────────────────── */
+function screenSayHTML(){
+  return '<div class="sayrow noprint" id="screenSay">'
+       +   '<p class="saysaid">Read aloud</p>'
+       +   '<button class="saybtn" id="screenSayBtn">Read it to me</button>'
+       +   '<button class="saybtn stop" id="screenSayStop" hidden>Stop</button>'
+       + '</div>';
+}
+/* Whatever the drawn screen says, in the order it says it. The controls are not
+   words, so buttons, fields and the bar itself are walked past. */
+function screenSayText(){
+  var v = id("view");
+  if (!v) return "";
+  var out = [];
+  var skip = /(^|\s)(noprint|sayrow|saybar|saysaid)(\s|$)/;
+  var walk = function(e){
+    var kids = e.children, deeper = false;
+    for (var i = 0; i < kids.length; i++){
+      var c = kids[i];
+      if (skip.test(c.className || "")) continue;
+      if (/^(BUTTON|INPUT|SELECT|TEXTAREA|OPTION|SCRIPT|STYLE)$/.test(c.tagName)) continue;
+      if (!(c.textContent || "").trim()) continue;
+      if (/^(DIV|P|LI|UL|OL|H2|H3|H4|TABLE|TR|TD|TH|SECTION|ARTICLE|A)$/.test(c.tagName)){ deeper = true; walk(c); }
+    }
+    if (!deeper){
+      var t = (e.textContent || "").replace(/\s+/g, " ").trim();
+      if (t.length > 1) out.push(t);
+    }
+  };
+  walk(v);
+  return out.join(". ");
+}
+function screenSay(){
+  if (SAYING){ sayStop(); return; }
+  if (!speechOK()){ var b0 = id("screenSayBtn"); if (b0) b0.textContent = "This phone has no voice"; return; }
+  var text = screenSayText();
+  if (!text){ var b1 = id("screenSayBtn"); if (b1) b1.textContent = "Nothing here to read yet"; return; }
+  sayStop();
+  var u = new SpeechSynthesisUtterance(text);
+  u.onend = function(){ if (SAYING) sayStop(); };
+  u.onerror = function(){ if (SAYING) sayStop(); };
+  SAYING = true;
+  var b = id("screenSayBtn"); if (b) b.textContent = "Stop";
+  var s = id("screenSayStop"); if (s) s.hidden = false;
+  try{ speechSynthesis.speak(u); }catch(e){ sayStop() }
+}
+/* Mounted after every render, and taken off the two screens that keep their own
+   arrangement — a lesson's own button, and a quiz, which is left to the eye. */
+function mountScreenSay(){
+  var v = id("view");
+  if (!v) return;
+  var old = id("screenSay");
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+  if (view.day || view.test || view.exam) return;
+  v.insertAdjacentHTML("beforeend", screenSayHTML());
+  var b = id("screenSayBtn"); if (b) b.addEventListener("click", screenSay);
+  var s = id("screenSayStop"); if (s) s.addEventListener("click", sayStop);
 }
 
 /* -- one lesson and its quiz -- */

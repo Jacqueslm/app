@@ -559,10 +559,11 @@ ol.steps li b{color:var(--gold); font-weight:600}
     const open = document.querySelector('.panel:not([hidden])');
     if(!open) return null;
     if(open.id === 'panel-read'){
-      /* Whichever version of the birthday reading is showing — reading the one
-         that is hidden aloud is worse than reading nothing. */
-      const box = document.getElementById('simple-box');
-      return (box && !box.hidden) ? box : document.getElementById('reading-full');
+      /* Everything the page drew into #result: the crest, whichever version of
+         the reading is showing, and the tools. The version that is hidden is
+         dropped by the reader itself rather than by this choice, so the crest
+         and the day layer are read too — they are outside #reading-full. */
+      return document.getElementById('result');
     }
     const id = ROOT[open.id];
     return id ? document.getElementById(id) : null;
@@ -576,21 +577,96 @@ ol.steps li b{color:var(--gold); font-weight:600}
       if(panel && !panel.querySelector('[data-act="speak"]')) panel.insertAdjacentHTML('afterbegin', BAR);
     });
 
-    /* 2. What gets read. The same filters the original used — no disclaimers, no
-       notes, and none of the AI block's own pitch — plus the things the other
-       tabs are made of: a saved person's card, a pair reading, a period on The
-       48, a quiz question with its answers, and on the matrix the names down the
-       side, the legend and the tally (the cells themselves are three marks in a
-       grid — read aloud they are noise, so they are left out on purpose). */
+    /* 2. What gets read — the whole open screen, not a list of class names.
+
+       It was a whitelist of classes, and that is exactly how the voice came to
+       skip whole sections of a reading: the three-books block, both of the pull
+       blocks, the strengths and weaknesses under the day's name and the crest's
+       own chips were none of them in the list, so a long reading was read with
+       holes in it and the button still looked like it had worked. A list of
+       classes can only ever cover the sections whoever wrote it happened to
+       remember, and this page is 8,000 lines of sections.
+
+       So the screen is walked instead. Held back from the walk, and nothing
+       else:
+
+         the app's own hedges       .disclaim and .note, which are for the eye
+         the AI block's pitch       .ai-ask outside .ai-out; the answer stays
+         the voice's own controls  .tools and .voicebar, or the bar would read
+                                    its own buttons out between paragraphs
+         anything not on screen     [hidden] — so the short version and the long
+                                    one are never both read, and a panel that
+                                    has been toggled away stays quiet
+         whatever holds no words    the marks and shapes the CSS draws carry no
+                                    text at all, so they fall out on their own
+
+       A section added tomorrow is read tomorrow, with no list to remember. */
+    const SKIP = '.disclaim, .note, .tools, .voicebar, [hidden]';
+    /* Block-level tags. Anything else inside a sentence — a <b>, a <small>, a
+       span — is part of that sentence, and reading it alone would read half of
+       one. */
+    const BLOCKTAG = { DIV:1, P:1, LI:1, UL:1, OL:1, TR:1, TD:1, TH:1, TABLE:1,
+      TBODY:1, THEAD:1, SECTION:1, ARTICLE:1, HEADER:1, FOOTER:1, BLOCKQUOTE:1,
+      DETAILS:1, SUMMARY:1, DL:1, DT:1, DD:1, FIGURE:1, FIGCAPTION:1, FORM:1,
+      FIELDSET:1, PRE:1, H1:1, H2:1, H3:1, H4:1, H5:1, H6:1, NAV:1, ASIDE:1,
+      /* A button on this page is an item — a menu line, a month, a quiz answer —
+         and each is read as its own line rather than run together. */
+      BUTTON:1 };
+
+    const holdBack = function(e){
+      return !!e.closest(SKIP) || (!!e.closest('.ai-ask') && !e.closest('.ai-out'));
+    };
+
+    /* The words of a block, with the pieces spaced. textContent runs inline
+       children together — a label in a <small> against its value in a <span>
+       comes out as "who this isPisces II" — and that is one word to a voice. */
+    const words = function(e){
+      let out = '';
+      for(let i = 0; i < e.childNodes.length; i += 1) out += ' ' + e.childNodes[i].textContent;
+      return out.replace(/\s+/g, ' ').trim();
+    };
+
+    /* Walk down to whatever actually holds the words. A wrapper is skipped once
+       a child below it is the block; the words a block holds directly, beside
+       a block child of its own, are taken as their own line so nothing sitting
+       next to a card is lost. */
+    const harvest = function(e, out){
+      let walked = false;
+      const kids = e.children;
+      for(let i = 0; i < kids.length; i += 1){
+        const c = kids[i];
+        if(holdBack(c)) continue;
+        if(!(c.textContent || '').trim().length) continue;
+        if(BLOCKTAG[c.tagName]){ walked = true; harvest(c, out); }
+      }
+      if(walked){
+        /* Only the words this box holds itself, beside the cards inside it. */
+        let own = '';
+        for(let i = 0; i < e.childNodes.length; i += 1){
+          const n = e.childNodes[i];
+          if(n.nodeType === 3) own += ' ' + n.textContent;
+        }
+        own = own.replace(/\s+/g, ' ').trim();
+        if(own.length > 1) out.push({el:e, text:own});
+      } else {
+        /* Nothing block-level below, so everything in here is one block —
+           including the words inside a <b> or a <small>, which are part of the
+           sentence and must not be read on their own. */
+        const text = words(e);
+        if(text.length > 1) out.push({el:e, text:text});
+      }
+      return out;
+    };
+
     readableBlocks = function(){
       const src = readRoot();
-      if(!src) return [];
-      return Array.prototype.slice.call(src.querySelectorAll(
-          'h2, h3, h4, .dt, .db, .pn, .pd, .pp, .pt, .q, .vt, .sub2, .legend span, .tally div, th, p, li, button.mbtn, button.opt'))
-        .filter(function(e){ return !e.classList.contains('disclaim') && !e.classList.contains('note'); })
-        .filter(function(e){ return !e.closest('.ai-ask') || e.closest('.ai-out'); })
-        .map(function(e){ return {el:e, text:(e.textContent || '').trim()}; })
-        .filter(function(b){ return b.text.length > 1; });
+      if(!src || holdBack(src)) return [];
+      const out = [];
+      /* The words a wrapper holds directly, then everything below it. The leaf
+         case — an element with text and no element children at all — is picked
+         up by the same test, because its own text is its own. */
+      harvest(src, out);
+      return out.filter(function(b){ return b.text.length > 1; });
     };
 
     /* 3. A screen with nothing on it says so. An empty People list, or a pair

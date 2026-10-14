@@ -152,10 +152,16 @@ function load(opts) {
       innerHTML: '', textContent: '', value: '', hidden: false, disabled: false,
       className: '', style: {}, attrs: {}, href: '', download: '', clicked: false,
       classList: { add() {}, remove() {} },
+      // The page mounts its screen bar with insertAdjacentHTML, which a stub
+      // without it turns into a crash on every render. The markup is kept so a
+      // check can see what was mounted, and on what screen.
+      inserted: '', insertions: [],
+      insertAdjacentHTML(pos, html) { this.insertions.push({ pos, html: String(html) }); this.inserted += String(html); },
+      children: [], parentNode: null, tagName: (tag || 'DIV').toUpperCase(),
       getAttribute: () => null,
       setAttribute() {}, removeAttribute() {}, focus() {}, closest: () => null,
       querySelectorAll: () => [], querySelector: () => null,
-      appendChild() {}, remove() {},
+      appendChild() {}, removeChild() {}, remove() {},
       addEventListener() {},
       click() { this.clicked = true; },
     };
@@ -283,6 +289,54 @@ test('every lesson on both tracks reads itself aloud, and the quiz is not read',
   plain.sandbox.window.CERTIFY.go({ track: 'herbalist', day: 1 });
   plain.sandbox.window.CERTIFY.sayLesson();
   assert.match(plain.byId('sayBtn').textContent, /no voice/, 'a phone with no voice says so');
+});
+
+test('every screen that is not a lesson or a quiz carries its own read-aloud bar', () => {
+  // Jacques, 15 Oct 2026: "the read it to me doesn't work here ... the whole app
+  // not just specific sections." A lesson had a button; home, a track and the
+  // certificate had none, so half the page could not be listened to. The bar is
+  // mounted after every render and reads the screen as it was just drawn.
+  assert.match(HTML, /function mountScreenSay\(\)/);
+  assert.match(HTML, /mountScreenSay\(\);/, 'and it is mounted after every render');
+  assert.ok(HTML.includes('screenSayBtn'), 'the bar carries its own button');
+  assert.ok(HTML.includes('screenSayStop'), 'and its own stop');
+
+  const { sandbox, byId } = load({ speech: true });
+  const C = sandbox.window.CERTIFY;
+  const screens = [
+    ['home (no track chosen)', { track: null, day: null, test: null, exam: false, cert: null }],
+    ['a track', { track: 'herbalist', day: null, test: null, exam: false, cert: null }],
+    ['the certificate', { track: 'herbalist', cert: 'herbalist', day: null, test: null, exam: false }],
+  ];
+  for (const [name, route] of screens) {
+    const v = byId('view');
+    v.insertions.length = 0;
+    C.go(route);
+    const mounted = v.insertions.map((i) => i.html).join('');
+    assert.match(mounted, /id="screenSayBtn"/, `${name}: the screen mounts the read-aloud bar`);
+  }
+
+  // The two screens that keep their own arrangement get none: a lesson has its
+  // own button on the lesson card, and a quiz is left to the eye.
+  for (const [name, route] of [
+    ['a lesson', { track: 'herbalist', day: 1, test: null, exam: false, cert: null }],
+    ['a test', { track: 'herbalist', day: null, test: 1, exam: false, cert: null }],
+    ['the examination', { track: 'herbalist', day: null, test: null, exam: true, cert: null }],
+  ]) {
+    const v = byId('view');
+    v.insertions.length = 0;
+    C.go(route);
+    const mounted = v.insertions.map((i) => i.html).join('');
+    assert.doesNotMatch(mounted, /id="screenSayBtn"/, `${name}: left as it was`);
+  }
+
+  // And the bar reads the screen, not a fixed line: the words it walks are the
+  // ones drawn under it, and it skips its own bar, the lesson row and printing.
+  assert.match(HTML, /function screenSayText\(\)/);
+  assert.ok(HTML.includes('noprint|sayrow|saybar|saysaid'),
+    'the bar, the lesson row and print-only words are never read back');
+  assert.ok(HTML.includes('if (view.day || view.test || view.exam) return;'),
+    'a lesson and a quiz mount nothing');
 });
 
 test('a passed day is remembered, and a passed exam earns the certificate', () => {

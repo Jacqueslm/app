@@ -238,3 +238,39 @@ test('the herb library: the safety tab can be read out loud', () => {
   assert.match(p.said[0].text, /Nothing here answers an infection/, 'the first safety line is read');
   assert.match(p.said[0].text, /is not a free addition to anything else/, 'and the line about what the herbs do to what you take comes through too');
 });
+
+test('the herb library: the My notes tab reads out loud, your own notes with it', () => {
+  // 15 Oct 2026, from the same instruction as everywhere else: "the whole app not
+  // just specific sections". My notes was the last shelf on this page with no
+  // voice, and the one place the person's own writing sits - the last shelf that
+  // should have stayed screen-only.
+  const p = loadPage();
+  const fennel = p.sandbox.allHerbs().filter((h) => /^Fennel/.test(h.n))[0];
+  assert.ok(fennel, 'Fennel is in the library');
+  p.sandbox.store['herb:' + fennel.id] = { note: 'Steeped it ten minutes and it settled my stomach.' };
+  p.sandbox.tab = 'mine';
+  p.sandbox.render();
+  const html = p.els.get('view').innerHTML;
+  assert.match(html, /data-say="mine"/, 'the tab carries its own read button');
+  assert.match(html, /Read it to me/, 'in words, not a bare icon');
+  assert.equal(p.said.length, 0, 'drawing it does not start reading');
+
+  p.sandbox.say('mine');
+  assert.equal(p.said.length, 1, 'one press, one reading');
+  const text = p.said[0].text;
+  assert.match(text, /^My notes\./, 'it starts by naming the tab');
+  assert.match(text, /Notes on 1 herb/, 'and says how many notes there are');
+  assert.ok(text.indexOf(fennel.n) > -1, 'the plant is named');
+  assert.ok(text.indexOf('Steeped it ten minutes') > -1, 'and the note itself is read, in the words it was written in');
+  assert.doesNotMatch(text, /<[^>]*>/, 'with no HTML read out loud');
+});
+
+test('the herb library: an empty My notes tab says so rather than reading nothing', () => {
+  const p = loadPage();
+  p.sandbox.tab = 'mine';
+  p.sandbox.render();
+  assert.match(p.els.get('view').innerHTML, /data-say="mine"/, 'the button is there with nothing in the tab');
+  p.sandbox.say('mine');
+  assert.equal(p.said.length, 1, 'and pressing it does not come out as silence');
+  assert.match(p.said[0].text, /No notes yet/, 'it says the tab is empty');
+});

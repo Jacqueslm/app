@@ -2524,6 +2524,9 @@ function render(){
         +(noteOf(h.id)?'<div class="mine-note">'+esc(noteOf(h.id))+'</div>':'')
         +'</div></div></div>';
     });
+    /* The tab reads out loud too, your own notes with it. */
+    SAY_TEXT['mine']=mineSayText(withNotes);
+    out+=saybarHTML('mine');
     out+='</div>';
   }
 
@@ -2664,6 +2667,22 @@ function daySayText(day){
 function safetySayText(){
   var s='Read this first. ';
   SAFETY_BOXES.forEach(function(x){ s+=x.h+'. '+x.b+' ' });
+  return s;
+}
+/* The My notes tab, read as it stands: what the tab is for, and every plant with
+   the note written beside it. The fields are left to the eye - a label read out
+   with no field under it is not a sentence. Added 15 Oct 2026, the last shelf on
+   this page that could only be read on a screen. */
+function mineSayText(withNotes){
+  var s='My notes. Add a herb from the book in the fields on this screen, and write a note on any herb you open. ';
+  s+= withNotes.length
+    ? ('Notes on '+withNotes.length+(withNotes.length===1?' herb. ':' herbs. '))
+    : 'No notes yet. ';
+  withNotes.forEach(function(h){
+    s+=h.n+'. ';
+    if(h.u) s+=h.u+'. ';
+    var n=noteOf(h.id); if(n) s+='Your note: '+n+'. ';
+  });
   return s;
 }
 

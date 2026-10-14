@@ -1524,10 +1524,13 @@ Emeka Nwosu&#9;Oct 21, 1975"></textarea>
     <summary>How this works, and what's original here</summary>
     <p class="note">
       The 48 periods and their date ranges come from this project's README and are used exactly as written.
+      The four seasons, the four elements, the three qualities, and the four quarters and twelve seven-year
+      bands of the Grand Cycle are the frame the system is built on, used as a structure rather than as text.
       The correspondences are the standard personology framework: each period's sign gives its element and quality;
       the day of the month reduces to a number 1&ndash;9 with its ruling planet; and the day of the month also names a
       Major Arcana card (days 1&ndash;22 directly, days 23&ndash;31 by digit sum).
-      Every word of interpretation &mdash; the readings, the paths, the pair profiles &mdash; was written for this app.
+      Every word of interpretation &mdash; the readings, the paths, the pair profiles and the Grand Cycle
+      &mdash; was written for this app.
       Nothing is quoted from any book, and the path names here are this app's own, not any published list.
     </p>
   </details>
@@ -1716,6 +1719,69 @@ function seasonLine(season){
   const v = SEASONS[season];
   return v.signs.map((n, i) => `${n} ${['opens','holds','ends'][i]}`).join(', ');
 }
+
+/* ============================================================
+   THE GRAND CYCLE — the same wheel read at the scale of a life.
+
+   The rest of this page reads a day, a period, a sign. This is
+   the widest reading in the system: the year's four seasons laid
+   over about eighty-four years, four stretches of twenty-one,
+   with the twelve signs taking seven years each in the wheel's
+   own order. It is the last section of the frame this app is
+   built on that this page did not carry, and it is a frame rather
+   than a forecast — people are routinely in the wrong quadrant
+   for their age, which is the first thing to say about it.
+   Every word below is this app's own writing.
+   ============================================================ */
+const GRAND_LIFE = 84;
+
+const GRAND = [
+  {season:"Spring", from:0, to:21, signs:["Aries","Taurus","Gemini"],
+   forWhat:"Getting the body, the nerve and the language working. Being taught by other people, then finding out which parts of it you actually believe. Nearly everything in this stretch is a first attempt, and a first attempt is not supposed to be a finished one.",
+   shape:"Three bands of seven. The first is nerve and appetite — wanting a thing and moving toward it. The second is getting your hands on real things, and learning that keeping them takes work. The third is other people: words, company, and trying on the versions of yourself you might become.",
+   goesWrong:"Being measured against the end of the process while standing at the start of it. Leaving early, and staying in a shape somebody else chose, are the two ways this stretch gets spent rather than used.",
+   carried:"Appetite, and the willingness to be bad at something where people can see."},
+  {season:"Summer", from:21, to:42, signs:["Cancer","Leo","Virgo"],
+   forWhat:"Making the thing and being seen making it. Work with a name on it, a home, the people you chose rather than the ones you were given. Output usually peaks in here, which is worth knowing and worth not mistaking for the whole point.",
+   shape:"Three bands of seven. The first is belonging — a place, and the few people who stay in it. The second is standing: taking the lead, being the one others look to. The third is craft: the details and the systems that make the first two survive you.",
+   goesWrong:"Letting the harvest stand in for the reason for it. The years go to an institution that will not remember, or to a version of yourself built for people who are watching.",
+   carried:"A place, a body of work, and a household. What is built here is what the second half has to work with."},
+  {season:"Autumn", from:42, to:63, signs:["Libra","Scorpio","Sagittarius"],
+   forWhat:"The half where the outward business stops being the whole point. Weighing what to keep, going deeper into fewer things, and putting some of it down on purpose instead of by attrition.",
+   shape:"Three bands of seven. The first is the accounting — what the first half actually produced, weighed honestly and without flattery. The second is depth, and the endings that were put off. The third is the wider view: teaching, meaning, and the question that was underneath all the others.",
+   goesWrong:"Reading the turn as a decline rather than a change of direction. It is the most common misreading in the whole model, and the year itself contradicts it every single time.",
+   carried:"Judgment, and the short list of things that survived being sorted."},
+  {season:"Winter", from:63, to:GRAND_LIFE, signs:["Capricorn","Aquarius","Pisces"],
+   forWhat:"Structure, distance, and dissolving. What was built gets handed on or wound down. The company thins to the chosen. The questions get larger, and there is far less noise in the way of them.",
+   shape:"Three bands of seven. The first is the long structure — order, legacy, and the last thing built properly at this scale. The second is distance: the wider view, the next generation taking the wheel, and the relief of not being the one in charge. The third is loosening — the shape gives way, and what it was for is what is left.",
+   goesWrong:"Holding a position long after it stopped being yours to hold. There is no version of this stretch in which the grip succeeds.",
+   carried:"Whatever is left once everything unnecessary has been put down."}
+];
+
+/* The two halves. Birth to forty-two is the outward one, forty-two to the end
+   is the inward one — and the second is not the first winding down. */
+const GRAND_HALVES = [
+  {to:42, n:"Birth to forty-two", t:"The outward half. Building, appearing, accumulating — a place, a body of work, a household. Almost all of it happens in front of other people, so how it looks is part of the job rather than a distraction from it."},
+  {to:GRAND_LIFE, n:"Forty-two to eighty-four", t:"The inward half. Sorting, deepening, giving away. Not the first half winding down — the same year travelled in the other direction, where autumn is not the absence of spring. Most of the work in these years is not visible from outside."}
+];
+
+/* Twelve signs, seven years each, in the wheel's own order. */
+const GRAND_BANDS = [
+  {sign:"Aries",       from:0,  to:7,  line:"Being new. Nerve, appetite, and the discovery that wanting a thing is enough to start moving toward it."},
+  {sign:"Taurus",      from:7,  to:14, line:"Things that can be touched. What is solid, what can be kept, and the first understanding that keeping takes work."},
+  {sign:"Gemini",      from:14, to:21, line:"Language and company. Trying on versions of yourself in front of other people, most of which will not survive."},
+  {sign:"Cancer",      from:21, to:28, line:"A place of your own, and the few people who will be in it. The first thing built that carries your name."},
+  {sign:"Leo",         from:28, to:35, line:"Being looked to. Authority arrives here whether or not it was asked for, and starts learning what it is for."},
+  {sign:"Virgo",       from:35, to:42, line:"Craft. The unglamorous middle where what you built either gets properly finished or quietly rots."},
+  {sign:"Libra",       from:42, to:49, line:"The accounting. What the first half actually produced, weighed honestly and with nobody watching."},
+  {sign:"Scorpio",     from:49, to:56, line:"Depth, and the endings that were postponed. What gets cut here stops causing trouble."},
+  {sign:"Sagittarius", from:56, to:63, line:"The view from higher up. Teaching, meaning, and the question that was underneath all the other ones."},
+  {sign:"Capricorn",   from:63, to:70, line:"The last structure. Order, legacy, and the one thing worth building properly at this scale."},
+  {sign:"Aquarius",    from:70, to:77, line:"Distance. The next generation takes the wheel, and being out of the room becomes a relief rather than a loss."},
+  {sign:"Pisces",      from:77, to:84, line:"Loosening. The shape you held gives way, and what it was for is what is left."}
+];
+
+function grandBand(signName){ return GRAND_BANDS.find(b => b.sign === signName) || null; }
 
 /* ============================================================
    LEARNING THE WHEEL — what the four elements and three
@@ -2941,8 +3007,8 @@ function renderPairStub(P){
       ${saved
         ? `${n} is saved — open Pair and choose ${n} alongside someone else.`
         : `Save ${n} first, then open Pair and choose ${n} alongside someone else.`}
-      It reads the two periods together: their elemental and quality currents, love, friendship,
-      work and family, and a two-card spread.</p>
+      It reads the two periods together: their elemental and quality currents, love, marriage, friendship,
+      work and family, what the two of them make between them, and a two-card spread.</p>
       <div class="actions" style="margin-top:2px">
         <button class="btn ghost tiny" id="go-pair">Open Pair</button>
         ${saved ? '' : '<button class="btn ghost tiny" id="go-save">Save ' + n + '</button>'}
@@ -4899,6 +4965,26 @@ Object.assign(QUIZ_KINDS, {
       a, distractors(['easy','complementary','charged'], a, 2, rand),
       `${rel.line || ''} Same element is easy, next-door elements complement, opposite ones run charged.`.trim(), 'meets');
   },
+  /* ---- the Grand Cycle, which is the seasons read at the scale of a life ---- */
+  grandSpan(rand){
+    const q = pick(GRAND, rand), a = `${q.from} to ${q.to}`;
+    return assemble(`In the Grand Cycle, which years does <strong>${q.season}</strong> cover?`,
+      a, distractors(GRAND.map(x=>`${x.from} to ${x.to}`), a, 3, rand),
+      `${q.season} is one of the four quarters of an ${GRAND_LIFE}-year life, and it runs ${SEASONS[q.season].arc}.`, 'grandSpan');
+  },
+  grandSeason(rand){
+    const q = pick(GRAND, rand), a = q.season;
+    return assemble(`Which quarter of the Grand Cycle covers the years <strong>${q.from} to ${q.to}</strong>?`,
+      a, distractors(GRAND.map(x=>x.season), a, 3, rand),
+      `Each quarter takes ${GRAND_LIFE / 4} years, in the same order as the year: ${GRAND.map(x=>x.season).join(', ')}. This one is ${q.signs.join(', ')}.`, 'grandSeason');
+  },
+  grandBand(rand){
+    const b = pick(GRAND_BANDS, rand), a = `${b.from} to ${b.to}`;
+    return assemble(`In the Grand Cycle, which seven years does <strong>${b.sign}</strong> cover?`,
+      a, distractors(GRAND_BANDS.map(x=>`${x.from} to ${x.to}`), a, 3, rand),
+      `${b.sign} is one of the twelve bands, seven years each, in the order of the year. ${b.line}`, 'grandBand');
+  },
+
   personSeason(rand, people){
     if(!people || people.length < 3) return null;
     const p = pick(people, rand);
@@ -4954,12 +5040,44 @@ function pairContext(A, B){
   };
 }
 
+/* The frame a long-bond reading opens with, chosen by how the two elements sit
+   against each other. Kept out of the DOMAINS list below so the list stays a
+   list of rooms with one job each. */
+const BOND_FRAME = {
+  easy:`A bond between two people this alike is comfortable from the first week and quiet about its own faults — nothing in it announces that it has gone stale, which is the whole risk.`,
+  complementary:`A bond here runs on the exchange. Each of them supplies something the other genuinely runs short of, and that is what carries a marriage past the years where attraction stops doing the work.`,
+  charged:`A bond here is never neutral. This is either the most substantial thing either of them has, or the one they leave, and both outcomes start from the same friction.`
+};
+/* Looked up through a function rather than indexed inside the list below: the
+   tests read these lists straight out of the page and stop at the first `];`
+   they find, which a lookup written inline would hand them. */
+function bondFrame(mode){ return BOND_FRAME[mode]; }
+
 const DOMAINS = [
   {t:'Love &amp; intimacy', f:c=>({
     easy:`In private these two need very little translation. Both run on ${ELEMENTS[c.elA].word}, so mood, pace and silence all read the same way, and closeness arrives early without much negotiation. What the pairing lacks is contrast — neither is naturally positioned to see what the other cannot. Build that in deliberately, or the intimacy slowly becomes a mirror.`,
     complementary:`The difference is the attraction here rather than the obstacle. ${c.a} brings ${c.elA.toLowerCase()} to it and ${c.b} brings ${c.elB.toLowerCase()}, and in private that gap is exactly what keeps the temperature up. Desire built on real otherness tends to last — provided neither one starts quietly trying to convert the other into a version of themselves.`,
     charged:`Expect heat rather than a level temperature. ${c.elA} and ${c.elB} do not naturally settle, so this runs hot and then cool, and the intensity and the friction turn out to be the same fact seen from two sides. It works when both of them stop reading a strong reaction as evidence that something has gone wrong.`
   })[c.mode]},
+
+  /* The long bond. The one room that is asked of a person rather than of a
+     pairing, and so the one the engine could not reach by comparing the two:
+     each of them is answering a different question. It is read out of the two
+     deep layers, one period at a time, which is what keeps it specific — 48
+     periods, so 1,176 different answers, none of them a formula. */
+  {t:'Marriage &amp; the long bond', f:c=>{
+    const da = DEPTH[c.A.per.n] || {}, db = DEPTH[c.B.per.n] || {};
+    if(c.samePeriod)
+      return `<p>${bondFrame(c.mode)}</p>
+      <p><strong>A lifelong bond, asked of both of them:</strong> ${da.bond}</p>
+      <p class="note">The same ask twice, so neither of them is positioned to notice it slipping —
+      and one answer has to satisfy two people who arrived at it from the same direction.</p>`;
+    return `<p>${bondFrame(c.mode)}</p>
+      <p><strong>What a lifelong bond asks of ${c.a}:</strong> ${da.bond}</p>
+      <p><strong>And what it asks of ${c.b}:</strong> ${db.bond}</p>
+      <p class="note">Two contracts rather than one, and most of the trouble in a pairing like this
+      is both of them assuming they signed the same one.</p>`;
+  }},
 
   {t:'Friendship', f:c=>({
     easy:`As friends they are effortless and slightly enclosed — the shorthand develops fast and outsiders find it hard to get in. ${c.samePeriod ? 'Sharing a period makes that doubly true: the same blind spot sits in both of them, unchallenged.' : `${c.A.per.t} and ${c.B.per.t} are near enough in temperament that neither has to explain themselves twice.`} The friendship needs a third party, or a shared project, to keep it from turning into a closed loop.`,
@@ -5007,6 +5125,47 @@ function pairDepth(A, B){
     at home is what each will reach for under strain, before either has decided to.</p>`;
 }
 
+/* The third thing. Every coupling makes three: the two of them and the thing
+   they are together, which has a temperament of its own rather than being a
+   mixture of the two. It is built out of what each of them is pointed at, so it
+   is written pair by pair from both periods' own path material — the pitfall of
+   one against the release of the other. 48 periods against 48, and the 1,176
+   combinations each read differently because each is two different paths. */
+function pairThird(A, B){
+  const DA = DESTINY[A.per.n], DB = DESTINY[B.per.n];
+  if(!DA || !DB) return '';
+  const a = esc(firstName(A.person.name)), b = esc(firstName(B.person.name));
+
+  if(A.per.n === B.per.n){
+    return `
+    <h4>The third thing</h4>
+    <p>They are moving the same way, which is the whole of the good news and the whole of the risk.
+    What ${a} is moving toward is ${DA.toward}, and it is the same thing ${b} is moving toward. One aim
+    shared by two people has twice the capacity behind it and none of the correction — neither of them is
+    positioned to see what the aim leaves out.</p>
+    <p class="note">None of this is a prediction — it is one aim read from two sides at once. The third
+    one has the temperament of both and the blind spots of both, and it is the only one of the three
+    that cannot be edited alone.</p>`;
+  }
+
+  return `
+    <h4>The third thing</h4>
+    <p>What the two of them make is not a blend of two people — it is a third one, with a temperament of
+    its own, assembled out of what each of them is moving toward. What ${a} is moving toward is
+    ${DA.toward}. What ${b} is moving toward is ${DB.toward}. Those are not the same destination, and the
+    third thing carries both of them or neither.</p>
+    <p>The place the two of them will actually collide is here. What ${a} does when the pressure is on is
+    ${DA.pitfall}. What ${b} does is ${DB.pitfall}. The argument that follows is rarely about whatever it
+    appears to be about — it is each of them asking the other to stop doing that, and neither able to,
+    because neither of those is a decision anybody made.</p>
+    <p>The half worth having is the other one. ${a} has to put down ${DA.release}, and ${b} is better placed
+    than anybody to say so, because it is not ${b}'s own blind spot. ${b} has to put down ${DB.release}, and
+    that one is ${a}'s to name. What waits on the far side of it is not abstract: for ${a},
+    ${DA.reward}; for ${b}, ${DB.reward}.</p>
+    <p class="note">None of this is a prediction. It is the two of them read against each other, and the
+    same two people read differently depending on who each of them is standing next to.</p>`;
+}
+
 function renderPair(A, B){
   const c = pairContext(A, B);
   const side = P => `
@@ -5039,11 +5198,13 @@ function renderPair(A, B){
       ${c.crosses.map(x=>`<p><strong>${x.ea} &amp; ${x.eb}:</strong> ${x.line}</p>`).join('')}
       <p><strong>${c.qA} &amp; ${c.qB}:</strong> ${c.qLine}</p>
 
-      <h4>Across the four rooms</h4>
+      <h4>Across the five rooms</h4>
       <div class="domains">
         ${DOMAINS.map(d=>`<div class="domain"><div class="dt">${d.t}</div><div class="db">${d.f(c)}</div></div>`).join('')}
       ${pairDepth(A, B)}
       </div>
+
+      ${pairThird(A, B)}
 
       <h4>The two-card spread</h4>
       <p>${spread}</p>
@@ -6389,6 +6550,50 @@ function learnQualities(){
   </div>`;
 }
 
+/* The widest screen in the Learn tab: the wheel laid over a life. It is drawn
+   from GRAND, GRAND_HALVES and GRAND_BANDS, so the ages printed here and the
+   band named on a sign page can only ever be the same numbers. */
+function learnGrand(){
+  return `<div class="game">
+    <h2>The Grand Cycle</h2>
+    <p class="sub2">The same wheel, read at the scale of a life. The frame under this whole
+    page takes the year's four seasons and lays them over about ${GRAND_LIFE} years &mdash; four
+    stretches of twenty-one, and inside them the twelve signs taking seven years each, in the
+    order they already sit in the year.</p>
+    <p class="note">It is a frame and not a forecast. People are routinely in a different
+    quadrant from the one their age suggests, and that is the first thing to say about it.
+    The seasons, the ages and the twelve bands are the framework this app is built on. Every
+    word describing them on this screen is this app's own writing.</p>
+    ${GRAND.map(q=>`
+      <div class="lcard el-b-${SIGNS[q.signs[0]].e}">
+        <div class="lh"><b>${q.season}</b><small>ages ${q.from}&ndash;${q.to} &middot;
+        ${q.signs.join(', ')} &middot; ${SEASONS[q.season].arc}</small></div>
+        <p>${q.forWhat}</p>
+        <div class="two">
+          <div><div class="dt">What it does</div><div class="db">${q.shape}</div></div>
+          <div><div class="dt">Where it goes wrong</div><div class="db">${q.goesWrong}</div></div>
+        </div>
+        <p class="note"><strong>Carried forward:</strong> ${q.carried}</p>
+      </div>`).join('')}
+    <h4 style="margin-top:22px">The two halves</h4>
+    <div class="books">
+      ${GRAND_HALVES.map(h=>`<div><small>${h.n}</small><span>${h.t}</span></div>`).join('')}
+    </div>
+    <h4>The twelve bands</h4>
+    <p class="sub2">Seven years each, in the order of the year. The band a birthday falls in
+    says what that stretch of a life is for, not what anybody is guaranteed to be doing in it.</p>
+    <div class="plist">
+      ${GRAND_BANDS.map(b=>`<div><b>${b.sign}</b> <span>ages ${b.from}&ndash;${b.to}</span>
+      <em>${b.line}</em></div>`).join('')}
+    </div>
+    <p class="note">This is the app's own reading of the frame, and it is description rather
+    than instruction &mdash; no part of it predicts anything about a particular person. If you
+    are forty and everything on this screen says spring, the model is not broken. It was never
+    a schedule; it is a way of asking which stretch of the year you are actually in.</p>
+    <div class="actions"><button class="btn ghost" id="g-back">Back</button></div>
+  </div>`;
+}
+
 function learnSign(name){
   /* The sign arrives from the <select> below, so it is DOM text by the time it
      gets here, and both the name and the line describeSign() writes carry it
@@ -6397,6 +6602,7 @@ function learnSign(name){
      reinterpreted as HTML. */
   const nm = esc(name);
   const d = describeSign(name);
+  const band = grandBand(name);
   const periods = PERIODS.filter(p=>p.signs.includes(name));
   const mine = PEOPLE.filter(p=>findPeriod(p.month, p.day).signs.includes(name));
   const opts = SIGN_NAMES().map(n=>`<option value="${n}"${n === name ? ' selected' : ''}>${SIGNS[n].g} ${n}</option>`).join('');
@@ -6415,6 +6621,8 @@ function learnSign(name){
       <p class="note">Same element, so easy with: ${ELEMENT_LORE[d.element].signs.filter(x=>x !== name).join(' and ')}.
       Charged with ${d.element === 'Fire' ? 'Water' : d.element === 'Water' ? 'Fire' : d.element === 'Air' ? 'Earth' : 'Air'} signs.
       Shares its quality with ${QUALITY_LORE[d.quality].signs.filter(x=>x !== name).join(', ')}.</p>
+      ${band ? `<p class="note"><strong>In the Grand Cycle:</strong> ${nm} is the seven years
+      from ${band.from} to ${band.to}. ${band.line}</p>` : ''}
     </div>
     <h4 style="margin-top:20px">The weeks inside it</h4>
     <div class="plist">${periods.map(p=>`<div><b>${esc(p.n)}</b> <span>${esc(p.r)}</span> <em>${esc(p.t)}</em></div>`).join('')}</div>
@@ -6429,6 +6637,7 @@ function renderGame(){
   if(LEARN === 'wheel')     { box.innerHTML = learnWheel();     return; }
   if(LEARN === 'elements')  { box.innerHTML = learnElements();  return; }
   if(LEARN === 'qualities') { box.innerHTML = learnQualities(); return; }
+  if(LEARN === 'grand')     { box.innerHTML = learnGrand();     return; }
   if(LEARN && LEARN.sign)   { box.innerHTML = learnSign(LEARN.sign); return; }
   if(!GAME){
     const best = bestScore();
@@ -6441,11 +6650,12 @@ function renderGame(){
         <button class="mbtn" id="g-wheel"><b>The wheel</b><span>All twelve at once, and why they sit where they do</span></button>
         <button class="mbtn" id="g-elements"><b>The four elements</b><span>Fire, Earth, Air, Water &mdash; what a person is made of</span></button>
         <button class="mbtn" id="g-qualities"><b>The three qualities</b><span>Cardinal, Fixed, Mutable &mdash; and the seasons that explain them</span></button>
+        <button class="mbtn" id="g-grand"><b>The Grand Cycle</b><span>The same wheel read at the scale of a life &mdash; four seasons over ${GRAND_LIFE} years</span></button>
         <button class="mbtn" id="g-onesign"><b>Learn one sign</b><span>Everything about a single sign, in one screen</span></button>
       </div>
       <h4 style="margin-top:22px">Then test it</h4>
-      <p class="sub2">${QUIZ_LENGTH} questions on the elements, the qualities, the seasons and how they
-      combine &mdash; plus periods, dates, cards and stones${PEOPLE.length >= 3 ? ', and the people you have saved' : ''}.
+      <p class="sub2">${QUIZ_LENGTH} questions on the elements, the qualities, the seasons, how they
+      combine, and the Grand Cycle &mdash; plus periods, dates, cards and stones${PEOPLE.length >= 3 ? ', and the people you have saved' : ''}.
       Every answer explains itself.</p>
       ${best ? `<p class="note" style="margin-bottom:18px">Your best so far: <strong>${best}/${QUIZ_LENGTH}</strong></p>` : ''}
       <div class="actions"><button class="btn primary" id="g-start">Start the quiz</button></div>
@@ -6508,6 +6718,7 @@ $('game-box').addEventListener('click', e=>{
   if(t.id === 'g-wheel')    { LEARN = 'wheel';     return renderGame(); }
   if(t.id === 'g-elements') { LEARN = 'elements';  return renderGame(); }
   if(t.id === 'g-qualities'){ LEARN = 'qualities'; return renderGame(); }
+  if(t.id === 'g-grand')    { LEARN = 'grand';      return renderGame(); }
   if(t.id === 'g-onesign')  { LEARN = {sign:'Aries'}; return renderGame(); }
   if(t.id === 'g-back')     { LEARN = null; return renderGame(); }
   if(t.id === 'g-start' || t.id === 'g-again'){

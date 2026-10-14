@@ -83,6 +83,9 @@ async function loadPage(file) {
     },
     scrollTo() {}, matchMedia: () => ({ matches: false, addEventListener() {} }),
     navigator: { userAgent: 'node' },
+    // The page's read-aloud bar unhooks itself on the way out, which is a call
+    // to the window - the page is right, the stub was short a method.
+    addEventListener() {},
   };
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;

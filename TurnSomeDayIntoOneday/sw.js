@@ -69,7 +69,12 @@
 // program"). The line under "The Trainer" changed, so the name moves to 3.2 with
 // it for exactly the reason above: a phone that keeps its old shell keeps a card
 // that says the programme is still coming.
-const CACHE_NAME = 'tsid-shell-v3.2';
+//
+// 15 Oct 2026, and the shell itself: it gained the read-aloud bar ("the read it
+// to me doesn't work here ... the whole app not just specific sections"). The
+// name moves to 3.3 with the page, or an installed phone keeps a shell with no
+// way to hear it.
+const CACHE_NAME = 'tsid-shell-v3.3';
 const SHELL_FILES = [
   '/',
   '/app',

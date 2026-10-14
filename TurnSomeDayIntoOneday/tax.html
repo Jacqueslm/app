@@ -40,6 +40,11 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;font-size:.8125rem;padding:7px 13px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s2);color:var(--ts);cursor:pointer;white-space:nowrap}
 .tab.on{background:var(--acc-b);border-color:var(--acc-b);color:var(--acc-t);font-weight:600}
+/* The voice (15 Oct 2026): the figures, the notes and the fine print, read out. */
+.sayrow{display:flex;gap:8px;padding:10px 16px 0}
+.saybtn{font:inherit;font-size:.8125rem;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s2);color:var(--acc-t);cursor:pointer}
+.saybtn:hover{border-color:var(--acc)}
+.saybtn.stop{border-color:#B4441F;color:#B4441F}
 .sec{padding:0 16px}
 .sec-hd{font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);font-weight:600;padding:16px 0 8px}
 .card{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px}
@@ -105,6 +110,12 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
       <h1>Tax Centre</h1>
       <p>Self-employed, one page, 2026 figures</p>
     </div>
+  </div>
+
+  <!-- The voice: the phone reads whichever tab is on the screen. -->
+  <div class="sayrow">
+    <button class="saybtn" id="sayBtn">Read it to me</button>
+    <button class="saybtn stop" id="sayStop" hidden>Stop</button>
   </div>
 
 
@@ -593,6 +604,109 @@ if(ASK_EL){
 
 
 render();
+</script>
+
+<script>
+/* ── THE VOICE ────────────────────────────────────────────────────────────────
+   Jacques, 15 Oct 2026: "the read it to me doesn't work here ... the whole app
+   not just specific sections." The Tax Centre had no voice: the figures, the
+   notes beside them and the fine print can all be heard now. It reads the tab
+   that is on the screen at the moment the button is pressed, so switching tabs
+   changes what is read, and the tab row itself is never read back. */
+(function(){
+  "use strict";
+  var ROOT = '.wrap';
+  var SKIP = /(^|\s)(sayrow|saybtn|saysaid|noprint|noSay|hide|tabs|controls|ask-chips|ask-badge|ask-chev)(\s|$)/;
+  var CONTROL = /^(BUTTON|INPUT|SELECT|TEXTAREA|OPTION|SCRIPT|STYLE|SVG|IMG|VIDEO|AUDIO|CANVAS)$/;
+  var BLOCK = /^(DIV|P|LI|UL|OL|H1|H2|H3|H4|TABLE|TR|TD|TH|SECTION|ARTICLE|FORM|LABEL|MAIN|HEADER|FOOTER|DETAILS|SUMMARY|ASIDE|NAV|BLOCKQUOTE|FIGURE|FIGCAPTION|DL|DT|DD)$/;
+  var SAYING = false;
+  function voiceOK(){
+    return typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
+  }
+  /* One leaf's words. A line break in the source is a line break, not a full
+     stop: the sentences carry their own punctuation, and the layout is never
+     read as punctuation it never had. */
+  function speakable(s){
+    return String(s).split(/[ \t]*\n+[ \t]*/)
+      .map(function(x){ return x.replace(/[ \t]{2,}/g, ' ').trim(); })
+      .filter(function(x){ return x.length > 1; })
+      .join(' ');
+  }
+  /* Only the words, and never a control's: a subtree that is a button, a field
+     or one of the skipped boxes contributes nothing, so a card whose only text
+     sits on its buttons is read as empty rather than as "Play, Next". */
+  function words(e){
+    var buf = '';
+    (function take(n){
+      var kids = n.childNodes;
+      for (var i = 0; i < kids.length; i++){
+        var c = kids[i];
+        if (c.nodeType === 3){ buf += c.nodeValue; continue; }
+        if (c.nodeType !== 1) continue;
+        if (c.hidden) continue;
+        if (SKIP.test(c.className || '')) continue;
+        if (CONTROL.test(c.tagName)) continue;
+        take(c);
+      }
+    })(e);
+    return buf;
+  }
+  function pageText(){
+    var root = document.querySelector(ROOT) || document.querySelector('.wrap') || document.body;
+    if (!root) return '';
+    var out = [];
+    (function walk(e){
+      var kids = e.children, deeper = false;
+      for (var i = 0; i < kids.length; i++){
+        var c = kids[i];
+        if (c.hidden) continue;
+        if (SKIP.test(c.className || '')) continue;
+        if (CONTROL.test(c.tagName)) continue;
+        if (!(c.textContent || '').trim()) continue;
+        if (BLOCK.test(c.tagName)){ deeper = true; walk(c); }
+      }
+      if (deeper) return;
+      var t = speakable(words(e));
+      if (t) out.push(t);
+    })(root);
+    return join(out);
+  }
+  /* The pieces are joined with a full stop, and a piece that already ends in
+     punctuation is not given a second one - "here.." is not a sentence. */
+  function join(out){
+    var s = '';
+    for (var i = 0; i < out.length; i++){
+      if (i) s += /[.!?,;:]$/.test(s) ? ' ' : '. ';
+      s += out[i];
+    }
+    return s;
+  }
+  function sayStop(){
+    if (voiceOK()){ try { speechSynthesis.cancel(); } catch (e) {} }
+    SAYING = false;
+    var b = document.getElementById('sayBtn'); if (b) b.textContent = 'Read it to me';
+    var s = document.getElementById('sayStop'); if (s) s.hidden = true;
+  }
+  function say(){
+    var b = document.getElementById('sayBtn');
+    if (SAYING){ sayStop(); return; }
+    if (!voiceOK()){ if (b) b.textContent = 'This phone has no voice'; return; }
+    var text = pageText();
+    if (!text){ if (b) b.textContent = 'Nothing here to read yet'; return; }
+    sayStop();
+    var u = new SpeechSynthesisUtterance(text);
+    u.onend = function(){ if (SAYING) sayStop(); };
+    u.onerror = function(){ if (SAYING) sayStop(); };
+    SAYING = true;
+    if (b) b.textContent = 'Stop';
+    var s = document.getElementById('sayStop'); if (s) s.hidden = false;
+    try { speechSynthesis.speak(u); } catch (e) { sayStop() }
+  }
+  var sb = document.getElementById('sayBtn'); if (sb) sb.addEventListener('click', say);
+  var ss = document.getElementById('sayStop'); if (ss) ss.addEventListener('click', sayStop);
+  window.addEventListener('beforeunload', sayStop);
+  window.SAY = { text: pageText, say: say, stop: sayStop };
+})();
 </script>
 </body>
 </html>

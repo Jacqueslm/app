@@ -25,10 +25,22 @@ start off with just basic input information that's it." So the page
 days a week, what time of day, what is in the house, what you want out of it,
 anything that hurts, anything a doctor has ruled out, and day one — keeps it on
 the phone (`localStorage`, key `tsid_trainer_intake_v1`), sends nothing
-anywhere and **plans nothing yet**. There is no exercise, no plan and no session
-on it on purpose; that is the next step, deliberately one at a time. The door is
+anywhere and **planned nothing at all** when it came back. The door is
 back on the shell, so the shell is **four doors** again and the cache name moved
 to `tsid-shell-v2.7` with it, for the same reason as every bump before it.
+
+**The by-10 programme is on the Trainer — 14 Oct 2026.** Jacques: "on the trainer
+add the by 10 program thats it I'll give you more details what it is later even
+though its based on p90x". So the page carries the programme now, written out as
+the Certification's trainer track already described it — the same weekly shape,
+the same ten seconds of rest between moves, the same two levels with the same
+numbers, the same kit, the three lifting days (A, B, C, eight moves each), the
+five cardio choices and the stretch day. `server/test/trainer.test.js` reads
+those numbers **out of `certify.html`** and requires them on the Trainer, so the
+two halves of the app cannot drift apart about the programme. Their information
+still comes first on the page and the safety card still outranks the programme.
+The Trainer's card in the shell changed with it (it said the plan came next), so
+the cache name moved to `tsid-shell-v3.2`.
 
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
@@ -94,6 +106,33 @@ leaves them alone, and nothing is copied into the phone's storage for them.
 public URLs on Vercel (about 32 MB of deployment weight) — that is the trade for
 them playing at all, since a gated route cannot stream range requests the way
 the static file can.
+
+**The Player's scan, and its manual — 14 Oct 2026.** Jacques: "in the player put
+the manual on a drop down menu and scan folder doesnt work scan set up only to
+scan only music folder or download and make sure it doesnt pick up the song
+twice". Three changes on `music.html`, and the reasons are the interesting part:
+
+- **The manual is a `<details>` now**, closed by default, above the songs instead
+  of between the player and them. It opens with no script: the browser's own
+  disclosure.
+- **The scan looks in two folders and two only** — Music and Download (and
+  "My Music"/"Downloads", which are the same folders under other names). A
+  folder that is neither is refused by name rather than walked. On a computer the
+  directory picker is still used and is started in Music; **on a phone it never
+  could work**, because `showDirectoryPicker` does not exist in any Android
+  browser, Safari or Firefox — that is the "doesnt work" he was looking at. A
+  phone now gets the folder chooser on a hidden `<input type="file"
+  webkitdirectory>` instead, which it does have, so the scan reaches the Music
+  folder on the handset.
+- **The same song can no longer land twice.** A file was already kept by its
+  name, its size and the moment it was last changed; a second copy of the same
+  track — the Music one and the Download one, with two dates on them — is now
+  recognised by its name as well, and counted as already here rather than added
+  as another row.
+
+`server/test/music-scan.test.js` drives all of it: the walk over a fake folder,
+both halves of the location rule, the phone path, and two copies of one track
+against the page's own `addFiles`.
 
 **The push rule (from CLAUDE.md, and it is the current one):** never push unless
 Jacques says push. When he does: `claude/new-session-im7bzg`, then `main`, then

@@ -11,6 +11,14 @@
 // one of the people he trains. The first test below is the one that holds that:
 // the questions ask about "them" and never about the reader.
 //
+// 14 Oct 2026, and the programme. Jacques: "on the trainer add the by 10 program
+// thats it I'll give you more details what it is later even though its based on
+// p90x". So the page carries the by-10 now, and the line that said nothing was
+// planned went with it. The tests below hold the two things that matter about
+// it: that the programme is the SAME one the Certification's trainer track
+// teaches (read out of certify.html, so neither page can drift), and that their
+// information still comes first and the safety lines still outrank it.
+//
 // That last part is the claim the page makes in its own words ("Everything here
 // stays on this phone and nothing is sent anywhere"), so it is checked here
 // rather than left to a comment: no fetch, no XMLHttpRequest, no form action,
@@ -140,8 +148,17 @@ test('the trainer page is the intake, and says what it is', () => {
   assert.match(html, /What to call them/, 'the fields ask about the person being trained');
   assert.doesNotMatch(html, /What to call you/, 'and none of them ask the reader about themselves');
   assert.match(html, /For the people you train/, 'the page says who it is for');
-  assert.match(html, /There is no plan on it yet/,
-    'and says plainly that nothing is planned yet, rather than looking finished');
+  // 14 Oct 2026: this used to assert the page said there was no plan on it,
+  // which was true until the by-10 arrived. What matters now is the order it is
+  // read in — their information, then the safety lines, then the programme.
+  const atForm = html.indexOf('id="intake"');
+  const atSafety = html.indexOf("A doctor's rule wins over this page, always");
+  const atProgramme = html.indexOf('<h2>The by-10 programme</h2>');
+  assert.ok(atForm > -1, 'the form is on the page');
+  assert.ok(atSafety > -1, 'so are the safety lines');
+  assert.ok(atProgramme > -1, 'so is the programme');
+  assert.ok(atSafety > atForm && atProgramme > atSafety,
+    'their information comes first, the safety lines outrank the programme, and the programme comes last');
   // Every field the step is for is on the page.
   for (const id of TEXT_IDS) assert.match(html, new RegExp(`id="${id}"`), `the ${id} field is on the page`);
   for (const k of [...KIT, ...WANT]) assert.ok(html.includes(k), `${k} is offered on the page`);
@@ -261,13 +278,54 @@ test('a browser that has been cleared starts empty instead of breaking', () => {
   assert.match(p.box('savedLine').textContent, /Nothing filled in yet/);
 });
 
-test('the page never promises a plan it does not have, and puts a doctor first', () => {
+test('the by-10 on the Trainer is the Certification\u2019s own programme, and a doctor outranks it', () => {
   const html = fs.readFileSync(PAGE, 'utf8');
-  // The words that would turn an information form into a program.
-  assert.match(html, /there is no plan on it yet/i, 'it says so, rather than implying otherwise');
-  // And the two lines that outrank anything a later plan will say.
+  const certify = fs.readFileSync(path.join(ROOT, 'certify.html'), 'utf8');
+  // The programme is written down twice — on the Trainer he trains from, and in
+  // the Certification that teaches it — and the two are only worth anything if
+  // they are the same programme. Every line below is read out of certify.html
+  // FIRST, so this cannot quietly become the Trainer checked against itself, and
+  // a line dropped from the Certification fails here rather than passing.
+  const FROM_CERTIFY = [
+    'three lifting days, two cardio days and one stretch day',
+    'ten seconds of rest',
+    'Beginner: three rounds, ten repetitions, eight rotations, a thirty-second last move, twenty minutes of cardio',
+    'Advanced: five rounds, twelve repetitions, ten rotations, a sixty-second last move, thirty minutes of cardio',
+    'a pair of dumbbells, push-up bars, a pull-up bar, and floor space',
+    'Plyometrics, jump rope, kickboxing, sweat step and dancing',
+  ];
+  for (const line of FROM_CERTIFY) {
+    assert.ok(certify.toLowerCase().includes(line.toLowerCase()),
+      `the Certification no longer says "${line}" — fix this check rather than deleting it`);
+    assert.ok(html.toLowerCase().includes(line.toLowerCase()),
+      `the Trainer's by-10 and the Certification's have drifted apart: "${line}"`);
+  }
+  // And the two lines that outrank the programme, which is now on the page.
+  assert.match(html, /The programme below is a workout, and two lines outrank it/,
+    'the safety card says the programme answers to it, rather than the other way round');
   assert.match(html, /A doctor's rule wins over this page, always/,
-    'a doctor comes first, and says so before anything is planned');
+    'a doctor comes first');
   assert.match(html, /stop, on the day, if there is chest pain/i,
     'and it names the day it should stop');
+});
+
+test('the three lifting days and the stretch day are on the page in full', () => {
+  // A programme named but not written out is a heading, not a programme: the
+  // days have to be walkable on the phone he is holding at the rack.
+  const html = fs.readFileSync(PAGE, 'utf8');
+  const days = [...html.matchAll(/<h3>Day ([ABC]) &mdash;/g)].map((m) => m[1]);
+  assert.deepStrictEqual(days, ['A', 'B', 'C'], 'the three lifting days, in order');
+  const lists = [...html.matchAll(/<ol class="moves">([\s\S]*?)<\/ol>/g)];
+  assert.equal(lists.length, 3, 'one move list per lifting day');
+  lists.forEach((m, i) => {
+    const moves = [...m[1].matchAll(/<li>[^<]+<\/li>/g)].map((x) => x[0].replace(/<[^>]*>/g, ''));
+    assert.equal(moves.length, 8, `day ${'ABC'[i]} is eight moves`);
+    moves.forEach((mv) => assert.ok(mv.trim(), `day ${'ABC'[i]} has an empty move`));
+  });
+  // The stretch day, with its own numbers: "the stretch day" alone tells a
+  // coach nothing at all.
+  assert.match(html, /twelve movements held for thirty seconds each/i,
+    'the stretch day says how many movements and how long each is held');
+  assert.match(html, /one round, no rest timer and no load/i,
+    'and how it differs from a lifting day');
 });

@@ -193,12 +193,17 @@
          my clients ... rewrite it for my people I'll put they information in".
          It said "Your information first", which read as though the trainee were
          the one typing; the page is filled in by the coach, for one of the
-         people he trains, so the card says that now. -->
+         people he trains, so the card says that now.
+
+         And again on 14 Oct 2026, because the note said "The plan comes next"
+         and the plan has arrived: the by-10 programme is on the page itself now
+         - Jacques: "on the trainer add the by 10 program". A door that still
+         says the plan is coming would send him looking for it somewhere else. -->
     <a class="card t" href="/trainer">
       <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9v6M20 9v6M7.5 7v10M16.5 7v10M7.5 12h9"/></svg></span>
       <span class="txt">
         <h2 class="name">The Trainer</h2>
-        <p class="note">For the people you train. The plan comes next.</p>
+        <p class="note">For the people you train. The by-10 programme, and their information.</p>
       </span>
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
@@ -241,7 +246,14 @@
   // about "your information", when the page is filled in by the coach for one
   // of the people he trains. One line of the shell changed, which is enough to
   // leave an installed phone showing the superseded wording for good.
-  const APP_VERSION='3.1';
+  //
+  // 14 Oct 2026: the Trainer's card said the plan came next, and the by-10
+  // programme is on the Trainer now - Jacques: "on the trainer add the by 10
+  // program". That card's line changed with it, so the name moves to 3.2 for the
+  // same reason as every bump above: an installed phone that never rebuilds the
+  // shell keeps the old line, and the old line is what sends him looking for the
+  // programme somewhere it is not.
+  const APP_VERSION='3.2';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');

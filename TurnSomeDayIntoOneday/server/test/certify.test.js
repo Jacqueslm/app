@@ -141,6 +141,7 @@ function load(opts) {
   const o = opts || {};
   const made = [];    // every node the page creates
   const drawn = [];   // every canvas it draws on
+  const said = [];    // every lesson the page reads aloud (opts.speech only)
   const blocks = [...HTML.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
     .filter((m) => !/\bsrc=/.test(m[1])).map((m) => m[2]);
   assert.ok(blocks.length > 0, 'the page must carry its own script');
@@ -211,11 +212,25 @@ function load(opts) {
     scrollTo() {}, matchMedia: () => ({ matches: false, addEventListener() {} }),
     navigator: { userAgent: 'node' },
   };
+  // The voice (13 Oct 2026). Off unless a check asks for it, so the other
+  // checks see the page exactly as a phone without a voice sees it — the
+  // button says so rather than doing nothing. When it is on, an utterance is
+  // recorded and ends at once, which is all that is needed to prove what was
+  // read and what was not.
+  if (o.speech) {
+    sandbox.speechSynthesis = {
+      speaking: false,
+      speak(u) { said.push(String(u.text)); if (u.onend) u.onend(); },
+      cancel() {}, pause() {}, resume() {},
+      getVoices() { return []; }, addEventListener() {},
+    };
+    sandbox.SpeechSynthesisUtterance = function (text) { this.text = text; };
+  }
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(blocks[0], sandbox, { filename: 'certify.html' });
-  return { sandbox, els, store, byId, made, drawn };
+  return { sandbox, els, store, byId, made, drawn, said };
 }
 
 test('the page script runs, and its two tracks are drivable', () => {
@@ -234,6 +249,40 @@ test('the page script runs, and its two tracks are drivable', () => {
   C.go({ track: 'herbalist' });
   C.go({ day: 1 });
   assert.ok(sandbox.sent === 0, 'nothing was fetched: the page is entirely on the phone');
+});
+
+test('every lesson on both tracks reads itself aloud, and the quiz is not read', () => {
+  // 13 Oct 2026. Jacques: "have the lessons all the lessons on both programs to
+  // read it to me like everything else." The Herb Library and The Key already
+  // read themselves, so a lesson does too — the day's title, its subject line
+  // and the teaching, on the herbalist track and on the trainer track, because
+  // both come through the one place a lesson is drawn. The quiz is left to the
+  // eye: a reading that spells out the right answer spoils the test.
+  assert.match(HTML, /speechSynthesis/, 'the voice is the browser\'s own, on the phone');
+  assert.match(HTML, /SpeechSynthesisUtterance/);
+  assert.match(HTML, /id=\\"sayBtn\\"/, 'and every lesson is drawn with the button');
+
+  const { sandbox, said, byId } = load({ speech: true });
+  const C = sandbox.window.CERTIFY;
+  for (const tid of ['herbalist', 'fitness']) {
+    const first = C.days(tid)[0];
+    C.go({ track: tid, day: 1, test: null, exam: false, cert: null });
+    // The button is really on the drawn lesson, not only in the template.
+    assert.match(byId('view').innerHTML, /id="sayBtn"/, `${tid}: the drawn lesson carries the button`);
+    C.sayLesson();
+    assert.equal(said.length, 1, `${tid}: the lesson was read once`);
+    const spoken = said.pop();
+    assert.ok(spoken.includes(first.t), `${tid}: the title is read`);
+    assert.ok(spoken.includes(first.s), `${tid}: the subject line is read`);
+    first.p.forEach((p) => assert.ok(spoken.includes(p), `${tid}: the teaching is read`));
+    first.q.forEach((q) => assert.ok(!spoken.includes(q.q), `${tid}: the quiz is left to the eye`));
+  }
+
+  // A phone with no voice says so rather than leaving a dead button behind.
+  const plain = load();
+  plain.sandbox.window.CERTIFY.go({ track: 'herbalist', day: 1 });
+  plain.sandbox.window.CERTIFY.sayLesson();
+  assert.match(plain.byId('sayBtn').textContent, /no voice/, 'a phone with no voice says so');
 });
 
 test('a passed day is remembered, and a passed exam earns the certificate', () => {

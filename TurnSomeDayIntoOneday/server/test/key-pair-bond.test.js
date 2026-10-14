@@ -130,18 +130,26 @@ test('every mode the element table can produce has a frame of its own', () => {
   }
 });
 
-test('every period carries the two things the new layers read', () => {
+test('every period carries the things the pair engine and the marriage box read', () => {
   assert.strictEqual(Object.keys(DEPTH).length, 48, 'the deep layer holds all 48 periods');
   assert.strictEqual(Object.keys(DESTINY).length, 48, 'and so does the path table');
   const thin = [];
   for(const p of PERIODS){
     const d = DEPTH[p.n], y = DESTINY[p.n];
-    if(!d || typeof d.bond !== 'string' || d.bond.trim().length < 40) thin.push(`${p.n} bond`);
+    // bond is what a long bond asks of the person, needs is what they need back,
+    // breaks is where it goes wrong and what to do about it. All three are drawn
+    // as boxes in the reading, and the pair tab's marriage room reads the first
+    // of them out of this same table.
+    for(const f of ['bond','needs','breaks'])
+      if(!d || typeof d[f] !== 'string' || d[f].trim().length < 40) thin.push(`${p.n}.${f}`);
     if(!y) thin.push(`${p.n} destiny`);
     else for(const f of ['toward','pitfall','release','reward'])
       if(typeof y[f] !== 'string' || !y[f].trim()) thin.push(`${p.n}.${f}`);
   }
-  assert.deepStrictEqual(thin, [], `periods the pair engine would print blank or "undefined" for: ${thin.join(', ')}`);
+  assert.deepStrictEqual(thin, [], `periods the pair engine or the reading would print blank or "undefined" for: ${thin.join(', ')}`);
+  for(const [label, field] of [['What you need back','needs'], ['Where it breaks','breaks']])
+    assert.match(PAGE, new RegExp(`\\$\\{box\\('${label}', D\\.${field}\\)\\}`),
+      `and the reading must draw the ${field} box off that field`);
 });
 
 /* ------------------------------------------------------------- the pairings */

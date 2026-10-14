@@ -76,22 +76,14 @@ function doorMiddleware(allows) {
 // route in server.js is still there and still correct — this is simply asked
 // first, so reopening the site is deleting this block.
 //
-// 13 Sep 2026, the one the closed list caught out: /game3d.html. The app loads
-// the 3D roof fight in an iframe from that address, and it is served only at
-// its .html address (express.static; no clean-URL route exists for it) — so the
-// "files with extensions are never judged" rule never got the chance to apply.
-// The gate answered 410 and the Fight tab died with "This page is not here any
-// more" at the exact moment the bell rang. It belongs to the app, so it sits
-// on the list beside /app.
-//
 // The pages that have to stay open. Each one is the app itself; the two policy
 // pages are on the list because they are the only pages here that are meant to
 // be read without signing in.
 //
 // The trading game, the trading school and the Trading Desk came off this list
 // on 24 Sep 2026 with the pages themselves - "remove the trading game the desk
-// everything about trading im done." What is left on it is the two reference
-// pages he asked to keep private.
+// everything about trading im done." The Fight came off it on 10 Oct 2026, the
+// same day as its page and its ring, at "delete the fight from everywhere".
 const OPEN_PAGES = [
   '/',                  // redirects to /app, so an old bookmark still works
   '/app',               // the app
@@ -102,12 +94,6 @@ const OPEN_PAGES = [
   '/delete-account',    // the deletion page, readable the same way
   '/delete-account.html',
   '/letter.html',       // the page a letter link opens
-  '/game3d.html',       // the 3D fight inside The Fight tab (added 13 Sep 2026)
-  // The Fight's own clean URL (4 Oct 2026). game3d.html is one of the three
-  // things the app still is, so it needs an address of its own that the gate
-  // lets through to the route that checks the door — the .html rule below only
-  // ever lets a request REACH a route, it never opens a page by itself.
-  '/fight', '/fight.html',
   // The herb library and the tax centre (15 Sep 2026): private, listed here
   // only so the request can reach the route that judges it. Both addresses
   // each, because each is a real FILE as well as a clean URL, and static would
@@ -119,6 +105,20 @@ const OPEN_PAGES = [
   // the route that judges it. Both addresses, because music.html is a real file
   // as well as a clean URL, and static would otherwise serve the name unguarded.
   '/music', '/music.html',
+  // The Trainer (9 Oct 2026; back on the app 11 Oct 2026). It came off on
+  // 10 Oct - "Ddelete the trainer" - and returned the next day as a smaller
+  // page: Jacques, "create the trainer we will be slowly so start off with just
+  // basic input information that's it". Private like the rest, so it is listed
+  // here only so the request can reach the route that judges it, and both
+  // addresses are named, because trainer.html is a real file as well as a clean
+  // URL and static would otherwise serve the file name unguarded.
+  '/trainer', '/trainer.html',
+  // The Certification (12 Oct 2026): the two ninety-day trainings and the two
+  // certificates. Private like the rest, so it is listed here only so the
+  // request can reach the route that judges it. Both addresses, because
+  // certify.html is a real file as well as a clean URL, and static would
+  // otherwise serve the file name unguarded.
+  '/certify', '/certify.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, and a letter link (/l/<token>).

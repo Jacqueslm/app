@@ -17,7 +17,6 @@
     --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
     --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.055);
     --gold:#e8c07a; --violet:#a78bfa; --teal:#5fd9c4; --rose:#f0919f;
-    --lamp:#f2a93b;
     --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
     --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     --r:18px;
@@ -46,7 +45,7 @@
   }
   .quiet:hover{color:var(--ink)}
 
-  /* ── the four doors ───────────────────────────────────────────────────── */
+  /* ── the doors ────────────────────────────────────────────────────────── */
   .cards{display:grid; gap:11px}
   a.card{
     --accent:var(--gold); --tint:rgba(232,192,122,.13);
@@ -60,9 +59,10 @@
   a.card:hover{background:var(--card2); border-color:rgba(255,255,255,.18); transform:translateY(-1px)}
   a.card:active{transform:translateY(0) scale(.995)}
   a.card.z{--accent:var(--gold);   --tint:rgba(232,192,122,.13)}
-  a.card.f{--accent:var(--lamp);   --tint:rgba(242,169,59,.13)}
   a.card.h{--accent:var(--teal);   --tint:rgba(95,217,196,.13)}
   a.card.m{--accent:var(--violet); --tint:rgba(167,139,250,.13)}
+  a.card.t{--accent:var(--rose);   --tint:rgba(240,145,159,.13)}
+  a.card.c{--accent:#9db7ff;       --tint:rgba(157,183,255,.13)}
   .glyph{
     flex:0 0 44px; width:44px; height:44px; border-radius:13px;
     display:flex; align-items:center; justify-content:center;
@@ -131,12 +131,12 @@
     <span class="mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="21" r="13.5" stroke="currentColor" stroke-width="1.8"/><circle cx="20" cy="7.5" r="2.9" fill="currentColor"/></svg></span>
     <div class="names">
       <h1>The Truth</h1>
-      <p class="who" id="whoTag">Four doors. That is the whole app.</p>
+      <p class="who" id="whoTag">Five doors. That is the whole app.</p>
     </div>
     <button class="quiet" id="signOut" hidden>Sign out</button>
   </header>
 
-  <!-- Locked: the four pages are private, so this is the way in. It is the
+  <!-- Locked: the three pages are private, so this is the way in. It is the
        only screen shown until the server says who you are. -->
   <section id="locked" hidden>
     <form class="lock" id="lockForm" autocomplete="on">
@@ -154,22 +154,13 @@
     </form>
   </section>
 
-  <!-- Open: the four doors, now. -->
+  <!-- Open: the doors, now. -->
   <section id="open" class="cards" hidden>
     <a class="card z" href="/key">
       <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12.6" r="7.4"/><circle cx="12" cy="5.2" r="1.7" fill="currentColor" stroke="none"/></svg></span>
       <span class="txt">
         <h2 class="name">The Zodiacs</h2>
         <p class="note">Any birthday, read in full.</p>
-      </span>
-      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
-    </a>
-
-    <a class="card f" href="/fight">
-      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.2a5.5 5.5 0 0 0-5.5 5.5V12L5 15h14l-1.5-3V8.7A5.5 5.5 0 0 0 12 3.2Z"/><path d="M9.8 17.6a2.2 2.2 0 0 0 4.4 0"/></svg></span>
-      <span class="txt">
-        <h2 class="name">The Fight</h2>
-        <p class="note">The bell, the rounds, the roof.</p>
       </span>
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
@@ -191,6 +182,48 @@
       </span>
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
+
+    <!-- The Trainer's door came back on 11 Oct 2026, the day after it came off
+         - Jacques: "create the trainer we will be slowly so start off with just
+         basic input information that's it". The note under it says what the
+         page is actually for right now, which is asking and keeping; the plan
+         arrives when it arrives.
+
+         The note changed on 13 Oct 2026 with the page itself: Jacques, "its for
+         my clients ... rewrite it for my people I'll put they information in".
+         It said "Your information first", which read as though the trainee were
+         the one typing; the page is filled in by the coach, for one of the
+         people he trains, so the card says that now.
+
+         And again on 14 Oct 2026, because the note said "The plan comes next"
+         and the plan has arrived: the by-10 programme is on the page itself now
+         - Jacques: "on the trainer add the by 10 program". A door that still
+         says the plan is coming would send him looking for it somewhere else. -->
+    <a class="card t" href="/trainer">
+      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9v6M20 9v6M7.5 7v10M16.5 7v10M7.5 12h9"/></svg></span>
+      <span class="txt">
+        <h2 class="name">The Trainer</h2>
+        <p class="note">For the people you train. The by-10 programme, and their information.</p>
+      </span>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
+    </a>
+
+    <!-- The Certification joined the shell on 12 Oct 2026: two ninety-day
+         trainings - the herbalist and the trainer - each with a quiz after every
+         lesson, a test after day thirty and after day sixty, and an ultimate
+         examination that writes a certificate. Because a door was added, the
+         shell's own count changed with it and the version and cache name moved
+         to 2.8 together, or an installed phone keeps being served a shell with
+         four doors and never sees this one. -->
+    <a class="card c" href="/certify">
+      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9.5" r="5.5"/><path d="M8.6 14.4 6 21l6-2.6L18 21l-2.6-6.6"/></svg></span>
+      <span class="txt">
+        <h2 class="name">The Certification</h2>
+        <p class="note">Two trainings, ninety days each, and a certificate.</p>
+      </span>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
+    </a>
+
   </section>
 
   <footer id="foot">Private. Signed in only.</footer>
@@ -203,7 +236,24 @@
   // The shell's version. sw.js keeps its cache name in step with this, and
   // sw-version.test.js fails if the two drift apart — the cache name is what
   // decides whether an installed phone ever repopulates its copy.
-  const APP_VERSION='2.2';
+  //
+  // 13 Oct 2026: the sign-in screen got the way back for a forgotten password -
+  // Jacques asked for a real one by email rather than nothing at all. The shell
+  // changed, so the name moves to 3.0 WITH it, or an installed phone keeps being
+  // served the old copy out of its cache and the option never appears.
+  //
+  // And to 3.1 the same day, for the Trainer's card: it said the Trainer was
+  // about "your information", when the page is filled in by the coach for one
+  // of the people he trains. One line of the shell changed, which is enough to
+  // leave an installed phone showing the superseded wording for good.
+  //
+  // 14 Oct 2026: the Trainer's card said the plan came next, and the by-10
+  // programme is on the Trainer now - Jacques: "on the trainer add the by 10
+  // program". That card's line changed with it, so the name moves to 3.2 for the
+  // same reason as every bump above: an installed phone that never rebuilds the
+  // shell keeps the old line, and the old line is what sends him looking for the
+  // programme somewhere it is not.
+  const APP_VERSION='3.2';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');
@@ -220,7 +270,7 @@
     locked.hidden = false;
     open.hidden = true;
     signOut.hidden = true;
-    whoTag.textContent = 'Four doors. That is the whole app.';
+    whoTag.textContent = 'Five doors. That is the whole app.';
     try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
   }
 
@@ -234,7 +284,7 @@
 
   // Who am I? /api/auth/me is 401 when signed out and carries the email when
   // not, so this single call decides which of the two screens is shown. It is
-  // also the only check that matters — the four pages re-check on the server
+  // also the only check that matters — the three pages re-check on the server
   // for themselves, so faking a 200 here would still leave nothing to open.
   function who(){
     return fetch('/api/auth/me', { credentials: 'same-origin' })
@@ -283,10 +333,11 @@
 
   // "Forgot your password?" - the answer depends on which build is serving the
   // page, so the server is asked rather than the page deciding. The accounts
-  // build (server.js) sends a real one-time link; the build the app actually
-  // runs on has one shared word for the house and no accounts, and answers 404 -
-  // there the honest answer is the spare word, which opens the same door.
-  // Nothing here says "we emailed you" unless the server said so first.
+  // build (server.js) sends a real one-time link; the build the app runs on has
+  // no accounts and no database, so there is nowhere to keep a token and
+  // nothing to send - it answers 404, and there the honest answer is the spare
+  // word, which opens the same door. Nothing here says "we emailed you" unless
+  // the server said so first.
   forgot.addEventListener('click', function(){
     var email = (emailEl.value || '').trim();
     if (!email) {

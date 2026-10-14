@@ -185,9 +185,11 @@ test('the herb library: its own safety lines are still on the page', () => {
   p.sandbox.tab = 'safety';
   p.sandbox.render();
   const html = p.els.get('view').innerHTML;
-  assert.match(html, /An infection is a doctor, not a tea/);
+  // Reworded on 12 Oct 2026 at the owner's request: the warnings stay, the
+  // "go and see" lines are gone.
+  assert.match(html, /Nothing here answers an infection/);
   assert.match(html, /Coming off alcohol or a drug/);
-  assert.match(html, /Ask a pharmacist before you add a herb/);
+  assert.match(html, /What these herbs do to what you already take/);
 });
 
 // The read-aloud is not only for a herb: the rest of the page reads out loud too,
@@ -233,6 +235,6 @@ test('the herb library: the safety tab can be read out loud', () => {
   assert.match(html, /data-say="safety"/, 'the safety tab carries a read button');
   p.sandbox.say('safety');
   assert.equal(p.said.length, 1, 'one press, one reading');
-  assert.match(p.said[0].text, /An infection is a doctor, not a tea/, 'the first safety line is read');
-  assert.match(p.said[0].text, /Ask a pharmacist before you add a herb/, 'and the pharmacist line comes through too');
+  assert.match(p.said[0].text, /Nothing here answers an infection/, 'the first safety line is read');
+  assert.match(p.said[0].text, /is not a free addition to anything else/, 'and the line about what the herbs do to what you take comes through too');
 });

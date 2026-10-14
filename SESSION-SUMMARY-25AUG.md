@@ -56,8 +56,8 @@ Branches: `claude/start-here-2ujk0y` (working) → `main` → `claude/vibe-code-
 12 finished videos: keys (drunk driving), the mail (gambling, both sides), ten
 seconds + mother's version (anger), hangxiety ×2, pills, after-recovery, plus 4
 capability samples. 5 score tracks in `content/score/` (Jacques's own Suno).
-**`tools/make-film.py`** — one command, JSON spec in, finished captioned +
-scored + watermarked video out (~27s for a 4-shot piece).
+**`tools/make-film.py`** (deleted 10 Oct 2026) — one command, JSON spec in,
+finished captioned + scored + watermarked video out (~27s for a 4-shot piece).
 
 ## Competitor intelligence (from the 160-app / 2,500-review scrape)
 Written up in `COMPETITORS.md`. Headlines:

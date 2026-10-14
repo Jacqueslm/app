@@ -32,6 +32,7 @@ process.env.FRIENDLY_EMAILS = 'jacques@example.com, wife@example.com';
 // own app, with the cure sitting on a host's settings screen.
 process.env.APP_OWNER_EMAIL = 'jacques@example.com';
 process.env.APP_RECOVERY_PASSWORD = 'the-spare-word';
+process.env.TMDB_READ_ACCESS_TOKEN = 'unit-test-token';
 delete process.env.GEMINI_API_KEY;
 
 const { test, before, after } = require('node:test');
@@ -45,11 +46,26 @@ const app = require('../vercel-app');
 const build = require('../../vercel-build');
 const vercelJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
 
-const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'fight.html', 'game3d.html', 'music.html'];
+// certify.html joined on 12 Oct 2026 with The Certification - two ninety-day
+// trainings and the two certificates - and it is behind the door like every
+// other page here: both of its addresses are in GATED below and its file is in
+// PAGE_FILES, so the two tests that iterate these lists keep covering it.
+const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'music.html', 'trainer.html', 'certify.html'];
+// fight.html and game3d.html were in both lists until 10 Oct 2026, when the
+// fight came off the app altogether - "delete the fight from everywhere". A page
+// that is gone cannot leak, so it is left out of the lists rather than named.
+//
+// trainer.html came out of both lists on 10 Oct 2026 too, on "Ddelete the
+// trainer", and came back on 11 Oct 2026 with the smaller page of the same name
+// - "start off with just basic input information that's it". It is behind the
+// door like the rest, so both of its addresses are back in the gated list here
+// and its file is back in PAGE_FILES above.
+//
 // The shell at /app and / is not in this list: it is the sign-in screen itself,
-// so it opens to everybody and holds nothing but a heading, three links and the
+// so it opens to everybody and holds nothing but a heading, the doors and the
 // form. Everything below is behind the door.
-const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/fight', '/fight.html', '/game3d.html', '/music', '/music.html'];
+const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/music', '/music.html',
+  '/trainer', '/trainer.html', '/certify', '/certify.html'];
 
 let server, base;
 before(async () => {
@@ -102,14 +118,16 @@ test('the sign-in screen itself holds nothing private', async () => {
   }
 });
 
-// --------------------------------------------- a forgotten word, 7 Oct 2026 --
-// Jacques: "add forgot my password sign in option". On the accounts build that
-// option emails a one-time link. THIS build has no accounts and no database, so
-// there is nowhere to keep a token and nothing to send — and the page must not
-// promise a link it cannot send. So the button asks /api/auth/forgot either way
-// and reads the answer: 200 means a link really is on its way, a 404 means the
-// honest answer is the spare word. What makes the page's spare-word sentence
-// correct on this host is the 404 below, which is what these tests hold still.
+// --------------------------------------------- a forgotten word, 13 Oct 2026 --
+// Jacques asked for a real way back — "or lets a user set a new password" —
+// after the option had been taken off the sign-in screen altogether. On the
+// accounts build (server.js) it emails a one-time link. THIS build has no
+// accounts and no database, so there is nowhere to keep a token and nothing to
+// send — and the page must not promise a link it cannot send. So the button
+// asks /api/auth/forgot either way and reads the answer: 200 means a link
+// really is on its way, a 404 means the honest answer is the spare word. What
+// makes the page's spare-word sentence correct on this host is the 404 below,
+// which is what these two tests hold still.
 
 test('the sign-in screen carries the way back for a forgotten word', async () => {
   const res = await get('/app');
@@ -121,6 +139,7 @@ test('the sign-in screen carries the way back for a forgotten word', async () =>
   // sign in with nothing and print "Both fields, please" instead.
   assert.match(html, /<button class="linkish" id="forgotBtn" type="button">/,
     'and it must not submit the sign-in form when tapped');
+  assert.match(html, /fetch\('\/api\/auth\/forgot'/, 'and it must ask the server rather than decide for itself');
 });
 
 test('a forgotten word here is a 404, not a link that was never sent', async () => {
@@ -266,6 +285,70 @@ test('signing out clears the cookie, and the only way to revoke one is the passw
   'the cookie is signed with the password, so changing it ends every session');
 });
 
+// --------------------------------------------------------- catalog discovery --
+
+test('catalog searches stay behind sign-in and return safe metadata to a signed-in user', async () => {
+  for (const route of ['/api/catalog/music?term=Blue%20Train', '/api/catalog/movies?term=The%20Matrix']) {
+    const stranger = await get(route);
+    assert.equal(stranger.status, 401, `${route} must refuse a signed-out request`);
+  }
+
+  const { cookie } = await signIn('jacques@example.com', 'let-me-in');
+  const realFetch = global.fetch;
+  const providerCalls = [];
+  global.fetch = (url, options) => {
+    const target = new URL(url);
+    if (target.hostname === 'itunes.apple.com') {
+      providerCalls.push(target);
+      return Promise.resolve(new Response(JSON.stringify({ results: [{
+        trackName: 'Blue Train', artistName: 'John Coltrane', collectionName: 'Blue Train',
+        releaseDate: '1957-09-15T00:00:00Z', trackViewUrl: 'https://music.apple.com/us/album/blue-train/1',
+      }] }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    }
+    if (target.hostname === 'api.themoviedb.org' && target.pathname === '/3/search/movie') {
+      providerCalls.push(target);
+      return Promise.resolve(new Response(JSON.stringify({
+        page: 1, total_pages: 1, total_results: 1,
+        results: [{ id: 603, title: 'The Matrix', overview: '1999 science fiction film', release_date: '1999-03-30' }],
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    }
+    if (target.hostname === 'api.themoviedb.org' && target.pathname === '/3/movie/603/watch/providers') {
+      providerCalls.push(target);
+      return Promise.resolve(new Response(JSON.stringify({ results: { US: {
+        link: 'https://www.themoviedb.org/movie/603/watch?locale=US',
+        flatrate: [{ provider_name: 'Stream+' }],
+      } } }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    }
+    return realFetch(url, options);
+  };
+
+  try {
+    const music = await fetch(base + '/api/catalog/music?term=Blue%20Train', { headers: { cookie } });
+    assert.equal(music.status, 200);
+    assert.equal(music.headers.get('cache-control'), 'no-store');
+    assert.deepEqual((await music.json()).results[0], {
+      title: 'Blue Train', detail: 'John Coltrane · Blue Train', year: '1957',
+      source: 'Apple Music', url: 'https://music.apple.com/us/album/blue-train/1',
+    });
+
+    const movies = await fetch(base + '/api/catalog/movies?term=The%20Matrix&page=1', { headers: { cookie } });
+    assert.equal(movies.status, 200);
+    assert.deepEqual((await movies.json()).results[0], {
+      id: 603, title: 'The Matrix', detail: '1999 science fiction film', year: '1999',
+      source: 'TMDb', posterUrl: '', url: 'https://www.themoviedb.org/movie/603',
+    });
+    const providers = await fetch(base + '/api/catalog/movies/603/providers', { headers: { cookie } });
+    assert.equal(providers.status, 200);
+    assert.deepEqual(await providers.json(), {
+      groups: [{ label: 'Subscription', providers: ['Stream+'] }],
+      url: 'https://www.themoviedb.org/movie/603/watch?locale=US', region: 'US',
+    });
+    assert.equal(providerCalls.length, 3, 'a movie search and a selected movie provider lookup only');
+  } finally {
+    global.fetch = realFetch;
+  }
+});
+
 // ------------------------------------------------------------- the AI routes --
 
 test('both AI routes refuse anyone who is not through the door', async () => {
@@ -289,6 +372,161 @@ test('with no key on the server it says so plainly, and never hands out a key', 
     assert.equal(res.status, 503, `${route} is honest when it cannot answer`);
     assert.doesNotMatch(text, /AIza/, 'a key must never appear in a response');
     assert.doesNotMatch(text, /GEMINI_API_KEY/, 'nor its name in words a person can read');
+  }
+});
+
+test('a refused reading says why, in Google\'s own words, and still never says the key', async () => {
+  // 10 Oct 2026. This host could refuse every single reading and say only "the
+  // reading could not be written just now", which is not a sentence anybody can
+  // act on from a phone — a dead key, an exhausted free quota and a retired
+  // model all read identically. The Railway build hands the owner Google's own
+  // words (server/key-reading-route.js:114) and key.html already prints them in
+  // brackets. This build threw them away, so the same break was fixable on one
+  // host and invisible on the other.
+  //
+  // Google is faked rather than called: what is being tested is what this route
+  // does with a refusal, and a real refusal needs a key and a quota no test has.
+  const savedKey = process.env.GEMINI_API_KEY;
+  // The fake still looks like a key, so "the key never appears in the answer"
+  // is a claim about the code and not a tautology about the fixture.
+  process.env.GEMINI_API_KEY = 'AIzaSyFAKE-for-these-tests-only-000000000';
+  const modulePath = require.resolve('../vercel-app');
+  delete require.cache[modulePath];
+
+  const realFetch = global.fetch;
+  let asked = 0;
+  global.fetch = (url, opts) => {
+    if (String(url).includes('generativelanguage.googleapis.com')) {
+      asked += 1;
+      return Promise.resolve(new Response(JSON.stringify({
+        error: {
+          code: 400,
+          message: 'API key not valid. Please pass a valid API key.',
+          status: 'INVALID_ARGUMENT',
+        },
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } }));
+    }
+    // The test's own calls to the spare port have to keep working while the
+    // provider is faked, or the fixture would break the thing it is measuring.
+    return realFetch(url, opts);
+  };
+
+  let spare, spareServer, spareBase;
+  try {
+    spare = require('../vercel-app');
+    spareServer = spare.listen(0);
+    await new Promise((r) => spareServer.once('listening', r));
+    spareBase = `http://127.0.0.1:${spareServer.address().port}`;
+
+    const login = await fetch(`${spareBase}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'jacques@example.com', password: 'let-me-in' }),
+    });
+    const cookies = typeof login.headers.getSetCookie === 'function'
+      ? login.headers.getSetCookie()
+      : [login.headers.get('set-cookie')].filter(Boolean);
+    const cookie = cookies[0].split(';')[0];
+
+    const res = await fetch(`${spareBase}/api/key-reading`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie },
+      body: JSON.stringify({ who: 'Somebody', message: 'THEIR READING' }),
+    });
+    assert.equal(res.status, 502);
+    const body = await res.json();
+    assert.equal(body.error, 'The reading could not be written just now.',
+      'the sentence on the page is unchanged — this adds the reason beside it');
+    assert.match(body.ownerError || '', /API key not valid/,
+      'the owner is told what Google actually said, so the fix is a step not a guess');
+    const text = JSON.stringify(body);
+    assert.doesNotMatch(text, /AIza/, 'and the key itself never comes back');
+    assert.doesNotMatch(text, /GEMINI_API_KEY/, 'nor the name of the setting it lives in');
+    assert.equal(asked, 2, 'the bare-400 retry still happens before it gives up');
+  } finally {
+    global.fetch = realFetch;
+    if (spareServer) spareServer.close();
+    if (savedKey === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = savedKey;
+    delete require.cache[modulePath];
+  }
+});
+
+test('a busy Google is asked again, and the reading lands instead of the excuse', async () => {
+  // Measured through this very route on 10 Oct 2026, with a key that answers
+  // 200 when asked directly: two readings came back whole and the third came
+  // back "HTTP 503: This model is currently experiencing high demand". Nothing
+  // was wrong. It was a queue, and the app was handing the queue to the phone
+  // as a failure — the one reading in three that a person would remember.
+  //
+  // Asking again is the whole fix, so this is the test that keeps it: a busy
+  // no must not reach the screen while a second ask would have answered.
+  const savedKey = process.env.GEMINI_API_KEY;
+  const savedWait = process.env.GEMINI_BUSY_WAIT_MS;
+  process.env.GEMINI_API_KEY = 'AIzaSyFAKE-for-these-tests-only-000000000';
+  // The wait is real time in the runner. One millisecond keeps the property
+  // being tested (it does wait, then it asks again) without making every test
+  // run sit through three seconds of nothing.
+  process.env.GEMINI_BUSY_WAIT_MS = '1';
+  const modulePath = require.resolve('../vercel-app');
+  delete require.cache[modulePath];
+
+  const realFetch = global.fetch;
+  let asked = 0;
+  global.fetch = (url, opts) => {
+    if (!String(url).includes('generativelanguage.googleapis.com')) return realFetch(url, opts);
+    asked += 1;
+    const json = (status, payload) => Promise.resolve(new Response(
+      JSON.stringify(payload), { status, headers: { 'Content-Type': 'application/json' } }));
+    if (asked === 1) {
+      return json(503, {
+        error: {
+          code: 503,
+          message: 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.',
+          status: 'UNAVAILABLE',
+        },
+      });
+    }
+    return json(200, {
+      candidates: [{ content: { parts: [{ text: 'A reading, at last.' }] }, finishReason: 'STOP' }],
+    });
+  };
+
+  let spare, spareServer, spareBase;
+  try {
+    spare = require('../vercel-app');
+    spareServer = spare.listen(0);
+    await new Promise((r) => spareServer.once('listening', r));
+    spareBase = `http://127.0.0.1:${spareServer.address().port}`;
+
+    const login = await fetch(`${spareBase}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'jacques@example.com', password: 'let-me-in' }),
+    });
+    const cookies = typeof login.headers.getSetCookie === 'function'
+      ? login.headers.getSetCookie()
+      : [login.headers.get('set-cookie')].filter(Boolean);
+    const cookie = cookies[0].split(';')[0];
+
+    const res = await fetch(`${spareBase}/api/key-reading`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie },
+      body: JSON.stringify({ who: 'Somebody', message: 'THEIR READING' }),
+    });
+    assert.equal(res.status, 200, 'the second ask is what the person sees, not the first no');
+    const body = await res.json();
+    assert.equal(body.text, 'A reading, at last.');
+    assert.ok(!body.ownerError, 'and there is nothing to apologise for');
+    assert.equal(asked, 2, 'a busy no is asked again, once');
+  } finally {
+    global.fetch = realFetch;
+    if (spareServer) spareServer.close();
+    if (savedKey === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = savedKey;
+    if (savedWait === undefined) delete process.env.GEMINI_BUSY_WAIT_MS;
+    else process.env.GEMINI_BUSY_WAIT_MS = savedWait;
+    delete require.cache[modulePath];
   }
 });
 
@@ -339,7 +577,7 @@ test('every gated address is rewritten into the function, file names included', 
   // the half that leaks.
   const destinations = new Map(vercelJson.rewrites.map((r) => [r.source, r.destination]));
   for (const route of ['/app', '/key', '/key.html', '/herbs', '/herbs.html', '/tax', '/tax.html',
-    '/fight', '/fight.html', '/game3d.html', '/music', '/music.html', '/']) {
+    '/music', '/music.html', '/trainer', '/trainer.html', '/certify', '/certify.html', '/']) {
     assert.equal(destinations.get(route), '/api/index.js', `${route} must reach the function`);
   }
   assert.equal(destinations.get('/api/(.*)'), '/api/index.js', 'and so must the API');
@@ -349,7 +587,7 @@ test('the pages travel inside the function, because they are not files out there
   const included = vercelJson.functions['api/index.js'].includeFiles;
   // A list here is rejected outright by Vercel: "Invalid request:
   // functions.api/index.js.includeFiles should be string." — a real error, from
-  // the first import attempt on 4 Oct 2026. It takes one glob, so the six pages
+  // the first import attempt on 4 Oct 2026. It takes one glob, so the pages
   // are named in a brace expansion and the test reads them back out of it.
   assert.equal(typeof included, 'string', 'includeFiles is a string to Vercel, not a list');
   assert.match(included, /\.html$/, 'a glob that does not end in .html matches no page');

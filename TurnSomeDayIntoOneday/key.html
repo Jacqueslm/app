@@ -601,7 +601,10 @@ ol.steps li b{color:var(--gold); font-weight:600}
                                     text at all, so they fall out on their own
 
        A section added tomorrow is read tomorrow, with no list to remember. */
-    const SKIP = '.disclaim, .note, .tools, .voicebar, [hidden]';
+    /* .askform is the questionnaire on the cards tab: the questions are for
+       answering, not for reading out, and the reading they produce is in
+       #cards-result directly below them. */
+    const SKIP = '.askform, .disclaim, .note, .tools, .voicebar, [hidden]';
     /* Block-level tags. Anything else inside a sentence — a <b>, a <small>, a
        span — is part of that sentence, and reading it alone would read half of
        one. */
@@ -1578,18 +1581,58 @@ Emeka Nwosu&#9;Oct 21, 1975"></textarea>
   <div class="people" id="wheel-list"></div>
 </section>
 
-<!-- THE CARDS — the three-card draw -->
+<!-- THE CARDS — the reading.
+     Jacques, 14 Oct 2026: "why the cards don't read like a tarot reading it's
+     short and it should be read like a professional tarot reader and they
+     should only be chosen based on birthday relationships and destiny by
+     asking a few key questions." So the tab is a session now rather than a
+     button: the handful of things a reader asks before dealing, then the
+     reading itself. The form carries .askform, which the read-aloud leaves
+     alone — it reads the reading, not the questionnaire. -->
 <section class="panel" id="panel-cards" role="tabpanel" hidden>
-  <div class="card">
+  <div class="card askform">
     <h2 class="ktitle">The cards</h2>
-    <p class="note" style="margin:0 0 4px">A draw is a way of asking yourself one question properly. Hold it in your head &mdash;
-    there is nothing to type, because the cards do not need the words, and this page never reads what you write.</p>
-    <p class="note" style="margin:0 0 16px">It comes back in three parts: <b>what you are facing</b>, <b>what is in the way</b>,
-    and <b>what to do</b>. The deck is the page's own &mdash; the same twenty-two Major Arcana your birthday draws from,
-    and the same meanings it already uses. Nothing is predicted, nothing is stored, and drawing again gives a different spread.</p>
-    <div class="actions">
-      <button class="btn primary" id="btn-cards">Draw three cards</button>
+    <p class="note" style="margin:0 0 4px">A reading, not a lucky draw. A reader asks a few things before dealing,
+    because a card only means anything against a real situation &mdash; so this asks <b>whose</b> reading it is,
+    <b>what it is about</b>, <b>what you are going through</b>, and <b>what you are after</b>. Answer by choosing;
+    the only things you type are a birthday and, if you want the reading to carry it, a name &mdash; and neither
+    one is saved anywhere.</p>
+    <p class="note" style="margin:0 0 16px">Your birthday decides which cards are yours: the personality card and the
+    soul card it gives, the number this year is running at for you, and &mdash; with a second birthday &mdash;
+    the card the two of you make between you. The spread is dealt from that and from your answers, so the same
+    question deals the same reading and a different question deals a different one. <b>Nothing is stored and
+    nothing is sent.</b> Drawing again changes nothing, because chance is not what is doing the choosing.</p>
+
+    <div class="form-grid">
+      <div><label for="cd-name">Whose reading is this? <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="cd-name" type="text" placeholder="Your name" autocomplete="off"></div>
+      <div><label for="cd-month">Birth month</label><select id="cd-month"></select></div>
+      <div><label for="cd-day">Day</label><select id="cd-day"></select></div>
+      <div><label for="cd-year">Year <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="cd-year" type="text" inputmode="numeric" placeholder="1990" maxlength="4" autocomplete="off"></div>
     </div>
+
+    <div class="form-grid" style="margin-top:14px">
+      <div><label for="cd-area">What is the reading about?</label><select id="cd-area"></select></div>
+      <div><label for="cd-thru">What are you going through?</label><select id="cd-thru"></select></div>
+      <div><label for="cd-seek">What are you seeking?</label><select id="cd-seek"></select></div>
+      <div><label for="cd-who">Who is it about?</label><select id="cd-who">
+        <option value="me">Just me</option>
+        <option value="two">Me and one other person</option>
+      </select></div>
+    </div>
+
+    <div id="cd-two" hidden style="margin-top:14px">
+      <div class="form-grid">
+        <div><label for="cd2-name">Their name <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="cd2-name" type="text" placeholder="Their name" autocomplete="off"></div>
+        <div><label for="cd2-month">Their birth month</label><select id="cd2-month"></select></div>
+        <div><label for="cd2-day">Their day</label><select id="cd2-day"></select></div>
+        <div><label for="cd2-year">Their year <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="cd2-year" type="text" inputmode="numeric" placeholder="1990" maxlength="4" autocomplete="off"></div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:16px">
+      <button class="btn primary" id="btn-cards">Read the cards</button>
+    </div>
+    <div class="err" id="cd-err"></div>
   </div>
   <div class="result" id="cards-result"></div>
 </section>
@@ -1607,6 +1650,13 @@ Emeka Nwosu&#9;Oct 21, 1975"></textarea>
       Major Arcana card (days 1&ndash;22 directly, days 23&ndash;31 by digit sum).
       Every word of interpretation &mdash; the readings, the paths, the pair profiles and the Grand Cycle
       &mdash; was written for this app.
+      The cards tab is a session rather than a draw: the few questions a reader asks before dealing, then the
+      birthday read by published method &mdash; the personality and soul card by Mary K. Greer's sum (day + month
+      + full year as numbers, reduced by digit sum, with 19 keeping its whole chain 19, 10, 1), the personal
+      year number from the birth month and day and this year's digits, and, when the reading is about two
+      people, the card the two of them make between them, both birth cards added and cut back by twenty-two.
+      The spread is dealt from that and from the answers rather than from chance, and every word of the card
+      by card reading is this app's own.
       Nothing is quoted from any book, and the path names here are this app's own, not any published list.
     </p>
   </details>
@@ -6018,7 +6068,7 @@ function showTab(id, silent){
   if(id === 'tab-game') renderGame();
   if(id === 'tab-matrix') renderMatrix();
   if(id === 'tab-wheel') renderWheel();
-  if(id === 'tab-cards') renderCards();
+  if(id === 'tab-cards') prepareCards();
   if(id === 'tab-key') primeKey();
 }
 
@@ -6181,148 +6231,604 @@ $('wheel-list').addEventListener('click', e=>{
 
 
 /* ============================================================
-   THE CARDS — the three-card draw.
+   THE CARDS — the reading.
 
-   One spread off the page's OWN Major Arcana table: the same
-   twenty-two cards a birthday draws from, no second deck and no
-   second set of meanings to keep in step with the first. Three
-   positions, and the third is the only one with a verb in it.
+   Jacques, 14 Oct 2026: "why the cards don't read like a tarot
+   reading it's short and it should be read like a professional
+   tarot reader and they should only be chosen based on birthday
+   relationships and destiny by asking a few key questions and what
+   a person is going through or what they are seeking."
 
-   A draw is a way of asking yourself a question properly, so it
-   asks for no birthday, reads no word you typed, stores nothing
-   and sends nothing. Draw again and you get a different spread.
+   He was right on both counts, and the two faults were the same
+   fault. The old version dealt three cards at random, for nobody in
+   particular, with one line under each — shorter than the card's own
+   entry in the birthday table, and answerable by pressing the button
+   again. A reading is not a draw; it is a session with a question in
+   it, and that is what this is now.
+
+   FOUR PARTS, and every one of them is the page's OWN deck and its
+   own engine — no second set of meanings to drift, nothing fetched,
+   nothing stored, nothing sent.
+
+   1. THE FEW KEY QUESTIONS. A working reader asks before dealing:
+      whose reading it is, what it is about, what you are going
+      through, and what you are after. That is what the reader's own
+      intake guidance says to ask (the area of life, the situation
+      in a sentence, the question you actually want answered), and
+      the phrasing here follows it — all of them are open questions,
+      none of them can be answered yes or no, and the only thing
+      typed is a birthday. Every answer below has four jobs: the
+      label on the screen, the line the reader says in the opening,
+      a sentence said once against each of the three cards so the
+      same card prose lands differently for love than for money, and
+      the question the reading hands back at the end.
+
+   2. THE DESTINY LAYER — the birthday, and what a reader does with
+      it. All three pieces are the published arithmetic rather than
+      invention:
+        · the personality card and the soul card, by the method Mary
+          K. Greer teaches (day + month + full year as numbers,
+          reduced by digit sum to 22 or under, then the soul card
+          from the digits of that again). 19 keeps its whole chain,
+          19-10-1: the Sun, the Wheel and the Magician.
+        · the personal year number, from the birth month and day and
+          the digits of this calendar year. That is the layer a
+          reader reaches for when somebody asks about timing.
+        · with a second birthday, the card the two of them make
+          between them: the two birth cards added, cut back by
+          twenty-two until it lands on a card.
+
+   3. THE DEAL IS NOT CHANCE. The spread is dealt from a shuffle
+      seeded by the birthday and the four answers, so the same
+      question on the same birthday deals the same reading, and a
+      different question deals a different one. The card that stands
+      for the querent — the birth card, or the card the two of them
+      make when the reading is about a relationship — is always on
+      the table, which is where a reader puts the significator.
+
+   4. THE READING IS A NARRATIVE, NOT A LIST OF KEYWORDS. An opening
+      that names the question in the querent's own words, a full
+      paragraph on every position, a synthesis that reads the three
+      together and says which way through the deck they move, the
+      destiny layer read against the question, and a close that
+      hands the question back with one step on it. The card prose is
+      long on purpose: this is the screen that has to read like a
+      reader talking rather than like a dictionary entry.
+
+   THE STANCE IS UNCHANGED AND IT IS THE WHOLE FLOOR THIS STANDS ON:
+   nothing here is a prediction, no card orders anybody to leave,
+   stay, pay or stop anything, no card is allowed to say a person is
+   finished, and the readings never use a pronoun for somebody who is
+   not in the room. Nothing is fetched and nothing is kept.
    ============================================================ */
 
-/* The three positions, in order. Situation, what holds it, and the
-   one card that tells you what to do about it. */
+/* ── 1. THE FEW KEY QUESTIONS ────────────────────────────────────────────────
+   open  — said in the opening paragraph, so the reading names the question in
+           the querent's terms and not in the cards' terms
+   bridge— said once against each card, in that card's own position. This is
+           the bridge from the card's meaning to the person's situation, which
+           is the difference between a reading and a horoscope column.
+   hold  — the question the close hands back. All of them are open. */
+const ASK_AREA = [
+  {v:'love', t:'Love, and the person I am with',
+   open:'the love in your life, and the person you are with',
+   bridge:{facing:'Read against love, the thing underneath this is not what the other person is about to do. It is who you are being while you wait to find out.',
+           block:'Read against love, the obstacle is not them. It is the part of you that has been arranging itself around somebody else\u2019s mood for so long that it looks like care.',
+           do:'Read against love, this is something you do in your own half of it: said out loud, in plain words, without asking for an answer on the spot.'},
+   hold:'What would you want to be true of how you carried yourself in this, whatever the other person decides?'},
+  {v:'work', t:'My work, and the place I am trying to make in it',
+   open:'your work, and the place you are trying to make in it',
+   bridge:{facing:'Read against work, this is about what you are actually being paid for, and how far that is from what you are actually doing all day.',
+           block:'Read against work, the thing in the way is rarely the work itself. It is the unspoken arrangement about who gets to decide what matters.',
+           do:'Read against work, the move is one visible, finished piece rather than a longer argument about how things should run.'},
+   hold:'If the recognition you are waiting for never came, what in this work would still be worth doing?'},
+  {v:'money', t:'Money — what comes in, what goes out, what I am carrying about it',
+   open:'money \u2014 what comes in, what goes out, and what you are quietly carrying about both',
+   bridge:{facing:'Read against money, this is about what the number means to you rather than what the number is.',
+           block:'Read against money, the obstacle is the story attached to the balance: what it would say about you if it were smaller, or bigger.',
+           do:'Read against money, the step is one honest figure written down and one decision made on the real one.'},
+   hold:'What would you spend differently tomorrow if nobody were ever going to see the number?'},
+  {v:'family', t:'My family — the people I did not choose and the ones I did',
+   open:'your family: the people you did not choose, and the ones you did',
+   bridge:{facing:'Read against family, this is about a role you were handed early and have not been released from.',
+           block:'Read against family, the obstacle is loyalty to a rule that was never spoken out loud and has never been argued with.',
+           do:'Read against family, the move is a boundary that is calm, brief, and repeated rather than explained one more time.'},
+   hold:'Which of the old rules in this family are you keeping because you believe it, and which because leaving it would be a conversation?'},
+  {v:'health', t:'My body, and how I am actually living in it',
+   open:'your body, and how you are actually living in it rather than how you mean to',
+   bridge:{facing:'Read against your body, this is about what your days are built out of, not about a single decision you can make once.',
+           block:'Read against your body, the obstacle is the thing that gets traded away first when the week gets crowded, which is almost always the same thing.',
+           do:'Read against your body, the move is small enough to keep on a bad week. A reading is not a treatment and this page will not pretend otherwise \u2014 for anything that needs a professional, that is a professional\u2019s call and not a card\u2019s.'},
+   hold:'What does your ordinary week actually look like, told honestly, rather than the week you intend to have?'},
+  {v:'self', t:'Me, apart from everybody who wants a piece of me',
+   open:'you yourself, apart from everybody who wants a piece of you',
+   bridge:{facing:'Read against your own life, this is the thing you would be working on if nobody were waiting for you to finish anything.',
+           block:'Read against your own life, the obstacle is usually somebody else\u2019s timetable that you have agreed to without ever having chosen it.',
+           do:'Read against your own life, the move is done for your own reasons and the account of it is kept private for a while.'},
+   hold:'If nobody were watching or waiting, what would you do with the next month?'}
+];
+
+const ASK_THRU = [
+  {v:'stuck', t:'Stuck, and I cannot see the way through',
+   open:'a stretch where you cannot see the way through and have stopped trusting your own read of it',
+   close:'Notice that you have been describing this as a verdict rather than a stage, and that the description has been doing some of the work of keeping it one.'},
+  {v:'tired', t:'Tired, and running on empty',
+   open:'a long stretch of being needed by everybody and replenished by nobody',
+   close:'The tiredness is information, not a character flaw, and whatever the cards said has to fit inside a life that is running low.'},
+  {v:'loss', t:'Carrying a loss I have not finished with',
+   open:'a loss you have not finished with, whatever you have been telling people about it',
+   close:'Grief keeps its own calendar, and nothing here asks you to be finished by a date that suits somebody else.'},
+  {v:'cross', t:'At a crossroads, and the choice is real',
+   open:'a crossroads where both directions cost something and neither of them is obviously right',
+   close:'A crossroads answered by waiting is still answered \u2014 the waiting chooses for you, and it chooses without your reasons.'},
+  {v:'storm', t:'In the middle of something that keeps changing shape',
+   open:'something that keeps changing shape while you are still deciding what to call it',
+   close:'When the situation keeps moving, the useful question is what stays true of you across all the versions of it.'},
+  {v:'rebuild', t:'Rebuilding after something came apart',
+   open:'a rebuilding, after something came apart in a way you did not get to choose',
+   close:'Rebuilding is slower than starting, because it carries a memory of the old shape, and the slowness is not failure.'}
+];
+
+const ASK_SEEK = [
+  {v:'clarity', t:'A clear picture of what is actually going on',
+   open:'a clear picture of what is actually going on',
+   close:'You came for a clear picture, so take the plainest sentence out of the three cards and act as if it were true for a week, and notice what changes.'},
+  {v:'next', t:'One next step I can actually take',
+   open:'one next step you can actually take this week',
+   close:'Before the week is out, do the smallest real version of the third card and tell one person you did it. A step nobody knows about is much easier to un-take.'},
+  {v:'staygo', t:'An honest answer about whether to stay or go',
+   open:'an honest answer about whether to stay or whether to go',
+   close:'The cards will not tell you which way to go, and any reader who says they will is selling you something. They can tell you what you are choosing between \u2014 so write both options down and be honest about which one you were hoping to hear.'},
+  {v:'pattern', t:'The name of a pattern I keep running into',
+   open:'the name of a pattern you keep running into',
+   close:'A pattern is only a pattern until it is named. Write the one thing that keeps happening in a single sentence, in your own words, and see whether you recognise the author of it.'},
+  {v:'timing', t:'Whether this is the moment, or whether it is early',
+   open:'a sense of whether this is the moment or whether it is early',
+   close:'Timing on this screen is read from your own year number and from where the cards sit in the deck, and both of those are about readiness rather than dates. The date is a decision you make.'},
+  {v:'nerve', t:'The nerve to do the thing I already half-know I am going to do',
+   open:'the nerve to do the thing you already half-know you are going to do',
+   close:'You are not short of the answer; you are short of the company. Tell one person who will not talk you out of it, and then take the first step while they are still in the room.'}
+];
+
+/* The three positions, in order. Situation, what holds it, and the one
+   card that tells you what to do about it. The lead is the reader's own
+   line before each card, which is how the three are separated out loud. */
 const DRAW_POS = [
-  {k:'facing', t:'What you are facing'},
-  {k:'block',  t:'What is in the way'},
-  {k:'do',     t:'What to do'}
+  {k:'facing', t:'What you are facing', lead:'Where you are actually standing, before anybody decides anything.'},
+  {k:'block',  t:'What is in the way',  lead:'The thing that is keeping the first card from moving.'},
+  {k:'do',     t:'What to do',          lead:'The only card of the three with a verb in it, and the only one that asks anything of you.'}
 ];
 
 /* One reading per card per position, so no line has to do duty in two
-   places and the draw never just repeats the card's own line. Written
-   for this app, like everything else on the page. */
+   places and the reading never just repeats the card's own line above it.
+   Each is a full paragraph because that is the whole of what he asked for: a
+   card read, not a card labelled. The bond line is the same card read as the
+   thing two birthdays make between them, which is what the pair layer uses. */
 const TAROT_DRAW = {
-  1:{facing:"You already have everything this needs. The question was never whether you are equipped. It is whether you will use it.",
-     block:"The skill is being held back to avoid the attempt, because a thing you have not started cannot go wrong.",
-     do:"Pick up the tool that is actually in your hand and use it once today, badly if that is what it takes."},
-  2:{facing:"You already know the answer and cannot yet prove it. Something in you decided a while ago.",
-     block:"You are waiting for permission or evidence before you trust what you know, and neither of them is coming.",
-     do:"Sit with it quietly and stop asking everybody else. The knowing is the information."},
-  3:{facing:"Something here is growing and wants feeding rather than fixing. Care is the work.",
-     block:"You are tending everything except the thing you actually want to grow.",
-     do:"Feed it on purpose, with time and attention and ordinary care, and let it be slower than you would like."},
-  4:{facing:"This wants a frame around it: a rule, a boundary, a decision that will hold.",
-     block:"Nobody has drawn the line, so the whole thing is being renegotiated every single day.",
-     do:"Set the rule and then live inside it. Say no once, clearly, and keep it."},
-  5:{facing:"This is about what you inherited, and the way it was always done in your house.",
-     block:"You are keeping a rule that stopped serving you years ago and calling it loyalty.",
-     do:"Sort the inherited wisdom from the habit. Keep one of them and put the other down."},
-  6:{facing:"This is a choice, not a romance. Two ways are open and you are standing in the middle of them.",
-     block:"You are trying to keep both options alive, which is exactly why nothing is moving.",
-     do:"Choose, and accept what the choosing costs. The cost is the price of the door."},
-  7:{facing:"Momentum is available. Two forces are pulling and one of them can be steered.",
-     block:"You are being pulled rather than driving it. Nobody has picked up the reins.",
-     do:"Take the reins. Choose one direction and hold the other force steady behind it."},
-  8:{facing:"This calls for patience with something wilder than the situation in front of you.",
-     block:"You are trying to force it, and the forcing is what is making it worse.",
-     do:"Use the hand, not the fist. Gentle and unbroken beats loud and quick."},
-  9:{facing:"This is a withdrawal, not a defeat. You need a quiet room to see it clearly.",
-     block:"You are hunting the answer in other people's opinions and collecting noise.",
-     do:"Go quiet for a day, then bring back one thing you can actually use."},
-  10:{facing:"Something here is turning on its own timing, and you are partway round rather than at the end.",
-      block:"You are fighting the turn instead of reading where on it you actually are.",
-      do:"Stop pushing the wheel. Work out which part of the cycle this is and act for that part."},
-  11:{facing:"This is a question of honest accounting, and you already know your own side of it.",
-      block:"There is an account you have been putting off opening, and it is colouring everything else.",
-      do:"Do the honest sum. Weigh your own case the way you weigh everybody else's."},
-  12:{facing:"This is a suspension rather than a failure. You are being held still so you can see it the other way up.",
-      block:"Nothing will move while you keep forcing the angle you are already standing at.",
-      do:"Hang there a while longer. Look at it from the other side before you move."},
-  13:{facing:"Something here has finished. This is clearance, not loss.",
-      block:"You are holding open a thing that ended, and it is taking the room the next thing needs.",
-      do:"Finish it properly. Close the door instead of leaving it ajar."},
-  14:{facing:"This is the patient mix, not the dramatic either-or.",
-      block:"You are looking for a clean decision where a slow blend is what this actually wants.",
-      do:"Pour slowly. Small amounts, regularly, and give the mix time to settle."},
-  15:{facing:"There is a want here that you have been calling a need.",
-      block:"An old appetite is doing the deciding. It is not a chain yet, but it is close.",
-      do:"Name what you call necessary and test whether it is. Loosen one link this week."},
-  16:{facing:"Something built badly is already coming down. This is the crack, not the whole collapse.",
-      block:"You are holding up a structure you know is unsound, to avoid the noise of it going.",
-      do:"Let the part that is wrong come down before it takes the rest with it."},
-  17:{facing:"There is hope in this, and it is the quiet kind that survives a wreck.",
-      block:"You want a result before you will keep pouring, and the pouring is the whole job.",
-      do:"Keep pouring while nothing shows. Do the small thing again tomorrow."},
-  18:{facing:"You are moving through country you cannot see, and instinct is what you have.",
-      block:"Something here is not as clear as it looks, and you are treating the fog as solid ground.",
-      do:"Go by feel for now, slowly, and check the ground under each step."},
-  19:{facing:"This is clearer and warmer than you are letting yourself believe.",
-      block:"You are dimming yourself to keep somebody else comfortable, and they never asked you to.",
-      do:"Be plainly visible. Say the good thing out loud and stop apologising for the warmth."},
-  20:{facing:"This is a reckoning and a call at the same time. You are being asked to answer for it and rise anyway.",
-      block:"An old verdict is doing the judging, and that court closed years ago.",
-      do:"Answer the call rather than the old verdict. Decide, then get up and act on it."},
-  21:{facing:"This is the last stretch of something that is nearly complete.",
-      block:"You keep starting the next circle before closing this one, so nothing ever finishes.",
-      do:"Close the circle properly. One finished thing beats three nearly-finished ones."},
-  22:{facing:"This is a beginning nobody has authorised, including you.",
-      block:"You are waiting for a guarantee that this kind of beginning has never once come with.",
-      do:"Step off. Take only what you can carry, and go before the courage cools."}
+  1:{facing:"You are standing in front of this with the tools already in your hands, and the reading starts here because the question was never whether you have what it takes. It is a card of assembled skill: the table is set, the elements are out, and the only thing missing is the willingness to work with what is on the table rather than hunt for a better set. Notice how much of your effort goes into gathering and how little into the using.",
+     block:"The tool is being kept clean. A thing that has not been tried cannot be found wanting, so the preparing has quietly become the place you live rather than the work itself. There is a version of you that would rather be excellent in theory than ordinary in practice, and this card names that hesitation without shaming it.",
+     do:"Use the thing once today, at a size that costs you almost nothing, and let it be clumsy. Skill is made out of repetitions that survived being bad at first, and the first one is the only one you have to get through.",
+     bond:"Between you, this is a pair who can genuinely make something: two sets of hands and one table. The risk is that you keep conferring instead of starting, so whoever picks the tool up first sets the direction for both of you."},
+  2:{facing:"This is a situation you already understand somewhere underneath the arguing part of your mind. You have known the shape of it for a while and you keep going back for evidence, which is the one thing this card never provides. Everything you need to read is the quiet, unwitnessed knowledge you have not said out loud yet.",
+     block:"You are asking other people to confirm what you know, and every answer you collect makes the knowing harder to hear. Waiting for proof is not patience here; it is a way of postponing the moment you have to act on your own read of it.",
+     do:"Take a quiet day and stop canvassing. Write down what you already think before you ask anybody anything, and treat that first answer as information rather than as a mood. Do it before the next conversation rather than after it, because after is where somebody else's version has already got in and started sounding reasonable.",
+     bond:"This is the pair who understand each other without the explanation, which is the gift and the whole difficulty \u2014 nobody says the thing out loud, and so nothing gets decided. Half of what passes between you has never been spoken."},
+  3:{facing:"Something in this is alive and needs feeding rather than fixing. This is a card of growth and ordinary care given repeatedly, and of the possibility that the thing worrying you is simply younger than you want it to be.",
+     block:"The care is going everywhere except the thing you actually want to grow. You have been generous with everything that asks for you first and stingy with the one that would ask you to be patient, and it shows in what has thickened and what has stalled.",
+     do:"Feed it on purpose: time on a fixed day, attention that is not stolen from somewhere else, and a willingness to let it be slower than you would choose. Care given regularly beats intensity given once.",
+     bond:"Between you this is the pairing that grows things \u2014 a home, a family, a project, a way of living \u2014 and it grows them by ordinary repetition rather than by grand gestures. What it asks is that you both keep watering on the days nobody feels like it."},
+  4:{facing:"This wants a frame: a rule, a boundary, a decision that will still hold next week when the mood has changed. Structure is not the opposite of feeling here; it is what stops the feeling being renegotiated every single morning.",
+     block:"Nobody has drawn the line, so everything is up for discussion all of the time. That is exhausting in a way that looks like flexibility, and it leaves the people close to you guessing which version of you is going to turn up.",
+     do:"Set the rule and then live inside it. Say no once, clearly, without a paragraph of justification, and hold it through the discomfort of the first few days. A boundary that has to be explained three times is not a boundary; it is a negotiation with a hopeful tone.",
+     bond:"Between you, one of you is the frame and the other is the weather, and the pairing works when the frame is a shelter rather than a cell. Decide together what is genuinely non-negotiable and let the rest be negotiated without a fight."},
+  5:{facing:"This is about inheritance: the way it was always done, in your family, your trade, your people. The card asks which of the inherited rules is carrying you and which one you are carrying for no better reason than nobody has put it down.",
+     block:"A rule that stopped fitting years ago is still being obeyed, and it is being called loyalty rather than being looked at as a habit. The cost is paid quietly, in the parts of your life that keep getting shaped around an old instruction.",
+     do:"Sort the two piles honestly. Keep one piece of the inheritance that genuinely serves you and name it as your own, put one piece down on purpose, and say out loud that you are doing it. Expect somebody to mind, and let them mind: the part of an inheritance that survives being questioned is the only part genuinely worth keeping.",
+     bond:"Between you this is a shared set of rules, and the work is finding out which ones you both believe and which one of you inherited them and brought them along. Tradition can be the floor you stand on or the ceiling you keep hitting."},
+  6:{facing:"This is a choice rather than a romance, whatever it is wearing. Two ways are open, you are standing in the middle of them, and the real subject of the card is the cost of taking one of them. Notice which of the two you have already told more people about: that is usually the one you have chosen, and the decision is lagging behind it.",
+     block:"You are keeping both doors open, which feels like wisdom and behaves like paralysis. Nothing has had to be given up, and so nothing has been chosen, and the waiting has a price that nobody is counting. What is being avoided is not the choosing itself but the explaining of it to the people who will have an opinion, and those are two very different jobs.",
+     do:"Choose, and accept the cost \u2014 the cost is not a sign that you chose wrongly, it is the price of any door at all. Then act on the choice in a way the other person can see. If the cost feels too high to pay, look at the cost rather than at the choice: one of them is real, and the other is a story about being watched.",
+     bond:"Between you, this is a decision that has not been finished: a commitment half-made, or a question you both keep walking around. What the pairing asks for is honesty about which choice is actually on the table."},
+  7:{facing:"Momentum is available and this can move quickly in whatever direction you point it. Two forces are pulling \u2014 two needs, two people, two loyalties \u2014 and only one of them is holding the reins. Ask what the second force actually needs, because a thing that keeps pulling has usually been given no other way of being heard.",
+     block:"You are being carried rather than driving. The direction has been set by whichever force shouted last, and the result has been speed without steering, which is how people end up a long way from where they meant to go. Look back over the last month and ask who has been deciding, because if the answer is the loudest person in the room, the chariot is not yours yet.",
+     do:"Take the reins: pick one direction and hold the second force steady behind it rather than letting it bolt. Momentum is a tool, and it goes where you aim it and nowhere you leave undecided. Say the destination out loud to somebody with no stake in either force: a direction nobody has heard is the easiest thing in the world to abandon quietly.",
+     bond:"Between you this is a great deal of forward motion and a standing question about who is steering. Two sets of reins on one chariot only works when you agree the destination out loud before you gallop."},
+  8:{facing:"This asks for the hand rather than the fist. Something in front of you is wilder than the situation itself \u2014 an appetite, a temper, a fear \u2014 and it answers to patience rather than to force. The wild part is not the enemy here. It is usually the part of you that has been carrying something heavy and has never once been thanked for it.",
+     block:"You are pushing, and the pushing is what is making it worse. Force applied to something that wants to be handled slowly produces the exact behaviour you are trying to stop. Force gets obedience and calls it change, and what you are actually building is a habit, which is made by repetition rather than by one strong day.",
+     do:"Keep your hands open. Go gently and without a break, and notice which of the two of you is actually frightened \u2014 the calm voice usually outlasts the loud one. Pick the smallest daily version of it, and keep that version for a week, including the days it feels pointless, and especially those.",
+     bond:"Between you this is the pairing where one of you can hold still while the other is roaring, which is worth more than either of you being reasonable. It asks for steadiness on the days it is not returned."},
+  9:{facing:"This is a withdrawal, and a deliberate one. You need a quiet room, a lamp, and a stretch of time with the question and none of the audience. This is not hiding, and the difference matters: it is going quiet so you can hear yourself, rather than going quiet so nobody can ask you anything.",
+     block:"You are looking for the answer in other people's opinions and collecting noise. Every extra voice adds a candidate and takes away a little of your certainty. The noise is not the problem; using the noise to postpone a decision you have already made is.",
+     do:"Go quiet for a day, then come back with one thing you can use. Solitude is only the first half of this card; the second half is the lamp carried back to the people waiting. Say the one thing you found to the person who has been waiting to hear from you, and notice that the lamp was for them.",
+     bond:"Between you this is the need for solitude that one of you mistakes for rejection. Time apart is not the opposite of closeness here; it is what makes the return worth anything."},
+  10:{facing:"Something here is turning on its own timing, and you are partway round rather than at the end of it. The situation is not stuck so much as between two positions, and it will move whether or not you push. Read the last year and work out whether you are at the top of the turn, the bottom of it, or on the slope, because the work is different in each of the three and misreading which one this is accounts for most of the frustration.",
+      block:"You are fighting the turn instead of reading where on it you actually are. Working against the part of a cycle you are in is how effort gets spent with nothing to show for it. Pushing at the wrong part of a cycle is how a person arrives at an ending convinced that they failed at a beginning.",
+      do:"Stop pushing and work out which part of the cycle this is \u2014 beginning, middle or end \u2014 then do the thing that belongs to that part, which is usually smaller and less dramatic than the thing you have been attempting. Give the part of the cycle a name, an opening or a middle or a closing, and then do the one thing that belongs to it and nothing that belongs to the other two.",
+      bond:"Between you this is a pairing being turned by timing rather than by either of you: a phase, a move, a season. Reading the cycle together is easier than each of you reading it alone."},
+  11:{facing:"This is a question of honest accounting, and you already know your own side of it. What the card asks for is the sum done in daylight, with your own case weighed the way you weigh everybody else's. This is not a question of who is to blame. It is a question of what the honest version of the story costs you to say out loud.",
+      block:"There is an account you have been putting off opening, and it is quietly colouring everything else. The debt itself is not the problem; the problem is the way it keeps leaking into rooms that have nothing to do with it. While it stays closed, every other decision gets made with the wrong numbers.",
+      do:"Do the honest sum and write it down. Where you were wrong, say so plainly once and then stop paying interest on it; where you are owed, ask, and be ready for the answer. Write the sum on paper in two columns, and let the paper hold it instead of your head.",
+      bond:"Between you this is about balance \u2014 what each of you gives, what each of you is owed, and the version of the ledger you have each been keeping privately. Say the numbers out loud before the two of you decide who is being unfair."},
+  12:{facing:"This is a suspension rather than a failure. You are being held still, and the holding is what lets you see the whole thing the other way up. Nothing has been lost yet except the speed you were used to. There is one real advantage in this position: nobody is asking you to decide quickly, and that is rarer in a life than it sounds.",
+      block:"Nothing will move while you keep forcing the angle you are already standing at. The stuckness is not the situation; it is the view from one position, held too long. Waiting has quietly become a kind of answer, and the part of you turning it over is hoping for a version where nobody has to move.",
+      do:"Hang there a while longer, on purpose. Turn the question over, work out what it looks like from the other person's side of it, and only then move. Turn it over properly: write the situation out from the other person's side, in their words, and keep whatever still holds when you read it back.",
+      bond:"Between you this is a pause neither of you chose: a delay, a suspension, a thing left on hold. Used well, it becomes the moment you both finally see the shape of it."},
+  13:{facing:"Something here has already finished, and what this is, is clearance rather than loss. The card is about the room that gets made when a thing is finally allowed to be over. It is worth saying plainly: what ended is not coming back in its old shape, and the wish for that is a large part of what is making this feel the way it does.",
+      block:"You are holding open something that ended, and it is occupying the space the next thing would need. What is being protected is not the thing itself; it is the not-having-the-ending. Holding on is rarely about the thing itself. It is about what the ending would say about the years you put into it.",
+      do:"Finish it properly. Close the door instead of leaving it ajar, give back what was borrowed, say the sentence you have been not-saying, and let an ending be an ending. Say the closing sentence once, to the person it belongs to, or to the empty room if that is what there is.",
+      bond:"Between you this is a chapter that is over, or a version of the two of you that has already gone. Neither reading means the bond has to end \u2014 it means the old shape of it cannot be the shape you keep."},
+  14:{facing:"This is the patient mix rather than the dramatic either-or. Two things that do not naturally blend are being asked to blend, slowly, in small amounts, with time in between. Nothing has to be chosen here: the work is the proportion, and proportion is slower and less satisfying than deciding.",
+      block:"You are looking for a clean decision where slow blending is what the situation actually wants. Rushing the mix is how two good ingredients turn into something that is neither of them. The hurry is understandable, because a clean decision feels like relief while a slow blend feels like being asked to be patient indefinitely.",
+      do:"Pour slowly: small amounts, regularly, with time in between to let the mix settle, and no grand declaration until it has. Give it a measured routine: the same small amount, at the same time, and no verdict on the whole thing for a month.",
+      bond:"Between you this is a pairing made of two unlike things that work precisely because they are unlike. The craft is proportion \u2014 enough of each, rather than a surrender by one of you."},
+  15:{facing:"There is a want in this that you have been calling a need. The card is not about wickedness; it is about the appetite that has started doing the deciding. The wanting is not the problem, and neither is the pleasure. The trouble begins when the wanting takes the decisions.",
+      block:"An old appetite has the wheel: the habit, the comfort, the thing you reach for before you have thought. It is not a chain yet, and it is tightening. Ask what the appetite is doing for you, because a habit that has lasted this long is carrying something, and that job has to go somewhere else before the thing itself will go.",
+      do:"Name what you are calling necessary and test whether it is. Loosen one link this week, just one, and watch what your hands do in the gap. Then tell somebody the honest number, how often and how much, because this one grows in the dark and shrinks in company.",
+      bond:"Between you this is the arrangement that is comfortable and slightly too tight \u2014 where each of you gets something and neither says what it costs. Naming the bargain out loud is the whole of the first move."},
+  16:{facing:"Something built badly is already coming down. What you are looking at is the crack rather than the whole collapse, which is the one piece of good news this card ever carries. Nothing here has to be turned into a catastrophe: what is coming down is a structure, and a structure is not the same thing as a person.",
+      block:"You are holding up a structure you already know is unsound, and the holding is costing more than rebuilding would. It is the noise of letting it go that is being avoided, not the loss of the thing. The dread of the noise is doing considerably more work than the noise itself would.",
+      do:"Let the wrong part come down before it takes the rest with it. Do it on a day of your own choosing rather than waiting for the day it chooses, and keep the foundation. Decide in advance what you are keeping, the people and the skill and the one thing that survives, and let the rest come down without a fight.",
+      bond:"Between you this is a structure \u2014 a plan, a home, a way of running the thing \u2014 that has to be rebuilt. The bond survives the rebuilding or it was built on the scaffolding, and either answer is useful."},
+  17:{facing:"There is hope in this, and it is the quiet kind that survives a wreck without making any noise about it. This card arrives after the damage rather than instead of it. It is quiet and it is real, and it rewards the people who are willing to look boring and repetitive for a while.",
+      block:"You want a result before you will keep pouring, and the pouring is the whole of the job. Requiring evidence first is how the thing that needed patience gets abandoned in the month it would have shown. Nothing you have already poured in has been wasted. It has simply not been paid yet.",
+      do:"Keep pouring while nothing shows. Do the small thing again tomorrow, at the same hour, and let the visible result arrive on its own schedule. Measure it in weeks rather than in days, and put that measurement somewhere you will see it on the bad ones.",
+      bond:"Between you this is the unglamorous part of a bond: the small kindness repeated on the days nobody is watching. It is the least dramatic card in the pack and the one that holds the most."},
+  18:{facing:"You are moving through country you cannot see, and instinct is what you have to steer with. Nothing here is as clear as it looks, including your own first reading of it. Ask what you are actually reacting to, because in this weather the loudest feeling is rarely the most accurate information.",
+      block:"The fog is being treated as solid ground. You are building conclusions on a view that is part your own fear and part somebody else's version of events, and the two have got mixed together. Fog is comfortable in one specific way: it excuses you from acting, and that is the trade being made here.",
+      do:"Go by feel for now, slowly, and check the ground under each step before you put weight on it. Write down what you actually saw rather than what you decided it meant, and get one fact from a person who was there instead of from the version going round your head.",
+      bond:"Between you this is the part that has never been said clearly \u2014 a mood, an unspoken worry, a version of events you have each been carrying alone. Say it in daylight and half of it will go."},
+  19:{facing:"This is clearer and warmer than you have been letting yourself believe. The card is the plain version of the situation, before all the qualifications you have been adding to it. This is not a plateau of nothing much happening. It is a good thing being treated as though it were a trap.",
+      block:"You are dimming yourself to keep somebody else comfortable, and they have not asked you to. What is being hidden is not the problem; the hiding is. Notice whose comfort you are protecting, and whether anybody ever asked you to protect it.",
+      do:"Be plainly visible. Say the good thing out loud, take the credit you have been deflecting, and stop apologising for the warmth you bring into a room. Take the compliment, use the window while it is open, and put one thing on the record that can be celebrated later.",
+      bond:"Between you this is the pairing at its best \u2014 easy, warm and uncomplicated \u2014 and it is available to you far more often than the two of you reach for it. Say the plain, affectionate thing instead of hoping it is understood."},
+  20:{facing:"This is a reckoning and a call at the same time. You are being asked to answer for something you have made and to get up anyway, and that is the whole of the card. This is not an audit of your character, whatever the old verdict says. It is a call to account for one specific thing, and then to move.",
+      block:"An old verdict is doing the judging, and that court closed years ago. The sentence you keep obeying was handed down by somebody who has no authority over who you are now. That judge has never heard the new evidence, because the case closed before any of it existed.",
+      do:"Answer the call rather than the verdict. Decide, name the decision out loud to one other person, and take the first action the decision implies. If it helps, answer the call in writing: what happened, what you make of it now, and what happens next.",
+      bond:"Between you this is a summons to be honest about what the bond has become and what it is for. Answering the call together is easier than each of you quietly deciding and hoping the other agrees."},
+  21:{facing:"This is the last stretch of something that is nearly complete. The work is finished in substance and unfinished in the one place that matters, which is the closing of it. The unfinished part is not the work. It is the acknowledging of it, which is why it can feel as though there is nothing further to be done here.",
+      block:"You keep starting the next circle before closing this one, so nothing ever gets the ending that would let it count. Beginning again is an effective way of never finishing. Closing costs something, namely the identity of the person still working on it, and that is the part nobody wants to pay.",
+      do:"Close the circle properly: name what is complete, mark it once, and let one finished thing stand instead of three almost-finished ones. Mark the ending in a way somebody else can see: tell the person who was there at the start, and let it be finished out loud.",
+      bond:"Between you this is a bond that has been through a whole cycle \u2014 a beginning, a middle, and the end of a phase \u2014 and the question is whether you have marked it. Say what this stretch has been."},
+  22:{facing:"This is a beginning nobody has authorised, including you. There is no guarantee attached to this one, and the card's entire subject is that kind of beginning. Notice how much of your preparation is genuine groundwork and how much of it is a way of staying on the ledge.",
+      block:"You are waiting for a certainty that this kind of beginning has never once come with. The plan is being polished as a way of postponing the step, and it is nearly good enough to be believed. Nobody is coming with a permission slip, and the people who might have given one are waiting to see what you do without it.",
+      do:"Step off. Take only what you can carry, tell one person what you are doing, and go before the courage cools back to the temperature of reason. Set a date inside the next fortnight, tell one person what it is, and take the first physical step before the date arrives.",
+      bond:"Between you this is something entirely new \u2014 a start with no precedent, with one of you ready before the other. Go slowly enough to bring the other with you, and fast enough that it actually happens."}
 };
 
-/* One line to close the draw, rotated so two draws in a row do not end
-   on the same sentence. Every one of them keeps the app's stance: this
-   is not a prediction and it never tells anybody they are finished. */
+/* One line to close the reading. The one that is used is chosen by the same
+   seed the spread is dealt from, so a reading is reproducible end to end
+   rather than ending on whichever sentence came round next. Every one of them
+   keeps the app's stance: this is not a prediction, and none of them tells
+   anybody they are finished. */
 const DRAW_CLOSE = [
-  "Nothing here is a prediction. It is the question you came in with, handed back in three parts, and only the third one asks you to do anything.",
+  "Nothing here is a prediction. It is the question you came in with, handed back in three parts, and only the third one asks you to do anything with it.",
   "Three cards, one question. The first says where you stand, the second names what is holding it, and the third is the only one with a verb in it.",
   "This is not a forecast. Read it as advice from a part of you that already knew, and take the third card seriously.",
-  "A draw is a way of asking yourself a question properly. The answer was never in the cards. It is in what you noticed while reading them.",
-  "Hold all three together rather than keeping the one you liked. The hard card is usually the one doing the work."
+  "A reading is a way of asking yourself a question properly. The answer was never in the cards. It is in what you noticed while reading them.",
+  "Hold all three together rather than keeping the one you liked. The hard card is usually the one doing the work.",
+  "Read the three once more before you close this, slowly, and notice which sentence you wanted to argue with. That one is the reading."
 ];
-let DRAWS = 0;
 
-/* Fisher-Yates over the 22 Major Arcana, then the top three. Three
-   different cards every time: a spread that repeats a card reads as a
-   mistake rather than as a message. Takes its randomness as an argument
-   so the draw can be tested without touching the page. */
-function drawThree(rand){
-  const deck = Object.keys(TAROT).map(Number);
-  for(let i = deck.length - 1; i > 0; i--){
-    const j = Math.floor(rand() * (i + 1));
-    const t = deck[i]; deck[i] = deck[j]; deck[j] = t;
-  }
-  return deck.slice(0, 3);
+/* ── the destiny layer ────────────────────────────────────────────────────────
+   Three things a birthday gives, and all three are the published arithmetic
+   rather than something invented here.
+
+   The birth cards are Mary K. Greer's personality and soul pair: day + month
+   + the full year as numbers, reduced by digit sum until it is 22 or under,
+   and then the soul card from the digits of that again. 22 is the Fool, as it
+   is everywhere else on this page, and 19 keeps its whole chain — 19, 10, 1:
+   the Sun, the Wheel and the Magician. */
+function birthCards(month, day, year){
+  let n = day + month + (year || 0);
+  while(n > 22) n = digitSum(n);
+  if(n < 1) n = 22;
+  const chain = [n];
+  let cur = n;
+  while(cur > 9){ cur = digitSum(cur); chain.push(cur); }
+  return { per: n, soul: chain[chain.length - 1], chain: chain };
 }
 
+/* The number this calendar year is running at for somebody: birth month,
+   birth day, and the digits of the year, reduced to 1-9. It is the layer a
+   reader reaches for when the question is about timing, and the page already
+   has a whole table of what each of the nine is (NUMBERS). */
+function personalYear(month, day){
+  return reduceNum(month + day + digitSum(new Date().getFullYear()));
+}
+
+/* The card two birthdays make between them: both birth cards added, then cut
+   back by twenty-two until it lands on a card of the deck. It is what the pair
+   make together rather than what either of them brings. */
+function bondCard(a, b){
+  let n = a + b;
+  while(n > 22) n -= 22;
+  return n < 1 ? 22 : n;
+}
+
+/* ── the deal ─────────────────────────────────────────────────────────────────
+   The spread is dealt from the birthday and the four answers rather than from
+   chance: the same question on the same birthday deals the same reading, and
+   changing one answer changes the cards. The card that stands for the querent
+   — the birth card, or the card the two of them make between them — is always
+   on the table, which is where a reader puts the significator down first.
+
+   Both of these take their seed as an argument so the whole deal can be run
+   in a test with no browser and no randomness to chase. */
+
+/* FNV-1a, which turns the answers into one number. */
+function seedFrom(str){
+  let h = 2166136261;
+  for(let i = 0; i < str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/* mulberry32, seeded. */
+function rngFrom(seed){
+  let s = seed >>> 0;
+  return function(){
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* Three different cards, always: the significator sits where the seed puts it
+   and the other two come off a seeded shuffle of the remaining twenty-one. */
+function dealCards(sig, seed){
+  const rand = rngFrom(seed);
+  const rest = Object.keys(TAROT).map(Number).filter(n=>n !== sig);
+  for(let i = rest.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    const t = rest[i]; rest[i] = rest[j]; rest[j] = t;
+  }
+  const where = Math.floor(rand() * 3);
+  const out = [];
+  let k = 0;
+  for(let i = 0; i < 3; i++) out.push(i === where ? sig : rest[k++]);
+  return out;
+}
+
+/* ── the questions, read off the screen ────────────────────────────────────────
+   The month and the day start with NOTHING chosen, which is different from
+   every other select on this page. The spread is dealt from the birthday, so a
+   form that quietly defaults to the first of January would deal a reading for
+   somebody who was never asked. Until a day is picked the reading refuses, and
+   says why. */
+function cdFillMonths(id){
+  const sel = $(id);
+  if(!sel) return;
+  const cur = sel.value || '';
+  sel.innerHTML = '<option value="">Choose month</option>'
+    + MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+  sel.value = cur;
+}
+function cdFillDays(id, month, keep){
+  const sel = $(id);
+  if(!sel) return;
+  const max = DIM[month - 1] || 31;
+  const cur = keep != null ? String(keep) : (sel.value || '');
+  sel.innerHTML = '<option value="">Choose day</option>'
+    + Array.from({length:max}, (_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
+  /* A day the month does not have (the 30th kept while the month moves to
+     February) cannot be selected, so it falls back to nothing chosen. */
+  sel.value = cur;
+}
+function cdFillAsks(){
+  const put = (id, list) => {
+    const sel = $(id);
+    if(sel && !sel.innerHTML) sel.innerHTML = list.map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join('');
+  };
+  put('cd-area', ASK_AREA);
+  put('cd-thru', ASK_THRU);
+  put('cd-seek', ASK_SEEK);
+}
+/* The other person's birthday is only on the screen when the reading is about
+   the two of them, so nobody is asked for a date that is not wanted. */
+function cdWhoRow(){
+  const two = $('cd-two');
+  if(two) two.hidden = $('cd-who').value !== 'two';
+}
+
+/* Opening the tab sets the form up, and carries over the birthday already
+   typed on the Read screen, because it is the same birthday. Done once: after
+   that the form belongs to whoever is using it. */
+let CD_READY = false;
+function prepareCards(){
+  cdFillMonths('cd-month'); cdFillDays('cd-day', +$('cd-month').value || 1, null);
+  cdFillMonths('cd2-month'); cdFillDays('cd2-day', +$('cd2-month').value || 1, null);
+  cdFillAsks(); cdWhoRow();
+  if(CD_READY) return;
+  CD_READY = true;
+  const fm = $('f-month'), fd = $('f-day');
+  if(!fm || !fd || !fm.value) return;
+  $('cd-month').value = fm.value;
+  cdFillDays('cd-day', +fm.value, +fd.value || 1);
+  const fy = $('f-year'), cy = $('cd-year');
+  if(fy && cy && fy.value && !cy.value) cy.value = fy.value;
+  const fn = $('f-name'), cn = $('cd-name');
+  if(fn && cn && fn.value.trim() && !cn.value) cn.value = firstName(fn.value);
+}
+
+/* Everything the reading is built from, off the screen. */
+function cdAsk(){
+  const ask = {
+    name: ($('cd-name').value || '').trim(),
+    month: +$('cd-month').value,
+    day: +$('cd-day').value,
+    year: parseInt($('cd-year').value, 10) || 0,
+    who: $('cd-who').value,
+    area: $('cd-area').value,
+    thru: $('cd-thru').value,
+    seek: $('cd-seek').value,
+    two: null,
+    err: ''
+  };
+  if(!ask.month || !ask.day) ask.err = 'The cards are dealt from a birthday — put in at least the month and the day.';
+  if(!ask.err && ask.who === 'two'){
+    ask.two = {
+      name: ($('cd2-name').value || '').trim(),
+      month: +$('cd2-month').value,
+      day: +$('cd2-day').value,
+      year: parseInt($('cd2-year').value, 10) || 0
+    };
+    if(!ask.two.month || !ask.two.day) ask.err = 'For a reading about the two of you, their month and day are needed as well.';
+  }
+  const find = (list, v) => list.filter(o=>o.v === v)[0] || list[0];
+  ask.areaOf = find(ASK_AREA, ask.area);
+  ask.thruOf = find(ASK_THRU, ask.thru);
+  ask.seekOf = find(ASK_SEEK, ask.seek);
+  return ask;
+}
+
+/* The birthday worked out: the birth cards, the year number, and — for a
+   reading about two people — the card they make between them, which is the
+   significator for that kind of reading. */
+function cdDestiny(ask){
+  const mine = birthCards(ask.month, ask.day, ask.year);
+  const out = { mine: mine, year: personalYear(ask.month, ask.day) };
+  if(ask.two){
+    out.other = birthCards(ask.two.month, ask.two.day, ask.two.year);
+    out.bond = bondCard(mine.per, out.other.per);
+    out.sig = out.bond;
+  } else {
+    out.sig = mine.per;
+  }
+  return out;
+}
+
+/* One number for the whole question, off the answers in order. */
+function cdSeed(ask){
+  return seedFrom([ask.month, ask.day, ask.year, ask.who, ask.area, ask.thru, ask.seek,
+    ask.two ? ask.two.month + '-' + ask.two.day + '-' + ask.two.year : ''].join('|'));
+}
+
+/* What can be said about the three cards as a set rather than one at a time:
+   the shape they make through the deck, anything they share, and where the
+   querent's own card landed. Every line is read off the numbers, so every line
+   is true of the spread that is actually on the table. */
+function cdPattern(cards, sig, sigLabel){
+  const a = cards[0], b = cards[1], c = cards[2];
+  const out = [];
+  if(a < b && b < c) out.push(`The three climb the deck in order — ${a}, ${b}, ${c} — which is the shape of something opening rather than closing, and it argues for moving a little sooner than feels comfortable.`);
+  else if(a > b && b > c) out.push(`The three fall through the deck — ${a}, ${b}, ${c} — which is the shape of a reading that turns inward: the outer question getting smaller as the inner one gets bigger. That is not the same thing as things going wrong.`);
+  else if(b > a && b > c) out.push(`The middle card is the high point, number ${b} between ${a} and ${c}. That is the shape of a crisis met and held — the thing in the way is the loudest card on the table, and it is not the last word.`);
+  else if(b < a && b < c) out.push(`The middle card is the low point, number ${b} between ${a} and ${c}. That is the shape of something passing through a narrow place and coming out the other side, which tends to be uncomfortable and short rather than gentle and long.`);
+  else out.push(`The numbers run ${cards.join(', ')}, which is the ordinary tangle rather than a clean line: two of these things are moving at once, and they are not moving at the same speed.`);
+
+  const mirrors = [...new Set(cards.filter(n=>cards.includes(22 - n) && 22 - n !== n))];
+  if(mirrors.length === 2)
+    out.push(`Two of them are mirror cards, ${mirrors[0]} and ${mirrors[1]}, which add to twenty-two — the whole reach of the deck between them. One is doing what the other cannot.`);
+
+  for(let i = 0; i < 3; i++){
+    for(let j = i + 1; j < 3; j++){
+      if(reduceNum(cards[i]) === reduceNum(cards[j]))
+        out.push(`${TAROT[cards[i]].n} and ${TAROT[cards[j]].n} carry the same number once the digits are added (${reduceNum(cards[i])}), so the same lesson arrives twice in this spread, wearing two different costumes.`);
+    }
+  }
+
+  const past = cards.filter(n=>n > 11).length;
+  if(past === 3) out.push('All three sit past the Wheel — the second half of the Arcana, which is about the inner work rather than the outer one — so this reads as a question about what you are becoming rather than about what is being done to you.');
+  else if(past === 0) out.push('All three sit before the Wheel — the first half of the Arcana, which is about the outer world: work, money, other people, and the ordinary mechanics of a life. This one is practical rather than mystical.');
+  else if(past === 1) out.push('One of the three sits past the Wheel and two sit before it, so this is mostly a practical question with one inward thread running through it.');
+  else out.push('Two of the three sit past the Wheel and one sits before it, so this is mostly inner work being played out in ordinary circumstances.');
+
+  const at = cards.indexOf(sig);
+  if(at >= 0) out.push(`${sigLabel} came up as the ${['first', 'second', 'third'][at]} of the three, which is where a reader would put it: `
+    + (at === 0 ? 'it is the situation itself rather than a comment on it.'
+      : at === 1 ? 'what stands between you and moving is made of the same material you are.'
+      : 'the way through this is the way you already do things, used deliberately this time.'));
+  return out;
+}
+
+/* ── the reading ────────────────────────────────────────────────────────────── */
 function renderCards(){
-  const cards = drawThree(Math.random);
+  /* The form is set up when the tab opens, but a reading must not depend on
+     having got here through that door: a reload straight onto the tab, or a
+     press from anywhere else, still has to find the questions built. Every
+     one of these is idempotent — each keeps whatever is already chosen. */
+  prepareCards();
+  const ask = cdAsk();
   const box = $('cards-result');
+  const err = $('cd-err');
+  if(ask.err){ if(err) err.textContent = ask.err; return null; }
+  if(err) err.textContent = '';
+
+  const D = cdDestiny(ask);
+  const seed = cdSeed(ask);
+  const cards = dealCards(D.sig, seed);
+  const area = ask.areaOf, thru = ask.thruOf, seek = ask.seekOf;
+  const myCard = TAROT[D.mine.per], soulCard = TAROT[D.mine.soul], yearInfo = NUMBERS[D.year];
+  const theName = ask.name ? firstName(ask.name) : '';
+
+  /* One card. The position's lead, then the card's own line, then the reading
+     written for this card in this position, then the sentence that ties it back
+     to what this person said they were bringing. The card's name sits outside
+     the .db box on purpose: the read-aloud walks .dt, .db and every <p>, so a
+     paragraph nested inside .db would be spoken twice. */
   const one = (idx, i) => {
     const c = TAROT[idx], d = TAROT_DRAW[idx], pos = DRAW_POS[i];
-    /* The card name sits outside the .db box on purpose: the read-aloud
-       walks .dt, .db and every <p>, so a paragraph nested inside .db would
-       be spoken twice. */
     return `<div class="dp">
       <div class="dt">${i + 1} &middot; ${pos.t}</div>
       <p class="dcard"><span class="dr">${c.r}</span>${c.n}</p>
-      <div class="db">${c.line} ${d[pos.k]}</div>
+      <div class="db">${pos.lead} ${c.line} ${d[pos.k]} ${area.bridge[pos.k]}</div>
     </div>`;
   };
-  const names = cards.map(n=>TAROT[n].n);
-  const close = DRAW_CLOSE[DRAWS++ % DRAW_CLOSE.length];
+
+  /* The opening names the question in the querent's own words, because that is
+     the thing that makes a reading feel like it was written for one person. */
+  const opening = `This reading is about ${area.open}, taken ${thru.open}, and you are after ${seek.open}. `
+    + `It is dealt from ${theName ? `${theName}\u2019s birthday` : 'a birthday'} and from those four answers, and the card that stands for ${ask.two ? 'the two of you' : 'you'} is somewhere in the three below. `
+    + `Read the whole thing at once rather than one card at a time: each of the three opens with where its question sits, then the card, then the reading for this card in that place, and then what it has to do with what you came in with.`;
+
+  /* The destiny layer, said plainly and read against the question. */
+  const soulLine = D.mine.soul === D.mine.per
+    ? `The soul card is the same card here, so there is no split between the face you show and what is running underneath it — what you see is what is doing the work.`
+    : `${soulCard.n} is the soul card underneath it: the part that does not change when the circumstances do.`;
+  const chainLine = D.mine.chain.length > 2
+    ? ` Your date carries the whole chain ${D.mine.chain.join(' \u2192 ')} — ${D.mine.chain.map(n=>TAROT[n].n).join(', ')} — which is the reading's own kind of unusual and worth knowing: the work of one card hands over to the next.`
+    : '';
+  const sigLine = ask.two
+    ? `For a reading about two people, the card that stands for the querent is the one the two of you make between you, and that is the card the spread was dealt around.`
+    : `That card is the significator for this reading — the card a reader takes out of the deck first when the question is somebody's own — so it is on the table below.`;
+  const destiny = `Your birthday gives you ${myCard.n} as your card. ${soulLine}${chainLine} `
+    + `${sigLine} `
+    + `On top of that, this is a number-${D.year} year for you: ${yearInfo.planet}, and ${yearInfo.key}. ${yearInfo.body}`;
+
+  /* What two birthdays make between them, when the reading is about two people. */
+  const otherCard = ask.two ? TAROT[D.other.per] : null;
+  const bond = ask.two
+    ? `${theName ? theName : 'You'} ${theName ? 'has' : 'have'} ${myCard.n} and ${ask.two.name ? firstName(ask.two.name) : 'the other person'} has ${otherCard.n}. `
+      + `Added together and cut back by twenty-two, the card the two of you make between you is ${TAROT[D.bond].n} — the thing this bond produces, rather than what either of you brings to it. `
+      + `${TAROT_DRAW[D.bond].bond} Beyond the two cards themselves, a pairing like this hands each of you something the other one does not have, and the work is naming what that is instead of keeping score about it.`
+    : '';
+
+  /* The close: the question back, the one step, and the pull that says what
+     this is not. */
+  const close = `${seek.close} ${thru.close}`;
+  const pull = DRAW_CLOSE[seed % DRAW_CLOSE.length];
+  const note = `The deck is this page\u2019s own twenty-two Major Arcana, and the spread is dealt from the birthday and the four answers — change one answer and the cards change with it. `
+    + `The card by card reading is the app\u2019s own writing, and nothing was saved and nothing was sent.`;
+
   box.innerHTML = `
   <div class="layer">
-    <h3>Three cards <small>one spread, drawn once &mdash; the situation, what holds it, and the move</small></h3>
+    <h3>A reading${theName ? ' for ' + esc(theName) : ''} <small>three cards, dealt from a birthday &mdash; the situation, what holds it, and the move</small></h3>
     <div class="layer-body">
+      <p>${opening}</p>
       ${cards.map(one).join('')}
       <h4>What the three say together</h4>
-      <p>${names[0]} names where you stand. ${names[1]} names what is holding it. ${names[2]} is the one with a verb in it, and that part is yours.</p>
-      <div class="pull epigram">${close}</div>
-      <p class="note">The same twenty-two cards your birthday uses, drawn fresh each time. Nothing was saved and nothing was sent. Hold your question again and press the button for a new spread.</p>
+      ${cdPattern(cards, D.sig, ask.two ? `The card the two of you make, ${TAROT[D.sig].n},` : 'Your own card').map(p=>`<p>${p}</p>`).join('')}
+      <h4>Your card, and the year you are in</h4>
+      <p>${destiny}</p>
+      ${ask.two ? `<h4>What the two of you make between you</h4>\n      <p>${bond}</p>` : ''}
+      <h4>Where this leaves you</h4>
+      <p>${close}</p>
+      <div class="pull epigram">${pull}</div>
+      <p class="note">${note}</p>
     </div>
   </div>`;
   return cards;
@@ -6332,6 +6838,9 @@ $('btn-cards').addEventListener('click', ()=>{
   renderCards();
   $('cards-result').scrollIntoView({behavior:'smooth', block:'start'});
 });
+$('cd-who').addEventListener('change', cdWhoRow);
+$('cd-month').addEventListener('change', ()=>cdFillDays('cd-day', +$('cd-month').value, null));
+$('cd2-month').addEventListener('change', ()=>cdFillDays('cd2-day', +$('cd2-month').value, null));
 
 
 /* ============================================================

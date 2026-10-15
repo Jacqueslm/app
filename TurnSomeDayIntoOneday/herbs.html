@@ -2405,6 +2405,33 @@ function save(){
   }catch(e){}
 }
 
+/* 15 Oct 2026. The course's quizzes were rewritten: three or four questions a
+   teaching day became five. An answer is kept against the position it was given
+   at, so an answer given to the old quiz would land on a question nobody read
+   and be scored against it. A day therefore remembers how many questions it
+   asked (r.n), and a record written for a different number is dropped rather
+   than repainted - the day opens again and says nothing it cannot stand behind.
+   The day-60 test kept its thirty questions through the rewrite, so a record of
+   it stands.
+
+   It runs here, after save() and the keys it writes, rather than at the top of
+   the script: the cleaning is one store, but the phone's other half - the
+   Certification's line about where these sixty days have got to - is written by
+   save(), and a cleaned store with a stale summary beside it would have the two
+   pages disagreeing about the same progress. */
+var QUIZ_N=5;
+if(store.quizN!==QUIZ_N){
+  Object.keys(store).forEach(function(k){
+    if(k.indexOf('day:')!==0) return;
+    var day=dayOf(Number(k.slice(4))), r=store[k];
+    if(!day||!r){ delete store[k]; return }
+    var asked=typeof r.n==='number'?r.n:(day.test?day.q.length:0);
+    if(asked!==day.q.length) delete store[k];
+  });
+  store.quizN=QUIZ_N;
+  save();
+}
+
 /* Where the ninety-day Certification has got to, read from its own store. */
 function certProgress(){
   var s=null;
@@ -2476,7 +2503,10 @@ function dayScore(d){
 }
 function daysDone(){ var n=0; COURSE.forEach(function(x){ if(!x.test && dayScore(x.d).done) n++ }); return n }
 function answer(d,qi,oi){
-  var r=dayRec(d); r.a[qi]=oi; store['day:'+d]=r; save();
+  var r=dayRec(d); r.a[qi]=oi;
+  // Which quiz this answer was given to, so a later rewrite can tell.
+  r.n=(dayOf(d)||{q:[]}).q.length;
+  store['day:'+d]=r; save();
 }
 
 function courseDay(day){

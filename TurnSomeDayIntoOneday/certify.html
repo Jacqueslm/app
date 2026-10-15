@@ -1816,6 +1816,26 @@ function herbBridgeLine(){
 
 function blankTrack(){ return { days:{}, tests:{}, exam:null }; }
 
+/* 15 Oct 2026. The herbalist track's quizzes were rewritten from three questions
+a lesson to five, and a day recorded against a different number of questions is
+a score for a quiz that is no longer on the page. So it is not a score: the day
+opens again, and the block tests and the examination - every question of them
+drawn from those same rewritten quizzes - are owed again with it. "Start over"
+is then not a button somebody has to find on a phone we cannot reach; the page
+notices for itself, once, and says nothing about the days that did not change.
+The trainer track's quizzes are the three they always were, so every record it
+has stands. */
+function dropStaleDays(t, cur){
+  var dropped = 0;
+  Object.keys(cur.days).forEach(function(k){
+    var day = t.days[Number(k) - 1], rec = cur.days[k];
+    if (!day || !rec || typeof rec !== "object" || rec.total !== day.q.length){
+      delete cur.days[k]; dropped++;
+    }
+  });
+  return dropped;
+}
+
 var state = null;
 function load(){
   var s = null;
@@ -1823,14 +1843,20 @@ function load(){
   if (!s || typeof s !== "object") s = {};
   if (!s.tracks || typeof s.tracks !== "object") s.tracks = {};
   s.name = typeof s.name === "string" ? s.name : "";
+  var rebuilt = false;
   TRACKS.forEach(function(t){
     var cur = s.tracks[t.id];
     if (!cur || typeof cur !== "object") s.tracks[t.id] = blankTrack();
     else {
       if (!cur.days || typeof cur.days !== "object") cur.days = {};
       if (!cur.tests || typeof cur.tests !== "object") cur.tests = {};
+      if (dropStaleDays(t, cur)) { cur.tests = {}; cur.exam = null; rebuilt = true; }
     }
   });
+  // Written straight back, so the phone is cleaned once rather than re-pruned on
+  // every open - and so the Herb Library, which reads this store to report where
+  // the ninety days have got to, reads the truth instead of the old 3/3s.
+  if (rebuilt){ try { localStorage.setItem(LS, JSON.stringify(s)); } catch(e){} }
   return s;
 }
 function save(){
@@ -1992,7 +2018,7 @@ function renderTrack(v, t){
        +   "<h2>" + (examPassed(t.id) ? "Certificate earned" : (done + " of 90 days")) + "</h2>"
        +   "<div class=\"bar\"><i style=\"width:" + pct(done,TOTAL) + "%\"></i></div>"
        +   "<p style=\"margin-top:10px\">" + esc(t.note) + "</p>"
-       +   "<p class=\"fine\">A day is done when its quiz is passed at " + passMark(t) + " of " + t.days[0].q.length + ". A test is passed at " + PASS_TEST + " of 30.</p>"
+       +   "<p class=\"fine\">A day is done when its quiz is passed at " + passMark(t) + " of " + t.days[0].q.length + ". A test is passed at " + PASS_TEST + " of 30. If a lesson's quiz is rewritten, that day opens again: a score against a different quiz is not a score.</p>"
        + "</div>";
 
   BLOCKS.forEach(function(b){
@@ -2672,6 +2698,7 @@ window.CERTIFY = {
   certStatus: certStatus, certFilename: certFilename,
   drawCert: drawCert, exportCert: exportCert, reload: reloadPage,
   GO_DEEPER: GO_DEEPER, deeperFor: deeperFor, libLabel: libLabel, plantSlug: plantSlug,
+  dropStaleDays: dropStaleDays,
   herbBridge: herbBridge, herbBridgeLine: herbBridgeLine,
   sayLesson: sayLesson, sayText: sayText, sayStop: sayStop, speechOK: speechOK,
   parseDeepLink: parseDeepLink, bootLink: bootLink

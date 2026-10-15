@@ -237,6 +237,45 @@ test('the herb library: the score follows the answer, and a day is done when it 
   assert.match(view, /Day 2 done/, 'the day says it is done');
 });
 
+test('the herb library: answers given to a quiz since rewritten are dropped, never repainted onto the new one', () => {
+  // 15 Oct 2026. The teaching days went from three or four questions to five.
+  // An answer is kept against the position it was given at, so the old ones
+  // would land on questions nobody read, be marked right or wrong against them,
+  // and be counted in a score. The day opens again instead. The day-60 test
+  // kept its thirty questions through the rewrite, so a record of it stands.
+  const seeded = {
+    tsid_herb_notes_v1: JSON.stringify({
+      'day:1': { a: [0, 1, 2] },               // three answers to a three-question day
+      'day:60': { a: new Array(30).fill(0) },  // the test's own thirty, unchanged
+    }),
+  };
+  const p = loadPage('herbs.html', seeded);
+  const s = p.sandbox;
+
+  assert.strictEqual(s.dayRec(1).a.length, 0, 'the answers to the old quiz are gone');
+  assert.strictEqual(s.dayScore(1).done, false, 'so the day is not a finished day');
+  assert.strictEqual(s.daysDone(), 0, 'and the course reports nothing done');
+  assert.strictEqual(s.dayRec(60).a.length, 30, 'the test kept its thirty questions, so its record stands');
+  assert.strictEqual(s.dayScore(60).done, true, 'and it is still read as a finished test');
+
+  // The summary the Certification reads is rewritten in the same breath, or the
+  // other half of the app would go on reporting sixty days done over a course
+  // that has just gone back to the beginning.
+  const bridge = JSON.parse(p.store.tsid_herb_progress_v1);
+  assert.strictEqual(bridge.done, 0, 'the library tells the Certification the truth about the reset');
+  assert.strictEqual(bridge.total, 59);
+
+  // A fresh answer is stamped with the quiz it was given to, and survives the
+  // next open - the page is not a wrecking ball, it is one question long: does
+  // this answer belong to the quiz that is here now.
+  const q0 = s.COURSE.filter((d) => d.d === 2)[0].q[0].k;
+  s.answer(2, 0, q0);
+  assert.strictEqual(s.dayRec(2).n, 5, 'the answer records how many questions the day asked');
+  const again = loadPage('herbs.html', p.store);
+  assert.strictEqual(again.sandbox.picked(2, 0), q0, 'and a later open keeps it');
+  assert.strictEqual(again.sandbox.dayRec(60).a.length, 30, 'beside the test it never touched');
+});
+
 test('the herb library: the test scores, passes, and can be taken again', () => {
   const p = loadPage('herbs.html');
   const s = p.sandbox;

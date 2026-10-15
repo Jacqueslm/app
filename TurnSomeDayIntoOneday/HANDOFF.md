@@ -186,6 +186,47 @@ the questions, and drives the new pass rule through the page's own surface
 bump:** `sw.js` skips `/certify` and `/herbs` before any handler can answer them,
 so the shell did not move.
 
+**A quiz that changed means the score goes with it — 15 Oct 2026.** Jacques, on
+the Certification's day list still reading **3/3 ✓** down ninety rows: "Why is it
+still showing 3 its should just start completely over." He was right, and the
+reason is worth writing down, because the two pages had the same fault in two
+different shapes.
+
+**The Certification kept the number.** A day was stored as
+`{ right, total, passed, on }`, so a day answered at three questions went on
+saying three of three after its quiz became five — and the block tests and the
+ultimate examination are drawn from those same rewritten quizzes. `load()` now
+drops any day whose `total` is not the number of questions that day asks now,
+and a track that lost one drops its block tests and its examination with it: the
+day opens again and the tests are owed again. It is written straight back to the
+phone, so it happens once, and the Herb Library — which reads that store to
+report where the ninety days have got to — reads the cleaned state rather than
+the old 3/3s. **The trainer track is untouched**, because its quizzes are the
+three they always were; there is a test that seeds both tracks and proves it.
+The track screen says the rule out loud: *"If a lesson's quiz is rewritten, that
+day opens again: a score against a different quiz is not a score."*
+
+**The Library kept the position.** An answer there is stored against the question
+it was given at (`a: [0,1,2]`), so the old answers did not merely sit there —
+they would have been **painted onto the new questions**, marked right or wrong
+against words nobody had read, and counted in the score. A day now remembers how
+many questions it asked (`r.n`), and on open any record written for a different
+number is dropped rather than repainted. The day-60 test kept its thirty
+questions through the rewrite, so a record of it stands. That cleaning runs
+**after** `save()` rather than at the top of the script, and calls it, because
+the Certification's line about these sixty days is written by `save()` — a
+cleaned store with a stale summary beside it would have the two halves of the app
+disagreeing about the same progress.
+
+**No button and no instructions.** Both pages notice for themselves on the next
+open, which matters because the progress is on his phone and not on any server we
+could reach. **Two new tests** cover it (a stale store pruned and written back,
+and the Library's answers dropped while the test's thirty survive), and two
+existing fixtures that still described a three-question herbalist day were
+corrected to the five it asks now — a fixture written for a quiz the page no
+longer has would have been testing the prune rather than what it was written for.
+Suite: 454 pass, 0 fail.
+
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
 to me** button instead, which reads the entry out loud with the phone's own

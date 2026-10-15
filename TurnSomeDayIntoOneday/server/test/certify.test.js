@@ -272,7 +272,9 @@ function load(opts) {
     },
     body: element('body'), documentElement: element('html'), readyState: 'complete',
   };
-  const store = {};
+  // opts.store seeds localStorage BEFORE the page's script runs, which is the
+  // only way to check what the page does to a phone that already holds scores.
+  const store = Object.assign({}, o.store || {});
   const sandbox = {
     document: doc, console,
     setTimeout, clearTimeout, setInterval, clearInterval,
@@ -310,6 +312,65 @@ function load(opts) {
   vm.runInContext(blocks[0], sandbox, { filename: 'certify.html' });
   return { sandbox, els, store, byId, made, drawn, said };
 }
+
+test('a day recorded against a different quiz opens again, and the tests on it with it', () => {
+  // 15 Oct 2026. The herbalist track's quizzes went from three questions a
+  // lesson to five, and the day rows on a phone that did the old ones read
+  // "3/3 ✓" for ninety days nobody has answered at five questions - with a
+  // certificate queued behind a pass earned on the quiz that is gone. A record
+  // that no longer describes the quiz on the page is not a record, so the day
+  // opens again and the two block tests and the examination, every question of
+  // them drawn from those same rewritten quizzes, are owed again with it. The
+  // trainer track's three-question quizzes did not change, so nothing of its is
+  // touched.
+  const { sandbox, store, byId } = load({
+    store: {
+      tsid_certify_v1: JSON.stringify({
+        name: 'Jacques',
+        tracks: {
+          herbalist: {
+            days: { 1: { right: 3, total: 3, passed: true, on: '2026-10-12' },
+                    2: { right: 2, total: 3, passed: false, on: '2026-10-12' } },
+            tests: { 30: { right: 27, total: 30, passed: true, on: '2026-10-12' } },
+            exam: { right: 27, total: 30, passed: true, on: '2026-10-12' },
+          },
+          fitness: {
+            days: { 1: { right: 3, total: 3, passed: true, on: '2026-10-12' } },
+            tests: { 30: { right: 25, total: 30, passed: true, on: '2026-10-12' } },
+            exam: null,
+          },
+        },
+      }),
+    },
+  });
+  const C = sandbox.window.CERTIFY;
+
+  // Compared by keys, not by an empty object literal: the page's own objects come
+  // from its own sandbox, and a bare {} is the wrong prototype to match against.
+  assert.deepStrictEqual(Object.keys(C.state.tracks.herbalist.days), [],
+    'the herbalist track starts over: a three-question score is not a score on a five-question quiz');
+  assert.deepStrictEqual(Object.keys(C.state.tracks.herbalist.tests), [],
+    'the block tests are drawn from the rewritten quizzes, so they are owed again');
+  assert.strictEqual(C.state.tracks.herbalist.exam, null, 'and so is the examination');
+
+  assert.strictEqual(C.state.tracks.fitness.days['1'].passed, true,
+    'the trainer track keeps what it earned: its quizzes are the three they always were');
+  assert.strictEqual(C.state.tracks.fitness.tests['30'].passed, true);
+
+  // And the screen a thumb lands on says so, rather than ninety rows of "3/3 ✓".
+  C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  const rows = byId('view').innerHTML;
+  assert.doesNotMatch(rows, /3\/3/, 'not one stale score is left on the list');
+  assert.match(rows, /0 of 90 days/);
+  assert.match(rows, /that day opens again: a score against a different quiz is not a score/,
+    'and the rule that emptied them is on the page, not only in the code');
+
+  // The written-back record is the cleaned one, so the phone is not pruned again
+  // on every open - the page that keeps its own house in order.
+  const kept = JSON.parse(store.tsid_certify_v1);
+  assert.deepStrictEqual(Object.keys(kept.tracks.herbalist.days), []);
+  assert.strictEqual(kept.tracks.fitness.days['1'].passed, true);
+});
 
 test('the page script runs, and its two tracks are drivable', () => {
   const { sandbox, store } = load();
@@ -416,7 +477,7 @@ test('a passed day is remembered, and a passed exam earns the certificate', () =
   const C = sandbox.window.CERTIFY;
   // The page's own state object, written the way wireQuiz writes it when a quiz
   // is passed. Then saved and read back, which is what survives a closed tab.
-  C.state.tracks.herbalist.days['1'] = { right: 3, total: 3, passed: true, on: '2026-10-12' };
+  C.state.tracks.herbalist.days['1'] = { right: 5, total: 5, passed: true, on: '2026-10-12' };
   C.save();
   assert.ok(/tsid_certify_v1/.test(JSON.stringify(store)) || 'tsid_certify_v1' in store,
     'the day is kept under the page\'s own key');
@@ -504,8 +565,8 @@ test('a certificate is not painted before the examination is passed', () => {
   balanced(early);
 
   // The record is the page's own store, not a story about it.
-  C.state.tracks.herbalist.days['1'] = { right: 3, total: 3, passed: true, on: '2026-10-13' };
-  C.state.tracks.herbalist.days['2'] = { right: 2, total: 3, passed: true, on: '2026-10-13' };
+  C.state.tracks.herbalist.days['1'] = { right: 5, total: 5, passed: true, on: '2026-10-13' };
+  C.state.tracks.herbalist.days['2'] = { right: 4, total: 5, passed: true, on: '2026-10-13' };
   C.save();
   C.go({ cert: 'herbalist', track: null, day: null, test: null, exam: false });
   assert.match(byId('view').innerHTML, /2 of 90 done/);
@@ -576,7 +637,10 @@ test('the reload reads the store again rather than throwing', () => {
   // A record written by another visit is picked up by the reload, which is the
   // part of it that matters on this page.
   store.tsid_certify_v1 = JSON.stringify({
-    name: 'Jacques', tracks: { herbalist: { days: { 1: { right: 3, total: 3, passed: true, on: '2026-10-13' } }, tests: {}, exam: null } },
+    // Four of the five the herbalist track asks now: a fixture still written as
+    // three would be a record of a quiz this page no longer has, and the page
+    // would rightly open the day again instead of reading it.
+    name: 'Jacques', tracks: { herbalist: { days: { 1: { right: 4, total: 5, passed: true, on: '2026-10-13' } }, tests: {}, exam: null } },
   });
   C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
   C.reload();

@@ -638,6 +638,30 @@
   @keyframes catalog-arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   @media(prefers-reduced-motion:reduce){.catalog-hero .catalog-hero-copy{animation:none}}
   footer{margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center}
+
+  /* ── books and reading (15 Oct 2026) ──────────────────────────────────────
+     "make my player able to read audio books and pdf and text files". The
+     audiobook half is three small controls on the player card that is already
+     there; this is the tab that reads a PDF or a text file out loud. */
+  .abrow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px}
+  .abrow .chips{margin:0}
+  .abrow .chip{font-size:.75rem; padding:7px 11px}
+  .readbar{display:flex; gap:9px; margin:0 0 6px}
+  .readbar .btn{flex:1}
+  .readnav{display:flex; gap:8px; margin-top:10px}
+  .readnav .chip{flex:1; text-align:center}
+  .byline{margin:5px 0 15px; color:var(--dimmer); font-size:.75rem}
+  .booktext{
+    margin:8px 0 14px; max-height:46vh; overflow-y:auto; padding:15px 16px;
+    background:rgba(0,0,0,.22); border:1px solid var(--line2); border-radius:13px;
+    font-family:var(--serif); font-size:.9375rem; line-height:1.72; color:var(--dim);
+    -webkit-overflow-scrolling:touch;
+  }
+  .booktext p{margin:0 0 1.05em}
+  .booktext p:last-child{margin-bottom:0}
+  .booktext p.now{color:var(--ink)}
+  .booktext p.now::before{content:"▶ "; color:var(--gold)}
+
   [hidden]{display:none !important}
 </style>
 </head>
@@ -661,6 +685,12 @@
     <button class="tab" role="tab" id="tab-player" aria-selected="true" aria-controls="panel-player">Player</button>
     <button class="tab" role="tab" id="tab-ringtone" aria-selected="false" aria-controls="panel-ringtone">Ringtone</button>
     <button class="tab" role="tab" id="tab-thumb" aria-selected="false" aria-controls="panel-thumb">Cover</button>
+    <!-- The reading tab (15 Oct 2026): "make my player able to read audio books
+         and pdf and text files". The audiobooks are the Player's own list; this
+         tab is the half that has no sound in it at all until the phone reads
+         it. It sits beside Cover because it belongs to what the player keeps,
+         not to the discovery tab at the end. -->
+    <button class="tab" role="tab" id="tab-read" aria-selected="false" aria-controls="panel-read">Read</button>
     <button class="tab" role="tab" id="tab-discover" aria-selected="false" aria-controls="panel-discover">Discover</button>
   </div>
 
@@ -686,8 +716,28 @@
           <button class="round" id="playBtn" aria-label="Play">▶</button>
           <button class="round small" id="next" aria-label="Next">⏭</button>
         </div>
+        <!-- Audiobooks, on the player itself (15 Oct 2026). A book is hours
+             long, and an audio file is already playable here, so what a book
+             needed was the three things a three-minute song never needed: a
+             place it remembers, a way back and on, and a speed. Every track
+             gets all three — a song is unharmed by them — and the reader's own
+             script owns these controls, because it owns the keeping. Marked
+             noSay so the page's voice never reads a control back. -->
+        <div class="abrow noSay" id="abRow">
+          <button class="chip" id="back15" type="button">−15s</button>
+          <button class="chip" id="fwd30" type="button">+30s</button>
+          <button class="chip" id="fromStart" type="button" hidden>Start it again</button>
+          <div class="chips" id="rateChips">
+            <button class="chip" data-rate="0.8" type="button">0.8×</button>
+            <button class="chip" data-rate="1" type="button" aria-pressed="true">1×</button>
+            <button class="chip" data-rate="1.25" type="button">1.25×</button>
+            <button class="chip" data-rate="1.5" type="button">1.5×</button>
+            <button class="chip" data-rate="2" type="button">2×</button>
+          </div>
+        </div>
       </div>
       <p class="note" id="playerNote"></p>
+      <p class="note" id="abNote" hidden></p>
     </div>
 
     <!-- The manual (10 Oct 2026), behind a drop-down from 14 Oct 2026 —
@@ -708,6 +758,10 @@
         <li><b>Tap any row to play it.</b> The player at the top follows whatever you pick. A song you add today lands at the top of the list — the <b>Order</b> chips flip that round.</li>
         <li><b>To take one off, tap the ✕</b> on its row. On a playlist the ✕ takes only the row out — the song itself stays on the phone.</li>
         <li><b>To make a playlist,</b> name one under “Playlists”, then tap + on any song. The same song can go in as many times as you like.</li>
+        <!-- 15 Oct 2026: an audiobook needed nothing new to play, so the manual
+             never mentioned the half of the page that is not sound at all, and
+             nothing on the page pointed at the Read tab. -->
+        <li><b>A book is not a song.</b> An <b>audiobook</b> is added here like any other file — the <b>−15s</b> and <b>+30s</b> buttons, the speed and the place it remembers on the player card are what it needs. A <b>PDF</b>, a <b>text</b> or a <b>Markdown</b> file has no sound in it, so it is read out loud on the <b>Read</b> tab instead, a paragraph at a time, and it remembers where it stopped.</li>
       </ol>
     </details>
 
@@ -890,6 +944,59 @@
         <button class="btn" id="saveThumb" type="button">Save picture</button>
       </div>
       <p class="status" id="thumbStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── READ ───────────────────────── -->
+  <section class="panel" id="panel-read" role="tabpanel" aria-labelledby="tab-read" hidden>
+
+    <!-- A PDF or a text file is not an audiobook: there is no sound in it until
+         the words are lifted out and the phone's own voice reads them. That is
+         what this card does, on this phone, with nothing sent anywhere. -->
+    <div class="card">
+      <p class="kicker">Books, PDFs and text</p>
+      <h2>Read a book to me</h2>
+      <p class="hint">Choose a <b>PDF</b>, a <b>text</b> file or a <b>Markdown</b> file from this phone. The words are lifted out of it here and read aloud a paragraph at a time, and the book remembers the paragraph it stopped on. Nothing is uploaded and nothing is sent anywhere.</p>
+      <label class="drop" for="bookInput">Tap to choose a book <b>(pdf, txt, md)</b></label>
+      <input type="file" id="bookInput" accept=".pdf,.txt,.md,.markdown,text/plain,text/markdown,application/pdf" multiple hidden>
+      <ul class="list" id="bookList"></ul>
+      <p class="empty" id="bookEmpty">No books here yet.</p>
+      <div class="row" id="bookKeepRow" hidden>
+        <button class="btn ghost" id="forgetBooks" type="button">Remove all books from this phone</button>
+      </div>
+      <p class="status" id="bookStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <!-- The open book. Everything in this card is noSay for the page's own voice:
+         the reading has its own button and its own button to stop, and the page
+         must never read a whole book back on top of them. -->
+    <div class="card noSay" id="readCard" hidden>
+      <p class="kicker">Reading now</p>
+      <h2 id="readName">—</h2>
+      <p class="byline" id="readMeta"></p>
+      <div class="readbar">
+        <button class="btn" id="readPlay" type="button">▶ Read aloud</button>
+        <button class="btn ghost" id="readPause" type="button" hidden>Pause</button>
+        <button class="btn ghost" id="readStop" type="button">Stop</button>
+      </div>
+      <p class="kicker" style="margin-top:16px">Speed</p>
+      <div class="chips" id="bookRateChips">
+        <button class="chip" data-rate="0.8" type="button">0.8×</button>
+        <button class="chip" data-rate="1" type="button" aria-pressed="true">1×</button>
+        <button class="chip" data-rate="1.25" type="button">1.25×</button>
+        <button class="chip" data-rate="1.5" type="button">1.5×</button>
+        <button class="chip" data-rate="2" type="button">2×</button>
+      </div>
+      <div class="readnav">
+        <button class="chip" id="readBack" type="button">← A paragraph back</button>
+        <button class="chip" id="readNext" type="button">A paragraph on →</button>
+      </div>
+      <p class="status" id="readStatus" role="status" aria-live="polite"></p>
+      <div class="booktext" id="bookText"></div>
+      <div class="row">
+        <button class="btn ghost" id="readRestart" type="button">Start from the beginning</button>
+        <button class="btn ghost" id="readClose" type="button">Close this book</button>
+      </div>
     </div>
   </section>
 
@@ -1294,6 +1401,7 @@
     ['tab-player', 'panel-player'],
     ['tab-ringtone', 'panel-ringtone'],
     ['tab-thumb', 'panel-thumb'],
+    ['tab-read', 'panel-read'],
     ['tab-discover', 'panel-discover'],
   ];
   tabs.forEach(function(pair){
@@ -2168,6 +2276,17 @@
     if (roomIndex >= 0) return 'The meditation room';
     return (viewList >= 0 && lists[viewList]) ? lists[viewList].name : 'All songs';
   }
+
+  // The one way out of this block (15 Oct 2026). The reading tab keeps the place
+  // in an audiobook, and a place is only meaningful against the track it belongs
+  // to — so it asks the player which track is playing rather than trying to work
+  // it out from the file name on the card, which is a copy of the answer and can
+  // drift from it. Nothing else in the page reaches in here.
+  window.PLAYER = {
+    key: function(){ var t = nowTrack(); return t ? (t.key || t.url || '') : ''; },
+    name: function(){ var t = nowTrack(); return t ? (t.name || '') : ''; },
+    audio: function(){ return audio; },
+  };
   function mediaSessionSetup(){
     if (!navigator.mediaSession) return;
     try {
@@ -3109,15 +3228,47 @@
     }
     return s;
   }
-  function sayStop(){
-    if (voiceOK()){ try { speechSynthesis.cancel(); } catch (e) {} }
-    SAYING = false;
+  function sayReset(){
     var b = document.getElementById('sayBtn'); if (b) b.textContent = 'Read it to me';
     var s = document.getElementById('sayStop'); if (s) s.hidden = true;
   }
+  function sayStop(){
+    if (voiceOK()){ try { speechSynthesis.cancel(); } catch (e) {} }
+    SAYING = false;
+    sayReset();
+    // Stopping the voice stops the book too. The phone may still report the
+    // paragraph that was cancelled as finished, and without this the reading
+    // would take that as its cue to speak the next one - so "Stop" would stop
+    // the sound and the book would carry on anyway, one paragraph behind.
+    // (The reader's own stop comes through here as well; it is idempotent.)
+    if (window.READER && typeof window.READER.stop === 'function') window.READER.stop();
+  }
+  /* ── what is not on the screen (15 Oct 2026) ─────────────────────────────
+     Jacques: "make my player able to read audio books and pdf and text files".
+     A book is not on this screen in any sense the reader above can walk — it is
+     held in the reading tab's own store and drawn a paragraph at a time — so the
+     voice is lent out from here instead: one paragraph in, and the phone is told
+     when it is done with it. The speed is the reader's, the words are the
+     reader's, and the phone's own voice is still the only thing that speaks. */
+  function speakText(text, onDone, rate){
+    if (!voiceOK()) return false;
+    try { speechSynthesis.cancel(); } catch (e) {}
+    SAYING = false;
+    sayReset();
+    var u = new SpeechSynthesisUtterance(String(text || ''));
+    if (rate && rate > 0) u.rate = rate;
+    u.onend = function(){ if (typeof onDone === 'function') onDone(true); };
+    u.onerror = function(){ if (typeof onDone === 'function') onDone(false); };
+    try { speechSynthesis.speak(u); return true; } catch (e) { return false; }
+  }
+  function sayPause(){ if (voiceOK()){ try { speechSynthesis.pause(); } catch (e) {} } }
+  function sayResume(){ if (voiceOK()){ try { speechSynthesis.resume(); } catch (e) {} } }
   function say(){
     var b = document.getElementById('sayBtn');
     if (SAYING){ sayStop(); return; }
+    // Reading the screen is a different job from reading a book, and two voices
+    // at once is neither: the book stops when the screen is asked to speak.
+    if (window.READER && typeof window.READER.stop === 'function') window.READER.stop();
     if (!voiceOK()){ if (b) b.textContent = 'This phone has no voice'; return; }
     var text = pageText();
     if (!text){ if (b) b.textContent = 'Nothing here to read yet'; return; }
@@ -3133,7 +3284,937 @@
   var sb = document.getElementById('sayBtn'); if (sb) sb.addEventListener('click', say);
   var ss = document.getElementById('sayStop'); if (ss) ss.addEventListener('click', sayStop);
   window.addEventListener('beforeunload', sayStop);
-  window.SAY = { text: pageText, say: say, stop: sayStop };
+  window.SAY = { text: pageText, say: say, stop: sayStop, speak: speakText, pause: sayPause, resume: sayResume };
+})();
+</script>
+
+<script>
+/* ── THE READING TAB: BOOKS, PDFS AND TEXT ───────────────────────────────────
+   Jacques, 15 Oct 2026: "make my player able to read audio books and pdf and
+   text files."
+
+   Three kinds of file, one ask, and only some of them are sound.
+
+   An AUDIOBOOK needed nothing to play — this page already takes any audio file
+   and plays it. What it needed was the three things a three-minute song never
+   needed: a place it remembers, a way back and on, and a speed. Those sit on
+   the player card and they apply to every track, because a song left at the
+   second it was left at, and played a little faster, is nobody's business but
+   his own.
+
+   A PDF or a text file has no sound in it at all until the words are lifted
+   out. They are lifted HERE, on the phone: a text file is already words, and a
+   PDF's words are inside compressed streams written as text operators. The
+   phone's own voice then reads them a paragraph at a time, and that paragraph
+   is also the bookmark — the place a book was left is the paragraph it stopped
+   on.
+
+   A SCANNED PDF is pictures of pages. There is no text in it to lift, and no
+   amount of looking will find any, so it is refused in plain words rather than
+   read back as gibberish or dropped without a word said.
+
+   Nothing leaves the phone and nothing is fetched: the books are kept in the
+   browser's own store, the voice is the browser's own, and the whole thing
+   works with no signal.
+
+   THE STORE IS ITS OWN (tsid-books), not the player's. Adding a store to the
+   player's database needs a version bump, and the connection the player already
+   holds open would block the upgrade — so this block keeps its own, and is the
+   only writer in it.
+
+   The tests slice this block from the first var below to the buttons marker,
+   so everything above that is the reading itself and nothing that touches a
+   page. */
+(function(){
+"use strict";
+
+var BOOK_DB = 'tsid-books';
+var BOOK_STORE = 'books';
+var POS_KEY = 'tsid-book-pos';        // where each book was left, in paragraphs
+var RATE_KEY = 'tsid-book-rate';      // how fast a book is read out loud
+var AUDIO_POS_KEY = 'tsid-music-pos'; // the same idea, in seconds, for the player
+var AUDIO_RATE_KEY = 'tsid-music-rate';
+var MAX_PARA = 700;                   // past this a paragraph is cut at a sentence
+
+/* ── one setting on the phone, kept or not ───────────────────────────────── */
+function kept(key, fallback){
+  try {
+    var raw = window.localStorage.getItem(key);
+    if (raw === null) return fallback;
+    var n = Number(raw);
+    return isFinite(n) ? n : fallback;
+  } catch (e) { return fallback; }
+}
+function keep(key, value){
+  try { window.localStorage.setItem(key, String(value)); } catch (e) { /* private window */ }
+}
+function keptMap(key){
+  try {
+    var raw = JSON.parse(window.localStorage.getItem(key) || '{}');
+    return (raw && typeof raw === 'object') ? raw : {};
+  } catch (e) { return {}; }
+}
+function keepMap(key, map){
+  try { window.localStorage.setItem(key, JSON.stringify(map)); } catch (e) { /* private window */ }
+}
+/* The place something was left, out of a map of them. A book never opened has
+   no entry, and 0 is the honest answer for that — so this answers 0 and the
+   reader starts at the top rather than at a false bookmark. */
+function whereItWas(key, mapKey){
+  var n = Number(keptMap(mapKey || POS_KEY)[key]);
+  return (isFinite(n) && n > 0) ? Math.floor(n) : 0;
+}
+function keepPosition(key, at, mapKey){
+  if (!key) return;
+  var all = keptMap(mapKey || POS_KEY);
+  if (at > 0) all[key] = Math.round(at);
+  else delete all[key];                  // finished, or back at the start
+  keepMap(mapKey || POS_KEY, all);
+}
+
+/* ── the words out of a text file ───────────────────────────────────────── */
+function countWords(text){
+  var m = String(text || '').match(/[A-Za-z0-9'\u2019]+/g);
+  return m ? m.length : 0;
+}
+/* A Markdown file read out loud is not the file. The hashes, the asterisks, the
+   brackets round a link, the backticks and the pipe of a table are punctuation
+   for a renderer — and a voice says them out loud where nobody wrote them. Only
+   the words travel. */
+function markdownOff(text){
+  return String(text || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/^\s*>\s?/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\*\*?([^*]+)\*\*?/g, '$1')
+    .replace(/^\s*\|.*\|\s*$/gm, ' ')
+    .replace(/^\s*[-_=]{3,}\s*$/gm, ' ');
+}
+
+/* ── lifting the words out of a PDF ──────────────────────────────────────── */
+
+/* A byte-per-character string of the whole file. PDF syntax is ASCII — the
+   dictionaries, the keywords, the operators — so it can be searched in this,
+   and the offsets it gives are cut back out of the original bytes. */
+function byteString(buf){
+  var bytes = (buf instanceof Uint8Array) ? buf : new Uint8Array(buf);
+  var out = '';
+  var step = 8192;
+  for (var i = 0; i < bytes.length; i += step){
+    out += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + step, bytes.length)));
+  }
+  return out;
+}
+function joinBytes(parts, total){
+  var out = new Uint8Array(total);
+  var at = 0;
+  for (var i = 0; i < parts.length; i++){ out.set(parts[i], at); at += parts[i].length; }
+  return out;
+}
+/* Where the streams are: the keyword, the line break after it, and the endstream
+   that closes it. A match that begins inside an earlier match has to be stepped
+   over — 'endstream' ends in the word being searched for too. */
+function streamSpans(bin){
+  var spans = [];
+  var i = 0;
+  while (i < bin.length){
+    var a = bin.indexOf('stream', i);
+    if (a < 0) break;
+    if (bin.substr(a - 3, 3) === 'end'){ i = a + 6; continue; }
+    var b = a + 6;
+    if (bin.charAt(b) === '\r') b++;
+    if (bin.charAt(b) === '\n') b++;
+    var e = bin.indexOf('endstream', b);
+    if (e < 0) break;
+    var stop = e;
+    if (bin.charAt(stop - 1) === '\n') stop--;   // that break is syntax, not data
+    if (bin.charAt(stop - 1) === '\r') stop--;
+    if (stop > b) spans.push([b, stop, a]);   // the bytes, and where it was named
+    i = e + 9;
+  }
+  return spans;
+}
+/* What the stream says it is, read from the dictionary just above it. Two of the
+   filters a PDF uses are photographs — DCT and JPX are JPEGs — and are skipped
+   by name rather than decoded into a megabyte of noise that is then thrown
+   away. ASCII85Decode matters more than it looks: ReportLab writes every stream
+   it makes as [ /ASCII85Decode /FlateDecode ], which is the text one encoding
+   on top of another, and it is what the PDFs in this repo are. */
+function streamFilters(bin, at){
+  var back = bin.slice(Math.max(0, at - 900), at);
+  var dict = back.slice(back.lastIndexOf('<<'));
+  return {
+    ascii85: dict.indexOf('/ASCII85Decode') > -1,
+    flate: dict.indexOf('/FlateDecode') > -1,
+    image: dict.indexOf('/DCTDecode') > -1 || dict.indexOf('/JPXDecode') > -1,
+  };
+}
+/* ASCII85: five characters hold four bytes, 'z' is four zero bytes, and the
+   stream ends at '~>'. The last group is short and is padded with the highest
+   digit, which is why it gives back one byte less than it holds. */
+function ascii85(bytes){
+  var s = byteString(bytes);
+  var out = [];
+  var group = [];
+  var i = (s.substr(0, 2) === '<~') ? 2 : 0;
+  for (; i < s.length; i++){
+    var c = s.charAt(i);
+    if (c === '~') break;
+    if (c === ' ' || c === '\n' || c === '\r' || c === '\t' || c === '\f') continue;
+    if (c === 'z' && !group.length){ out.push(0, 0, 0, 0); continue; }
+    var v = c.charCodeAt(0) - 33;
+    if (v < 0 || v > 84) continue;                 // the tail, not the data
+    group.push(v);
+    if (group.length === 5){
+      var n = ((((group[0] * 85 + group[1]) * 85 + group[2]) * 85 + group[3]) * 85) + group[4];
+      out.push((n / 16777216) & 0xff, (n / 65536) & 0xff, (n / 256) & 0xff, n & 0xff);
+      group = [];
+    }
+  }
+  if (group.length > 1){
+    var held = group.length;
+    while (group.length < 5) group.push(84);
+    var m = ((((group[0] * 85 + group[1]) * 85 + group[2]) * 85 + group[3]) * 85) + group[4];
+    var four = [(m / 16777216) & 0xff, (m / 65536) & 0xff, (m / 256) & 0xff, m & 0xff];
+    for (var k = 0; k < held - 1; k++) out.push(four[k]);
+  }
+  return new Uint8Array(out);
+}
+/* FlateDecode, which is what nearly every PDF stream is. The phone's own
+   decompressor does the work; a browser without one is answered honestly
+   further up rather than left with a book that quietly comes out empty. */
+function canUnzip(){
+  return typeof DecompressionStream !== 'undefined' && typeof WritableStream !== 'undefined';
+}
+function inflate(bytes){
+  return new Promise(function(resolve){
+    if (!canUnzip()) return resolve(null);
+    var ds;
+    try { ds = new DecompressionStream('deflate'); } catch (e) { return resolve(null); }
+    var parts = [];
+    var total = 0;
+    ds.readable.pipeTo(new WritableStream({
+      write: function(chunk){
+        var u = (chunk instanceof Uint8Array) ? chunk : new Uint8Array(chunk);
+        parts.push(u);
+        total += u.length;
+      },
+    })).then(function(){ resolve(joinBytes(parts, total)); }, function(){ resolve(null); });
+    var w = ds.writable.getWriter();
+    w.write(bytes).then(function(){ return w.close(); }, function(){ /* a stream that will not decode */ });
+  });
+}
+/* PDF strings are bytes, not characters. (windows-1252) is what a document with
+   the ordinary fonts means by them, and there is a fallback for a phone that
+   will not name that encoding. */
+function decodeBytes(bytes){
+  try { return new TextDecoder('windows-1252').decode(new Uint8Array(bytes)); }
+  catch (e) {
+    var s = '';
+    for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i] & 0xff);
+    return s;
+  }
+}
+/* One (string) out of a content stream, escapes and all: the three-digit octal a
+   generator writes for a hard space, the backslash in front of a bracket, and
+   the backslash at the very end of a line, which is a word carrying on. */
+function pdfLiteral(s, start){
+  var i = start + 1;
+  var depth = 1;
+  var bytes = [];
+  while (i < s.length){
+    var c = s.charAt(i);
+    if (c === '\\'){
+      var n = s.charAt(i + 1);
+      i += 2;
+      if (n === 'n') bytes.push(10);
+      else if (n === 'r') bytes.push(13);
+      else if (n === 't') bytes.push(9);
+      else if (n === 'b') bytes.push(8);
+      else if (n === 'f') bytes.push(12);
+      else if (n === '\n') { /* a continuation: nothing at all */ }
+      else if (n === '\r') { if (s.charAt(i) === '\n') i++; }
+      else if (n >= '0' && n <= '7'){
+        var oct = n;
+        while (oct.length < 3 && /[0-7]/.test(s.charAt(i))){ oct += s.charAt(i); i++; }
+        bytes.push(parseInt(oct, 8) & 0xff);
+      }
+      else bytes.push(n.charCodeAt(0) & 0xff);
+      continue;
+    }
+    if (c === '('){ depth++; bytes.push(40); i++; continue; }
+    if (c === ')'){ depth--; i++; if (!depth) break; bytes.push(41); continue; }
+    bytes.push(c.charCodeAt(0) & 0xff);
+    i++;
+  }
+  return { text: decodeBytes(bytes), next: i };
+}
+/* A <hex string> is two hex digits a byte, and an odd number of digits is
+   padded with a zero — that is what the specification says it means. */
+function pdfHex(s, start){
+  var i = start + 1;
+  var digits = '';
+  while (i < s.length && s.charAt(i) !== '>'){ digits += s.charAt(i); i++; }
+  if (digits.length % 2) digits += '0';
+  var bytes = [];
+  for (var j = 0; j + 1 < digits.length; j += 2) bytes.push(parseInt(digits.substr(j, 2), 16) & 0xff);
+  return { text: decodeBytes(bytes), next: i + 1 };
+}
+/* The text operators: the words in brackets, the words in hex, and the moves
+   that start a new line. Everything else — the graphics, the images, the fonts
+   — is not words, and is passed over by not being looked for. */
+function contentText(bytes){
+  var s = byteString(bytes);
+  var out = '';
+  var arrDepth = 0;
+  var i = 0;
+  while (i < s.length){
+    var c = s.charAt(i);
+    if (c === '('){
+      var lit = pdfLiteral(s, i);
+      out += lit.text;
+      i = lit.next;
+      continue;
+    }
+    if (c === '<' && s.charAt(i + 1) !== '<'){
+      var hex = pdfHex(s, i);
+      out += hex.text;
+      i = hex.next;
+      continue;
+    }
+    if (c === '['){ arrDepth++; i++; continue; }
+    if (c === ']'){ if (arrDepth > 0) arrDepth--; i++; continue; }
+    if ((c === '-' || /[0-9]/.test(c)) && arrDepth > 0){
+      // A number between the strings of a TJ array is the spacing the typesetter
+      // put there. A big negative one is a word space that was never typed as a
+      // space; a small one is kerning, and stays silent.
+      var m = /^-?[0-9]+(\.[0-9]+)?/.exec(s.substr(i, 12));
+      if (m && Number(m[0]) <= -100) out += ' ';
+      i += m ? m[0].length : 1;
+      continue;
+    }
+    if (c === 'T'){
+      var two = s.substr(i, 2);
+      if (two === 'Td' || two === 'TD' || two === 'T*' || two === 'Tm'){ out += '\n'; i += 2; continue; }
+      // Showing a string ends one run of text. Two runs in a row with nothing
+      // between them are still two pieces of text, and gluing them writes
+      // "study.It" where the PDF put two separate runs beside each other.
+      if (two === 'Tj' || two === 'TJ'){
+        if (out && !/\s$/.test(out)) out += ' ';
+        i += 2;
+        continue;
+      }
+    }
+    if (c === "'" || c === '"'){ out += '\n'; i++; continue; }
+    i++;
+  }
+  return tidy(out);
+}
+/* A line of a PDF is not a paragraph. The breaks a generator put in for its own
+   layout go back to being spaces, a word cut in half across one is put back
+   together, and only a blank line stays a break. */
+function tidy(s){
+  var lines = String(s || '').replace(/\r\n?/g, '\n').split('\n');
+  var out = '';
+  for (var i = 0; i < lines.length; i++){
+    var line = lines[i].replace(/[ \t\u00a0]+/g, ' ').trim();
+    if (!line){
+      if (out && !/\n\s*$/.test(out)) out += '\n\n';
+      continue;
+    }
+    if (out && !/\n\n$/.test(out)){
+      if (/-$/.test(out)) out = out.slice(0, -1);
+      else out += ' ';
+    }
+    out += line;
+  }
+  out = out.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '');
+  return out.replace(/\n{3,}/g, '\n\n').trim();
+}
+/* Whether a stream came out as words at all. An image, a font, a compressed
+   picture of a page — they all decompress to bytes that are not letters, and
+   this is what tells them apart from a page of writing. */
+function isWords(text){
+  var letters = (text.match(/[A-Za-z]/g) || []).length;
+  var printable = (text.match(/\S/g) || []).length;
+  return letters >= 25 && letters / Math.max(1, printable) >= 0.6;
+}
+/* The whole job: every stream in the file, decompressed if it needs it, its text
+   operators read out, and only the pieces that are words kept. */
+function pdfText(buf){
+  var all = (buf instanceof Uint8Array) ? buf : new Uint8Array(buf);
+  var bin = byteString(all);
+  var spans = streamSpans(bin);
+  var pieces = [];
+  var work = Promise.resolve();
+  for (var i = 0; i < spans.length; i++){
+    (function(span){
+      work = work.then(function(){
+        var filters = streamFilters(bin, span[2]);
+        if (filters.image) return;                     // a photograph is not words
+        var raw = all.subarray(span[0], span[1]);
+        var stream = filters.ascii85 ? Promise.resolve(ascii85(raw)) : Promise.resolve(raw);
+        return stream.then(function(bytes){
+          if (!bytes || !bytes.length) return null;
+          var zipped = bytes.length > 1 && bytes[0] === 0x78;   // the zlib header
+          if (!zipped && !filters.flate) return bytes;          // already the text
+          return inflate(bytes);                                // null if it will not
+        }).then(function(decoded){
+          if (!decoded) return;
+          var text = contentText(decoded);
+          if (isWords(text)) pieces.push(text);
+        }).catch(function(){ /* a stream that will not decode is not words */ });
+      });
+    })(spans[i]);
+  }
+  return work.then(function(){ return pieces.join('\n\n'); });
+}
+/* Whether what came out of a file is a book or a photograph of one. A scan has
+   no text layer, so no amount of looking finds words in it — and saying that is
+   the only honest answer this can give.
+
+   The floor is low on purpose. What a scan gives up is nothing at all, or a
+   stray running head of a few letters; a real one-page letter is a few hundred.
+   Set high, this would refuse a short honest document and tell its owner it was
+   a picture, which is the wrong answer said confidently. */
+function wordsEnough(text){
+  var letters = (String(text || '').match(/[A-Za-z]/g) || []).length;
+  var printable = (String(text || '').match(/\S/g) || []).length;
+  return { ok: letters >= 60 && letters / Math.max(1, printable) >= 0.5, letters: letters };
+}
+/* The reading is a paragraph at a time: that is the piece the phone's voice is
+   handed, and the place the book is left at. A paragraph longer than a phone
+   will speak is cut at a sentence, so nothing is dropped for being too long. */
+function split(text){
+  var blocks = String(text || '').split(/\n\s*\n+/);
+  var out = [];
+  for (var i = 0; i < blocks.length; i++){
+    var t = blocks[i].replace(/\s+/g, ' ').trim();
+    if (!t) continue;
+    while (t.length > MAX_PARA){
+      var cut = t.lastIndexOf('. ', MAX_PARA);
+      if (cut < MAX_PARA * 0.4) cut = t.lastIndexOf(' ', MAX_PARA);
+      if (cut <= 0) cut = MAX_PARA;
+      out.push(t.slice(0, cut + 1).trim());
+      t = t.slice(cut + 1).trim();
+    }
+    if (t) out.push(t);
+  }
+  return out;
+}
+
+// ── the reading tab's buttons ─────────────────────────────────────────────
+/* Everything below here touches the page: the list of books, the open book, the
+   buttons, and the audiobook half on the player. Everything above is the
+   reading itself, and is what the tests run. */
+function $(id){ return document.getElementById(id); }
+function makeEl(tag, cls, text){
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+function clock(sec){
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  var h = Math.floor(sec / 3600);
+  var m = Math.floor((sec % 3600) / 60);
+  var s = Math.floor(sec % 60);
+  return (h ? h + ':' + (m < 10 ? '0' : '') + m : String(m)) + ':' + (s < 10 ? '0' : '') + s;
+}
+function tell(el, text, isErr){
+  if (!el) return;
+  el.textContent = text || '';
+  el.className = (el.id === 'abNote' ? 'note' : 'status') + (isErr ? ' err' : '');
+  el.hidden = false;
+}
+function bookName(name){
+  return String(name || '').replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'A book';
+}
+function bookKey(file){
+  return String(file.name || 'book') + '|' + (file.size || 0) + '|' + (file.lastModified || 0);
+}
+function looksBook(file){
+  var name = String(file.name || '');
+  var type = String(file.type || '');
+  return /\.pdf$/i.test(name) || /^application\/pdf$/i.test(type)
+    || /\.(txt|text|md|markdown|log)$/i.test(name) || /^text\//i.test(type);
+}
+/* One file into words. A PDF has to be taken apart; a text or Markdown file is
+   already words, and only Markdown needs its punctuation taken off. */
+function lift(file){
+  var isPdf = /\.pdf$/i.test(file.name || '') || /^application\/pdf$/i.test(file.type || '');
+  if (isPdf){
+    return file.arrayBuffer().then(function(buf){ return pdfText(buf); }).then(function(text){
+      if (!wordsEnough(text).ok) throw new Error(canUnzip() ? 'no words to lift' : 'no unzipper');
+      return text;
+    });
+  }
+  return file.text().then(function(t){
+    return /\.(md|markdown)$/i.test(file.name || '') ? markdownOff(t) : String(t || '');
+  });
+}
+
+/* ── the books kept on this phone ────────────────────────────────────────── */
+var books = [];
+var book = null;        // the one open
+var index = 0;          // the paragraph the reader is on
+var speaking = false;
+var paused = false;
+var dbPromise = null;
+
+function openDb(){
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise(function(resolve, reject){
+    if (!window.indexedDB) { reject(new Error('no store')); return; }
+    var req = window.indexedDB.open(BOOK_DB, 1);
+    req.onupgradeneeded = function(){
+      var db = req.result;
+      if (!db.objectStoreNames.contains(BOOK_STORE)) db.createObjectStore(BOOK_STORE, { keyPath: 'key' });
+    };
+    req.onsuccess = function(){ resolve(req.result); };
+    req.onerror = function(){ reject(req.error || new Error('no store')); };
+  });
+  return dbPromise;
+}
+function dbPut(record){
+  return openDb().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(BOOK_STORE, 'readwrite');
+      tx.objectStore(BOOK_STORE).put(record);
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ reject(tx.error || new Error('write')); };
+      tx.onabort = function(){ reject(tx.error || new Error('write')); };
+    });
+  });
+}
+function dbAll(){
+  return openDb().then(function(db){
+    return new Promise(function(resolve, reject){
+      var out = [];
+      var req = db.transaction(BOOK_STORE, 'readonly').objectStore(BOOK_STORE).openCursor();
+      req.onsuccess = function(){
+        var cursor = req.result;
+        if (cursor) { out.push(cursor.value); cursor.continue(); } else resolve(out);
+      };
+      req.onerror = function(){ reject(req.error || new Error('read')); };
+    });
+  });
+}
+function dbDrop(key){
+  return openDb().then(function(db){
+    return new Promise(function(resolve){
+      var tx = db.transaction(BOOK_STORE, 'readwrite');
+      tx.objectStore(BOOK_STORE).delete(key);
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ resolve(); };
+    });
+  }).catch(function(){ /* nothing was ever kept */ });
+}
+function dbDropAll(){
+  return openDb().then(function(db){
+    return new Promise(function(resolve){
+      var tx = db.transaction(BOOK_STORE, 'readwrite');
+      tx.objectStore(BOOK_STORE).clear();
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ resolve(); };
+    });
+  }).catch(function(){ /* nothing was ever kept */ });
+}
+function restoreBooks(){
+  if (!window.indexedDB) { renderBooks(); return; }
+  dbAll().then(function(rows){
+    rows.slice().sort(function(a, b){ return (a.added || 0) - (b.added || 0); }).forEach(function(r){
+      if (!r || !r.text) return;
+      if (books.some(function(b){ return b.key === r.key; })) return;
+      books.push({ key: r.key, name: r.name || 'A book', kind: r.kind || 'text', text: r.text, added: r.added || 0 });
+    });
+    renderBooks();
+  }).catch(function(){ renderBooks(); });
+}
+function renderBooks(){
+  var list = $('bookList');
+  if (!list) return;
+  list.innerHTML = '';
+  var arr = books.slice().sort(function(a, b){ return (b.added || 0) - (a.added || 0); });
+  $('bookEmpty').hidden = arr.length > 0;
+  $('bookKeepRow').hidden = arr.length === 0;
+  arr.forEach(function(b){
+    var li = makeEl('li', 'song' + (book && book.key === b.key ? ' playing' : ''));
+    var meta = makeEl('div', 'meta');
+    meta.appendChild(makeEl('p', 't', b.name));
+    var where = whereItWas(b.key);
+    var words = countWords(b.text);
+    meta.appendChild(makeEl('p', 'd', (b.kind === 'pdf' ? 'PDF' : 'Text') + ' \u00b7 '
+      + (words ? words.toLocaleString() + ' words' : 'no words')
+      + (where ? ' \u00b7 left off at paragraph ' + (where + 1) : '')));
+    li.appendChild(meta);
+    var x = makeEl('button', 'x', '\u2715');
+    x.type = 'button';
+    x.setAttribute('aria-label', 'Remove ' + b.name + ' from this phone');
+    x.addEventListener('click', function(ev){ ev.stopPropagation(); dropBook(b.key); });
+    li.appendChild(x);
+    li.addEventListener('click', function(){ openBook(b); });
+    list.appendChild(li);
+  });
+}
+function dropBook(key){
+  if (book && book.key === key) closeBook();
+  books = books.filter(function(b){ return b.key !== key; });
+  dbDrop(key);
+  renderBooks();
+  tell($('bookStatus'), 'Taken off this phone.');
+}
+/* One book file in. A book that arrives is a book somebody wants to hear, so it
+   opens as soon as it is lifted rather than sitting in the list waiting to be
+   found. A file with no words in it is refused in words, and a file that will
+   not open is named as that rather than as nothing. */
+function addBookFiles(files){
+  var list = Array.prototype.slice.call(files || []);
+  var job = Promise.resolve();
+  var added = 0, refused = 0, quiet = 0;
+  list.forEach(function(file){
+    job = job.then(function(){
+      if (!file) return;
+      if (!looksBook(file)){ refused++; return; }
+      var key = bookKey(file);
+      if (books.some(function(b){ return b.key === key; })){ quiet++; return; }
+      tell($('bookStatus'), 'Reading ' + file.name + '\u2026');
+      return lift(file).then(function(text){
+        var words = countWords(text);
+        if (!words){
+          tell($('bookStatus'), file.name + ' has no words to read \u2014 it is a picture of a page, or a scan. Nothing was added.', true);
+          return;
+        }
+        var entry = { key: key, name: bookName(file.name),
+          kind: /\.pdf$/i.test(file.name || '') ? 'pdf' : 'text', text: text, added: Date.now() };
+        books.push(entry);
+        renderBooks();
+        openBook(entry);
+        dbPut(entry).catch(function(){
+          tell($('bookStatus'), 'This phone would not keep the book \u2014 the storage may be full. It can still be read now.', true);
+        });
+        tell($('bookStatus'), 'Added ' + entry.name + ' \u2014 ' + words.toLocaleString() + ' words to read.');
+        added++;
+      }, function(err){
+        var why = String(err && err.message);
+        // Three different failures, three different answers. "It has no words"
+        // said about a PDF this phone simply could not open would send somebody
+        // looking for a text layer that is there.
+        tell($('bookStatus'), /no unzipper/.test(why)
+          ? 'This phone\u2019s browser is too old to open a PDF\u2019s words. A text or Markdown file works on it; so does a newer browser.'
+          : (/no words/.test(why)
+            ? file.name + ' has no words to read \u2014 a scanned page is a picture, and this cannot hear it. Nothing was added.'
+            : 'That file would not open. If it is a PDF, its words may be locked inside it.'), true);
+      });
+    });
+  });
+  return job.then(function(){
+    if (!added){
+      if (quiet) tell($('bookStatus'), 'That book is already here.');
+      else if (refused) tell($('bookStatus'), 'That file is not a PDF, a text file or a Markdown file.', true);
+    }
+  });
+}
+
+/* ── one book open, read a paragraph at a time ───────────────────────────── */
+function openBook(entry){
+  book = entry;
+  var parts = split(entry.text);
+  var at = whereItWas(entry.key);
+  index = (at < parts.length) ? at : 0;
+  $('readCard').hidden = false;
+  $('readName').textContent = entry.name;
+  $('readMeta').textContent = (entry.kind === 'pdf' ? 'A PDF' : 'A text file') + ' \u00b7 '
+    + countWords(entry.text).toLocaleString() + ' words \u00b7 ' + parts.length + ' paragraphs';
+  paintBook(parts);
+  updateReadBar(parts);
+  tell($('readStatus'), index > 0
+    ? 'Left off at paragraph ' + (index + 1) + ' of ' + parts.length + '. Press Read aloud to carry on.'
+    : 'Ready. Press Read aloud.');
+  renderBooks();
+}
+function closeBook(){
+  stopReading();
+  book = null;
+  $('readCard').hidden = true;
+  $('bookText').innerHTML = '';
+  renderBooks();
+}
+function paintBook(parts){
+  var box = $('bookText');
+  box.innerHTML = '';
+  for (var i = 0; i < parts.length; i++) box.appendChild(makeEl('p', i === index ? 'now' : '', parts[i]));
+}
+/* The paragraph being read is marked and brought into view: a book is long, and
+   the reader should not have to hunt for the line the voice is on. */
+function markParagraph(){
+  var nodes = $('bookText').querySelectorAll('p');
+  for (var i = 0; i < nodes.length; i++){
+    nodes[i].className = (i === index) ? 'now' : '';
+    if (i === index && nodes[i].scrollIntoView){
+      try { nodes[i].scrollIntoView({ block: 'center' }); }
+      catch (e) { nodes[i].scrollIntoView(); }
+    }
+  }
+}
+function updateReadBar(parts){
+  if (!book) return;
+  parts = parts || split(book.text);
+  $('readPlay').textContent = speaking ? '\u275a\u275a Pause' : (paused ? '\u25b6 Carry on' : '\u25b6 Read aloud');
+  $('readPause').hidden = !speaking || paused;
+  if (!parts.length) return;
+  var at = Math.min(index + 1, parts.length);
+  $('readStatus').textContent = speaking
+    ? 'Reading paragraph ' + at + ' of ' + parts.length + '.'
+    : 'Paragraph ' + at + ' of ' + parts.length + ' \u2014 '
+      + Math.round((index / parts.length) * 100) + '% of the way in.';
+  $('readStatus').className = 'status';
+}
+function voice(){
+  return (window.SAY && typeof window.SAY.speak === 'function') ? window.SAY : null;
+}
+/* The book is kept BEFORE the paragraph is spoken, not after it. A phone that
+   locks or a tab that closes mid-paragraph must not lose the paragraph: the
+   place it comes back to is the one it was reading. */
+function readFrom(i){
+  if (!book) return;
+  var parts = split(book.text);
+  if (!parts.length) return;
+  if (i < 0) i = 0;
+  if (i >= parts.length){
+    stopReading();
+    keepPosition(book.key, 0);
+    index = 0;
+    markParagraph();
+    updateReadBar(parts);
+    tell($('readStatus'), 'That is the end of the book. It starts again from the beginning.');
+    return;
+  }
+  var v = voice();
+  if (!v){ tell($('readStatus'), 'This phone has no voice to read with.', true); return; }
+  index = i;
+  markParagraph();
+  keepPosition(book.key, i);
+  speaking = true;
+  paused = false;
+  updateReadBar(parts);
+  v.speak(parts[i], function(ok){
+    if (!speaking) return;                     // stopped while it was speaking
+    if (!ok){ stopReading(); tell($('readStatus'), 'The reading stopped \u2014 this phone would not speak that paragraph.', true); return; }
+    readFrom(index + 1);
+  }, kept(RATE_KEY, 1));
+}
+function pauseReading(){
+  if (!speaking || paused) return;
+  var v = voice();
+  if (v && v.pause) v.pause();
+  paused = true;
+  updateReadBar();
+  tell($('readStatus'), 'Paused on paragraph ' + (index + 1) + '. The place is kept.');
+}
+function continueReading(){
+  if (!speaking){ readFrom(index); return; }
+  var v = voice();
+  if (v && v.resume) v.resume();
+  paused = false;
+  updateReadBar();
+}
+function stopReading(){
+  var was = speaking;
+  speaking = false;
+  paused = false;
+  var v = voice();
+  if (was && v && v.stop) v.stop();
+  if (book) updateReadBar();
+}
+
+$('bookInput').addEventListener('change', function(){
+  var files = Array.prototype.slice.call($('bookInput').files || []);
+  $('bookInput').value = '';
+  addBookFiles(files);
+});
+$('readPlay').addEventListener('click', function(){
+  if (!book) return;
+  if (!speaking){ readFrom(index); return; }
+  if (paused) continueReading(); else pauseReading();
+});
+$('readPause').addEventListener('click', pauseReading);
+$('readStop').addEventListener('click', function(){
+  stopReading();
+  tell($('readStatus'), 'Stopped on paragraph ' + (index + 1) + '. The place is kept.');
+});
+$('readBack').addEventListener('click', function(){ readFrom(Math.max(0, index - 1)); });
+$('readNext').addEventListener('click', function(){ readFrom(index + 1); });
+$('readRestart').addEventListener('click', function(){
+  if (!book) return;
+  stopReading();
+  keepPosition(book.key, 0);
+  index = 0;
+  markParagraph();
+  updateReadBar();
+  tell($('readStatus'), 'Back to the beginning.');
+});
+$('readClose').addEventListener('click', closeBook);
+$('forgetBooks').addEventListener('click', function(){
+  if (!books.length) return;
+  books = [];
+  closeBook();
+  dbDropAll();
+  renderBooks();
+  tell($('bookStatus'), 'All books removed from this phone.');
+});
+
+/* How fast a book is read out loud. The choice is the reader's, kept on the
+   phone, and it is handed to the phone's voice with every paragraph. */
+function paintBookRate(){
+  var v = kept(RATE_KEY, 1);
+  Array.prototype.forEach.call($('bookRateChips').querySelectorAll('.chip'), function(c){
+    c.setAttribute('aria-pressed', Number(c.getAttribute('data-rate')) === v ? 'true' : 'false');
+  });
+}
+Array.prototype.forEach.call($('bookRateChips').querySelectorAll('.chip'), function(c){
+  c.addEventListener('click', function(){
+    var v = Number(c.getAttribute('data-rate')) || 1;
+    keep(RATE_KEY, v);
+    paintBookRate();
+    tell($('readStatus'), v === 1 ? 'Reading at the normal speed.' : 'Reading at ' + v + '\u00d7 the normal speed.');
+  });
+});
+
+/* ── the audiobook half: the place, the jump and the speed ───────────────── */
+/* The reading of a book and the playing of one are two different things, and
+   this is the second: the player's own elements, asked which track is playing
+   through the one window the player leaves open. */
+function player(){
+  return window.PLAYER || null;
+}
+function playerEl(){
+  var p = player();
+  if (p && typeof p.audio === 'function') return p.audio();
+  return $('audio');
+}
+function trackKey(){
+  var p = player();
+  return (p && typeof p.key === 'function') ? String(p.key() || '') : '';
+}
+var audioRate = kept(AUDIO_RATE_KEY, 1);
+function paintRate(){
+  Array.prototype.forEach.call($('rateChips').querySelectorAll('.chip'), function(c){
+    c.setAttribute('aria-pressed', Number(c.getAttribute('data-rate')) === audioRate ? 'true' : 'false');
+  });
+}
+/* Applied to BOTH elements, because the cross-fade plays the next song on the
+   other one and a speed that only touched the first would be lost at every join.
+   A track already playing is corrected where it plays (below), so a rate chosen
+   mid-book is heard from that moment rather than from the next chapter. */
+function applyRate(){
+  [$('audio'), $('xfade')].forEach(function(el){
+    if (!el) return;
+    try { el.playbackRate = audioRate; } catch (e) { /* not this phone */ }
+  });
+  paintRate();
+}
+Array.prototype.forEach.call($('rateChips').querySelectorAll('.chip'), function(c){
+  c.addEventListener('click', function(){
+    audioRate = Number(c.getAttribute('data-rate')) || 1;
+    keep(AUDIO_RATE_KEY, audioRate);
+    applyRate();
+    tell($('abNote'), audioRate === 1 ? 'Playing at the normal speed.' : 'Playing at ' + audioRate + '\u00d7 the normal speed.');
+  });
+});
+function jumpAudio(by){
+  var el = playerEl();
+  if (!el){ return; }
+  if (!isFinite(el.duration) || el.duration <= 0){ tell($('abNote'), 'Nothing is playing to move through yet.'); return; }
+  var to = Math.max(0, Math.min(el.duration - 0.5, (Number(el.currentTime) || 0) + by));
+  try { el.currentTime = to; } catch (e) { return; }
+  tell($('abNote'), (by > 0 ? 'On ' + Math.round(by) + ' seconds \u2014 now at ' : 'Back ' + Math.round(-by) + ' seconds \u2014 now at ') + clock(to) + '.');
+}
+$('back15').addEventListener('click', function(){ jumpAudio(-15); });
+$('fwd30').addEventListener('click', function(){ jumpAudio(30); });
+$('fromStart').addEventListener('click', function(){
+  var el = playerEl();
+  if (el){ try { el.currentTime = 0; } catch (e) { /* nothing playing */ } }
+  keepPosition(trackKey(), 0, AUDIO_POS_KEY);
+  $('fromStart').hidden = true;
+  tell($('abNote'), 'Back at the start of it.');
+});
+/* The place in an audiobook, kept as it plays and whenever it stops. A book is
+   hours long, and the second it was left at is the whole point of the control. */
+var lastSaved = 0;
+function savePlace(){
+  var el = playerEl();
+  var key = trackKey();
+  if (!el || !key) return;
+  if (!isFinite(el.duration) || el.duration <= 0) return;
+  var at = Number(el.currentTime) || 0;
+  if (Math.abs(at - lastSaved) < 5) return;
+  lastSaved = at;
+  // Within ten seconds of the end it is finished, not paused: coming back to
+  // that would play two seconds of the end and stop.
+  if (at < 5 || el.duration - at < 10) keepPosition(key, 0, AUDIO_POS_KEY);
+  else keepPosition(key, at, AUDIO_POS_KEY);
+}
+/* Offered, not done behind his back: the track is moved to where it was left and
+   told so, with a way straight back to the beginning beside it. */
+function offerResume(){
+  var el = playerEl();
+  var key = trackKey();
+  if (!el || !key) return;
+  var at = whereItWas(key, AUDIO_POS_KEY);
+  if (!(at > 5)) return;
+  if (isFinite(el.duration) && el.duration > 0 && at > el.duration - 10) return;
+  if (Math.abs((Number(el.currentTime) || 0) - at) < 3) return;
+  try { el.currentTime = at; } catch (e) { return; }
+  lastSaved = at;
+  $('fromStart').hidden = false;
+  tell($('abNote'), 'Picking up where you left off \u2014 ' + clock(at) + '. \u201cStart it again\u201d is beside the speed.');
+}
+[$('audio'), $('xfade')].forEach(function(el){
+  if (!el) return;
+  el.addEventListener('loadedmetadata', function(){
+    // The cross-fade loads the next track onto the other element; that one is
+    // not the track being listened to, and its position is not this one's.
+    if (el !== playerEl()) return;
+    applyRate();
+    setTimeout(offerResume, 0);
+  });
+  el.addEventListener('play', function(){ if (el === playerEl()) applyRate(); });
+  el.addEventListener('timeupdate', function(){
+    if (el !== playerEl()) return;
+    if (el.playbackRate !== audioRate) applyRate();   // self-healing across a join
+    savePlace();
+  });
+  el.addEventListener('pause', function(){ if (el === playerEl()) savePlace(); });
+  el.addEventListener('ended', function(){ if (el === playerEl()) savePlace(); });
+});
+/* The page being put away is the moment a place is most likely to be lost — and
+   on a phone it is the usual way a book is finished with for the day. */
+window.addEventListener('pagehide', function(){ savePlace(); });
+window.addEventListener('beforeunload', function(){ savePlace(); });
+
+applyRate();
+paintBookRate();
+renderBooks();
+restoreBooks();
+
+/* The one thing the page's own voice needs to know about: a book is being read
+   aloud, and asking the screen to read itself should stop it first. */
+window.READER = {
+  stop: function(){ stopReading(); },
+  pdf: pdfText,
+  unzip: canUnzip,
+  text: split,
+  where: whereItWas,
+  keep: keepPosition,
+  words: wordsEnough,
+  markdown: markdownOff,
+  MAX: MAX_PARA,
+};
 })();
 </script>
 </body>

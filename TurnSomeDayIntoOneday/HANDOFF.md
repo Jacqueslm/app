@@ -146,6 +146,46 @@ reopened) so "opens where it stopped" is proven, not asserted. The repo's own
 choose. **No version bump:** `music.html` is never cached — `sw.js` skips
 `/music` before any handler can answer it — so the shell did not move.
 
+**Both herb courses ask five plain questions a lesson — 15 Oct 2026.** Jacques:
+"As I'm doing to herb certification i dont its confusing rewrite it on the level
+a 2nd grader would understand in the quiz give 5 questions," and then, on how
+much of it and where: "Both herb tracks' quizzes (Certify + Herb Library)",
+"5 questions after every lesson", "All 90 days now." So the two herb tracks of
+this app were rewritten whole — not the plant prose, the quizzes after the
+lessons.
+
+**`certify.html`, the herbalist track: all ninety lessons, three questions to
+five.** Every question is a short sentence read straight off the lesson (nothing
+over **14 words**, and the reason under each answer nothing over 18), and the
+right answer is not parked in one position: the checks count each position across
+all 450 questions and fail if any one of them holds 300 or more. The trainer
+track was **left at three**, because the ask was the herb tracks and its own
+three-question quiz is the by-10 ground it always was.
+
+**`herbs.html`, the library's course: all fifty-nine teaching days, to five.**
+Its questions carry the same **14-word roof** as the herbalist track, so the two
+herb courses read alike (the five longest were trimmed to fit). Day 60 is the
+test rather than a lesson, so it keeps its thirty questions, and both counts are
+pinned in the suite so no later edit can drop them back.
+
+**Two things the rewrite exposed, both fixed rather than left.** (1) **The pass
+mark was fixed at two, of a quiz that might ask five.** `PASS_DAY = 2` scored a
+five-question day at two right — a quiz nobody can fail — while the page's own
+copy said "of 3" under it. The mark is **per track** now (`PASS_DAY_HERB = 4` for
+the herbalist track, 4 of 5, the same four-in-five the block tests ask; `PASS_DAY
+= 2` for the trainer), the day's pass is decided in one function,
+`passOk(id,right)`, and the copy reads the mark and the count off the track
+instead of repeating a number. (2) **`herbs.html` labelled the day-60 test
+"twenty questions"** over a test of thirty. It reads the count off the day now.
+
+**The tests came with it.** `server/test/certify.test.js` pins five a lesson on
+the herbalist track and three on the trainer, keeps the plain-and-short roof on
+the questions, and drives the new pass rule through the page's own surface
+(four of five passes, three of five does not, the trainer unchanged).
+`server/test/herbs-course.test.js` pins five on every teaching day. **No version
+bump:** `sw.js` skips `/certify` and `/herbs` before any handler can answer them,
+so the shell did not move.
+
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
 to me** button instead, which reads the entry out loud with the phone's own

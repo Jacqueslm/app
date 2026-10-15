@@ -155,10 +155,16 @@ test('the herb library: the course is sixty days, numbered once each, all with a
   for (let n = 1; n <= 60; n++) assert.ok(seen.includes(n), `day ${n} exists`);
 });
 
-test('the herb library: every day asks, and every answer index points at an option that is there', () => {
+// 15 Oct 2026. Jacques: "As I'm doing to herb certification i dont its confusing
+// rewrite it on the level a 2nd grader would understand in the quiz give 5
+// questions." Both herb courses were rewritten in plainer words, five questions
+// to a teaching day. Day 60 is the test rather than a lesson, so it keeps its
+// thirty. The count is pinned here so a later edit cannot quietly drop it back.
+test('the herb library: every teaching day asks five questions, and every answer index points at an option that is there', () => {
   const p = loadPage('herbs.html');
   for (const d of p.sandbox.COURSE) {
     assert.ok(Array.isArray(d.q) && d.q.length >= 3, `day ${d.d} has its questions`);
+    if (d.d < 60) assert.strictEqual(d.q.length, 5, `day ${d.d} asks five questions`);
     d.q.forEach((q, i) => {
       const where = `day ${d.d} question ${i + 1}`;
       assert.ok(q.q && q.q.length > 5, `${where} asks something`);
@@ -168,6 +174,13 @@ test('the herb library: every day asks, and every answer index points at an opti
       q.a.forEach((t) => assert.ok(t && t.length, `${where}: no blank option`));
       assert.strictEqual(new Set(q.a).size, q.a.length, `${where}: no option is offered twice`);
       assert.ok(q.w && q.w.length > 5, `${where} says why, which is the whole point of it`);
+      // The same roof the Certification's herbalist track is held to: the ask
+      // was a second grader's reading, and a question is a sentence, not a
+      // paragraph. Both roofs are 14 words so the two herb tracks read alike.
+      const words = q.q.trim().split(/\s+/).length;
+      assert.ok(words <= 14, `${where} is ${words} words - too long for a beginner`);
+      const why = q.w.trim().split(/\s+/).length;
+      assert.ok(why <= 22, `${where}: the reason is ${why} words long`);
     });
   }
 });
@@ -256,8 +269,8 @@ test('the herb library: the test scores, passes, and can be taken again', () => 
 test('the herb library: the course header reports the day-60 test, not day 30', () => {
   // The progress line above the days says "The test: …", but it was reading
   // dayScore(30) — a leftover from when the exam was day 30 and the course was
-  // thirty days. Day 30 is an ordinary teaching day now, with only four
-  // questions, so the header could report a four-question "test". The header is
+  // thirty days. Day 30 is an ordinary teaching day now, with only five
+  // questions, so the header could report a five-question "test". The header is
   // what a person reads before the days themselves, so it is pinned here.
   const p = loadPage('herbs.html');
   const s = p.sandbox;

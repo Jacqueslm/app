@@ -43,6 +43,13 @@ test('both tracks are ninety days, numbered one to ninety', () => {
   }
 });
 
+// 15 Oct 2026. Jacques: "As I'm doing to herb certification i dont its confusing
+// rewrite it on the level a 2nd grader would understand in the quiz give 5
+// questions." The herbalist track's quizzes were rewritten in plainer words,
+// five to a lesson, and the trainer track was left at three. The count is
+// asserted per track rather than for both, because that is the shape asked for.
+const QUIZ = { herbalist: 5, trainer: 3 };
+
 test('every lesson carries a title, a subject, teaching and a quiz', () => {
   for (const [name, days] of [['herbalist', HERB], ['trainer', FIT]]) {
     for (const d of days) {
@@ -52,9 +59,31 @@ test('every lesson carries a title, a subject, teaching and a quiz', () => {
       d.p.forEach((p) => assert.ok(typeof p === 'string' && p.trim(),
         `${name} day ${d.d}: an empty teaching paragraph`));
       assert.ok(Array.isArray(d.q), `${name} day ${d.d}: no quiz`);
-      assert.equal(d.q.length, 3, `${name} day ${d.d}: the quiz is three questions`);
+      assert.equal(d.q.length, QUIZ[name], `${name} day ${d.d}: the quiz is ${QUIZ[name]} questions`);
     }
   }
+});
+
+// The rewrite is a rewrite, not a relabelling: the herbalist track's questions
+// are short, plain sentences a beginner reads straight off, and no lesson leans
+// on one question position for its right answer. Both are the kind of thing an
+// edit can quietly undo, so both are checked.
+test('the herbalist quizzes are plain and short, and no position is always right', () => {
+  const at = [0, 0, 0, 0];
+  for (const d of HERB) {
+    d.q.forEach((q, qi) => {
+      const words = q.q.trim().split(/\s+/).length;
+      assert.ok(words <= 14, `herbalist day ${d.d} question ${qi + 1} is ${words} words - too long for a beginner`);
+      const why = q.w.trim().split(/\s+/).length;
+      assert.ok(why <= 22, `herbalist day ${d.d} question ${qi + 1}: the reason is ${why} words long`);
+      at[q.k]++;
+    });
+  }
+  // Five questions a day over ninety days: if one position were always right,
+  // it would hold 450 answers. Nothing close.
+  at.forEach((n, i) => assert.ok(n < 300,
+    `the right answer sits at position ${i} ${n} times - that is a pattern, not a quiz`));
+  assert.ok(at.filter((n) => n > 0).length === 4, 'all four positions are used');
 });
 
 test('every quiz question has one right answer among three or four options', () => {
@@ -90,6 +119,49 @@ test('a test sits after day thirty and after day sixty, and an exam at the end',
   // And the passing marks are stated once, at the top.
   assert.match(HTML, /var PASS_DAY = 2;/);
   assert.match(HTML, /var PASS_TEST = 24;/);
+  // 15 Oct 2026. The herbalist quizzes went to five questions and the mark had
+  // to follow them: the page used to say "2 of 3" whatever the quiz asked, and
+  // a five-question quiz passed at two right is a quiz nobody can fail. The
+  // mark is per track now, and the copy reads it from the track rather than
+  // repeating a number.
+  assert.match(HTML, /var PASS_DAY_HERB = 4;/);
+  assert.match(HTML, /function passMark\(t\)\{ return t\.id === "herbalist" \? PASS_DAY_HERB : PASS_DAY; \}/);
+  assert.match(HTML, /passed at " \+ passMark\(t\) \+ " of " \+ t\.days\[0\]\.q\.length/);
+  assert.match(HTML, /passed:passOk\(t\.id,right\)/);
+  assert.doesNotMatch(HTML, /of 3 is the pass/, 'the pass is not a fixed three anymore');
+});
+
+test('the day pass mark fits the quiz each track asks', () => {
+  // Four of five and two of three, measured against the quizzes themselves, so
+  // a later edit to either track cannot leave the page passing a day on the
+  // wrong fraction of its own questions.
+  const { sandbox, byId } = load();
+  const C = sandbox.window.CERTIFY;
+  const herb = C.TRACKS.find((t) => t.id === 'herbalist');
+  const fit = C.TRACKS.find((t) => t.id === 'fitness');
+  assert.equal(C.passMark(herb), 4);
+  assert.equal(C.passMark(fit), 2);
+  assert.equal(C.passMark(herb) / herb.days[0].q.length, 0.8);
+  assert.ok(C.passMark(fit) <= fit.days[0].q.length);
+  assert.ok(C.passMark(herb) <= herb.days[0].q.length);
+
+  // And the decision the quiz actually makes, through the page's own surface.
+  assert.equal(C.passOk('herbalist', 5), true, 'five of five passes an herbalist day');
+  assert.equal(C.passOk('herbalist', 4), true, 'four of five passes an herbalist day');
+  assert.equal(C.passOk('herbalist', 3), false, 'three of five does not: the old 2-of-3 mark would have');
+  assert.equal(C.passOk('herbalist', 2), false, 'and two of five is nowhere near a pass');
+  assert.equal(C.passOk('fitness', 3), true, 'the trainer track is unchanged: three of three');
+  assert.equal(C.passOk('fitness', 2), true, 'two of three passes it, as it always did');
+  assert.equal(C.passOk('fitness', 1), false);
+
+  // And the line a person actually reads on the track screen, rendered. It said
+  // "of 3" for both tracks whatever the quiz asked.
+  C.go({ track: 'herbalist', day: null, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /its quiz is passed at 4 of 5\./,
+    'the herbalist track states its own mark over its own question count');
+  C.go({ track: 'fitness', day: null, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /its quiz is passed at 2 of 3\./,
+    'and the trainer track is unchanged');
 });
 
 test('the exam unlocks only on the two passed tests and all ninety days', () => {

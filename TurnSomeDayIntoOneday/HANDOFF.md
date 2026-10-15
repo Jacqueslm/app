@@ -77,6 +77,75 @@ uses a pronoun for somebody who is not in the room. **No version bump:**
 `key.html` is never cached — `sw.js` skips `/key` before any handler can answer
 it — so the shell did not move.
 
+**The Player reads audiobooks, PDFs and text files — 15 Oct 2026.** Jacques:
+"make my player able to read audio books and pdf and text files." Three kinds of
+file, one ask, and only some of them are sound.
+
+**The audiobook half is on the player card itself.** An audio file always played
+here, so what a book needed was the three things a three-minute song never
+needed: **a place it remembers, a way back and on, and a speed**. The card now
+carries −15s / +30s, a hidden **Start it again** that appears only when a place
+was picked up, and 0.8× to 2× chips. The place is kept per track every few
+seconds while it plays and again on pause and on the page going away, under
+`tsid-music-pos`; within ten seconds of the end (or the first five) it is cleared
+rather than saved. The rate lives under `tsid-music-rate` and is applied to
+**both** `<audio>` elements, because the cross-fade plays the next song on the
+other one and a speed that only touched the first would be lost at every join;
+a track already playing is corrected where it plays, so a rate chosen mid-book
+is heard from that moment. **`music.html` now leaves one window open —
+`window.PLAYER = { key, name, audio }`** — because a place is only meaningful
+against the track it belongs to, and the reading half must not guess that from
+the file name printed on the card. The cross-fade's next song is left exactly
+where it starts (`el !== playerEl()`), or the bookmark of one chapter would be
+written onto the next.
+
+**The reading half is a fifth tab, Read**, between Cover and Discover: choose a
+PDF, a text or a Markdown file, and the words are lifted out **on the phone** and
+read aloud a paragraph at a time by the phone's own voice. The paragraph is the
+bookmark, so a book opens where it stopped and says so in words. Markdown loses
+its hashes, asterisks, link brackets and pipes before it is spoken — a renderer's
+punctuation is not something a voice should read. Books are kept in their own
+database (`tsid-books`, store `books`) rather than the player's, because adding a
+store to the player's needs a version bump and the connection the player already
+holds open would block it.
+
+**Two things were found by running it rather than reading it, and both matter.**
+(1) **The PDFs in this repo are ASCII85 on top of Flate** — ReportLab writes
+`/Filter [ /ASCII85Decode /FlateDecode ]` on every stream it makes. The first
+version of the extractor knew only Flate, and it read **0 words** out of
+`START-HERE.pdf`, `Studio/Studio-Guide.pdf` and `SESSION-SUMMARY-25AUG.pdf`; with
+the ASCII85 decoder in, the same files give **15,552 / 8,116 / 1,091 words** as
+real paragraphs. Streams are also skipped **by name** when the filter says
+`DCTDecode` or `JPXDecode` — a photograph is not words, whatever its bytes
+decompress to. (2) A **document-wide floor on letters** is what tells a scan
+apart from a letter, and set high it refuses a short honest page and calls it a
+picture. It sits at 60 letters with a letter-to-character ratio, and a page of
+gibberish still fails it. When a PDF yields nothing, the page says which of the
+three it was: a scan with no words in it, a file that would not open, or a
+browser too old to unzip — never the wrong one confidently.
+
+**The book is not read twice.** The reading speaks through the page's existing
+voice (`window.SAY.speak`, added the same day as a way to have something spoken
+that is not on the screen), so there is still exactly one
+`SpeechSynthesisUtterance` on the page; `voice-all-pages.test.js` fails if a
+second one appears. The open-book card is `noSay`, or pressing **Read it to me**
+would read several hundred paragraphs back at him, and asking the screen to read
+itself stops the book first. **The page's Stop stops the book too.** A cancelled
+utterance can still report itself finished — `speechSynthesis.cancel()` and a
+real ending look the same from the callback — so a reader that only listened to
+the callback would speak the next paragraph after every Stop: the sound stops
+and the book carries on anyway. It is guarded, and there is a test that fires the
+end event after a Stop to prove it.
+
+**`server/test/music-reader.test.js` — 27 tests.** PDFs are built in the file
+with Node's own deflater and a small ASCII85 encoder, in both the shapes a real
+generator writes, and the whole tab is **driven as a person would drive it**
+(a stand-in page, a file chosen, Read aloud pressed, a paragraph on, the book
+reopened) so "opens where it stopped" is proven, not asserted. The repo's own
+`START-HERE.pdf` is read in the suite as well — the file he would actually
+choose. **No version bump:** `music.html` is never cached — `sw.js` skips
+`/music` before any handler can answer it — so the shell did not move.
+
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
 to me** button instead, which reads the entry out loud with the phone's own

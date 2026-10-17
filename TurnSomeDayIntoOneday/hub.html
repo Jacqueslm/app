@@ -217,12 +217,17 @@
          And again on 14 Oct 2026, because the note said "The plan comes next"
          and the plan has arrived: the by-10 programme is on the page itself now
          - Jacques: "on the trainer add the by 10 program". A door that still
-         says the plan is coming would send him looking for it somewhere else. -->
+         says the plan is coming would send him looking for it somewhere else.
+
+         And once more on 17 Oct 2026 - Jacques: "p90x workout". The P90X
+         rotation the by-10 is based on is on the page too, so the note names it:
+         somebody looking for the P90X workout has no way of knowing it is behind
+         a door that only mentions the by-10. -->
     <a class="card t" href="/trainer">
       <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9v6M20 9v6M7.5 7v10M16.5 7v10M7.5 12h9"/></svg></span>
       <span class="txt">
         <h2 class="name">The Trainer</h2>
-        <p class="note">For the people you train. The by-10 programme, and their information.</p>
+        <p class="note">For the people you train. The by-10, the P90X rotation, and their information.</p>
       </span>
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
@@ -277,7 +282,14 @@
   // me doesn't work here ... the whole app not just specific sections", and the
   // one screen every other page is opened from had no voice at all. A new
   // button is a changed shell, so the name moves to 3.3 with it.
-  const APP_VERSION='3.3';
+  //
+  // 17 Oct 2026: the Trainer's card now names the P90X rotation ("p90x
+  // workout"), which is on the Trainer beside the by-10. One line of a card is
+  // still a change to the shell, so the name moves to 3.4 for the same reason
+  // as every bump above: an installed phone that never rebuilds keeps the old
+  // line, and the old line hides the rotation behind a door that never
+  // mentions it.
+  const APP_VERSION='3.4';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');

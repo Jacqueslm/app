@@ -99,7 +99,8 @@ the file name printed on the card. The cross-fade's next song is left exactly
 where it starts (`el !== playerEl()`), or the bookmark of one chapter would be
 written onto the next.
 
-**The reading half is a fifth tab, Read**, between Cover and Discover: choose a
+**The reading half is a fifth tab, Read**, after Cover — and the last tab since
+the Discover tab came off on 17 Oct 2026. Choose a
 PDF, a text or a Markdown file, and the words are lifted out **on the phone** and
 read aloud a paragraph at a time by the phone's own voice. The paragraph is the
 bookmark, so a book opens where it stopped and says so in words. Markdown loses
@@ -244,6 +245,33 @@ record stands at any depth). A teaching day can no longer keep answers to a quiz
 it no longer asks even if nobody remembers to touch `QUIZ_N` — and that constant
 is now pinned to the days themselves in `herbs-course.test.js`, which had held
 the quiz lengths but never the number the page compares against. Suite: 456 pass.
+
+**The music and movie search is gone — 17 Oct 2026.** Jacques: "Remove the music
+and movie scraper." The Player's fifth tab, **Discover**, was a catalog search:
+it sent a title to Apple's iTunes API for songs or to TMDb for films and series,
+showed the poster and metadata, offered a "Where to watch" lookup through
+JustWatch, and kept a watchlist in `localStorage` (`tsid-watchlist`). Nothing
+was ever downloaded — it only linked to official listings — but it was the one
+part of the Player that spoke to another company, and it is off the app.
+
+**What went:** the Discover tab and its whole panel, the `catalog` block of the
+page's script (search, popular browse, providers, pagination, the saved list),
+the 446 lines of catalog CSS that the panel had accumulated, and the footer
+sentence that promised the search. On the server: the `/api/catalog/*` routes,
+their limiter and mount in both `server.js` and `vercel-app.js`, and
+`server/catalog.js` with `server/catalog-routes.js`. Their two test files
+(`catalog.test.js`, `catalog-routes.test.js`) and the catalog block inside
+`vercel-app.test.js` went with them; two guards stay: a signed-in request to
+`/api/catalog/music` is a 404 rather than an unlinked-but-live route, and
+`music.html` is checked for the tab and for any catalog address. Suite: 442 pass
+(456 before: sixteen catalog tests went and two guards took their place — the
+count that went is tests, not tests going quiet).
+
+**Kept, untouched:** the local player, playlists, the meditation room, the
+ringtone cutter, the cover maker and the Read tab. Nothing the page did with the
+person's own files depended on the catalog. `TMDB_READ_ACCESS_TOKEN` is no longer
+read by anything, and none is set in this workspace; if one is ever put in
+Settings → Environment it will do nothing.
 
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it

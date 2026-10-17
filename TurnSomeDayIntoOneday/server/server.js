@@ -12,7 +12,6 @@ const push = require('./push');
 const backup = require('./backup');
 const aiChatBody = require('./ai-chat-body');
 const musicList = require('./music-list');
-const catalogRoutes = require('./catalog-routes');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -137,23 +136,6 @@ function requireAuth(req, res, next) {
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
-
-// Catalog lookups return public metadata only. Keep these same-origin and behind
-// the Music page's own signed-in/allowlist gate, with a modest per-IP limit.
-const catalogLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many catalog searches. Wait a little and try again.' },
-});
-catalogRoutes.mount(app, {
-  limiter: catalogLimiter,
-  authorize(req, res, next) {
-    if (!isValidSession(req) || !isFriendlyRequest(req)) {
-      return res.status(401).json({ error: 'Not signed in.' });
-    }
-    next();
-  },
-  tmdbToken: process.env.TMDB_READ_ACCESS_TOKEN,
-});
 
 // A letter link is the SECOND way an account gets made in this app —
 // /api/auth/signup is the other one — so it needs the same door, checked the same

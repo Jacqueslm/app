@@ -79,7 +79,12 @@
 // ("p90x workout"), which is on the Trainer beside the by-10. The name moves to
 // 3.4 with it, for the reason above: an installed phone that never rebuilds
 // keeps a door that does not mention the rotation at all.
-const CACHE_NAME = 'tsid-shell-v3.4';
+//
+// The same day the by-10 came off the Trainer ("Remove the workout you made up
+// in the trainer only p90x is relativity"), so the card's line changed again and
+// the name moves to 3.5 with it, for the same reason: a phone that keeps its old
+// shell keeps being offered a programme the page no longer has.
+const CACHE_NAME = 'tsid-shell-v3.5';
 const SHELL_FILES = [
   '/',
   '/app',

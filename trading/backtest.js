@@ -19,6 +19,7 @@
 //   node trading/backtest.js prices.csv                     every setting
 //   node trading/backtest.js prices.csv --zones             only trades inside a zone
 //   node trading/backtest.js prices.csv --align             only when 4h and daily agree
+//   node trading/backtest.js prices.csv --ny-close          stop entries at 16:00 NY, as the chart does
 //   node trading/backtest.js prices.csv --pv 10 --cost 1.18 money per point, cost per trade
 //   node trading/backtest.js --selftest                     checks the engine itself
 //
@@ -98,8 +99,15 @@ const dayFmt = new Intl.DateTimeFormat('en-CA', { timeZone: NY, year: 'numeric',
 function nyHour(ms) { return Number(hourFmt.format(new Date(ms))) % 24; }
 function nyDay(ms) { return dayFmt.format(new Date(ms)); }
 // The 09:30-16:00 New York session the indicator gates on.
-function inSession(ms) {
-  return nyHour(ms) * 60 + Number(minFmt.format(new Date(ms))) >= 9 * 60 + 30;
+//
+// By default only the OPEN is enforced (>= 09:30), which is how the first runs
+// were made. That is not the chart: jacques-zones.pine also closes the gate at
+// 16:00, and the 15:00 range candle is only complete at 16:00 — so the default
+// can take evening entries the chart cannot. --ny-close applies the same close
+// the Pine does, which is the reproducible way to compare the two.
+function inSession(ms, opts) {
+  const mins = nyHour(ms) * 60 + Number(minFmt.format(new Date(ms)));
+  return mins >= 9 * 60 + 30 && (!opts || !opts.nyClose || mins < 16 * 60);
 }
 
 // ------------------------------------------------------- the range candles --
@@ -266,7 +274,7 @@ function run(bars, opts) {
           }
           if (pos) continue;
         }
-        if (!inSession(b.t)) continue;
+        if (!inSession(b.t, opts)) continue;
 
         const upA = A.has && A.alive && A.up, upB = B.has && B.alive && B.up;
         const dnA = A.has && A.alive && !A.up, dnB = B.has && B.alive && !B.up;
@@ -341,6 +349,7 @@ function report(all, opts) {
   console.log('');
   console.log(`Ran on ${opts.bars} bars. $${opts.pv} a point, $${opts.cost} a trade.`);
   console.log(`Filters: zones ${opts.zoneFilter ? 'ON' : 'off'}, 4h+daily alignment ${opts.align ? 'ON' : 'off'}.`);
+  console.log(`Session: ${opts.nyClose ? '09:30-16:00' : '09:30 to midnight'} New York.`);
   console.log('');
   console.log('setting'.padEnd(14) + 'trades'.padStart(7) + 'win'.padStart(6) + 'loss'.padStart(6) +
     'win %'.padStart(8) + 'net'.padStart(12) + 'PF'.padStart(8) + 'per trade'.padStart(11) + 'worst dip'.padStart(11));
@@ -376,9 +385,18 @@ function selftest() {
   ];
   const opts = { structure: 10, trendLen: 20, pv: 10, cost: 0, zoneFilter: false, align: false };
   const fib30 = run(bars, opts)['fib 30'];
-  const ok = fib30.n === 1 && fib30.win === 1 && Math.abs(fib30.net - 30) < 1e-6;
+  const okTrade = fib30.n === 1 && fib30.win === 1 && Math.abs(fib30.net - 30) < 1e-6;
+  // --ny-close must close the gate at 16:00 and leave it open before; without
+  // the flag the old open-ended gate stays. 5 Jan is EST (UTC-5).
+  const at9 = Date.parse('2026-01-05T14:45:00Z');   // 09:45 NY
+  const at16 = Date.parse('2026-01-05T21:05:00Z');  // 16:05 NY
+  const at8 = Date.parse('2026-01-05T13:45:00Z');   // 08:45 NY
+  const okSession = inSession(at9, { nyClose: true }) && !inSession(at16, { nyClose: true })
+    && !inSession(at8, { nyClose: true }) && inSession(at16, {});
+  const ok = okTrade && okSession;
   console.log('self-check: ' + (ok ? 'PASS' : 'FAIL') + ' — fib 30 found ' + fib30.n +
-    ' trade(s), ' + fib30.win + ' winner(s), net ' + money(fib30.net));
+    ' trade(s), ' + fib30.win + ' winner(s), net ' + money(fib30.net) +
+    '; session bounds ' + (okSession ? 'hold' : 'WRONG'));
   console.log('(self-check uses a made-up 4-bar fixture. It is not a result.)');
   process.exit(ok ? 0 : 1);
 }
@@ -386,13 +404,14 @@ function selftest() {
 // --------------------------------------------------------------------- main --
 
 function main(argv) {
-  const opts = { pv: 10, cost: 1.18, structure: 10, trendLen: 20, zoneFilter: false, align: false };
+  const opts = { pv: 10, cost: 1.18, structure: 10, trendLen: 20, zoneFilter: false, align: false, nyClose: false };
   const files = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--selftest') return selftest();
     else if (a === '--zones') opts.zoneFilter = true;
     else if (a === '--align') opts.align = true;
+    else if (a === '--ny-close') opts.nyClose = true;
     else if (a === '--pv') opts.pv = Number(argv[++i]);
     else if (a === '--cost') opts.cost = Number(argv[++i]);
     else if (a === '--structure') opts.structure = Number(argv[++i]);

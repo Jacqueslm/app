@@ -101,6 +101,10 @@ node_modules/
 *.bak
 
 
+# The trading journal is a personal record of fills, size and P&L. The template
+# (trading/journal-template.csv) is the committed one; the filled copy stays local.
+trading/journal.csv
+
 # Vercel build output - regenerate with the build command (node vercel-build.js).
 # Only public assets land here; a page in this folder is a page served to the world.
 TurnSomeDayIntoOneday/webroot/

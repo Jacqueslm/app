@@ -7,7 +7,8 @@ Correction frame = the lower timeframe the bot drops to.
 
 **Sections 0–4 came off his TradingView screenshots.** Section 5 is different:
 it is `trading/backtest.js` run on prices pulled into the repo, and it is the
-only section with prices attached to it. Read section 5d before trusting 5a.
+only section with prices attached to it. Read sections 5d and 5e before
+trusting 5a — 5e changes what 5a is measuring.
 
 ## 0. Jacques TBR Zones — the candle play — reported 1 Oct 2026
 
@@ -281,16 +282,57 @@ happened inside one contract.
 of MGCZ2026 itself, one contract, has no seams at all, and `trading/backtest.js`
 reads that file as-is. Drop it in and re-run.
 
+### 5e. The session gate did not match the chart — found 17 Oct 2026
+
+`inSession()` in `backtest.js` enforced only the **09:30 open**. The chart's
+gate is `0930-1600` New York, and the **15:00 range candle is only complete at
+16:00** — so under the chart's gate that range cannot produce an entry at all,
+while the backtester could take evening entries from it and from the 9:00 range.
+Every table above was made with the open-ended gate.
+
+The close is now a flag, `--ny-close`, so the old numbers stay reproducible and
+the chart's session can be measured beside them. Same file, zones ON, nothing
+else changed:
+
+| Setting | Trades | Win | Loss | Win % | Net | PF | Per trade | Worst dip |
+|---|---|---|---|---|---|---|---|---|
+| fib 30 | 29 | 25 | 4 | 86.2% | +$1,340.78 | 2.67 | +$46.23 | −$363.18 |
+| fib 50 | 27 | 22 | 5 | 81.5% | +$1,440.16 | 3.30 | +$53.34 | −$349.36 |
+| fib 70 | 28 | 19 | 9 | 67.9% | +$1,969.97 | 3.03 | +$70.36 | −$360.18 |
+| sweep | 19 | 11 | 8 | 57.9% | +$644.59 | 1.70 | +$33.93 | −$450.54 |
+
+What this changes:
+
+- **The 48-trade sweep figure is not the chart's figure.** Under the chart's
+  gate it is 19 trades, and the per-trade result is nearly the same
+  (+$33.93 against +$35.90), so the edge is not purely an evening effect — but
+  the sample is now too small to call anything settled.
+- **The fib levels are no longer losing** once the evening entries are removed.
+  Under the zone filter fib 30 rises from +$707 to +$1,341 (not from the
+  −$1,595 of the unfiltered 5a run — that row has no zone filter, so it is not
+  the like-for-like baseline); the chart-gate samples are 27–29 trades. That
+  does not refute 5b's mechanism argument (fib 30 still averages +$86 a win
+  against −$201 a loss), but the loss 5b explained is not in this sample. Treat
+  "fib loses" as unproven, not settled.
+- **No setting reaches 30 trades.** Nothing in 5e is a result; it is the honest
+  size of the sample the chart can actually trade.
+
 ### How to re-run any of this
 
 ```
 node trading/fetch-prices.js                       # refresh all four CSVs
 node trading/backtest.js trading/data/mgc-1h-730d.csv
 node trading/backtest.js trading/data/mgc-1h-730d.csv --zones
+node trading/backtest.js trading/data/mgc-1h-730d.csv --zones --ny-close
 node trading/backtest.js trading/data/mgc-1h-730d.csv --align
 node trading/backtest.js trading/data/mgc-1h-730d.csv --zones --align
+node trading/backtest.js trading/data/mgc-1h-730d.csv --zones --align --ny-close
 node trading/backtest.js --selftest                # engine check, made-up bars
 ```
+
+`--ny-close` is the chart's session (09:30–16:00 New York). Without it the
+engine keeps the older open-ended gate (09:30 to midnight), which is what
+sections 5a–5d were made with.
 
 ## Not written here
 

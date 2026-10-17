@@ -1,5 +1,8 @@
 # The method — Jacques, written down so no session asks again
 
+`PROCESS.md` is the routine around this — one setting, size, journal, review.
+This file is the method itself.
+
 ## The range candle (TBR)
 
 - The candle at the chosen hour **is** the range. Its own high and low. Nothing to
@@ -77,8 +80,9 @@
   can be argued with.
 - `node trading/backtest.js --selftest` checks the engine on a made-up 4-bar
   fixture. It is not a result.
-- **Not yet run on real prices** — no market data lives in this repo. Until it
-  is, every number it prints is whatever is in the file it is handed.
+- **Run on real prices from 6 Oct 2026** — the files live in `trading/data/`.
+  Section 5 of `results.md` has the numbers, including the session-gate caveat
+  in 5e: the chart's gate is `--ny-close` (09:30–16:00 New York).
 
 ## One bot
 

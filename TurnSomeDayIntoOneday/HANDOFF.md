@@ -227,6 +227,24 @@ corrected to the five it asks now — a fixture written for a quiz the page no
 longer has would have been testing the prune rather than what it was written for.
 Suite: 454 pass, 0 fail.
 
+**The check runs on every open, and the test day is no exception — 17 Oct 2026.**
+The Library's prune above cleaned a phone **once** and then switched itself off:
+it was gated behind `store.quizN !== QUIZ_N`, so a second rewrite of the questions
+would have repainted the old answers after the first open, and its day-60 branch
+compared the test's length with itself (`day.test ? day.q.length : 0`), so no
+test record was ever dropped however few questions it held. Both are one
+promise — *does this answer belong to the quiz that is here now* — so the check
+now measures every `day:` record against the day in front of it on **every**
+open, and writes back only when it actually dropped something, the way
+`certify.html`'s `dropStaleDays()` already did. `QUIZ_N` stays as the marker for
+stores written before answers carried a count: a record with `r.n` is judged by
+its own number, and one without is judged by how many answers it holds (three or
+four on an old teaching day, so it goes; the test kept its thirty, so an old test
+record stands at any depth). A teaching day can no longer keep answers to a quiz
+it no longer asks even if nobody remembers to touch `QUIZ_N` — and that constant
+is now pinned to the days themselves in `herbs-course.test.js`, which had held
+the quiz lengths but never the number the page compares against. Suite: 456 pass.
+
 **The herb library has no Friendly on it.** The ask box came off `/herbs` on
 4 Oct 2026 ("take a friendly off the herbs"). An open herb carries a **Read it
 to me** button instead, which reads the entry out loud with the phone's own

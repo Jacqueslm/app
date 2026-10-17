@@ -309,6 +309,22 @@ test('the by-10 is off the Trainer, and P90X is the programme on it', () => {
   // rotation rather than left behind in a programme of its own.
   assert.match(html, /ten seconds between exercises/i,
     'the ten-second rest is written into the P90X rotation');
+  // 19 Oct 2026, and the rest of the rule, in his words: "By 10 is not based on
+  // how much weight you can lift ... 2 to 5 sets no matter your level for a
+  // beginners 1 weeknof stretching first ... by 10 can be done everyday as long
+  // as workout or rotated and do 2 workouts a day resistance and cardio ...
+  // week 4 8 12 rest I dont do". A page that kept only the ten seconds would be
+  // a page that left out the method, so the rotation card carries all of it.
+  for (const re of [
+    /pump out reps/,
+    /two to five sets/i,
+    /twenty reps at most/i,
+    /every day/i,
+    /two sessions a day/i,
+    /jump rope, a step session, walking, dancing/i,
+    /a week of stretching/i,
+    /the by-10 does not require them/i,
+  ]) assert.match(html, re, `the by-10's rule is on the Trainer: ${re} is missing`);
   // And the lines that outrank it still do.
   assert.match(html, /The programme below is a workout, and two lines outrank it/,
     'the safety card says the programme answers to it, rather than the other way round');

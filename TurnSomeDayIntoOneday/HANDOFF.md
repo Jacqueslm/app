@@ -42,6 +42,103 @@ still comes first on the page and the safety card still outranks the programme.
 The Trainer's card in the shell changed with it (it said the plan came next), so
 the cache name moved to `tsid-shell-v3.2`.
 
+**The by-10 came off the Trainer and P90X's rotation went on — 17 Oct 2026.**
+Jacques: "p90x workout", then "Remove the workout you made up in the trainer only
+p90x is relativity and the by 10 is weaven into those exercise as far as rest
+peiod". `trainer.html` now holds P90X's classic ninety-day rotation - thirteen
+weeks, three phases, a recovery week after each (weeks 4, 8 and 13), six days on
+and one off, and a tick for every day kept on the phone - and nothing else. The
+by-10's own sections (the three lifting days, the two levels, the five cardio
+choices, the stretch day) were mine rather than his and are gone; the one part he
+kept, the ten-second rest, is written into the rotation. The Trainer's card in
+the shell changed with it, so the cache name went to `tsid-shell-v3.5`, and
+`server/test/trainer.test.js` was inverted: it now holds the by-10 **out** rather
+than checking its numbers in.
+
+**The by-10 is the rule, and P90X is the exercises — 18 Oct 2026.** Jacques,
+correcting the Certification: "P90x is just the exercises I'm using by 10 is the
+theory behind how I train because when I actually train I reorganize p90x you
+dont need to do that", and then the rule itself: "The by 10 is 3-5 sets max reps
+nomre than 20 and 10 seconds rest that's the gist of it." The trainer track had
+grown a programme of its own out of the by-10 and called it the app's - rounds
+and rotations, two levels with fixed rep counts, a timed last move, twenty
+minutes of cardio, five cardio choices - none of which he ever gave. The track
+now teaches the rule as he states it: **three to five sets, every set to as many
+good repetitions as the person has and never more than twenty, ten seconds
+between one move and the next** (the set range was corrected to two to five the
+next day - see below), with P90X named as the exercise source and a
+session described as P90X rearranged rather than followed to the letter. The
+invented numbers are out of the lessons, the quizzes, the track card and all
+ninety "Going deeper" paragraphs (which had been describing a Trainer page that
+no longer exists), and `certify.test.js` now requires the rule in the page and
+the inventions out of it.
+
+**Why the by-10 works, in his words — 19 Oct 2026.** Jacques: "traditional
+workouts rest between 30 seconds to 2 minutes yes it allows you to get more reps
+in but it keeps you in the working out longer my by 10 cuts down workout duration
+so and 1 hour workout becomes 30 minutes and so on you do less reps in each set
+but it guarantees that you burn out and each move is not done in full extension
+its at about 3/4 both ways to keep the intensity throughout building strength
+cardiovascular system and promotes muscle growth". So the theory is a trade:
+thirty seconds to two minutes of rest buys repetitions and a longer session, and
+ten seconds buys a session half the length, fewer reps a set, and a set that ends
+in failure anyway. The other half is range - about three-quarters in each
+direction rather than full extension, so no rep hands the muscle a rest - and the
+outcome is strength, cardiovascular work through the whole session, and muscle
+growth. That is written into the by-10 lessons (days 3, 13, 31, 32, 36, 40), and
+two sentences were **reversed** to make room for it: the track had called the
+by-10 "moderate intensity" and had said training to failure was "not the by-10's
+choice", which is the opposite of the burnout being the point.
+
+**What the by-10 is based on, and the shape of its week — 19 Oct 2026, same
+day.** Jacques again: "By 10 is not based on how much weight you can lift its
+finding that comfort to pump ot reps with dumbell sets depend on individual
+starting point 2 to 5 sets no matter your level for a beginners 1 weeknof
+stretching first to condition the body to restrict injuries by 10 can be done
+everyday as long as workout or rotated and do 2 workouts a day resistance and
+cardio p90 has a couple of cardio workouts but sometimes I replace those with
+jump rope step walking and dancing or I mix them up the week 4 8 12 rest I dont
+do I go right intonthenbext rotatation or a full week of cardio and a little
+stretching just depends on the mood this is suppose to be able to be explained
+to a 2nd grader not with all the complexes of big scientific words keep it
+simple because the mind body and spirit are simple".
+
+That corrected six things, and all six are in now:
+
+- **The weight is not the measure.** The rule asks for a dumbbell light enough
+to pump reps out with, not the heaviest the person can lift. Day 3 says so
+first, and its third quiz question now asks it.
+- **Sets are two to five, by starting point rather than by level.** The whole
+track said three to five; days 31, 34, 35, 72, 87, 88, 89 and the class-format
+day all moved to two to five, and day 35's title with them.
+- **Every day, if the workout rotates.** Day 31's FITT-VP answer, day 33's
+periodisation and day 88's sample week say the by-10 can run daily; P90X's own
+six-on-one-off is named as P90X's week, not the method's.
+- **Two sessions a day, resistance and cardio.** Day 3 and days 31 and 88. The
+cardio can be P90X's, or jump rope, a step session, walking, dancing, or a mix
+(days 42 and 88).
+- **A beginner's first week is stretching**, before any dumbbell, to condition
+the body and keep the injuries away: day 3, day 48 (the stretch day) and day 88.
+- **The recovery weeks are optional.** Weeks 4, 8 and 13 are P90X's. The by-10
+does not require them: straight into the next rotation, or a full week of cardio
+and a little stretching, depending on the mood. Days 33, 52, 87 and the bridge
+lines on days 28, 32 and 52 say it; so does the Trainer's rotation card.
+
+The writing instruction is honoured where the theory lives. Day 3 is now short
+sentences a second grader could follow - "pick up a dumbbell you can pump out
+reps with, do two to five sets, keep every set under twenty reps, and rest ten
+seconds between one move and the next" - and the plain-words version sits
+beside the theory rather than replacing the physiology lessons around it.
+
+`trainer.html` now carries the rule on the rotation card: pump-rep weight,
+two to five sets, twenty at most, ten seconds, two sessions a day, every day if
+the days rotate, the cardio swaps, the beginner's stretch week, and the recovery
+weeks marked optional. `certify.test.js` requires the corrected rule in the page
+and requires the superseded claims out of it (`three to five sets`, the
+"Three sets to five" title, the six-days frequency and the old recovery-week
+bridge); `trainer.test.js` requires the rule on the rotation card. 442 tests,
+442 pass.
+
 **The cards on the Key are a reading, not a draw — 14 Oct 2026.** Jacques:
 "why the cards don't read like a tarot reading it's short and it should be read
 like a professional tarot reader and they should only be chosen based on

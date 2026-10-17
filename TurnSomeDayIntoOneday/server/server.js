@@ -358,8 +358,12 @@ app.get('/trainer.html', pageLimiter, (req, res) => {
 // The Certification - added 12 Oct 2026. Jacques: two ninety-day trainings, a
 // quiz after every lesson, a test after day thirty and after day sixty, and an
 // ultimate examination that writes a certificate for each track. The two tracks
-// are the herbalist and the trainer, and the trainer's practical spine is the
-// by-10 programme from the Trainer app.
+// are the herbalist and the trainer. The trainer's practical spine is the by-10,
+// which is a rule rather than a programme - two to five sets, every set to as
+// many good repetitions as the person has and never more than twenty, ten
+// seconds between moves, with a weight light enough to pump reps out with -
+// applied to P90X's rotation, which is what the Trainer
+// page holds.
 //
 // Same door as The Trainer above, for the same reason: certify.html is a real
 // file, so express.static below would hand it out by name if only the clean URL

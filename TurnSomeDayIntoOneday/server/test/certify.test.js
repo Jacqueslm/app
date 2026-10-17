@@ -181,17 +181,85 @@ test('a certificate is written, and says honestly what it is not', () => {
   assert.match(HTML, /it is not one of those credentials and it is not a licence/);
 });
 
-test('the trainer track is built on the by-10 programme from the Trainer app', () => {
-  // "My by 10 program in the trainer app." Its numbers and its kit have to be
-  // the ones the Trainer actually uses, or the track is a different programme
-  // wearing its name.
+test('the trainer track teaches the by-10 as a rule and P90X as the exercises', () => {
+  // 18 Oct 2026. Jacques, on what the by-10 actually is: "P90x is just the
+  // exercises I'm using by 10 is the theory behind how I train because when I
+  // actually train I reorganize p90x", and then the rule itself: "The by 10 is
+  // 3-5 sets max reps nomre than 20 and 10 seconds rest that's the gist of it."
+  //
+  // That is the whole of the by-10, and it is not what this track used to say.
+  // The track had grown a programme of its own out of the by-10 - rounds and
+  // rotations, two levels with fixed rep counts, a timed last move, twenty
+  // minutes of cardio, five cardio choices - none of which he ever gave, all of
+  // it stated as though it lived in the Trainer app. The exercises are P90X's
+  // and the app holds P90X's rotation; the by-10 is the rule applied to it. So
+  // the rule is required here, and the inventions are required to be gone, or
+  // the course is certifying a method that does not exist.
+  // 19 Oct 2026, the theory behind the rule, in his words: "traditional workouts
+  // rest between 30 seconds to 2 minutes ... my by 10 cuts down workout duration
+  // so and 1 hour workout becomes 30 minutes ... you do less reps in each set but
+  // it guarantees that you burn out and each move is not done in full extension
+  // its at about 3/4 both ways to keep the intensity throughout building strength
+  // cardiovascular system and promotes muscle growth". So the trade against
+  // traditional rest, the halved session, the burnout and the three-quarter range
+  // are all required here - and the track used to say the opposite of two of
+  // them, calling the by-10 "moderate intensity" and saying training to failure
+  // was "not the by-10's choice".
+  //
+  // 19 Oct 2026, and the rule corrected again, in his words: "By 10 is not based
+  // on how much weight you can lift its finding that comfort to pump ot reps
+  // with dumbell sets depend on individual starting point 2 to 5 sets no matter
+  // your level for a beginners 1 weeknof stretching first ... by 10 can be done
+  // everyday as long as workout or rotated and do 2 workouts a day resistance
+  // and cardio ... week 4 8 12 rest I dont do I go right intonthe next
+  // rotatation or a full week of cardio and a little stretching". So the sets
+  // are two to five rather than three to five, the weight is chosen by comfort
+  // rather than by what a person can lift, the method can run every day, the
+  // day holds two sessions, a beginner's first week is stretching, and the
+  // rest weeks are optional. Those are required now, and the claims they
+  // replace are required gone.
   assert.match(HTML, /by-10/);
-  assert.match(HTML, /ten seconds of rest/i);
-  assert.match(HTML, /Three lifting days, two cardio days, one stretch day/);
-  assert.match(HTML, /three rounds, ten repetitions, eight rotations, a thirty-second last move, twenty minutes of cardio/i);
-  assert.match(HTML, /five rounds, twelve repetitions, ten rotations, a sixty-second last move, thirty minutes of cardio/i);
-  assert.match(HTML, /Plyometrics, jump rope, kickboxing, sweat step and dancing/);
-  // And the accreditation ground beside it.
+  for (const re of [
+    /The by-10 is not a list of exercises/,
+    /does not ask how much a person can lift/,
+    /dumbbell light enough to pump out the reps with/,
+    /two to five sets/i,
+    /never more than twenty/,
+    /ten seconds between one move and the next/,
+    /The exercises are not the by-10's/,
+    /thirty seconds to two minutes/,
+    /an hour's workout becomes thirty minutes/,
+    /guaranteed burnout/,
+    /three-quarters/,
+    /promotes muscle growth/,
+    /can be done every day/,
+    /Two sessions a day/,
+    /jump rope, a step session, walking, dancing/,
+    /first week is stretching/,
+    /the by-10 does not require them/,
+    /P90X/,
+  ]) assert.match(HTML, re);
+  for (const gone of [
+    /eight rotations/i,
+    /ten rotations/i,
+    /thirty-second last move/i,
+    /sixty-second last move/i,
+    /last-move times/i,
+    /twenty minutes of cardio/i,
+    /thirty minutes of cardio/i,
+    /five choices/i,
+    /the two levels/i,
+    /three lifting days/i,
+    /regimen in the Trainer app/i,
+    /not the by-10's choice/i,
+    /moderate intensity and moderate volume/i,
+    /three to five sets/i,
+    /Three sets to five/,
+    /six days on and one off, the way the rotation runs/,
+    /recovery weeks at weeks 4, 8 and 13 are the rotation's own way/,
+    /A set of ten at a moderate load/,
+  ]) assert.doesNotMatch(HTML, gone, `the by-10's superseded numbers are gone: ${gone} is back`);
+  // And the accreditation ground beside it is unchanged.
   assert.match(HTML, /FITT-VP/);
   assert.match(HTML, /AFAA-CGFI/);
   assert.match(HTML, /CPR and AED/);

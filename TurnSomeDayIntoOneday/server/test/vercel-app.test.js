@@ -32,7 +32,6 @@ process.env.FRIENDLY_EMAILS = 'jacques@example.com, wife@example.com';
 // own app, with the cure sitting on a host's settings screen.
 process.env.APP_OWNER_EMAIL = 'jacques@example.com';
 process.env.APP_RECOVERY_PASSWORD = 'the-spare-word';
-process.env.TMDB_READ_ACCESS_TOKEN = 'unit-test-token';
 delete process.env.GEMINI_API_KEY;
 
 const { test, before, after } = require('node:test');
@@ -285,68 +284,27 @@ test('signing out clears the cookie, and the only way to revoke one is the passw
   'the cookie is signed with the password, so changing it ends every session');
 });
 
-// --------------------------------------------------------- catalog discovery --
+// ------------------------------------------------- the catalog search is gone --
+// 17 Oct 2026. Jacques: "Remove the music and movie scraper." The Player's
+// Discover tab searched Apple Music and TMDb through /api/catalog/*. The tab,
+// the code behind it and the four server/test files that held it went; this
+// holds the server half still, because a route that is merely unlinked still
+// answers anyone who kept the address.
 
-test('catalog searches stay behind sign-in and return safe metadata to a signed-in user', async () => {
-  for (const route of ['/api/catalog/music?term=Blue%20Train', '/api/catalog/movies?term=The%20Matrix']) {
-    const stranger = await get(route);
-    assert.equal(stranger.status, 401, `${route} must refuse a signed-out request`);
-  }
-
+test('the music and movie catalog search is gone for a signed-in user too', async () => {
   const { cookie } = await signIn('jacques@example.com', 'let-me-in');
-  const realFetch = global.fetch;
-  const providerCalls = [];
-  global.fetch = (url, options) => {
-    const target = new URL(url);
-    if (target.hostname === 'itunes.apple.com') {
-      providerCalls.push(target);
-      return Promise.resolve(new Response(JSON.stringify({ results: [{
-        trackName: 'Blue Train', artistName: 'John Coltrane', collectionName: 'Blue Train',
-        releaseDate: '1957-09-15T00:00:00Z', trackViewUrl: 'https://music.apple.com/us/album/blue-train/1',
-      }] }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
-    }
-    if (target.hostname === 'api.themoviedb.org' && target.pathname === '/3/search/movie') {
-      providerCalls.push(target);
-      return Promise.resolve(new Response(JSON.stringify({
-        page: 1, total_pages: 1, total_results: 1,
-        results: [{ id: 603, title: 'The Matrix', overview: '1999 science fiction film', release_date: '1999-03-30' }],
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
-    }
-    if (target.hostname === 'api.themoviedb.org' && target.pathname === '/3/movie/603/watch/providers') {
-      providerCalls.push(target);
-      return Promise.resolve(new Response(JSON.stringify({ results: { US: {
-        link: 'https://www.themoviedb.org/movie/603/watch?locale=US',
-        flatrate: [{ provider_name: 'Stream+' }],
-      } } }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
-    }
-    return realFetch(url, options);
-  };
-
-  try {
-    const music = await fetch(base + '/api/catalog/music?term=Blue%20Train', { headers: { cookie } });
-    assert.equal(music.status, 200);
-    assert.equal(music.headers.get('cache-control'), 'no-store');
-    assert.deepEqual((await music.json()).results[0], {
-      title: 'Blue Train', detail: 'John Coltrane · Blue Train', year: '1957',
-      source: 'Apple Music', url: 'https://music.apple.com/us/album/blue-train/1',
-    });
-
-    const movies = await fetch(base + '/api/catalog/movies?term=The%20Matrix&page=1', { headers: { cookie } });
-    assert.equal(movies.status, 200);
-    assert.deepEqual((await movies.json()).results[0], {
-      id: 603, title: 'The Matrix', detail: '1999 science fiction film', year: '1999',
-      source: 'TMDb', posterUrl: '', url: 'https://www.themoviedb.org/movie/603',
-    });
-    const providers = await fetch(base + '/api/catalog/movies/603/providers', { headers: { cookie } });
-    assert.equal(providers.status, 200);
-    assert.deepEqual(await providers.json(), {
-      groups: [{ label: 'Subscription', providers: ['Stream+'] }],
-      url: 'https://www.themoviedb.org/movie/603/watch?locale=US', region: 'US',
-    });
-    assert.equal(providerCalls.length, 3, 'a movie search and a selected movie provider lookup only');
-  } finally {
-    global.fetch = realFetch;
+  for (const route of ['/api/catalog/music?term=Blue%20Train', '/api/catalog/movies?term=The%20Matrix']) {
+    const res = await get(route, cookie);
+    assert.equal(res.status, 404, `${route} must be gone, not just off the page`);
   }
+  assert.equal(fs.existsSync(path.join(__dirname, '..', 'catalog.js')), false,
+    'and the module that called Apple and TMDb is deleted, not orphaned');
+});
+
+test('the Player carries no Discover tab and no catalog address', () => {
+  const page = fs.readFileSync(path.join(ROOT, 'music.html'), 'utf8');
+  assert.doesNotMatch(page, /panel-discover|tab-discover/, 'the fifth tab is gone, not just hidden');
+  assert.doesNotMatch(page, /\/api\/catalog|themoviedb|itunes\.apple/, 'and nothing on the page calls a catalog');
 });
 
 // ------------------------------------------------------------- the AI routes --

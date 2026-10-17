@@ -35,7 +35,6 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const aiChatBody = require('./ai-chat-body');
 const keyReading = require('./key-reading');
-const catalogRoutes = require('./catalog-routes');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -266,10 +265,6 @@ function buildApp() {
     windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
     message: { error: 'Too many tries. Wait a few minutes.' },
   });
-  const catalogLimiter = rateLimit({
-    windowMs: 5 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
-    message: { error: 'Too many catalog searches. Wait a little and try again.' },
-  });
 
   // --- signing in. The page (hub.html) posts the same shape it always has, so
   // it did not have to change when the accounts went: an email and a password.
@@ -339,17 +334,6 @@ function buildApp() {
     if (route === '/app') continue;
     app.get(route, gated(file));
   }
-
-  // Public catalog metadata only; require the same signed-in allowlist as /music.
-  catalogRoutes.mount(app, {
-    limiter: catalogLimiter,
-    authorize(req, res, next) {
-      const who = readSession(req);
-      if (!who || !allowed(who.email)) return res.status(401).json({ error: 'Not signed in.' });
-      next();
-    },
-    tmdbToken: process.env.TMDB_READ_ACCESS_TOKEN,
-  });
 
   // --- the AI. The tax page's ask box. Same request and same reply shape as
   // Railway, so the pages did not change: {system, messages} in,

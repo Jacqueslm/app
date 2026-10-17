@@ -74,7 +74,12 @@
 // to me doesn't work here ... the whole app not just specific sections"). The
 // name moves to 3.3 with the page, or an installed phone keeps a shell with no
 // way to hear it.
-const CACHE_NAME = 'tsid-shell-v3.3';
+//
+// 17 Oct 2026: the Trainer's card in the shell names the P90X rotation now
+// ("p90x workout"), which is on the Trainer beside the by-10. The name moves to
+// 3.4 with it, for the reason above: an installed phone that never rebuilds
+// keeps a door that does not mention the rotation at all.
+const CACHE_NAME = 'tsid-shell-v3.4';
 const SHELL_FILES = [
   '/',
   '/app',

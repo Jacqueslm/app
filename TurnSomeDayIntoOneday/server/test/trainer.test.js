@@ -13,11 +13,17 @@
 //
 // 14 Oct 2026, and the programme. Jacques: "on the trainer add the by 10 program
 // thats it I'll give you more details what it is later even though its based on
-// p90x". So the page carries the by-10 now, and the line that said nothing was
-// planned went with it. The tests below hold the two things that matter about
-// it: that the programme is the SAME one the Certification's trainer track
-// teaches (read out of certify.html, so neither page can drift), and that their
-// information still comes first and the safety lines still outrank it.
+// p90x". The by-10 went on the page, and the tests below checked it against the
+// Certification's trainer track so neither page could drift.
+//
+// 17 Oct 2026: "Remove the workout you made up in the trainer only p90x is
+// relativity and the by 10 is weaven into those exercise as far as rest peiod".
+// The by-10 was ours, not his, so it is off the Trainer and P90X is the only
+// programme on it. The tests below now hold the opposite thing: that the by-10
+// stays gone, that the ten-second rest it contributed is written into the
+// rotation, and that their information still comes first with the safety lines
+// still outranking it. certify.html is untouched - the Certification still has
+// its own trainer track - so this file no longer reads one against the other.
 //
 // That last part is the claim the page makes in its own words ("Everything here
 // stays on this phone and nothing is sent anywhere"), so it is checked here
@@ -153,10 +159,10 @@ test('the trainer page is the intake, and says what it is', () => {
   // read in — their information, then the safety lines, then the programme.
   const atForm = html.indexOf('id="intake"');
   const atSafety = html.indexOf("A doctor's rule wins over this page, always");
-  const atProgramme = html.indexOf('<h2>The by-10 programme</h2>');
+  const atProgramme = html.indexOf('<h2>The P90X rotation</h2>');
   assert.ok(atForm > -1, 'the form is on the page');
   assert.ok(atSafety > -1, 'so are the safety lines');
-  assert.ok(atProgramme > -1, 'so is the programme');
+  assert.ok(atProgramme > -1, 'so is the P90X rotation');
   assert.ok(atSafety > atForm && atProgramme > atSafety,
     'their information comes first, the safety lines outrank the programme, and the programme comes last');
   // Every field the step is for is on the page.
@@ -278,29 +284,32 @@ test('a browser that has been cleared starts empty instead of breaking', () => {
   assert.match(p.box('savedLine').textContent, /Nothing filled in yet/);
 });
 
-test('the by-10 on the Trainer is the Certification\u2019s own programme, and a doctor outranks it', () => {
+test('the by-10 is off the Trainer, and P90X is the programme on it', () => {
+  // 17 Oct 2026: "Remove the workout you made up in the trainer only p90x is
+  // relativity and the by 10 is weaven into those exercise as far as rest
+  // peiod". The by-10 was written from the Certification's description rather
+  // than from him, so it is gone - and this holds it gone rather than letting it
+  // creep back in beside P90X.
   const html = fs.readFileSync(PAGE, 'utf8');
-  const certify = fs.readFileSync(path.join(ROOT, 'certify.html'), 'utf8');
-  // The programme is written down twice — on the Trainer he trains from, and in
-  // the Certification that teaches it — and the two are only worth anything if
-  // they are the same programme. Every line below is read out of certify.html
-  // FIRST, so this cannot quietly become the Trainer checked against itself, and
-  // a line dropped from the Certification fails here rather than passing.
-  const FROM_CERTIFY = [
-    'three lifting days, two cardio days and one stretch day',
-    'ten seconds of rest',
-    'Beginner: three rounds, ten repetitions, eight rotations, a thirty-second last move, twenty minutes of cardio',
-    'Advanced: five rounds, twelve repetitions, ten rotations, a sixty-second last move, thirty minutes of cardio',
-    'a pair of dumbbells, push-up bars, a pull-up bar, and floor space',
-    'Plyometrics, jump rope, kickboxing, sweat step and dancing',
-  ];
-  for (const line of FROM_CERTIFY) {
-    assert.ok(certify.toLowerCase().includes(line.toLowerCase()),
-      `the Certification no longer says "${line}" — fix this check rather than deleting it`);
-    assert.ok(html.toLowerCase().includes(line.toLowerCase()),
-      `the Trainer's by-10 and the Certification's have drifted apart: "${line}"`);
+  for (const gone of [
+    'The by-10 programme',
+    'The two levels',
+    'The three lifting days',
+    'Day A &mdash;',
+    'Day B &mdash;',
+    'Day C &mdash;',
+    'The two cardio days',
+    'The stretch day',
+    'twelve movements held for thirty seconds',
+  ]) {
+    assert.ok(!html.includes(gone), `the made-up by-10 is gone from the Trainer: "${gone}" is back`);
   }
-  // And the two lines that outrank the programme, which is now on the page.
+  assert.match(html, /<h2>The P90X rotation<\/h2>/, 'P90X is the programme on the page');
+  // The one part of the by-10 he kept - its rest period - is woven into the
+  // rotation rather than left behind in a programme of its own.
+  assert.match(html, /ten seconds between exercises/i,
+    'the ten-second rest is written into the P90X rotation');
+  // And the lines that outrank it still do.
   assert.match(html, /The programme below is a workout, and two lines outrank it/,
     'the safety card says the programme answers to it, rather than the other way round');
   assert.match(html, /A doctor's rule wins over this page, always/,
@@ -309,23 +318,23 @@ test('the by-10 on the Trainer is the Certification\u2019s own programme, and a 
     'and it names the day it should stop');
 });
 
-test('the three lifting days and the stretch day are on the page in full', () => {
-  // A programme named but not written out is a heading, not a programme: the
-  // days have to be walkable on the phone he is holding at the rack.
-  const html = fs.readFileSync(PAGE, 'utf8');
-  const days = [...html.matchAll(/<h3>Day ([ABC]) &mdash;/g)].map((m) => m[1]);
-  assert.deepStrictEqual(days, ['A', 'B', 'C'], 'the three lifting days, in order');
-  const lists = [...html.matchAll(/<ol class="moves">([\s\S]*?)<\/ol>/g)];
-  assert.equal(lists.length, 3, 'one move list per lifting day');
-  lists.forEach((m, i) => {
-    const moves = [...m[1].matchAll(/<li>[^<]+<\/li>/g)].map((x) => x[0].replace(/<[^>]*>/g, ''));
-    assert.equal(moves.length, 8, `day ${'ABC'[i]} is eight moves`);
-    moves.forEach((mv) => assert.ok(mv.trim(), `day ${'ABC'[i]} has an empty move`));
-  });
-  // The stretch day, with its own numbers: "the stretch day" alone tells a
-  // coach nothing at all.
-  assert.match(html, /twelve movements held for thirty seconds each/i,
-    'the stretch day says how many movements and how long each is held');
-  assert.match(html, /one round, no rest timer and no load/i,
-    'and how it differs from a lifting day');
+test('the P90X rotation is the classic thirteen weeks, in full', () => {
+  // A programme named but not written out is a heading, not a programme. This
+  // drives the page's own surface, the way the week chips drive it, so the weeks
+  // checked here are the ones a coach would actually see on the phone.
+  const p = loadPage({});
+  const rot = p.sandbox.TRAINER.p90x;
+  assert.ok(rot, 'the rotation is on the page and drivable');
+  const plan = rot.plan();
+  assert.equal(plan.length, 13, 'thirteen weeks, not twelve or fourteen');
+  plan.forEach((week, i) => assert.equal(week.length, 7, `week ${i + 1} is seven days`));
+  const at = (w, d) => plan[w - 1][d - 1];
+  // Recovery weeks: 4, 8, and the last week, which closes the ninety days.
+  for (const w of [4, 8, 13]) assert.equal(at(w, 1), 'yoga', `week ${w} is a recovery week`);
+  assert.equal(at(1, 7), 'rest', 'every week ends on rest or X Stretch');
+  assert.equal(at(1, 1), 'cb', 'week 1 opens on Chest & Back');
+  assert.equal(at(5, 1), 'cst', 'phase 2 opens on Chest, Shoulders & Triceps');
+  assert.equal(at(9, 1), 'cb', 'week 9 is the Chest & Back block');
+  assert.equal(at(10, 1), 'cst', 'week 10 switches to Chest, Shoulders & Triceps');
+  assert.equal(at(12, 1), 'cst', 'week 12 is still the second block');
 });

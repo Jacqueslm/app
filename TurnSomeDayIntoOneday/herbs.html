@@ -2420,17 +2420,37 @@ function save(){
    save(), and a cleaned store with a stale summary beside it would have the two
    pages disagreeing about the same progress. */
 var QUIZ_N=5;
-if(store.quizN!==QUIZ_N){
+
+/* How many questions the day asked when this record was written. A record of
+   the rewrite or later says so itself (r.n). One written before the stamp
+   existed holds only the answers, and a day can only have asked as many as were
+   answered - asking more would have left the day unfinished, which carries no
+   score worth keeping. Day 60 is the test and kept all thirty of its questions
+   through the rewrite, so an old record of it stands on the count it asks now,
+   however far the person got: its questions are the ones it answered. */
+function askedBy(day, r){
+  if(typeof r.n==='number') return r.n;
+  return day.test ? day.q.length : (r.a||[]).length;
+}
+
+/* Every open, not once. QUIZ_N is a number in this file, and the next person to
+   change how many questions a day asks will change the questions and not the
+   number - so the marker cannot be what decides. Each record is measured
+   against the day in front of it instead: does this answer belong to the quiz
+   that is here now. certify.html's dropStaleDays() checks the same way, on
+   every load, for the same reason. */
+function dropStaleDays(){
+  var changed=false;
   Object.keys(store).forEach(function(k){
     if(k.indexOf('day:')!==0) return;
     var day=dayOf(Number(k.slice(4))), r=store[k];
-    if(!day||!r){ delete store[k]; return }
-    var asked=typeof r.n==='number'?r.n:(day.test?day.q.length:0);
-    if(asked!==day.q.length) delete store[k];
+    if(!day||!r||!r.a){ delete store[k]; changed=true; return }
+    if(askedBy(day,r)!==day.q.length){ delete store[k]; changed=true }
   });
-  store.quizN=QUIZ_N;
-  save();
+  if(store.quizN!==QUIZ_N){ store.quizN=QUIZ_N; changed=true }
+  if(changed) save();
 }
+dropStaleDays();
 
 /* Where the ninety-day Certification has got to, read from its own store. */
 function certProgress(){

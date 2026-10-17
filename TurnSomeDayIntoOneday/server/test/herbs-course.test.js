@@ -165,6 +165,12 @@ test('the herb library: every teaching day asks five questions, and every answer
   for (const d of p.sandbox.COURSE) {
     assert.ok(Array.isArray(d.q) && d.q.length >= 3, `day ${d.d} has its questions`);
     if (d.d < 60) assert.strictEqual(d.q.length, 5, `day ${d.d} asks five questions`);
+    // QUIZ_N is the number a stored answer is measured against when the page
+    // opens (dropStaleDays). It is a hand-set constant, so an edit that changes
+    // how many questions a day asks can leave it behind and nothing would say
+    // so - it is pinned to the days themselves here.
+    if (!d.test) assert.strictEqual(p.sandbox.QUIZ_N, d.q.length,
+      `QUIZ_N is the ${d.q.length} questions day ${d.d} asks`);
     d.q.forEach((q, i) => {
       const where = `day ${d.d} question ${i + 1}`;
       assert.ok(q.q && q.q.length > 5, `${where} asks something`);
@@ -183,6 +189,25 @@ test('the herb library: every teaching day asks five questions, and every answer
       assert.ok(why <= 22, `${where}: the reason is ${why} words long`);
     });
   }
+});
+
+test('the herb library: a record written before answers were stamped is judged by what it holds', () => {
+  // Before 15 Oct 2026 a record carried no count, only its answers. A teaching
+  // day then asked three or four, so a record holding three or four cannot be
+  // matched to the five it asks now and goes. The test asked thirty and still
+  // does, so its records stand at any depth the person reached.
+  const seeded = {
+    tsid_herb_notes_v1: JSON.stringify({
+      'day:3': { a: [0, 1, 2, 3] },                       // all four of an old quiz
+      'day:60': { a: new Array(12).fill(0) },             // part of the test, unchanged
+    }),
+  };
+  const p = loadPage('herbs.html', seeded);
+  const s = p.sandbox;
+
+  assert.strictEqual(s.dayRec(3).a.length, 0, 'an unstamped record of an old four-question day is dropped');
+  assert.strictEqual(s.dayRec(60).a.length, 12, 'an unstamped test record is kept, because the test did not change');
+  assert.strictEqual(s.dayScore(60).done, false, 'and a part of the test is still not a finished test');
 });
 
 test('the herb library: the last day is the test, and its pass mark is inside it', () => {
@@ -274,6 +299,32 @@ test('the herb library: answers given to a quiz since rewritten are dropped, nev
   const again = loadPage('herbs.html', p.store);
   assert.strictEqual(again.sandbox.picked(2, 0), q0, 'and a later open keeps it');
   assert.strictEqual(again.sandbox.dayRec(60).a.length, 30, 'beside the test it never touched');
+});
+
+test('the herb library: the check runs on every open, and the test day is no exception', () => {
+  // 17 Oct 2026. The check above only ran while the store's quizN marker
+  // disagreed with QUIZ_N, so it cleaned a phone once and then switched itself
+  // off: a second rewrite would repaint the old answers. And its day-60 branch
+  // compared the test's length with itself, so no test record was ever dropped.
+  // Both are the same promise, so both are checked here on a store that has
+  // already been through the marker once.
+  const seeded = {
+    tsid_herb_notes_v1: JSON.stringify({
+      quizN: 5,
+      'day:1': { a: [0, 1, 2], n: 3 },                // stamped, for a 3-question quiz
+      'day:60': { a: new Array(20).fill(0), n: 20 },  // the test holds thirty now
+      'day:2': { a: [0], n: 5 },                      // half of today's quiz
+    }),
+  };
+  const p = loadPage('herbs.html', seeded);
+  const s = p.sandbox;
+
+  assert.strictEqual(s.dayRec(1).a.length, 0, 'a record stamped for another quiz is dropped on any open');
+  assert.strictEqual(s.dayRec(60).a.length, 0, 'and so is a test record written against twenty questions');
+  assert.strictEqual(s.dayScore(60).right, 0, 'so nothing is scored against a question nobody read');
+  assert.strictEqual(s.dayRec(2).a.length, 1, 'a record that matches the quiz in front of it is kept, even half-done');
+  assert.strictEqual(s.picked(2, 0), 0, 'and its answer is still the answer given');
+  assert.strictEqual(JSON.parse(p.store.tsid_herb_notes_v1).quizN, s.QUIZ_N, 'the marker is written back');
 });
 
 test('the herb library: the test scores, passes, and can be taken again', () => {

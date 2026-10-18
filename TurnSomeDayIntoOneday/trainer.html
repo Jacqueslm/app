@@ -65,6 +65,28 @@
   .saved{margin:12px 0 0; color:var(--teal); font-size:.8125rem; min-height:1.2em}
   .fine{margin:10px 0 24px; color:var(--dimmer); font-size:.75rem; line-height:1.6}
   .card b{color:var(--ink); font-weight:500}
+  details.guide{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin:0 0 12px;background:rgba(0,0,0,.14)}
+  details.guide summary{cursor:pointer;color:var(--gold);font-weight:600;font-size:.9rem;line-height:1.5;min-height:44px;display:flex;align-items:center}
+  details.guide[open] summary{margin-bottom:12px}
+  .client-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end}
+  .client-row .field{min-width:0}
+  select{width:100%;padding:13px 12px;margin:0 0 15px;color:var(--ink);background:#100e18;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:1rem}
+  .btn.small{padding:11px 12px;font-size:.8125rem;min-height:44px}
+  .client-status,.workout-status{min-height:1.3em;color:var(--teal);font-size:.8rem;margin:0 0 8px}
+  .back-row{display:flex;justify-content:flex-start;margin-top:14px}
+  .back-row .btn{min-height:44px}
+  .exercise-form{display:grid;grid-template-columns:1fr 1fr;gap:0 9px;margin-top:14px}
+  .exercise-form .wide{grid-column:1/-1}
+  .exercise-log{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:rgba(0,0,0,.18)}
+  .exercise-log h3{font-size:.95rem;margin:0 0 8px;color:var(--rose);font-weight:600}
+  .exercise-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;color:var(--dim);font-size:.8rem}
+  .exercise-grid span{overflow-wrap:anywhere}
+  .workout-select{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+  .workout-select button{min-height:44px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.2);color:var(--dim);font:inherit;cursor:pointer}
+  .workout-select button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+  .day-btn .dow{flex-basis:76px;font-size:.7rem;letter-spacing:.02em;text-transform:none}
+  .voice-status{min-height:1.2em;margin:4px 0 12px;color:var(--dimmer);font-size:.75rem}
+  @media(max-width:360px){.client-row{grid-template-columns:1fr 1fr}.client-row .field{grid-column:1/-1}.exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   /* The P90X rotation (17 Oct 2026). A schedule and 91 tick-boxes, set as a
      list of rows rather than a table: a table of thirteen weeks is unreadable on
      the phone this is used from, so one week is shown at a time and the week
@@ -175,9 +197,24 @@
   -->
   <div class="card lead">
     <h2>Step one: their information</h2>
-    <p>This page is for the people you train. You fill it in for one of them, and it keeps what you type.</p>
-    <p>The programme itself &mdash; the <b>P90X rotation</b> &mdash; is on this page too, below the form. What their answers do is decide how it is set up for the one person in front of you: the days that actually work, the kit that is actually in the house, and what to leave out.</p>
-    <p>Everything here stays on this phone and nothing is sent anywhere. You can change any answer at any time, and clearing it clears all of it.</p>
+    <details class="guide">
+      <summary>Instructions: how to use this Trainer</summary>
+      <p>This page is for the people you train. Save each client separately, choose a workout, add exercises and record sets, reps, weight, and duration.</p>
+      <p>Everything stays on this phone in this browser. Choose another client from the list to pull up their saved information and workout log.</p>
+    </details>
+    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
+  </div>
+
+  <div class="card" id="clientCard">
+    <h2>Clients on this phone</h2>
+    <label for="clientSelect">Choose a saved client</label>
+    <div class="client-row">
+      <div class="field"><select id="clientSelect" aria-label="Choose client"><option value="">No clients saved yet</option></select></div>
+      <button class="btn small" id="newClientBtn" type="button">New client</button>
+      <button class="btn quiet small" id="deleteClientBtn" type="button">Delete</button>
+    </div>
+    <p class="client-status" id="clientStatus" role="status" aria-live="polite"></p>
+    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
   </div>
 
   <form class="card" id="intake" autocomplete="off">
@@ -216,6 +253,7 @@
       <label class="pick"><input type="checkbox" data-want="Breathing"><span>Breathing easier</span></label>
       <label class="pick"><input type="checkbox" data-want="Moving better"><span>Moving better</span></label>
       <label class="pick"><input type="checkbox" data-want="Sleep"><span>Sleeping</span></label>
+      <label class="pick"><input type="checkbox" data-want="Lose weight"><span>Lose weight</span></label>
       <label class="pick"><input type="checkbox" data-want="All of it"><span>All of it</span></label>
     </div>
 
@@ -229,18 +267,23 @@
     <input id="dayone" name="dayone" type="date">
 
     <div class="row">
-      <button class="btn" id="saveBtn" type="submit">Save it</button>
-      <button class="btn quiet" id="clearBtn" type="button">Clear</button>
+      <button class="btn" id="saveBtn" type="submit">Save this client</button>
+      <button class="btn quiet" id="clearBtn" type="button">Clear this form</button>
     </div>
     <p class="saved" id="savedLine" role="status" aria-live="polite"></p>
+    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
   </form>
 
   <div class="card">
     <h2>Before anything gets planned</h2>
-    <p>The programme below is a workout, and two lines outrank it.</p>
-    <p>A doctor's rule wins over this page, always. If a doctor has said no to a lift or a movement, that is the answer here, and nothing on this page changes it.</p>
-    <p>If there is a heart condition, blood pressure, a pregnancy, a recent operation or a back that has gone recently, ask a doctor before starting anything &mdash; and if any of it is already being looked at or medicated, that stays exactly as it is.</p>
-    <p>And stop, on the day, if there is chest pain, or dizziness, or something sharp rather than a muscle working. That is not pushing on.</p>
+    <details class="guide">
+      <summary>Safety instructions — read before training</summary>
+      <p>The programme below is a workout, and two lines outrank it.</p>
+      <p>A doctor's rule wins over this page, always. If a doctor has said no to a lift or a movement, that is the answer here, and nothing on this page changes it.</p>
+      <p>If there is a heart condition, blood pressure, a pregnancy, a recent operation or a back that has gone recently, ask a doctor before starting anything &mdash; and if any of it is already being looked at or medicated, that stays exactly as it is.</p>
+      <p>And stop, on the day, if there is chest pain, or dizziness, or something sharp rather than a muscle working. That is not pushing on.</p>
+    </details>
+    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
   </div>
 
   <!-- ── THE P90X ROTATION ────────────────────────────────────────────────
@@ -260,15 +303,18 @@
        this page. The ticks are a record of what was done, kept on this phone
        under their own key so clearing one person's information does not wipe
        the rotation. The safety card above outranks all of it. -->
-  <div class="card">
+  <div class="card" id="rotationCard">
     <h2>The P90X rotation</h2>
-    <p>This is <b>P90X</b>'s classic ninety-day rotation: <b>thirteen weeks</b> in three phases, with a <b>recovery week</b> at the end of each phase, and <b>six days on and one off</b> every week.</p>
-    <p>This is how the by-10 sits on it. Pick a dumbbell they can <b>pump out reps</b> with, not the heaviest they can lift. How many sets they do depends on where they are starting, not on how advanced they are &mdash; <b>two to five sets</b>, and <b>twenty reps at most</b> in a set. Then <b>ten seconds between exercises</b>, and on to the next one. The order of the sessions is P90X's own.</p>
-    <p><b>Two sessions a day</b> is how it is trained: one with the weights, one for the heart and lungs. The by-10 can be done <b>every day</b>, as long as the days rotate. P90X's cardio days can be swapped or mixed &mdash; <b>jump rope, a step session, walking, dancing</b> &mdash; and which one it is matters much less than that it happens.</p>
-    <p>A beginner starts with <b>a week of stretching</b> on its own, before any dumbbell, to get the body used to moving and keep it from getting hurt.</p>
-    <p><b>Phase 1</b> (weeks 1&ndash;3) and <b>Phase 2</b> (weeks 5&ndash;7) each use one resistance block: <b>Chest &amp; Back</b>, <b>Plyometrics</b>, <b>Shoulders &amp; Arms</b>, <b>Yoga X</b>, <b>Legs &amp; Back</b>, <b>Kenpo X</b>; then <b>Chest, Shoulders &amp; Triceps</b>, <b>Plyometrics</b>, <b>Back &amp; Biceps</b>, <b>Yoga X</b>, <b>Legs &amp; Back</b>, <b>Kenpo X</b>. <b>Phase 3</b> (weeks 9&ndash;12) alternates the two week by week &mdash; weeks 9 and 11 are the Chest &amp; Back block, weeks 10 and 12 the Chest, Shoulders &amp; Triceps block. The five resistance days finish with <b>Ab Ripper X</b>, sixteen minutes.</p>
-    <p><b>Weeks 4, 8 and 13 are recovery weeks</b>, and they are the same shape but no load: <b>Yoga X, Core Synergistics, Kenpo X, X Stretch, Core Synergistics, Yoga X</b>, then rest. They are P90X's weeks and <b>the by-10 does not require them</b>: go straight into the next rotation, or take a full week of cardio and a little stretching instead, whichever the day asks for. The last one closes the ninety days.</p>
-    <p>Tap a day when it is done. The ticks stay on this phone, and the week chips show which weeks are complete.</p>
+    <details class="guide">
+      <summary>Workout instructions and schedule</summary>
+      <p>This is <b>P90X</b>'s classic ninety-day rotation: <b>thirteen weeks</b> in three phases, with a <b>recovery week</b> at the end of each phase, and <b>six days on and one off</b> every week.</p>
+      <p>This is how the by-10 sits on it. Pick a dumbbell they can <b>pump out reps</b> with, not the heaviest they can lift. How many sets they do depends on where they are starting, not on how advanced they are &mdash; <b>two to five sets</b>, and <b>twenty reps at most</b> in a set. Then <b>ten seconds between exercises</b>, and on to the next one. The order of the sessions is P90X's own.</p>
+      <p><b>Two sessions a day</b> is how it is trained: one with the weights, one for the heart and lungs. The by-10 can be done <b>every day</b>, as long as the days rotate. P90X's cardio days can be swapped or mixed &mdash; <b>jump rope, a step session, walking, dancing</b> &mdash; and which one it is matters much less than that it happens.</p>
+      <p>A beginner starts with <b>a week of stretching</b> on its own, before any dumbbell, to get the body used to moving and keep it from getting hurt.</p>
+      <p><b>Phase 1</b> (weeks 1&ndash;3) and <b>Phase 2</b> (weeks 5&ndash;7) each use one resistance block: <b>Chest &amp; Back</b>, <b>Plyometrics</b>, <b>Shoulders &amp; Arms</b>, <b>Yoga X</b>, <b>Legs &amp; Back</b>, <b>Kenpo X</b>; then <b>Chest, Shoulders &amp; Triceps</b>, <b>Plyometrics</b>, <b>Back &amp; Biceps</b>, <b>Yoga X</b>, <b>Legs &amp; Back</b>, <b>Kenpo X</b>. <b>Phase 3</b> (weeks 9&ndash;12) alternates the two week by week &mdash; weeks 9 and 11 are the Chest &amp; Back block, weeks 10 and 12 the Chest, Shoulders &amp; Triceps block. The five resistance days finish with <b>Ab Ripper X</b>, sixteen minutes.</p>
+      <p><b>Weeks 4, 8 and 13 are recovery weeks</b>, and they are the same shape but no load: <b>Yoga X, Core Synergistics, Kenpo X, X Stretch, Core Synergistics, Yoga X</b>, then rest. They are P90X's weeks and <b>the by-10 does not require them</b>: go straight into the next rotation, or take a full week of cardio and a little stretching instead, whichever the day asks for. The last one closes the ninety days.</p>
+      <p>Tap a workout to select it, log the exercises, and save what was done. Each client has a separate log on this phone.</p>
+    </details>
 
     <div class="rot-top">
       <p class="rot-week" id="rotWeek">Week 1 of 13</p>
@@ -276,6 +322,29 @@
     </div>
     <div class="weeks" id="rotWeeks" role="group" aria-label="Week"></div>
     <div class="days" id="rotDays"></div>
+    <section class="card" id="workoutLog" aria-live="polite" hidden style="margin-top:12px">
+      <h2 id="workoutLogTitle">Workout 1</h2>
+      <p id="workoutLogSubtitle"></p>
+      <label for="workoutTitle">Workout name</label><input id="workoutTitle" type="text" placeholder="Workout name">
+      <div class="exercise-form">
+        <div><label for="workoutDuration">Total duration (min)</label><input id="workoutDuration" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 45"></div>
+        <div><label for="workoutDate">Workout date</label><input id="workoutDate" type="date"></div>
+      </div>
+      <div id="exerciseRows"></div>
+      <form class="exercise-form" id="exerciseForm" autocomplete="off">
+        <div class="wide"><label for="exerciseName">Exercise</label><input id="exerciseName" type="text" required placeholder="Exercise name"></div>
+        <div><label for="exerciseSets">Sets</label><input id="exerciseSets" type="number" min="1" max="50" inputmode="numeric" placeholder="3"></div>
+        <div><label for="exerciseReps">Reps</label><input id="exerciseReps" type="number" min="1" max="500" inputmode="numeric" placeholder="10"></div>
+        <div><label for="exerciseWeight">Weight</label><input id="exerciseWeight" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 20"></div>
+        <div><label for="exerciseUnit">Weight unit</label><select id="exerciseUnit"><option>lb</option><option>kg</option><option>bodyweight</option></select></div>
+        <div><label for="exerciseDuration">Duration (min)</label><input id="exerciseDuration" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional"></div>
+        <div><label for="exerciseNotes">Notes</label><input id="exerciseNotes" type="text" placeholder="Optional"></div>
+        <div class="wide"><button class="btn" type="submit">Add exercise to this workout</button></div>
+      </form>
+      <p class="workout-status" id="workoutStatus" role="status" aria-live="polite"></p>
+      <div class="row"><button class="btn" id="saveWorkoutBtn" type="button">Save workout log</button><button class="btn quiet" id="markWorkoutDoneBtn" type="button">Mark workout complete</button><button class="btn quiet" id="closeWorkoutBtn" type="button">Close workout</button></div>
+      <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
+    </section>
     <div class="rot-bar" aria-hidden="true"><i id="rotBar" style="width:0%"></i></div>
     <p class="rot-count" id="rotCount" role="status" aria-live="polite">0 of 7 done this week.</p>
 
@@ -284,12 +353,13 @@
       <button class="btn quiet" id="rotNext" type="button">Next week &rarr;</button>
     </div>
     <button class="btn quiet" id="rotReset" type="button" style="width:100%; margin-top:8px">Start the rotation again</button>
+    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
     <p class="fine">A missed day is not made up by stacking two workouts: pick the rotation up where it is and carry on. If a session is cut short, the part that was done still counts &mdash; the tick is adherence, not perfection. The schedule is P90X's; the page holds no video, no music and no account, and it works with no signal.</p>
   </div>
 
   <footer>
     The Trainer &mdash; private.<br>
-    The P90X rotation, and their information for one person at a time.
+    Client profiles and workout logs stay in this browser on this phone.
   </footer>
 </div>
 
@@ -301,12 +371,22 @@
      notes: nothing is sent anywhere, and a browser that has been cleared starts
      again from empty rather than from somebody else's answers. */
   var KEY = 'tsid_trainer_intake_v1';
+  var CLIENTS_KEY = 'tsid_trainer_clients_v1';
+  var ROT_KEY = 'tsid_trainer_p90x_v1';
 
   var store = {};
+  var clientsDb = { active: '', clients: [] };
+  try {
+    clientsDb = JSON.parse(localStorage.getItem(CLIENTS_KEY) || '{"active":"","clients":[]}') || clientsDb;
+    if (!clientsDb || !Array.isArray(clientsDb.clients)) clientsDb = { active: '', clients: [] };
+  } catch (e) { clientsDb = { active: '', clients: [] }; }
   try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
   catch (e) { store = {}; }
 
   var KIT = 'kit', WANT = 'want';
+  var activeClientId = clientsDb.active || '';
+  var activeWorkout = null;
+  var draftExercises = [];
   var el = function(id){ return document.getElementById(id); };
 
   /* ── THE VOICE ─────────────────────────────────────────────────────────────
@@ -329,24 +409,20 @@
     var wrap = document.querySelector('.wrap');
     if (!wrap) return '';
     var out = [];
-    var mine = /(^|\s)(noprint|sayrow|row)(\s|$)/;
-    var walk = function(e){
-      var kids = e.children, deeper = false;
-      for (var i = 0; i < kids.length; i++){
-        var c = kids[i];
-        if (c.id === 'sayRow') continue;
-        if (mine.test(c.className || '') && c.id !== 'intake') continue;
-        if (/^(BUTTON|INPUT|SELECT|TEXTAREA|OPTION|SCRIPT|STYLE)$/.test(c.tagName)) continue;
-        if (!(c.textContent || '').trim()) continue;
-        if (/^(DIV|P|LI|UL|OL|H2|H3|H4|TABLE|TR|TD|TH|SECTION|ARTICLE|FORM|LABEL|HEADER)$/.test(c.tagName)){ deeper = true; walk(c); }
+    var skipClass = /(^|\s)(noprint|sayrow|row|day-btn|wk|btn)(\s|$)/;
+    var walk = function(node){
+      if (node.nodeType === 3){
+        var text = String(node.nodeValue || '').replace(/\s+/g, ' ').trim();
+        if (text) out.push(text);
+        return;
       }
-      if (!deeper){
-        var t = (e.textContent || '').replace(/\s+/g, ' ').trim();
-        if (t.length > 1) out.push(t);
-      }
+      if (node.nodeType !== 1 || node.hidden || skipClass.test(node.className || '')) return;
+      if (/^(BUTTON|INPUT|SELECT|TEXTAREA|OPTION|SCRIPT|STYLE)$/.test(node.tagName)) return;
+      var children = node.childNodes || [];
+      for (var i = 0; i < children.length; i++) walk(children[i]);
     };
     walk(wrap);
-    return out.join('. ');
+    return out.join(' ').replace(/\s+([.,;!?])/g, '$1').replace(/\s+/g, ' ').trim();
   }
   function say(){
     if (SAYING){ sayStop(); return; }
@@ -374,10 +450,121 @@
     var s = el('sayStop'); if (s) s.addEventListener('click', sayStop);
   }
 
+  function activeClient(){
+    for (var i = 0; i < clientsDb.clients.length; i++) if (clientsDb.clients[i].id === activeClientId) return clientsDb.clients[i];
+    return null;
+  }
+
+  function ensureClient(){
+    var client = activeClient();
+    if (client) return client;
+    activeClientId = 'client-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+    client = { id:activeClientId, name:store.name || 'New client', data:store, rotation:rot || {}, logs:{} };
+    clientsDb.clients.push(client);
+    clientsDb.active = activeClientId;
+    return client;
+  }
+
+  function saveDb(){
+    var client = ensureClient();
+    client.name = store.name || client.name || 'Unnamed client';
+    client.data = store;
+    client.rotation = rot || client.rotation || {};
+    client.logs = client.logs || {};
+    clientsDb.active = activeClientId;
+    try {
+      localStorage.setItem(CLIENTS_KEY, JSON.stringify(clientsDb));
+      localStorage.setItem(KEY, JSON.stringify(store));
+    } catch(e){}
+    renderClients();
+  }
+
   function save(){
-    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
+    saveDb();
     stamp();
   }
+
+  function renderClients(){
+    var select = el('clientSelect');
+    if (!select) return;
+    var html = clientsDb.clients.length ? '' : '<option value="">No clients saved yet</option>';
+    clientsDb.clients.forEach(function(c){
+      html += '<option value="' + escapeHtml(c.id) + '"' + (c.id === activeClientId ? ' selected' : '') + '>' + escapeHtml(c.name || 'Unnamed client') + '</option>';
+    });
+    select.innerHTML = html;
+    select.value = activeClientId;
+  }
+
+  function escapeHtml(value){
+    return String(value == null ? '' : value).replace(/[&<>\"]/g, function(ch){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'})[ch]; });
+  }
+
+  function newClient(){
+    if (activeClient()) saveDb();
+    else if (Object.keys(store).length) saveDb();
+    var id = 'client-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+    activeClientId = id;
+    store = {};
+    rot = {};
+    clientsDb.clients.push({ id:id, name:'New client', data:{}, rotation:{}, logs:{} });
+    fill(store);
+    save();
+    stamp();
+    renderRotation();
+    setClientStatus('New client started. Fill in their details, then save.');
+    return id;
+  }
+
+  function setClientStatus(message){
+    var line = el('clientStatus'); if (line) line.textContent = message || '';
+  }
+
+  function switchClient(id){
+    saveDb();
+    activeClientId = id || '';
+    var client = activeClient();
+    store = client && client.data ? client.data : {};
+    rot = client && client.rotation ? client.rotation : {};
+    try { if (client) localStorage.setItem(ROT_KEY, JSON.stringify(rot)); else localStorage.removeItem(ROT_KEY); } catch(e){}
+    fill(store); stamp(); renderClients(); renderRotation(); closeWorkout();
+    setClientStatus(client ? 'Loaded ' + (client.name || 'client') + ' and their saved workout logs.' : 'No saved client selected.');
+    return Boolean(client);
+  }
+
+  function deleteClient(){
+    var before = clientsDb.clients.length;
+    clientsDb.clients = clientsDb.clients.filter(function(c){ return c.id !== activeClientId; });
+    if (clientsDb.clients.length === before) return false;
+    activeClientId = clientsDb.clients.length ? clientsDb.clients[0].id : '';
+    store = activeClient() && activeClient().data || {};
+    rot = activeClient() && activeClient().rotation || {};
+    try {
+      localStorage.setItem(CLIENTS_KEY, JSON.stringify(clientsDb));
+      if (activeClient()) {
+        localStorage.setItem(KEY, JSON.stringify(store));
+        localStorage.setItem(ROT_KEY, JSON.stringify(rot));
+      } else { localStorage.removeItem(KEY); localStorage.removeItem(ROT_KEY); }
+    } catch(e){}
+    fill(store); stamp(); renderClients(); renderRotation(); closeWorkout();
+    setClientStatus('Client removed from this phone.');
+    return true;
+  }
+
+  // Preserve the existing one-client intake when upgrading to profiles.
+  if (!clientsDb.clients.length && Object.keys(store).length){
+    activeClientId = 'client-existing';
+    clientsDb.clients.push({ id:activeClientId, name:store.name || 'Existing client', data:store, rotation:(function(){ try{return JSON.parse(localStorage.getItem(ROT_KEY)||'{}')||{};}catch(e){return {};}})() });
+    clientsDb.active = activeClientId;
+    try { localStorage.setItem(CLIENTS_KEY, JSON.stringify(clientsDb)); } catch(e){}
+  } else if (activeClientId && activeClient()) {
+    store = activeClient().data || store;
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
+  } else if (clientsDb.clients.length) {
+    activeClientId = clientsDb.clients[0].id;
+    store = clientsDb.clients[0].data || {};
+    clientsDb.active = activeClientId;
+  }
+  renderClients();
 
   function stamp(){
     var line = el('savedLine');
@@ -429,7 +616,7 @@
   function fill(o){
     ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
       var box = el(k);
-      if (box && o[k] != null) box.value = String(o[k]);
+      if (box) box.value = o[k] != null ? String(o[k]) : '';
     });
     check('data-kit', o[KIT] || []);
     check('data-want', o[WANT] || []);
@@ -437,6 +624,11 @@
 
   function clearAll(){
     store = {};
+    if (activeClient()){
+      activeClient().data = {};
+      activeClient().name = 'Unnamed client';
+      try { localStorage.setItem(CLIENTS_KEY, JSON.stringify(clientsDb)); } catch(e){}
+    }
     try { localStorage.removeItem(KEY); } catch(e){}
     ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
       var box = el(k);
@@ -449,6 +641,7 @@
 
   fill(store);
   stamp();
+  renderClients();
 
   var form = el('intake');
   if (form && form.addEventListener) {
@@ -461,11 +654,11 @@
        no save button to forget on a phone. */
     form.addEventListener('input', function(){
       store = read();
-      try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
+      save();
     });
     form.addEventListener('change', function(){
       store = read();
-      try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){}
+      save();
     });
   }
 
@@ -475,6 +668,19 @@
   }
 
   mountSay();
+
+  var clientSelect = el('clientSelect');
+  if (clientSelect) clientSelect.addEventListener('change', function(){ switchClient(clientSelect.value); });
+  var newClientBtn = el('newClientBtn');
+  if (newClientBtn) newClientBtn.addEventListener('click', newClient);
+  var deleteClientBtn = el('deleteClientBtn');
+  if (deleteClientBtn) deleteClientBtn.addEventListener('click', deleteClient);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-backtop]'), function(btn){
+    btn.addEventListener('click', function(){
+      var top = el('trainerTop');
+      if (top && top.scrollIntoView) top.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
 
   /* ── THE P90X ROTATION ────────────────────────────────────────────────────
      17 Oct 2026, Jacques: "p90x workout". The published classic rotation, as
@@ -488,8 +694,7 @@
      that is not an object (a cleared or corrupted phone), a week chip clicked
      past either end, and the block being absent or unbuildable, which must
      leave the intake working rather than break the page. */
-  var ROT_KEY = 'tsid_trainer_p90x_v1';
-  var ROT_DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  var ROT_DOW = ['Workout 1', 'Workout 2', 'Workout 3', 'Workout 4', 'Workout 5', 'Workout 6', 'Workout 7'];
   var ROT_PHASE = ['Phase 1', 'Phase 2', 'Phase 3'];
   var ROT_MOVE = {
     cb:     { name: 'Chest & Back',               min: 53, ab: true },
@@ -524,7 +729,8 @@
 
   var rot = {};
   try {
-    rot = JSON.parse(localStorage.getItem(ROT_KEY) || '{}');
+    var selectedClient = activeClient();
+    rot = selectedClient && selectedClient.rotation ? selectedClient.rotation : JSON.parse(localStorage.getItem(ROT_KEY) || '{}');
     if (!rot || typeof rot !== 'object') rot = {};
   } catch (e) { rot = {}; }
   /* Open on the week that was last looked at, not always week 1: a ninety-day
@@ -552,6 +758,7 @@
   function rotPut(){
     rot.week = rotWeek;
     try { localStorage.setItem(ROT_KEY, JSON.stringify(rot)); } catch (e) {}
+    if (activeClient()) saveDb();
   }
 
   function rotSetText(id, text){
@@ -574,6 +781,84 @@
       + '<span class="mins">' + note + '</span></span>'
       + '<span class="tick" aria-hidden="true">\u2713</span>'
       + '</button>';
+  }
+
+  function workoutKey(w, d){ return 'w' + w + 'd' + d; }
+  function getWorkout(w, d){
+    var client = activeClient();
+    return client && client.logs && client.logs[workoutKey(w, d)] || null;
+  }
+  function currentWorkout(){ return activeWorkout ? getWorkout(activeWorkout.week, activeWorkout.day) : null; }
+  function renderRotation(){ rotRender(); }
+  function renderWorkout(){
+    var box = el('exerciseRows'), log = currentWorkout();
+    if (!box) return;
+    box.innerHTML = '';
+    (log && Array.isArray(log.exercises) ? log.exercises : []).forEach(function(ex, i){
+      var row = document.createElement('div');
+      row.className = 'exercise-log';
+      row.innerHTML = '<h3>' + escapeHtml(ex.name || 'Exercise ' + (i + 1)) + '</h3>'
+        + '<div class="exercise-grid"><span>Sets: ' + escapeHtml(ex.sets || '—') + '</span>'
+        + '<span>Reps: ' + escapeHtml(ex.reps || '—') + '</span>'
+        + '<span>Weight: ' + escapeHtml(ex.weight ? ex.weight + ' ' + (ex.unit || 'lb') : '—') + '</span>'
+        + '<span>Time: ' + escapeHtml(ex.duration ? ex.duration + ' min' : '—') + '</span></div>'
+        + (ex.notes ? '<p>' + escapeHtml(ex.notes) + '</p>' : '')
+        + '<button class="btn quiet small" type="button" data-remove-exercise="' + i + '">Remove</button>';
+      box.appendChild(row);
+    });
+    if (!log || !log.exercises || !log.exercises.length) box.innerHTML = '<p>No exercises logged yet. Add the first one below.</p>';
+  }
+  function openWorkout(w, d){
+    activeWorkout = { week:w, day:d };
+    var mv = ROT_MOVE[rotOf(w).d[d - 1]] || ROT_MOVE.rest;
+    var log = getWorkout(w, d) || { title:mv.name + (mv.ab ? ' + Ab Ripper X' : ''), duration:'', exercises:[] };
+    el('workoutLog').hidden = false;
+    el('workoutLogTitle').textContent = ROT_DOW[d - 1] + ' · Week ' + w;
+    el('workoutLogSubtitle').textContent = mv.name + (mv.min ? ' · about ' + mv.min + ' min' : ' · recovery / rest');
+    el('workoutTitle').value = log.title || mv.name;
+    el('workoutDuration').value = log.duration || '';
+    el('workoutDate').value = log.date || new Date().toISOString().slice(0, 10);
+    el('markWorkoutDoneBtn').textContent = rot[rotKey(w, d)] ? 'Mark workout not done' : 'Mark workout complete';
+    el('workoutStatus').textContent = '';
+    renderWorkout();
+  }
+  function saveWorkout(){
+    if (!activeWorkout) return false;
+    var client = ensureClient(), key = workoutKey(activeWorkout.week, activeWorkout.day);
+    var existing = client.logs[key] || { exercises:[] };
+    existing.title = el('workoutTitle').value.trim() || 'Workout ' + activeWorkout.day;
+    existing.duration = el('workoutDuration').value;
+    existing.date = el('workoutDate').value;
+    existing.exercises = Array.isArray(existing.exercises) ? existing.exercises : [];
+    client.logs[key] = existing;
+    saveDb(); rotRender(); renderWorkout();
+    el('workoutStatus').textContent = 'Workout saved for ' + (client.name || 'this client') + '.';
+    return true;
+  }
+  function closeWorkout(){
+    activeWorkout = null;
+    var panel = el('workoutLog'); if (panel) panel.hidden = true;
+  }
+  function addExercise(ev){
+    if (ev && ev.preventDefault) ev.preventDefault();
+    if (!activeWorkout) return false;
+    saveWorkout();
+    var client = ensureClient(), log = client.logs[workoutKey(activeWorkout.week, activeWorkout.day)];
+    var name = el('exerciseName').value.trim();
+    if (!name){ el('workoutStatus').textContent = 'Enter an exercise name first.'; return false; }
+    log.exercises.push({ name:name, sets:el('exerciseSets').value, reps:el('exerciseReps').value,
+      weight:el('exerciseWeight').value, unit:el('exerciseUnit').value,
+      duration:el('exerciseDuration').value, notes:el('exerciseNotes').value.trim() });
+    saveDb();
+    ['exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseDuration','exerciseNotes'].forEach(function(id){ el(id).value = ''; });
+    renderWorkout(); rotRender();
+    el('workoutStatus').textContent = 'Exercise added and saved to this client.';
+    return true;
+  }
+  function removeExercise(index){
+    var log = currentWorkout();
+    if (!log || !Array.isArray(log.exercises) || !log.exercises[index]) return false;
+    log.exercises.splice(index, 1); saveDb(); renderWorkout(); rotRender(); return true;
   }
 
   function rotRender(){
@@ -618,6 +903,7 @@
     var next = rotWeek + step;
     if (next < 1) next = ROT_WEEKS.length;
     if (next > ROT_WEEKS.length) next = 1;
+    if (activeWorkout) saveWorkout();
     rotWeek = next;
     rotPut();
     rotRender();
@@ -633,6 +919,7 @@
       if (!b) return;
       var w = Number(b.getAttribute('data-week'));
       if (!(w >= 1 && w <= ROT_WEEKS.length)) return;
+      if (activeWorkout) saveWorkout();
       rotWeek = w;
       rotPut();
       rotRender();
@@ -643,12 +930,29 @@
       if (!b) return;
       var d = Number(b.getAttribute('data-day'));
       if (!(d >= 1 && d <= 7)) return;
-      var k = rotKey(rotWeek, d);
-      if (rot[k]) delete rot[k]; else rot[k] = 1;
-      rotPut();
-      rotRender();
+      openWorkout(rotWeek, d);
     });
 
+    var exerciseForm = el('exerciseForm');
+    if (exerciseForm) exerciseForm.addEventListener('submit', addExercise);
+    var saveWorkoutBtn = el('saveWorkoutBtn');
+    if (saveWorkoutBtn) saveWorkoutBtn.addEventListener('click', saveWorkout);
+    var closeWorkoutBtn = el('closeWorkoutBtn');
+    if (closeWorkoutBtn) closeWorkoutBtn.addEventListener('click', closeWorkout);
+    var markDoneBtn = el('markWorkoutDoneBtn');
+    if (markDoneBtn) markDoneBtn.addEventListener('click', function(){
+      if (!activeWorkout) return;
+      var key = rotKey(activeWorkout.week, activeWorkout.day);
+      if (rot[key]) delete rot[key]; else rot[key] = 1;
+      rotPut();
+      markDoneBtn.textContent = rot[key] ? 'Mark workout not done' : 'Mark workout complete';
+      rotRender();
+    });
+    var exerciseRows = el('exerciseRows');
+    if (exerciseRows) exerciseRows.addEventListener('click', function(ev){
+      var btn = rotUpTo(ev.target, 'data-remove-exercise');
+      if (btn) removeExercise(Number(btn.getAttribute('data-remove-exercise')));
+    });
     var prev = document.getElementById('rotPrev');
     if (prev) prev.addEventListener('click', function(){ rotGo(-1); });
     var next = document.getElementById('rotNext');
@@ -657,8 +961,10 @@
     var reset = document.getElementById('rotReset');
     if (reset) reset.addEventListener('click', function(){
       rot = {};
+      if (activeClient()) activeClient().rotation = rot;
       try { localStorage.removeItem(ROT_KEY); } catch (e) {}
       rotWeek = 1;
+      saveDb();
       rotRender();
     });
 
@@ -669,11 +975,12 @@
 
   /* The page's own surface, so a check can drive it the same way a thumb does.
      Nothing else is on window. */
-  window.TRAINER = { KEY: KEY, read: read, saved: function(){ return store; }, clear: clearAll,
+  window.TRAINER = { KEY: KEY, CLIENTS_KEY: CLIENTS_KEY, read: read, saved: function(){ return store; }, clear: clearAll,
+                     newClient:newClient, switchClient:switchClient, deleteClient:deleteClient,
+                     saveWorkout:saveWorkout, addExercise:addExercise, openWorkout:openWorkout,
                      sayText: sayText, say: say,
                      p90x: { KEY: ROT_KEY, weeks: ROT_WEEKS.length,
-                             week: function(){ return rotWeek; },
-                             done: rotDoneAll, show: rotRender,
+                             week: function(){ return rotWeek; }, done: rotDoneAll, show: rotRender,
                              plan: function(){ return ROT_WEEKS.map(function(w){ return w.d.slice(); }); } } };
 })();
 </script>

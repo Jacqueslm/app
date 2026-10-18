@@ -48,7 +48,7 @@ const PAGE = path.join(ROOT, 'trainer.html');
 
 const TEXT_IDS = ['name', 'age', 'build', 'days', 'when', 'hurts', 'rules', 'dayone'];
 const KIT = ['Dumbbells', 'A pull-up bar', 'Push-up bars', 'A bench or a chair', 'A band', 'Floor space', 'Nothing yet'];
-const WANT = ['Stronger', 'Breathing', 'Moving better', 'Sleep', 'All of it'];
+const WANT = ['Stronger', 'Breathing', 'Moving better', 'Sleep', 'Lose weight', 'All of it'];
 
 const JS_TYPES = new Set(['', 'text/javascript', 'application/javascript', 'module']);
 function inlineScript(file) {
@@ -74,11 +74,12 @@ function loadPage(storage) {
   function element(id, attrs) {
     const o = {
       id, value: '', textContent: '', innerHTML: '', checked: false,
-      className: '', style: {}, dataset: {}, disabled: false,
+      className: '', style: {}, dataset: {}, disabled: false, hidden:false, parentNode:null,
+      childNodes: [], children: [], _html:'', tagName:'DIV', nodeType:1, scrollIntoView() {},
       attrs: attrs || {},
       getAttribute: (k) => (attrs && k in attrs ? attrs[k] : null),
-      setAttribute() {}, removeAttribute() {}, focus() {}, closest: () => null,
-      querySelectorAll: () => [], appendChild() {}, remove() {},
+      setAttribute(k, v) { (o.attrs || (o.attrs = {}))[k] = v; }, removeAttribute() {}, focus() {}, closest: () => null,
+      querySelectorAll: () => [], appendChild(node) { node.parentNode = o; o.children.push(node); o.childNodes.push(node); }, remove() {},
       addEventListener(type, fn) {
         if (!listeners.has(id)) listeners.set(id, {});
         listeners.get(id)[type] = fn;
@@ -92,20 +93,52 @@ function loadPage(storage) {
     return els.get(id);
   }
 
+  const header = element('header');
+  header.className = 'hdr';
+  const wrap = element('wrap');
+  wrap.className = 'wrap';
+  wrap.nodeType = 1;
+  wrap.childNodes = [];
+  wrap.children = [];
+  header.nodeType = 1;
+  header.children = [];
+  header.childNodes = [];
+  header.insertAdjacentHTML = function(){
+    const row = element('sayRow'); row.id = 'sayRow'; row.className = 'row noprint';
+    els.set('sayRow', row);
+    const btn = element('sayBtn'); btn.textContent = 'Read it to me'; els.set('sayBtn', btn);
+    const stop = element('sayStop'); stop.textContent = 'Stop'; stop.hidden = true; els.set('sayStop', stop);
+  };
+
   const boxes = [];
   for (const k of KIT) { const b = element(`kit:${k}`, { 'data-kit': k }); boxes.push(b); els.set(`kit:${k}`, b); }
   for (const w of WANT) { const b = element(`want:${w}`, { 'data-want': w }); boxes.push(b); els.set(`want:${w}`, b); }
+  const clientSelect = element('clientSelect');
+  const rotWeeks = element('rotWeeks');
+  const rotDays = element('rotDays');
+  const exerciseRows = element('exerciseRows');
+  Object.defineProperty(exerciseRows, 'innerHTML', { get() { return this._html || ''; }, set(v) { this._html = v; this.children = []; this.childNodes = []; } });
+  const exerciseForm = element('exerciseForm');
+  const workoutIds = ['workoutTitle','workoutDuration','workoutDate','workoutLog','workoutLogTitle','workoutLogSubtitle','workoutStatus','markWorkoutDoneBtn',
+    'exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseUnit','exerciseDuration','exerciseNotes',
+    'saveWorkoutBtn','closeWorkoutBtn','rotPrev','rotNext','rotReset','rotWeek','rotPhase','rotCount','rotBar','newClientBtn','deleteClientBtn','savedLine','clearBtn'];
+  workoutIds.forEach((id) => els.set(id, element(id)));
+  const form = element('intake');
+  form.querySelectorAll = (sel) => /data-kit/.test(sel) ? boxes.filter((b) => 'data-kit' in b.attrs)
+    : /data-want/.test(sel) ? boxes.filter((b) => 'data-want' in b.attrs) : [];
+  [clientSelect, rotWeeks, rotDays, exerciseRows, exerciseForm, form].forEach((node) => els.set(node.id, node));
 
   const doc = {
     getElementById: byId,
+    querySelector(sel) { return sel === '.wrap' ? wrap : sel === '.hdr' ? header : null; },
     querySelectorAll(sel) {
+      if (sel === '[data-backtop]') return [];
       if (/data-kit/.test(sel)) return boxes.filter((b) => 'data-kit' in b.attrs);
       if (/data-want/.test(sel)) return boxes.filter((b) => 'data-want' in b.attrs);
       return [];
     },
-    querySelector: () => null,
     addEventListener() {},
-    createElement: () => element('_new'),
+    createElement: (tag) => element('_new-' + tag),
     body: element('body'),
     documentElement: element('html'),
     readyState: 'complete',
@@ -238,6 +271,84 @@ test('the page keeps what is typed, and hands it back on the next open', () => {
   // Nothing was sent anywhere, in either run.
   assert.equal(p.sandbox.sent, 0, 'the page must not have sent anything');
   assert.equal(again.sandbox.sent, 0, 'nor on the second open');
+});
+
+test('a first new client does not leave an empty placeholder profile', () => {
+  const store = {};
+  const p = loadPage(store);
+  const T = p.sandbox.TRAINER;
+  const firstId = T.newClient();
+  p.box('name').value = 'Carol';
+  p.fire('intake', 'input');
+  const clients = JSON.parse(store[T.CLIENTS_KEY]).clients;
+  assert.equal(clients.length, 1);
+  assert.equal(clients[0].id, firstId);
+  assert.equal(clients[0].name, 'Carol');
+});
+
+test('client profiles can be created, named, switched, and retained separately', () => {
+  const store = {};
+  const p = loadPage(store);
+  const T = p.sandbox.TRAINER;
+  p.box('name').value = 'Carol';
+  p.fire('intake', 'input');
+  const first = JSON.parse(store[T.CLIENTS_KEY]);
+  assert.equal(first.clients.length, 1);
+  assert.equal(first.clients[0].name, 'Carol');
+  assert.equal(first.clients[0].data.name, 'Carol');
+
+  const secondId = T.newClient();
+  p.box('name').value = 'Andre';
+  p.fire('intake', 'input');
+  const two = JSON.parse(store[T.CLIENTS_KEY]);
+  assert.equal(two.clients.length, 2);
+  assert.equal(two.clients.find((c) => c.id === secondId).name, 'Andre');
+
+  assert.equal(T.switchClient(first.clients[0].id), true);
+  assert.equal(p.box('name').value, 'Carol');
+  p.box('want:Lose weight').checked = true;
+  p.fire('intake', 'change');
+  const again = loadPage(store);
+  assert.equal(again.box('name').value, 'Carol');
+  assert.equal(again.box('want:Lose weight').checked, true);
+  const reopened = JSON.parse(store[T.CLIENTS_KEY]);
+  assert.equal(reopened.clients.length, 2);
+  assert.equal(reopened.clients.find((c) => c.id === secondId).name, 'Andre');
+});
+
+test('workout entries capture sets, reps, weight, duration, and stay per client', () => {
+  const store = {};
+  const p = loadPage(store);
+  const T = p.sandbox.TRAINER;
+  T.newClient();
+  T.openWorkout(1, 1);
+  p.box('workoutTitle').value = 'Strength session';
+  p.box('workoutDuration').value = '42';
+  p.box('workoutDate').value = '2026-10-18';
+  T.saveWorkout();
+  p.box('exerciseName').value = 'Dumbbell row';
+  p.box('exerciseSets').value = '3';
+  p.box('exerciseReps').value = '12';
+  p.box('exerciseWeight').value = '20';
+  p.box('exerciseUnit').value = 'kg';
+  p.box('exerciseDuration').value = '5';
+  p.box('exerciseNotes').value = 'Controlled tempo';
+  T.addExercise({ preventDefault() {} });
+
+  const clientSet = JSON.parse(store[T.CLIENTS_KEY]);
+  const active = clientSet.clients.find((c) => c.id === clientSet.active);
+  const log = active.logs.w1d1;
+  assert.equal(log.title, 'Strength session');
+  assert.equal(log.duration, '42');
+  assert.deepStrictEqual(log.exercises[0], {
+    name: 'Dumbbell row', sets: '3', reps: '12', weight: '20', unit: 'kg', duration: '5', notes: 'Controlled tempo'
+  });
+  assert.equal(p.box('workoutLog').hidden, false, 'the selected workout log is open');
+  assert.equal(p.box('workoutTitle').value, 'Strength session');
+  assert.equal(p.box('workoutDuration').value, '42');
+  assert.equal(T.openWorkout(1, 1), undefined);
+  assert.equal(p.box('workoutTitle').value, 'Strength session', 'reopening shows the saved workout name');
+  assert.equal(p.box('workoutDate').value, '2026-10-18', 'reopening shows the saved workout date');
 });
 
 test('an answer left blank is left out, not stored as empty', () => {

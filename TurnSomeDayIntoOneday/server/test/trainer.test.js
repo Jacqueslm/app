@@ -339,10 +339,20 @@ test('selecting a P90X day exposes its exercise names and can prefill the log fo
   T.newClient();
 
   T.openWorkout(1, 1);
+  const chestBackMenu = p.box('exerciseSuggestionRows').innerHTML;
   assert.match(p.box('exerciseSuggestionsTitle').textContent, /Chest & Back \+ Ab Ripper X/);
-  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Standard Push-Ups/);
-  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Mason \(Kayak\) Twist/,
-    'Ab Ripper X exercises are included with resistance days');
+  assert.match(chestBackMenu, /<details class="muscle-dropdown"><summary><span>Chest<\/span>/,
+    'chest exercises are inside a closed muscle dropdown');
+  assert.match(chestBackMenu, /<details class="muscle-dropdown"><summary><span>Back<\/span>/,
+    'back exercises have their own dropdown');
+  assert.match(chestBackMenu, /<details class="muscle-dropdown"><summary><span>Core<\/span>/,
+    'Ab Ripper X is grouped under core');
+  assert.doesNotMatch(chestBackMenu, /<details class="muscle-dropdown" open/,
+    'exercise groups start collapsed so the logger stays compact');
+  assert.match(chestBackMenu, /<span>Standard Push-Ups<\/span><button type="button" data-suggested-index="0">Use<\/button>/,
+    'the chest exercise stays within the dropdown and has a prefill action');
+  assert.match(chestBackMenu, /<span>Mason \(Kayak\) Twist<\/span><button type="button" data-suggested-index="35">Use<\/button>/,
+    'Ab Ripper X exercises remain available in the same grouped menu');
   assert.equal(T.p90x.exercises(1, 1).length, 36, 'Chest & Back and Ab Ripper X names are available');
   assert.equal(T.useSuggestedExercise(0), true);
   assert.equal(p.box('exerciseName').value, 'Standard Push-Ups');
@@ -358,11 +368,18 @@ test('selecting a P90X day exposes its exercise names and can prefill the log fo
   assert.equal(T.p90x.exercises(4, 7).length, 33, 'optional X Stretch names are listed on rest days');
 
   T.openWorkout(1, 3);
-  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Alternating Shoulder Presses/);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /<details class="muscle-dropdown"><summary><span>Shoulders<\/span>/,
+    'shoulder exercises have a dedicated dropdown');
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /<details class="muscle-dropdown"><summary><span>Biceps<\/span>/,
+    'biceps exercises have a dedicated dropdown');
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /<details class="muscle-dropdown"><summary><span>Triceps<\/span>/,
+    'triceps exercises have a dedicated dropdown');
   assert.equal(T.p90x.exercises(1, 3).length, 27, 'shoulder/arm and Ab Ripper X names are available');
   T.openWorkout(1, 5);
   assert.match(p.box('exerciseSuggestionRows').innerHTML, /Balanced Lunges/);
   T.openWorkout(5, 1);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /<span>Chest<\/span>/,
+    'Chest, Shoulders & Triceps exercises are organized by focus muscle');
   assert.match(p.box('exerciseSuggestionRows').innerHTML, /Plange Push-Ups/);
   T.openWorkout(5, 3);
   assert.match(p.box('exerciseSuggestionRows').innerHTML, /Twenty-Ones/);
@@ -370,6 +387,17 @@ test('selecting a P90X day exposes its exercise names and can prefill the log fo
   assert.match(p.box('exerciseSuggestionRows').innerHTML, /Banana Rolls/);
   T.openWorkout(4, 4);
   assert.match(p.box('exerciseSuggestionRows').innerHTML, /Frog/);
+});
+
+test('workout logger keeps its metadata and actions in a compact mobile layout', () => {
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.match(html, /class="exercise-form workout-meta"/, 'duration and date use their own compact row');
+  assert.match(html, /\.workout-meta input\{margin-bottom:12px;padding:11px 10px;font-size:\.9rem\}/,
+    'metadata inputs have controlled mobile spacing and sizing');
+  assert.match(html, /class="workout-actions"/, 'workout actions use a dedicated responsive layout');
+  assert.match(html, /\.workout-actions #saveWorkoutBtn\{grid-column:1\/-1\}/,
+    'the primary save action gets a full row');
+  assert.match(html, /@media\(max-width:420px\)/, 'exercise menu adapts to narrow phone screens');
 });
 
 test('workout entries capture sets, reps, weight, duration, and stay per client', () => {

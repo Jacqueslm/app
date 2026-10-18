@@ -45,7 +45,7 @@
   .lead h2{color:var(--rose)}
   label{display:block; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dimmer); margin:0 0 6px}
   input[type=text], input[type=number], input[type=date], textarea{
-    width:100%; margin:0 0 15px; padding:13px 14px; font:inherit; font-size:1rem; color:var(--ink);
+    width:100%; min-width:0; max-width:100%; margin:0 0 15px; padding:13px 14px; font:inherit; font-size:1rem; color:var(--ink);
     background:rgba(0,0,0,.28); border:1px solid var(--line); border-radius:12px; outline:none;
   }
   textarea{min-height:74px; resize:vertical; line-height:1.5}
@@ -75,24 +75,38 @@
   .client-status,.workout-status{min-height:1.3em;color:var(--teal);font-size:.8rem;margin:0 0 8px}
   .back-row{display:flex;justify-content:flex-start;margin-top:14px}
   .back-row .btn{min-height:44px}
-  .exercise-form{display:grid;grid-template-columns:1fr 1fr;gap:0 9px;margin-top:14px}
+  .exercise-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;margin-top:14px}
+  .exercise-form>div{min-width:0}
   .exercise-form .wide{grid-column:1/-1}
+  .workout-meta{margin-top:0;gap:0 12px}
+  .workout-meta label{letter-spacing:.08em}
+  .workout-meta input{margin-bottom:12px;padding:11px 10px;font-size:.9rem}
+  .workout-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+  .workout-actions .btn{min-width:0;min-height:46px;padding:11px 8px;font-size:.8rem}
+  .workout-actions #saveWorkoutBtn{grid-column:1/-1}
   .exercise-log{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:rgba(0,0,0,.18)}
   .exercise-log h3{font-size:.95rem;margin:0 0 8px;color:var(--rose);font-weight:600}
   .exercise-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;color:var(--dim);font-size:.8rem}
-  .suggestion-list{display:grid;gap:6px;margin:8px 0 14px}
-  .suggestion-row{display:flex;align-items:center;gap:8px;padding:7px 8px 7px 11px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.16)}
-  .suggestion-row span{flex:1;min-width:0;color:var(--dim);font-size:.8125rem;line-height:1.4}
-  .suggestion-row button{flex:0 0 auto;min-height:40px;padding:7px 10px;border:1px solid rgba(240,145,159,.35);border-radius:9px;background:rgba(240,145,159,.08);color:var(--rose);font:inherit;font-size:.75rem;cursor:pointer}
-  .suggestion-note{font-size:.75rem!important;color:var(--dimmer)!important}
-  .suggestion-group{margin:0 0 12px}
-  .suggestion-group h4{margin:0 0 6px;color:var(--gold);font-size:.8rem;font-weight:600}
-  .suggestion-group .suggestion-list{margin-bottom:8px}
+  .exercise-menu{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin:12px 0 14px;background:rgba(0,0,0,.14)}
+  .exercise-menu-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
+  .exercise-menu-head h3{margin:0;color:var(--gold);font-size:.9rem;font-weight:600}
+  .exercise-menu-title{margin:0;color:var(--dimmer);font-size:.75rem;line-height:1.4;text-align:right}
+  .suggestion-note{margin:0 0 8px;color:var(--dimmer);font-size:.75rem;line-height:1.45}
+  .muscle-dropdown{border-top:1px solid var(--line)}
+  .muscle-dropdown summary{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;color:var(--ink);font-size:.85rem;font-weight:600;-webkit-tap-highlight-color:transparent}
+  .muscle-dropdown[open] summary{color:var(--gold)}
+  .suggestion-count{margin-left:auto;color:var(--dimmer);font-size:.7rem;font-weight:400}
+  .suggestion-list{display:grid;gap:0;margin:0 0 8px;padding-left:5px}
+  .suggestion-row{display:flex;align-items:center;gap:8px;min-width:0;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.055)}
+  .suggestion-row:last-child{border-bottom:0}
+  .suggestion-row span{flex:1;min-width:0;color:var(--dim);font-size:.8125rem;line-height:1.35;overflow-wrap:anywhere}
+  .suggestion-row button{flex:0 0 auto;min-height:36px;padding:5px 10px;border:1px solid rgba(240,145,159,.3);border-radius:9px;background:rgba(240,145,159,.07);color:var(--rose);font:inherit;font-size:.75rem;cursor:pointer}
   .suggestion-row button:active{transform:translateY(1px)}
   .back-row{scroll-margin-top:16px}
   .hdr{scroll-margin-top:16px}
   .exercise-grid span{overflow-wrap:anywhere}
-  @media(max-width:360px){.suggestion-row{padding-left:8px}}
+  @media(max-width:420px){.exercise-menu{padding:10px 11px}.exercise-menu-head{display:block}.exercise-menu-title{text-align:left;margin-top:2px}}
+  @media(max-width:360px){.exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .workout-select{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
   .workout-select button{min-height:44px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.2);color:var(--dim);font:inherit;cursor:pointer}
   .workout-select button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
@@ -338,16 +352,16 @@
       <h2 id="workoutLogTitle">Workout 1</h2>
       <p id="workoutLogSubtitle"></p>
       <label for="workoutTitle">Workout name</label><input id="workoutTitle" type="text" placeholder="Workout name">
-      <div class="exercise-form">
-        <div><label for="workoutDuration">Total duration (min)</label><input id="workoutDuration" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 45"></div>
+      <div class="exercise-form workout-meta">
+        <div><label for="workoutDuration">Duration (min)</label><input id="workoutDuration" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 45"></div>
         <div><label for="workoutDate">Workout date</label><input id="workoutDate" type="date"></div>
       </div>
       <div id="exerciseRows"></div>
-      <details class="guide" id="exerciseSuggestions" open>
-        <summary id="exerciseSuggestionsTitle">Exercises in this P90X workout</summary>
-        <p class="suggestion-note">Tap Use to put an exercise in the log form, then enter the sets, reps, and weight you actually completed. Names only; use the P90X workout for movement instructions.</p>
+      <section class="exercise-menu" id="exerciseSuggestions" aria-label="Exercise suggestions">
+        <div class="exercise-menu-head"><h3>Exercises by focus area</h3><p class="exercise-menu-title" id="exerciseSuggestionsTitle">Choose a workout</p></div>
+        <p class="suggestion-note">Open a group to see its exercises. Use fills the log form.</p>
         <div id="exerciseSuggestionRows"></div>
-      </details>
+      </section>
       <form class="exercise-form" id="exerciseForm" autocomplete="off">
         <div class="wide"><label for="exerciseName">Exercise</label><input id="exerciseName" type="text" required placeholder="Exercise name"></div>
         <div><label for="exerciseSets">Sets</label><input id="exerciseSets" type="number" min="1" max="50" inputmode="numeric" placeholder="3"></div>
@@ -359,7 +373,7 @@
         <div class="wide"><button class="btn" type="submit">Add exercise to this workout</button></div>
       </form>
       <p class="workout-status" id="workoutStatus" role="status" aria-live="polite"></p>
-      <div class="row"><button class="btn" id="saveWorkoutBtn" type="button">Save workout log</button><button class="btn quiet" id="markWorkoutDoneBtn" type="button">Mark workout complete</button><button class="btn quiet" id="closeWorkoutBtn" type="button">Close workout</button></div>
+      <div class="workout-actions"><button class="btn" id="saveWorkoutBtn" type="button">Save workout log</button><button class="btn quiet" id="markWorkoutDoneBtn" type="button">Mark workout complete</button><button class="btn quiet" id="closeWorkoutBtn" type="button">Close workout</button></div>
       <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
     </section>
     <div class="rot-bar" aria-hidden="true"><i id="rotBar" style="width:0%"></i></div>
@@ -827,27 +841,57 @@
   }
   function currentWorkout(){ return activeWorkout ? getWorkout(activeWorkout.week, activeWorkout.day) : null; }
   function renderRotation(){ rotRender(); }
+  function muscleFocus(moveKey, name){
+    if (moveKey === 'cb') return /push-ups/i.test(name) ? 'Chest' : 'Back';
+    if (moveKey === 'sa'){
+      if (/shoulder|upright rows|swimmers presses/i.test(name)) return 'Shoulders';
+      if (/curl/i.test(name)) return 'Biceps';
+      return 'Triceps';
+    }
+    if (moveKey === 'lb') return /pull-ups|chin-ups/i.test(name) ? 'Back' : 'Legs';
+    if (moveKey === 'cst'){
+      if (/triceps|tri-rises|chair dips/i.test(name)) return 'Triceps';
+      if (/shoulder|pike presses|scarecrows|weighted circles|y-presses/i.test(name)) return 'Shoulders';
+      return 'Chest';
+    }
+    if (moveKey === 'bb') return /pull-ups|lawnmowers|rows|superman/i.test(name) ? 'Back' : 'Biceps';
+    if (moveKey === 'ab') return 'Core';
+    if (moveKey === 'plyo') return 'Legs & cardio';
+    if (moveKey === 'core') return 'Core & full body';
+    if (moveKey === 'kenpo') return 'Full body & cardio';
+    if (moveKey === 'yoga') return 'Mobility & balance';
+    if (moveKey === 'rest' || moveKey === 'stretch') return 'Mobility & flexibility';
+    return 'Full body';
+  }
+
   function renderSuggestions(moveKey, move){
     var box = el('exerciseSuggestionRows');
     if (!box) return;
-    var groups = [];
+    var groups = [], byFocus = {};
     var primary = ROT_EXERCISES[moveKey] || [];
-    if (primary.length) groups.push({ title:moveKey === 'rest' ? 'Optional X Stretch' : move.name, names:primary });
-    if (move.ab) groups.push({ title:'Ab Ripper X', names:ROT_EXERCISES.ab });
+    function addToFocus(key, names){
+      names.forEach(function(name){
+        var title = muscleFocus(key, name);
+        if (!byFocus[title]){ byFocus[title] = { title:title, names:[] }; groups.push(byFocus[title]); }
+        byFocus[title].names.push(name);
+      });
+    }
+    if (primary.length) addToFocus(moveKey, primary);
+    if (move.ab) addToFocus('ab', ROT_EXERCISES.ab);
     activeSuggestions = [];
     groups.forEach(function(group){ activeSuggestions = activeSuggestions.concat(group.names); });
     var index = 0;
     box.innerHTML = groups.map(function(group){
-      return '<div class="suggestion-group"><h4>' + escapeHtml(group.title) + '</h4><div class="suggestion-list">'
-        + group.names.map(function(name){
+      return '<details class="muscle-dropdown"><summary><span>' + escapeHtml(group.title) + '</span>'
+        + '<span class="suggestion-count">' + group.names.length + ' exercises</span></summary>'
+        + '<div class="suggestion-list">' + group.names.map(function(name){
           var row = '<div class="suggestion-row"><span>' + escapeHtml(name) + '</span>'
             + '<button type="button" data-suggested-index="' + index + '">Use</button></div>';
           index++;
           return row;
-        }).join('') + '</div></div>';
-    }).join('') || '<p>No exercise list is attached to this day.</p>';
-    el('exerciseSuggestionsTitle').textContent = 'Exercises in ' + move.name + (move.ab ? ' + Ab Ripper X' : '');
-    el('exerciseSuggestions').open = true;
+        }).join('') + '</div></details>';
+    }).join('') || '<p class="suggestion-note">No exercise list is attached to this day.</p>';
+    el('exerciseSuggestionsTitle').textContent = move.name + (move.ab ? ' + Ab Ripper X' : '');
   }
 
   function useSuggestedExercise(index){

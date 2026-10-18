@@ -69,12 +69,17 @@
   details.guide summary{cursor:pointer;color:var(--gold);font-weight:600;font-size:.9rem;line-height:1.5;min-height:44px;display:flex;align-items:center}
   details.guide[open] summary{margin-bottom:12px}
   .client-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end}
+  .guide-card>summary,.section-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;color:var(--gold);font-weight:600;line-height:1.4}
+  .guide-card[open]>summary,.intake-card[open]>.section-toggle,.safety-card[open]>.section-toggle{margin-bottom:12px}
+  .section-toggle span{color:var(--dimmer);font-size:.7rem;font-weight:400;text-align:right}
+  .intake-card form{padding-top:4px}
+  .safety-copy p:last-child{margin-bottom:0}
+  .workout-jump{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;margin:0 0 8px;padding:11px 14px;text-align:center;text-decoration:none}
+  .workout-jump span{font-size:1.1em}
   .client-row .field{min-width:0}
   select{width:100%;padding:13px 12px;margin:0 0 15px;color:var(--ink);background:#100e18;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:1rem}
   .btn.small{padding:11px 12px;font-size:.8125rem;min-height:44px}
   .client-status,.workout-status{min-height:1.3em;color:var(--teal);font-size:.8rem;margin:0 0 8px}
-  .back-row{display:flex;justify-content:flex-start;margin-top:14px}
-  .back-row .btn{min-height:44px}
   .exercise-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;margin-top:14px}
   .exercise-form>div{min-width:0}
   .exercise-form .wide{grid-column:1/-1}
@@ -102,8 +107,6 @@
   .suggestion-row span{flex:1;min-width:0;color:var(--dim);font-size:.8125rem;line-height:1.35;overflow-wrap:anywhere}
   .suggestion-row button{flex:0 0 auto;min-height:36px;padding:5px 10px;border:1px solid rgba(240,145,159,.3);border-radius:9px;background:rgba(240,145,159,.07);color:var(--rose);font:inherit;font-size:.75rem;cursor:pointer}
   .suggestion-row button:active{transform:translateY(1px)}
-  .back-row{scroll-margin-top:16px}
-  .hdr{scroll-margin-top:16px}
   .exercise-grid span{overflow-wrap:anywhere}
   @media(max-width:420px){.exercise-menu{padding:10px 11px}.exercise-menu-head{display:block}.exercise-menu-title{text-align:left;margin-top:2px}}
   @media(max-width:360px){.exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -221,15 +224,10 @@
     anywhere, there is no account and no server behind the form, and the page
     works with no signal. One person is held at a time; Clear starts the next.
   -->
-  <div class="card lead">
-    <h2>Step one: their information</h2>
-    <details class="guide">
-      <summary>Instructions: how to use this Trainer</summary>
-      <p>This page is for the people you train. Save each client separately, choose a workout, add exercises and record sets, reps, weight, and duration.</p>
-      <p>Everything stays on this phone in this browser. Choose another client from the list to pull up their saved information and workout log.</p>
-    </details>
-    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
-  </div>
+  <details class="card lead guide-card">
+    <summary>How to use this Trainer</summary>
+    <p>This page is for the people you train. Save each client separately, choose a workout, and record what they complete. Everything stays on this phone.</p>
+  </details>
 
   <div class="card" id="clientCard">
     <h2>Clients on this phone</h2>
@@ -239,11 +237,13 @@
       <button class="btn small" id="newClientBtn" type="button">New client</button>
       <button class="btn quiet small" id="deleteClientBtn" type="button">Delete</button>
     </div>
+    <a class="btn workout-jump" href="#rotationCard">Go to workouts <span aria-hidden="true">↓</span></a>
     <p class="client-status" id="clientStatus" role="status" aria-live="polite"></p>
-    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
   </div>
 
-  <form class="card" id="intake" autocomplete="off">
+  <details class="card intake-card" id="intakeDetails">
+    <summary class="section-toggle">Step one: their information <span>Optional · saved on this phone</span></summary>
+    <form id="intake" autocomplete="off">
     <h2>The person you're training</h2>
 
     <label for="name">What to call them</label>
@@ -297,20 +297,18 @@
       <button class="btn quiet" id="clearBtn" type="button">Clear this form</button>
     </div>
     <p class="saved" id="savedLine" role="status" aria-live="polite"></p>
-    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
-  </form>
+    </form>
+  </details>
 
-  <div class="card">
-    <h2>Before anything gets planned</h2>
-    <details class="guide">
-      <summary>Safety instructions — read before training</summary>
+  <details class="card safety-card">
+    <summary class="section-toggle">Before anything gets planned <span>Safety instructions</span></summary>
+    <div class="safety-copy">
       <p>The programme below is a workout, and two lines outrank it.</p>
       <p>A doctor's rule wins over this page, always. If a doctor has said no to a lift or a movement, that is the answer here, and nothing on this page changes it.</p>
       <p>If there is a heart condition, blood pressure, a pregnancy, a recent operation or a back that has gone recently, ask a doctor before starting anything &mdash; and if any of it is already being looked at or medicated, that stays exactly as it is.</p>
       <p>And stop, on the day, if there is chest pain, or dizziness, or something sharp rather than a muscle working. That is not pushing on.</p>
-    </details>
-    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
-  </div>
+    </div>
+  </details>
 
   <!-- ── THE P90X ROTATION ────────────────────────────────────────────────
        17 Oct 2026. Jacques: "p90x workout", then "Remove the workout you made
@@ -374,17 +372,11 @@
       </form>
       <p class="workout-status" id="workoutStatus" role="status" aria-live="polite"></p>
       <div class="workout-actions"><button class="btn" id="saveWorkoutBtn" type="button">Save workout log</button><button class="btn quiet" id="markWorkoutDoneBtn" type="button">Mark workout complete</button><button class="btn quiet" id="closeWorkoutBtn" type="button">Close workout</button></div>
-      <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
     </section>
     <div class="rot-bar" aria-hidden="true"><i id="rotBar" style="width:0%"></i></div>
     <p class="rot-count" id="rotCount" role="status" aria-live="polite">0 of 7 done this week.</p>
 
-    <div class="row" style="margin-top:14px">
-      <button class="btn quiet" id="rotPrev" type="button">&larr; Last week</button>
-      <button class="btn quiet" id="rotNext" type="button">Next week &rarr;</button>
-    </div>
     <button class="btn quiet" id="rotReset" type="button" style="width:100%; margin-top:8px">Start the rotation again</button>
-    <div class="back-row"><button class="btn quiet" type="button" data-backtop>Back to Trainer</button></div>
     <p class="fine">A missed day is not made up by stacking two workouts: pick the rotation up where it is and carry on. If a session is cut short, the part that was done still counts &mdash; the tick is adherence, not perfection. The schedule is P90X's; the page holds no video, no music and no account, and it works with no signal.</p>
   </div>
 
@@ -532,6 +524,8 @@
   }
 
   function newClient(){
+    var intakeDetails = el('intakeDetails');
+    if (intakeDetails) intakeDetails.open = true;
     if (activeClient()) saveDb();
     else if (Object.keys(store).length) saveDb();
     var id = 'client-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
@@ -707,13 +701,6 @@
   if (newClientBtn) newClientBtn.addEventListener('click', newClient);
   var deleteClientBtn = el('deleteClientBtn');
   if (deleteClientBtn) deleteClientBtn.addEventListener('click', deleteClient);
-  Array.prototype.forEach.call(document.querySelectorAll('[data-backtop]'), function(btn){
-    btn.addEventListener('click', function(){
-      var top = el('trainerTop');
-      if (top && top.scrollIntoView) top.scrollIntoView({ behavior:'smooth', block:'start' });
-    });
-  });
-
   /* ── THE P90X ROTATION ────────────────────────────────────────────────────
      17 Oct 2026, Jacques: "p90x workout". The published classic rotation, as
      data rather than ninety-one hand-written rows: thirteen weeks, three
@@ -1014,16 +1001,6 @@
     return null;
   }
 
-  function rotGo(step){
-    var next = rotWeek + step;
-    if (next < 1) next = ROT_WEEKS.length;
-    if (next > ROT_WEEKS.length) next = 1;
-    if (activeWorkout) saveWorkout();
-    rotWeek = next;
-    rotPut();
-    rotRender();
-  }
-
   function rotBoot(){
     var chipBox = document.getElementById('rotWeeks');
     var dayBox = document.getElementById('rotDays');
@@ -1073,11 +1050,6 @@
       var btn = rotUpTo(ev.target, 'data-suggested-index');
       if (btn) useSuggestedExercise(Number(btn.getAttribute('data-suggested-index')));
     });
-    var prev = document.getElementById('rotPrev');
-    if (prev) prev.addEventListener('click', function(){ rotGo(-1); });
-    var next = document.getElementById('rotNext');
-    if (next) next.addEventListener('click', function(){ rotGo(1); });
-
     var reset = document.getElementById('rotReset');
     if (reset) reset.addEventListener('click', function(){
       rot = {};

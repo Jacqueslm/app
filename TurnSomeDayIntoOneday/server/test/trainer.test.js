@@ -96,9 +96,6 @@ function loadPage(storage) {
   const header = element('trainerTop');
   header.id = 'trainerTop';
   header.className = 'hdr';
-  const backButtons = Array.from({ length: 6 }, (_, i) => element(`backtop:${i}`, { 'data-backtop': '' }));
-  let backScrolls = 0;
-  header.scrollIntoView = () => { backScrolls += 1; };
   els.set('trainerTop', header);
   const wrap = element('wrap');
   wrap.className = 'wrap';
@@ -126,9 +123,12 @@ function loadPage(storage) {
   const exerciseForm = element('exerciseForm');
   const workoutIds = ['workoutTitle','workoutDuration','workoutDate','workoutLog','workoutLogTitle','workoutLogSubtitle','workoutStatus','markWorkoutDoneBtn',
     'exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseUnit','exerciseDuration','exerciseNotes',
-    'saveWorkoutBtn','closeWorkoutBtn','rotPrev','rotNext','rotReset','rotWeek','rotPhase','rotCount','rotBar','newClientBtn','deleteClientBtn','savedLine','clearBtn',
+    'saveWorkoutBtn','closeWorkoutBtn','rotReset','rotWeek','rotPhase','rotCount','rotBar','newClientBtn','deleteClientBtn','savedLine','clearBtn',
     'exerciseSuggestions','exerciseSuggestionsTitle','exerciseSuggestionRows','exerciseName'];
   workoutIds.forEach((id) => els.set(id, element(id)));
+  const intakeDetails = element('intakeDetails');
+  intakeDetails.open = false;
+  els.set('intakeDetails', intakeDetails);
   const form = element('intake');
   form.querySelectorAll = (sel) => /data-kit/.test(sel) ? boxes.filter((b) => 'data-kit' in b.attrs)
     : /data-want/.test(sel) ? boxes.filter((b) => 'data-want' in b.attrs) : [];
@@ -138,7 +138,6 @@ function loadPage(storage) {
     getElementById: byId,
     querySelector(sel) { return sel === '.wrap' ? wrap : sel === '.hdr' ? header : null; },
     querySelectorAll(sel) {
-      if (sel === '[data-backtop]') return backButtons;
       if (/data-kit/.test(sel)) return boxes.filter((b) => 'data-kit' in b.attrs);
       if (/data-want/.test(sel)) return boxes.filter((b) => 'data-want' in b.attrs);
       return [];
@@ -172,7 +171,7 @@ function loadPage(storage) {
   vm.createContext(sandbox);
   vm.runInContext(inlineScript(PAGE), sandbox, { filename: 'trainer.html' });
   return {
-    sandbox, els, store, listeners, backButtons, get backScrolls() { return backScrolls; },
+    sandbox, els, store, listeners,
     fire(id, type, ev) {
       const fn = listeners.get(id) && listeners.get(id)[type];
       if (!fn) return false;
@@ -322,15 +321,31 @@ test('client profiles can be created, named, switched, and retained separately',
   assert.equal(reopened.clients.find((c) => c.id === secondId).name, 'Andre');
 });
 
-test('Back to Trainer buttons scroll the page to its real header target', () => {
-  const p = loadPage({});
+test('the Trainer starts compact and offers a direct jump to the workout plan', () => {
   const html = fs.readFileSync(PAGE, 'utf8');
-  assert.match(html, /<header class="hdr" id="trainerTop">/, 'the scroll target is the page header');
-  assert.ok(p.backButtons.length >= 5, 'Back to Trainer controls are present across the Trainer');
-  p.backButtons.forEach((button, i) => {
-    assert.ok(p.fire(button.id, 'click'), `Back button ${i + 1} is wired`);
-  });
-  assert.equal(p.backScrolls, p.backButtons.length, 'each button scrolls to the header');
+  assert.match(html, /<details class="card lead guide-card">\s*<summary>How to use this Trainer<\/summary>/,
+    'help stays available in a collapsed details panel');
+  assert.match(html, /<details class="card intake-card" id="intakeDetails">\s*<summary class="section-toggle">Step one: their information/,
+    'the long client form is optional and collapsed by default');
+  assert.match(html, /<details class="card safety-card">\s*<summary class="section-toggle">Before anything gets planned/,
+    'safety guidance remains available in a compact collapsed panel');
+  assert.match(html, /<a class="btn workout-jump" href="#rotationCard">Go to workouts/,
+    'the client area links directly to the workout plan');
+  assert.doesNotMatch(html, /data-backtop|Back to Trainer/,
+    'repeated buttons that only return to the top are gone');
+  assert.match(html, /<div class="weeks" id="rotWeeks" role="group" aria-label="Week"><\/div>/,
+    'direct week chips remain available');
+  assert.doesNotMatch(html, /id="rotPrev"|id="rotNext"|Last week|Next week/,
+    'duplicate previous/next week controls are removed');
+  assert.doesNotMatch(html, /function rotGo\(/,
+    'the unused previous/next navigation code is removed too');
+});
+
+test('creating a client opens the optional client information form', () => {
+  const p = loadPage({});
+  p.box('intakeDetails').open = false;
+  p.sandbox.TRAINER.newClient();
+  assert.equal(p.box('intakeDetails').open, true, 'the form opens when a new client is created');
 });
 
 test('selecting a P90X day exposes its exercise names and can prefill the log form', () => {

@@ -93,8 +93,13 @@ function loadPage(storage) {
     return els.get(id);
   }
 
-  const header = element('header');
+  const header = element('trainerTop');
+  header.id = 'trainerTop';
   header.className = 'hdr';
+  const backButtons = Array.from({ length: 6 }, (_, i) => element(`backtop:${i}`, { 'data-backtop': '' }));
+  let backScrolls = 0;
+  header.scrollIntoView = () => { backScrolls += 1; };
+  els.set('trainerTop', header);
   const wrap = element('wrap');
   wrap.className = 'wrap';
   wrap.nodeType = 1;
@@ -121,7 +126,8 @@ function loadPage(storage) {
   const exerciseForm = element('exerciseForm');
   const workoutIds = ['workoutTitle','workoutDuration','workoutDate','workoutLog','workoutLogTitle','workoutLogSubtitle','workoutStatus','markWorkoutDoneBtn',
     'exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseUnit','exerciseDuration','exerciseNotes',
-    'saveWorkoutBtn','closeWorkoutBtn','rotPrev','rotNext','rotReset','rotWeek','rotPhase','rotCount','rotBar','newClientBtn','deleteClientBtn','savedLine','clearBtn'];
+    'saveWorkoutBtn','closeWorkoutBtn','rotPrev','rotNext','rotReset','rotWeek','rotPhase','rotCount','rotBar','newClientBtn','deleteClientBtn','savedLine','clearBtn',
+    'exerciseSuggestions','exerciseSuggestionsTitle','exerciseSuggestionRows','exerciseName'];
   workoutIds.forEach((id) => els.set(id, element(id)));
   const form = element('intake');
   form.querySelectorAll = (sel) => /data-kit/.test(sel) ? boxes.filter((b) => 'data-kit' in b.attrs)
@@ -132,7 +138,7 @@ function loadPage(storage) {
     getElementById: byId,
     querySelector(sel) { return sel === '.wrap' ? wrap : sel === '.hdr' ? header : null; },
     querySelectorAll(sel) {
-      if (sel === '[data-backtop]') return [];
+      if (sel === '[data-backtop]') return backButtons;
       if (/data-kit/.test(sel)) return boxes.filter((b) => 'data-kit' in b.attrs);
       if (/data-want/.test(sel)) return boxes.filter((b) => 'data-want' in b.attrs);
       return [];
@@ -166,7 +172,7 @@ function loadPage(storage) {
   vm.createContext(sandbox);
   vm.runInContext(inlineScript(PAGE), sandbox, { filename: 'trainer.html' });
   return {
-    sandbox, els, store, listeners,
+    sandbox, els, store, listeners, backButtons, get backScrolls() { return backScrolls; },
     fire(id, type, ev) {
       const fn = listeners.get(id) && listeners.get(id)[type];
       if (!fn) return false;
@@ -314,6 +320,56 @@ test('client profiles can be created, named, switched, and retained separately',
   const reopened = JSON.parse(store[T.CLIENTS_KEY]);
   assert.equal(reopened.clients.length, 2);
   assert.equal(reopened.clients.find((c) => c.id === secondId).name, 'Andre');
+});
+
+test('Back to Trainer buttons scroll the page to its real header target', () => {
+  const p = loadPage({});
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.match(html, /<header class="hdr" id="trainerTop">/, 'the scroll target is the page header');
+  assert.ok(p.backButtons.length >= 5, 'Back to Trainer controls are present across the Trainer');
+  p.backButtons.forEach((button, i) => {
+    assert.ok(p.fire(button.id, 'click'), `Back button ${i + 1} is wired`);
+  });
+  assert.equal(p.backScrolls, p.backButtons.length, 'each button scrolls to the header');
+});
+
+test('selecting a P90X day exposes its exercise names and can prefill the log form', () => {
+  const p = loadPage({});
+  const T = p.sandbox.TRAINER;
+  T.newClient();
+
+  T.openWorkout(1, 1);
+  assert.match(p.box('exerciseSuggestionsTitle').textContent, /Chest & Back \+ Ab Ripper X/);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Standard Push-Ups/);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Mason \(Kayak\) Twist/,
+    'Ab Ripper X exercises are included with resistance days');
+  assert.equal(T.p90x.exercises(1, 1).length, 36, 'Chest & Back and Ab Ripper X names are available');
+  assert.equal(T.useSuggestedExercise(0), true);
+  assert.equal(p.box('exerciseName').value, 'Standard Push-Ups');
+
+  T.openWorkout(1, 2);
+  assert.match(p.box('exerciseSuggestionsTitle').textContent, /Plyometrics/);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Jump Knee Tuck/);
+  assert.equal(T.p90x.exercises(1, 2).length, 23);
+
+  T.openWorkout(4, 7);
+  assert.match(p.box('exerciseSuggestionsTitle').textContent, /Rest or X Stretch/);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Neck Stretch/);
+  assert.equal(T.p90x.exercises(4, 7).length, 33, 'optional X Stretch names are listed on rest days');
+
+  T.openWorkout(1, 3);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Alternating Shoulder Presses/);
+  assert.equal(T.p90x.exercises(1, 3).length, 27, 'shoulder/arm and Ab Ripper X names are available');
+  T.openWorkout(1, 5);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Balanced Lunges/);
+  T.openWorkout(5, 1);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Plange Push-Ups/);
+  T.openWorkout(5, 3);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Twenty-Ones/);
+  T.openWorkout(4, 2);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Banana Rolls/);
+  T.openWorkout(4, 4);
+  assert.match(p.box('exerciseSuggestionRows').innerHTML, /Frog/);
 });
 
 test('workout entries capture sets, reps, weight, duration, and stay per client', () => {

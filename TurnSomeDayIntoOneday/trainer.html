@@ -98,6 +98,9 @@
   .rest-timer{margin:8px 0;color:var(--teal);font-size:.9rem;font-weight:600;text-align:center}
   .exercise-menu-title{margin:0;color:var(--dimmer);font-size:.75rem;line-height:1.4;text-align:right}
   .suggestion-note{margin:0 0 8px;color:var(--dimmer);font-size:.75rem;line-height:1.45}
+  /* The readiness screen (19 Oct 2026): the sort the Certification's day 23
+     teaches, written down rather than held in the coach's head. */
+  .screening{margin:0 0 15px;padding:11px 12px;border:1px solid rgba(240,145,159,.35);border-radius:12px;background:rgba(240,145,159,.06);color:var(--ink);font-size:.8125rem;line-height:1.5}
   .muscle-dropdown{border-top:1px solid var(--line)}
   .muscle-dropdown summary{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;color:var(--ink);font-size:.85rem;font-weight:600;-webkit-tap-highlight-color:transparent}
   .muscle-dropdown[open] summary{color:var(--gold)}
@@ -213,6 +216,15 @@
        swappable for jump rope or step or walking or dancing, a beginner's first
        week of stretching, and the recovery weeks optional.
 
+    19 Oct 2026, the audit against the Certification. Its trainer track says its
+    day 23 screening is this page's form, sorts three ways, and that the intake
+    keeps a training history. Neither was here, so both are now: the readiness
+    screen sits in the intake with its verdict written under it, and the history
+    is a field beside the goal and the kit. The six Certification lines that
+    described this page wrongly - a talk test, cues on the rotation, sets not
+    counted, one card of each, X Stretch by name, regressions on the page - were
+    corrected on that side instead, because the page is what he asked it to be.
+
     13 Oct 2026, and who it is for. Jacques: "its for my clients ... rewrite it
     for my people I'll put they information in". So this page is written for the
     person holding the phone, about somebody else — the coach, not the trainee.
@@ -262,6 +274,9 @@
     <label for="when">The time of day that actually works for them</label>
     <input id="when" name="when" type="text" placeholder="Before work, after the school run, at night">
 
+    <label for="history">What they have done before</label>
+    <textarea id="history" name="history" placeholder="New to training, or years of it &mdash; and what they stopped doing"></textarea>
+
     <h2 style="margin-top:20px">What they have at home</h2>
     <p>Tick what is in their house. Anything not ticked is simply not used.</p>
     <div class="picks" id="kit">
@@ -284,6 +299,18 @@
       <label class="pick"><input type="checkbox" data-want="All of it"><span>All of it</span></label>
     </div>
 
+    <h2 style="margin-top:20px">Before the first session</h2>
+    <p>A readiness screen, read with them before anything is planned. Tick every line that is true for them; nothing ticked is read as clear to start.</p>
+    <div class="picks" id="screen">
+      <label class="pick"><input type="checkbox" data-screen="Chest pain, or a heart condition"><span>Chest pain, or a heart condition</span></label>
+      <label class="pick"><input type="checkbox" data-screen="Dizziness or fainting"><span>Dizziness or fainting</span></label>
+      <label class="pick"><input type="checkbox" data-screen="Blood pressure, or a medicine that changes it"><span>Blood pressure, or a medicine that changes it</span></label>
+      <label class="pick"><input type="checkbox" data-screen="A joint problem exercise would aggravate"><span>A joint problem exercise would aggravate</span></label>
+      <label class="pick"><input type="checkbox" data-screen="Pregnant, or recently after birth"><span>Pregnant, or recently after birth</span></label>
+      <label class="pick"><input type="checkbox" data-screen="A recent operation"><span>A recent operation</span></label>
+    </div>
+    <p class="screening" id="screeningResult" role="status" aria-live="polite">Nothing ticked: clear to start.</p>
+
     <label for="hurts">Anything that hurts</label>
     <textarea id="hurts" name="hurts" placeholder="A knee, a back, a shoulder &mdash; exactly as they would say it out loud"></textarea>
 
@@ -305,6 +332,7 @@
     <summary class="section-toggle">Before anything gets planned <span>Safety instructions</span></summary>
     <div class="safety-copy">
       <p>The programme below is a workout, and two lines outrank it.</p>
+      <p>The screening in their information is read first, and its answer holds: clear to start, start gently with a doctor's view first, or nothing until a doctor has said so.</p>
       <p>A doctor's rule wins over this page, always. If a doctor has said no to a lift or a movement, that is the answer here, and nothing on this page changes it.</p>
       <p>If there is a heart condition, blood pressure, a pregnancy, a recent operation or a back that has gone recently, ask a doctor before starting anything &mdash; and if any of it is already being looked at or medicated, that stays exactly as it is.</p>
       <p>And stop, on the day, if there is chest pain, or dizziness, or something sharp rather than a muscle working. That is not pushing on.</p>
@@ -360,7 +388,7 @@
         <p class="suggestion-note">Use fills the exercise name and starts at 2 sets. Reps and weight are optional.</p>
         <div id="exerciseSuggestionRows"></div>
         <details class="muscle-dropdown" id="supplementExerciseGroup">
-          <summary><span>By-10 extras · not P90X</span><span class="suggestion-count">6 movements</span></summary>
+          <summary><span>Extras · not P90X</span><span class="suggestion-count">6 movements</span></summary>
           <div class="suggestion-list" id="supplementExerciseRows">
             <div class="suggestion-row"><span>Jump rope</span><button type="button" data-supplement-name="Jump rope">Use</button></div>
             <div class="suggestion-row"><span>Step / sweat stepping</span><button type="button" data-supplement-name="Step / sweat stepping">Use</button></div>
@@ -417,7 +445,7 @@
   try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
   catch (e) { store = {}; }
 
-  var KIT = 'kit', WANT = 'want';
+  var KIT = 'kit', WANT = 'want', SCREEN = 'screen';
   var activeClientId = clientsDb.active || '';
   var activeWorkout = null;
   var activeSuggestions = [];
@@ -519,6 +547,7 @@
   function save(){
     saveDb();
     stamp();
+    renderScreening();
   }
 
   function renderClients(){
@@ -635,14 +664,38 @@
     });
   }
 
+  /* The readiness screen, and the three-way sort the Certification teaches:
+     clear to start; start gently with a doctor's view first; and not until a
+     doctor has said so. The three red lines below are the ones that hold the
+     session - the rest are a doctor-first question rather than a stop. */
+  var SCREEN_RED = [
+    'Chest pain, or a heart condition',
+    'Dizziness or fainting',
+    'Blood pressure, or a medicine that changes it'
+  ];
+  function screenVerdict(list){
+    list = list || [];
+    if (!list.length) return 'Nothing ticked: clear to start.';
+    for (var i = 0; i < list.length; i++){
+      if (SCREEN_RED.indexOf(list[i]) > -1) return 'Do not start until a doctor has said so.';
+    }
+    return 'Start gently, and check with a doctor first.';
+  }
+  function renderScreening(){
+    var line = el('screeningResult');
+    if (line) line.textContent = screenVerdict(ticks('data-screen'));
+  }
+
   /* What is on the page, as the object that gets kept. Every field is optional:
      a half-filled form is a half-filled form, not an error. */
   function read(){
     var o = {};
-    ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
+    ['name','age','build','days','when','history','hurts','rules','dayone'].forEach(function(k){
       var v = text(k);
       if (v) o[k] = v;
     });
+    var screen = ticks('data-screen');
+    if (screen.length) o[SCREEN] = screen;
     var kit = ticks('data-kit');
     if (kit.length) o[KIT] = kit;
     var want = ticks('data-want');
@@ -653,12 +706,14 @@
   /* Put what was kept back on the page. Called once, on open: reading it back is
      the only thing this page does with the answers so far. */
   function fill(o){
-    ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
+    ['name','age','build','days','when','history','hurts','rules','dayone'].forEach(function(k){
       var box = el(k);
       if (box) box.value = o[k] != null ? String(o[k]) : '';
     });
     check('data-kit', o[KIT] || []);
     check('data-want', o[WANT] || []);
+    check('data-screen', o[SCREEN] || []);
+    renderScreening();
   }
 
   function clearAll(){
@@ -669,12 +724,14 @@
       try { localStorage.setItem(CLIENTS_KEY, JSON.stringify(clientsDb)); } catch(e){}
     }
     try { localStorage.removeItem(KEY); } catch(e){}
-    ['name','age','build','days','when','hurts','rules','dayone'].forEach(function(k){
+    ['name','age','build','days','when','history','hurts','rules','dayone'].forEach(function(k){
       var box = el(k);
       if (box) box.value = '';
     });
     check('data-kit', []);
     check('data-want', []);
+    check('data-screen', []);
+    renderScreening();
     stamp();
   }
 
@@ -1129,7 +1186,8 @@
                      newClient:newClient, switchClient:switchClient, deleteClient:deleteClient,
                      saveWorkout:saveWorkout, addExercise:addExercise, openWorkout:openWorkout,
                      useSuggestedExercise:useSuggestedExercise, useSupplementExercise:useSupplementExercise,
-                     sayText: sayText, say: say,
+                     sayText: sayText, say: say, screenVerdict: screenVerdict,
+                     renderScreening: renderScreening,
                      p90x: { KEY: ROT_KEY, weeks: ROT_WEEKS.length,
                              exercises: function(w,d){
                                var moveKey = rotOf(w).d[d - 1], move = ROT_MOVE[moveKey] || ROT_MOVE.rest;

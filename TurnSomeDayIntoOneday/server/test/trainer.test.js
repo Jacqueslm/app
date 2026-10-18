@@ -30,6 +30,12 @@
 // rather than left to a comment: no fetch, no XMLHttpRequest, no form action,
 // and no address that is not this app.
 //
+// 19 OCT 2026, the audit against the Certification. certify.html says the
+// Trainer's form is the readiness screen, sorts it three ways and keeps the
+// training history. Two of those were not on the page, so they were added and
+// are held here; the six Certification lines that described the page wrongly
+// were corrected on that side instead.
+//
 // The rest of this file drives the page's own script the way a thumb does — it
 // fills the fields, submits, clears, and re-opens the page with what was stored
 // — because "the tests pass" is not the same as "the form works". The herb
@@ -46,9 +52,17 @@ const vm = require('vm');
 const ROOT = path.join(__dirname, '..', '..');
 const PAGE = path.join(ROOT, 'trainer.html');
 
-const TEXT_IDS = ['name', 'age', 'build', 'days', 'when', 'hurts', 'rules', 'dayone'];
+const TEXT_IDS = ['name', 'age', 'build', 'days', 'when', 'history', 'hurts', 'rules', 'dayone'];
 const KIT = ['Dumbbells', 'A pull-up bar', 'Push-up bars', 'A bench or a chair', 'A band', 'Floor space', 'Nothing yet'];
 const WANT = ['Stronger', 'Breathing', 'Moving better', 'Sleep', 'Lose weight', 'All of it'];
+const SCREEN = [
+  'Chest pain, or a heart condition',
+  'Dizziness or fainting',
+  'Blood pressure, or a medicine that changes it',
+  'A joint problem exercise would aggravate',
+  'Pregnant, or recently after birth',
+  'A recent operation',
+];
 
 const JS_TYPES = new Set(['', 'text/javascript', 'application/javascript', 'module']);
 function inlineScript(file) {
@@ -117,6 +131,7 @@ function loadPage(storage) {
   const boxes = [];
   for (const k of KIT) { const b = element(`kit:${k}`, { 'data-kit': k }); boxes.push(b); els.set(`kit:${k}`, b); }
   for (const w of WANT) { const b = element(`want:${w}`, { 'data-want': w }); boxes.push(b); els.set(`want:${w}`, b); }
+  for (const s of SCREEN) { const b = element(`screen:${s}`, { 'data-screen': s }); boxes.push(b); els.set(`screen:${s}`, b); }
   const clientSelect = element('clientSelect');
   const rotWeeks = element('rotWeeks');
   const rotDays = element('rotDays');
@@ -134,7 +149,8 @@ function loadPage(storage) {
   els.set('intakeDetails', intakeDetails);
   const form = element('intake');
   form.querySelectorAll = (sel) => /data-kit/.test(sel) ? boxes.filter((b) => 'data-kit' in b.attrs)
-    : /data-want/.test(sel) ? boxes.filter((b) => 'data-want' in b.attrs) : [];
+    : /data-want/.test(sel) ? boxes.filter((b) => 'data-want' in b.attrs)
+      : /data-screen/.test(sel) ? boxes.filter((b) => 'data-screen' in b.attrs) : [];
   [clientSelect, rotWeeks, rotDays, exerciseRows, exerciseForm, form].forEach((node) => els.set(node.id, node));
 
   const doc = {
@@ -143,6 +159,7 @@ function loadPage(storage) {
     querySelectorAll(sel) {
       if (/data-kit/.test(sel)) return boxes.filter((b) => 'data-kit' in b.attrs);
       if (/data-want/.test(sel)) return boxes.filter((b) => 'data-want' in b.attrs);
+      if (/data-screen/.test(sel)) return boxes.filter((b) => 'data-screen' in b.attrs);
       return [];
     },
     addEventListener() {},
@@ -210,7 +227,7 @@ test('the trainer page is the intake, and says what it is', () => {
     'their information comes first, the safety lines outrank the programme, and the programme comes last');
   // Every field the step is for is on the page.
   for (const id of TEXT_IDS) assert.match(html, new RegExp(`id="${id}"`), `the ${id} field is on the page`);
-  for (const k of [...KIT, ...WANT]) assert.ok(html.includes(k), `${k} is offered on the page`);
+  for (const k of [...KIT, ...WANT, ...SCREEN]) assert.ok(html.includes(k), `${k} is offered on the page`);
   // And it is reachable from the app's own door.
   assert.match(html, /href="\/app"/, 'the way back to the app is on the page');
 });
@@ -527,6 +544,59 @@ test('a browser that has been cleared starts empty instead of breaking', () => {
   assert.ok(p.sandbox.TRAINER, 'the page still comes up');
   assert.equal(p.box('name').value, '');
   assert.match(p.box('savedLine').textContent, /Nothing filled in yet/);
+});
+
+test('the readiness screen is on the intake and sorts three ways', () => {
+  // The Certification's day 23 says the Trainer's form is the readiness
+  // questionnaire and sorts it three ways. It did not; it does now, and the
+  // sort is the page's own so a coach sees the answer rather than working it out.
+  const store = {};
+  const p = loadPage(store);
+  assert.match(p.box('screeningResult').textContent, /clear to start/i,
+    'nothing ticked reads as clear to start');
+
+  p.box('screen:A joint problem exercise would aggravate').checked = true;
+  p.fire('intake', 'change');
+  assert.match(p.box('screeningResult').textContent, /start gently, and check with a doctor first/i,
+    'a joint problem is a doctor-first question, not a stop');
+
+  p.box('screen:Dizziness or fainting').checked = true;
+  p.fire('intake', 'change');
+  assert.match(p.box('screeningResult').textContent, /do not start until a doctor has said so/i,
+    'a red line holds the session');
+
+  const kept = JSON.parse(store[p.sandbox.TRAINER.KEY]);
+  assert.deepStrictEqual(kept.screen, ['Dizziness or fainting', 'A joint problem exercise would aggravate'],
+    'the screening is kept with the rest of their information');
+
+  const again = loadPage(store);
+  assert.equal(again.box('screen:Dizziness or fainting').checked, true, 'and comes back ticked on the next open');
+  assert.match(again.box('screeningResult').textContent, /do not start/i, 'with the same answer on the page');
+
+  assert.ok(again.fire('clearBtn', 'click'), 'Clear is wired up');
+  assert.match(again.box('screeningResult').textContent, /clear to start/i, 'and clearing clears the screen too');
+});
+
+test('a training history is part of their information', () => {
+  // The Certification's day 23 lists it beside the goal and the kit.
+  const store = {};
+  const p = loadPage(store);
+  p.box('history').value = 'Two years of gym, stopped after a shoulder injury';
+  p.fire('intake', 'change');
+  assert.equal(JSON.parse(store[p.sandbox.TRAINER.KEY]).history,
+    'Two years of gym, stopped after a shoulder injury', 'the history is kept');
+  const again = loadPage(store);
+  assert.equal(again.box('history').value, 'Two years of gym, stopped after a shoulder injury',
+    'and handed back on the next open');
+});
+
+test('the quick-add extras are not called the by-10 ones', () => {
+  // The by-10 is a rule, not an exercise list; the Certification says so twice
+  // and day 41 says the page carries no regressions either. The menu is P90X
+  // extras, so it says that rather than claiming a method it is not.
+  const html = fs.readFileSync(PAGE, 'utf8');
+  assert.doesNotMatch(html, /By-10 extras/, 'the extras are not labelled as the by-10\u2019s');
+  assert.match(html, /Extras · not P90X/, 'they are labelled as extras that are not P90X');
 });
 
 test('the by-10 is off the Trainer, and P90X is the programme on it', () => {

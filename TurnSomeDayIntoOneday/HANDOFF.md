@@ -139,6 +139,140 @@ and requires the superseded claims out of it (`three to five sets`, the
 bridge); `trainer.test.js` requires the rule on the rotation card. 442 tests,
 442 pass.
 
+**Two parts open at once — 18 Oct 2026.** Jacques: "the fix: two parts open at
+once." Every door on the shell (`/app`) replaces it with the part it opens, and
+inside the installed app there is no tab bar to open a second part in — one tap
+on a door and the first part is gone. So the shell carries both parts itself
+now: a **Two at once** button above the doors turns the screen into two panes,
+one above the other, each holding the very page its door leads to. Nothing here
+reaches round the door — a pane asks for `/key` or `/herbs` exactly as a tap on
+the card does, so the server checks the session and the list for it the same way,
+and `sw.js` still keeps every one of those pages out of its cache.
+
+Three things are deliberate. **A part is never loaded twice:** picking the part
+already in the other pane swaps the two, which is what changing one into the
+other means and spares the phone a second copy of the heaviest pages here. **The
+two are remembered** (`localStorage`, `tsid-split`), so the app opens on the two
+parts he was using, and closing the panes does not empty them — **signing out
+is the only thing that does.** And a part's own way back ("← The app") is read
+as what he meant — the doors — rather than drawing the shell inside its own pane.
+Because no other shape fits a phone, the panes are stacked rather than side by
+side: two half-width columns of a 412px screen are not readable, and every page
+here was built full width (the Key was audited at 412x915). **Tall** gives the
+pane being worked in the whole screen and leaves the other one loaded behind its
+own bar, one tap from being the tall one.
+
+`server/test/hub-split.test.js` — 9 tests. The table the panes are filled from
+must match the doors exactly (in order, same addresses, same names, so a sixth
+door cannot slip in unnoticed); nothing loads until he asks; asking loads
+**both**; the second part never replaces the first; a swap never loads a page
+twice; the choice survives a close and a reopen but not a sign-out; and a pane
+landing on `/app` closes the panes instead of nesting the shell. Version moved
+to `3.6` in `hub.html` and `tsid-shell-v3.6` in `sw.js` together — a new screen
+on the shell is a changed shell, and an installed phone that never rebuilds has
+no way to open a second part at all. Suite: 451 tests, 451 pass.
+
+**The third book is on the herbs — 18 Oct 2026.** Jacques pasted the text of
+*Melanin: What Makes Black People Black!* (Llaila Afrika, Seaburn, 2009) and
+said: "put this in the herbs." It is on the Herb Library's **From the books**
+tab now, as its own eleven shelves — the foreword's argument, what the book says
+melanin is (the pineal, the molecule, the melanocytes), what it takes in, where
+it is in the body, the two hormones, how it says to measure melanin, its six race
+types, its comparison of the two races, its psychology chapter, its nutrition
+chapter, and the two principles with the twelve clusters. It went there rather
+than into the A–Z shelf for the reason that tab exists: most of a book about
+melanin is not about one plant.
+
+Two rules came with it from the tab it joined, and both are pinned by tests:
+**every line is the book's claim, printed as the book's claim**, and where this
+page has a line of its own it sits in the box at the foot of the section and says
+so — so the pH and blood-pressure shelf says the self-test is the book's and not
+this page's, and the safety tab still outranks the whole shelf. The three herbs
+the book names for melanin (ginkgo, gotu kola, echinacea) are already on the
+page's own shelf with their cautions on them, so the nutrition shelf points at
+them instead of restating them.
+
+**The sixty days are untouched.** The course was written out of the first two
+books and its day one still names two of them; rather than rewrite ninety
+lessons and the day-one quiz around a third book, the tab's own card says so.
+`herbs-books.test.js` gained three tests: every shelf renders with real rows
+rather than a title alone, every shelf says whose voice its box is, the intro
+card now says three books and names the third, and every herb the nutrition
+shelf names is a real entry carrying its caution. **No version bump:** `sw.js`
+skips `/herbs` before any handler can answer it, so the shell did not move.
+Suite: 454 tests, 454 pass.
+
+**The herb course went to ninety days, and the third book went into both tracks —
+18 Oct 2026.** Jacques: "Alignment: Expand it to 90 and correlate the melanin
+book info into both the herbs course and the certification." So the library's
+course is ninety days now, the same length as the Certification's herbalist
+track, and the two can be read side by side.
+
+**Days 60 to 89 are the melanin book, whole.** Every one of the thirty is built
+out of the twelve shelves already transcribed on the From the books tab (18 Oct
+2026), and nothing is invented to fill a day: the pineal as master gland, what
+melanin does, what it is like, the molecule, where it is made, what it takes in,
+resonance, where it is in the body, the gland itself, the nerves, where the
+brain keeps it, what dulls it, the alkaloids, serotonin, melatonin, the drug
+claim, free radicals, the saliva and urine reading, insufficiency, deficiency,
+where the book stops, the six types, the standard-that-is-not-your-own, the two
+melanins, the two brains, the senses and the body, two ways of thinking, what
+melanin is built from, and the twelve clusters. Each day is three or four
+paragraphs, a book line where the shelf gives one, this page's own note, and
+five questions in the same plain style as the rest of the course. Day 90 is the
+test, still thirty questions and twenty-four to pass; five of its questions now
+ask about the third book (the master gland, serotonin, melatonin, the two
+melanins, the three herbs), so the test covers both halves. The tab reads **90
+days**, the progress line says "of 89 days done", and the bridge to the
+Certification writes total 89.
+
+**The Certification carries the same book.** Ten of its herbalist lessons now
+say what the third book says and say whose it is: day 2 is "The three books, and
+how they are quoted" and quotes it like the other two; day 21 and 22 carry its
+vitamin and mineral lists; day 24 and 70 carry its pineal-as-master-gland claim;
+day 35 sends its six race types, its two brains and its lab-values charge back
+to the book; day 37 and 64 add its daylight serotonin and ten-at-night melatonin;
+day 40 puts its drug claim beside the first safety rule without moving the rule;
+and day 67 keeps its melanin-in-the-skin claim while leaving the red flags
+unchanged for every skin. Its references to the library now say ninety days
+throughout, and `libLabel` reads "Herb Library - the ninety days".
+
+**Tests:** `herbs-course.test.js` is pinned to ninety days, eighty-nine teaching
+days, day 90 as the test, and the bridge total of 89; the day-90 record
+migration is checked the way day 60's used to be. Suite: 454 tests, 454 pass.
+**No version bump:** `sw.js` still answers nothing for `/herbs`.
+
+**The Read this first tab came off the herb library — 18 Oct 2026.** Jacques:
+"Remove what: Remove the \"Read this first\" tab itself." So the tab went: the
+chip in the strip, its seven boxes, its read-aloud (`SAFETY_BOXES` and
+`safetySayText`), its render branch and its `#safety` address. The strip is
+seven tabs now — A–Z, By need, From the books, 60 days, Meal plan, The deep
+story, My notes — and nothing on the page points at the one that left.
+
+**The lines themselves did not go with it.** They were already day 28 of the
+course in the page's own words, and that day is the only place all seven now
+sit together: its subtitle and its last paragraph were rewritten to point at
+itself rather than at a tab, and its last question asks where the lines live
+now (the day, and the card of every herb they touch). Every card still carries
+its own caution, and the infection refusal is still written into the entries
+where it matters, so the shelf is not left without the line that matters most.
+The books and melanin shelves now say "the page's own lines are not softened by
+any of it" instead of naming a tab, and the one line that lived only in the
+tab's foot box — *the claims are made here plainly* — moved to the From the
+books intro card as **The voice**, so the page's own statement about its own
+voice was not lost with the furniture.
+
+**Everything that pointed at it now points at day 28.** The Certification's
+`GO_DEEPER` doors that landed on `/herbs#safety` land on `/herbs#d28` (the
+label comes out as "Herb Library - day 28"), the doors whose real subject was a
+plant card go to the cards, `libLabel`'s dead `#safety` branch came off, and the
+Certification's own teaching says "the library's day 28" where it said "the
+safety tab". A phone still holding `#safety` in its history opens the library
+on its ordinary A–Z tab rather than a blank page; a test pins that, and the
+voice and course tests now check the lines on day 28 instead of on the tab.
+**No version bump:** `sw.js` still returns before any handler can answer
+`/herbs`, so the shell did not move. Suite: 454 tests, 454 pass.
+
 **The cards on the Key are a reading, not a draw — 14 Oct 2026.** Jacques:
 "why the cards don't read like a tarot reading it's short and it should be read
 like a professional tarot reader and they should only be chosen based on

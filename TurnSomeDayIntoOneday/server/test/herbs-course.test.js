@@ -1,8 +1,10 @@
-// The herb library's 60 days tab — the beginner course built out of the same
-// two Llaila O. Afrika books as the rest of /herbs. It was thirty days until
-// 11 Oct 2026, when Jacques asked for it gone deeper: thirty new days were
-// added (the books' own theory, the history, the money, and coming off sugar)
-// and the test moved from day 30 to day 60 with thirty questions on it.
+// The herb library's 90 days tab — the beginner course built out of the three
+// Llaila O. Afrika books behind /herbs. It was thirty days until 11 Oct 2026
+// and sixty until 18 Oct 2026, when Jacques asked to "expand it to 90 and
+// correlate the melanin book info into both the herbs course and the
+// certification": days 60 to 89 are the melanin book's own material, and the
+// test moved to day 90 with its thirty questions. Ninety matches the
+// Certification's ninety, so the two herb tracks can be read side by side.
 //
 // What this checks is not the prose. It is the four places a course like this
 // goes quietly wrong:
@@ -10,14 +12,16 @@
 //   1. a day that teaches and then asks nothing, or a question whose answer
 //      index points at an option that is not there — the page would then
 //      mark every answer wrong and never say why;
-//   2. the days not adding up to sixty, or a number used twice;
-//   2b. the extra forty-one questions on the new days repeating an option or
+//   2. the days not adding up to ninety, or a number used twice;
+//   2b. the extra questions on the new days repeating an option or
 //      blanking one, which marks a right answer wrong;
 //   3. the score not actually following the answer, which is the only part of
 //      the page a person can catch it lying about;
-//   4. the lines on the Read this first tab going missing from the last weeks
-//      of the course, because those are the lines that outrank every claim on
-//      every other tab and they are the reason day 28 exists.
+//   4. the page's own safety lines going missing from the course, because those
+//      are the lines that outrank every claim on every other tab and they are
+//      the reason day 28 exists. The Read this first tab that used to carry
+//      them came off on 18 Oct 2026, so the day is now the only place all of
+//      them sit together and this check matters more than it did.
 //
 // The page is run for real in a stub DOM, the same way herbs-books.test.js runs
 // it.
@@ -81,7 +85,7 @@ function loadPage(file, seeded) {
   return { sandbox, els, store: mem };
 }
 
-test('the herb library: the 60 days tab also renders all ten supplied source lessons separately', () => {
+test('the herb library: the 90 days tab also renders all ten supplied source lessons separately', () => {
   const p = loadPage('herbs.html');
   p.sandbox.tab = 'course';
   p.sandbox.render();
@@ -128,23 +132,25 @@ test('the herb library: the supplied European Mythology summary renders as separ
   assert.match(notes[4].notes[0], /communities of African descent should prioritize indigenous African folk tales/);
 });
 
-test('the herb library: the 60 days tab is a door in the page, and it renders', () => {
+test('the herb library: the 90 days tab is a door in the page, and it renders', () => {
   const html = fs.readFileSync(path.join(ROOT, 'herbs.html'), 'utf8');
-  assert.match(html, /data-t="course">60 days</, 'the tab is on the page');
+  assert.match(html, /data-t="course">90 days</, 'the tab is on the page');
   const p = loadPage('herbs.html');
   p.sandbox.tab = 'course';
   p.sandbox.render();
   const view = p.els.get('view').innerHTML;
   assert.match(view, /data-h="d1"/, 'the first day renders');
-  assert.match(view, /data-h="d60"/, 'and the last one does');
-  assert.match(view, /of 59 days done/, 'the progress line counts the fifty-nine teaching days');
+  assert.match(view, /data-h="d90"/, 'and the last one does');
+  assert.match(view, /of 89 days done/, 'the progress line counts the eighty-nine teaching days');
+  assert.match(view, /The third book/, 'the thirty melanin days render on the tab');
+  assert.match(view, /The twelve clusters/, 'and the last teaching day does');
   assert.match(view, /Twenty-four out of thirty is a pass/, 'and the test is announced before it is taken');
 });
 
-test('the herb library: the course is sixty days, numbered once each, all with a title', () => {
+test('the herb library: the course is ninety days, numbered once each, all with a title', () => {
   const p = loadPage('herbs.html');
   const days = p.sandbox.COURSE;
-  assert.strictEqual(days.length, 60, 'sixty days');
+  assert.strictEqual(days.length, 90, 'ninety days');
   const seen = [];
   for (const d of days) {
     assert.ok(d.t && d.t.length > 2, `day ${d.d} has a title`);
@@ -152,19 +158,19 @@ test('the herb library: the course is sixty days, numbered once each, all with a
     assert.ok(!seen.includes(d.d), `day ${d.d} is numbered once`);
     seen.push(d.d);
   }
-  for (let n = 1; n <= 60; n++) assert.ok(seen.includes(n), `day ${n} exists`);
+  for (let n = 1; n <= 90; n++) assert.ok(seen.includes(n), `day ${n} exists`);
 });
 
 // 15 Oct 2026. Jacques: "As I'm doing to herb certification i dont its confusing
 // rewrite it on the level a 2nd grader would understand in the quiz give 5
 // questions." Both herb courses were rewritten in plainer words, five questions
-// to a teaching day. Day 60 is the test rather than a lesson, so it keeps its
+// to a teaching day. Day 90 is the test rather than a lesson, so it keeps its
 // thirty. The count is pinned here so a later edit cannot quietly drop it back.
 test('the herb library: every teaching day asks five questions, and every answer index points at an option that is there', () => {
   const p = loadPage('herbs.html');
   for (const d of p.sandbox.COURSE) {
     assert.ok(Array.isArray(d.q) && d.q.length >= 3, `day ${d.d} has its questions`);
-    if (d.d < 60) assert.strictEqual(d.q.length, 5, `day ${d.d} asks five questions`);
+    if (!d.test) assert.strictEqual(d.q.length, 5, `day ${d.d} asks five questions`);
     // QUIZ_N is the number a stored answer is measured against when the page
     // opens (dropStaleDays). It is a hand-set constant, so an edit that changes
     // how many questions a day asks can leave it behind and nothing would say
@@ -199,21 +205,21 @@ test('the herb library: a record written before answers were stamped is judged b
   const seeded = {
     tsid_herb_notes_v1: JSON.stringify({
       'day:3': { a: [0, 1, 2, 3] },                       // all four of an old quiz
-      'day:60': { a: new Array(12).fill(0) },             // part of the test, unchanged
+      'day:90': { a: new Array(12).fill(0) },             // part of the test, unchanged
     }),
   };
   const p = loadPage('herbs.html', seeded);
   const s = p.sandbox;
 
   assert.strictEqual(s.dayRec(3).a.length, 0, 'an unstamped record of an old four-question day is dropped');
-  assert.strictEqual(s.dayRec(60).a.length, 12, 'an unstamped test record is kept, because the test did not change');
-  assert.strictEqual(s.dayScore(60).done, false, 'and a part of the test is still not a finished test');
+  assert.strictEqual(s.dayRec(90).a.length, 12, 'an unstamped test record is kept, because the test did not change');
+  assert.strictEqual(s.dayScore(90).done, false, 'and a part of the test is still not a finished test');
 });
 
 test('the herb library: the last day is the test, and its pass mark is inside it', () => {
   const p = loadPage('herbs.html');
-  const last = p.sandbox.COURSE.filter((d) => d.d === 60)[0];
-  assert.ok(last && last.test === 1, 'day 60 is the test');
+  const last = p.sandbox.COURSE.filter((d) => d.d === 90)[0];
+  assert.ok(last && last.test === 1, 'day 90 is the test');
   assert.strictEqual(last.q.length, 30, 'the test is thirty questions');
   assert.strictEqual(p.sandbox.EXAM_PASS, 24, 'twenty-four is the pass mark');
   assert.ok(p.sandbox.EXAM_PASS > 0 && p.sandbox.EXAM_PASS <= last.q.length,
@@ -266,12 +272,12 @@ test('the herb library: answers given to a quiz since rewritten are dropped, nev
   // 15 Oct 2026. The teaching days went from three or four questions to five.
   // An answer is kept against the position it was given at, so the old ones
   // would land on questions nobody read, be marked right or wrong against them,
-  // and be counted in a score. The day opens again instead. The day-60 test
+  // and be counted in a score. The day opens again instead. The day-90 test
   // kept its thirty questions through the rewrite, so a record of it stands.
   const seeded = {
     tsid_herb_notes_v1: JSON.stringify({
       'day:1': { a: [0, 1, 2] },               // three answers to a three-question day
-      'day:60': { a: new Array(30).fill(0) },  // the test's own thirty, unchanged
+      'day:90': { a: new Array(30).fill(0) },  // the test's own thirty, unchanged
     }),
   };
   const p = loadPage('herbs.html', seeded);
@@ -280,15 +286,15 @@ test('the herb library: answers given to a quiz since rewritten are dropped, nev
   assert.strictEqual(s.dayRec(1).a.length, 0, 'the answers to the old quiz are gone');
   assert.strictEqual(s.dayScore(1).done, false, 'so the day is not a finished day');
   assert.strictEqual(s.daysDone(), 0, 'and the course reports nothing done');
-  assert.strictEqual(s.dayRec(60).a.length, 30, 'the test kept its thirty questions, so its record stands');
-  assert.strictEqual(s.dayScore(60).done, true, 'and it is still read as a finished test');
+  assert.strictEqual(s.dayRec(90).a.length, 30, 'the test kept its thirty questions, so its record stands');
+  assert.strictEqual(s.dayScore(90).done, true, 'and it is still read as a finished test');
 
   // The summary the Certification reads is rewritten in the same breath, or the
-  // other half of the app would go on reporting sixty days done over a course
+  // other half of the app would go on reporting ninety days done over a course
   // that has just gone back to the beginning.
   const bridge = JSON.parse(p.store.tsid_herb_progress_v1);
   assert.strictEqual(bridge.done, 0, 'the library tells the Certification the truth about the reset');
-  assert.strictEqual(bridge.total, 59);
+  assert.strictEqual(bridge.total, 89);
 
   // A fresh answer is stamped with the quiz it was given to, and survives the
   // next open - the page is not a wrecking ball, it is one question long: does
@@ -298,13 +304,13 @@ test('the herb library: answers given to a quiz since rewritten are dropped, nev
   assert.strictEqual(s.dayRec(2).n, 5, 'the answer records how many questions the day asked');
   const again = loadPage('herbs.html', p.store);
   assert.strictEqual(again.sandbox.picked(2, 0), q0, 'and a later open keeps it');
-  assert.strictEqual(again.sandbox.dayRec(60).a.length, 30, 'beside the test it never touched');
+  assert.strictEqual(again.sandbox.dayRec(90).a.length, 30, 'beside the test it never touched');
 });
 
 test('the herb library: the check runs on every open, and the test day is no exception', () => {
   // 17 Oct 2026. The check above only ran while the store's quizN marker
   // disagreed with QUIZ_N, so it cleaned a phone once and then switched itself
-  // off: a second rewrite would repaint the old answers. And its day-60 branch
+  // off: a second rewrite would repaint the old answers. And its day-90 branch
   // compared the test's length with itself, so no test record was ever dropped.
   // Both are the same promise, so both are checked here on a store that has
   // already been through the marker once.
@@ -312,7 +318,7 @@ test('the herb library: the check runs on every open, and the test day is no exc
     tsid_herb_notes_v1: JSON.stringify({
       quizN: 5,
       'day:1': { a: [0, 1, 2], n: 3 },                // stamped, for a 3-question quiz
-      'day:60': { a: new Array(20).fill(0), n: 20 },  // the test holds thirty now
+      'day:90': { a: new Array(20).fill(0), n: 20 },  // the test holds thirty now
       'day:2': { a: [0], n: 5 },                      // half of today's quiz
     }),
   };
@@ -320,8 +326,8 @@ test('the herb library: the check runs on every open, and the test day is no exc
   const s = p.sandbox;
 
   assert.strictEqual(s.dayRec(1).a.length, 0, 'a record stamped for another quiz is dropped on any open');
-  assert.strictEqual(s.dayRec(60).a.length, 0, 'and so is a test record written against twenty questions');
-  assert.strictEqual(s.dayScore(60).right, 0, 'so nothing is scored against a question nobody read');
+  assert.strictEqual(s.dayRec(90).a.length, 0, 'and so is a test record written against twenty questions');
+  assert.strictEqual(s.dayScore(90).right, 0, 'so nothing is scored against a question nobody read');
   assert.strictEqual(s.dayRec(2).a.length, 1, 'a record that matches the quiz in front of it is kept, even half-done');
   assert.strictEqual(s.picked(2, 0), 0, 'and its answer is still the answer given');
   assert.strictEqual(JSON.parse(p.store.tsid_herb_notes_v1).quizN, s.QUIZ_N, 'the marker is written back');
@@ -330,33 +336,33 @@ test('the herb library: the check runs on every open, and the test day is no exc
 test('the herb library: the test scores, passes, and can be taken again', () => {
   const p = loadPage('herbs.html');
   const s = p.sandbox;
-  const exam = s.COURSE.filter((d) => d.d === 60)[0];
+  const exam = s.COURSE.filter((d) => d.d === 90)[0];
 
   // Twenty-three right, seven left blank: not finished, so not scored yet.
-  exam.q.forEach((q, i) => { if (i < 23) s.answer(60, i, q.k); });
-  assert.strictEqual(s.dayScore(60).done, false, 'a half-answered test is not a result');
+  exam.q.forEach((q, i) => { if (i < 23) s.answer(90, i, q.k); });
+  assert.strictEqual(s.dayScore(90).done, false, 'a half-answered test is not a result');
 
   // Deliberately get seven wrong. Twenty-three right is below the pass mark.
-  for (let i = 23; i < 30; i++) s.answer(60, i, (exam.q[i].k + 1) % exam.q[i].a.length);
-  let score = s.dayScore(60);
+  for (let i = 23; i < 30; i++) s.answer(90, i, (exam.q[i].k + 1) % exam.q[i].a.length);
+  let score = s.dayScore(90);
   assert.strictEqual(score.done, true, 'the test is finished once all thirty are answered');
   assert.strictEqual(score.right, 23, 'twenty-three right');
   assert.ok(score.right < s.EXAM_PASS, 'which is below the pass mark');
   s.tab = 'course';
-  s.openId = 'd60';
+  s.openId = 'd90';
   s.render();
   assert.match(p.els.get('view').innerHTML, /Not yet/, 'and the page says so');
 
   // Take it again, all right this time.
-  exam.q.forEach((q, i) => s.answer(60, i, q.k));
-  score = s.dayScore(60);
+  exam.q.forEach((q, i) => s.answer(90, i, q.k));
+  score = s.dayScore(90);
   assert.strictEqual(score.right, 30, 'thirty right');
   assert.ok(score.right >= s.EXAM_PASS, 'which passes');
   s.render();
   assert.match(p.els.get('view').innerHTML, /Passed/, 'and the page says that too');
 });
 
-test('the herb library: the course header reports the day-60 test, not day 30', () => {
+test('the herb library: the course header reports the day-90 test, not day 30', () => {
   // The progress line above the days says "The test: …", but it was reading
   // dayScore(30) — a leftover from when the exam was day 30 and the course was
   // thirty days. Day 30 is an ordinary teaching day now, with only five
@@ -364,19 +370,19 @@ test('the herb library: the course header reports the day-60 test, not day 30', 
   // what a person reads before the days themselves, so it is pinned here.
   const p = loadPage('herbs.html');
   const s = p.sandbox;
-  const exam = s.COURSE.filter((d) => d.d === 60)[0];
+  const exam = s.COURSE.filter((d) => d.d === 90)[0];
   const day30 = s.COURSE.filter((d) => d.d === 30)[0];
   assert.strictEqual(exam.q.length, 30, 'the test is thirty questions');
   assert.notStrictEqual(day30.q.length, exam.q.length,
     'day 30 is not the exam, so the header cannot be right by reading it');
 
   // Twenty-six right, four wrong: all thirty answered, above the pass mark.
-  exam.q.forEach((q, i) => s.answer(60, i, i < 26 ? q.k : (q.k + 1) % q.a.length));
+  exam.q.forEach((q, i) => s.answer(90, i, i < 26 ? q.k : (q.k + 1) % q.a.length));
   s.tab = 'course';
   s.render();
   let view = p.els.get('view').innerHTML;
   assert.match(view, /The test: 26 of 30 \u2014 passed/, 'the header carries the exam score');
-  assert.doesNotMatch(view, /The test is day 60/, 'and not the not-yet-taken line');
+  assert.doesNotMatch(view, /The test is day 90/, 'and not the not-yet-taken line');
 
   // Answering day 30 does not change it — the header is the exam's, not day 30's.
   day30.q.forEach((q, i) => s.answer(30, i, q.k));
@@ -385,7 +391,7 @@ test('the herb library: the course header reports the day-60 test, not day 30', 
   assert.match(view, /The test: 26 of 30 \u2014 passed/, 'still the exam once day 30 is answered');
 
   // Below the pass mark, the header says so with the exam's own numbers.
-  exam.q.forEach((q, i) => s.answer(60, i, i < 23 ? q.k : (q.k + 1) % q.a.length));
+  exam.q.forEach((q, i) => s.answer(90, i, i < 23 ? q.k : (q.k + 1) % q.a.length));
   s.render();
   view = p.els.get('view').innerHTML;
   assert.match(view, /The test: 23 of 30 \u2014 the pass mark is 24/, 'and reports a fail honestly');
@@ -395,8 +401,9 @@ test('the herb library: the lines that never move are taught in the last week', 
   const p = loadPage('herbs.html');
   const day = p.sandbox.COURSE.filter((d) => d.d === 28)[0];
   const text = JSON.stringify(day);
-  // Day 28 exists to carry the Read this first tab into the course. If it stops
-  // carrying it, the course has a hole exactly where it cannot afford one.
+  // Day 28 exists to carry the page's own lines. It was the course's end of the
+  // Read this first tab until 18 Oct 2026, when the tab came off; the day is the
+  // only place all of them sit together now, so a hole here is a hole in the page.
   // The wording was rewritten on 12 Oct 2026 at the owner's request, so that the
   // page never sends anybody to a doctor: same warnings, no "go and see" lines.
   // What is checked here is what was always checked — that the warnings are on
@@ -406,9 +413,9 @@ test('the herb library: the lines that never move are taught in the last week', 
   assert.match(text, /nothing on this shelf is ever a reason to stop something you are already taking/, 'and the line about what somebody is already taking');
   assert.match(text, /Pregnancy and children/, 'and pregnancy and children');
   assert.match(text, /kratom is not in this library/, 'and kratom');
-  // The tab itself is still the page's, unsoftened.
+  // And the page still says the same thing outside the course's words.
   const html = fs.readFileSync(path.join(ROOT, 'herbs.html'), 'utf8');
-  assert.match(html, /Nothing here answers an infection/, 'the tab still says it');
+  assert.match(html, /Nothing on this shelf answers an infection/, 'the page still says it');
   assert.match(html, /Alcohol withdrawal can kill/, 'and still says that');
 });
 
@@ -472,7 +479,7 @@ test('the herb library: the new days are the books\u2019 material, not invented'
 // 13 Oct 2026, at Jacques's word "link them and deepen them": the library and the
 // Certification were two islands. The course now opens the ninety-day
 // Certification, and a link from the Certification lands on the exact tab and
-// day it names - #d12 on the course, #safety on the lines that outrank it.
+// day it names - #d12 on the course, #d28 on the lines that outrank it.
 test('the herb library links out to the Certification and reads a deep link', () => {
   const html = fs.readFileSync(path.join(ROOT, 'herbs.html'), 'utf8');
   assert.match(html, /href="\/certify#herbalist"/, 'the course links to the ninety-day Certification');
@@ -481,14 +488,23 @@ test('the herb library links out to the Certification and reads a deep link', ()
   // A completion link from a course-lesson opens the tab and the day it names.
   p.sandbox.window.location = { hash: '#d12', search: '' };
   p.sandbox.applyDeepLink();
-  assert.strictEqual(p.sandbox.tab, 'course', 'a course-day link opens the 60 days tab');
+  assert.strictEqual(p.sandbox.tab, 'course', 'a course-day link opens the 90 days tab');
   assert.strictEqual(p.sandbox.openId, 'd12', 'and the day it names');
 
-  // The safety tab, the plant cards and the rest are reachable the same way.
+  // The plant cards and the shelves are reachable the same way, and the lines
+  // themselves are a day now, so the Certification's door lands on day 28.
+  p.sandbox.window.location = { hash: '#d28', search: '' };
+  p.sandbox.applyDeepLink();
+  assert.strictEqual(p.sandbox.tab, 'course', 'the lines are a day of the course');
+  assert.strictEqual(p.sandbox.openId, 'd28', 'and land on the day that keeps them');
+  // The retired Read this first address (18 Oct 2026) still sits in some
+  // histories. It must leave the library open on its ordinary tab, not blank it.
+  p.sandbox.tab = 'az';
+  p.sandbox.openId = null;
   p.sandbox.window.location = { hash: '#safety', search: '' };
   p.sandbox.applyDeepLink();
-  assert.strictEqual(p.sandbox.tab, 'safety', 'the read-first tab is a real address');
-  assert.strictEqual(p.sandbox.openId, null, 'and opens no card of its own');
+  assert.strictEqual(p.sandbox.tab, 'az', 'a retired address opens no tab of its own');
+  assert.strictEqual(p.sandbox.openId, null, 'and opens no card either');
 
   // The query shape a shared link travels in works too.
   p.sandbox.window.location = { hash: '', search: '?tab=course&day=30' };
@@ -591,6 +607,6 @@ test('the herb library: saving a day writes the progress the Certification reads
   day.q.forEach((q, i) => s.answer(2, i, q.k));
   const written = JSON.parse(s.localStorage.getItem('tsid_herb_progress_v1'));
   assert.strictEqual(written.done, 1, 'the day is counted');
-  assert.strictEqual(written.total, 59, 'against the fifty-nine teaching days');
+  assert.strictEqual(written.total, 89, 'against the eighty-nine teaching days');
   assert.strictEqual(written.passed, false, 'and the test is not claimed until it is passed');
 });

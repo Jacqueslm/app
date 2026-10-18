@@ -180,16 +180,23 @@ test('the herb library: no voice on the phone is said in words, not silence', ()
 
 test('the herb library: its own safety lines are still on the page', () => {
   // The ask box that carried these went with Friendly. The lines themselves are
-  // the page's own, on the safety tab, and they are the part that never moves.
+  // the page's own, and they are the part that never moves. They lived on a
+  // Read this first tab until 18 Oct 2026, when Jacques had the tab itself taken
+  // off ("Remove the Read this first tab itself"); they are day 28's teaching
+  // now, and every card still carries its own.
   const p = loadPage();
-  p.sandbox.tab = 'safety';
+  assert.doesNotMatch(HTML, /data-t="safety"/, 'the tab itself is gone');
+  p.sandbox.tab = 'course';
+  p.sandbox.openId = 'd28';
   p.sandbox.render();
   const html = p.els.get('view').innerHTML;
   // Reworded on 12 Oct 2026 at the owner's request: the warnings stay, the
   // "go and see" lines are gone.
-  assert.match(html, /Nothing here answers an infection/);
-  assert.match(html, /Coming off alcohol or a drug/);
-  assert.match(html, /What these herbs do to what you already take/);
+  assert.match(html, /Nothing on this shelf answers an infection/);
+  assert.match(html, /Alcohol withdrawal can kill/);
+  assert.match(html, /nothing on this shelf is ever a reason to stop something you are already taking/);
+  assert.match(html, /Pregnancy and children/);
+  assert.match(html, /kratom is not in this library/);
 });
 
 // The read-aloud is not only for a herb: the rest of the page reads out loud too,
@@ -227,15 +234,19 @@ test('the herb library: each day of the thirty days reads out loud', () => {
   assert.ok(p.said[0].text.indexOf(day1.q[0].q) === -1, 'the quiz question stays on the screen');
 });
 
-test('the herb library: the safety tab can be read out loud', () => {
+test('the herb library: the day that carries the safety lines can be read out loud', () => {
+  // The tab that used to carry its own read button came off on 18 Oct 2026.
+  // Day 28 of the course carries the same lines, and the day's own button reads
+  // them, so they are still listenable rather than screen-only.
   const p = loadPage();
-  p.sandbox.tab = 'safety';
+  p.sandbox.tab = 'course';
+  p.sandbox.openId = 'd28';
   p.sandbox.render();
   const html = p.els.get('view').innerHTML;
-  assert.match(html, /data-say="safety"/, 'the safety tab carries a read button');
-  p.sandbox.say('safety');
+  assert.match(html, /data-say="d28"/, 'the day carries a read button');
+  p.sandbox.say('d28');
   assert.equal(p.said.length, 1, 'one press, one reading');
-  assert.match(p.said[0].text, /Nothing here answers an infection/, 'the first safety line is read');
+  assert.match(p.said[0].text, /Nothing on this shelf answers an infection/, 'the infection line is read');
   assert.match(p.said[0].text, /is not a free addition to anything else/, 'and the line about what the herbs do to what you take comes through too');
 });
 

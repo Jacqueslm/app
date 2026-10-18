@@ -119,10 +119,9 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div class="tab on" data-t="az">A&#8211;Z</div>
     <div class="tab" data-t="need">By need</div>
     <div class="tab" data-t="books">From the books</div>
-    <div class="tab" data-t="course">60 days</div>
+    <div class="tab" data-t="course">90 days</div>
     <div class="tab" data-t="meal">Meal plan</div>
     <div class="tab" data-t="deep">The deep story</div>
-    <div class="tab" data-t="safety">Read this first</div>
     <div class="tab" data-t="mine">My notes</div>
   </div>
 
@@ -130,7 +129,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 
   <div class="ft">
     Herb Library — private. Built for Jacques.<br>
-    Kept beside <i>African Holistic Health</i> and <i>Nutricide</i> (Llaila O. Afrika),<br>both of them in the shelves and the From the books tab.
+    Kept beside <i>African Holistic Health</i>, <i>Nutricide</i> and <i>Melanin: What Makes<br>Black People Black!</i> (Llaila O. Afrika), all three in the From the books tab.
   </div>
 </div>
 
@@ -140,7 +139,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 
    The entries make claims — what a plant does, how it is taken, what it is
    taken with, and the caution that travels with it. This page is private,
-   between two people, built from books they own, and the public app’s caution does not govern it (15 Sep 2026). Every shelf here can be read out loud by the phone itself — an open herb, the book sections, the thirty days and the safety tab.
+   between two people, built from books they own, and the public app’s caution does not govern it (15 Sep 2026). Every shelf here can be read out loud by the phone itself —   an open herb, the book sections and the days of the course.
 
    On 11 Oct 2026 "go deep" was asked for, and three things were added to it:
    the course went from thirty days to sixty (days 30 to 59 are new, and the
@@ -149,7 +148,14 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
    books actually say about sugar, mucus, the twenty-four hour cycle, the two
    principles, the food business and the medicine business. Everything in
    those three is still the books' claim, printed as their claim, and the
-   safety tab still outranks all of it.
+   page's own lines still outrank all of it.
+
+   On 18 Oct 2026 the course went to ninety days ("expand it to 90 and
+   correlate the melanin book info into both the herbs course and the
+   certification"): days 60 to 89 are the third book, Melanin: What Makes
+   Black People Black!, and the test moved to day 90 with its thirty
+   questions on it. The ninety match the Certification's ninety, so the two
+   herb tracks can be read side by side.
 
    The second rule is the one that matters for this house: nothing here tells
    somebody they are finished, and nothing here talks somebody out of what they take.
@@ -657,8 +663,8 @@ var NEEDS = [
    Every line here is theirs, and the claims in them are theirs and are made
    here. The amounts are theirs, printed as the books give them. They are here
    because the library belongs to two people who own the books, and because
-   that is what was asked for (24 Sep 2026). The safety tab is not softened by
-   any of it, and where a book names something that is a poison, the entry says
+   that is what was asked for (24 Sep 2026). The page's own lines are not
+   softened by any of it, and where a book names something that is a poison, the entry says
    so.
 
    African Holistic Health (the copy in this repo is Bookey's summary of it) and
@@ -667,11 +673,12 @@ var NEEDS = [
 var BOOKS = [
  {h:"What this tab is, and where each line came from", s:"Read this one first",
   rows:[
-   ["The two books","African Holistic Health and Nutricide, both by Llaila O. Afrika. They sit beside this library. Everything in this tab, and every entry with a From the books line on it, is theirs rather than the page's."],
+   ["The three books","African Holistic Health and Nutricide, both by Llaila O. Afrika, and Melanin: What Makes Black People Black! by the same author (Seaburn, 2009), which joined the tab on 18 Oct 2026 — its twelve shelves are the last ones on this tab, just above What came from where. They sit beside this library, and everything in this tab, and every entry with a From the books line on it, is theirs rather than the page's."],
    ["The copy of African Holistic Health here","is Bookey's summary of the book — chapter summaries, quoted pages, and questions and answers. Where a line below says the book, that is the summary's words about the book. It is not the whole book."],
    ["The copy of Nutricide here","is a rough scan read as text. The seasonings, the nutritional approach, the blood cleansers and the immune builders in this tab are transcribed from it."],
    ["The amounts","Every measurement in this tab is the book's own, printed exactly as the book gives it. They are stated as claims, which is what they are."],
-   ["What has not changed","The safety tab stands exactly as it was. An infection, coming off alcohol or a drug, pregnancy, a child, and what you are already taking still go where they went before."],
+   ["What has not changed","The page's own lines stand exactly as they were, and day 28 of the course keeps all of them together. An infection, coming off alcohol or a drug, pregnancy, a child, and what you are already taking still go where they went before."],
+   ["The voice","The claims are made here plainly, because this is a private shelf for two people and their own books (15 Sep 2026). Where a line is the book's, it says so; where it is the page's, that says so too, and nothing here is a reason to stop or change anything you have been given."],
    ["Why it is a tab and not entries","The books' own material is mostly not about one plant. Classes, methods, amounts, shelves and tables do not fit a herb card, so they got their own shelf instead of being cut up into one."]],
   note:"<b>Read the amounts as the book\u2019s, printed as the book gives them as claims</b>The book gives them plainly, so they are printed plainly, and taken as claims.",
   noteCls:"warnbox"},
@@ -793,7 +800,7 @@ var BOOKS = [
    ["Grape seed extract","infection."],
    ["Pine bark extract","colds, infection."],
    ["Yohimbe extract","energy and the reproductive organs, and the book pairs it with damiana for a woman. Its own entry carries the caution that has to travel with it: it is dangerous with anything acting on serotonin or on blood pressure."],
-   ["Goldenseal extract","the book gives it broadly, for all types of disease. It has harmed newborns, and it sits on the safety tab by name for that reason."],
+   ["Goldenseal extract","the book gives it broadly, for all types of disease. It has harmed newborns, and its own entry carries that line for that reason."],
    ["Vitamin E","up to 800 i.u. a day, as the book gives it."],
    ["Ginseng","energy."],
    ["Lecithin","the book gives it for the nerves."],
@@ -858,7 +865,7 @@ var BOOKS = [
    ["Bowel problems","Dandelion and slippery elm."],
    ["Burns","Aloe vera, goldenseal, marshmallow — on the skin, never the neat oil."],
    ["Colds","Aconite and bryonia; and allium cepa, the onion. Allium cepa is the onion and is not homeopathy; aconite and bryonia are."],
-   ["Coughs","Coltsfoot, mullein and thyme; and in the book's answers, lobelia, hyssop and mullein. Coltsfoot is the one on the safety list: a few days at most, never for a child."],
+   ["Coughs","Coltsfoot, mullein and thyme; and in the book's answers, lobelia, hyssop and mullein. Coltsfoot is the one with the hard limit: a few days at most, never for a child."],
    ["Diabetes","Gymnema sylvestre and bilberry. No herb on this shelf is a treatment for diabetes, and a leaf is never in place of what somebody is already doing about it."],
    ["Diarrhea","Arsenicum, bryonia."],
    ["Fever","Aconite, belladonna, nux vomica."],
@@ -1045,13 +1052,133 @@ var BOOKS = [
    ["On the ideal","Herbs are the ideal medicine for Africans."],
    ["On the whole of it","The spirit, the mind and the body are one. The past, the present and the future are one now."]]},
 
+/* ---- MELANIN ---------------------------------------------------------------
+   The third book, added 18 Oct 2026. Jacques: "put this in the herbs", with the
+   book's own text pasted in — Melanin: What Makes Black People Black! by Llaila
+   Afrika (Seaburn, 2009), the same author as the two books this tab was already
+   built from. It has its own shelf for the reason the other two do: most of it is
+   not about one plant.
+
+   The rule the rest of this tab keeps is kept exactly here. Every line is the
+   book's claim, printed as its claim; where this page has a line of its own it is
+   in the box at the foot of the section and says so; and the page's own lines
+   are not softened by any of it. The first fifty-nine days still teach the first
+   two books, which is why its day one still names two of them; days 60 to 89
+   teach this one. */
+
+ {h:"Melanin \u2014 the third book", s:"Melanin: What Makes Black People Black! \u00b7 Llaila Afrika, Seaburn, 2009",
+  rows:[
+   ["The book","Melanin: What Makes Black People Black! by Llaila Afrika, published by the Seaburn Publishing Group in 2009. Sixty-six pages, from the foreword to the suggested reading, and the same author as the two books this tab was built from."],
+   ["What it sets out to do","The foreword's own line: melanin is the biochemical substance that drives physical, mental, emotional and spiritual life. The book's reason for existing is to give the basics of it, and of how to feed it, in everyday language rather than in the Latin of chemistry and biology."],
+   ["The complaint it answers","The book repeats what its readers tell it — what good is it, it does not help you to be free — and agrees with them: a Black person unaware of melanin is manipulated and controlled by that unawareness. So the book is about knowing what melanin is and what nourishes it."],
+   ["What the book says about the diet","Its claim, in the foreword: Black people are a melanin-dominant race eating as though they were white, and since white people carry the least melanin, that way of eating gives the least nourishment to melanin — nutritionally against their own melanin, and against themselves."],
+   ["How this shelf is labelled","Every line below is the book's claim, printed as its claim, the same rule the rest of this tab keeps. Where this page has a line of its own, it is in the box at the foot of the section and says so."]],
+  note:"<b>The book's claims, printed as the book's claims</b>This shelf is a third book's material, not this page's advice. The page's own lines are not softened by any of it, and nothing here is a reason to stop or change anything you have been given.",
+  noteCls:"warnbox"},
+
+ {h:"The pineal gland, and what melanin is", s:"the book's first chapters",
+  rows:[
+   ["The pineal is the master gland","The pituitary has been called the master gland, and the book says that is wrong: the pineal gland, in the middle of the brain, is the true one. It secretes melanin, and melanin regulates the body's functions and glands, its cycles and its daily rhythms."],
+   ["What melanin does","The book's own list: it is a civilising chemical, it reproduces itself, it protects against free radicals, it can be transformed in the blood, it concentrates nerve and brain information, it neutralises, oxidises, converts and reduces other substances, and it is unchanged by radiation and by high temperatures."],
+   ["What it is like","Flexible like plastic, and able to resemble cloud, gas, wood, metal or liquid without losing its structure. Heat-resistant in the book's figure to 1225\u00b0F. A pleasant smell. Resistant to X-ray diffraction, to strong acids and to strong alkalis. It is found inside and outside the body, and in springs, lakes, soil, plants, the atmosphere and animals."],
+   ["The molecule","A biochemical of high molecular weight carrying carbon-nitrogen, ether, saturated and unsaturated carbon-carbon, organometallic and peroxide groupings — what the book calls a Black carbon hydro-amine. That is what lets it be a polymer (taking many forms) and polycyclic (many rhythms)."],
+   ["Where it is made","By cells called melanocytes, and inside those by smaller organs called melanosomes, made in the endoplasmic reticulum. The book's picture is small cells building bigger ones, up to the chemical itself."]],
+  note:"<b>Read the race claim as the book's</b>Its line that the more melanin a race has the more humane and civilised the race is stated in the book as a fact of the chemistry. It is printed here as the book's claim, which is what it is.",
+  noteCls:"warnbox"},
+
+ {h:"What melanin takes in", s:"energy, resonance, and the black hole of the cell",
+  rows:[
+   ["Energy","It makes itself using substances such as copper, and the book says it absorbs every kind of energy: sunlight, electromagnetic, music, sounds the ear cannot hear, phone waves, radio waves, radar, computer radiation, X-rays, cosmic rays, ultraviolet rays, heat waves, microwaves — and the cycles of water, earth, moon, sun, galaxy and mineral."],
+   ["Resonance","On the molecular level its particles — electrons, protons, neutrons — rearrange their orbits. The book calls that resonance, and the shift is towards the weak, low-energy sites."],
+   ["Why it looks black","Because it absorbs every colour and lets none of it back out. The book's comparison is the black hole of outer space, in the cell."]],
+  note:"<b>The book's claims, not measurements</b>None of this is a figure this page has checked. It is the book describing melanin, printed in the book's own terms.",
+  noteCls:"warnbox"},
+
+ {h:"Where melanin is in the body", s:"the anatomy chapter",
+  rows:[
+   ["In the body","It gives the iris of the eye its brown colour, darkens the hair and the skin, and sits in the substantia nigra of the brain, where the cerebrum meets the pons."],
+   ["The pineal gland itself","Pine-cone shaped, reddish, on a stem about half an inch long, its head a little smaller than a green pea and around two grams in weight. Its cells are like the retina's, and it sits in the third ventricle, in the middle of the brain."],
+   ["Nerves","The pineal stimulates the growth of the cerebrum's grey matter. The book's claim is that nerves carrying more melanin pass their messages with less resistance — it calls it superconductivity — and that this is highest in Black people."],
+   ["Where the brain keeps it","It concentrates in the locus ceruleus at the fourth ventricle and in the reticular formation, the black dots of the brain. That, in the book, is why the brain stores more and works at a high level."],
+   ["What dulls it","The book's own list of what reduces melanin function in the body and the brain: steroids (from the cortical adrenals), stimulants (synthetic speed, cocaine, caffeine), antidepressants (anti-cholinergics), and unnatural light."]],
+  note:"<b>This page's own line</b>Nothing on this shelf is a reason to stop, skip or change anything prescribed, and nothing here is a judgement about anybody. The herbs for the things the book names are on this page's own shelf, each with its caution on it.",
+  noteCls:"warnbox"},
+
+ {h:"The two melanin hormones", s:"serotonin and melatonin",
+  rows:[
+   ["The pineal makes alkaloids","Organic carbon substances that react to salts. The book calls the melanin hormones the primary controllers of human life: stable nerves, water balance, blood volume, enzymes, clotting, osmotic pressure and acid-base balance."],
+   ["Serotonin","Stimulated by sunlight and by full-spectrum light in the daytime, and it polymerises into melanin. In the body it contracts muscle, narrows the blood vessels and moves the blood pressure; in the mind the book says it alters consciousness, and it gives it the credit for how Black music, dance, acting, dress, language and art are improvised."],
+   ["Melatonin","Secreted after sundown and at its highest around ten at night. It helps maintain, repair and build brain and nerve tissue — the book names Alzheimer's, Parkinson's, memory loss and lupus — and it synchronises the body's functions, holds the daily rhythm, triggers puberty, brings sleep, and brings a sense of wellbeing and joy."],
+   ["Why the book says drugs grip harder","Its own reasoning: serotonin and melatonin carry benzene rings and amino groups, so they merge easily with drugs — crack, Ritalin, cocaine, caffeine, codeine, morphine, mescaline. The book's claim is that this is why higher-melanin people are hit harder by synthetic drugs, and it puts that inside what it calls genocide."],
+   ["Free radicals","Melanin hunts them: it goes at the synthetic chemicals it meets (preservatives, drugs, Viagra, caffeine), neutralising them or binding to them. The book's warning is over-saturation — too much junk food, drugs and radiation, and those toxic molecules come loose in the blood, where the first things hurt are the high-melanin organs: the brain, the sex organs, the digestive tract."]],
+  note:"<b>The book's claims, printed as its claims</b>This page takes no position on them and offers them as what the book says. The page's own lines still stand above the whole shelf.",
+  noteCls:"warnbox"},
+
+ {h:"How the book says to measure melanin", s:"pH, blood pressure, and the two ways it goes wrong",
+  rows:[
+   ["Saliva pH","The book reads the saliva as the parasympathetic side of the autonomic nervous system, and ties it to melatonin, to alkalinity, to raw fats and to the right hemisphere. It is tested against the saliva range and the diastolic blood pressure."],
+   ["Urine pH","The urine is read as the sympathetic side, and tied to serotonin, to acidity, to carbohydrates and to the left hemisphere. It is tested against the urine range and the systolic blood pressure."],
+   ["Insufficiency","When the supply cannot meet a high demand — pollution, radiation, stress, drugs, junk food. In the book it shows when the urine pH or the systolic pressure moves off the figure it uses, 120."],
+   ["Deficiency","When there is enough melanin but the body cannot use it, because the organs doing the work are weakened — liver, pancreas, kidneys — by drugs, soda, alcohol, processed sugar and table salt. It shows when the saliva pH or the diastolic pressure moves off its figure of 80."],
+   ["Where the book stops","It is a book of claims and it prints them as claims: there is no measured study behind this shelf, and none is offered."]],
+  note:"<b>This page's own line</b>This is the book's claim about a self-test, not a test this page asks anybody to run, and not a reason to stop or change anything you take. Nothing here is a diagnosis of a person.",
+  noteCls:"warnbox"},
+
+ {h:"The races, by melanin", s:"the book's six types",
+  rows:[
+   ["Type 6","Africans — black and blue-black, the most melanin on the book's scale."],
+   ["Type 5","Native Indians, Malaysians and others — black-brown and brown."],
+   ["Type 4","Native Americans and Japanese — brown and red."],
+   ["Types 2 and 3","The book's \u201cOrientals\u201d — yellow, and mixed browns."],
+   ["Type 1","Caucasians — white, the least melanin on the scale."],
+   ["What the book says follows from that","Its claim, in its own words: the medical lab values, the recommended daily allowances, the therapeutic doses and the growth charts are all built on a white body, so a Black body is measured against a standard that is not its own and called sick for not fitting it. That, in the book, is medical white racism."]],
+  note:"<b>The book's own classification</b>It is the book's scale and the book's words, printed here as its claim. This page keeps the herbs' own cautions and adds nothing to them from this shelf.",
+  noteCls:"warnbox"},
+
+ {h:"The two races compared, as the book puts it", s:"melanin, the brain, and the body",
+  rows:[
+   ["The two melanins","Black people carry eumelanin — selenium-centred, heavier, and more of it, which the book gives as the reason for deeper colour and for what it calls the highest civilising and spiritual capacity. White people carry pheomelanin — sulphur-centred, lighter and least in amount; the book calls it a pseudo-melanin and ties its absence to albinism."],
+   ["The brain","The book's claim: Black people use both hemispheres equally and process a great deal of information in the mid-brain, while the white mind works mostly from the left."],
+   ["The senses","A wider range of smells and flavours, better absorption of electromagnetic energy, and higher conductivity in the nerves."],
+   ["The hair","Black hair is curly and brown, with a cross-section the book describes as galaxy-shaped and treats as an antenna. White hair is flat, limp and kidney-shaped in section — closer, in the book's words, to fur."],
+   ["Eyes and nose","Eyes set further apart, for wider peripheral vision, and brown, for taking in more light; and a broad flat nose in which, the book says, the columns of air vibrate at higher frequencies."],
+   ["Skin and muscle","The most pores of any race, for cooling, and the highest nutrient density to the square inch; and fast-twitch, light-coloured, quick-responding muscle, against the slow-twitch dark muscle of the white body."]],
+  note:"<b>The book's claims, printed as its claims</b>This comparison is the book's, not this page's, and it is here because the book is on the shelf beside this library.",
+  noteCls:"warnbox"},
+
+ {h:"Two ways of thinking", s:"the psychology chapter",
+  rows:[
+   ["African-centred","Both hemispheres in balance; time that is cyclic and tied to events and to nature rather than to the clock; language whose words lean on their context (the book's own example is bad meaning excellent); and a life that is communal, family-centred and spiritual, built on Maat."],
+   ["European-centred","In the book's own words: unholy and illogical left-mind use, definitions fixed and linear, time as a fixed measurable duration, and a culture that is individualistic, competitive, self-centred and conflict-driven — its examples are the Oedipus complex and good against evil as a pair."]],
+  note:"<b>The book's own claim</b>It is the book's read of two psychologies, printed as its claim rather than as this page's.",
+  noteCls:"warnbox"},
+
+ {h:"What melanin is built from", s:"the nutrition chapter",
+  rows:[
+   ["Amino acids","Phenylalanine, tyrosine, tryptophan, histidine and lysine."],
+   ["Vitamins","A, the B-complex, C, D and E."],
+   ["Minerals","Copper, magnesium, zinc, selenium and iron."],
+   ["Herbs the book names","Ginkgo, gotu kola and echinacea. All three are already on this page's own shelf, and each carries its caution there — ginkgo and blood thinners, gotu kola and pregnancy, echinacea and autoimmune conditions."],
+   ["Food","Whole, unprocessed, unchemicalised food, in the book's phrase."]],
+  note:"<b>This page's own line</b>The three herbs are on the A\u2013Z shelf here, with what each one is taken for and what has to travel with it. The minerals are food first — no amount is given on this shelf for a person to take.",
+  noteCls:"warnbox"},
+
+ {h:"The two principles, and the twelve clusters", s:"sleep, energy, and where it gathers",
+  rows:[
+   ["The male principle","Serotonin: sympathetic, acid, fast-moving, breaking down, an active body with an inactive mind, aimed at the future, left brain."],
+   ["The female principle","Melatonin: parasympathetic, alkaline, slow-moving, building up, an inactive body with an active mind and spirit, aimed at the past, right brain."],
+   ["The twelve clusters","The book's twelve zones where melanin gathers, which it says have been called acupuncture meridians, and which it says are at full capacity only in a melanin-dominant Black body: the pineal and pituitary; the frontal cortex; the limbic system; the cerebellum; the pharynx, larynx and thyroid; the heart; the liver and pancreas; the spleen and the circulation; the large and small intestine; the kidneys and bladder; the organs of elimination; and the reproductive organs."]],
+  note:"<b>The book's claims, printed as its claims</b>Nothing on this shelf is a treatment, a dose or a diagnosis. The three herbs the book names are on the page's own shelf with their cautions; the page's own lines still come before all of it.",
+  noteCls:"warnbox"},
+
  {h:"What came from where", s:"So the next hand can find it",
   rows:[
    ["Nutricide","The seasoning amounts and the list of which seasoning goes on which food (p339). What each seasoning is for (p341). The nutritional approach and the blood cleansers (p342). The immune builders, and the short shelves for skin, yeast, sleep and digestive enzymes (p342-343)."],
    ["African Holistic Health","How to prepare a herb, and the two amounts it gives by name. The multi-vitamin method and the herbs in it. The twenty classes. The herbs for dis-eases and the homeopathic quick reference. The vitamin and mineral guides. The doctrine of signatures. The sample menu. Added in the second pass on 24 Sep: the dis-ease chart, the easy remedies, the food chapter, the diagnosis chapter, colours and the cycles, the history chapter, and the book's own lines."],
    ["Nutricide","and its food medicine chart (p337-338), in the second pass."],
    ["When","Both read and put in on 24 Sep 2026."],
-   ["The rest of the two books","The middle of both is not transcribed here and was not read line by line. Nothing in this tab is invented to fill a gap, and the places where the copies run out are said so in the row they run out in."]]}
+   ["Melanin: What Makes Black People Black!","Read and put in whole on 18 Oct 2026, at the owner's word (\u201cput this in the herbs\u201d): the foreword, what the book says melanin is, what it absorbs, where it is in the body, the two hormones, how it says to measure melanin, its six race types, its comparison of the two races, its psychology chapter, its nutrition chapter, the two principles, and the twelve clusters. Its twelve shelves are the ones above this card."],
+   ["The rest of the books","The middle of the first two is not transcribed here and was not read line by line. Nothing in this tab is invented to fill a gap, and the places where the copies run out are said so in the row they run out in."]]}
 ];
 
 /* ---- THIRTY DAYS -----------------------------------------------------------
@@ -1059,8 +1186,8 @@ var BOOKS = [
    twenty-nine days of teaching and then a test. Every claim in it is one the
    page already makes somewhere else: the preparations, the amounts, the twenty
    classes, the food chapter and the seasoning rows are the books' own and are
-   labelled as theirs; the safety lines on the Read this first tab are the
-   page's and day 28 walks through them.
+   labelled as theirs; the safety lines are the page's own and day 28 walks
+   through them.
 
    One day is: p = the teaching, in paragraphs; bk = a line out of one of the
    books; note = this page's own line, where it has one; q = the day's
@@ -1074,14 +1201,14 @@ var COURSE = [
 {d:1, t:"What this tradition is", s:"Start here",
  p:["Two books sit behind this whole library: African Holistic Health and Nutricide, both by Llaila O. Afrika. Every line on this page marked From the books is theirs, printed the way they give it. Everything else is this page saying plainly what a plant does.",
     "The tradition the two books describe is far older than either of them. It puts food first and a plant second, and it treats a person as one thing, body and mind and spirit together, rather than a set of parts to be fixed one at a time.",
-    "The course is sixty days. Days 1 to 11 are the ground: how the books read a body, how they prepare a plant, and what the twenty classes of herb mean. Days 12 to 29 are food, what not to eat, how a seasoning is used as medicine, the shelves, the vitamins and minerals, the easy remedies, and the lines that never move. Days 30 to 43 are the books' own theory: sugar and the craving for it, mucus, food combining, the twenty-four hour cycle, salt, white flour, and the two principles the whole chart is built on. Days 44 to 49 are the history and the money the books describe. Days 50 to 59 are coming off sugar and holding a house to it. Day 60 is the test.",
+    "The course is ninety days. Days 1 to 11 are the ground: how the books read a body, how they prepare a plant, and what the twenty classes of herb mean. Days 12 to 29 are food, what not to eat, how a seasoning is used as medicine, the shelves, the vitamins and minerals, the easy remedies, and the lines that never move. Days 30 to 43 are the books' own theory: sugar and the craving for it, mucus, food combining, the twenty-four hour cycle, salt, white flour, and the two principles the whole chart is built on. Days 44 to 49 are the history and the money the books describe. Days 50 to 59 are coming off sugar and holding a house to it. Days 60 to 89 are the third book, Melanin: What Makes Black People Black!, the same author's book on melanin and what feeds it. Day 90 is the test.",
     "One day at a time. Nothing here has to be bought, and no day is timed."],
  bk:"Food is medicine and medicine is food.",
  q:[{q:"Which two books is this library built from?", k:2, a:["A cookbook and a dictionary","Two books with no author","African Holistic Health and Nutricide","A journal and a government guide"], w:"Both are named on the shelves and in the From the books tab."},
     {q:"Who wrote those two books?", k:3, a:["Two doctors","Nobody knows","A school","Llaila O. Afrika"], w:"The same author wrote both of them."},
     {q:"In this tradition, which comes first?", k:0, a:["Food","A tablet","A strong herb","A tincture"], w:"Food is the first medicine here, and a plant is the second."},
-    {q:"How long is this course?", k:1, a:["Ten days","Sixty days, one a day","A whole year","One lesson"], w:"Fifty-nine days of teaching, then the test on day 60."},
-    {q:"What happens on the last day?", k:2, a:["A party","Nothing","A test","A new book"], w:"Day 60 is the test, and twenty-four out of thirty passes it."}]},
+    {q:"How long is this course?", k:1, a:["Ten days","Ninety days, one a day","A whole year","One lesson"], w:"Eighty-nine days of teaching, then the test on day 90."},
+    {q:"What happens on the last day?", k:2, a:["A party","Nothing","A test","A new book"], w:"Day 90 is the test, and twenty-four out of thirty passes it."}]},
 
 {d:2, t:"Read the body first", s:"The order the book works in",
  p:["The book's order is not the one most people expect. Nothing is given until the body has been read.",
@@ -1178,7 +1305,7 @@ var COURSE = [
     {q:"Which herbs are the diaphoretics?", k:3, a:["Garlic and thyme","Aloe and senna","Kelp and sage","Ginger, sage and yarrow"], w:"A sweat is the point of them."},
     {q:"Which class soothes and protects inside?", k:0, a:["Demulcents","Diuretics","Cathartics","Refrigerants"], w:"Licorice, marshmallow and oatmeal."},
     {q:"Which demulcents does the book name?", k:1, a:["Garlic and ginger","Licorice, marshmallow and oatmeal","Senna and aloe","Thyme and sage"], w:"A demulcent coats as it goes down."},
-    {q:"Comfrey is in two classes, and what hard rule comes with it?", k:2, a:["It is only for children","It must be boiled for an hour","It is never taken inside the body","It is only for burns on the feet"], w:"Its entry says never internally, and the safety tab names it for babies too."}]},
+    {q:"Comfrey is in two classes, and what hard rule comes with it?", k:2, a:["It is only for children","It must be boiled for an hour","It is never taken inside the body","It is only for burns on the feet"], w:"Its entry says never internally, and names it for babies too."}]},
 
 {d:10, t:"The twenty classes, part four", s:"Numbers sixteen to twenty",
  p:["Nervines relax the nervous system. Valerian and catnip.",
@@ -1194,13 +1321,13 @@ var COURSE = [
     {q:"How many classes are in the book's list?", k:0, a:["Twenty","Five","Twelve","Thirty"], w:"This course walked them in four days."}]},
 
 {d:11, t:"One plant, two classes — and the caution", s:"The rule under the list",
- p:["Comfrey is a demulcent and an emollient on the book's list. It is also the herb on this page that is never taken internally, and the safety tab names it beside goldenseal for babies.",
+ p:["Comfrey is a demulcent and an emollient on the book's list. It is also the herb on this page that is never taken internally, and it is named beside goldenseal for babies.",
     "That is the whole lesson of the four days just gone. A class tells you what a plant does. It does not tell you how far to take it, how long to take it for, or who must not take it at all.",
     "So a herb you meet in the library is read in two halves. What it does, which is the class and the old use. And the caution that travels with it, which is the line under Caution on its card, and which is never softened by how good the class sounds.",
     "Five cautions from this shelf, as examples of the shape of them. St John's wort changes how the liver handles a long list of medicines. Ginkgo thins the blood. Senna is a week, not a habit. Comfrey is never swallowed. Lobelia has killed people."],
  note:"A plant with a strong class and no caution printed is a plant whose caution has not been found yet. That is not the same as a plant with no caution.",
  q:[{q:"What does a class tell you about a herb?", k:2, a:["How much to take","Who must never take it","What it does","How long to take it for"], w:"The class is the action. The caution is a separate line."},
-    {q:"Which herb is never taken inside the body?", k:3, a:["Chamomile","Ginger","Valerian","Comfrey"], w:"Its entry and the safety tab both carry it."},
+    {q:"Which herb is never taken inside the body?", k:3, a:["Chamomile","Ginger","Valerian","Comfrey"], w:"Its entry carries it."},
     {q:"What are the two halves of reading a plant?", k:0, a:["What it does, and the caution with it","The price and the colour","The Latin name and the common one","The taste and the smell"], w:"Both halves are read before anything is decided."},
     {q:"Which herb changes how the liver handles many medicines?", k:1, a:["Ginkgo","St John's wort","Comfrey","Chamomile"], w:"It clashes with antidepressants, birth control, blood thinners and more."},
     {q:"What must you tell somebody before adding St John's wort?", k:2, a:["Nothing","The price","Which medicines you take","Your weight"], w:"The clash is with the medicine, so the medicine list comes first."}]},
@@ -1259,7 +1386,7 @@ var COURSE = [
     "And the beef row: bay leaf, basil, dry mustard, nutmeg, green pepper, sage, marjoram, onion, pepper, thyme, dill seed, oregano, caraway, garlic, parsley, rosemary, savory, turmeric, allspice, celery seed. It is the book's row. This page is not the one who put it back, and it is not this page's diet."],
  bk:"A quarter teaspoon of dill seed and a quarter teaspoon of dry mustard on vegetables, or a quarter teaspoon of basil and an eighth of a teaspoon of garlic powder in bean or soy patties.",
  q:[{q:"How does the book give the seasonings?", k:0, a:["Paired food by food, in a table","One list of everything","By price","By season of the year"], w:"Food by food, and the whole table is on the From the books tab."},
-    {q:"Where is the whole table?", k:1, a:["On the A to Z tab","On the From the books tab","On the safety tab","In the notes"], w:"Printed as the book has it."},
+    {q:"Where is the whole table?", k:1, a:["On the A to Z tab","On the From the books tab","On the 90 days tab","In the notes"], w:"Printed as the book has it."},
     {q:"Which seasoning is on the page's list for headaches and colds?", k:2, a:["Vanilla","Cinnamon","Thyme","Allspice"], w:"Thyme: headaches, colds, worms, loss of appetite, diarrhea."},
     {q:"What is the beef row in the book's table?", k:3, a:["This page's suggestion","A grocery advert","A mistake that should be deleted","The book's own row, printed as the book has it"], w:"The page prints it and does not claim it as its own diet."},
     {q:"Does this page claim the book's table as its own diet?", k:0, a:["No, it prints it and says whose it is","Yes, all of it","Only the vegetables","Only the meat"], w:"That is how the whole library is written."}]},
@@ -1308,7 +1435,7 @@ var COURSE = [
  note:"Some plants are for one bad night and some are for weeks. Ashwagandha and valerian are the second kind in this tradition, and the evening shelf itself is the book's own: valerian, catnip, chamomile, kava, passion flower and hops.",
  q:[{q:"Which six does the book's sleep shelf name?", k:0, a:["Valerian, catnip, chamomile, kava, passion flower, hops","Ashwagandha and lavender","Ginger and thyme","Burdock and dandelion"], w:"The library adds ashwagandha, lavender and lemon balm from other traditions."},
     {q:"What does the library say about lavender oil?", k:1, a:["Drink a spoonful at night","Never swallow the neat oil","Rub it in the eyes","Give it to a baby"], w:"Dilute it, always, and never swallow it neat."},
-    {q:"Which one is read first if the liver has had a bad time?", k:2, a:["Chamomile","Hops","Kava","Catnip"], w:"Its own entry carries it, and the safety tab names kava with the liver."},
+    {q:"Which one is read first if the liver has had a bad time?", k:2, a:["Chamomile","Hops","Kava","Catnip"], w:"Its own entry carries it, and names kava with the liver."},
     {q:"What does the library add from other traditions?", k:3, a:["Nothing","Only kitchen herbs","Only minerals","Ashwagandha, lavender and lemon balm"], w:"So the shelf is not one book's alone."},
     {q:"What are these evening herbs for?", k:0, a:["A nervous system that will not come down","A chest","A fever","A wound"], w:"And they are the last move, not the first."}]},
 
@@ -1341,7 +1468,7 @@ var COURSE = [
     "Inside, for the joints: the anti-inflammatory shelf from the book's classes, arnica, cayenne, garlic and chaparral. Turmeric is on the seasoning list for its own reasons, and its entry carries the caution that it thins the blood.",
     "For the spring clean: burdock root and dandelion are the old pair, and milk thistle the seed most often named, with each of their own cautions travelling with them.",
     "Two things this page will not do with this shelf. It will not let a burn be treated at home when it is deep, or on a face, or bigger than a palm. And it will not let a joint that is hot, red, swollen and painful be treated at home either, because that is a joint that needs looking at."],
- note:"Goldenseal on the skin is one thing. Goldenseal swallowed has harmed newborns, which is why it sits on the safety tab by name.",
+ note:"Goldenseal on the skin is one thing. Goldenseal swallowed has harmed newborns, which is why its own caution names it.",
  q:[{q:"Which plant is the astringent of this shelf?", k:2, a:["Aloe vera","Oatmeal","Witch hazel","Turmeric"], w:"The book's astringent class names witch hazel and alum root."},
     {q:"Which pair is the old spring clean?", k:3, a:["Garlic and cayenne","Arnica and thuja","Ginger and sage","Burdock root and dandelion"], w:"With milk thistle the seed most often named in the library."},
     {q:"What does the page say about a joint that is hot, red and swollen?", k:0, a:["It needs looking at, not a poultice","Rub in cayenne","Use garlic","Ignore it for a week"], w:"That is a doctor's ground, not a shelf's."},
@@ -1398,31 +1525,31 @@ var COURSE = [
     {q:"What do you do with a remedy the page will not print?", k:1, a:["Follow it carefully","Leave it in the book","Double the amount","Sell it"], w:"A remedy nobody should mix is not a remedy this page teaches."},
     {q:"Which of these rows does the page keep?", k:2, a:["A stronger recipe","A powder for the scalp","The tea tree oil for the foot","None of them"], w:"And the reader is told which of them came from the book."}]},
 
-{d:28, t:"The lines that never move", s:"Read this first, all of it, today",
- p:["This is the day to open the Read this first tab and read the whole thing, slowly, because it is the only tab on this page that does not soften.",
+{d:28, t:"The lines that never move", s:"The page's own lines, all of them, today",
+ p:["This is the day to read the page's own lines slowly, all of them at once, because they are the only part of this library that does not soften. They were a tab of their own until 18 Oct 2026; they are here on this day now, and every card carries its own.",
     "Nothing on this shelf answers an infection. Not oregano oil, not goldenseal, not garlic. A fever that will not come down, a wound going red and hot, a chest that rattles, a tooth gone bad, anything yellow or green coming up — no plant here touches that.",
     "Alcohol withdrawal can kill, and it is not something to sit out with chamomile and valerian. If you have been drinking heavily and stop, that week is an emergency and not a herb week, and the timeline page in the app says the same thing. Herbs do not belong in it.",
     "St John's wort interferes with antidepressants, birth control, blood thinners and HIV medicine. Licorice and hibiscus move blood pressure. Ginger, ginkgo, turmeric, garlic and white willow thin the blood. Those are facts about the plants, and they are why a herb is not a free addition to anything else — and nothing on this shelf is ever a reason to stop something you are already taking.",
-    "Pregnancy and children. Most of the list is not for pregnancy, and a child is not a small adult for dosing. Goldenseal and comfrey root are named on that tab for babies. And kratom is not in this library at all: it is sold as a herb, it acts on the same receptors as opioids, and it is addictive.",
-    "Read that tab today, and again on any day a plant looks like a way out of something that needs a person."],
+    "Pregnancy and children. Most of the list is not for pregnancy, and a child is not a small adult for dosing. Goldenseal and comfrey root carry that line on their own cards for babies. And kratom is not in this library at all: it is sold as a herb, it acts on the same receptors as opioids, and it is addictive.",
+    "Read it again on any day a plant looks like a way out of something that needs a person, and read the caution on a card before the use."],
  note:"These are the page's lines and they outrank every claim on every other tab of it.",
  q:[{q:"What does the page say about an infection?", k:0, a:["No plant here touches that","Try oregano oil first","Wait three days","Take goldenseal"], w:"Not oregano oil, not goldenseal, not garlic."},
     {q:"What is the rule about something you are already taking?", k:1, a:["A herb can replace it","Nothing here is a reason to stop it","It can be halved while taking herbs","It is not mentioned"], w:"The clashes are real, and the shelf is not a free addition to anything."},
     {q:"Why is kratom not in this library?", k:2, a:["It is expensive","It only grows abroad","It acts on opioid receptors and is addictive","It tastes bad"], w:"People come off it with withdrawal like any opioid."},
     {q:"How do people come off kratom?", k:3, a:["Easily","With no effects at all","With a doctor only","With withdrawal like any opioid"], w:"Which is why it is not kept on this shelf."},
-    {q:"Where are these lines kept?", k:0, a:["On the Read this first tab","In the notes","On the A to Z tab","On the meal plan"], w:"Seven lines that outrank everything else here."}]},
+    {q:"Where do these lines live now?", k:0, a:["On this day, and on the card of every herb they touch","In the notes","Only in the books","On the meal plan"], w:"The day teaches them and each card carries its own."}]},
 
 {d:29, t:"Keeping your own book", s:"Gathering it up",
  p:["You have the whole library now, and the course has been through it. What is left is the habit, and the page is already built for it.",
     "Read a plant before you use it, not after. What it does is the top of its card. The caution is the part under it, and it is never softened by how good the top sounded.",
     "Write down what you find. Every herb card has a What your book says box at the bottom, the My notes tab collects them, and you can add a plant the two books name that is not on the shelf yet. It is kept on the phone and nothing is sent anywhere.",
     "Use the search box before you forget a name, and use the By need tab when you know the trouble and not the plant. And read a plant out loud with the Read it to me button if that is easier than reading it on a screen, because the phone's own voice reads the whole entry, caution included.",
-    "Then the same rule the course opened with, at the end of it: food first, a plant second, and the safety tab over both of them."],
+    "Then the same rule the course opened with, at the end of it: food first, a plant second, and these lines over both of them."],
  bk:"The spirit, the mind and the body are one. The past, the present and the future are one now.",
  q:[{q:"Where does a herb card put what a plant does?", k:2, a:["At the bottom","Nowhere","At the top, under the name","Only in the notes"], w:"The caution is the part under it, and it is read every time."},
     {q:"Where does the caution sit?", k:3, a:["At the top","Nowhere","In the notes","Under the use"], w:"Both halves are read before anything is decided."},
     {q:"Where do your own notes live?", k:0, a:["On this phone, in the app","On a server","In an email","Nowhere"], w:"Nothing is sent anywhere."},
-    {q:"Which tab holds the lines that outrank everything?", k:1, a:["A to Z","Read this first","From the books","By need"], w:"An infection, withdrawal, a prescription, pregnancy, a child, the liver, and kratom."},
+    {q:"Where does the course put the lines that outrank everything?", k:1, a:["A to Z","Day 28","From the books","By need"], w:"An infection, withdrawal, a prescription, pregnancy, a child, the liver, and kratom."},
     {q:"Which of these is one of those lines?", k:2, a:["A cold","A bruise","An infection","A sniffle"], w:"Nothing on this shelf answers an infection."}]},
 
 {d:30, t:"White sugar, in the book's words", s:"Nutricide, the classification of energy chart",
@@ -1453,13 +1580,13 @@ var COURSE = [
  p:["Mucus is the book's own word, and the book means something specific by it: the slime that cooked, starchy, greasy, fiberless food leaves behind as it is eaten and not fully moved on.",
     "Its account of the body is that there are ordinary ways out — the bowel, the kidneys and the urine, and the breath — and that when those cannot keep pace with what is going in, the body uses the routes it has left. The skin, the nose, the throat and the lungs start moving things out instead.",
     "That is the hinge of a great deal of the book. What it says is happening in a cold, in a runny nose, in a cough that brings something up, is the body clearing. Its own name for the whole process is a cleansing, and it uses that name where the rest of the world says illness.",
-    "This page carries the idea and stops where the book does not stop. The book's further step, that these things are therefore not passed from person to person, does not travel to this page, and nothing on this shelf answers an infection — the same line that is at the top of the safety tab. What is left is the part a person can use: what goes in decides how much there is to clear."],
+    "This page carries the idea and stops where the book does not stop. The book's further step, that these things are therefore not passed from person to person, does not travel to this page, and nothing on this shelf answers an infection — the same line that day 28 of the course opens with. What is left is the part a person can use: what goes in decides how much there is to clear."],
  bk:"The internal organs, tissues, nerves and cells are clogged and activity-impaired with liquid, slimy manure called mucus or plaque.",
  q:[{q:"In the book, what is mucus?", k:0, a:["What cooked, starchy food leaves behind","A virus","A mineral","An infection"], w:"And the book has its own name for what the body then does about it."},
     {q:"Which are the ordinary ways out, in the book?", k:1, a:["The fingers and toes","The bowel, the kidneys and the breath","Only the skin","The hair"], w:"When those cannot keep pace, the body uses what it has left."},
     {q:"What does the book call a runny nose and a cough that clears?", k:2, a:["A contagion","A weakness","A cleansing","A shortage"], w:"This page takes the idea and not the whole step."},
     {q:"Which routes does the body use when the others cannot keep pace?", k:3, a:["The eyes","The ears","The bones","The skin, nose, throat and lungs"], w:"That is the book's claim about congestion."},
-    {q:"What does this page do with the part it will not carry?", k:0, a:["Leaves it in the book, and says nothing here answers an infection","Repeats it as fact","Deletes the chapter","Calls it a lie"], w:"The safety tab outranks everything else here."}]},
+    {q:"What does this page do with the part it will not carry?", k:0, a:["Leaves it in the book, and says nothing here answers an infection","Repeats it as fact","Deletes the chapter","Calls it a lie"], w:"The page's own lines outrank everything else here."}]},
 
 {d:33, t:"Mucus, part two: what the book says it weighs", s:"Nutricide, p167 and p113",
  p:["The book puts figures on it, and this page prints those figures exactly as the book gives them, because they are the book's.",
@@ -1557,7 +1684,7 @@ var COURSE = [
     {q:"What does the book say about sea salt?", k:1, a:["It has no salt","That it is seven times saltier","It is weaker","That it is a herb"], w:"Its line, exactly as it gives it."},
     {q:"What is the book's argument about the amount?", k:2, a:["Salt is needed in large amounts","Salt is a mineral the body cannot get elsewhere","The taste for salt grows","Salt is a herb"], w:"If the salt level rises, the book says everything has to rise with it."},
     {q:"Whose salt rule does somebody with a heart or kidney condition follow?", k:3, a:["This page's","The book's","Nobody's","Their own, set elsewhere"], w:"No herb on this shelf is a reason to change it."},
-    {q:"What is no herb on this shelf a reason to do?", k:0, a:["Change that rule","Read a label","Drink water","Eat greens"], w:"The safety tab outranks every claim on the page."}]},
+    {q:"What is no herb on this shelf a reason to do?", k:0, a:["Change that rule","Read a label","Drink water","Eat greens"], w:"The page's own lines outrank every claim on the page."}]},
 
 {d:41, t:"The two principles, part one: the chart", s:"Nutricide, the classification of energy chart, p152",
  p:["This is the piece of the book that everything else hangs from, and it is a chart rather than a chapter.",
@@ -1635,13 +1762,13 @@ var COURSE = [
  p:["This is the day the course has to be careful, because it is the day a reader is most likely to walk out with the wrong idea.",
     "The books' target is a system, and their claim is an economic one: that a business paid per illness cannot be the one that ends it, and that the training behind the practice is a training in drugs and surgery rather than in food. That claim is the books' and it is printed as the books'. Read it as an argument about incentives and it is worth arguing with.",
     "It is not a claim about the person in front of you. The person in the room spent years learning how a body fails and has seen more of it than either of us. The books' numbers are not their fault, and none of this is a reason to be rude to somebody who is trying to help.",
-    "So the page holds both things at once, and the safety tab is the proof that it does. The system is worth reading about. What is already in your hand stays yours to keep taking. Nothing on this shelf answers an infection. And the food on the plate is the part of all of this that is actually yours today, which is why the last ten days of the course are the food."],
+    "So the page holds both things at once, and day 28 of the course is the proof that it does. The system is worth reading about. What is already in your hand stays yours to keep taking. Nothing on this shelf answers an infection. And the food on the plate is the part of all of this that is actually yours today, which is why the last ten days of the course are the food."],
  note:"The books argue about a system. This page's rule about the person in front of you never changes: what somebody is already taking stays theirs, and nothing on this shelf answers an infection.",
  q:[{q:"What is the books' actual target?", k:2, a:["An individual practitioner","Nurses","A system, and an economic argument about it","Front desks"], w:"Its claim is that a business paid per illness cannot be the one that ends it."},
     {q:"What does the page say about the person in the room?", k:3, a:["That they are the problem","That they should be avoided","That they cannot help","That they learned how a body fails and have seen more of it than either of us"], w:"And none of the books' numbers are that person's fault."},
     {q:"What stays theirs to keep taking?", k:0, a:["What is already in your hand","The food on the plate","The shopping list","The herb shelf"], w:"Where this page draws its own line again."},
     {q:"What does the page say is actually yours today?", k:1, a:["The system","The food on the plate","The forms","The advert"], w:"Which is why the rest of the course is the food."},
-    {q:"What is the proof the page holds both things at once?", k:2, a:["The price list","The index","The safety tab","The meal plan"], w:"Seven lines that outrank every claim on the page."}]},
+    {q:"What is the proof the page holds both things at once?", k:2, a:["The price list","The index","Day 28 of the course","The meal plan"], w:"Seven lines that outrank every claim on the page."}]},
 
 {d:48, t:"Read the label, the book's own chapter", s:"Nutricide, Read Labels or Comic Books",
  p:["The book has a short chapter with this title, and the practical instruction inside it is one sentence long: read the label.",
@@ -1678,7 +1805,7 @@ var COURSE = [
  q:[{q:"Which two things come off the table entirely?", k:0, a:["Dairy and fried food","Fruit and grains","Beans and greens","Water and tea"], w:"The rest is raw whole food, cooked whole grains and green leaves."},
     {q:"What does the book put on the plate, raw where possible?", k:1, a:["Meat and fish","Fruit, vegetables, grains and beans","Dairy and eggs","Bread and cereals"], w:"Eaten fresh and raw where they can be."},
     {q:"What does the page say this diet is?", k:2, a:["A cure","A detox","Food, not a cure","A treatment plan"], w:"And the plan sits beside what somebody is already doing."},
-    {q:"Where is the whole plan written down?", k:3, a:["In the book only","On the safety tab","In the notes","On the Meal plan tab, with thirty days and a shopping list"], w:"With the seasoning amounts the book gives."},
+    {q:"Where is the whole plan written down?", k:3, a:["In the book only","On the Deep story tab","In the notes","On the Meal plan tab, with thirty days and a shopping list"], w:"With the seasoning amounts the book gives."},
     {q:"What amounts does it carry?", k:0, a:["The seasoning amounts the book gives","None","Double the usual","Half the usual"], w:"An eighth to a quarter of a teaspoon for four servings."}]},
 
 {d:51, t:"The first fortnight", s:"What the first two weeks ask of a person",
@@ -1778,20 +1905,382 @@ var COURSE = [
     {q:"Why does the page rate walking so highly?", k:3, a:["It burns calories","It is the book's instruction","It replaces food","It is the fastest thing here for a craving, and it works in five minutes"], w:"And it is the cheapest thing here."},
     {q:"What does a glass of water often answer?", k:0, a:["What people call hunger between meals","A headache","A cough","A fever"], w:"The ordinary half of the page."}]},
 
-{d:59, t:"When a day goes wrong", s:"The last day before the test",
- p:["Tomorrow is the test. Today is the one thing the whole sixty days has been building towards, and it is the smallest lesson in the course.",
+{d:59, t:"When a day goes wrong", s:"The last day of the food half",
+ p:["Tomorrow the course turns to a third book. Today is the one thing the whole food half has been building towards, and it is the smallest lesson in it.",
     "A day will go wrong. There will be an evening with a plate of the old food on it, and a morning that follows it. The page's rule for that morning is the app's own rule for everything else in it, and it is not softened here: a day can end a day. It cannot end a person.",
     "So the instruction is the shortest on the page. The next meal is the one that matters, and it starts in ten minutes. Nothing is undone, nothing has to be started over from the beginning, and nothing about last night is a reason for tomorrow to be worse.",
-    "The course says the same thing about a bad answer on the test tomorrow. The day is read again, and then the test is taken again, and the score is not a verdict either."],
+    "The course says the same thing about a bad answer on the test at the end. The day is read again, and then the test is taken again, and the score is not a verdict either."],
  note:"A day can end a day. It cannot end a person. The next meal is the one that matters, and it starts in ten minutes.",
  q:[{q:"What is the page's rule for a morning after a bad night?", k:2, a:["Start the whole course again","Fast all day","The next meal is the one that matters, and it starts in ten minutes","Give up the plan"], w:"Nothing is undone, and nothing has to be started over."},
-    {q:"Where does that line come from?", k:3, a:["The book's chapter on fasting","The safety tab","The meal plan","The app's own rule, which holds everywhere in it"], w:"A day can end a day; it can never end a person."},
+    {q:"Where does that line come from?", k:3, a:["The book's chapter on fasting","Day 28 of the course","The meal plan","The app's own rule, which holds everywhere in it"], w:"A day can end a day; it can never end a person."},
     {q:"What does the page say about a bad answer on the test?", k:0, a:["The day is read again and the test is taken again","It ends the course","It is a verdict","It cannot be changed"], w:"The score is not a verdict either."},
-    {q:"How long is the instruction for a day that has gone wrong?", k:1, a:["A page","One sentence","A chapter","A whole course"], w:"The shortest instruction on the page, and the last one before the test."},
+    {q:"How long is the instruction for a day that has gone wrong?", k:1, a:["A page","One sentence","A chapter","A whole course"], w:"The shortest instruction on the page, and the last one before the third book."},
     {q:"What is the score, like a day?", k:2, a:["A verdict","A licence","Not a verdict","A certificate"], w:"So the test can be taken again as many times as it takes."}]},
 
-{d:60, t:"The test", s:"Thirty questions, all sixty days", test:1,
- p:["Thirty questions drawn from all sixty days, in the order the course ran. Twenty-four is a pass.",
+{d:60, t:"The third book", s:"Melanin: What Makes Black People Black!",
+ p:["The course has been built out of two books. From today it turns to a third, by the same author: Melanin: What Makes Black People Black!, published by Seaburn in 2009 and sixty-six pages long.",
+    "Its foreword gives the book's own reason for existing. Melanin, it says, is the biochemical substance that drives physical, mental, emotional and spiritual life, and the book puts that in everyday language rather than the Latin of chemistry.",
+    "It answers a complaint it says its readers make — what good is it, it does not help you to be free — and agrees with them: a Black person unaware of melanin is manipulated and controlled by that unawareness. So the book is about knowing what melanin is and what feeds it.",
+    "From today to day 89, every line is the book's claim, printed as its claim. Where this page has a line of its own, it sits in its own box and says so."],
+ bk:"Melanin is the biochemical substance that drives physical, mental, emotional and spiritual life.",
+ note:"This is the third book's material, not this page's advice, and none of it is a reason to stop or change anything you take.",
+ q:[{q:"Whose book is this half of the course built from?", k:0, a:["Llaila O. Afrika's, a third book","Two unknown authors","A cookbook","A drug company"], w:"Melanin: What Makes Black People Black!, published in 2009."},
+    {q:"What does the foreword say melanin drives?", k:1, a:["Only the skin","Physical, mental, emotional and spiritual life","Only the blood","Only sleep"], w:"That is the book's own line about what melanin is."},
+    {q:"What complaint does the book answer?", k:2, a:["That it is too long","That it is expensive","That it does not help you be free","That it is old"], w:"The book agrees with the complaint, and answers it with knowing."},
+    {q:"How long is the book?", k:0, a:["Sixty-six pages","Six pages","Six hundred pages","Nine pages"], w:"From the foreword to the suggested reading."},
+    {q:"How is this half of the course written?", k:3, a:["As this page's advice","As a dictionary","As a story","As the book's claims, labelled"], w:"Every line is the book's claim, printed as its claim."}]},
+
+{d:61, t:"The pineal is the master gland", s:"The book's first claim",
+ p:["The pituitary has been called the master gland of the body. The book says that is wrong. The master gland, in its account, is the pineal, in the middle of the brain.",
+    "The pineal secretes melanin, and in the book's picture melanin then regulates the body's functions and glands, its cycles and its daily rhythms.",
+    "So on this account the smallest gland in the middle of the head runs the rest of the body, and it does it through melanin."],
+ bk:"The pituitary has been called the master gland. The pineal is the true one.",
+ note:"This is the book's claim about a gland. This page takes no position on it, and nothing here replaces a test or a treatment.",
+ q:[{q:"Which gland does the book call the master gland?", k:0, a:["The pineal","The pituitary","The thyroid","The liver"], w:"The book says the pituitary has been called that wrongly."},
+    {q:"Where does the book put the pineal gland?", k:1, a:["In the stomach","In the middle of the brain","Behind the eye","In the neck"], w:"It sits in the third ventricle, in the middle of the brain."},
+    {q:"What does the pineal secrete, in the book?", k:2, a:["Insulin","Bile","Melanin","Adrenaline"], w:"And that melanin is what regulates the rest."},
+    {q:"What does melanin regulate, in the book?", k:0, a:["Functions, glands, cycles and rhythms","Only the skin colour","Only the eyes","Only the hair"], w:"The book's own list of what melanin runs."},
+    {q:"What does the book say about the pituitary?", k:3, a:["It is the master gland","It does not exist","It makes melanin","It is not the master gland"], w:"The pineal is, on the book's account."}]},
+
+{d:62, t:"What melanin does, in the book's list", s:"A list of claims, printed as claims",
+ p:["The book gives its own list of what melanin does. It is a civilising chemical, it reproduces itself, it protects against free radicals, it can be transformed in the blood, and it concentrates nerve and brain information.",
+    "The list goes on: it neutralises, oxidises, converts and reduces other substances, and it is unchanged by radiation and by high temperatures.",
+    "That is the book's account of the substance the whole of this half of the course is about, and none of it is a figure this page has checked."],
+ bk:"It protects against free radicals. It is unchanged by radiation and by high temperatures.",
+ note:"A list of claims is not a measurement. This page prints it as the book's list and adds nothing to it.",
+ q:[{q:"What does the book say melanin protects against?", k:0, a:["Free radicals","Sunburn only","Cold","Bacteria"], w:"It is the third thing on the book's own list."},
+    {q:"What is melanin unchanged by, in the book?", k:1, a:["Water and salt","Radiation and high temperatures","Light and air","Time and rest"], w:"The book's own line about heat and radiation."},
+    {q:"What does melanin do to nerve and brain information?", k:2, a:["Deletes it","Slows it","Concentrates it","Sells it"], w:"That is on the book's list of what melanin does."},
+    {q:"Can melanin be transformed in the blood, in the book?", k:0, a:["Yes, it says so","No","Only at night","Only in the brain"], w:"The book lists it among what melanin does."},
+    {q:"What kind of chemical does the book call melanin first?", k:3, a:["A vitamin","A mineral","A disease","A civilising chemical"], w:"That is the first line of the book's list."}]},
+
+{d:63, t:"What melanin is like", s:"Form, heat and resistance",
+ p:["The book describes melanin as flexible like plastic, and able to look like cloud, gas, wood, metal or liquid without losing its structure.",
+    "Its figure for heat-resistance is 1225 degrees Fahrenheit. It has a pleasant smell, and the book says it resists X-ray diffraction and strong acids and strong alkalis.",
+    "It is found inside and outside the body: in springs, lakes, soil, plants, the atmosphere and animals, as well as in a person."],
+ bk:"Flexible like plastic, and able to resemble cloud, gas, wood, metal or liquid.",
+ note:"That heat figure is the book's, not a measurement made here, and nothing on this shelf is built on it.",
+ q:[{q:"What does the book compare melanin's flexibility to?", k:0, a:["Plastic","Glass","Iron","Water"], w:"It can take many forms without losing its structure."},
+    {q:"What heat does the book say melanin resists?", k:1, a:["212 degrees","1225 degrees Fahrenheit","50 degrees","It gives no figure"], w:"The book's own figure, printed as the book's."},
+    {q:"What does the book say melanin smells like?", k:2, a:["Like sulphur","Like nothing","Pleasant","Like smoke"], w:"That is the book's own description of it."},
+    {q:"Which two things does the book say it resists?", k:0, a:["Strong acids and strong alkalis","Water and air","Salt and sugar","Light and dark"], w:"Along with X-ray diffraction."},
+    {q:"Where does the book say melanin is found?", k:3, a:["Only in the skin","Only in the blood","Only in plants","Inside and outside the body"], w:"In springs, lakes, soil, plants, the atmosphere and animals too."}]},
+
+{d:64, t:"The molecule", s:"Polymer and polycyclic",
+ p:["The book describes melanin as a biochemical of high molecular weight carrying carbon-nitrogen, ether, saturated and unsaturated carbon-carbon, organometallic and peroxide groupings.",
+    "Its name for all that is a Black carbon hydro-amine.",
+    "That is what lets it be a polymer, taking many forms, and polycyclic, holding many rhythms — the two words the book uses for why one substance can do so much."],
+ bk:"A Black carbon hydro-amine: a polymer that takes many forms, and polycyclic, with many rhythms.",
+ note:"This is the book's chemistry, printed as the book's words. This page does not extend it.",
+ q:[{q:"What does the book call melanin's molecule?", k:0, a:["A Black carbon hydro-amine","A simple sugar","A salt","A fat"], w:"That is the book's own name for it."},
+    {q:"What does polymer mean, in the book's use?", k:1, a:["It cannot change","It takes many forms","It is small","It is white"], w:"And polycyclic is the word for its many rhythms."},
+    {q:"What weight does the book give melanin?", k:2, a:["Light","Medium","High molecular weight","It gives none"], w:"It is the first thing the book says about the molecule."},
+    {q:"Which grouping does the book list for melanin?", k:0, a:["Organometallic","Plastic","Fibre","Mineral"], w:"With carbon-nitrogen, ether and peroxide groupings."},
+    {q:"What does polycyclic describe, in the book?", k:3, a:["Its colour","Its weight","Its smell","Many rhythms"], w:"Polymer is many forms; polycyclic is many rhythms."}]},
+
+{d:65, t:"Where it is made", s:"Melanocytes and melanosomes",
+ p:["The book says melanin is made by cells called melanocytes, and inside those by smaller organs called melanosomes.",
+    "The melanosomes are made in the endoplasmic reticulum. The book's picture is small cells building bigger ones, up to the chemical itself.",
+    "That is the whole of the book's account of where it is made: a cell inside a cell, and then the substance."],
+ bk:"Melanosomes are made in the endoplasmic reticulum, and they build the chemical.",
+ note:"The book's account is printed here as its account. Nothing on this shelf asks anybody to measure their own cells.",
+ q:[{q:"Which cells does the book say make melanin?", k:0, a:["Melanocytes","Red cells","Nerve cells","Fat cells"], w:"And inside them, smaller organs called melanosomes."},
+    {q:"Where are the melanosomes made?", k:1, a:["In the liver","In the endoplasmic reticulum","In the blood","In the skin's surface"], w:"That is the book's own account of it."},
+    {q:"What is the book's picture of the process?", k:2, a:["Big cells making small ones","One cell making nothing","Small cells building bigger ones","The blood making it"], w:"Up to the chemical itself."},
+    {q:"How many cells does the book name?", k:0, a:["Two: melanocytes and melanosomes","One","Ten","None"], w:"A cell, and a smaller organ inside it."},
+    {q:"What does the book call the smaller organs?", k:3, a:["Glands","Nodules","Sacs","Melanosomes"], w:"They sit inside the melanocytes."}]},
+
+{d:66, t:"What melanin takes in", s:"The book's list of energy",
+ p:["The book says melanin makes itself using substances such as copper, and that it absorbs every kind of energy.",
+    "Its list is long: sunlight, electromagnetic energy, music, sounds the ear cannot hear, phone waves, radio waves, radar, computer radiation, X-rays, cosmic rays, ultraviolet rays, heat waves and microwaves.",
+    "It adds the cycles of water, earth, moon, sun, galaxy and mineral. That is the book's list, printed as the book's list."],
+ bk:"It absorbs every kind of energy, and the cycles of water, earth, moon, sun and galaxy.",
+ note:"No measurement stands behind this list. It is what the book says, and this page does not turn it into advice.",
+ q:[{q:"Which substance does the book say melanin uses to make itself?", k:0, a:["Copper","Iron","Salt","Sugar"], w:"It is named in the book's own sentence about making itself."},
+    {q:"What does the book say melanin absorbs?", k:1, a:["Only sunlight","Every kind of energy","Only heat","Nothing"], w:"That is the whole claim of the section."},
+    {q:"Which of these is on the book's list of energy?", k:2, a:["Moonlight only","Rain only","Phone waves and radar","Wind only"], w:"Along with X-rays, microwaves and music."},
+    {q:"Which cycles does the book add to the list?", k:0, a:["Water, earth, moon and sun","Only the moon","Only the sun","Only water"], w:"Galaxy and mineral are on the same line."},
+    {q:"How does this page treat that list?", k:3, a:["As proven science","As advice","As a warning","As the book's list"], w:"Printed as the book's, and built on by nothing here."}]},
+
+{d:67, t:"Resonance, and why it looks black", s:"The book's explanation",
+ p:["On the molecular level, the book says melanin's particles — electrons, protons, neutrons — rearrange their orbits. It calls that resonance.",
+    "The shift is towards the weak, low-energy sites. That is the book's description of what happens when melanin takes energy in.",
+    "And it looks black, in the book's words, because it absorbs every colour and lets none of it back out. Its comparison is the black hole of outer space, in the cell."],
+ bk:"It looks black because it absorbs every colour and lets none of it out.",
+ note:"This page prints the picture as the book's picture. It is not an explanation this page is making.",
+ q:[{q:"What does the book call the rearranging of particles?", k:0, a:["Resonance","Reflection","Digestion","Oxidation"], w:"Electrons, protons and neutrons shift their orbits."},
+    {q:"Which way does the shift go, in the book?", k:1, a:["Towards strong sites","Towards weak, low-energy sites","Nowhere","Towards heat"], w:"That is the book's own wording of it."},
+    {q:"Why does melanin look black, in the book?", k:2, a:["It reflects light","It makes light","It absorbs every colour","It has no colour"], w:"And lets none of the colour back out."},
+    {q:"What does the book compare it to?", k:0, a:["The black hole of outer space","A mirror","A lamp","A window"], w:"Its comparison is the black hole, in the cell."},
+    {q:"Which three particles does the book name?", k:3, a:["Cells, glands, nerves","Water, salt, sugar","Sun, moon, stars","Electrons, protons, neutrons"], w:"They are the particles that rearrange their orbits."}]},
+
+{d:68, t:"Where melanin is in the body", s:"The anatomy chapter",
+ p:["The book puts melanin in the iris of the eye, where it gives the brown colour, and in the hair and the skin, which it darkens.",
+    "It also sits in the substantia nigra of the brain, where the cerebrum meets the pons — the part of the brain the book keeps coming back to.",
+    "That is the book's map of where it is: the eye, the hair, the skin, and one place deep in the brain."],
+ bk:"It gives the iris its brown colour, darkens the hair and the skin, and sits in the substantia nigra.",
+ note:"The book's map, printed as the book's. Nothing on this shelf is a diagnosis of a person's body.",
+ q:[{q:"What colour does melanin give the iris?", k:0, a:["Brown","Blue","Green","Grey"], w:"The book names the iris first, in its map."},
+    {q:"What does melanin do to the hair and skin?", k:1, a:["Lightens them","Darkens them","Nothing","Cools them"], w:"That is the book's own line about both."},
+    {q:"Which part of the brain does the book name?", k:2, a:["The cerebellum","The cortex only","The substantia nigra","The spinal cord"], w:"Where the cerebrum meets the pons."},
+    {q:"How many places does the book name in the body?", k:0, a:["The eye, hair, skin and brain","Only the skin","Only the brain","Only the eyes"], w:"It is a map, not a single site."},
+    {q:"What does the substantia nigra mean in the book's words?", k:3, a:["A gland","A nerve","A muscle","A black place in the brain"], w:"It sits where the cerebrum meets the pons."}]},
+
+{d:69, t:"The pineal gland itself", s:"Shape, size and seat",
+ p:["The book describes the pineal as pine-cone shaped and reddish, on a stem about half an inch long.",
+    "Its head is a little smaller than a green pea and it weighs around two grams. Its cells are like the retina's.",
+    "It sits in the third ventricle, in the middle of the brain. That is the whole of the book's picture of it."],
+ bk:"Pine-cone shaped, on a stem about half an inch long, its head smaller than a green pea.",
+ note:"These are the book's figures, printed as the book's. This page adds no figure of its own.",
+ q:[{q:"What shape does the book give the pineal?", k:0, a:["Pine-cone","Round","Flat","Ring"], w:"That is where its name comes from."},
+    {q:"How heavy does the book say it is?", k:1, a:["Two pounds","Around two grams","Two ounces","It gives no weight"], w:"Its head is a little smaller than a green pea."},
+    {q:"What are its cells like, in the book?", k:2, a:["The liver's","The skin's","The retina's","The bone's"], w:"That is the book's own comparison."},
+    {q:"Where does it sit?", k:0, a:["The third ventricle","The stomach","The throat","The pelvis"], w:"In the middle of the brain."},
+    {q:"How long is its stem, in the book?", k:3, a:["Six inches","Two feet","An inch and a half","About half an inch"], w:"The book gives the stem its own figure."}]},
+
+{d:70, t:"Nerves, and the book's word for it", s:"Superconductivity",
+ p:["The book says the pineal stimulates the growth of the cerebrum's grey matter.",
+    "Its claim is that nerves carrying more melanin pass their messages with less resistance, and it calls that superconductivity.",
+    "It adds that this is highest in Black people. That is the book's claim, printed here as its claim."],
+ bk:"Nerves carrying more melanin pass their messages with less resistance.",
+ note:"This page does not repeat the comparison as its own. It prints the book's claim and leaves it with the book.",
+ q:[{q:"What does the book say the pineal stimulates?", k:0, a:["Grey matter growth","Hair growth","Bone growth","Nothing"], w:"In the cerebrum, in the book's account."},
+    {q:"What word does the book use for the nerves' messages?", k:1, a:["Digestion","Superconductivity","Resonance","Reflex"], w:"Its claim is that they pass with less resistance."},
+    {q:"Who does the book say has the most of it?", k:2, a:["Elderly people","Athletes","Black people","Everybody equally"], w:"That is the book's claim, and it stays the book's."},
+    {q:"What does this page do with that claim?", k:0, a:["Prints it as the book's","Makes it its own","Deletes it","Calls it a cure"], w:"The page's own lines are separate from the book's."},
+    {q:"Which part of the brain does the book name here?", k:3, a:["The pons","The spinal cord","The cortex","The cerebrum"], w:"Its grey matter is what the pineal stimulates."}]},
+
+{d:71, t:"Where the brain keeps it", s:"The black dots of the brain",
+ p:["The book says melanin concentrates in the locus ceruleus at the fourth ventricle, and in the reticular formation.",
+    "It calls those the black dots of the brain.",
+    "That, in the book, is why the brain stores more and works at a high level. It is the book's reasoning, and it is printed as the book's."],
+ bk:"It concentrates in the locus ceruleus and the reticular formation, the black dots of the brain.",
+ note:"The book's anatomy, printed as the book's. No test on this page reads anybody's brain.",
+ q:[{q:"Which two places does the book name?", k:0, a:["The locus ceruleus and the reticular formation","The liver and the spleen","The eye and the ear","The heart and the lungs"], w:"It calls them the black dots of the brain."},
+    {q:"Where is the locus ceruleus, in the book?", k:1, a:["The third ventricle","The fourth ventricle","The stomach","The skull's base"], w:"That is where the book puts it."},
+    {q:"What does the book call those places?", k:2, a:["The white lines","The red rooms","The black dots","The green rooms"], w:"Its own name for where melanin gathers in the brain."},
+    {q:"What does the book say follows from that?", k:0, a:["The brain stores more and works higher","The brain works less","The brain is smaller","Nothing follows"], w:"That is the book's own conclusion."},
+    {q:"Whose reasoning is this?", k:3, a:["This page's","A hospital's","A trial's","The book's"], w:"It is printed here as the book's reasoning."}]},
+
+{d:72, t:"What dulls it, in the book's words", s:"Four things the book names",
+ p:["The book gives its own list of what reduces melanin function in the body and the brain.",
+    "The list is steroids, from the cortical adrenals; stimulants, which it names as synthetic speed, cocaine and caffeine; antidepressants, which it calls anti-cholinergics; and unnatural light.",
+    "It is the book's list, and it is the only one of its kind in this half of the course."],
+ bk:"Steroids, stimulants, antidepressants and unnatural light reduce melanin function.",
+ note:"Nothing on that list is a reason to stop, skip or change anything a doctor has given. Prescribed medicine stays yours, and this page says so on every shelf.",
+ q:[{q:"How many things are on the book's list?", k:0, a:["Four","Two","Ten","None"], w:"Steroids, stimulants, antidepressants and unnatural light."},
+    {q:"Which stimulants does the book name?", k:1, a:["Tea and water","Speed, cocaine and caffeine","Sugar and salt","Herbs and spices"], w:"It calls them synthetic speed, cocaine and caffeine."},
+    {q:"What does the book call antidepressants?", k:2, a:["Stimulants","Steroids","Anti-cholinergics","Minerals"], w:"That is its own word for them."},
+    {q:"What does this page say about that list?", k:0, a:["It is no reason to stop medicine","Stop your medicine","Change your dose","Skip the doctor"], w:"Prescribed medicine stays yours, on every shelf of this page."},
+    {q:"Where do the steroids come from, in the book?", k:3, a:["The thyroid","The liver","The pancreas","The cortical adrenals"], w:"That is how the book names them."}]},
+
+{d:73, t:"The pineal makes alkaloids", s:"The melanin hormones",
+ p:["The book says the pineal makes alkaloids: organic carbon substances that react to salts.",
+    "It calls the melanin hormones the primary controllers of human life, and gives their work as stable nerves, water balance, blood volume, enzymes, clotting, osmotic pressure and acid-base balance.",
+    "That is the book's account of what the two hormones it names are for."],
+ bk:"The melanin hormones are the primary controllers of human life.",
+ note:"The book's claim, printed as its claim. This page does not hand anybody a hormone or a dose.",
+ q:[{q:"What does the book say the pineal makes?", k:0, a:["Alkaloids","Vitamins","Minerals","Sugar"], w:"Organic carbon substances that react to salts."},
+    {q:"What does the book call the melanin hormones?", k:1, a:["Secondary helpers","Primary controllers of human life","Digestive juices","Waste products"], w:"That is its own phrase for them."},
+    {q:"Which of these is on the book's list of their work?", k:2, a:["Hair colour only","Skin colour only","Water balance","Eye colour only"], w:"With nerves, blood volume, enzymes and clotting."},
+    {q:"What does the book say about acid-base balance?", k:0, a:["The hormones keep it","It does not matter","Food keeps it","Nothing keeps it"], w:"It is on the book's list of what they do."},
+    {q:"How does this page treat that claim?", k:3, a:["As a dose","As a cure","As a diagnosis","As the book's claim"], w:"It prints it and hands out nothing."}]},
+
+{d:74, t:"Serotonin", s:"The daylight hormone",
+ p:["The book says serotonin is stimulated by sunlight and by full-spectrum light in the daytime, and that it polymerises into melanin.",
+    "In the body it contracts muscle, narrows the blood vessels and moves the blood pressure. In the mind, the book says it alters consciousness.",
+    "It also gives serotonin the credit for how Black music, dance, acting, dress, language and art are improvised."],
+ bk:"Serotonin is stimulated by sunlight, and it polymerises into melanin.",
+ note:"The book's claim about a hormone, printed as its claim. This page adds no dose and no supplement to it.",
+ q:[{q:"What stimulates serotonin, in the book?", k:0, a:["Sunlight and full-spectrum light","Darkness","Cold water","Salt"], w:"In the daytime, the book says."},
+    {q:"What does serotonin turn into, in the book?", k:1, a:["Insulin","Melanin","Bile","Adrenaline"], w:"The book says it polymerises into melanin."},
+    {q:"What does serotonin do to the blood vessels?", k:2, a:["Widens them","Nothing","Narrows them","Removes them"], w:"And it moves the blood pressure."},
+    {q:"What does the book credit serotonin for in the mind?", k:0, a:["Altering consciousness","Sleep only","Memory only","Nothing"], w:"That is its own line about the mind."},
+    {q:"Which arts does the book tie to it?", k:3, a:["Painting only","Writing only","Cooking only","Music, dance, acting and dress"], w:"Along with language and art."}]},
+
+{d:75, t:"Melatonin", s:"The hormone after sundown",
+ p:["The book says melatonin is secreted after sundown and is at its highest around ten at night.",
+    "It helps maintain, repair and build brain and nerve tissue — the book names Alzheimer's, Parkinson's, memory loss and lupus — and it synchronises the body's functions and holds the daily rhythm.",
+    "It also triggers puberty, brings sleep, and brings a sense of wellbeing and joy, in the book's words."],
+ bk:"Melatonin is secreted after sundown, and it is highest around ten at night.",
+ note:"The book's claim, printed as the book's. Nothing here diagnoses or treats any of the conditions it names.",
+ q:[{q:"When is melatonin highest, in the book?", k:0, a:["Around ten at night","At noon","At dawn","At three in the afternoon"], w:"It is secreted after sundown."},
+    {q:"What does the book say it repairs?", k:1, a:["Bone only","Brain and nerve tissue","Skin only","Teeth only"], w:"It helps maintain, repair and build them."},
+    {q:"Which condition does the book name?", k:2, a:["A cold","A sprain","Parkinson's","A toothache"], w:"Along with Alzheimer's, memory loss and lupus."},
+    {q:"What does melatonin trigger, in the book?", k:0, a:["Puberty","Hunger","Thirst","A fever"], w:"And it brings sleep."},
+    {q:"What feeling does the book tie to it?", k:3, a:["Anger","Fear","Hunger","Wellbeing and joy"], w:"That is the book's own way of putting it."}]},
+
+{d:76, t:"Why the book says drugs grip harder", s:"Benzene rings and amino groups",
+ p:["The book's reasoning is chemistry. Serotonin and melatonin carry benzene rings and amino groups, so, it says, they merge easily with drugs.",
+    "The drugs it lists are crack, Ritalin, cocaine, caffeine, codeine, morphine and mescaline.",
+    "Its claim is that higher-melanin people are hit harder by synthetic drugs, and it puts that inside what it calls genocide. That is the book's claim, printed as its claim."],
+ bk:"Serotonin and melatonin carry benzene rings and amino groups, so they merge easily with drugs.",
+ note:"This page keeps its own line here, and it does not soften: nothing on this shelf is a reason to stop anything you have been given, and no herb replaces it.",
+ q:[{q:"What do the two hormones carry, in the book?", k:0, a:["Benzene rings and amino groups","Only water","Only salt","Only sugar"], w:"That is the book's reason for the claim."},
+    {q:"Why does the book say they merge with drugs?", k:1, a:["Because of their weight","Because of those groups","Because of their colour","Because of heat"], w:"The chemistry is the book's own reasoning."},
+    {q:"Which drug does the book name?", k:2, a:["Aspirin","Penicillin","Morphine","Insulin"], w:"Along with crack, Ritalin, cocaine and others."},
+    {q:"What does the book call the result?", k:0, a:["Genocide","A cold","A habit only","Nothing"], w:"That is the book's own word for it."},
+    {q:"What does this page say about prescribed medicine?", k:3, a:["Stop it","Halve it","Replace it with a herb","Nothing here is a reason to stop it"], w:"That line holds on every shelf of this page."}]},
+
+{d:77, t:"Free radicals, and over-saturation", s:"The book's warning",
+ p:["The book says melanin hunts free radicals. It goes at the synthetic chemicals it meets — preservatives, drugs, caffeine — and neutralises them or binds to them.",
+    "Its warning is over-saturation: too much junk food, drugs and radiation, and those toxic molecules come loose in the blood.",
+    "The first things hurt, in the book, are the high-melanin organs: the brain, the sex organs and the digestive tract."],
+ bk:"Over-saturation, and the toxic molecules come loose in the blood.",
+ note:"The book's warning is printed as the book's. This page's own advice is smaller and older: food, water and time first.",
+ q:[{q:"What does melanin hunt, in the book?", k:0, a:["Free radicals","Vitamins","Minerals","Water"], w:"It neutralises them or binds to them."},
+    {q:"What does the book call too much of the wrong thing?", k:1, a:["A fast","Over-saturation","A cleanse","A cure"], w:"Then the molecules come loose in the blood."},
+    {q:"Which organs does the book say are hurt first?", k:2, a:["The teeth, hair and nails","The bones and joints","The brain, sex organs and gut","The eyes only"], w:"It calls them the high-melanin organs."},
+    {q:"Which chemicals does the book name?", k:0, a:["Preservatives, drugs and caffeine","Water and salt","Herbs and spices","Fruit and leaves"], w:"Melanin goes at the synthetic ones it meets."},
+    {q:"What is this page's own advice?", k:3, a:["A strong cleanse","A long fast","A supplement","Food, water and time first"], w:"The page's own line is smaller and older than the book's."}]},
+
+{d:78, t:"Reading the saliva and the urine", s:"The book's self-test",
+ p:["The book reads the saliva as the parasympathetic side of the nervous system, and ties it to melatonin, to alkalinity, to raw fats and to the right hemisphere.",
+    "The urine it reads as the sympathetic side, tied to serotonin, to acidity, to carbohydrates and to the left hemisphere.",
+    "Each is tested against its own range, and against blood pressure: the saliva against the diastolic figure, the urine against the systolic."],
+ bk:"The saliva is read as the parasympathetic side, and the urine as the sympathetic side.",
+ note:"This is the book's claim about a self-test, not a test this page asks anybody to run, and not a reason to stop or change anything you take.",
+ q:[{q:"What does the book tie the saliva to?", k:0, a:["Melatonin and alkalinity","Serotonin and acidity","Sugar and salt","Heat and cold"], w:"And to raw fats and the right hemisphere."},
+    {q:"What does it tie the urine to?", k:1, a:["Melatonin","Serotonin and acidity","Only water","Only salt"], w:"And to carbohydrates and the left hemisphere."},
+    {q:"Which figures does the book test against?", k:2, a:["Temperature only","Weight only","Blood pressure","Pulse only"], w:"The saliva against diastolic, the urine against systolic."},
+    {q:"Does this page ask anybody to run that test?", k:3, a:["Yes, daily","Yes, weekly","Yes, if ill","No, it prints the claim only"], w:"The test belongs to the book, not to this page."},
+    {q:"Which side does the book call the saliva?", k:0, a:["Parasympathetic","Sympathetic","Central","Peripheral"], w:"The urine is the sympathetic side."}]},
+
+{d:79, t:"Insufficiency", s:"When demand outruns supply",
+ p:["The book's first way melanin goes wrong is insufficiency: when the supply cannot meet a high demand.",
+    "It names pollution, radiation, stress, drugs and junk food as the demand, and says it shows when the urine pH or the systolic pressure moves off its figure.",
+    "That figure is 120. It is the book's number, printed as the book's number."],
+ bk:"Insufficiency is when the supply cannot meet a high demand.",
+ note:"The book's number and its reasoning, printed as the book's. This page does not read anybody's pressure as a diagnosis.",
+ q:[{q:"What is insufficiency, in the book?", k:0, a:["Supply cannot meet demand","Too much melanin","No melanin at all","A kind of food"], w:"It is the first of the book's two ways."},
+    {q:"Which of these does the book name as demand?", k:1, a:["Sleep","Pollution and stress","Water","Rest"], w:"Along with radiation, drugs and junk food."},
+    {q:"Which figure does the book use for systolic pressure?", k:2, a:["80","100","120","140"], w:"It is the book's own figure for it."},
+    {q:"What else does the book test for it?", k:0, a:["Urine pH","Hair colour","Eye colour","Height"], w:"Along with the systolic pressure."},
+    {q:"Does this page turn that into a diagnosis?", k:3, a:["Yes","For adults","For children","No, it prints the claim"], w:"Nothing here diagnoses a person."}]},
+
+{d:80, t:"Deficiency", s:"Enough, but not usable",
+ p:["The book's second way is deficiency: there is enough melanin, but the body cannot use it.",
+    "That happens, it says, when the organs doing the work are weakened — the liver, the pancreas and the kidneys — by drugs, soda, alcohol, processed sugar and table salt.",
+    "It shows when the saliva pH or the diastolic pressure moves off its figure, which is 80."],
+ bk:"Deficiency is enough melanin that the body cannot use.",
+ note:"The book's claim, printed as its claim, and not a diagnosis this page makes of anybody.",
+ q:[{q:"What is deficiency, in the book?", k:0, a:["Enough melanin, unusable","No melanin","Too much melanin","A shortage of food"], w:"It is the second of the book's two ways."},
+    {q:"Which organs does the book name?", k:1, a:["The heart and lungs","The liver, pancreas and kidneys","The eyes and ears","The bones"], w:"The organs doing the work are weakened."},
+    {q:"Which of these does the book blame?", k:2, a:["Water","Sleep","Soda and alcohol","Walking"], w:"Along with drugs, processed sugar and table salt."},
+    {q:"Which figure does the book use for diastolic pressure?", k:3, a:["120","100","60","80"], w:"Insufficiency uses 120 on the systolic."},
+    {q:"What else does it test for deficiency?", k:0, a:["Saliva pH","Hair colour","Height","Weight"], w:"Along with the diastolic pressure."}]},
+
+{d:81, t:"Where the book stops", s:"Claims, not measurements",
+ p:["This is the day to say plainly what this half of the course is. The book is a book of claims, and it prints them as claims.",
+    "There is no measured study behind its shelf in this library, and none is offered here. Nothing in the last twenty days is an experiment this page ran.",
+    "That does not make it worthless. It makes it a tradition, written down by a man who fed people from it, and this page prints it in his voice and says whose voice it is."],
+ bk:"It is a book of claims, and it prints them as claims.",
+ note:"The page's own line, and the oldest one here: nothing on this shelf answers an infection, and nothing here is a reason to stop anything you take.",
+ q:[{q:"What kind of book is this third one?", k:0, a:["A book of claims","A clinical trial","A government report","A lab manual"], w:"It prints its claims as claims."},
+    {q:"Is there a study behind the shelf in this library?", k:1, a:["Yes, a large one","No, and none is offered","Two studies","A small one"], w:"That is said plainly here rather than hidden."},
+    {q:"What does that make the book?", k:2, a:["Worthless","A cure","A tradition written down","A diagnosis"], w:"Written by a man who fed people from it."},
+    {q:"What does this page still stand on?", k:0, a:["Its own lines","The book's claims","A trial","A label"], w:"Nothing here answers an infection, and medicine stays yours."},
+    {q:"Whose voice is the last twenty days in?", k:3, a:["This page's","A doctor's","A trial's","The book's"], w:"This page's own lines sit in their own boxes."}]},
+
+{d:82, t:"The six types", s:"The book's scale of melanin",
+ p:["The book sorts people into six types by how much melanin it says they carry.",
+    "Type 6 is Africans, black and blue-black, the most on its scale. Then type 5, type 4, types 2 and 3, and type 1 for Caucasians, white, the least on the scale.",
+    "It is the book's scale and the book's words, printed here as its claim. This page keeps the herbs' own cautions and adds nothing to them from this shelf."],
+ bk:"Type 6 is Africans, the most melanin on the scale; type 1 is Caucasians, the least.",
+ note:"This is the book's classification, printed as the book's. Nothing on this page uses it to judge a person or to dose one.",
+ q:[{q:"How many types does the book give?", k:0, a:["Six","Two","Ten","Three"], w:"From type 6 down to type 1."},
+    {q:"Which type has the most melanin, in the book?", k:1, a:["Type 1","Type 6","Type 3","Type 4"], w:"Type 6 is Africans, on its scale."},
+    {q:"Which type does the book put last?", k:2, a:["Type 5","Type 4","Type 1","Type 2"], w:"Caucasians, white, the least on the scale."},
+    {q:"What does this page do with the scale?", k:0, a:["Prints it as the book's","Uses it to dose","Uses it to judge","Deletes it"], w:"The herbs keep their own cautions regardless."},
+    {q:"Which types does the book group together?", k:3, a:["5 and 6","1 and 2","4 and 5","2 and 3"], w:"It calls those the Orientals, in its own words."}]},
+
+{d:83, t:"The standard that is not your own", s:"The book's charge",
+ p:["The book's charge is that the medical lab values, the recommended daily allowances, the therapeutic doses and the growth charts were all built on a white body.",
+    "So, it says, a Black body is measured against a standard that is not its own, and called sick for not fitting it.",
+    "Its name for that is medical white racism. It is the book's charge, printed as the book's."],
+ bk:"The lab values and the growth charts were built on a white body.",
+ note:"The book's argument about how a body is measured is printed as the book's argument. This page adds no measurement of its own, and no herb here is dosed off it.",
+ q:[{q:"What does the book say the values were built on?", k:0, a:["A white body","A Black body","An average of all","No body at all"], w:"Lab values, allowances, doses and charts."},
+    {q:"What does it say happens to a Black body?", k:1, a:["It fits perfectly","It is called sick for not fitting","It is measured separately","It is not measured"], w:"Measured against a standard that is not its own."},
+    {q:"What does the book call that?", k:2, a:["A mistake","A law","Medical white racism","A trend"], w:"That is its own name for it."},
+    {q:"Is this page's dosing built on that argument?", k:3, a:["Yes","Partly","For minerals","No"], w:"No herb here is dosed off it."},
+    {q:"Which of these does the book name?", k:0, a:["The growth charts","The weather","The roads","The schools"], w:"Along with lab values and daily allowances."}]},
+
+{d:84, t:"Two melanins", s:"Eumelanin and pheomelanin",
+ p:["The book divides melanin in two. Black people carry eumelanin, which it calls selenium-centred and heavier, and more of it.",
+    "White people carry pheomelanin, sulphur-centred and lighter, and the least in amount. The book calls it a pseudo-melanin and ties its absence to albinism.",
+    "That is the book's division, and its own words for the two."],
+ bk:"Eumelanin is selenium-centred; pheomelanin is sulphur-centred and lighter.",
+ note:"The book's classification, printed as the book's. This page makes no claim about a person from it.",
+ q:[{q:"Which melanin does the book give to Black people?", k:0, a:["Eumelanin","Pheomelanin","Both equally","Neither"], w:"It calls it selenium-centred and heavier."},
+    {q:"Which element is eumelanin centred on, in the book?", k:1, a:["Sulphur","Selenium","Iron","Copper"], w:"Pheomelanin is the sulphur one."},
+    {q:"What does the book call pheomelanin?", k:2, a:["A true melanin","A mineral","A pseudo-melanin","A vitamin"], w:"And it ties its absence to albinism."},
+    {q:"Which element is pheomelanin centred on?", k:3, a:["Copper","Zinc","Selenium","Sulphur"], w:"That is the book's own pairing."},
+    {q:"Which is heavier, in the book?", k:0, a:["Eumelanin","Pheomelanin","They are equal","It gives neither"], w:"Eumelanin is the heavier and the more of the two."}]},
+
+{d:85, t:"The brain, in the book's comparison", s:"Two hemispheres",
+ p:["The book's claim is that Black people use both hemispheres equally, and process a great deal of information in the mid-brain.",
+    "The white mind, in its account, works mostly from the left.",
+    "It is the book's comparison of two brains, printed as its comparison and as nobody's measurement here."],
+ bk:"Black people use both hemispheres equally, and process much in the mid-brain.",
+ note:"The book's comparison, printed as the book's. This page does not use it to tell anybody how to think or learn.",
+ q:[{q:"What does the book say about the hemispheres?", k:0, a:["Both are used equally","Only the left is used","Only the right is used","Neither is used"], w:"That is its claim about the Black mind."},
+    {q:"Where does it say the information is processed?", k:1, a:["The cortex","The mid-brain","The spine","The skull"], w:"It says a great deal is processed there."},
+    {q:"Which hemisphere does it give the white mind?", k:2, a:["The right","Both","Mostly the left","Neither"], w:"That is the book's own comparison."},
+    {q:"Does this page measure any of that?", k:3, a:["Yes","In children","In adults","No"], w:"It prints the comparison and measures nothing."},
+    {q:"Whose comparison is it?", k:0, a:["The book's","This page's","A hospital's","A school's"], w:"The page's own lines sit apart from it."}]},
+
+{d:86, t:"The senses and the body", s:"The book's comparison, part two",
+ p:["The book's list here is about the senses and the body. A wider range of smells and flavours, better absorption of electromagnetic energy, and higher conductivity in the nerves.",
+    "The hair it calls curly, brown, galaxy-shaped in cross-section and an antenna; white hair it calls flat, limp and kidney-shaped, closer to fur.",
+    "Eyes set further apart for wider peripheral vision, a broad flat nose, the most pores of any race for cooling, and fast-twitch muscle. All of it is the book's, printed as the book's."],
+ bk:"Black hair is galaxy-shaped in cross-section, and the book treats it as an antenna.",
+ note:"The book's comparison, printed as its comparison. Nothing on this page is a judgement about a person's body.",
+ q:[{q:"What does the book say about smells and flavours?", k:0, a:["A wider range","A narrower range","The same range","None at all"], w:"It is first on its list for this section."},
+    {q:"How does the book describe Black hair?", k:1, a:["Flat and limp","Galaxy-shaped, an antenna","Straight and thin","Kidney-shaped"], w:"White hair is the flat, kidney-shaped one."},
+    {q:"What are the pores for, in the book?", k:2, a:["Smelling","Tasting","Cooling","Hearing"], w:"It says Black skin has the most of any race."},
+    {q:"Which muscle does the book name?", k:3, a:["Slow-twitch","Smooth","Cardiac","Fast-twitch"], w:"It calls it quick-responding and light-coloured."},
+    {q:"What does this page make of that list?", k:0, a:["It prints it as the book's","It is a judgement","It is a test","It is a dose"], w:"It is here because the book is on the shelf."}]},
+
+{d:87, t:"Two ways of thinking", s:"The psychology chapter",
+ p:["The book sets out two psychologies. The African-centred one it calls both hemispheres in balance, time that is cyclic and tied to events rather than the clock, language that leans on context, and a life that is communal, family-centred and spiritual, built on Maat.",
+    "The European-centred one it calls left-mind use, definitions fixed and linear, time as a fixed measurable duration, and a culture that is individualistic, competitive and conflict-driven.",
+    "Its examples are the Oedipus complex and good against evil as a pair. It is the book's read of two psychologies, printed as its claim."],
+ bk:"African-centred thinking keeps both hemispheres in balance, and time that is cyclic.",
+ note:"This is the book's psychology, printed as the book's. This page adds no judgement about any person or family to it.",
+ q:[{q:"What does the book call African-centred time?", k:0, a:["Cyclic, tied to events","Linear, on a clock","Fixed and measured","Not a thing"], w:"It is set against time as duration."},
+    {q:"What is African-centred life built on, in the book?", k:1, a:["Profit","Maat","Speed","Fame"], w:"It calls the life communal, family-centred and spiritual."},
+    {q:"Which example does the book give for the European read?", k:2, a:["A proverb","A song","The Oedipus complex","A recipe"], w:"Good against evil is the other example."},
+    {q:"How does the book describe the European mind?", k:3, a:["Both hemispheres","Right-hemisphere only","No hemispheres","Mostly the left"], w:"With definitions fixed and linear."},
+    {q:"Whose read of two psychologies is this?", k:0, a:["The book's","This page's","A clinic's","A school's"], w:"It is printed as the book's claim."}]},
+
+{d:88, t:"What melanin is built from", s:"The nutrition chapter",
+ p:["The book's nutrition chapter names what melanin is built from. The amino acids are phenylalanine, tyrosine, tryptophan, histidine and lysine.",
+    "The vitamins are A, the B-complex, C, D and E. The minerals are copper, magnesium, zinc, selenium and iron.",
+    "The herbs it names are ginkgo, gotu kola and echinacea, and all three are already on this page's own shelf with their cautions. The food, in its phrase, is whole, unprocessed and unchemicalised food."],
+ bk:"Whole, unprocessed, unchemicalised food.",
+ note:"The three herbs are on the A to Z shelf here, each with what travels with it. The minerals are food first; no amount is given for a person to take.",
+ q:[{q:"Which amino acids does the book name?", k:0, a:["Phenylalanine, tyrosine, tryptophan, histidine, lysine","Only lysine","Only tyrosine","It names none"], w:"That is the book's own list of five."},
+    {q:"Which vitamins does the book name?", k:1, a:["Only C","A, the B-complex, C, D and E","Only D","K and E only"], w:"It gives the whole group as its list."},
+    {q:"Which mineral does the book name?", k:2, a:["Calcium only","Sodium only","Copper","Iodine only"], w:"Along with magnesium, zinc, selenium and iron."},
+    {q:"Which three herbs does the book name?", k:3, a:["Nettle, mint, sage","Basil, thyme, dill","Senna, aloe, kelp","Ginkgo, gotu kola, echinacea"], w:"All three are on this page's own shelf."},
+    {q:"What food does the book ask for?", k:0, a:["Whole and unprocessed","Tinned and sweet","Refined and white","Fried and salted"], w:"It says unchemicalised food, in its own phrase."}]},
+
+{d:89, t:"The twelve clusters", s:"The last day before the test",
+ p:["The book ends its anatomy with two principles and twelve clusters. The male principle is serotonin: sympathetic, acid, fast, breaking down, an active body with an inactive mind, aimed at the future.",
+    "The female principle is melatonin: parasympathetic, alkaline, slow, building up, an inactive body with an active mind, aimed at the past.",
+    "Its twelve clusters are the zones where it says melanin gathers: the pineal and pituitary, the frontal cortex, the limbic system, the cerebellum, the throat and thyroid, the heart, the liver and pancreas, the spleen and circulation, the intestines, the kidneys and bladder, the organs of elimination, and the reproductive organs.",
+    "The book says those clusters have been called acupuncture meridians, and that they are at full capacity only in a melanin-dominant body. Tomorrow is the test."],
+ bk:"The twelve clusters are where melanin gathers, and they have been called meridians.",
+ note:"The book's map, printed as the book's, and not a chart this page treats anybody by. Tomorrow's test asks about the whole ninety days.",
+ q:[{q:"Which principle is serotonin, in the book?", k:0, a:["The male principle","The female principle","Neither","Both"], w:"It calls it acid, fast and breaking down."},
+    {q:"Which principle is melatonin?", k:1, a:["The male principle","The female principle","Neither","Both"], w:"Alkaline, slow, and building up."},
+    {q:"How many clusters does the book give?", k:2, a:["Three","Seven","Twelve","Twenty"], w:"From the pineal down to the reproductive organs."},
+    {q:"What have the clusters been called, in the book?", k:3, a:["Chakras","Nerves","Zones only","Acupuncture meridians"], w:"That is the book's own comparison for them."},
+    {q:"What is tomorrow?", k:0, a:["The test","A new course","A meal plan","A herb"], w:"Thirty questions over the whole ninety days."}]},
+
+{d:90, t:"The test", s:"Thirty questions, all ninety days", test:1,
+ p:["Thirty questions drawn from the course, in the order it ran, from the first book to the third. Twenty-four is a pass.",
     "Nothing is timed, the answers are checked on the phone, and nothing goes anywhere. Answer them all and the score appears at the bottom, with the reason for every one.",
     "If a day is wrong, that is the day to read again. The day number is in the reason."],
  note:"Twenty-four out of thirty to pass, and you can take it as many times as you like.",
@@ -1809,13 +2298,14 @@ var COURSE = [
   {q:"Which herb on this page is never taken internally?", k:2, a:["Chamomile","Ginger","Comfrey","Valerian"], w:"Day 11."},
   {q:"Which two things come off the table in the book's nutritional approach?", k:0, a:["Dairy and fried food","Fruit and grains","Water and tea","Herbs and spices"], w:"Day 12."},
   {q:"Which of the book's lines does this page not keep?", k:2, a:["Eat dark green leaves","Drink water in the morning","No drugs of any kind, prescribed included","Steam vegetables lightly"], w:"Day 13. What somebody is already taking stays theirs."},
-  {q:"How much of a herbal spice does the book use for four servings?", k:1, a:["A tablespoon","An eighth to a quarter of a teaspoon","Half a cup","A handful"], w:"Day 14."},
-  {q:"Which seasoning does the book give for the thyroid and goiter?", k:0, a:["Kelp","Basil","Vanilla","Dill"], w:"Day 15."},
-  {q:"In the food medicine chart, lycopene is in which two foods?", k:2, a:["Parsley and citrus","Tea and berries","Tomatoes and red grapefruit","Cabbage and sprouts"], w:"Day 17."},
+  {q:"Which gland does the third book call the master gland?", k:0, a:["The pineal","The pituitary","The thyroid","The liver"], w:"Day 61. The book says the pituitary has been called that wrongly."},
+  {q:"What does the third book say serotonin turns into?", k:0, a:["Melanin","Insulin","Bile","Adrenaline"], w:"Day 74. It is polymerised into melanin, in the book's words."},
+  {q:"When is melatonin highest, in the third book?", k:0, a:["Around ten at night","At noon","At dawn","At three in the afternoon"], w:"Day 75. It is secreted after sundown."},
   {q:"How much vitamin C does the book give for an infection?", k:1, a:["60 mg","25,000 to 60,000 mg","500 mg","It gives none"], w:"Day 19. And 300 mg every two hours, in the book's own words."},
   {q:"When is echinacea taken?", k:0, a:["At the first tickle of a cold","In the middle of a cold","Every day","Only with a fever"], w:"Day 22."},
   {q:"What does the page say about an infection?", k:2, a:["Try oregano oil","Give it three days","No plant here touches that","Take goldenseal"], w:"Day 28."},
-  {q:"In the book's framing, what do minerals do?", k:1, a:["Energise the body","Stabilise the body","Build the blood","Cool the body"], w:"Day 24: vitamins energise, minerals stabilise."},
+  {q:"Which melanin does the third book give to Black people?", k:0, a:["Eumelanin","Pheomelanin","Both equally","Neither"], w:"Day 84. Eumelanin is selenium-centred; pheomelanin is the sulphur one."},
+  {q:"Which three herbs does the third book name for melanin?", k:0, a:["Ginkgo, gotu kola, echinacea","Nettle, mint, sage","Senna, aloe, kelp","Basil, thyme, dill"], w:"Day 88. All three are on this page's own shelf with their cautions."},
   {q:"What does the book call a runny nose and a cough that clears?", k:2, a:["A contagion","A weakness","A cleansing, in its words","A mineral shortage"], w:"Day 32. This page takes the idea and not the whole step."},
   {q:"Why does the book say not to combine starch and sugar?", k:1, a:["It costs more","Sugar makes the starches spoil","It tastes bad","It is hard to chew"], w:"Day 34."},
   {q:"Which hours are the cleansing phase in the book's day?", k:0, a:["Four in the morning to noon","Noon to seven in the evening","Seven in the evening to four in the morning","Midnight to six"], w:"Day 35. That is why its African breakfast is fruit."},
@@ -1823,13 +2313,12 @@ var COURSE = [
   {q:"What are the two branches of the book's chart called?", k:1, a:["Hot and cold","The Male principle and the Female principle","Wet and dry","Inside and outside"], w:"Day 41. Two directions a thing moves a body in, not two kinds of person."},
   {q:"Which claim about a cold does this page leave in the book?", k:1, a:["That it involves mucus","That it is not passed from person to person","That it has a name","That it passes in a week"], w:"Day 49. Nothing on the shelf answers an infection, which is the oldest line on the page."},
   {q:"What is the book's rule of thumb for a label?", k:2, a:["Buy the cheapest","Check the price per ounce","If it is white, do not trust it","Look for a brand"], w:"Day 48."},
-  {q:"In the page's account, how long does a craving last?", k:2, a:["Hours","Days","Minutes, in waves","A second"], w:"Day 51. And the next meal is the one that matters."},
   {q:"What is the cheapest move on the whole page?", k:0, a:["Not keeping it in the house","A strong herb","A fast","A supplement"], w:"Day 52. A craving needs something to land on."},
   {q:"In the book, where is the money in an illness?", k:0, a:["In managing it, not in the cure","In the cure only","In the food only","Nowhere"], w:"Day 45. Its own words are that the food and the disease industries cannot be separated."}
  ]}
 ];
 
-/* The pass mark for day 60. */
+/* The pass mark for the test on day 90. */
 var EXAM_PASS = 24;
 
 /* Ten additional lessons built from text the app owner supplied on 12 Oct 2026.
@@ -1953,7 +2442,7 @@ function lectureNoteCard(lesson,i){
 
 /* ---- THE DEEP STORY ---------------------------------------------------------
    Everything this tab holds is one of the two books' claims, put in one place
-   so the sixty days can be checked against their source: sugar, honey and the
+   so the ninety days can be checked against their source: sugar, honey and the
    sweeteners, the chart of the two principles, what the chart does with a herb,
    the body read before it is treated, the twenty-four hour cycle, food
    combining, the breakfast, starch and teeth and salt, mucus, and the food and
@@ -1967,7 +2456,7 @@ var DEEP = [
  {h:"What this tab is, and whose words these are", s:"Read this one first",
   rows:[
    ["The rule this tab follows","Every line here is one of the two books' claims, printed as its claim. Nothing on this tab is this page's opinion, and nothing here was sharpened to sound stronger than the books put it."],
-   ["The other rule","The safety tab outranks this tab the same way it outranks the rest of the page. Nothing on this shelf answers an infection. Coming off alcohol or a drug is an emergency, not a herb week. What somebody is already taking stays theirs. A child and a pregnancy go where they went before."],
+   ["The other rule","The page's own lines outrank this tab the same way they outrank the rest of the page. Nothing on this shelf answers an infection. Coming off alcohol or a drug is an emergency, not a herb week. What somebody is already taking stays theirs. A child and a pregnancy go where they went before."],
    ["Four claims that stay in the book","That a cold is not passed from person to person. That inoculations cause epidemics. That a herb undoes junk food. And the parts that blame a people rather than a system. None of those four is made here in this page's own voice, and the course says so out loud on its day."],
    ["The rest of it","Everything else the books claim, this page claims with them, and it says whose claim it is every single time."],
    ["How to check it","Each section opens like a herb card, and each one reads out loud. The source is named on the row: the book it came from and the pages where the copy in this house has it."]],
@@ -2385,20 +2874,20 @@ var tab='az', openId=null, q='';
 /* ── THE CROSS PROGRESS BRIDGE ───────────────────────────────────────────────
    Two pages, one phone, two halves of the same study (13 Oct 2026). The
    Certification keeps its ninety days under tsid_certify_v1; this library keeps
-   its sixty under tsid_herb_notes_v1. Neither needs the other to work, so each
+   its ninety under tsid_herb_notes_v1. Neither needs the other to work, so each
    writes a small summary of its own progress beside its store and reads the
    other's - so the course can say where the ninety days have got to, and the
-   Certification can say where these sixty have. Nothing is sent anywhere; it is
+   Certification can say where these ninety have. Nothing is sent anywhere; it is
    one phone reading its own two shelves.
 */
 var BRIDGE_KEY='tsid_herb_progress_v1';
 var CERT_KEY='tsid_certify_v1';
-var HERB_DAYS_TOTAL=59;
+var HERB_DAYS_TOTAL=89;
 
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(store)) }catch(e){}
   try{
-    var t=dayScore(60);
+    var t=dayScore(90);
     localStorage.setItem(BRIDGE_KEY, JSON.stringify({
       done:daysDone(), total:HERB_DAYS_TOTAL, passed:!!(t.done && t.right>=EXAM_PASS)
     }));
@@ -2416,7 +2905,7 @@ function save(){
 
    It runs here, after save() and the keys it writes, rather than at the top of
    the script: the cleaning is one store, but the phone's other half - the
-   Certification's line about where these sixty days have got to - is written by
+   Certification's line about where these ninety days have got to - is written by
    save(), and a cleaned store with a stale summary beside it would have the two
    pages disagreeing about the same progress. */
 var QUIZ_N=5;
@@ -2425,7 +2914,7 @@ var QUIZ_N=5;
    the rewrite or later says so itself (r.n). One written before the stamp
    existed holds only the answers, and a day can only have asked as many as were
    answered - asking more would have left the day unfinished, which carries no
-   score worth keeping. Day 60 is the test and kept all thirty of its questions
+   score worth keeping. Day 90 is the test and kept all thirty of its questions
    through the rewrite, so an old record of it stands on the count it asks now,
    however far the person got: its questions are the ones it answered. */
 function askedBy(day, r){
@@ -2509,7 +2998,7 @@ function allHerbs(){
 /* ── THE THIRTY DAYS ──────────────────────────────────────────────────────────
    Progress lives in the same store as the notes, one key a day. Nothing is
    sent anywhere, there is no clock on it, and an answer can be changed —
-   changing it just changes the score. The test on day 60 is checked here on
+   changing it just changes the score. The test on day 90 is checked here on
    the phone, the same way every other day is.
 --------------------------------------------------------------------------- */
 function dayRec(d){ var r=store['day:'+d]; if(!r||!r.a) return {a:[]}; return r }
@@ -2533,7 +3022,7 @@ function courseDay(day){
   var rec=dayScore(day.d), open=openId==='d'+day.d;
   SAY_TEXT['d'+day.d]=daySayText(day);
   var out='<div class="card'+(open?' open':'')+'" data-h="d'+day.d+'">'
-   +'<div class="row"><div class="row-txt"><div class="dayno">Day '+day.d+(day.test?' \u00b7 the test':' of 60')+'</div>'
+   +'<div class="row"><div class="row-txt"><div class="dayno">Day '+day.d+(day.test?' \u00b7 the test':' of 90')+'</div>'
    +'<b>'+esc(day.t)+'</b><span>'+esc(day.s)+(rec.done?' &middot; '+rec.right+' of '+rec.total+' right':'')+'</span></div>'
    +'<div class="chev">&#8250;</div></div><div class="body">';
   (day.p||[]).forEach(function(t){ out+='<p>'+esc(t)+'</p>' });
@@ -2565,14 +3054,14 @@ function courseDay(day){
 }
 
 function courseView(){
-  var done=daysDone(), t=dayScore(60);
+  var done=daysDone(), t=dayScore(90);
   var test=t.done ? 'The test: '+t.right+' of '+t.total+(t.right>=EXAM_PASS?' \u2014 passed':' \u2014 the pass mark is '+EXAM_PASS+'. Take it again whenever you like.')
-                  : 'The test is day 60. Twenty-four out of thirty is a pass. More than one answer can be changed, and the test can be taken again as many times as you like.';
+                  : 'The test is day 90. Twenty-four out of thirty is a pass. More than one answer can be changed, and the test can be taken again as many times as you like.';
   return '<div class="sec">'
-   +'<div class="prog"><b>'+done+' of 59 days done</b>'
-   +'<div class="bar"><i style="width:'+Math.round(done/59*100)+'%"></i></div>'
+   +'<div class="prog"><b>'+done+' of 89 days done</b>'
+   +'<div class="bar"><i style="width:'+Math.round(done/89*100)+'%"></i></div>'
    +'<span>'+test+'</span></div>'
-   +'<div class="big okbox"><b>Sixty days, beginner to the end</b>A day of teaching, a quiz under it, and the test on the last day. Every day is built out of the two books already behind this library, and each quiz tells you why the answer is the answer. Nothing is timed, nothing is sent anywhere, and nothing here has to be bought.</div>'
+   +'<div class="big okbox"><b>Ninety days, beginner to the end</b>A day of teaching, a quiz under it, and the test on the last day. Every day is built out of the three books behind this library, and each quiz tells you why the answer is the answer. Nothing is timed, nothing is sent anywhere, and nothing here has to be bought.</div>'
    +'<a href="/certify#herbalist" style="display:block;margin:14px 0 0;padding:13px 14px;border:1px solid rgba(255,255,255,.14);border-radius:14px;color:inherit;text-decoration:none;font-size:.875rem;line-height:1.5"><b>Ninety days, and a certificate.</b> The Certification teaches this same ground at length \u2014 ninety days of clinical herbalism, a quiz after every lesson, and a certificate at the end. Each of its lessons links back onto these plant cards.</a>'
    +'<div class="big okbox" style="margin-top:12px"><b>Cross progress &middot; the Certification</b>'+certBridgeText()+'</div>'
    +'<div class="sec-hd">The days</div>'
@@ -2635,14 +3124,6 @@ function render(){
 
   if(tab==='deep'){
     out='<div class="sec">'+DEEP.map(function(b,i){ return bsec(b,i,'dp') }).join('')+'</div>';
-  }
-
-  if(tab==='safety'){
-    SAY_TEXT['safety']=safetySayText();
-    out='<div class="sec">'
-    +SAFETY_BOXES.map(function(x){ return '<div class="big '+x.cls+'"><b>'+x.h+'</b>'+x.b+'</div>' }).join('')
-    +saybarHTML('safety')
-    +'</div>';
   }
 
   if(tab==='mine'){
@@ -2762,23 +3243,11 @@ document.querySelectorAll('.tab').forEach(function(el){
 --------------------------------------------------------------------------- */
 var SAY_BUSY=null;
 
-/* The same on-device voice reads the rest of the page too — the book sections,
-   the thirty days and the safety tab — so the whole library can be listened to,
-   not only one herb at a time. Ids that are not herbs register their plain text
-   here when the page draws them; say() reads it back word for word. */
+/* The same on-device voice reads the rest of the page too, the book sections
+   and the days of the course, so the whole library can be listened to, not only
+   one herb at a time. Ids that are not herbs register their plain text here when
+   the page draws them; say() reads it back word for word. */
 var SAY_TEXT={};
-
-/* The safety tab, said as well as shown. One source for both, so the spoken
-   version can never drift from the written one. */
-var SAFETY_BOXES=[
- {cls:'redbox',h:'Nothing here answers an infection',b:'Nothing in this library treats an infection. Not oregano oil, not goldenseal, not garlic. A fever that will not come down, a wound going red and hot, a chest that rattles, a tooth gone bad, anything yellow or green coming up — no herb on this shelf touches that.'},
- {cls:'warnbox',h:'Coming off alcohol or a drug',b:'Alcohol withdrawal can kill. It is not something to sit out with chamomile and valerian. If you have been drinking heavily and stop, that week is an emergency and not a herb week, and the timeline page in the app says the same thing. Herbs do not belong in it.'},
- {cls:'warnbox',h:'What these herbs do to what you already take',b:'St John\u2019s wort interferes with antidepressants, birth control, blood thinners and HIV medicine. Licorice and hibiscus move blood pressure. Ginger, ginkgo, turmeric, garlic and white willow all thin the blood. Those are facts about the plants, and they are why a herb is not a free addition to anything else.'},
- {cls:'warnbox',h:'Kratom is not in this library',b:'It is sold as a herb. It acts on the same receptors as opioids and it is addictive — people come off it with withdrawal like any opioid. It has no place here.'},
- {cls:'warnbox',h:'Pregnancy and children',b:'Most of this list is not for pregnancy. Raspberry leaf is the one people talk about, and that one is not a call this page can make for you. Children are not small adults for dosing — a few of these are genuinely dangerous for a baby, goldenseal and comfrey root especially.'},
- {cls:'warnbox',h:'Liver',b:'Comfrey is never taken internally. Kava and several cleanse brews put strain on a liver that is already tired. If you have been hard on your body and you want to clean it up, food and water and time do that. A tea does not.'},
- {cls:'okbox',h:'What this page is',b:'What these plants do, and what the two books say they do. The claims are made here plainly, because this is a private shelf for two people and their own books (15 Sep 2026). What still holds is at the top of this tab: nothing on this shelf answers an infection or a withdrawal, a chest that hurts to breathe or a bleed that will not stop.'}
-];
 
 /* The read-aloud buttons, built once so every shelf carries the same pair. */
 function saybarHTML(id){
@@ -2802,11 +3271,6 @@ function daySayText(day){
   (day.p||[]).forEach(function(t){ s+=t+' ' });
   if(day.bk) s+='From the books, their line. '+day.bk+' ';
   if(day.note) s+='This page\u2019s own line. '+day.note+' ';
-  return s;
-}
-function safetySayText(){
-  var s='Read this first. ';
-  SAFETY_BOXES.forEach(function(x){ s+=x.h+'. '+x.b+' ' });
   return s;
 }
 /* The My notes tab, read as it stands: what the tab is for, and every plant with
@@ -2886,7 +3350,7 @@ document.getElementById('view').addEventListener('click',function(e){
 
 
 /* ── THE DEEP LINK ─────────────────────────────────────────────────────────────
-   A link from the Certification lands here: #course, #d12, #safety, #az,
+   A link from the Certification lands here: #course, #d28, #d12, #az,
    #books, #need, #meal, #deep, or ?tab=course&day=12. The hash opens the tab
    and the day; the query is the shape a shared link travels in. Read once at
    boot, so an unknown address leaves the library on its ordinary A–Z tab.
@@ -2908,7 +3372,7 @@ function applyDeepLink(){
     var m=h.match(/^d(\d+)$/), mp=h.match(/^p-(.+)$/);
     if(mp){ plant=mp[1]; }
     else if(m){ tab='course'; openId='d'+m[1]; }
-    else if(['az','need','books','course','meal','deep','safety','mine'].indexOf(h)>-1){ tab=h; openId=null; }
+    else if(['az','need','books','course','meal','deep','mine'].indexOf(h)>-1){ tab=h; openId=null; }
   }
   /* A plant's own address (13 Oct 2026): /herbs#p-garlic, or ?plant=garlic,
      opens the A-Z tab on that card. A name the library does not have leaves the

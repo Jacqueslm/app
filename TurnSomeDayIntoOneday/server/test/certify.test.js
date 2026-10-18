@@ -743,11 +743,12 @@ test('every lesson is deepened, and linked into the library it stands on', () =>
       assert.match(g.to, /^\/(herbs|trainer)/, `${id} day ${d}: the door goes nowhere real`);
     }
   }
-  // The door names the exact place: a course day, the safety tab, the cards, or
-  // the Trainer.
+  // The door names the exact place: a course day, the cards, or the Trainer.
+  // The library's Read this first tab came off on 18 Oct 2026, so the days that
+  // leant on it name day 28, where those lines are kept now.
   assert.equal(C.deeperFor('herbalist', 2).label, 'Herb Library - day 1');
-  assert.match(C.deeperFor('herbalist', 40).label, /Read this first/);
-  assert.match(C.deeperFor('herbalist', 40).to, /#safety/);
+  assert.match(C.deeperFor('herbalist', 40).label, /day 28/);
+  assert.match(C.deeperFor('herbalist', 40).to, /#d28/);
   assert.equal(C.deeperFor('fitness', 12).to, '/trainer');
   assert.match(C.deeperFor('fitness', 12).label, /Trainer/);
 

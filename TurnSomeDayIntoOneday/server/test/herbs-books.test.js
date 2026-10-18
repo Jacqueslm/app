@@ -190,7 +190,7 @@ test('the herb library: the page makes its claims, and no longer refuses to', as
   for (const re of REFUSALS) assert.doesNotMatch(html, re, `the page no longer says ${re}`);
   // And the claims are in the page's own voice, on the page's own furniture.
   assert.match(html, /<div class="lbl">What it does<\/div>/, 'the herb card asks what it does, not what it was ever used for');
-  assert.match(html, /The claims are made here/, 'and the safety tab says so plainly');
+  assert.match(html, /The claims are made here/, 'and the From the books tab says so plainly');
   assert.match(html, /The claims are made here plainly/, 'in the page\u2019s own voice, not in a prompt\u2019s');
   // The ask box that used to be told to make them too came off the page with
   // Friendly on 4 Oct 2026. The claims are the page's own and they stay.
@@ -239,6 +239,101 @@ test('the herb library: searching finds a herb by the book words too', () => {
   p.sandbox.tab = 'az';
   p.sandbox.render();
   assert.match(p.els.get('view').innerHTML, /Gymnema/, 'a herb is found by its other name in the book line');
+});
+
+/* ---------------------------------------------------------- the third book
+   18 Oct 2026. Jacques: "put this in the herbs", with the text of Melanin: What
+   Makes Black People Black! by Llaila Afrika pasted in — the same author as the
+   first two. It went in as its own shelves on this tab, for the reason the tab
+   exists: most of a book about melanin is not about one plant.
+
+   What is held here is the shelf's shape and the one rule that makes printing
+   another person's claims honest on this page. */
+const MELANIN_TITLES = [
+  'Melanin — the third book',
+  'The pineal gland, and what melanin is',
+  'What melanin takes in',
+  'Where melanin is in the body',
+  'The two melanin hormones',
+  'How the book says to measure melanin',
+  'The races, by melanin',
+  'The two races compared, as the book puts it',
+  'Two ways of thinking',
+  'What melanin is built from',
+  'The two principles, and the twelve clusters',
+];
+
+function melaninShelf(p) {
+  return p.sandbox.BOOKS.filter((b) => MELANIN_TITLES.indexOf(b.h) > -1);
+}
+
+test('the herb library: the third book is a shelf on the tab, and it renders', () => {
+  const p = loadPage('herbs.html');
+  p.sandbox.tab = 'books';
+  p.sandbox.render();
+  const html = p.els.get('view').innerHTML;
+
+  const shelf = melaninShelf(p);
+  assert.equal(shelf.length, MELANIN_TITLES.length,
+    `every shelf of the book is in the tab: ${shelf.map((b) => b.h).join(' / ')}`);
+  for (const b of shelf) {
+    assert.match(html, new RegExp(b.h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${b.h} renders`);
+    assert.ok(b.rows.length >= 2, `${b.h} holds rows and not a title alone`);
+    for (const r of b.rows) {
+      assert.ok(r[0] && r[1] && r[1].length > 20, `${b.h} — ${r[0]} carries the book's line`);
+    }
+  }
+  // The first card is still the first card: everything that reads "bk0" on
+  // this page, including its own read-aloud test, points at it.
+  assert.equal(p.sandbox.BOOKS[0].h, 'What this tab is, and where each line came from');
+  assert.match(html, /data-h="bk0"/);
+});
+
+test('the herb library: the third book is named, and its claims are labelled as its own', () => {
+  const p = loadPage('herbs.html');
+  const shelf = melaninShelf(p);
+  const first = shelf[0];
+  assert.match(first.s, /Llaila Afrika/, 'the shelf names the author');
+  assert.match(first.s, /Seaburn, 2009/, 'and the publisher and the year');
+  assert.match(first.rows[0][1], /Melanin: What Makes Black People Black!/, 'and the title of the book');
+
+  // The rule the rest of this tab keeps: a figure or a claim says whose it is,
+  // and this page's own line sits in the box at the foot of the section.
+  for (const b of shelf) {
+    assert.ok(b.s, `${b.h} says where it came from`);
+    assert.ok(b.note, `${b.h} carries the box that says whose claims these are`);
+    assert.match(b.note, /^(<b>The book|<b>This page|<b>Read the race)/, `${b.h}'s box says which voice it is`);
+    assert.equal(b.noteCls, 'warnbox', `${b.h}'s box is drawn as a warning, not as prose`);
+  }
+  // And the page's own line is where the book's claim is a self-test.
+  const measuring = shelf.filter((b) => b.h === 'How the book says to measure melanin')[0];
+  assert.match(measuring.note, /not a test this page asks/,
+    'the pH and blood-pressure shelf says the test is the book\u2019s, not this page\u2019s');
+
+  // The tab's own card now counts three books, and the copy that named two went.
+  const intro = p.sandbox.BOOKS[0];
+  const nine = JSON.stringify(intro);
+  assert.match(nine, /The three books/, 'the tab says three books');
+  assert.match(nine, /Melanin: What Makes Black People Black!/, 'and names the third');
+});
+
+test('the herb library: the herbs the third book names are on this page, with their cautions', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const nutrition = melaninShelf(p).filter((b) => b.h === 'What melanin is built from')[0];
+  const herbsRow = nutrition.rows.filter((r) => /Herbs the book names/.test(r[0]))[0];
+  assert.ok(herbsRow, 'the nutrition shelf names the herbs');
+
+  // Every herb that shelf names has to be a real entry on the A–Z shelf, with
+  // its caution on it — the page's own promise, and the reason the row can
+  // point at it at all.
+  for (const name of ['Ginkgo', 'Gotu kola', 'Echinacea']) {
+    assert.match(herbsRow[1], new RegExp(name, 'i'), `the shelf names ${name}`);
+    const h = list.filter((x) => x.n === name)[0];
+    assert.ok(h, `${name} is in the library`);
+    assert.ok(h.u, `${name} says what people use it for`);
+    assert.ok(h.c, `${name} carries its caution`);
+  }
 });
 
 test('the app no longer prints a herb count it cannot keep true', () => {

@@ -9,6 +9,15 @@ Use this skill whenever the user asks to write a song, lyrics, or a prompt for a
 - When asked for Suno or another music-generation tool, provide a separate, ready-to-paste **Style of Music** prompt. If the user asks for both lyrics and a Suno prompt, provide both in separate labeled blocks.
 - Keep the result easy to copy, download, or paste into the tool. Do not claim text is an audio file or that a song has been generated unless it actually has.
 
+## Suno prompt delivery
+
+When the user asks for a Suno prompt:
+
+- Write the ready-to-paste prompt into a plain-text `.txt` file, with the prompt itself clearly labeled and no unrelated explanation mixed into the text.
+- Provide the file through the platform's actual downloadable-file or attachment mechanism. Do not present a repository path as a download link if opening it treats the filename as a project or repository route.
+- Also include the prompt inline in one fenced text block so it remains easy to copy if the file link does not work.
+- If a real downloadable attachment cannot be created in the current interface, say so plainly and provide the complete prompt in the copyable text block instead. Never claim that text is generated audio or a downloaded song.
+
 ## Creative direction
 
 For themes of self-discovery, healing, and winning in life:

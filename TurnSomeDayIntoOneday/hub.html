@@ -117,6 +117,48 @@
     margin-top:24px; color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center;
   }
 
+  /* ── two at once ────────────────────────────────────────────────────────────
+     Jacques, 18 Oct 2026: "two parts open at once". Every door here replaces the
+     shell with the part it opens, and inside the installed app there is no tab
+     bar to open a second part in — so one tap on a door and the first part is
+     gone. The shell carries both parts itself instead: two panes, one above the
+     other, holding the very pages the doors lead to. On a phone no other shape
+     fits (two half-width columns of a 412px screen are not readable), and the
+     one above the other keeps its full width, which is what every page here was
+     built for: the Key was audited at 412x915 like all of them. */
+  .splitsay{display:flex; align-items:center; gap:11px; flex-wrap:wrap}
+  .splitwho{margin:0; flex:1 1 160px; color:var(--dimmer); font-size:.75rem; line-height:1.5}
+  #split{
+    position:fixed; inset:0; z-index:60; background:var(--bg);
+    display:grid; grid-template-rows:auto 1fr; gap:8px;
+    padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 10px);
+  }
+  .splitbar{display:flex; align-items:center; gap:8px}
+  .splittitle{
+    flex:1 1 auto; min-width:0; font-family:var(--serif); font-size:.9375rem; color:var(--dim);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .panes{display:grid; gap:8px; grid-template-rows:1fr 1fr; min-height:0}
+  /* Tall: the pane being worked in takes the screen and the other one keeps its
+     place behind its own bar — still loaded, still where it was, one tap from
+     being the tall one. A part is never reloaded to come back to. */
+  .panes[data-tall="0"]{grid-template-rows:1fr auto}
+  .panes[data-tall="1"]{grid-template-rows:auto 1fr}
+  .pane{
+    display:flex; flex-direction:column; min-height:0; overflow:hidden;
+    background:var(--bg2); border:1px solid var(--line); border-radius:var(--r);
+  }
+  .panes[data-tall="0"] .pane[data-pane="1"] .frame,
+  .panes[data-tall="1"] .pane[data-pane="0"] .frame{display:none}
+  .panehead{display:flex; align-items:center; gap:8px; padding:7px 9px; border-bottom:1px solid var(--line2)}
+  .pick{
+    flex:1 1 auto; min-width:0; font:inherit; font-size:.875rem; color:var(--ink);
+    background:rgba(0,0,0,.3); border:1px solid var(--line); border-radius:10px; padding:8px 10px;
+  }
+  .pane .quiet{padding:7px 11px; font-size:.75rem}
+  .panenote{margin:0; padding:9px 11px; color:var(--rose); font-size:.75rem; line-height:1.5}
+  .frame{flex:1 1 auto; width:100%; min-height:0; border:0; background:var(--bg2); display:block}
+
   /* ── the voice ────────────────────────────────────────
      Jacques, 15 Oct 2026: "the read it to me doesn't work here ... the whole app
      not just specific sections." The shell had none, so the one screen every
@@ -175,6 +217,15 @@
 
   <!-- Open: the doors, now. -->
   <section id="open" class="cards" hidden>
+    <!-- Two at once (18 Oct 2026). Jacques: "two parts open at once". The door
+         beside this opens one part on its own, as every door always has; this
+         opens two, in the app, at the same time. Both are always here - neither
+         is the main one. -->
+    <div class="splitsay">
+      <button class="quiet" id="splitOpen" type="button">Two at once</button>
+      <p class="splitwho" id="splitWho">Open two doors at the same time &mdash; one above the other, each keeping its place.</p>
+    </div>
+
     <a class="card z" href="/key">
       <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12.6" r="7.4"/><circle cx="12" cy="5.2" r="1.7" fill="currentColor" stroke="none"/></svg></span>
       <span class="txt">
@@ -252,6 +303,36 @@
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
 
+    <!-- Both parts, on the screen together. This is the whole of the two-at-once
+         screen: a bar that says what it is and a way back to the doors, then the
+         two panes. The selects are filled from the page's own table of parts
+         (see TWO AT ONCE below), so a door added later cannot appear on this
+         screen without being added to that table first. -->
+    <section id="split" hidden aria-label="Two parts at once">
+      <div class="splitbar">
+        <span class="splittitle" id="splitTitle">Two at once</span>
+        <button class="quiet" id="splitDoors" type="button">The doors</button>
+      </div>
+      <div class="panes" id="panes">
+        <div class="pane" data-pane="0">
+          <div class="panehead">
+            <select class="pick" id="pick0" aria-label="The first part"></select>
+            <button class="quiet" id="tall0" type="button">Tall</button>
+          </div>
+          <p class="panenote" id="note0" hidden>This part is not kept on the phone, so it needs a signal. Turn your data on, or use the doors.</p>
+          <iframe class="frame" id="frame0" title="The first part"></iframe>
+        </div>
+        <div class="pane" data-pane="1">
+          <div class="panehead">
+            <select class="pick" id="pick1" aria-label="The second part"></select>
+            <button class="quiet" id="tall1" type="button">Tall</button>
+          </div>
+          <p class="panenote" id="note1" hidden>This part is not kept on the phone, so it needs a signal. Turn your data on, or use the doors.</p>
+          <iframe class="frame" id="frame1" title="The second part"></iframe>
+        </div>
+      </div>
+    </section>
+
   </section>
 
   <footer id="foot">Private. Signed in only.</footer>
@@ -299,7 +380,13 @@
   // programme the page no longer has, so its line changed again and the name
   // moves to 3.5 with it, or an installed phone keeps being told about a
   // programme that is not there.
-  const APP_VERSION='3.5';
+  //
+  // 18 Oct 2026: the shell carries two parts at once - Jacques: "two parts open
+  // at once". A new screen on the shell is a changed shell, so the name moves to
+  // 3.6 with it, for the reason every bump above gives: an installed phone that
+  // never rebuilds keeps a shell with no way to open a second part beside the
+  // first, which is the whole of what he asked for.
+  const APP_VERSION='3.6';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');
@@ -316,6 +403,10 @@
     locked.hidden = false;
     open.hidden = true;
     signOut.hidden = true;
+    // Signing out empties the two-at-once panes: a frame left loaded is a
+    // private page left open. The choice of parts is kept, so signing back in
+    // lands on the same two. (Absent where there are no panes at all.)
+    try { if (window.SPLIT) window.SPLIT.unload(); } catch (e) { /* no panes here */ }
     whoTag.textContent = 'Five doors. That is the whole app.';
     try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
   }
@@ -446,6 +537,252 @@
         showLocked();
       });
   });
+})();
+</script>
+
+<script>
+/* ── TWO AT ONCE ──────────────────────────────────────────────────────────────
+   Jacques, 18 Oct 2026: "two parts open at once".
+
+   Every door on this screen replaces the shell with the part it opens, and inside
+   the installed app there is no tab bar to open a second part in: one tap on a
+   door and the first part is gone. So the shell carries both parts itself, in two
+   frames, one above the other - the same gated pages the doors lead to, loaded
+   beside each other instead of one at a time. Nothing here reaches round the
+   door: a frame asks for /key or /herbs exactly as a tap on the card does, so the
+   server checks the session and the list for it the same way.
+
+   Four things are deliberate, and each is the reason a line below is written the
+   way it is:
+
+   · A part is never loaded twice. Picking the part that is already in the other
+     pane SWAPS the two rather than loading a second copy of it - which is what
+     changing one into the other means, and two copies of the heaviest pages here
+     is a phone's memory spent on nothing.
+   · The two parts are remembered on the phone (localStorage, tsid-split), so the
+     app opens on the two parts he was using rather than back at the doors.
+   · Closing the panes does not empty them. Pressing Two at once again puts him
+     back exactly where he was - a book on its fortieth paragraph stays there.
+     Signing out is the one case that empties them, because that is the one case
+     where what is in them is no longer his to leave open (see showLocked above).
+   · A part's own way back - "← The app" on every page - points at /app. Followed
+     inside a pane it would draw the shell inside itself, so it is read as what the
+     person meant: back to the doors.
+*/
+(function(){
+  'use strict';
+
+  // The parts, in the order the doors put them in, and the only place this screen
+  // gets its list from: the selects are filled from here. hub-split.test.js fails
+  // if this table and the doors' own links ever stop agreeing, because a sixth
+  // door that never reaches the panes is exactly the drift a second list brings.
+  var PARTS = [
+    { key: 'key',     name: 'The Zodiacs',       href: '/key' },
+    { key: 'herbs',   name: 'The Herbs',         href: '/herbs' },
+    { key: 'music',   name: 'The Player',        href: '/music' },
+    { key: 'trainer', name: 'The Trainer',       href: '/trainer' },
+    { key: 'certify', name: 'The Certification', href: '/certify' }
+  ];
+  var KEEP = 'tsid-split';
+  var DEFAULT_PARTS = ['key', 'herbs'];
+  var HINT = 'Open two doors at the same time \u2014 one above the other, each keeping its place.';
+
+  function byId(id){ return document.getElementById(id); }
+  var split = byId('split'), panes = byId('panes');
+  if (!split || !panes) return;          // not the shell: nothing to do here
+
+  var rowBtn = byId('splitOpen'), who = byId('splitWho'), doors = byId('splitDoors');
+  var picks  = [byId('pick0'), byId('pick1')];
+  var frames = [byId('frame0'), byId('frame1')];
+  var talls  = [byId('tall0'), byId('tall1')];
+  var notes  = [byId('note0'), byId('note1')];
+
+  var chosen = DEFAULT_PARTS.slice();
+  var tallPane = -1;
+  var seen = false;                      // has a choice ever been kept here?
+
+  function partOf(key){
+    for (var i = 0; i < PARTS.length; i++) if (PARTS[i].key === key) return PARTS[i];
+    return null;
+  }
+
+  /* The choice, as the phone holds it. Anything unreadable - a phone in private
+     mode, a half-written entry from a version that kept something else - is an
+     ordinary first use, not an error: the panes simply start on the first two
+     doors. */
+  function read(){
+    try {
+      var raw = localStorage.getItem(KEEP);
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      var two = (o && o.parts) || [];
+      if (!partOf(two[0]) || !partOf(two[1])) return null;
+      return { on: !!o.on, parts: [two[0], two[1]] };
+    } catch (e) { return null; }
+  }
+  function save(){
+    try {
+      localStorage.setItem(KEEP, JSON.stringify({ on: !split.hidden, parts: chosen.slice() }));
+    } catch (e) { /* a phone that keeps nothing still gets the two panes */ }
+  }
+
+  /* The list under each pane. Written once, from PARTS. */
+  function fill(sel){
+    if (!sel || sel.filled) return;
+    var h = '';
+    for (var i = 0; i < PARTS.length; i++){
+      h += '<option value="' + PARTS[i].key + '">' + PARTS[i].name + '</option>';
+    }
+    sel.innerHTML = h;
+    sel.filled = true;
+  }
+
+  /* Everything that follows from what is chosen, without loading anything: the
+     two selects, what each frame is called, the Tall button in each pane, and the
+     one sentence the panes cannot show - that the private parts are never kept on
+     the phone (sw.js keeps none of them, on purpose), so a pane held offline has
+     nothing to show rather than a browser error page and no explanation. */
+  function paint(){
+    var offline = (typeof navigator !== 'undefined' && navigator.onLine === false);
+    for (var i = 0; i < 2; i++){
+      var p = partOf(chosen[i]) || PARTS[0];
+      if (picks[i] && picks[i].value !== p.key) picks[i].value = p.key;
+      if (frames[i]) frames[i].title = p.name;
+      if (notes[i]) notes[i].hidden = !offline;
+      if (talls[i]) talls[i].textContent = (tallPane === i) ? 'Both the same' : 'Tall';
+    }
+    try {
+      if (tallPane >= 0) panes.setAttribute('data-tall', String(tallPane));
+      else panes.removeAttribute('data-tall');
+    } catch (e) { /* an element that cannot carry the attribute keeps the even split */ }
+    if (who && seen && partOf(chosen[0]) && partOf(chosen[1])){
+      who.textContent = 'Last time: ' + partOf(chosen[0]).name + ' and ' + partOf(chosen[1]).name + '.';
+    }
+  }
+
+  /* Load a pane, unless it is already showing that part. The loaded address is
+     kept on the frame itself (data-src) rather than compared against the browser's
+     own idea of src, so "already there" is one plain comparison. */
+  function load(i){
+    var p = partOf(chosen[i]) || PARTS[0];
+    var f = frames[i];
+    if (!f) return;
+    if (f.getAttribute('data-src') === p.href) return;
+    f.setAttribute('data-src', p.href);
+    f.setAttribute('src', p.href);
+  }
+
+  function set(i, key){
+    if (!partOf(key)) return;
+    var other = (i === 0) ? 1 : 0;
+    if (key === chosen[other]) chosen[other] = chosen[i];   // swap, never a copy
+    chosen[i] = key;
+    seen = true;
+    paint(); load(0); load(1); save();
+  }
+
+  function tall(i){
+    tallPane = (tallPane === i) ? -1 : i;
+    paint();
+  }
+
+  function open(){
+    var was = read();
+    if (was) chosen = was.parts.slice();
+    seen = true;
+    split.hidden = false;
+    // The shell's own voice has nothing to say about what is in the panes, and
+    // would talk over the part being opened - every part carries its own voice.
+    try { if (window.SAY && window.SAY.stop) window.SAY.stop(); } catch (e) { /* no voice here */ }
+    paint(); load(0); load(1); save();
+  }
+
+  function close(){
+    split.hidden = true;
+    save();
+  }
+
+  /* Hide the panes and put both frames back to nothing. Only signing out does
+     this: everywhere else, what was open stays open. */
+  function unload(){
+    split.hidden = true;
+    for (var i = 0; i < 2; i++){
+      if (!frames[i]) continue;
+      frames[i].removeAttribute('data-src');
+      frames[i].setAttribute('src', 'about:blank');
+    }
+    save();
+  }
+
+  /* Is this address the shell itself? /app is what every page's own way back
+     points at, and / is what the server sends to /app. */
+  function isShell(path){
+    var p = String(path || '');
+    return p === '/app' || p === '/' || p === '/hub.html';
+  }
+
+  /* A pane that lands back on the shell means the person pressed a part's own way
+     back. Read as what they meant - the doors - rather than drawing the shell
+     inside its own pane. Same-origin, so the address can be read; a pane showing a
+     browser's own error page (offline, a failed load) cannot be read at all and is
+     left exactly as it is. */
+  function watch(f){
+    if (!f) return;
+    f.addEventListener('load', function(){
+      var here = '';
+      try { here = f.contentWindow.location.pathname; } catch (e) { return; }
+      if (isShell(here)){
+        // The pane is holding the shell now, not the part it was asked for -
+        // left alone, opening the panes again would put the shell inside a pane
+        // of itself. Empty it so that part loads fresh next time.
+        f.removeAttribute('data-src');
+        f.setAttribute('src', 'about:blank');
+        close();
+        return;
+      }
+      // Where the frame actually is, so "already showing that part" can never be
+      // answered by something the frame has since left.
+      f.setAttribute('data-src', here);
+    });
+  }
+
+  fill(picks[0]); fill(picks[1]);
+  for (var i = 0; i < 2; i++) (function(i){
+    if (picks[i]) picks[i].addEventListener('change', function(){ set(i, picks[i].value); });
+    if (talls[i]) talls[i].addEventListener('click', function(){ tall(i); });
+    watch(frames[i]);
+  })(i);
+
+  if (rowBtn) rowBtn.addEventListener('click', open);
+  if (doors) doors.addEventListener('click', close);
+  try {
+    window.addEventListener('online', paint);
+    window.addEventListener('offline', paint);
+  } catch (e) { /* nothing to keep in step */ }
+
+  /* What the phone was left holding. Coming back to the app lands on the two
+     parts, or - for somebody who has never opened them - on the doors, with the
+     one line that says what the button does. */
+  var kept = read();
+  if (kept){ chosen = kept.parts.slice(); seen = true; }
+  if (kept && kept.on) open();
+  else { if (who && !seen) who.textContent = HINT; paint(); }
+
+  /* Named for the suite that drives it: hub-split.test.js opens the panes, picks
+     parts and reads the frames back through this, so the behaviour is checked
+     rather than the markup. */
+  window.SPLIT = {
+    parts: PARTS,
+    open: open,
+    close: close,
+    unload: unload,
+    set: set,
+    tall: tall,
+    isShell: isShell,
+    chosen: function(){ return chosen.slice(); },
+    tallPane: function(){ return tallPane; },
+    on: function(){ return !split.hidden; }
+  };
 })();
 </script>
 

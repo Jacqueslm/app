@@ -84,7 +84,14 @@
 // in the trainer only p90x is relativity"), so the card's line changed again and
 // the name moves to 3.5 with it, for the same reason: a phone that keeps its old
 // shell keeps being offered a programme the page no longer has.
-const CACHE_NAME = 'tsid-shell-v3.5';
+//
+// 18 Oct 2026: the shell carries two parts at once ("two parts open at once") -
+// two panes holding /key, /herbs, /music, /trainer or /certify beside each
+// other. The name moves to 3.6 with it, for the reason above: an installed phone
+// that keeps its old shell has no panes on it at all. Note what this does NOT
+// change - the panes load the same gated routes a tap on a door loads, and the
+// skips below still keep every one of those pages out of the cache.
+const CACHE_NAME = 'tsid-shell-v3.6';
 const SHELL_FILES = [
   '/',
   '/app',

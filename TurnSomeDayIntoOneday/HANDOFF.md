@@ -246,7 +246,7 @@ migration is checked the way day 60's used to be. Suite: 454 tests, 454 pass.
 "Remove what: Remove the \"Read this first\" tab itself." So the tab went: the
 chip in the strip, its seven boxes, its read-aloud (`SAFETY_BOXES` and
 `safetySayText`), its render branch and its `#safety` address. The strip is
-seven tabs now — A–Z, By need, From the books, 60 days, Meal plan, The deep
+seven tabs now — A–Z, By need, From the books, 90 days, Meal plan, The deep
 story, My notes — and nothing on the page points at the one that left.
 
 **The lines themselves did not go with it.** They were already day 28 of the

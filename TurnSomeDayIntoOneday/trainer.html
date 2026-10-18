@@ -91,10 +91,11 @@
   .workout-actions #saveWorkoutBtn{grid-column:1/-1}
   .exercise-log{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:rgba(0,0,0,.18)}
   .exercise-log h3{font-size:.95rem;margin:0 0 8px;color:var(--rose);font-weight:600}
-  .exercise-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;color:var(--dim);font-size:.8rem}
+  .exercise-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;color:var(--dim);font-size:.8rem}
   .exercise-menu{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin:12px 0 14px;background:rgba(0,0,0,.14)}
   .exercise-menu-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
   .exercise-menu-head h3{margin:0;color:var(--gold);font-size:.9rem;font-weight:600}
+  .rest-timer{margin:8px 0;color:var(--teal);font-size:.9rem;font-weight:600;text-align:center}
   .exercise-menu-title{margin:0;color:var(--dimmer);font-size:.75rem;line-height:1.4;text-align:right}
   .suggestion-note{margin:0 0 8px;color:var(--dimmer);font-size:.75rem;line-height:1.45}
   .muscle-dropdown{border-top:1px solid var(--line)}
@@ -350,26 +351,36 @@
       <h2 id="workoutLogTitle">Workout 1</h2>
       <p id="workoutLogSubtitle"></p>
       <label for="workoutTitle">Workout name</label><input id="workoutTitle" type="text" placeholder="Workout name">
-      <div class="exercise-form workout-meta">
-        <div><label for="workoutDuration">Duration (min)</label><input id="workoutDuration" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 45"></div>
-        <div><label for="workoutDate">Workout date</label><input id="workoutDate" type="date"></div>
+      <div class="workout-meta">
+        <label for="workoutDate">Workout date</label><input id="workoutDate" type="date">
       </div>
       <div id="exerciseRows"></div>
       <section class="exercise-menu" id="exerciseSuggestions" aria-label="Exercise suggestions">
         <div class="exercise-menu-head"><h3>Exercises by focus area</h3><p class="exercise-menu-title" id="exerciseSuggestionsTitle">Choose a workout</p></div>
-        <p class="suggestion-note">Open a group to see its exercises. Use fills the log form.</p>
+        <p class="suggestion-note">Use fills the exercise name and starts at 2 sets. Reps and weight are optional.</p>
         <div id="exerciseSuggestionRows"></div>
+        <details class="muscle-dropdown" id="supplementExerciseGroup">
+          <summary><span>By-10 extras · not P90X</span><span class="suggestion-count">6 movements</span></summary>
+          <div class="suggestion-list" id="supplementExerciseRows">
+            <div class="suggestion-row"><span>Jump rope</span><button type="button" data-supplement-name="Jump rope">Use</button></div>
+            <div class="suggestion-row"><span>Step / sweat stepping</span><button type="button" data-supplement-name="Step / sweat stepping">Use</button></div>
+            <div class="suggestion-row"><span>Dancing</span><button type="button" data-supplement-name="Dancing">Use</button></div>
+            <div class="suggestion-row"><span>Frog leaps</span><button type="button" data-supplement-name="Frog leaps">Use</button></div>
+            <div class="suggestion-row"><span>Dip-machine dips</span><button type="button" data-supplement-name="Dip-machine dips">Use</button></div>
+            <div class="suggestion-row"><span>Jumping jacks</span><button type="button" data-supplement-name="Jumping jacks">Use</button></div>
+          </div>
+        </details>
       </section>
       <form class="exercise-form" id="exerciseForm" autocomplete="off">
         <div class="wide"><label for="exerciseName">Exercise</label><input id="exerciseName" type="text" required placeholder="Exercise name"></div>
-        <div><label for="exerciseSets">Sets</label><input id="exerciseSets" type="number" min="1" max="50" inputmode="numeric" placeholder="3"></div>
+        <div><label for="exerciseSets">Sets · usually 2</label><input id="exerciseSets" type="number" min="1" max="50" inputmode="numeric" value="2"></div>
         <div><label for="exerciseReps">Reps</label><input id="exerciseReps" type="number" min="1" max="500" inputmode="numeric" placeholder="10"></div>
         <div><label for="exerciseWeight">Weight</label><input id="exerciseWeight" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 20"></div>
         <div><label for="exerciseUnit">Weight unit</label><select id="exerciseUnit"><option>lb</option><option>kg</option><option>bodyweight</option></select></div>
-        <div><label for="exerciseDuration">Duration (min)</label><input id="exerciseDuration" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional"></div>
-        <div><label for="exerciseNotes">Notes</label><input id="exerciseNotes" type="text" placeholder="Optional"></div>
+        <div class="wide"><label for="exerciseNotes">Notes</label><input id="exerciseNotes" type="text" placeholder="Optional"></div>
         <div class="wide"><button class="btn" type="submit">Add exercise to this workout</button></div>
       </form>
+      <p class="rest-timer" id="restTimer" role="timer" aria-live="off" hidden></p>
       <p class="workout-status" id="workoutStatus" role="status" aria-live="polite"></p>
       <div class="workout-actions"><button class="btn" id="saveWorkoutBtn" type="button">Save workout log</button><button class="btn quiet" id="markWorkoutDoneBtn" type="button">Mark workout complete</button><button class="btn quiet" id="closeWorkoutBtn" type="button">Close workout</button></div>
     </section>
@@ -411,6 +422,8 @@
   var activeWorkout = null;
   var activeSuggestions = [];
   var draftExercises = [];
+  var restTimerId = null;
+  var restSecondsRemaining = 0;
   var el = function(id){ return document.getElementById(id); };
 
   /* ── THE VOICE ─────────────────────────────────────────────────────────────
@@ -735,17 +748,17 @@
   };
   ROT_EXERCISES.stretch = ROT_EXERCISES.rest;
   var ROT_MOVE = {
-    cb:     { name: 'Chest & Back',               min: 53, ab: true },
-    plyo:   { name: 'Plyometrics',                min: 59 },
-    sa:     { name: 'Shoulders & Arms',           min: 60, ab: true },
-    yoga:   { name: 'Yoga X',                     min: 93 },
-    lb:     { name: 'Legs & Back',                min: 59, ab: true },
-    kenpo:  { name: 'Kenpo X',                    min: 59 },
-    rest:   { name: 'Rest or X Stretch',          min: 0 },
-    core:   { name: 'Core Synergistics',          min: 58 },
-    stretch:{ name: 'X Stretch',                  min: 58 },
-    cst:    { name: 'Chest, Shoulders & Triceps', min: 56, ab: true },
-    bb:     { name: 'Back & Biceps',              min: 52, ab: true }
+    cb:      { name: 'Chest & Back',               ab: true },
+    plyo:    { name: 'Plyometrics' },
+    sa:      { name: 'Shoulders & Arms',           ab: true },
+    yoga:    { name: 'Yoga X' },
+    lb:      { name: 'Legs & Back',                ab: true },
+    kenpo:   { name: 'Kenpo X' },
+    rest:    { name: 'Rest or X Stretch' },
+    core:    { name: 'Core Synergistics' },
+    stretch: { name: 'X Stretch' },
+    cst:     { name: 'Chest, Shoulders & Triceps', ab: true },
+    bb:      { name: 'Back & Biceps',              ab: true }
   };
   var ROT_LIFT_1 = ['cb', 'plyo', 'sa', 'yoga', 'lb', 'kenpo', 'rest'];
   var ROT_LIFT_2 = ['cst', 'plyo', 'bb', 'yoga', 'lb', 'kenpo', 'rest'];
@@ -804,13 +817,13 @@
     if (e) e.textContent = text;
   }
 
-  /* One day's row. The minutes are the DVD's own length and the ab work is
-     named separately, because they are separate sessions on the disc. */
+  /* One day's row shows the scheduled movement, not DVD runtime: the by-10
+     ten-second rest changes the actual session length. */
   function rotRow(w, d){
     var mv = ROT_MOVE[rotOf(w).d[d - 1]] || ROT_MOVE.rest;
-    var note = mv.min
-      ? ('about ' + mv.min + ' min' + (mv.ab ? ', then Ab Ripper X (16 min)' : ''))
-      : 'the day off \u2014 or X Stretch if you want to move';
+    var note = mv.name === 'Rest or X Stretch'
+      ? 'recovery day'
+      : 'tap to log · 2 sets to start';
     return '<button class="day-btn" type="button" data-day="' + d + '" aria-pressed="'
       + (rot[rotKey(w, d)] ? 'true' : 'false') + '">'
       + '<span class="dow">' + ROT_DOW[d - 1] + '</span>'
@@ -881,13 +894,52 @@
     el('exerciseSuggestionsTitle').textContent = move.name + (move.ab ? ' + Ab Ripper X' : '');
   }
 
-  function useSuggestedExercise(index){
-    if (!activeWorkout || index < 0 || index >= activeSuggestions.length) return false;
-    var field = el('exerciseName');
-    if (!field) return false;
-    field.value = activeSuggestions[index];
+  function fillExerciseForm(name){
+    if (!activeWorkout || !name) return false;
+    var field = el('exerciseName'), sets = el('exerciseSets');
+    if (!field || !sets) return false;
+    field.value = name;
+    sets.value = '2';
     if (field.focus) field.focus();
     return true;
+  }
+
+  function useSuggestedExercise(index){
+    if (index < 0 || index >= activeSuggestions.length) return false;
+    return fillExerciseForm(activeSuggestions[index]);
+  }
+
+  function useSupplementExercise(name){
+    var allowed = ['Jump rope','Step / sweat stepping','Dancing','Frog leaps','Dip-machine dips','Jumping jacks'];
+    if (allowed.indexOf(name) < 0) return false;
+    return fillExerciseForm(name);
+  }
+
+  function clearRestTimer(hide){
+    if (restTimerId !== null){ clearInterval(restTimerId); restTimerId = null; }
+    restSecondsRemaining = 0;
+    var timer = el('restTimer');
+    if (hide && timer){ timer.hidden = true; timer.textContent = ''; }
+  }
+
+  function startRestTimer(){
+    clearRestTimer(false);
+    var timer = el('restTimer');
+    if (!timer) return;
+    restSecondsRemaining = 10;
+    timer.hidden = false;
+    timer.textContent = '10-second rest · ' + restSecondsRemaining;
+    restTimerId = setInterval(function(){
+      restSecondsRemaining -= 1;
+      if (restSecondsRemaining <= 0){
+        clearInterval(restTimerId);
+        restTimerId = null;
+        restSecondsRemaining = 0;
+        timer.textContent = 'Rest complete · ready for the next exercise';
+        return;
+      }
+      timer.textContent = '10-second rest · ' + restSecondsRemaining;
+    }, 1000);
   }
 
   function renderWorkout(){
@@ -898,10 +950,9 @@
       var row = document.createElement('div');
       row.className = 'exercise-log';
       row.innerHTML = '<h3>' + escapeHtml(ex.name || 'Exercise ' + (i + 1)) + '</h3>'
-        + '<div class="exercise-grid"><span>Sets: ' + escapeHtml(ex.sets || '—') + '</span>'
-        + '<span>Reps: ' + escapeHtml(ex.reps || '—') + '</span>'
-        + '<span>Weight: ' + escapeHtml(ex.weight ? ex.weight + ' ' + (ex.unit || 'lb') : '—') + '</span>'
-        + '<span>Time: ' + escapeHtml(ex.duration ? ex.duration + ' min' : '—') + '</span></div>'
+      + '<div class="exercise-grid"><span>Sets: ' + escapeHtml(ex.sets || '—') + '</span>'
+      + '<span>Reps: ' + escapeHtml(ex.reps || '—') + '</span>'
+      + '<span>Weight: ' + escapeHtml(ex.weight ? ex.weight + ' ' + (ex.unit || 'lb') : '—') + '</span></div>'
         + (ex.notes ? '<p>' + escapeHtml(ex.notes) + '</p>' : '')
         + '<button class="btn quiet small" type="button" data-remove-exercise="' + i + '">Remove</button>';
       box.appendChild(row);
@@ -909,16 +960,16 @@
     if (!log || !log.exercises || !log.exercises.length) box.innerHTML = '<p>No exercises logged yet. Add the first one below.</p>';
   }
   function openWorkout(w, d){
+    clearRestTimer(true);
     activeWorkout = { week:w, day:d };
     var moveKey = rotOf(w).d[d - 1];
     var mv = ROT_MOVE[moveKey] || ROT_MOVE.rest;
     renderSuggestions(moveKey, mv);
-    var log = getWorkout(w, d) || { title:mv.name + (mv.ab ? ' + Ab Ripper X' : ''), duration:'', exercises:[] };
+    var log = getWorkout(w, d) || { title:mv.name + (mv.ab ? ' + Ab Ripper X' : ''), exercises:[] };
     el('workoutLog').hidden = false;
     el('workoutLogTitle').textContent = ROT_DOW[d - 1] + ' · Week ' + w;
-    el('workoutLogSubtitle').textContent = mv.name + (mv.min ? ' · about ' + mv.min + ' min' : ' · recovery / rest');
+    el('workoutLogSubtitle').textContent = mv.name + (mv.ab ? ' · Ab Ripper X is listed below' : '');
     el('workoutTitle').value = log.title || mv.name;
-    el('workoutDuration').value = log.duration || '';
     el('workoutDate').value = log.date || new Date().toISOString().slice(0, 10);
     el('markWorkoutDoneBtn').textContent = rot[rotKey(w, d)] ? 'Mark workout not done' : 'Mark workout complete';
     el('workoutStatus').textContent = '';
@@ -929,7 +980,6 @@
     var client = ensureClient(), key = workoutKey(activeWorkout.week, activeWorkout.day);
     var existing = client.logs[key] || { exercises:[] };
     existing.title = el('workoutTitle').value.trim() || 'Workout ' + activeWorkout.day;
-    existing.duration = el('workoutDuration').value;
     existing.date = el('workoutDate').value;
     existing.exercises = Array.isArray(existing.exercises) ? existing.exercises : [];
     client.logs[key] = existing;
@@ -938,6 +988,7 @@
     return true;
   }
   function closeWorkout(){
+    clearRestTimer(true);
     activeWorkout = null;
     var panel = el('workoutLog'); if (panel) panel.hidden = true;
   }
@@ -950,11 +1001,13 @@
     if (!name){ el('workoutStatus').textContent = 'Enter an exercise name first.'; return false; }
     log.exercises.push({ name:name, sets:el('exerciseSets').value, reps:el('exerciseReps').value,
       weight:el('exerciseWeight').value, unit:el('exerciseUnit').value,
-      duration:el('exerciseDuration').value, notes:el('exerciseNotes').value.trim() });
+      notes:el('exerciseNotes').value.trim() });
     saveDb();
-    ['exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseDuration','exerciseNotes'].forEach(function(id){ el(id).value = ''; });
+    ['exerciseName','exerciseReps','exerciseWeight','exerciseNotes'].forEach(function(id){ el(id).value = ''; });
+    el('exerciseSets').value = '2';
     renderWorkout(); rotRender();
     el('workoutStatus').textContent = 'Exercise added and saved to this client.';
+    startRestTimer();
     return true;
   }
   function removeExercise(index){
@@ -1050,6 +1103,11 @@
       var btn = rotUpTo(ev.target, 'data-suggested-index');
       if (btn) useSuggestedExercise(Number(btn.getAttribute('data-suggested-index')));
     });
+    var supplementRows = el('supplementExerciseRows');
+    if (supplementRows) supplementRows.addEventListener('click', function(ev){
+      var btn = rotUpTo(ev.target, 'data-supplement-name');
+      if (btn) useSupplementExercise(btn.getAttribute('data-supplement-name'));
+    });
     var reset = document.getElementById('rotReset');
     if (reset) reset.addEventListener('click', function(){
       rot = {};
@@ -1070,7 +1128,8 @@
   window.TRAINER = { KEY: KEY, CLIENTS_KEY: CLIENTS_KEY, read: read, saved: function(){ return store; }, clear: clearAll,
                      newClient:newClient, switchClient:switchClient, deleteClient:deleteClient,
                      saveWorkout:saveWorkout, addExercise:addExercise, openWorkout:openWorkout,
-                     useSuggestedExercise:useSuggestedExercise, sayText: sayText, say: say,
+                     useSuggestedExercise:useSuggestedExercise, useSupplementExercise:useSupplementExercise,
+                     sayText: sayText, say: say,
                      p90x: { KEY: ROT_KEY, weeks: ROT_WEEKS.length,
                              exercises: function(w,d){
                                var moveKey = rotOf(w).d[d - 1], move = ROT_MOVE[moveKey] || ROT_MOVE.rest;

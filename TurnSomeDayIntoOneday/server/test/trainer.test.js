@@ -70,6 +70,8 @@ function inlineScript(file) {
 function loadPage(storage) {
   const els = new Map();
   const listeners = new Map();
+  const intervalCallbacks = new Map();
+  let nextIntervalId = 1;
 
   function element(id, attrs) {
     const o = {
@@ -121,11 +123,12 @@ function loadPage(storage) {
   const exerciseRows = element('exerciseRows');
   Object.defineProperty(exerciseRows, 'innerHTML', { get() { return this._html || ''; }, set(v) { this._html = v; this.children = []; this.childNodes = []; } });
   const exerciseForm = element('exerciseForm');
-  const workoutIds = ['workoutTitle','workoutDuration','workoutDate','workoutLog','workoutLogTitle','workoutLogSubtitle','workoutStatus','markWorkoutDoneBtn',
-    'exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseUnit','exerciseDuration','exerciseNotes',
+  const workoutIds = ['workoutTitle','workoutDate','workoutLog','workoutLogTitle','workoutLogSubtitle','workoutStatus','markWorkoutDoneBtn','restTimer',
+    'exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseUnit','exerciseNotes',
     'saveWorkoutBtn','closeWorkoutBtn','rotReset','rotWeek','rotPhase','rotCount','rotBar','newClientBtn','deleteClientBtn','savedLine','clearBtn',
     'exerciseSuggestions','exerciseSuggestionsTitle','exerciseSuggestionRows','exerciseName'];
   workoutIds.forEach((id) => els.set(id, element(id)));
+  byId('restTimer').hidden = true;
   const intakeDetails = element('intakeDetails');
   intakeDetails.open = false;
   els.set('intakeDetails', intakeDetails);
@@ -152,7 +155,9 @@ function loadPage(storage) {
   const store = storage || {};
   const sandbox = {
     document: doc, console,
-    setTimeout, clearTimeout, setInterval, clearInterval,
+    setTimeout, clearTimeout,
+    setInterval(fn) { const id = nextIntervalId++; intervalCallbacks.set(id, fn); return id; },
+    clearInterval(id) { intervalCallbacks.delete(id); },
     Math, JSON, Date, Object, Array, String, Number, Boolean, RegExp, Error, Promise, Map, Set, Intl,
     localStorage: {
       getItem: (k) => (k in store ? store[k] : null),
@@ -171,7 +176,7 @@ function loadPage(storage) {
   vm.createContext(sandbox);
   vm.runInContext(inlineScript(PAGE), sandbox, { filename: 'trainer.html' });
   return {
-    sandbox, els, store, listeners,
+    sandbox, els, store, listeners, intervalCallbacks,
     fire(id, type, ev) {
       const fn = listeners.get(id) && listeners.get(id)[type];
       if (!fn) return false;
@@ -404,25 +409,35 @@ test('selecting a P90X day exposes its exercise names and can prefill the log fo
   assert.match(p.box('exerciseSuggestionRows').innerHTML, /Frog/);
 });
 
-test('workout logger keeps its metadata and actions in a compact mobile layout', () => {
+test('the logger removes duration entry and offers two-set quick-add extras', () => {
   const html = fs.readFileSync(PAGE, 'utf8');
-  assert.match(html, /class="exercise-form workout-meta"/, 'duration and date use their own compact row');
-  assert.match(html, /\.workout-meta input\{margin-bottom:12px;padding:11px 10px;font-size:\.9rem\}/,
-    'metadata inputs have controlled mobile spacing and sizing');
+  assert.doesNotMatch(html, /id="workoutDuration"|id="exerciseDuration"|Duration \(min\)/,
+    'irrelevant duration inputs are removed');
+  assert.match(html, /id="exerciseSets"[^>]*value="2"/,
+    'the exercise form defaults to two sets');
+  assert.match(html, /data-supplement-name="Jump rope"/, 'jump rope is one-tap addable');
+  assert.match(html, /data-supplement-name="Step \/ sweat stepping"/, 'step is one-tap addable');
+  assert.match(html, /data-supplement-name="Dancing"/, 'dancing is one-tap addable');
+  assert.match(html, /data-supplement-name="Frog leaps"/, 'frog leaps are one-tap addable');
+  assert.match(html, /data-supplement-name="Dip-machine dips"/, 'dip-machine dips are one-tap addable');
+  assert.match(html, /data-supplement-name="Jumping jacks"/, 'jumping jacks are one-tap addable');
+  assert.match(html, /ten-second rest changes the actual session length/i,
+    'schedule notes avoid misleading DVD runtime estimates');
+  assert.doesNotMatch(html, /about .* min|mv\.min/,
+    'workout runtime estimates are no longer presented');
   assert.match(html, /class="workout-actions"/, 'workout actions use a dedicated responsive layout');
   assert.match(html, /\.workout-actions #saveWorkoutBtn\{grid-column:1\/-1\}/,
     'the primary save action gets a full row');
   assert.match(html, /@media\(max-width:420px\)/, 'exercise menu adapts to narrow phone screens');
 });
 
-test('workout entries capture sets, reps, weight, duration, and stay per client', () => {
+test('workout entries capture sets, reps, weight, and stay per client', () => {
   const store = {};
   const p = loadPage(store);
   const T = p.sandbox.TRAINER;
   T.newClient();
   T.openWorkout(1, 1);
   p.box('workoutTitle').value = 'Strength session';
-  p.box('workoutDuration').value = '42';
   p.box('workoutDate').value = '2026-10-18';
   T.saveWorkout();
   p.box('exerciseName').value = 'Dumbbell row';
@@ -430,7 +445,6 @@ test('workout entries capture sets, reps, weight, duration, and stay per client'
   p.box('exerciseReps').value = '12';
   p.box('exerciseWeight').value = '20';
   p.box('exerciseUnit').value = 'kg';
-  p.box('exerciseDuration').value = '5';
   p.box('exerciseNotes').value = 'Controlled tempo';
   T.addExercise({ preventDefault() {} });
 
@@ -438,16 +452,37 @@ test('workout entries capture sets, reps, weight, duration, and stay per client'
   const active = clientSet.clients.find((c) => c.id === clientSet.active);
   const log = active.logs.w1d1;
   assert.equal(log.title, 'Strength session');
-  assert.equal(log.duration, '42');
+  assert.equal(log.duration, undefined, 'workout runtime is not stored');
   assert.deepStrictEqual(log.exercises[0], {
-    name: 'Dumbbell row', sets: '3', reps: '12', weight: '20', unit: 'kg', duration: '5', notes: 'Controlled tempo'
+    name: 'Dumbbell row', sets: '3', reps: '12', weight: '20', unit: 'kg', notes: 'Controlled tempo'
   });
   assert.equal(p.box('workoutLog').hidden, false, 'the selected workout log is open');
   assert.equal(p.box('workoutTitle').value, 'Strength session');
-  assert.equal(p.box('workoutDuration').value, '42');
+  assert.equal(p.box('exerciseSets').value, '2', 'the quick-add field returns to the usual two-set default');
+  assert.equal(p.box('restTimer').hidden, false, 'logging an exercise starts the rest countdown');
+  assert.equal(p.box('restTimer').textContent, '10-second rest · 10');
+  assert.equal(p.intervalCallbacks.size, 1, 'only one rest countdown runs at a time');
+  for (let second = 0; second < 10; second++) p.intervalCallbacks.values().next().value();
+  assert.equal(p.box('restTimer').textContent, 'Rest complete · ready for the next exercise');
+  assert.equal(p.intervalCallbacks.size, 0, 'the countdown stops after ten seconds');
   assert.equal(T.openWorkout(1, 1), undefined);
   assert.equal(p.box('workoutTitle').value, 'Strength session', 'reopening shows the saved workout name');
   assert.equal(p.box('workoutDate').value, '2026-10-18', 'reopening shows the saved workout date');
+  assert.equal(p.box('restTimer').hidden, true, 'reopening clears the previous rest countdown');
+});
+
+test('P90X and By-10 quick-adds fill the exercise name and default to two sets', () => {
+  const p = loadPage({});
+  const T = p.sandbox.TRAINER;
+  T.newClient();
+  T.openWorkout(1, 1);
+  assert.equal(T.useSuggestedExercise(0), true);
+  assert.equal(p.box('exerciseName').value, 'Standard Push-Ups');
+  assert.equal(p.box('exerciseSets').value, '2');
+  assert.equal(T.useSupplementExercise('Jump rope'), true);
+  assert.equal(p.box('exerciseName').value, 'Jump rope');
+  assert.equal(p.box('exerciseSets').value, '2');
+  assert.equal(T.useSupplementExercise('Made-up exercise'), false, 'unknown extras cannot be injected');
 });
 
 test('an answer left blank is left out, not stored as empty', () => {

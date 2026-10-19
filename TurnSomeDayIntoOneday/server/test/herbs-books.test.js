@@ -80,6 +80,400 @@ const ADDED = [
   'Spikenard root', 'Blue cohosh', 'Black haw', 'Centaury', 'Gymnema',
 ];
 
+// 19 Oct 2026. Jacques: "research more herbs that are not in the app and
+// correlate new findings where they need to be lessons certificate". Fourteen
+// herbs the library did not carry were researched and added. Unlike the
+// eighteen above, these are not in the three books: they are the page's own
+// voice, so each one must carry a use, a how-it-is-taken line, a caution and a
+// description, and must NOT carry a From the books line - a book line on one of
+// these would be the page claiming the books said something they never said.
+// By name, so a later edit cannot quietly drop one.
+const RESEARCHED = [
+  'Dulse', 'Bitter leaf', 'Baobab', 'Rooibos', 'Cleavers', 'Self-heal', 'Usnea',
+  'Oak bark', 'Arjuna', 'Guduchi', 'Danshen', 'Notoginseng', 'Maitake', 'Sutherlandia',
+];
+
+test('the herb library: the fourteen researched herbs are in it, in the page\u2019s own voice', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const keys = new Set(p.sandbox.NEEDS.map((n) => n.k));
+  for (const name of RESEARCHED) {
+    const h = list.filter((x) => x.n === name)[0];
+    assert.ok(h, `${name} is in the library`);
+    assert.ok(h.a, `${name} carries the other names it goes by`);
+    assert.ok(h.u, `${name} says what people use it for`);
+    assert.ok(h.d, `${name} says what it does`);
+    assert.ok(h.h, `${name} says how it is taken`);
+    assert.ok(h.c, `${name} carries its caution, not just its uses`);
+    assert.ok(!h.bk, `${name} carries no From the books line - it is not in the books`);
+    for (const t of h.t || []) assert.ok(keys.has(t), `${name} is on a shelf that exists (${t})`);
+  }
+  // And the count follows them, so the shelf is read as grown rather than swapped.
+  assert.ok(list.length >= 280, `the library grew again: ${list.length}`);
+});
+
+test('the herb library: the researched herbs keep the facts that have to travel with them', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const card = (n) => list.filter((x) => x.n === n)[0];
+  // The four that are on the shelf for their caution as much as for their use.
+  assert.match(card('Usnea').c, /do not take it inside the body/, 'usnea is not swallowed');
+  assert.match(card('Usnea').c, /serious liver injury/, 'and says why');
+  assert.match(card('Oak bark').c, /three or four days/, 'oak bark is a short course inside');
+  assert.match(card('Oak bark').c, /leave an hour between/, 'and is spaced from other medicines');
+  assert.match(card('Danshen').c, /increase the effect of warfarin badly/, 'danshen names the warfarin reports');
+  assert.match(card('Danshen').c, /pregnancy and breastfeeding are a contraindication/i, 'and its pregnancy line');
+  assert.match(card('Sutherlandia').c, /never replace antiretroviral therapy/, 'sutherlandia is not a treatment for HIV');
+  assert.match(card('Sutherlandia').c, /improved neither the viral load nor the CD4 count/,
+    'and keeps the trial result that is on its card');
+  // The iodine one, which is the food on the thyroid ground.
+  assert.match(card('Dulse').c, /1,500 to 7,500 micrograms/, 'dulse carries the reported iodine range');
+  assert.match(card('Dulse').c, /low-iodine diet/, 'and the scan-list caution');
+  // And the two that are food first.
+  assert.match(card('Baobab').c, /food/i, 'baobab is a food card');
+  assert.match(card('Rooibos').c, /tacrolimus/, 'rooibos names the transplant case report');
+
+  // And the card is read on the shelf, not only in the data: open usnea the way
+  // the page opens one and the caution has to be on the screen.
+  const p2 = loadPage('herbs.html');
+  p2.sandbox.tab = 'az';
+  p2.sandbox.openId = p2.sandbox.allHerbs().filter((x) => x.n === 'Usnea')[0].id;
+  p2.sandbox.render();
+  const shown = p2.els.get('view').innerHTML;
+  assert.match(shown, /id="p-usnea"/, 'the card has its own address');
+  assert.match(shown, /do not take it inside the body/, 'and shows its caution when it is opened');
+});
+
+// 19 Oct 2026, same day, next ask: "Next step: Research more herbs". Twelve more
+// herbs the library did not carry were researched and added, in the same voice
+// and under the same rule: the page's own card, no From the books line, because
+// none of them is in the three books. This batch was chosen where the evidence
+// has an edge worth teaching, so the facts below are the ones a later edit must
+// not sand off.
+const RESEARCHED_2 = [
+  'Ivy leaf', 'Primula root', 'Sweet wormwood', 'Nutmeg', 'Miswak', 'Bergamot',
+  'Griffonia', 'Rye pollen', 'Tart cherry', 'Soy', 'White peony', 'Chrysanthemum',
+];
+
+test('the herb library: the twelve herbs of the second research batch are in it, in the page\u2019s own voice', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const keys = new Set(p.sandbox.NEEDS.map((n) => n.k));
+  for (const name of RESEARCHED_2) {
+    const h = list.filter((x) => x.n === name)[0];
+    assert.ok(h, `${name} is in the library`);
+    assert.ok(h.a, `${name} carries the other names it goes by`);
+    assert.ok(h.u, `${name} says what people use it for`);
+    assert.ok(h.d, `${name} says what it does`);
+    assert.ok(h.h, `${name} says how it is taken`);
+    assert.ok(h.c, `${name} carries its caution, not just its uses`);
+    assert.ok(!h.bk, `${name} carries no From the books line - it is not in the books`);
+    for (const t of h.t || []) assert.ok(keys.has(t), `${name} is on a shelf that exists (${t})`);
+  }
+  assert.ok(list.length >= 292, `the library grew again: ${list.length}`);
+});
+
+test('the herb library: the second research batch keeps the facts that have to travel with them', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const card = (n) => list.filter((x) => x.n === n)[0];
+  // The regulator's age limit, and the combination that was tested instead of
+  // the single herb.
+  assert.match(card('Ivy leaf').c, /Not for a child under two/, 'ivy leaf keeps the age limit');
+  assert.match(card('Ivy leaf').c, /aralia/, 'and the family allergy line');
+  assert.match(card('Primula root').c, /no clinical studies of primula root on its own/,
+    'primula says the root alone was not tested');
+  assert.match(card('Primula root').c, /361 adults with acute bronchitis/, 'and keeps the combination trial');
+  // The plant that must not stand in for a medicine.
+  assert.match(card('Sweet wormwood').c, /World Health Organization/, 'sweet wormwood names WHO');
+  assert.match(card('Sweet wormwood').c, /should not be used to prevent or treat malaria/,
+    'and the position on Artemisia plant material');
+  assert.match(card('Sweet wormwood').c, /combination therapy/, 'and what the treatment actually is');
+  // The amounts that have poisoned people.
+  assert.match(card('Nutmeg').c, /five grams/, 'nutmeg carries the reported illness amount');
+  assert.match(card('Nutmeg').c, /fifteen to twenty grams/, 'and the psychogenic range');
+  assert.match(card('Nutmeg').c, /no medicinal dose at all/, 'and gives no medicinal dose');
+  // The mouth, where the stick is not a toothpaste.
+  assert.match(card('Miswak').c, /fluoride/, 'miswak says it does not deliver fluoride');
+  assert.match(card('Miswak').c, /nine small trials/, 'and keeps the trial count');
+  // The citrus interaction and the serotonin line.
+  assert.match(card('Bergamot').c, /grapefruit/, 'bergamot names the grapefruit-type interaction');
+  assert.match(card('Bergamot').c, /statin/, 'and the statins it matters for');
+  assert.match(card('Griffonia').c, /serotonin syndrome/, 'griffonia names serotonin syndrome');
+  assert.match(card('Griffonia').c, /two trials of 64 people/, 'and the thin Cochrane evidence');
+  // The trials that found no effect on the thing being sold.
+  assert.match(card('Rye pollen').c, /444 men/, 'rye pollen keeps the review size');
+  assert.match(card('Rye pollen').c, /no change in urine flow/, 'and what it did not change');
+  assert.match(card('Tart cherry').c, /no significant effect on blood urate/, 'tart cherry keeps its gout result');
+  // The women's shelf, food before supplement.
+  assert.match(card('Soy').c, /62 studies and 6,653 women/, 'soy keeps the review size');
+  assert.match(card('Soy').c, /tamoxifen/, 'and the tamoxifen question');
+  assert.match(card('White peony').c, /has not adopted a monograph/, 'white peony says there is no monograph');
+  // The eye flower, with its family and its red flag.
+  assert.match(card('Chrysanthemum').c, /ragweed/, 'chrysanthemum names the daisy family');
+  assert.match(card('Chrysanthemum').c, /change in sight/, 'and the red-eye red flag');
+
+  // Read on the shelf, not only in the data: open nutmeg and its amount has to
+  // be on the screen.
+  const p2 = loadPage('herbs.html');
+  p2.sandbox.tab = 'az';
+  p2.sandbox.openId = p2.sandbox.allHerbs().filter((x) => x.n === 'Nutmeg')[0].id;
+  p2.sandbox.render();
+  const shown = p2.els.get('view').innerHTML;
+  assert.match(shown, /id="p-nutmeg"/, 'the card has its own address');
+  assert.match(shown, /fifteen to twenty grams/, 'and shows its amount when it is opened');
+});
+
+// 19 Oct 2026, third batch: "Next step: Research a third batch". Twelve more, in
+// the same voice and under the same rule. This batch is the shelf's hard edge,
+// so the facts pinned below are the regulator dates, the case numbers and the
+// null results - the things a later edit might soften.
+const RESEARCHED_3 = [
+  'Ephedra', 'Aristolochia', 'Germander', 'Frangula bark', 'Chanca piedra',
+  'Mastic', 'Birch leaf', 'Hoodia', 'Pippali', 'Haritaki', 'Vasaka',
+  'African potato',
+];
+
+test('the herb library: the twelve herbs of the third research batch are in it, in the page\u2019s own voice', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const keys = new Set(p.sandbox.NEEDS.map((n) => n.k));
+  for (const name of RESEARCHED_3) {
+    const h = list.filter((x) => x.n === name)[0];
+    assert.ok(h, `${name} is in the library`);
+    assert.ok(h.a, `${name} carries the other names it goes by`);
+    assert.ok(h.u, `${name} says what people use it for`);
+    assert.ok(h.d, `${name} says what it does`);
+    assert.ok(h.h, `${name} says how it is taken`);
+    assert.ok(h.c, `${name} carries its caution, not just its uses`);
+    assert.ok(!h.bk, `${name} carries no From the books line - it is not in the books`);
+    for (const t of h.t || []) assert.ok(keys.has(t), `${name} is on a shelf that exists (${t})`);
+  }
+  assert.ok(list.length >= 304, `the library grew again: ${list.length}`);
+});
+
+test('the herb library: the third research batch keeps the facts that have to travel with them', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const card = (n) => list.filter((x) => x.n === n)[0];
+  // The four on the shelf for what they did to people.
+  assert.match(card('Ephedra').c, /11 February 2004/, 'ephedra keeps the FDA rule date');
+  assert.match(card('Ephedra').c, /unreasonable risk/, 'and what the rule says');
+  assert.match(card('Ephedra').c, /deaths have been reported/, 'and the deaths');
+  assert.match(card('Aristolochia').c, /Group 1, carcinogenic to humans/, 'aristolochia keeps the IARC class');
+  assert.match(card('Aristolochia').c, /Stephania tetrandra/, 'and the substitution');
+  assert.match(card('Aristolochia').h, /no safe amount/, 'and that there is no safe amount');
+  assert.match(card('Germander').c, /acute hepatitis/, 'germander names the liver injury');
+  assert.match(card('Germander').c, /26 cases/, 'and the series');
+  assert.match(card('Germander').c, /no agreed dose/, 'and that it has no dose');
+  assert.match(card('Frangula bark').c, /over twelve/, 'frangula keeps the age limit');
+  assert.match(card('Frangula bark').c, /no more than a week/, 'and the one-week limit');
+  assert.match(card('Frangula bark').c, /10 to 30 milligrams/, 'and the monograph dose');
+  // The regional herbs, with the trials that were actually done.
+  assert.match(card('Chanca piedra').c, /two controlled human studies/, 'chanca piedra keeps the review size');
+  assert.match(card('Chanca piedra').c, /emergency care/, 'and the stone red flags');
+  assert.match(card('Mastic').c, /148 people/, 'mastic keeps the dyspepsia trial size');
+  assert.match(card('Mastic').c, /77 per cent on mastic against 40 per cent/, 'and its result');
+  assert.match(card('Mastic').c, /pistachio/, 'and the family allergy');
+  assert.match(card('Birch leaf').c, /clinical evidence is insufficient/, 'birch leaf says the evidence is traditional');
+  assert.match(card('Birch leaf').c, /15 people/, 'and keeps the small study it rests on');
+  assert.match(card('Birch leaf').c, /birch pollen/, 'and the pollen allergy');
+  assert.match(card('Hoodia').c, /49 overweight women/, 'hoodia keeps the trial size');
+  assert.match(card('Hoodia').c, /no adequate trial/, 'and says there is no adequate trial');
+  assert.match(card('Hoodia').c, /CITES Appendix II/, 'and the trade listing');
+  // The four whose lesson is an interaction or a red flag.
+  assert.match(card('Pippali').c, /carbamazepine/, 'pippali names the drug it changed');
+  assert.match(card('Pippali').c, /69 per cent/, 'and the size of the change');
+  assert.match(card('Pippali').c, /CYP3A4/, 'and the mechanism');
+  assert.match(card('Haritaki').c, /1983 trial/, 'haritaki names the old trial');
+  assert.match(card('Haritaki').c, /hold iron back/, 'and the tannin line');
+  assert.match(card('Vasaka').c, /syrup's job/, 'vasaka says an attack is not a syrup\u2019s job');
+  assert.match(card('Vasaka').c, /uterine/, 'and keeps the pregnancy concern');
+  assert.match(card('African potato').c, /never replace antiretroviral therapy/, 'African potato is not HIV treatment');
+  assert.match(card('African potato').c, /efavirenz/, 'and keeps the interaction study it has');
+
+  // Read on the shelf, not only in the data: open ephedra and the rule has to
+  // be on the screen.
+  const p2 = loadPage('herbs.html');
+  p2.sandbox.tab = 'az';
+  p2.sandbox.openId = p2.sandbox.allHerbs().filter((x) => x.n === 'Ephedra')[0].id;
+  p2.sandbox.render();
+  const shown = p2.els.get('view').innerHTML;
+  assert.match(shown, /id="p-ephedra"/, 'the card has its own address');
+  assert.match(shown, /unreasonable risk/, 'and shows the FDA rule when it is opened');
+});
+
+// 19 Oct 2026, fourth batch: "Next step: Research a fourth batch". Twelve more,
+// the counter shelf - what people actually buy. The facts pinned below are the
+// trial comparisons, the doses the regulators state, and the null results.
+const RESEARCHED_4 = [
+  'Berberine', 'Glucomannan', 'Guar gum', 'Diosmin', 'Goji', 'Jamun',
+  'Black currant seed oil', 'Artemisia afra', 'Lovage root', 'Avens',
+  'Agaricus blazei', 'Kanna',
+];
+
+test('the herb library: the twelve herbs of the fourth research batch are in it, in the page\u2019s own voice', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const keys = new Set(p.sandbox.NEEDS.map((n) => n.k));
+  for (const name of RESEARCHED_4) {
+    const h = list.filter((x) => x.n === name)[0];
+    assert.ok(h, `${name} is in the library`);
+    assert.ok(h.a, `${name} carries the other names it goes by`);
+    assert.ok(h.u, `${name} says what people use it for`);
+    assert.ok(h.d, `${name} says what it does`);
+    assert.ok(h.h, `${name} says how it is taken`);
+    assert.ok(h.c, `${name} carries its caution, not just its uses`);
+    assert.ok(!h.bk, `${name} carries no From the books line - it is not in the books`);
+    for (const t of h.t || []) assert.ok(keys.has(t), `${name} is on a shelf that exists (${t})`);
+  }
+  assert.ok(list.length >= 316, `the library grew again: ${list.length}`);
+});
+
+test('the herb library: the fourth research batch keeps the facts that have to travel with them', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const card = (n) => list.filter((x) => x.n === n)[0];
+  // The metabolic two: the comparison that is not equivalence, and the enzyme line.
+  assert.match(card('Berberine').c, /28 studies and 2,313 people/, 'berberine keeps the review size');
+  assert.match(card('Berberine').c, /36 adults/, 'and the small head-to-head trial');
+  assert.match(card('Berberine').c, /kernicterus/, 'and the newborn caution');
+  assert.match(card('Berberine').c, /CYP2D6, CYP2C9 and CYP3A4/, 'and the enzymes it inhibits');
+  // The three fibres, with the water and the registers.
+  assert.match(card('Glucomannan').h, /3 grams a day in three 1-gram doses/, 'glucomannan keeps the authorised regimen');
+  assert.match(card('Glucomannan').c, /blocked the throat and the oesophagus/, 'and the obstruction reports');
+  assert.match(card('Glucomannan').c, /no significant weight loss/, 'and the trial that found none');
+  assert.match(card('Guar gum').c, /19 randomised trials/, 'guar gum keeps the review size');
+  assert.match(card('Guar gum').c, /19 milligrams per decilitre/, 'and the cholesterol result');
+  assert.match(card('Guar gum').c, /10 grams a day/, 'and the claim condition');
+  assert.match(card('Diosmin').c, /2,344 people/, 'diosmin keeps the Cochrane size');
+  assert.match(card('Diosmin').c, /19 reports of bleeding/, 'and the bleeding review');
+  assert.match(card('Diosmin').c, /possible clot/, 'and the clot red flag');
+  // The food and the regional pair.
+  assert.match(card('Goji').c, /raised INR/, 'goji keeps the warfarin reports');
+  assert.match(card('Goji').c, /heavy metals/, 'and the contamination survey');
+  assert.match(card('Goji').c, /macular pigment/, 'and that its eye trial was a biomarker');
+  assert.match(card('Jamun').c, /Ninety-nine people/, 'jamun keeps the trial size');
+  assert.match(card('Jamun').c, /wording is ambiguous/, 'and says the dose wording is ambiguous');
+  assert.match(card('Jamun').c, /glucose meter/, 'and the monitoring line');
+  assert.match(card('Black currant seed oil').c, /10.5 grams a day/, 'black currant keeps the trial dose');
+  assert.match(card('Black currant seed oil').c, /no better than placebo overall/, 'and the null result');
+  assert.match(card('Black currant seed oil').c, /evening primrose/, 'and the GLA caution it does not inherit');
+  assert.match(card('Artemisia afra').c, /retracted in 2020/, 'Artemisia afra keeps the retraction');
+  assert.match(card('Artemisia afra').c, /not Artemisia annua/, 'and the species line');
+  assert.match(card('Artemisia afra').c, /alpha-thujone/, 'and the oil caution');
+  // The monograph pair and the two mushrooms-and-mood cards.
+  assert.match(card('Lovage root').c, /traditional use/, 'lovage says its use is traditional');
+  assert.match(card('Lovage root').c, /fluid is restricted/, 'and the fluid-restriction line');
+  assert.match(card('Lovage root').c, /emmenagogue/, 'and the pregnancy precaution');
+  assert.match(card('Avens').c, /no clinical trial could be found/, 'avens admits there is no trial');
+  assert.match(card('Avens').c, /tannins hold iron and other things back/, 'and keeps the tannin line');
+  assert.match(card('Avens').h, /no dose is printed/, 'and prints no dose');
+  assert.match(card('Agaricus blazei').c, /no survival benefit/, 'Agaricus keeps the survival result');
+  assert.match(card('Agaricus blazei').c, /inorganic arsenic/, 'and the arsenic finding');
+  assert.match(card('Agaricus blazei').c, /not a cancer treatment/, 'and says it is not a cancer treatment');
+  assert.match(card('Kanna').c, /37 healthy adults/, 'kanna keeps the trial size');
+  assert.match(card('Kanna').c, /serotonin toxicity/, 'and the serotonin caution');
+  assert.match(card('Kanna').c, /clinical depression/, 'and what its trials do not show');
+
+  // Read on the shelf, not only in the data: open kanna and the caution has to
+  // be on the screen.
+  const p2 = loadPage('herbs.html');
+  p2.sandbox.tab = 'az';
+  p2.sandbox.openId = p2.sandbox.allHerbs().filter((x) => x.n === 'Kanna')[0].id;
+  p2.sandbox.render();
+  const shown = p2.els.get('view').innerHTML;
+  assert.match(shown, /id="p-kanna"/, 'the card has its own address');
+  assert.match(shown, /serotonin toxicity/, 'and shows its caution when it is opened');
+});
+
+// 19 Oct 2026, fifth batch: "Next step: Research a fifth batch". Twelve more, at
+// the edge of the pharmacopoeia - the monograph herbs with no trial, the plants
+// with a file against them, and the sold extracts whose one trial was small or
+// null. The facts pinned here are the regulator's findings and the case counts.
+const RESEARCHED_5 = [
+  'Iceland moss', 'Sundew', 'Orthosiphon', 'Restharrow', 'Greater celandine',
+  'Thuja', 'Calamus', 'Camphor', 'He Shou Wu', 'White mulberry leaf',
+  'Coleus', 'Bromelain',
+];
+
+test('the herb library: the twelve herbs of the fifth research batch are in it, in the page\u2019s own voice', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const keys = new Set(p.sandbox.NEEDS.map((n) => n.k));
+  for (const name of RESEARCHED_5) {
+    const matches = list.filter((x) => x.n === name);
+    assert.equal(matches.length, 1, `${name} is in the library once`);
+    const h = matches[0];
+    assert.ok(h.a, `${name} carries the other names it goes by`);
+    assert.ok(h.u, `${name} says what people use it for`);
+    assert.ok(h.d, `${name} says what it does`);
+    assert.ok(h.h, `${name} says how it is taken`);
+    assert.ok(h.c, `${name} carries its caution, not just its uses`);
+    assert.ok(!h.bk, `${name} carries no From the books line - it is not in the books`);
+    for (const t of h.t || []) assert.ok(keys.has(t), `${name} is on a shelf that exists (${t})`);
+  }
+  assert.ok(list.length >= 328, `the library grew again: ${list.length}`);
+  assert.equal(new Set(list.map((x) => x.n)).size, list.length, 'and no name is in it twice');
+});
+
+test('the herb library: the fifth research batch keeps the facts that have to travel with them', () => {
+  const p = loadPage('herbs.html');
+  const list = p.sandbox.allHerbs();
+  const card = (n) => list.filter((x) => x.n === n)[0];
+  // The four monograph herbs: what the regulator found, and what it did not.
+  assert.match(card('Iceland moss').c, /traditional use and not a trial result/, 'Iceland moss says its use is traditional');
+  assert.match(card('Iceland moss').c, /over six/, 'and keeps the age line');
+  assert.match(card('Iceland moss').h, /prints none/, 'and prints no amount it could not read');
+  assert.match(card('Sundew').c, /No controlled human trial of sundew could be verified/, 'sundew admits there is no trial');
+  assert.match(card('Sundew').c, /no agreed dose, no agreed age and no agreed length of use/, 'and says what that leaves');
+  assert.match(card('Orthosiphon').c, /adopted monograph|traditional use/, 'orthosiphon names its monograph');
+  assert.match(card('Orthosiphon').c, /A flush is not an infection/, 'and the line a flush cannot cross');
+  assert.match(card('Restharrow').c, /no studies in patients had been carried out/, 'restharrow keeps the agency finding');
+  assert.match(card('Restharrow').c, /over twelve/, 'and its age limit');
+  // The four with a file against them.
+  assert.match(card('Greater celandine').c, /62-year-old woman/, 'celandine keeps the published case');
+  assert.match(card('Greater celandine').c, /22 spontaneous reports/, 'and the German report count');
+  assert.match(card('Greater celandine').c, /highly probable/, 'and the causality rating');
+  assert.match(card('Greater celandine').c, /get liver tests/, 'and what to do about it');
+  assert.match(card('Thuja').c, /eight generalised seizures/, 'thuja keeps the seizure report');
+  assert.match(card('Thuja').h, /external use only/, 'and the external-only rule');
+  assert.match(card('Thuja').h, /one drop at a time/, 'and the monograph directions');
+  assert.match(card('Thuja').c, /never on a child/, 'and the child line');
+  assert.match(card('Calamus').c, /small-intestinal leiomyosarcomas/, 'calamus keeps the animal finding');
+  assert.match(card('Calamus').c, /no acceptable daily intake/, 'and the missing ADI');
+  assert.match(card('Calamus').c, /21 CFR 189\.110/, 'and the food rule');
+  assert.match(card('Camphor').c, /nineteen-month-old/, 'camphor keeps the fatal case');
+  assert.match(card('Camphor').c, /half a gram to one gram/, 'and the lethal estimate');
+  assert.match(card('Camphor').c, /five to ninety minutes/, 'and the onset');
+  assert.match(card('Camphor').c, /21 CFR 310\.502/, 'and the camphorated-oil rule');
+  // The four sold extracts, and their small or null studies.
+  assert.match(card('He Shou Wu').c, /25 people/, 'He Shou Wu keeps the case series size');
+  assert.match(card('He Shou Wu').c, /one needed a transplant and one died/, 'and what happened');
+  assert.match(card('He Shou Wu').c, /nine liver-damage reports/, 'and the Australian count');
+  assert.match(card('White mulberry leaf').c, /crossover in 20 people/, 'mulberry keeps the trial size');
+  assert.match(card('White mulberry leaf').c, /high risk of bias/, 'and the committee rating');
+  assert.match(card('White mulberry leaf').c, /notifier's request/, 'and the food-safety notice');
+  assert.match(card('White mulberry leaf').c, /metformin/, 'and that it does not replace one');
+  assert.match(card('Coleus').c, /30 overweight or obese men/, 'coleus keeps the men\u2019s trial size');
+  assert.match(card('Coleus').c, /0\.7 kilograms/, 'and the women\u2019s null result');
+  assert.match(card('Coleus').c, /1 per cent forskolin eye drops/, 'and the different glaucoma product');
+  assert.match(card('Bromelain').c, /47 people/, 'bromelain keeps the trial size');
+  assert.match(card('Bromelain').c, /31 finished/, 'and the completion');
+  assert.match(card('Bromelain').c, /no significant difference/, 'and the null result');
+  assert.match(card('Bromelain').c, /no case report tying bromelain to bleeding/, 'and refuses a case it could not verify');
+
+  // Read on the shelf, not only in the data: open camphor and the route rule
+  // has to be on the screen.
+  const p2 = loadPage('herbs.html');
+  p2.sandbox.tab = 'az';
+  p2.sandbox.openId = p2.sandbox.allHerbs().filter((x) => x.n === 'Camphor')[0].id;
+  p2.sandbox.render();
+  const shown = p2.els.get('view').innerHTML;
+  assert.match(shown, /id="p-camphor"/, 'the card has its own address');
+  assert.match(shown, /Never by mouth/, 'and shows the route rule when it is opened');
+});
+
 test('the herb library: the eighteen herbs the books named are in it, each with the book line', () => {
   const p = loadPage('herbs.html');
   const list = p.sandbox.allHerbs();

@@ -132,6 +132,81 @@ test('the herb library: the supplied European Mythology summary renders as separ
   assert.match(notes[4].notes[0], /communities of African descent should prioritize indigenous African folk tales/);
 });
 
+// 19 Oct 2026. Jacques: "Correlate this info into the herb and the herb
+// certificate", with the written thesis of Dr. Tim Morrill's lecture "Thyroid
+// and Goiters" (ILLUMINATED33, youtube.com/watch?v=909LNn4ACf4) supplied as
+// text. It is the one source behind this library that is not one of the three
+// books, so it is held the way the European Mythology summary is held: its own
+// set of notes on the 90 days tab, every line kept as the lecture's claim.
+//
+// Two failures are guarded here and neither makes a sound. The first is the
+// section losing its attribution and reading as this page's own teaching - the
+// lecture argues against the medicine the page's first rule sits over, so a
+// section that reads as the page's voice would be the page saying it. The
+// second is the page's own line going missing from under the lecture, which is
+// the line that keeps the whole thing honest.
+test('the herb library: the supplied Thyroid and Goiters summary renders as its own lecture notes', () => {
+  const p = loadPage('herbs.html');
+  p.sandbox.tab = 'course';
+  p.sandbox.render();
+  const html = p.els.get('view').innerHTML;
+  assert.match(html, /Lecture summary · Thyroid and Goiters/, 'the section is on the tab');
+  assert.match(html, /Dr\. Tim Morrill\u2019s lecture/, 'it names the lecture it came from');
+  assert.match(html, /on the ILLUMINATED33 channel/, 'and where the lecture is');
+  assert.match(html, /not a verbatim transcript/, 'the lecture keeps its attribution');
+  assert.match(html, /This page\u2019s own line/, 'and the page keeps its own line over it');
+  assert.match(html, /data-h="goiter-note-1"/, 'the first note renders');
+  assert.match(html, /data-h="goiter-note-5"/, 'and so does the last');
+
+  const notes = p.sandbox.GOITER_NOTES;
+  assert.strictEqual(notes.length, 5, 'five organized lecture notes');
+  for (const n of notes) {
+    assert.ok(typeof n.t === 'string' && n.t.length > 5, `a note is titled "${n.t}"`);
+    assert.ok(Array.isArray(n.notes) && n.notes.length >= 3, `"${n.t}" carries its claims`);
+  }
+  assert.match(notes[0].notes[0], /goiter, the sluggish thyroid/, 'the thesis is the first note');
+  assert.match(notes[1].notes[0], /kelp and dulse/, 'so are the plants it names');
+  assert.match(notes[2].notes[0], /allopathic model/, 'and its argument against the medicine');
+  // The two positions this page does not take are named as the lecture's, not
+  // left for a reader to infer from the rest of the note.
+  assert.match(notes[3].notes[1],
+    /Turning away from medical care is the lecture's position and not this page's/, 'the lecture keeps its own position');
+  assert.match(notes[3].notes[2],
+    /ever a reason to stop or change anything you have been given/, 'and the page keeps its own line');
+});
+
+// The same word delivered to the two places in the library the lecture's ground
+// already lived: the minerals day of the course, and kelp's card, which now
+// carries the book's own kitchen row for the thyroid beside its iodine caution.
+test('the herb library: the iodine ground carries the lecture on the minerals day and on kelp', () => {
+  const p = loadPage('herbs.html');
+  const s = p.sandbox;
+  const day = s.COURSE.filter((d) => d.d === 25)[0];
+  const text = JSON.stringify(day);
+  assert.match(text, /Thyroid and Goiters/, 'day 25 names the lecture');
+  assert.match(text, /That is the lecture's claim and it is printed as one/, 'and prints its case as a claim');
+  assert.match(text, /Iodine in quantity moves a thyroid either way/, 'with the page\u2019s own caution under it');
+  assert.match(text, /belongs to the clinician treating it/, 'and the line about a treated thyroid');
+
+  const kelp = s.allHerbs().filter((h) => h.n === 'Kelp')[0];
+  assert.ok(kelp, 'kelp has its card');
+  assert.match(kelp.bk, /the thyroid, goiter/, 'the book\u2019s own kitchen row is on it');
+  assert.match(kelp.c, /should not get a lot of extra iodine/, 'and its iodine caution is unchanged');
+  // And it renders on the card, where a person reads it rather than in the data.
+  p.sandbox.tab = 'az';
+  p.sandbox.openId = kelp.id;
+  p.sandbox.render();
+  const shelf = p.els.get('view').innerHTML;
+  assert.match(shelf, /id="p-kelp"/, 'the card keeps its own address');
+  assert.match(shelf, /From the books<\/div><p>the thyroid, goiter\./, 'and carries the book\u2019s row under its caution');
+  // It is in the From the books tab too, where the lecture is listed as a source.
+  const source = JSON.stringify(s.BOOKS);
+  assert.match(source, /Thyroid and Goiters/, 'the lecture is named on the From the books tab');
+  assert.match(source, /Dr\. Tim Morrill/, 'with its author');
+  assert.match(source, /youtube\.com\/watch\?v=909LNn4ACf4/, 'and its address, so the next hand can find it');
+  assert.match(source, /are the lecture's and not this page's/, 'and the position the page does not take');
+});
+
 test('the herb library: the 90 days tab is a door in the page, and it renders', () => {
   const html = fs.readFileSync(path.join(ROOT, 'herbs.html'), 'utf8');
   assert.match(html, /data-t="course">90 days</, 'the tab is on the page');

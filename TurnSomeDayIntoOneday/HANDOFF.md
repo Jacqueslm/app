@@ -139,6 +139,80 @@ and requires the superseded claims out of it (`three to five sets`, the
 bridge); `trainer.test.js` requires the rule on the rotation card. 442 tests,
 442 pass.
 
+**Sixty-two more herbs, researched, and the certificate teaches them — 19 Oct
+2026.** Jacques: "research more herbs that are not in the app and correlate new
+findings where they need to be lessons certificate", then "Next step: Research
+more herbs", then "Next step: Research a third batch", then "Next step: Research
+a fourth batch", then "Next step: Research a fifth batch". Five batches went onto
+the shelf the same day, **266 to 328 cards**.
+The first fourteen: dulse, bitter leaf, baobab, rooibos, cleavers, self-heal,
+usnea, oak bark, arjuna, guduchi, danshen, notoginseng, maitake, sutherlandia.
+The second twelve: ivy leaf, primula root, sweet wormwood, nutmeg, miswak,
+bergamot, griffonia, rye pollen, tart cherry, soy, white peony, chrysanthemum.
+The third twelve, the shelf's hard edge: ephedra, aristolochia, germander,
+frangula bark, chanca piedra, mastic, birch leaf, hoodia, pippali, haritaki,
+vasaka, African potato.
+The fourth twelve, the counter shelf - what people actually buy: berberine,
+glucomannan, guar gum, diosmin, goji, jamun, black currant seed oil, Artemisia
+afra, lovage root, avens, Agaricus blazei, kanna.
+The fifth twelve, the pharmacopoeia's edge: Iceland moss, sundew, orthosiphon,
+restharrow, greater celandine, thuja, calamus, camphor, He Shou Wu, white
+mulberry leaf, coleus, bromelain. Its first four are the European monograph's
+own ground, the next four are there for a file against them, and the last four
+are sold extracts whose trials are small or null. Several of those cards print
+**no amount at all**, and say why: the monograph PDF could not be read, or no
+regulator has set a dose - the page does not fill that gap from a shop label.
+
+None of them is in the three books, so **none carries a From the books line** -
+each is the page's own card, written after reading a monograph, a trial or a
+regulator's page, and each says in its own words where the evidence is thin or
+where the name is doing the promising. The cards that exist for their cautions
+say so on their face: usnea is never taken inside (usnic acid and reported liver
+injury), oak bark is three or four days and an hour from other medicines,
+danshen is the warfarin card, sutherlandia keeps the HIV trial that changed
+neither viral load nor CD4 count, ivy leaf is never for a child under two,
+sweet wormwood may not stand in for malaria treatment, and nutmeg has no
+medicinal dose at all. The third batch sharpens the same edge: ephedra keeps the
+FDA's 2004 rule and the deaths, aristolochia has no safe amount and keeps the
+Belgian substitution, germander has no dose and 26 hepatitis cases, frangula
+bark is one week and over-twelve only, and African potato never replaces
+antiretroviral therapy. The fourth keeps the trial rather than the claim:
+berberine's 36-person metformin comparison is not equivalence and its CYP
+inhibition is real, glucomannan needs its water, guar gum's claim is 10 grams a
+day, diosmin's bleeding review is in, goji carries the warfarin reports, jamun's
+99-person trial is one small study, black currant seed oil was no better than
+placebo, Artemisia afra's malaria trial was retracted, avens has no trial at
+all, Agaricus has no survival benefit and an arsenic signal, and kanna is not
+clinical depression evidence. The fifth runs the same way: Iceland moss is
+traditional use with a printed amount the card refuses to invent, sundew has no
+monograph at all, restharrow's agency record says outright that no studies in
+patients were done, greater celandine keeps the 62-year-old hepatitis case and
+the 22 German reports, thuja keeps the seven-month-old's seizures and the
+external-only rule, calamus keeps the rat leiomyosarcomas and the 1968 food ban,
+camphor keeps the one-gram fatal ingestion and the 0.5-to-1-gram lethal
+estimate, He Shou Wu keeps the 25-person liver series, white mulberry leaf keeps
+the 20-person crossover and the committee's high-risk-of-bias rating, coleus
+keeps two small weight trials that disagree, and bromelain keeps the 47-person
+knee trial that was no better than placebo.
+
+The herbalist track teaches them where their ground is. Days 14, 22, 31, 42, 43,
+44, 45, 46, 47, 54, 58, 61, 62, 63, 65, 66, 67, 68, 69, 70, 71 and 72 each carry
+a link onto the cards, and the days whose ground a batch belongs to say
+the finding in a sentence of their own. No day count, quiz count or pass mark
+changed.
+
+`server/test/herbs-books.test.js` gained tests for each batch: all of them are in
+the library with full fields and no book line, and the facts that have to travel
+with them (the amount, the trial size, the interaction, the missing monograph)
+are asserted by name - plus a card opened and read on screen. `certify.test.js`
+pins every researched card to its day and requires the teaching sentences, and
+requires the pages to render the card doors. While adding the third batch, a
+**duplicate key in that test's `wanted` map** was found and fixed: day 43 had
+been appended twice, so the later entry silently overrode the earlier one and
+the second batch's bergamot and griffonia links were not actually being checked.
+The map is now one key per day, in day order, with a comment saying why.
+**479 tests, 479 pass.**
+
 **Two parts open at once — 18 Oct 2026.** Jacques: "the fix: two parts open at
 once." Every door on the shell (`/app`) replaces it with the part it opens, and
 inside the installed app there is no tab bar to open a second part in — one tap

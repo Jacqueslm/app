@@ -802,14 +802,39 @@ test('every plant a lesson names gets a link onto its own card', () => {
   assert.equal(C.plantSlug('Pau d\u2019arco'), 'pau-d-arco');
 
   // The lessons that name plants carry a card link for each of them.
+  // One key per day, in day order. The 19 Oct herb runs were added in three
+  // batches and their days are merged here rather than appended, because a
+  // repeated key in an object literal is silently overridden by the last one -
+  // which is exactly the kind of quiet hole this test exists to catch.
   const wanted = {
+    14: ['bitter-leaf'],
     16: ['comfrey'],
+    22: ['kelp', 'alfalfa', 'dulse'],
     26: ['garlic'],
     27: ['echinacea', 'licorice', 'marshmallow', 'yarrow', 'sage'],
     28: ['valerian', 'catnip', 'fennel', 'dandelion', 'kelp'],
     29: ['aloe', 'comfrey', 'witch-hazel', 'senna', 'pau-d-arco'],
     30: ['gymnema', 'bilberry', 'guggul', 'chickweed', 'goldenseal'],
-    43: ['st-john-s-wort', 'ginkgo'],
+    31: ['baobab', 'rooibos'],
+    42: ['frangula-bark', 'vasaka', 'camphor'],
+    43: ['st-john-s-wort', 'ginkgo', 'bergamot', 'griffonia', 'goji', 'kanna'],
+    44: ['gymnema', 'bilberry', 'licorice', 'comfrey', 'ephedra', 'pippali', 'chanca-piedra', 'african-potato', 'berberine', 'jamun'],
+    45: ['usnea', 'oak-bark', 'nutmeg', 'sweet-wormwood', 'aristolochia', 'germander', 'frangula-bark', 'glucomannan'],
+    46: ['chamomile', 'chrysanthemum', 'rye-pollen'],
+    47: ['aristolochia', 'hoodia', 'chanca-piedra'],
+    54: ['miswak', 'chanca-piedra', 'vasaka', 'diosmin', 'artemisia-afra'],
+    58: ['hoodia', 'african-potato'],
+    61: ['oak-bark', 'bitter-leaf', 'mastic', 'haritaki', 'frangula-bark', 'glucomannan', 'guar-gum', 'avens', 'calamus'],
+    62: ['guduchi', 'bitter-leaf', 'greater-celandine', 'he-shou-wu'],
+    63: ['ivy-leaf', 'primula-root', 'ephedra', 'vasaka', 'pippali', 'artemisia-afra', 'iceland-moss', 'sundew'],
+    65: ['maitake', 'guduchi', 'sutherlandia', 'agaricus-blazei'],
+    66: ['cleavers', 'birch-leaf', 'chanca-piedra', 'lovage-root', 'orthosiphon', 'restharrow'],
+    67: ['self-heal', 'oak-bark', 'cleavers', 'thuja'],
+    68: ['arjuna', 'danshen', 'guar-gum'],
+    69: ['notoginseng', 'self-heal', 'tart-cherry', 'black-currant-seed-oil', 'bromelain'],
+    70: ['dulse', 'white-mulberry-leaf', 'coleus'],
+    71: ['soy', 'white-peony'],
+    72: ['rye-pollen'],
     83: ['st-john-s-wort', 'ginkgo', 'comfrey', 'kava'],
   };
   for (const d of Object.keys(wanted)) {
@@ -830,6 +855,196 @@ test('every plant a lesson names gets a link onto its own card', () => {
   assert.match(day, /href="\/herbs#p-echinacea"/);
   assert.match(day, /href="\/herbs#p-licorice"/);
   assert.match(day, /href="\/herbs#p-marshmallow"/);
+});
+
+// 19 Oct 2026. The other half of "correlate new findings where they need to be
+// lessons certificate": a card on the shelf and a link from a lesson is not
+// teaching. Eight of the days whose ground the researched herbs belong to say
+// the same thing in a sentence of their own, and those sentences are the place
+// a person actually meets them. Guarded here: the sentence going missing, and
+// the sentence losing the caution it was written around, which is the failure
+// that would make the research a promotion rather than a lesson.
+test('the herbalist track teaches the researched herbs where their ground is taught', () => {
+  const { sandbox, byId } = load();
+  const C = sandbox.window.CERTIFY;
+  const day = (d) => JSON.stringify(C.days('herbalist').filter((x) => x.d === d)[0]);
+
+  // The dose, duration and toxicity day is where the four caution-first plants land.
+  const d45 = day(45);
+  assert.match(d45, /usnic acid/, 'day 45 names what usnea carries');
+  assert.match(d45, /linked to serious liver injury/, 'and what it has been linked to');
+  assert.match(d45, /three or four days for a loose bowel/, 'oak bark is a short course, not a daily tea');
+  assert.match(d45, /still fail its own trial/, 'and sutherlandia is the lesson in a claim');
+
+  // Digestion, and the two that work the gut ground.
+  const d61 = day(61);
+  assert.match(d61, /Bitter leaf, the West African bitter/, 'day 61 names bitter leaf');
+  assert.match(d61, /a caution with diabetes medicine/, 'with its blood-sugar caution');
+  assert.match(d61, /Oak bark is the astringent on the shelf/, 'and oak bark is named for the loose bowel');
+
+  // The liver, where the case reports matter.
+  const d62 = day(62);
+  assert.match(d62, /case reports of liver injury after products made from it/, 'day 62 keeps guduchi\u2019s liver reports');
+  assert.match(d62, /publishes its heavy-metal test/, 'and the contamination line with them');
+
+  // The immune day, which carries the trial that did not work.
+  const d65 = day(65);
+  assert.match(d65, /changed neither the viral load nor the CD4 count/, 'day 65 keeps sutherlandia\u2019s trial result');
+  assert.match(d65, /more infections/, 'including the infections the trial found');
+  assert.match(d65, /never replaces antiretroviral therapy/, 'and the line that outranks the plant');
+  assert.match(d65, /raised INR on warfarin/, 'and maitake\u2019s warfarin case report');
+
+  // Water, where a gentle herb keeps its own caution.
+  assert.match(day(66), /Its card is the caution and not the promise/, 'day 66 reads cleavers against its own card');
+
+  // The heart, where the rule is not to change a medicine.
+  const d68 = day(68);
+  assert.match(d68, /increase the effect of warfarin badly/, 'day 68 keeps danshen\u2019s warfarin reports');
+  assert.match(d68, /pregnancy is a contraindication/, 'and its pregnancy line');
+  assert.match(d68, /neither is a reason to change one/, 'and neither is a reason to stop a heart medicine');
+
+  // The glands, where the food that carries iodine belongs.
+  const d70 = day(70);
+  assert.match(d70, /1,500 to 7,500 micrograms/, 'day 70 gives dulse\u2019s reported iodine range');
+  assert.match(d70, /low-iodine diet's own avoid list/, 'and the scan-list caution with it');
+
+  // 19 Oct 2026, second batch: the same rule for the twelve added that day - a
+  // link from the day and a sentence of the day's own, so the research is
+  // taught rather than shelved.
+  const d43 = day(43);
+  assert.match(d43, /grapefruit is known to block the enzyme/, 'day 43 names bergamot\u2019s citrus interaction');
+  assert.match(d43, /serotonin syndrome has been reported/, 'and griffonia\u2019s serotonin line');
+  assert.match(d45, /five grams of ground nutmeg/, 'day 45 keeps nutmeg\u2019s reported amount');
+  assert.match(d45, /should not be used to prevent or treat malaria/, 'and WHO\u2019s position on sweet wormwood');
+  const d46 = day(46);
+  assert.match(d46, /daisy family with ragweed/, 'day 46 puts chrysanthemum in the daisy family');
+  assert.match(d46, /is pollen/, 'and calls rye pollen what it is');
+  const d54 = day(54);
+  assert.match(d54, /Miswak/, 'day 54 names the chewing stick');
+  assert.match(d54, /does not deliver fluoride/, 'with the fluoride line that stops it replacing a brush');
+  const d63 = day(63);
+  assert.match(d63, /Ivy leaf is assessed by the European medicines agency/, 'day 63 names ivy leaf\u2019s assessment');
+  assert.match(d63, /from the age of two and never under it/, 'and its age limit');
+  assert.match(d63, /361 adults with acute bronchitis/, 'and primula\u2019s combination trial');
+  assert.match(day(69), /no significant effect on blood urate/, 'day 69 keeps tart cherry\u2019s gout result');
+  const d71 = day(71);
+  assert.match(d71, /62 studies and 6,653 women/, 'day 71 keeps the soy review size');
+  assert.match(d71, /has adopted no monograph/, 'and white peony\u2019s missing monograph');
+  const d72 = day(72);
+  assert.match(d72, /444 men/, 'day 72 keeps the rye pollen review size');
+  assert.match(d72, /no change in urine flow/, 'and what the prostate trials did not change');
+
+  // 19 Oct 2026, third batch: the same rule again, on the shelf's hard edge.
+  const t42 = day(42);
+  assert.match(t42, /no more than a week/, 'day 42 keeps frangula\u2019s week');
+  assert.match(t42, /vasicine/, 'and vasaka\u2019s pregnancy concern');
+  const t44 = day(44);
+  assert.match(t44, /illegal in the United States/, 'day 44 keeps ephedra\u2019s status');
+  assert.match(t44, /Pippali's piperine raises the blood levels/, 'and pippali\u2019s drug levels');
+  assert.match(t44, /may lower blood sugar/, 'and chanca piedra\u2019s sugar caution');
+  assert.match(d45, /26 cases/, 'day 45 keeps germander\u2019s case series');
+  assert.match(d45, /10 to 30 milligrams/, 'and frangula\u2019s dose');
+  assert.match(d45, /no dose/, 'and aristolochia\u2019s refusal of one');
+  const t47 = day(47);
+  assert.match(t47, /Stephania tetrandra/, 'day 47 keeps the substitution');
+  assert.match(t47, /federal trade commission/, 'and the hoodia adulteration');
+  assert.match(t47, /P\. amarus/, 'and the chanca piedra species line');
+  assert.match(d54, /emergency care, not chanca piedra/, 'day 54 keeps the stone red flags');
+  assert.match(d54, /acute asthma attack is not vasaka/, 'and the asthma attack');
+  const t58 = day(58);
+  assert.match(t58, /heavily harvested/, 'day 58 keeps the African potato harvest');
+  assert.match(t58, /CITES Appendix II/, 'and hoodia\u2019s listing');
+  assert.match(t58, /8 per cent of milestone payments/, 'and the benefit-sharing terms');
+  const t61 = day(61);
+  assert.match(t61, /148-person trial/, 'day 61 keeps the mastic trial');
+  assert.match(t61, /tannins hold iron back/, 'and haritaki\u2019s tannin line');
+  const t63 = day(63);
+  assert.match(t63, /may not be sold in the United States since 2004/, 'day 63 keeps the ephedra ban');
+  assert.match(t63, /not for an acute asthma attack/, 'and vasaka\u2019s red flag');
+  const t66 = day(66);
+  assert.match(t66, /increase urine in a minor complaint/, 'day 66 keeps birch leaf\u2019s indication');
+  assert.match(t66, /two controlled studies/, 'and chanca piedra\u2019s evidence');
+
+  // 19 Oct 2026, fourth batch: the counter shelf, on the same rule.
+  const u43 = day(43);
+  assert.match(u43, /raised INR/, 'day 43 keeps goji\u2019s warfarin reports');
+  assert.match(u43, /serotonin reuptake/, 'and kanna\u2019s serotonin line');
+  const u44 = day(44);
+  assert.match(u44, /CYP2D6, CYP2C9 and CYP3A4/, 'day 44 keeps berberine\u2019s enzymes');
+  assert.match(u44, /99-person trial/, 'and jamun\u2019s trial');
+  assert.match(day(45), /blocked the throat and the oesophagus/, 'day 45 keeps glucomannan\u2019s obstruction');
+  const u54 = day(54);
+  assert.match(u54, /possible clot/, 'day 54 keeps diosmin\u2019s clot red flag');
+  assert.match(u54, /fever in a malaria area/, 'and the malaria-fever red flag');
+  const u61 = day(61);
+  assert.match(u61, /fibre in food and the fibre in a capsule/, 'day 61 keeps the fibre distinction');
+  assert.match(u61, /no trial behind it/, 'and avens\u2019 missing evidence');
+  const u63 = day(63);
+  assert.match(u63, /not Artemisia annua/, 'day 63 keeps the species line');
+  assert.match(u63, /retracted in 2020/, 'and the retracted malaria trial');
+  const u65 = day(65);
+  assert.match(u65, /no survival benefit/, 'day 65 keeps the Agaricus result');
+  assert.match(u65, /inorganic arsenic/, 'and its arsenic finding');
+  assert.match(day(66), /fluid is restricted/, 'day 66 keeps lovage\u2019s fluid line');
+  assert.match(day(68), /19 milligrams per decilitre/, 'day 68 keeps guar gum\u2019s cholesterol result');
+  assert.match(day(69), /no better than placebo overall/, 'day 69 keeps black currant\u2019s null result');
+
+  // 19 Oct 2026, fifth batch: the pharmacopoeia's edge, on the same rule.
+  const v42 = day(42);
+  assert.match(v42, /nineteen-month-old/, 'day 42 keeps the camphor case');
+  assert.match(v42, /never put in the nostrils/, 'and the route that is never taken');
+  assert.match(v42, /child under two/, 'and the age line');
+  const v61 = day(61);
+  assert.match(v61, /leiomyosarcomas/, 'day 61 keeps calamus\u2019s rat tumours');
+  assert.match(v61, /1968/, 'and the food rule of 1968');
+  assert.match(v61, /not a daily bitter/, 'and says it is not a daily bitter');
+  const v62 = day(62);
+  assert.match(v62, /62-year-old woman/, 'day 62 keeps the celandine case');
+  assert.match(v62, /22 spontaneous reports/, 'and the German report count');
+  assert.match(v62, /25 people/, 'and He Shou Wu\u2019s series');
+  assert.match(v62, /one was transplanted/, 'and what happened to them');
+  const v63 = day(63);
+  assert.match(v63, /lichen and not a moss/, 'day 63 says what Iceland moss is');
+  assert.match(v63, /children over six/, 'and its age line');
+  assert.match(v63, /no European monograph found/, 'and that sundew has none');
+  const v66 = day(66);
+  assert.match(v66, /no studies in patients had been carried out/, 'day 66 keeps the restharrow finding');
+  assert.match(v66, /neither card prints an amount/i, 'and that neither amount is printed');
+  const v67 = day(67);
+  assert.match(v67, /eight generalised seizures/, 'day 67 keeps the thuja seizure report');
+  assert.match(v67, /external use only/, 'and the external-only rule');
+  assert.match(v67, /never used on a child/, 'and the child line');
+  const v69 = day(69);
+  assert.match(v69, /47 people/, 'day 69 keeps the bromelain trial size');
+  assert.match(v69, /no significant difference from placebo/, 'and its null result');
+  const v70 = day(70);
+  assert.match(v70, /crossover in 20 people/, 'day 70 keeps mulberry\u2019s trial size');
+  assert.match(v70, /high risk of bias/, 'and the committee\u2019s rating');
+  assert.match(v70, /not significant/, 'and coleus\u2019s null result');
+
+  // Food first, which is where the two African foods are read.
+  const d31 = day(31);
+  assert.match(d31, /Baobab fruit pulp/, 'day 31 reads baobab as the food it is');
+  assert.match(d31, /Rooibos is the Cape's everyday red tea/, 'and rooibos the same way');
+
+  // And on the page, not only in the data: open the two days that carry the
+  // cautions and the sentences have to be on the screen, with the cards under
+  // them, since that is how a student meets them.
+  for (const [d, must, card] of [
+    [45, /usnic acid/, '/herbs#p-usnea'],
+    [45, /five grams of ground nutmeg/, '/herbs#p-nutmeg'],
+    [45, /26 cases/, '/herbs#p-germander'],
+    [63, /Ivy leaf is assessed by the European medicines agency/, '/herbs#p-ivy-leaf'],
+    [44, /CYP2D6, CYP2C9 and CYP3A4/, '/herbs#p-berberine'],
+    [66, /increase urine in a minor complaint/, '/herbs#p-birch-leaf'],
+    [69, /no better than placebo overall/, '/herbs#p-black-currant-seed-oil'],
+    [70, /1,500 to 7,500 micrograms/, '/herbs#p-dulse'],
+  ]) {
+    C.go({ track: 'herbalist', day: d, test: null, exam: false, cert: null });
+    const view = byId('view').innerHTML;
+    assert.match(view, must, `day ${d} renders the researched herb it teaches`);
+    assert.ok(view.indexOf(card) > -1, `day ${d} renders the door onto the card`);
+  }
 });
 
 test('the herbalist track carries the Herb Library cross progress bridge', () => {
@@ -860,4 +1075,50 @@ test('the herbalist track carries the Herb Library cross progress bridge', () =>
   // The trainer track has no library behind it, so it carries no bridge.
   C.go({ track: 'fitness', day: null, test: null, exam: false, cert: null });
   assert.doesNotMatch(byId('view').innerHTML, /Herb Library's own progress/);
+});
+
+// 19 Oct 2026. Jacques: "Correlate this info into the herb and the herb
+// certificate", with the written thesis of Dr. Tim Morrill's lecture "Thyroid
+// and Goiters" (ILLUMINATED33) supplied as text. On this side it lands on the
+// herbalist track's iodine ground: day 22, the minerals, and day 24, the gland
+// day that follows it. Both now name the lecture and both keep this page's own
+// line over it, which is the line that matters here - the lecture argues
+// against the medicine, and this course's first rule sits over that.
+//
+// Guarded: the lecture reading as this page's own teaching, this page's line
+// about medicine going missing from under it, the two days disagreeing about
+// whether the lecture was read at all, and the lesson's door losing the two
+// cards the lecture names.
+test('the herbalist track reads the Thyroid and Goiters lecture as the lecture’s claim', () => {
+  const { sandbox, byId } = load();
+  const C = sandbox.window.CERTIFY;
+  const day22 = C.days('herbalist').filter((d) => d.d === 22)[0];
+  const text22 = JSON.stringify(day22);
+  assert.match(text22, /Dr\. Tim Morrill's Thyroid and Goiters/, 'day 22 names the lecture');
+  assert.match(text22, /That is the lecture's claim and it is printed as one/, 'and prints its case as a claim');
+  assert.match(text22, /which is why salt is iodised/, 'with the part of it that is not a claim');
+  assert.match(text22, /is the lecture's and not this page's/, 'and the position the page does not take');
+  assert.match(text22, /reason to stop or change anything a doctor has given/, 'with this page’s own line over it');
+  assert.equal(day22.q.length, 5, 'and the day still asks its five questions');
+
+  const day24 = C.days('herbalist').filter((d) => d.d === 24)[0];
+  assert.match(JSON.stringify(day24), /Thyroid and Goiters/, 'day 24 names the same lecture');
+  assert.match(JSON.stringify(day24), /the clinician's ground/, 'and keeps the boundary over it');
+
+  // The lesson's own door into the library, with the cards the lecture names.
+  assert.match(C.deeperFor('herbalist', 22).p, /Thyroid and Goiters/);
+  // Dulse joined the two on 19 Oct 2026 with the research, so the day's own
+  // iodine cards grew with the shelf rather than staying as they were.
+  assert.deepEqual(C.deeperFor('herbalist', 22).cards.map((c) => c.slug), ['kelp', 'alfalfa', 'dulse'],
+    'day 22 opens the iodine cards, the lecture\u2019s two and the researched one');
+  assert.match(C.deeperFor('herbalist', 24).p, /Thyroid and Goiters/);
+  assert.deepEqual(C.deeperFor('herbalist', 24).cards.map((c) => c.slug), ['kelp']);
+  // And the track says at its foot where the lecture sits.
+  assert.match(C.TRACKS.filter((t) => t.id === 'herbalist')[0].note, /Thyroid and Goiters/, 'the track names the lecture');
+
+  // The two days render it, on the page and not only in the data.
+  C.go({ track: 'herbalist', day: 22, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /Thyroid and Goiters/, 'day 22 shows it');
+  C.go({ track: 'herbalist', day: 24, test: null, exam: false, cert: null });
+  assert.match(byId('view').innerHTML, /Thyroid and Goiters/, 'and so does day 24');
 });

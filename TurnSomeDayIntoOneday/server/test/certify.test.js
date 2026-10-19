@@ -282,6 +282,7 @@ function load(opts) {
   const made = [];    // every node the page creates
   const drawn = [];   // every canvas it draws on
   const said = [];    // every lesson the page reads aloud (opts.speech only)
+  const spoken = [];  // the utterances themselves, so their speed can be checked
   const blocks = [...HTML.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
     .filter((m) => !/\bsrc=/.test(m[1])).map((m) => m[2]);
   assert.ok(blocks.length > 0, 'the page must carry its own script');
@@ -368,7 +369,7 @@ function load(opts) {
   if (o.speech) {
     sandbox.speechSynthesis = {
       speaking: false,
-      speak(u) { said.push(String(u.text)); if (u.onend) u.onend(); },
+      speak(u) { said.push(String(u.text)); spoken.push(u); if (u.onend) u.onend(); },
       cancel() {}, pause() {}, resume() {},
       getVoices() { return []; }, addEventListener() {},
     };
@@ -378,7 +379,7 @@ function load(opts) {
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(blocks[0], sandbox, { filename: 'certify.html' });
-  return { sandbox, els, store, byId, made, drawn, said };
+  return { sandbox, els, store, byId, made, drawn, said, spoken };
 }
 
 test('a day recorded against a different quiz opens again, and the tests on it with it', () => {
@@ -490,6 +491,40 @@ test('every lesson on both tracks reads itself aloud, and the quiz is not read',
   plain.sandbox.window.CERTIFY.go({ track: 'herbalist', day: 1 });
   plain.sandbox.window.CERTIFY.sayLesson();
   assert.match(plain.byId('sayBtn').textContent, /no voice/, 'a phone with no voice says so');
+});
+
+test('the teaching can be read slower or faster, and the choice is remembered', () => {
+  // 19 Oct 2026. Jacques: "In the teachings have it where I can pick the speed of
+  // the voice its goes too fast i have that option in other places of the app."
+  // The Music reader has had speed chips since it grew a reading tab; a lesson
+  // went out at the phone's own 1x with no way to slow it down. Six speeds now,
+  // the same rate handed to the utterance, and the choice kept on the phone.
+  assert.match(HTML, /data-sayrate/, 'the lesson offers a speed');
+  assert.match(HTML, /u\.rate = sayRate\(\)/, 'and the chosen rate really reaches the voice');
+
+  const slow = load({ speech: true, store: { 'tsid-say-rate': '0.75' } });
+  const C = slow.sandbox.window.CERTIFY;
+  C.go({ track: 'herbalist', day: 1, test: null, exam: false, cert: null });
+  const drawn = slow.byId('view').innerHTML;
+  assert.match(drawn, /data-sayrate="0\.6"/, 'a slower speed is offered, not only faster ones');
+  assert.match(drawn, /data-sayrate="0\.75" aria-pressed="true"/, 'the remembered speed is the one marked');
+  C.sayLesson();
+  assert.equal(slow.spoken.length, 1, 'the lesson is read once');
+  assert.equal(slow.spoken[0].rate, 0.75, 'and at the speed that was chosen');
+
+  // A phone that has never chosen one reads at the normal speed.
+  const plain = load({ speech: true });
+  plain.sandbox.window.CERTIFY.go({ track: 'herbalist', day: 1, test: null, exam: false, cert: null });
+  plain.sandbox.window.CERTIFY.sayLesson();
+  assert.equal(plain.spoken[0].rate, 1, 'with no choice made, the reading is 1x');
+
+  // The other screens' bar carries the same choice, so the speed is set once and
+  // is not a lesson-only setting.
+  const home = load({ speech: true, store: { 'tsid-say-rate': '0.9' } });
+  const v = home.byId('view');
+  home.sandbox.window.CERTIFY.go({ track: null, day: null, test: null, exam: false, cert: null });
+  const mounted = v.insertions.map((i) => i.html).join('');
+  assert.match(mounted, /data-sayrate="0\.9" aria-pressed="true"/, 'the screen bar offers the same speed choice');
 });
 
 test('every screen that is not a lesson or a quiz carries its own read-aloud bar', () => {

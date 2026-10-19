@@ -133,6 +133,15 @@
     background:rgba(232,192,122,.08); border:1px solid rgba(232,192,122,.32); border-radius:12px; cursor:pointer}
   .saybtn:hover{background:rgba(232,192,122,.16)}
   .saybtn.stop{flex:0 0 auto; color:var(--dim); background:none; border-color:var(--line)}
+  /* Speed (19 Oct 2026): the lesson was read at the phone's own 1×, which is too
+     quick for a page this long. The same choice the Music reader offers, on the
+     teaching itself, and remembered for the next lesson. */
+  .sayerow{display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:8px 0 2px}
+  .sayerow .saysaid{flex:0 0 auto; margin-right:2px}
+  .sayrate{padding:7px 11px; font:inherit; font-size:.75rem; font-weight:600; color:var(--dim);
+    background:none; border:1px solid var(--line); border-radius:999px; cursor:pointer}
+  .sayrate:hover{border-color:rgba(232,192,122,.45)}
+  .sayrate[aria-pressed="true"]{color:var(--gold); border-color:rgba(232,192,122,.55); background:rgba(232,192,122,.10)}
 
   ol.plan{margin:0; padding-left:20px; color:var(--dim); font-size:.8438rem; line-height:1.7}
 
@@ -2170,6 +2179,48 @@ var SAYING = false;
 function speechOK(){
   return typeof speechSynthesis !== "undefined" && typeof SpeechSynthesisUtterance !== "undefined";
 }
+/* How fast the teaching is read. Kept on the phone, so the next lesson opens at
+   the speed that was chosen rather than back at the phone's default. */
+var SAY_RATE_KEY = "tsid-say-rate";
+var SAY_RATES = [0.6, 0.75, 0.9, 1, 1.25, 1.5];
+function sayRate(){
+  var v = 1;
+  try{ v = Number(localStorage.getItem(SAY_RATE_KEY)) || 1; }catch(e){}
+  return SAY_RATES.indexOf(v) === -1 ? 1 : v;
+}
+function sayRateHTML(){
+  var v = sayRate(), out = "<div class=\"sayerow noprint\"><p class=\"saysaid\">Speed</p>";
+  SAY_RATES.forEach(function(r){
+    out += "<button class=\"sayrate\" type=\"button\" data-sayrate=\"" + r + "\" aria-pressed=\""
+         + (r === v ? "true" : "false") + "\" aria-label=\"Read at " + r + " times the normal speed\">"
+         + r + "&times;</button>";
+  });
+  return out + "</div>";
+}
+function sayRatePaint(){
+  var v = sayRate();
+  var all = document.querySelectorAll("[data-sayrate]");
+  for (var i = 0; i < all.length; i++){
+    var b = all[i];
+    b.setAttribute("aria-pressed", Number(b.getAttribute("data-sayrate")) === v ? "true" : "false");
+  }
+}
+function sayWithRate(u){ u.rate = sayRate(); return u; }
+/* Choosing a speed while a lesson is playing restarts that lesson at the new
+   speed: the phone cannot change an utterance already in its mouth, and a speed
+   control that only works from the next reading looks broken. */
+document.addEventListener("click", function(e){
+  var b = e.target && e.target.closest ? e.target.closest("[data-sayrate]") : null;
+  if (!b) return;
+  var r = Number(b.getAttribute("data-sayrate"));
+  if (SAY_RATES.indexOf(r) === -1) return;
+  try{ localStorage.setItem(SAY_RATE_KEY, String(r)); }catch(err){}
+  var lesson = !!(id("sayBtn") && id("sayBtn").textContent === "Stop");
+  var screen = !!(id("screenSayBtn") && id("screenSayBtn").textContent === "Stop");
+  sayRatePaint();
+  if (lesson){ sayStop(); sayLesson(); }
+  else if (screen){ sayStop(); screenSay(); }
+});
 function sayStop(){
   if (speechOK()){ try{ speechSynthesis.cancel(); }catch(e){} }
   SAYING = false;
@@ -2199,7 +2250,7 @@ function sayLesson(){
   var text = sayText(day);
   var deeper = deeperFor(t.id, day.d);
   if (deeper && deeper.p) text += "Going deeper. " + deeper.p + " ";
-  var u = new SpeechSynthesisUtterance(text);
+  var u = sayWithRate(new SpeechSynthesisUtterance(text));
   u.onend = function(){ if (SAYING) sayStop(); };
   u.onerror = function(){ if (SAYING) sayStop(); };
   SAYING = true;
@@ -2221,10 +2272,13 @@ function sayLesson(){
    that one reads the teaching and stops at the quiz by design.
 ─────────────────────────────────────────────────────────────────────────── */
 function screenSayHTML(){
-  return '<div class="sayrow noprint" id="screenSay">'
-       +   '<p class="saysaid">Read aloud</p>'
-       +   '<button class="saybtn" id="screenSayBtn">Read it to me</button>'
-       +   '<button class="saybtn stop" id="screenSayStop" hidden>Stop</button>'
+  return '<div class="noprint" id="screenSay">'
+       +   '<div class="sayrow">'
+       +     '<p class="saysaid">Read aloud</p>'
+       +     '<button class="saybtn" id="screenSayBtn">Read it to me</button>'
+       +     '<button class="saybtn stop" id="screenSayStop" hidden>Stop</button>'
+       +   '</div>'
+       +   sayRateHTML()
        + '</div>';
 }
 /* Whatever the drawn screen says, in the order it says it. The controls are not
@@ -2233,7 +2287,7 @@ function screenSayText(){
   var v = id("view");
   if (!v) return "";
   var out = [];
-  var skip = /(^|\s)(noprint|sayrow|saybar|saysaid)(\s|$)/;
+  var skip = /(^|\s)(noprint|sayrow|saybar|saysaid|sayerow)(\s|$)/;
   var walk = function(e){
     var kids = e.children, deeper = false;
     for (var i = 0; i < kids.length; i++){
@@ -2257,7 +2311,7 @@ function screenSay(){
   var text = screenSayText();
   if (!text){ var b1 = id("screenSayBtn"); if (b1) b1.textContent = "Nothing here to read yet"; return; }
   sayStop();
-  var u = new SpeechSynthesisUtterance(text);
+  var u = sayWithRate(new SpeechSynthesisUtterance(text));
   u.onend = function(){ if (SAYING) sayStop(); };
   u.onerror = function(){ if (SAYING) sayStop(); };
   SAYING = true;
@@ -2297,6 +2351,7 @@ function renderDay(v, d){
        +   "<button class=\"saybtn\" id=\"sayBtn\">Read it to me</button>"
        +   "<button class=\"saybtn stop\" id=\"sayStop\" hidden>Stop</button>"
        + "</div>";
+  out += sayRateHTML();
   out += "<p class=\"kicker\">The day's quiz</p>";
   out += quizHtml(day.q);
   out += "<button class=\"btn\" id=\"submit\">Check the answers</button>";

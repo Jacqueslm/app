@@ -141,8 +141,8 @@ test('the herb library: the supplied European Mythology summary renders as separ
 //
 // Two failures are guarded here and neither makes a sound. The first is the
 // section losing its attribution and reading as this page's own teaching - the
-// lecture argues against the medicine the page's first rule sits over, so a
-// section that reads as the page's voice would be the page saying it. The
+// lecture argues against medical care, so a section that reads as the page's
+// voice would be the page saying it. The
 // second is the page's own line going missing from under the lecture, which is
 // the line that keeps the whole thing honest.
 test('the herb library: the supplied Thyroid and Goiters summary renders as its own lecture notes', () => {
@@ -154,7 +154,7 @@ test('the herb library: the supplied Thyroid and Goiters summary renders as its 
   assert.match(html, /Dr\. Tim Morrill\u2019s lecture/, 'it names the lecture it came from');
   assert.match(html, /on the ILLUMINATED33 channel/, 'and where the lecture is');
   assert.match(html, /not a verbatim transcript/, 'the lecture keeps its attribution');
-  assert.match(html, /This page\u2019s own line/, 'and the page keeps its own line over it');
+  assert.match(html, /This page\u2019s own line/, 'and the page keeps its own line beside it');
   assert.match(html, /data-h="goiter-note-1"/, 'the first note renders');
   assert.match(html, /data-h="goiter-note-5"/, 'and so does the last');
 
@@ -186,7 +186,7 @@ test('the herb library: the iodine ground carries the lecture on the minerals da
   assert.match(text, /Thyroid and Goiters/, 'day 25 names the lecture');
   assert.match(text, /That is the lecture's claim and it is printed as one/, 'and prints its case as a claim');
   assert.match(text, /Iodine in quantity moves a thyroid either way/, 'with the page\u2019s own caution under it');
-  assert.match(text, /belongs to the clinician treating it/, 'and the line about a treated thyroid');
+  assert.match(text, /is not a herb's ground/, 'and the line about a treated thyroid');
 
   const kelp = s.allHerbs().filter((h) => h.n === 'Kelp')[0];
   assert.ok(kelp, 'kelp has its card');
@@ -479,8 +479,8 @@ test('the herb library: the lines that never move are taught in the last week', 
   // Day 28 exists to carry the page's own lines. It was the course's end of the
   // Read this first tab until 18 Oct 2026, when the tab came off; the day is the
   // only place all of them sit together now, so a hole here is a hole in the page.
-  // The wording was rewritten on 12 Oct 2026 at the owner's request, so that the
-  // page never sends anybody to a doctor: same warnings, no "go and see" lines.
+  // The wording was rewritten on 12 Oct 2026 at the owner's request: same
+  // warnings, no "go and see" referral lines.
   // What is checked here is what was always checked — that the warnings are on
   // the day at all — so a later edit still cannot quietly take them out.
   assert.match(text, /Nothing on this shelf answers an infection/, 'the infection line is there');
@@ -496,7 +496,7 @@ test('the herb library: the lines that never move are taught in the last week', 
 
 test('the herb library: the course never talks anybody out of their medicine', () => {
   // The page's own rule, and the one line in the whole library that could hurt
-  // somebody: nothing here is a reason to stop anything a doctor has given.
+  // somebody: nothing here is a reason to stop anything somebody is already taking.
   // The course says so in its own voice on day 13, and the test is here so a
   // later edit cannot quietly take it out. The thirty new days keep it too:
   // day 47 is where the books' argument about a system is separated from the

@@ -1082,8 +1082,8 @@ test('the herbalist track carries the Herb Library cross progress bridge', () =>
 // and Goiters" (ILLUMINATED33) supplied as text. On this side it lands on the
 // herbalist track's iodine ground: day 22, the minerals, and day 24, the gland
 // day that follows it. Both now name the lecture and both keep this page's own
-// line over it, which is the line that matters here - the lecture argues
-// against the medicine, and this course's first rule sits over that.
+// line beside it, which is the line that matters here - the lecture argues
+// against the medicine, and this course's own line does not adopt it.
 //
 // Guarded: the lecture reading as this page's own teaching, this page's line
 // about medicine going missing from under it, the two days disagreeing about
@@ -1098,12 +1098,12 @@ test('the herbalist track reads the Thyroid and Goiters lecture as the lecture�
   assert.match(text22, /That is the lecture's claim and it is printed as one/, 'and prints its case as a claim');
   assert.match(text22, /which is why salt is iodised/, 'with the part of it that is not a claim');
   assert.match(text22, /is the lecture's and not this page's/, 'and the position the page does not take');
-  assert.match(text22, /reason to stop or change anything a doctor has given/, 'with this page’s own line over it');
+  assert.match(text22, /reason to stop or change a medicine you take/, 'with this page’s own line beside it');
   assert.equal(day22.q.length, 5, 'and the day still asks its five questions');
 
   const day24 = C.days('herbalist').filter((d) => d.d === 24)[0];
   assert.match(JSON.stringify(day24), /Thyroid and Goiters/, 'day 24 names the same lecture');
-  assert.match(JSON.stringify(day24), /the clinician's ground/, 'and keeps the boundary over it');
+  assert.match(JSON.stringify(day24), /is not an herb's ground/, 'and says where the page stops');
 
   // The lesson's own door into the library, with the cards the lecture names.
   assert.match(C.deeperFor('herbalist', 22).p, /Thyroid and Goiters/);

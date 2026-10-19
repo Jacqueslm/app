@@ -153,7 +153,7 @@ test('the herb library: the deep story says whose claims these are, and who outr
   assert.match(data, /printed as its claim/, 'the tab says the claims are the books\u2019');
   assert.match(data, /The page's own lines outrank this tab/, 'and that the page\u2019s own lines outrank it');
   // Reworded on 12 Oct 2026 at the owner's request: the warnings stay, the
-  // "go and see a doctor" wording is gone.
+  // "go and see" referral wording is gone.
   assert.match(data, /An infection outranks this section/, 'the infection line comes first');
   assert.match(data, /stays in the book/, 'and the claims that stay in the book are named');
   // The four claims the page promises not to make, each named as left behind.
@@ -269,7 +269,7 @@ test('the herb library: the meal quiz scores, passes, and can be taken again', (
   assert.match(p.els.get('view').innerHTML, /Not yet/, 'and the page says that too');
 });
 
-test('the herb library: the meal plan sends a condition to a doctor, and says the plan is not a cure', () => {
+test('the herb library: the meal plan puts a condition with whoever is managing it, and says the plan is not a cure', () => {
   const p = loadPage('herbs.html');
   const data = JSON.stringify(p.sandbox.MEALP);
   assert.match(data, /diabetes/i, 'the plan speaks about diabetes');

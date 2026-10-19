@@ -101,6 +101,54 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 .score{font-size:.8125rem;font-weight:600;margin-top:8px}
 .done{background:var(--ok);color:var(--ok-t);border-radius:11px;padding:9px 12px;font-size:.8125rem;font-weight:600;margin-top:12px}
 .dayno{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);font-weight:600}
+/* ── THE MUCUS SCALE ──────────────────────────────────────────────────────────
+   Five bands, five colours, one number on every food. The bands are the whole
+   navigation: a person can read down from Dangerous to Safe instead of hunting
+   for a name they were never taught to look for. */
+.msub{display:flex;gap:6px;padding:0 0 12px}
+.mu-intro{margin-bottom:10px}
+.mu-legend{padding:2px 0 4px}
+.mu-leg{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.mu-leg:last-child{border-bottom:none}
+.mu-badge{flex:0 0 auto;min-width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:.8125rem;font-weight:700;line-height:1}
+.mu-badge.b1{background:var(--ok);color:var(--ok-t)}
+.mu-badge.b2{background:#E8F3E4;color:#2C5A24}
+.mu-badge.b3{background:var(--warn);color:var(--warn-t)}
+.mu-badge.b4{background:#FBE3D0;color:#7A3B12}
+.mu-badge.b5{background:var(--red);color:var(--red-t)}
+@media(prefers-color-scheme:dark){
+  .mu-badge.b2{background:#1D331C;color:#A9D8A0}
+  .mu-badge.b4{background:#3A2312;color:#F2B48A}
+}
+.mu-leg-txt b{display:block;font-size:.9375rem}
+.mu-leg-txt span{display:block;font-size:.75rem;color:var(--tm);line-height:1.45;margin-top:2px}
+.mu-food{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--bdr)}
+.mu-food:last-child{border-bottom:none}
+.mu-food .mu-badge{min-width:36px;height:30px;border-radius:9px;font-size:.75rem;margin-top:1px}
+.mu-food-txt{flex:1;min-width:0}
+.mu-food-txt b{font-size:.875rem;display:block}
+.mu-food-txt span{display:block;font-size:.75rem;color:var(--tm);line-height:1.45;margin-top:2px}
+.mu-count{font-size:.6875rem;color:var(--tm);font-weight:400;letter-spacing:0;text-transform:none}
+.mu-search{padding:0 0 10px}
+.mu-search input{width:100%;font:inherit;font-size:.9375rem;padding:11px 13px;border-radius:12px;border:1px solid var(--bdr2);background:var(--s2);color:var(--tp)}
+.mu-search input:focus{outline:2px solid var(--acc);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chip{font:inherit;font-size:.8125rem;line-height:1.3;padding:8px 12px;border-radius:999px;border:1px solid var(--bdr2);background:var(--s2);color:var(--ts);cursor:pointer;text-align:left}
+.chip.on{background:var(--acc-b);border-color:var(--acc-b);color:var(--acc-t);font-weight:600}
+.mfield{margin-top:8px}
+.mfield label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tm);font-weight:600;margin:12px 0 4px}
+.mfield input,.mfield textarea{width:100%;font:inherit;font-size:.875rem;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:var(--s1);color:var(--tp)}
+.mfield textarea{min-height:74px;resize:vertical}
+.mfield .hint{font-size:.6875rem;color:var(--tm);line-height:1.5;margin-top:6px}
+.plan-top{display:flex;gap:12px;align-items:center;padding:14px;background:var(--s2);border:1px solid var(--bdr);border-radius:14px;margin-bottom:10px}
+.plan-top .mu-badge{width:56px;height:56px;font-size:1rem;border-radius:14px}
+.plan-top b{display:block;font-size:.9375rem}
+.plan-top span{display:block;font-size:.75rem;color:var(--tm);line-height:1.45;margin-top:2px}
+.plan-sum{font-size:.875rem;line-height:1.6;color:var(--ts);margin:10px 0}
+.plan-line{display:flex;gap:8px;font-size:.8125rem;line-height:1.5;color:var(--ts);padding:6px 0;border-bottom:1px solid var(--bdr)}
+.plan-line:last-child{border-bottom:none}
+.plan-line b{flex:0 0 74px;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tm);padding-top:2px}
+.mu-empty{padding:18px 16px;border:1px dashed var(--bdr2);border-radius:14px;color:var(--tm);font-size:.8125rem;line-height:1.55;text-align:center}
 </style>
 </head>
 <body>
@@ -120,6 +168,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div class="tab" data-t="need">By need</div>
     <div class="tab" data-t="books">From the books</div>
     <div class="tab" data-t="course">90 days</div>
+    <div class="tab" data-t="mucus">Mucus scale</div>
     <div class="tab" data-t="meal">Meal plan</div>
     <div class="tab" data-t="deep">The deep story</div>
     <div class="tab" data-t="mine">My notes</div>
@@ -697,9 +746,7 @@ var HERBS = [
    The Certification teaches them where they belong: the herbalist track's days
    14, 22, 31, 45, 61, 62, 65, 66, 67, 68, 69 and 70 each carry a link onto the
    card, and six of those days say the thing on the card in a sentence of their
-   own. Same rule as everywhere else on this page: food first, a plant second,
-   and nothing here is ever a reason to stop or change anything a doctor has
-   given.
+   own. Same rule as everywhere else on this page: food first, a plant second.
    -------------------------------------------------------------------------- */
 {n:"Dulse",a:"Palmaria palmata, dillisk, red dulse",u:"Iodine and minerals, as food",t:["energy"],
  d:"A red seaweed of the cold Atlantic, eaten as food in Ireland, Iceland and the Canadian Maritimes and dried into flakes for a soup. It is on this shelf for the same reason kelp is: it is one of the food seaweeds that carry iodine.",
@@ -736,7 +783,7 @@ var HERBS = [
 {n:"Arjuna",a:"Terminalia arjuna, arjuna bark",u:"The heart, in the Ayurvedic tradition",t:["heart"],
  d:"The bark of an Indian tree, and one of the heart woods of the Ayurvedic materia medica: a decoction for the heart and the circulation, and an astringent for a wound and a loose bowel.",
  h:"The dried bark simmered as a decoction, in the tradition; or the bark powder stirred into water or food.",
- c:"The tradition's own heart herb, and this page's rule sits over it: a heart that has been measured and is being treated belongs to the clinician, and nothing here is ever a reason to stop or change a heart medicine. Its trials are small and mixed - a heart-failure trial found no improvement in the pumping measure over twelve weeks - so the card is a tradition rather than a result. Additive effects on blood pressure and on bleeding are plausible and have not been established, which means ask first if you take anything for the heart or the blood."},
+ c:"The tradition's own heart herb, and this page's rule is simple: nothing here is ever a reason to stop or change a heart medicine, and a heart that has been measured and is being treated is not a herb's ground. Its trials are small and mixed - a heart-failure trial found no improvement in the pumping measure over twelve weeks - so the card is a tradition rather than a result. Additive effects on blood pressure and on bleeding are plausible and have not been established, which means ask first if you take anything for the heart or the blood."},
 {n:"Guduchi",a:"Tinospora cordifolia, giloy, amrita",u:"A fever, the liver, building back up",t:["immune","liver","fever"],
  d:"The stem of an Indian climbing plant, called amrita - the nectar - and one of the Ayurvedic tradition's rasayanas: a bitter, cooling decoction for a fever, for a sluggish liver, and for building a body back up after an illness.",
  h:"The dried stem simmered as a decoction, or the powder stirred into water or honey; the fresh juice is used too.",
@@ -774,8 +821,7 @@ var HERBS = [
    herbalist track's days 43, 45, 46, 54, 63, 69, 71 and 72 each carry a link
    onto the cards, and each of those days says the thing on the card in a
    sentence of its own. Same rule as everywhere else here: food first, a plant
-   second, and nothing on this page is ever a reason to stop or change anything
-   a doctor has given.
+   second.
    -------------------------------------------------------------------------- */
 {n:"Ivy leaf",a:"Hedera helix, English ivy",u:"A chesty cough",t:["lungs","cold"],
  d:"The leaf of the ivy that climbs European walls and woods, brewed and taken as an expectorant for the cough that brings something up. The European medicines agency has assessed specific ivy-leaf extracts for exactly that use, which is more than most of this shelf can say.",
@@ -839,9 +885,7 @@ var HERBS = [
    The Certification teaches them on the days whose ground they belong to: the
    herbalist track's days 42, 44, 45, 47, 54, 58, 61, 63 and 66 each carry a link
    onto the cards, and each of those days says the finding in a sentence of its
-   own. Same rule as everywhere else here: food first, a plant second, and
-   nothing on this page is ever a reason to stop or change anything a doctor has
-   given.
+   own. Same rule as everywhere else here: food first, a plant second.
    -------------------------------------------------------------------------- */
 {n:"Ephedra",a:"Ephedra sinica, ma huang, Chinese ephedra",u:"A chest and fever herb of the Chinese tradition - and the plant the FDA took off the supplement shelf",t:["lungs","fever","energy"],
  d:"The dried stem and branches of a horsetail-like desert shrub, used in Chinese medicine for colds, fever, congestion, cough and wheezing, and the source of ephedrine, which is why it is also a stimulant and why it is on this page at all.",
@@ -1572,7 +1616,7 @@ var BOOKS = [
    ["When","Both read and put in on 24 Sep 2026."],
    ["Melanin: What Makes Black People Black!","Read and put in whole on 18 Oct 2026, at the owner's word (\u201cput this in the herbs\u201d): the foreword, what the book says melanin is, what it absorbs, where it is in the body, the two hormones, how it says to measure melanin, its six race types, its comparison of the two races, its psychology chapter, its nutrition chapter, the two principles, and the twelve clusters. Its twelve shelves are the ones above this card."],
    ["Thyroid and Goiters","a lecture by Dr. Tim Morrill, on the ILLUMINATED33 channel (youtube.com/watch?v=909LNn4ACf4), supplied as a written thesis on 19 Oct 2026. It is the one source on this page that is not one of the three books. What it adds is the iodine ground: that goiter and the sluggish thyroid are iodine starvation before they are an inherited fault, that the iodine is in the deep-sea vegetables, alfalfa and the raw leafy greens, and its argument against medicating a deficiency. It is printed as the lecture's own claim, in its own set of notes on the 90 days tab under Lecture summary - Thyroid and Goiters."],
-   ["How a lecture is treated here","exactly as a book is. Where a line is the lecture's, it says so; where a line is this page's, that says so too, and this page's own lines are not softened by any of it. Two positions of that lecture are the lecture's and not this page's: that a person should turn away from medical care, and that extra iodine is the thing to take for a slow thyroid. The first rule still sits over all of it - food first, a plant second, and a doctor's line over both - and nothing here is ever a reason to stop or change anything a doctor has given."],
+   ["How a lecture is treated here","exactly as a book is. Where a line is the lecture's, it says so; where a line is this page's, that says so too, and this page's own lines are not softened by any of it. Two positions of that lecture are the lecture's and not this page's: that a person should turn away from medical care, and that extra iodine is the thing to take for a slow thyroid. The first rule still holds through all of it - food first, a plant second."],
    ["The rest of the books","The middle of the first two is not transcribed here and was not read line by line. Nothing in this tab is invented to fill a gap, and the places where the copies run out are said so in the row they run out in."]]}
 ];
 
@@ -1889,7 +1933,7 @@ var COURSE = [
     "Zinc is cell and tissue growth, the prostate, healing wounds and burns, taste and smell, and in the book's words it is vital to enzymes. Selenium is liver function, less energy lost, protection from toxins, the prostate, and an antioxidant.",
     "The copy of the summary in the repo cuts off in the middle of the mineral guide, at phosphorus, and that is where the From the books tab ends. There is no fuller list to put here from it, so the course stops where the book stops.",
     "One mineral has a whole lecture behind it outside the books. Iodine is the thyroid's, and a lecture read behind this library - Dr. Tim Morrill's Thyroid and Goiters - argues that goiter and the sluggish thyroid are iodine starvation rather than an inherited fault, and that the iodine comes out of the deep-sea vegetables, alfalfa and the raw leafy greens. That is the lecture's claim and it is printed as one, in its own notes on this tab under Lecture summary - Thyroid and Goiters.",
-    "Two things on it are this page's own line, and they do not move. Iodine in quantity moves a thyroid either way, so it is not a mineral to take on a guess. And a thyroid that has been measured and is being treated belongs to the clinician treating it. Food first, and nothing on this shelf is ever a reason to stop or change anything you have been given."],
+    "Two things on it are this page's own line, and they do not move. Iodine in quantity moves a thyroid either way, so it is not a mineral to take on a guess. And a thyroid that has been measured and is being treated is not a herb's ground. Food first, and nothing on this shelf is ever a reason to stop or change anything you have been given."],
  bk:"Minerals stabilise the body.",
  note:"Where the copy of the book runs out, the tab says so. Nothing is invented to fill a gap.",
  q:[{q:"How does the book say to buy minerals?", k:2, a:["In any form","As a powder only","Chelated rather than synthetic","From a supermarket"], w:"From a health food shop, in its words."},
@@ -1941,7 +1985,7 @@ var COURSE = [
     "Read a plant before you use it, not after. What it does is the top of its card. The caution is the part under it, and it is never softened by how good the top sounded.",
     "Write down what you find. Every herb card has a What your book says box at the bottom, the My notes tab collects them, and you can add a plant the two books name that is not on the shelf yet. It is kept on the phone and nothing is sent anywhere.",
     "Use the search box before you forget a name, and use the By need tab when you know the trouble and not the plant. And read a plant out loud with the Read it to me button if that is easier than reading it on a screen, because the phone's own voice reads the whole entry, caution included.",
-    "Then the same rule the course opened with, at the end of it: food first, a plant second, and these lines over both of them."],
+    "Then the same rule the course opened with, at the end of it: food first, a plant second, with these lines kept beside them."],
  bk:"The spirit, the mind and the body are one. The past, the present and the future are one now.",
  q:[{q:"Where does a herb card put what a plant does?", k:2, a:["At the bottom","Nowhere","At the top, under the name","Only in the notes"], w:"The caution is the part under it, and it is read every time."},
     {q:"Where does the caution sit?", k:3, a:["At the top","Nowhere","In the notes","Under the use"], w:"Both halves are read before anything is decided."},
@@ -2464,7 +2508,7 @@ var COURSE = [
     "The list is steroids, from the cortical adrenals; stimulants, which it names as synthetic speed, cocaine and caffeine; antidepressants, which it calls anti-cholinergics; and unnatural light.",
     "It is the book's list, and it is the only one of its kind in this half of the course."],
  bk:"Steroids, stimulants, antidepressants and unnatural light reduce melanin function.",
- note:"Nothing on that list is a reason to stop, skip or change anything a doctor has given. Prescribed medicine stays yours, and this page says so on every shelf.",
+ note:"Nothing on that list is a reason to stop, skip or change a medicine you take. Prescribed medicine stays yours, and this page says so on every shelf.",
  q:[{q:"How many things are on the book's list?", k:0, a:["Four","Two","Ten","None"], w:"Steroids, stimulants, antidepressants and unnatural light."},
     {q:"Which stimulants does the book name?", k:1, a:["Tea and water","Speed, cocaine and caffeine","Sugar and salt","Herbs and spices"], w:"It calls them synthetic speed, cocaine and caffeine."},
     {q:"What does the book call antidepressants?", k:2, a:["Stimulants","Steroids","Anti-cholinergics","Minerals"], w:"That is its own word for them."},
@@ -2833,8 +2877,8 @@ var LECTURE_NOTES = [
    lecture's own claim. Two positions in it are the lecture's and are not made
    here in this page's voice, and they are named in the fourth note rather than
    left to be inferred: that a deficiency should be treated rather than fed, and
-   that a person should turn away from medical care. The page's own lines sit
-   over the whole of it, the first rule first. */
+   that a person should turn away from medical care. The page's own lines come
+   first, food first and a plant second. */
 var GOITER_NOTES = [
  {t:'The lecture’s case: a deficiency, not a fault in the family', notes:[
   `The lecture's central claim is that goiter, the sluggish thyroid and the disorders that travel with them are predominantly a dietary iodine deficiency rather than an inherited fault or an incurable disease.`,
@@ -2850,10 +2894,10 @@ var GOITER_NOTES = [
   `It draws a historical parallel with the heavy-handed treatments of the nineteenth century - calomel, mercury and opium - and argues that a pharmaceutical answer can add to a body's burden rather than lift it.`,
   `The lecture's conclusion is that health has to be uncoupled from that dependency and kept in the person's own hands, by food and by study.`]},
  {t:'What this page does with it', notes:[
-  `Feeding a deficiency with food is the part of the lecture this page can stand behind, and it sits under the page's first rule: food first, a plant second, and a doctor's line over both.`,
+  `Feeding a deficiency with food is the part of the lecture this page can stand behind, and it sits under the page's first rule: food first, a plant second.`,
   `Turning away from medical care is the lecture's position and not this page's.`,
   `Nothing on this page is ever a reason to stop or change anything you have been given. That is the same line day 28 of this course carries, and the same line the Certification keeps.`,
-  `Extra iodine is not a thing to try on yourself either. Too much moves a thyroid in either direction, and a thyroid that has been measured and is being treated belongs to the clinician who is treating it.`]},
+  `Extra iodine is not a thing to try on yourself either. Too much moves a thyroid in either direction, and a thyroid that has been measured and is being treated is not a herb's ground.`]},
  {t:'The plants it names, and where they are here', notes:[
   `Kelp and alfalfa both have cards on this page, each with its own caution. Kelp's says plainly that a thyroid which is over-active, or is being treated for anything at all, should not get a lot of extra iodine, and that too much iodine can make a thyroid worse in either direction.`,
   `Dulse is food here rather than a card, and the raw leafy greens are the plate the course's own food days are built on.`,
@@ -3223,6 +3267,208 @@ var MEAL_QUIZ = [
  {q:"What does the cheapest move on the plan say to do?", k:0, a:["Not buy it in the first place","Buy it and resist it","Buy a smaller packet","Only buy it at the weekend"], w:"A craving needs something to land on, and the cupboard is ten seconds away."}
 ];
 
+/* ---- THE MUCUS SCALE --------------------------------------------------------
+   Every food the books' plate talks about, with a number from 1 to 5: 1 is
+   safe and 5 is dangerous, and 3 is the risky middle. The books do not print a
+   table like this, so the tab says plainly that the number is this page's
+   reading of their principle — raw, water-rich, fibre-rich food leaves less
+   behind; cooked starch, grease, dairy and refined food leaves more — and not a
+   quotation from the book.
+
+   The block is plain JSON on purpose: server/mucus-plan.js reads it out of this
+   page so the prompt, the plan and the tab can never hold three different
+   lists. Keep it one object a line, double-quoted, and leave the \n]; ending
+   alone — that is the edge the server's parser finds.
+--------------------------------------------------------------------------- */
+var MUCUS_FOODS = [
+{"n":"Watermelon","s":1,"c":"Fruit","w":"Water and fruit sugar, eaten raw. The book's morning food."},
+{"n":"Melon","s":1,"c":"Fruit","w":"Water first, fibre with it. The same morning half of the day."},
+{"n":"Berries","s":1,"c":"Fruit","w":"Raw, seeded and water-rich; the book's fruit half of the day."},
+{"n":"Lemon","s":1,"c":"Fruit","w":"Juice instead of a bottle of dressing, which is how the plan uses it."},
+{"n":"Lime","s":1,"c":"Fruit","w":"The same job as lemon, in the book's seasoning."},
+{"n":"Orange","s":1,"c":"Fruit","w":"Raw citrus, eaten rather than juiced."},
+{"n":"Grapefruit","s":1,"c":"Fruit","w":"Raw citrus. It changes how some medicines are handled, so ask before making it daily."},
+{"n":"Avocado","s":1,"c":"Fruit","w":"Raw fat with fibre; the book's own salad plate carries it."},
+{"n":"Apple","s":1.5,"c":"Fruit","w":"Raw and fibre-rich, with the skin left on."},
+{"n":"Pear","s":1.5,"c":"Fruit","w":"Raw and fibre-rich, with the skin left on."},
+{"n":"Grapes","s":1.5,"c":"Fruit","w":"Raw and water-rich; a handful, not a bowl."},
+{"n":"Peach","s":1.5,"c":"Fruit","w":"Raw stone fruit, eaten whole."},
+{"n":"Plum","s":1.5,"c":"Fruit","w":"Raw stone fruit, eaten whole."},
+{"n":"Cherry","s":1.5,"c":"Fruit","w":"Raw and small; a handful is the serving."},
+{"n":"Pineapple","s":1.5,"c":"Fruit","w":"Raw and water-rich, cut fresh rather than tinned."},
+{"n":"Papaya","s":1.5,"c":"Fruit","w":"Raw, soft and water-rich; the book's fruit half of the day."},
+{"n":"Kiwi","s":1.5,"c":"Fruit","w":"Raw and seeded, eaten with a spoon."},
+{"n":"Mango","s":2,"c":"Fruit","w":"Raw, but the sweetest of the fruit. Still fruit, still washed down with water."},
+{"n":"Banana","s":2,"c":"Fruit","w":"Raw and starchy for a fruit; the book keeps it to the fruit half of the day."},
+{"n":"Fresh figs","s":2,"c":"Fruit","w":"Raw and soft. The book's breakfast when there is no melon."},
+{"n":"Apricot","s":2,"c":"Fruit","w":"Raw stone fruit; dried is the concentrated version below."},
+{"n":"Dried figs","s":2.5,"c":"Fruit","w":"The book's morning standby, but the water is gone and the sugar is not."},
+{"n":"Dates","s":2.5,"c":"Fruit","w":"Concentrated fruit sugar; the plan uses four, not a handful."},
+{"n":"Raisins","s":2.5,"c":"Fruit","w":"Dried fruit: easy to eat past the point the fresh fruit would stop."},
+{"n":"Spinach","s":1,"c":"Leaves","w":"Raw leaf, water-rich and fibrous. The book's raw midday plate."},
+{"n":"Kale","s":1,"c":"Leaves","w":"Raw leaf, tough enough to need chewing, which the book counts as part of it."},
+{"n":"Collard greens","s":1,"c":"Leaves","w":"Raw in the midday plate, steamed at night."},
+{"n":"Mustard greens","s":1,"c":"Leaves","w":"A bitter leaf for the raw plate and the evening pot."},
+{"n":"Turnip greens","s":1,"c":"Leaves","w":"The leaf of the root, used both raw and steamed."},
+{"n":"Lettuce","s":1,"c":"Leaves","w":"Water and fibre; the bulk of a midday plate."},
+{"n":"Rocket","s":1,"c":"Leaves","w":"A peppery raw leaf; the book's plate uses whatever is in season."},
+{"n":"Watercress","s":1,"c":"Leaves","w":"A water-grown leaf, raw in the salad."},
+{"n":"Parsley","s":1,"c":"Leaves","w":"Raw herb, chopped through the midday plate."},
+{"n":"Coriander","s":1,"c":"Leaves","w":"Raw herb, chopped through the midday plate."},
+{"n":"Dandelion leaf","s":1,"c":"Leaves","w":"A bitter spring leaf, raw when young."},
+{"n":"Cucumber","s":1,"c":"Raw vegetable","w":"Mostly water; the book's raw half is built on it."},
+{"n":"Celery","s":1,"c":"Raw vegetable","w":"Water and fibre, and the thing to chew when the craving is for a biscuit."},
+{"n":"Tomato","s":1,"c":"Raw vegetable","w":"Raw and water-rich; a whole one, not a bottle of sauce."},
+{"n":"Sweet pepper","s":1,"c":"Raw vegetable","w":"Raw, crunchy and water-rich."},
+{"n":"Radish","s":1,"c":"Raw vegetable","w":"A sharp raw root for the plate."},
+{"n":"Spring onion","s":1,"c":"Raw vegetable","w":"Raw and sharp; a seasoning and a vegetable at once."},
+{"n":"Carrot","s":1.5,"c":"Raw vegetable","w":"Raw and fibrous. Cooked at night it is still food, just softer."},
+{"n":"Beet","s":1.5,"c":"Raw vegetable","w":"Raw and fibrous, grated through the plate."},
+{"n":"Raw cabbage","s":1.5,"c":"Raw vegetable","w":"Raw and fibrous; cooked, it moves down the scale."},
+{"n":"Fennel bulb","s":1.5,"c":"Raw vegetable","w":"Raw and crunchy, with the seed used as the book's seasoning."},
+{"n":"Broccoli","s":1.5,"c":"Cooked vegetable","w":"Lightly steamed, still firm. Not boiled to nothing."},
+{"n":"Cauliflower","s":1.5,"c":"Cooked vegetable","w":"Lightly steamed and eaten with the evening grain."},
+{"n":"Courgette","s":1.5,"c":"Cooked vegetable","w":"Water-rich and quickly steamed."},
+{"n":"Green beans","s":1.5,"c":"Cooked vegetable","w":"Steamed until they squeak, not until they slump."},
+{"n":"Okra","s":1.5,"c":"Cooked vegetable","w":"Steamed whole; the book's evening pot."},
+{"n":"Asparagus","s":1.5,"c":"Cooked vegetable","w":"Steamed and eaten the day it is bought."},
+{"n":"Brussels sprouts","s":1.5,"c":"Cooked vegetable","w":"Steamed, not roasted in oil."},
+{"n":"Cooked cabbage","s":1.5,"c":"Cooked vegetable","w":"Steamed lightly; longer cooking and the water is all that is left."},
+{"n":"Leek","s":1.5,"c":"Cooked vegetable","w":"Steamed through the evening pot."},
+{"n":"Aubergine","s":2,"c":"Cooked vegetable","w":"Steamed or baked without oil; fried, it belongs on the dangerous shelf."},
+{"n":"Squash","s":2,"c":"Cooked vegetable","w":"Steamed and starchy enough to be part of the evening."},
+{"n":"Pumpkin","s":2,"c":"Cooked vegetable","w":"Steamed and starchy enough to be part of the evening."},
+{"n":"Mushrooms","s":2,"c":"Cooked vegetable","w":"Cooked plainly; the book's plate has no cream sauce on them."},
+{"n":"Sweet potato","s":2,"c":"Root","w":"The book's root at night, steamed or baked with nothing on it."},
+{"n":"Yam","s":2,"c":"Root","w":"Boiled or steamed; the evening root on the plan."},
+{"n":"Parsnip","s":2,"c":"Root","w":"A sweet root, steamed with the evening vegetables."},
+{"n":"Turnip","s":2,"c":"Root","w":"The root and its greens both go in the pot."},
+{"n":"Potato","s":2.5,"c":"Root","w":"A starch, not a vegetable. Boiled or baked, never fried."},
+{"n":"Brown rice","s":2.5,"c":"Grain","w":"The whole grain the plan uses; a cup at the evening meal."},
+{"n":"Millet","s":2.5,"c":"Grain","w":"A whole grain, cooked plainly."},
+{"n":"Quinoa","s":2.5,"c":"Grain","w":"A whole seed-grain, cooked plainly."},
+{"n":"Oats","s":3,"c":"Grain","w":"Whole oats are food, but cooked porridge is the book's starchy side. Evening, not morning."},
+{"n":"Corn","s":3,"c":"Grain","w":"Whole corn is food; cornmeal and cornflakes are not the same thing."},
+{"n":"Whole wheat","s":3.5,"c":"Grain","w":"The whole grain, not the white flour made from it."},
+{"n":"White rice","s":4,"c":"Grain","w":"The colour and the fibre have been taken out. The book's rule is the shortest label."},
+{"n":"Couscous","s":4,"c":"Grain","w":"Refined grain, quick and soft; not the book's plate."},
+{"n":"White bread","s":4.5,"c":"Grain","w":"White flour, water and air. The book takes it off the list."},
+{"n":"Pasta","s":4.5,"c":"Grain","w":"Refined flour, cooked soft; the book takes it off the list."},
+{"n":"Breakfast cereal","s":4.5,"c":"Grain","w":"A packet food with sugar in it, eaten in place of the fruit morning."},
+{"n":"Lentils","s":2,"c":"Beans and peas","w":"A whole bean, cooked plainly; the evening protein on the plan."},
+{"n":"Chickpeas","s":2,"c":"Beans and peas","w":"A whole bean, cooked plainly."},
+{"n":"Black beans","s":2,"c":"Beans and peas","w":"A whole bean, cooked plainly."},
+{"n":"Kidney beans","s":2,"c":"Beans and peas","w":"A whole bean, cooked plainly. Never raw."},
+{"n":"Black-eyed peas","s":2,"c":"Beans and peas","w":"A whole pea, cooked plainly."},
+{"n":"Butter beans","s":2,"c":"Beans and peas","w":"A whole bean, cooked plainly; the name is about the texture, not dairy."},
+{"n":"Split peas","s":2,"c":"Beans and peas","w":"A whole pea split, not refined."},
+{"n":"Mung beans","s":2.5,"c":"Beans and peas","w":"A small whole bean, cooked plainly."},
+{"n":"Soy beans","s":2.5,"c":"Beans and peas","w":"A whole bean, cooked plainly. The processed versions are below."},
+{"n":"Tofu","s":3,"c":"Beans and peas","w":"A processed soy food; use it sparingly if at all, and never fried."},
+{"n":"Almonds","s":2,"c":"Nuts and seeds","w":"A raw handful between meals, as the book uses nuts."},
+{"n":"Walnuts","s":2,"c":"Nuts and seeds","w":"A raw handful between meals."},
+{"n":"Pumpkin seeds","s":2,"c":"Nuts and seeds","w":"A raw handful; the plan's between-meal food."},
+{"n":"Sunflower seeds","s":2,"c":"Nuts and seeds","w":"A raw handful; the plan's between-meal food."},
+{"n":"Sesame","s":2,"c":"Nuts and seeds","w":"A seed, sprinkled rather than poured."},
+{"n":"Flaxseed","s":2,"c":"Nuts and seeds","w":"Ground and eaten small; the book's fibre shelf."},
+{"n":"Cashews","s":2.5,"c":"Nuts and seeds","w":"A richer nut; a small handful, not the bag."},
+{"n":"Peanuts","s":2.5,"c":"Nuts and seeds","w":"A legume sold as a nut; raw or boiled, never roasted in oil."},
+{"n":"Tahini","s":2.5,"c":"Nuts and seeds","w":"Ground sesame, a spoon through the plate rather than a pour."},
+{"n":"Peanut butter","s":3,"c":"Nuts and seeds","w":"Ground nuts with sugar and oil in most jars; read the label."},
+{"n":"Fish","s":3.5,"c":"Animal food","w":"Fresh fish, steamed or baked. Fried fish belongs on the dangerous shelf."},
+{"n":"Shellfish","s":4,"c":"Animal food","w":"Animal food the book's plate does not build on; use sparingly if at all."},
+{"n":"Chicken","s":4.5,"c":"Animal food","w":"The book's plate is plant-built; chicken is not part of it."},
+{"n":"Turkey","s":4.5,"c":"Animal food","w":"The book's plate is plant-built; turkey is not part of it."},
+{"n":"Eggs","s":4.5,"c":"Animal food","w":"Animal food, and not the book's breakfast: its morning is fruit and water."},
+{"n":"Beef","s":5,"c":"Animal food","w":"The book's plate leaves red meat out."},
+{"n":"Pork","s":5,"c":"Animal food","w":"The book's plate leaves pork out."},
+{"n":"Lamb","s":5,"c":"Animal food","w":"The book's plate leaves red meat out."},
+{"n":"Processed meat","s":5,"c":"Animal food","w":"A packet food with salt and chemistry in it; the book's food-stuffs shelf."},
+{"n":"Yogurt","s":4.5,"c":"Dairy","w":"Dairy, which is one of the book's two exclusions."},
+{"n":"Milk","s":5,"c":"Dairy","w":"Dairy, which is one of the book's two exclusions."},
+{"n":"Cheese","s":5,"c":"Dairy","w":"Dairy, concentrated and salted."},
+{"n":"Butter","s":5,"c":"Dairy","w":"Dairy and fat; the book's two exclusions meet here."},
+{"n":"Cream","s":5,"c":"Dairy","w":"Dairy, concentrated."},
+{"n":"Ice cream","s":5,"c":"Dairy","w":"Dairy and sugar at once."},
+{"n":"Cold-pressed olive oil","s":3.5,"c":"Fat","w":"A fat, not a food group. A spoon, never a fry."},
+{"n":"Honey","s":4.5,"c":"Sweetener","w":"Sugar with a different name; the book's rule is the shortest label."},
+{"n":"Sea salt","s":3,"c":"Seasoning","w":"The book's own warning: sea salt is seven times saltier. A pinch, not a pour."},
+{"n":"White salt","s":4.5,"c":"Seasoning","w":"One of the three whites the plan takes off the list."},
+{"n":"Refined vegetable oil","s":5,"c":"Fat","w":"The bottle the fried food is cooked in."},
+{"n":"Margarine","s":5,"c":"Fat","w":"A processed fat standing in for butter; neither is the book's food."},
+{"n":"White sugar","s":5,"c":"Sweetener","w":"One of the three whites the plan takes off the list."},
+{"n":"Sweets","s":5,"c":"Packet food","w":"Sugar with colour and flavour added. The book's food-stuffs shelf."},
+{"n":"Soda","s":5,"c":"Drink","w":"Sweet water; the book's own example of a drink that is not water."},
+{"n":"Fast food","s":5,"c":"Packet food","w":"Fried, salted and refined at once. The book's food-stuffs shelf."},
+{"n":"Crisps","s":5,"c":"Packet food","w":"Fried starch and salt in a bag."},
+{"n":"Biscuits","s":5,"c":"Packet food","w":"White flour and sugar, the two things the plan takes off the list."},
+{"n":"Cake","s":5,"c":"Packet food","w":"White flour, sugar, dairy and often fried fat in one slice."},
+{"n":"Fried food","s":5,"c":"Packet food","w":"One of the book's two exclusions, whoever cooked it."},
+{"n":"Water","s":1,"c":"Drink","w":"The first thing in the morning and the drink through the day."},
+{"n":"Herbal tea","s":1,"c":"Drink","w":"Leaves in water, with nothing added."},
+{"n":"Fresh fruit juice","s":2,"c":"Drink","w":"The whole fruit is better; juice is the concentrated version."},
+{"n":"Coffee","s":3,"c":"Drink","w":"Not the book's drink. If it stays, it is black and it is not sweet."},
+{"n":"Black tea","s":3,"c":"Drink","w":"Not the book's drink; the herbal shelf is what it uses."},
+{"n":"Beer","s":4.5,"c":"Drink","w":"Alcohol, and grain; not the book's drink."},
+{"n":"Wine","s":4.5,"c":"Drink","w":"Alcohol and fruit sugar; not the book's drink."},
+{"n":"Spirits","s":4.5,"c":"Drink","w":"Alcohol, concentrated."},
+{"n":"Sweet drinks","s":5,"c":"Drink","w":"Sugar water with a label on it. The plan's answer is water."},
+{"n":"Energy drinks","s":5,"c":"Drink","w":"Sugar, caffeine and chemistry in a can."},
+{"n":"Garlic","s":1,"c":"Seasoning","w":"The book's first seasoning, used by the eighth of a teaspoon."},
+{"n":"Ginger","s":1,"c":"Seasoning","w":"The book's root for a queasy stomach, grated into the pot."},
+{"n":"Turmeric","s":1,"c":"Seasoning","w":"The book's yellow root, used by the quarter teaspoon."},
+{"n":"Thyme","s":1,"c":"Seasoning","w":"The book's herb for the chest and the cough."},
+{"n":"Oregano","s":1,"c":"Seasoning","w":"A dried herb from the book's seasoning rack."},
+{"n":"Basil","s":1,"c":"Seasoning","w":"A dried herb from the book's seasoning rack."},
+{"n":"Marjoram","s":1,"c":"Seasoning","w":"A dried herb from the book's seasoning rack."},
+{"n":"Dill seed","s":1,"c":"Seasoning","w":"The book's seed for indigestion, used by the quarter teaspoon."},
+{"n":"Cinnamon","s":1,"c":"Seasoning","w":"The book's sweet spice, used by the eighth of a teaspoon."},
+{"n":"Paprika","s":1,"c":"Seasoning","w":"A dried pepper from the book's seasoning rack."},
+{"n":"Rosemary","s":1,"c":"Seasoning","w":"A dried herb from the book's seasoning rack."},
+{"n":"Sage","s":1,"c":"Seasoning","w":"A dried herb from the book's seasoning rack."},
+{"n":"Bay leaf","s":1,"c":"Seasoning","w":"A leaf in the pot, taken out before eating."},
+{"n":"Onion","s":1.5,"c":"Seasoning","w":"The book's second seasoning after garlic, cooked into the pot."},
+{"n":"Dry mustard","s":2,"c":"Seasoning","w":"The book's sharp seasoning, an eighth of a teaspoon at a time."},
+{"n":"Black pepper","s":2,"c":"Seasoning","w":"A spice, used by the pinch and not as a crust."}
+];
+
+/* The five bands. The number on a food is the score; the band is what the page
+   calls it. 1.0–1.9 safe, 2.0–2.9 low, 3.0–3.9 risky, 4.0–4.9 high, 5.0
+   dangerous — so a 2.5 falls in Low, and a 3.5 in Risky, without anybody having
+   to guess what is between the numbers. */
+var MUCUS_BANDS = [
+ {n:1,k:'safe',t:'Safe',r:'1.0 \u2013 1.9',d:'Raw, water-rich and fibre-rich. The books\u2019 plate is built here.'},
+ {n:2,k:'low',t:'Low',r:'2.0 \u2013 2.9',d:'Whole cooked food eaten plainly: beans, whole grains, roots, cooked vegetables.'},
+ {n:3,k:'risky',t:'Risky',r:'3.0 \u2013 3.9',d:'Cooked starch, roasted or concentrated food. The book would have it rarely.'},
+ {n:4,k:'high',t:'High',r:'4.0 \u2013 4.9',d:'Refined, greasy or animal food. The book\u2019s plate does not build on it.'},
+ {n:5,k:'danger',t:'Dangerous',r:'5.0',d:'Dairy, fried food, white sugar, white flour, white salt and the packet. The books leave these out.'}
+];
+function muBand(score){
+  var s=Number(score);
+  if(!(s>=2)) return MUCUS_BANDS[0];
+  if(s<3) return MUCUS_BANDS[1];
+  if(s<4) return MUCUS_BANDS[2];
+  if(s<5) return MUCUS_BANDS[3];
+  return MUCUS_BANDS[4];
+}
+
+/* The questionnaire. The five goals are the person's, not the page's: the plan
+   is built around the one they pick, and the prompt is given the same words so
+   the model cannot quietly answer a different question. */
+var PLAN_GOALS = [
+ 'Gain weight and muscle',
+ 'Lose weight and get sculpted',
+ 'Live a healthier life with lifestyle changes',
+ 'Be pain free',
+ 'Live longer'
+];
+var PLAN_GENDERS = ['Woman','Man','Non-binary','Prefer not to say'];
+var PLAN_RACES = [
+ 'African / Black','African Caribbean','Mixed','South Asian',
+ 'East or Southeast Asian','White','Indigenous','Other','Prefer not to say'
+];
+var PLAN_HEALTH = ['Healthy','In between','Unhealthy'];
+
 /* The whole plan: the rules, the shopping list, the thirty days, and twelve
    questions on it. Nothing on it is sent anywhere and nothing is timed. */
 function mealScore(){
@@ -3264,7 +3510,7 @@ function mealView(){
   var head=s.done ? ('The meal quiz: '+s.right+' of '+s.total+(s.right>=MEAL_PASS?' \u2014 passed':' \u2014 the pass is '+MEAL_PASS+'. Take it again whenever you like.'))
                   : ('The meal quiz &middot; twelve questions. '+MEAL_PASS+' of twelve is a pass, and it can be taken again as many times as you like.');
   var out='<div class="sec">'
-   +'<div class="big okbox"><b>Thirty days on the books\u2019 own diet</b>A fruit morning, a raw middle and a steamed evening, with the books\u2019 own seasonings and their two exclusions. Nothing is timed, nothing is scored, and every day reads out loud.</div>'
+   +'<div class="big okbox"><b>Thirty days on the books\u2019 own diet</b>A fruit morning, a raw middle and a steamed evening, with the books\u2019 own seasonings and their two exclusions. Nothing is timed, nothing is scored, and every day reads out loud. For a week built around your own goal, age and health, the Mucus scale tab asks five questions and writes one.</div>'
    +MEALP.map(function(b,i){ return bsec(b,i,'mp') }).join('')
    +'<div class="sec-hd">'+head+'</div>';
   MEAL_QUIZ.forEach(function(q,i){
@@ -3281,6 +3527,187 @@ function mealView(){
    +MEALS.map(mealDay).join('')
    +'</div>';
   return out;
+}
+
+/* ── THE MUCUS SCALE AND THE PLAN ────────────────────────────────────────────
+   The food is grouped by band rather than by plant, because the band is the
+   question the tab exists to answer. The questionnaire is deliberately short:
+   goal, age, gender, race, current health, and one box for anything the plan
+   must work around. Those answers go to Gemini once, when the button is
+   pressed; the plan comes back here and is kept on the phone like the notes.
+--------------------------------------------------------------------------- */
+var mucusSub='scale', planBusy=false, planError='';
+
+function mucusSayText(){
+  var s='The mucus scale. One is safe, three is risky and five is dangerous, and every number in between falls in those ranges. ';
+  MUCUS_BANDS.forEach(function(b){ s+=b.t+', '+b.r+'. '+b.d+' ' });
+  var list=MUCUS_FOODS.filter(function(f){
+    if(!q) return true;
+    return (f.n+' '+f.c+' '+f.w).toLowerCase().indexOf(q)>-1;
+  });
+  s+='Showing '+list.length+(list.length===1?' food. ':' foods. ');
+  list.forEach(function(f){ s+=f.n+', '+Number(f.s).toFixed(1)+', '+muBand(f.s).t+'. ' });
+  return s;
+}
+
+function muFoodRow(f){
+  var b=muBand(f.s);
+  return '<div class="mu-food"><span class="mu-badge b'+b.n+'">'+Number(f.s).toFixed(1)+'</span>'
+   +'<div class="mu-food-txt"><b>'+esc(f.n)+'</b><span>'+esc(f.c)+' &middot; '+esc(f.w)+'</span></div></div>';
+}
+
+function mucusScaleView(){
+  var counts=[0,0,0,0,0];
+  MUCUS_FOODS.forEach(function(f){ counts[muBand(f.s).n-1]++ });
+  SAY_TEXT['mucus']=mucusSayText();
+  var out='<div class="big okbox mu-intro"><b>Every food, 1 to 5</b>'
+   +'The left of the scale is the books\u2019 plate; the right is what they leave out. One is safe. Three is risky. Five is dangerous. The bands catch everything in between: 1.0\u20131.9 is Safe, 2.0\u20132.9 Low, 3.0\u20133.9 Risky, 4.0\u20134.9 High, and 5.0 Dangerous. '
+   +'The books do not print a table like this, so the number is this page\u2019s reading of their principle \u2014 raw, water-rich, fibre-rich food leaves less behind; cooked starch, grease, dairy and refined food leaves more \u2014 and not a quotation from the book.</div>'
+   +'<div class="sec-hd">How to read it</div><div class="card" style="padding:2px 14px">';
+  MUCUS_BANDS.forEach(function(b){
+    out+='<div class="mu-leg"><span class="mu-badge b'+b.n+'">'+b.n+'</span>'
+     +'<div class="mu-leg-txt"><b>'+esc(b.t)+' <span class="mu-count">'+esc(b.r)+' &middot; '+counts[b.n-1]+' foods</span></b>'
+     +'<span>'+esc(b.d)+'</span></div></div>';
+  });
+  out+='</div><div class="lbl">Read the scale aloud</div>'+saybarHTML('mucus');
+  var shown=MUCUS_FOODS.filter(function(f){
+    if(!q) return true;
+    return (f.n+' '+f.c+' '+f.w).toLowerCase().indexOf(q)>-1;
+  });
+  out+='<div class="sec-hd">'+(q?shown.length+' found':'The foods, by band')+'</div>';
+  if(!shown.length){
+    out+='<div class="empty">Nothing on the scale matches that.<br>Try a food name, or a word like <b>dairy</b>, <b>fried</b>, <b>fruit</b>.</div>';
+  }
+  MUCUS_BANDS.forEach(function(band){
+    var items=shown.filter(function(f){ return muBand(f.s).n===band.n });
+    if(!items.length) return;
+    items.sort(function(a,b){ return Number(a.s)-Number(b.s) || a.n.localeCompare(b.n) });
+    out+='<div class="sec-hd">'+esc(band.t)+' <span class="mu-count">'+esc(band.r)+' &middot; '+items.length+'</span></div>'
+     +'<div class="card" style="padding:2px 14px">'+items.map(muFoodRow).join('')+'</div>';
+  });
+  return out;
+}
+
+/* The answers live beside the notes, under one key, so a plan and the answers it
+   was built from come back together. Nothing here leaves the phone until the
+   button is pressed. */
+function planAnswers(){
+  var a=store.planAnswers;
+  return (a && typeof a==='object') ? a : {};
+}
+function planSet(k,v){ var a=planAnswers(); a[k]=v; store.planAnswers=a; save() }
+function planChips(field,list,cur){
+  return '<div class="chips">'+list.map(function(v){
+    return '<button type="button" class="chip'+(cur===v?' on':'')+'" data-plan="'+esc(field)+'|'+esc(v)+'">'+esc(v)+'</button>';
+  }).join('')+'</div>';
+}
+function planComplete(){
+  var a=planAnswers();
+  return !!(a.goal && Number(a.age)>=13 && Number(a.age)<=100 && a.gender && a.race && a.health);
+}
+
+function mucusPlanForm(){
+  var a=planAnswers();
+  var out='<div class="big okbox"><b>One week, built for you</b>'
+   +'Answer five questions, and Gemini writes a seven-day plan from Dr. Llaila O. Afrika\u2019s <i>African Holistic Health</i> and <i>Nutricide</i> and the scale above \u2014 no other diet, no other book. '
+   +'The answers go to Gemini, Google\u2019s model, once, when you press the button. Nothing else leaves this phone, and the plan comes back here and is kept on it.</div>'
+   +'<div class="addf"><div class="mfield">'
+   +'<label>What are you after?</label>'+planChips('goal',PLAN_GOALS,a.goal)
+   +'<label>Age</label><input id="plan-age" type="number" inputmode="numeric" min="13" max="100" placeholder="e.g. 42" value="'+esc(a.age||'')+'">'
+   +'<div class="hint">Thirteen and over. A plan for a child or a pregnancy belongs with a clinician, not a page.</div>'
+   +'<label>Gender</label>'+planChips('gender',PLAN_GENDERS,a.gender)
+   +'<label>Race</label>'+planChips('race',PLAN_RACES,a.race)
+   +'<div class="hint">The books are written by a Black doctor for Black people. This is used as context, never as a diagnosis.</div>'
+   +'<label>How is your health right now?</label>'+planChips('health',PLAN_HEALTH,a.health)
+   +'<label>Anything the plan must work around?</label>'
+   +'<textarea id="plan-notes" placeholder="A condition, an allergy, a medicine, a pregnancy, a food you cannot get \u2014 or leave this blank.">'+esc(a.notes||'')+'</textarea>'
+   +'<button class="txtbtn" id="mpbuild"'+(planBusy?' disabled':'')+'>'+(planBusy?'Writing your plan\u2026':'Build my plan')+'</button>'
+   +'<div class="hint">Food, not medicine. Nothing here is a diagnosis, a cure, or a reason to stop or change a medicine you take.</div>'
+   +(planError?'<div class="big redbox" style="margin-top:10px"><b>Not yet</b>'+esc(planError)+'</div>':'')
+   +'</div></div>';
+  return out;
+}
+
+async function buildMucusPlan(){
+  var a=planAnswers();
+  if(!a.goal){ planError='Choose the goal first.'; render(); return }
+  if(!(Number(a.age)>=13 && Number(a.age)<=100)){ planError='Put an age between 13 and 100.'; render(); return }
+  if(!a.gender){ planError='Choose a gender, or prefer not to say.'; render(); return }
+  if(!a.race){ planError='Choose a race, or prefer not to say.'; render(); return }
+  if(!a.health){ planError='Say how your health is right now.'; render(); return }
+  planBusy=true; planError=''; render();
+  try{
+    var r=await fetch('/api/mucus-plan',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        goal:a.goal, age:Number(a.age), gender:a.gender, race:a.race, health:a.health, notes:a.notes||''
+      })
+    });
+    var d=null; try{ d=await r.json() }catch(e){ d=null }
+    if(!r.ok){
+      throw new Error((d&&d.error) || (r.status===401?'Your sign-in has expired. Open /app and sign in again.':'The plan could not be written just now.'));
+    }
+    if(!d || !d.plan) throw new Error('The plan came back empty. Try again.');
+    store.plan={answers:{goal:a.goal,age:Number(a.age),gender:a.gender,race:a.race,health:a.health,notes:a.notes||''},plan:d.plan,model:d.model||'',at:new Date().toISOString()};
+    save();
+  }catch(err){ planError=String((err&&err.message)||'The plan could not be written just now.'); }
+  planBusy=false; render();
+}
+
+function planDayCard(d,i){
+  var id='pl'+i, n=Number(d.d)||i+1;
+  var lines=[['Morning',d.morning],['Midday &middot; the raw half',d.midday],['Evening &middot; the cooked half',d.evening],['Between meals',d.snack],['Drink',d.drink]];
+  var text='Day '+n+'. '+(d.title?d.title+'. ':'');
+  lines.forEach(function(l){ if(l[1]) text+=l[0].replace(/&middot;/g,'')+'. '+l[1]+'. ' });
+  SAY_TEXT[id]=text;
+  var out='<div class="card'+(openId===id?' open':'')+'" data-h="'+id+'">'
+   +'<div class="row"><div class="row-txt"><div class="dayno">Day '+n+' of 7</div><b>'+esc(d.title||'A day on the books\u2019 plate')+'</b>'
+   +'<span>'+esc(d.morning||d.midday||'')+'</span></div><div class="chev">&#8250;</div></div><div class="body">';
+  lines.forEach(function(l){ if(l[1]) out+='<div class="lbl">'+l[0]+'</div><p>'+esc(l[1])+'</p>' });
+  out+=saybarHTML(id)+'</div></div>';
+  return out;
+}
+
+function mucusPlanResult(){
+  var saved=store.plan;
+  if(!saved || !saved.plan) return '<div class="sec-hd">Your week</div><div class="mu-empty">No plan yet. Answer the questions above, and the week comes back here.</div>';
+  var p=saved.plan, load=Number(p.mucusLoad), hasLoad=load>=1 && load<=5;
+  var band=muBand(hasLoad?load:1);
+  var loadTxt=hasLoad?load.toFixed(1):'\u2014';
+  SAY_TEXT['mucusplan']=String(p.summary||'')+' '+((p.focus&&p.focus.join)?p.focus.join('. '):'')+'. '+String(p.caution||'');
+  var out='<div class="sec-hd">Your week</div>'
+   +'<div class="plan-top"><span class="mu-badge b'+band.n+'">'+loadTxt+'</span>'
+   +'<div><b>'+(hasLoad?('Mucus load '+loadTxt+' &middot; '+esc(band.t)):'Mucus load not given')+'</b><span>A rough average of the foods in this week, on the same 1\u20135 scale. Not a promise and not a measure of your body.</span></div></div>'
+   +'<p class="plan-sum">'+esc(p.summary)+'</p>';
+  var focus=Array.isArray(p.focus)?p.focus:[];
+  var days=Array.isArray(p.days)?p.days:[];
+  var shopping=Array.isArray(p.shopping)?p.shopping:[];
+  var avoid=Array.isArray(p.avoid)?p.avoid:[];
+  if(focus.length) out+='<div class="chips">'+focus.map(function(f){ return '<span class="pill calm">'+esc(f)+'</span>' }).join('')+'</div>';
+  out+='<div class="lbl">Read the summary aloud</div>'+saybarHTML('mucusplan')
+   +'<div class="sec-hd">Seven days</div>'+days.map(planDayCard).join('');
+  out+='<div class="sec-hd">Buy this week</div>';
+  out+= shopping.length
+    ? '<div class="card" style="padding:12px 14px">'+shopping.map(function(x){ return '<span class="pill">'+esc(x)+'</span>' }).join('')+'</div>'
+    : '<div class="mu-empty">The shopping list came back empty. The seven days above still name what to buy.</div>';
+  if(avoid.length){
+    out+='<div class="sec-hd">Leave these out</div><div class="big redbox"><b>The books\u2019 two exclusions, and the packet</b>'+esc(avoid.join(' \u00b7 '))+'</div>';
+  }
+  if(p.caution) out+='<div class="sec-hd">Before you start</div><div class="big redbox"><b>Read this one first</b>'+esc(p.caution)+'</div>';
+  var a=saved.answers||{};
+  out+='<div class="sec-hd">Built from your answers</div><div class="big warnbox"><b>'+esc(a.goal||'A goal')+'</b>'
+   +esc([a.age?('Age '+a.age):'',a.gender,a.race,a.health].filter(Boolean).join(' \u00b7 '))
+   +(a.notes?'<br><br><b>Worked around</b>'+esc(a.notes):'')+'</div>'
+   +'<button class="txtbtn" id="mclear">Clear this plan</button>';
+  return out;
+}
+
+function mucusView(){
+  var out='<div class="msub">'
+   +'<button class="chip'+(mucusSub==='scale'?' on':'')+'" data-msub="scale">The scale</button>'
+   +'<button class="chip'+(mucusSub==='plan'?' on':'')+'" data-msub="plan">My plan</button></div>';
+  out+= mucusSub==='plan' ? (mucusPlanForm()+mucusPlanResult()) : mucusScaleView();
+  return '<div class="sec">'+out+'</div>';
 }
 
 /* Each section opens and shuts like a herb card does, so the page keeps one
@@ -3511,7 +3938,7 @@ function courseView(){
    +LECTURE_NOTES.map(lectureNoteCard).join('')
    +'<div class="sec-hd">Lecture summary · Thyroid and Goiters</div>'
    +'<div class="big warnbox"><b>Your lecture summary</b>These notes organize your account of Dr. Tim Morrill’s lecture <i>Thyroid and Goiters</i>, on the ILLUMINATED33 channel. They are the lecture’s own claims, kept in the lecture’s voice, and they are your summary of the lecture rather than a transcript or a verified quotation.</div>'
-   +'<div class="big okbox"><b>This page’s own line</b>Food first, a plant second, and a doctor’s line over both — the first rule of the whole course, kept over every line the lecture makes. Extra iodine is not a thing to try on yourself, and nothing here is ever a reason to stop or change anything a doctor has given you.</div>'
+   +'<div class="big okbox"><b>This page’s own line</b>Food first, a plant second — the first rule of the whole course, kept through every line the lecture makes. Extra iodine is not a thing to try on yourself.</div>'
    +GOITER_NOTES.map(goiterNoteCard).join('')
    +'</div>';
 }
@@ -3563,6 +3990,10 @@ function render(){
     out=mealView();
   }
 
+  if(tab==='mucus'){
+    out=mucusView();
+  }
+
   if(tab==='deep'){
     out='<div class="sec">'+DEEP.map(function(b,i){ return bsec(b,i,'dp') }).join('')+'</div>';
   }
@@ -3593,6 +4024,16 @@ function render(){
   }
 
   v.innerHTML=out;
+  /* The one search field does both jobs: on the Mucus scale it filters food,
+     on every other tab it filters herbs. The placeholder says which. */
+  var searchEl=document.getElementById('q');
+  if(searchEl) searchEl.placeholder = tab==='mucus' ? 'Find a food on the mucus scale' : 'Search a herb, or what it\u2019s used for';
+  if(tab==='mucus' && mucusSub==='plan'){
+    var mb=document.getElementById('mpbuild');
+    if(mb) mb.onclick=buildMucusPlan;
+    var mc=document.getElementById('mclear');
+    if(mc) mc.onclick=function(){ delete store.plan; save(); render() };
+  }
   if(tab==='mine'){
     var b=document.getElementById('aadd');
     if(b)b.onclick=function(){
@@ -3648,6 +4089,25 @@ document.getElementById('view').addEventListener('click',function(e){
   mealPick(Number(p[0]),Number(p[1]));
   render();
 });
+/* The Mucus scale's two doors, and the answers to its questionnaire. The value
+   travels as field|label so a label with a colon, a slash or a space in it
+   does not have to be escaped twice. */
+document.getElementById('view').addEventListener('click',function(e){
+  var sub=e.target.closest && e.target.closest('[data-msub]');
+  if(sub){ mucusSub=sub.getAttribute('data-msub'); planError=''; openId=null; render(); return }
+  var b=e.target.closest && e.target.closest('[data-plan]');
+  if(!b) return;
+  var p=b.getAttribute('data-plan').split('|');
+  planSet(p[0],p.slice(1).join('|'));
+  render();
+});
+/* Typing an age or a note should not rebuild the form under the cursor. The
+   store is written as it is typed, and the next render reads it back. */
+document.getElementById('view').addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='plan-age'){ var a=planAnswers(); a.age=Number(t.value)||0; store.planAnswers=a; save(); return }
+  if(t.id==='plan-notes'){ var n=planAnswers(); n.notes=String(t.value||''); store.planAnswers=n; save() }
+});
 document.getElementById('view').addEventListener('click',function(e){
   var row=e.target.closest('.row'); if(!row) return;
   var cardEl=row.closest('.card'); if(!cardEl) return;
@@ -3663,12 +4123,13 @@ document.getElementById('view').addEventListener('input',function(e){
 });
 document.getElementById('q').addEventListener('input',function(e){
   q=e.target.value.trim().toLowerCase();
-  if(q && tab!=='az'){ tab='az'; document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on',x.getAttribute('data-t')==='az') }) }
+  if(q && tab!=='az' && tab!=='mucus'){ tab='az'; document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on',x.getAttribute('data-t')==='az') }) }
   render();
 });
 document.querySelectorAll('.tab').forEach(function(el){
   el.onclick=function(){
-    tab=el.getAttribute('data-t'); openId=null;
+    tab=el.getAttribute('data-t'); openId=null; q=''; planError='';
+    var search=document.getElementById('q'); if(search) search.value='';
     document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on',x===el) });
     render();
   };
@@ -3813,7 +4274,8 @@ function applyDeepLink(){
     var m=h.match(/^d(\d+)$/), mp=h.match(/^p-(.+)$/);
     if(mp){ plant=mp[1]; }
     else if(m){ tab='course'; openId='d'+m[1]; }
-    else if(['az','need','books','course','meal','deep','mine'].indexOf(h)>-1){ tab=h; openId=null; }
+    else if(h==='plan'){ tab='mucus'; mucusSub='plan'; openId=null; }
+    else if(['az','need','books','course','meal','mucus','deep','mine'].indexOf(h)>-1){ tab=h; openId=null; }
   }
   /* A plant's own address (13 Oct 2026): /herbs#p-garlic, or ?plant=garlic,
      opens the A-Z tab on that card. A name the library does not have leaves the

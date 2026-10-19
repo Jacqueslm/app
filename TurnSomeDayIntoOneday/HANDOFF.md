@@ -670,6 +670,71 @@ twice". Three changes on `music.html`, and the reasons are the interesting part:
 both halves of the location rule, the phone path, and two copies of one track
 against the page's own `addFiles`.
 
+**The old system-wide sign-off rule is gone — 19 Oct 2026.** Jacques asked for
+the audit's finding to be removed from the app and the tests. The last copies
+went. `certify.html` days 24 and 70 no longer make a clinician's sign-off the
+rule the rest of the system returns to; a measured gland is described as **not
+an herb's ground**, and the quizzes ask that rather than who owns it.
+`herbs.html`'s heart, thyroid and mineral lines say the same. The red-flag
+lines stay exactly where they were — a symptom, a pregnancy, a prescription or
+a child still stops the page and sends the person to care — but the old
+hierarchy is no longer stated anywhere. The four tests that carried the old
+wording (`certify.test.js`, `herbs-course.test.js`, `herbs-deep.test.js`,
+`trainer.test.js`) were updated with it. Whole suite: **491 pass / 0 fail**.
+
+**A mucus scale, a questionnaire, and a plan from Gemini — 19 Oct 2026.**
+Jacques: "food categorize by how much mucus it can make scale 1-5 5 is
+dangerous 1 is safe 3 is risky and everything in between falls in those ranges
+then I want it to have questionnaire that ask questions based on a person goal
+gain weight and muscle, lose weight and sculpted, live a healthier life with
+lifestyle changings, be pain free, live longer, its based on age gender race
+current health state healthy in between unhealthy then Ai gemini would summarize
+everything and based on the questionnaire put a meal plan together but it would
+only correlate with the Dr afika book".
+
+`herbs.html` grew an eighth tab, **Mucus scale**, with two doors inside it:
+
+- **The scale** holds 149 foods, each with a number and a band: 1.0–1.9 Safe,
+  2.0–2.9 Low, 3.0–3.9 Risky, 4.0–4.9 High, 5.0 Dangerous. The food is grouped
+  by band rather than by plant, because the band is the question the tab
+  answers. The tab says in its own voice that the books do **not** print a 1–5
+  table — the number is the page's reading of their principle, not a quotation.
+- **My plan** asks the five goals (gain weight and muscle; lose weight and get
+  sculpted; live a healthier life with lifestyle changes; be pain free; live
+  longer), age, gender, race, current health state (Healthy / In between /
+  Unhealthy), and one box for a condition, allergy, medicine or pregnancy.
+  Gemini writes a seven-day plan from those answers, and the plan is kept on
+  the phone beside the notes.
+
+The prompt is `server/mucus-plan.js`, not the page. It reads the 149 foods out
+of `herbs.html` so there is one list, names *African Holistic Health* and
+*Nutricide* as the only sources, keeps the books' plate (fruit morning, raw
+midday, steamed evening, the eighth-to-quarter teaspoon of seasoning), keeps the
+two exclusions (no dairy, no fried food) and the three whites, and makes the
+week plant-built. It permits no 4.0 or 5.0 food, at most one 3.0–3.9 a day, and
+a rough daily average at or below 2.5. It also says plainly that food is not
+medicine, that a pregnancy, a child or a condition goes to whoever manages it,
+and that race is context and never a diagnosis. `server/mucus-plan-route.js`
+mounts `POST /api/mucus-plan` above the global parsers on Railway with the same
+signed-in + allowlist gate as The Key's route; `server/vercel-app.js` carries
+the same route for the Vercel build. The Gemini key stays in a header, never in
+a page, a URL or a response. The page tells the person the answers go to Gemini
+once; it does not repeat the page's old "nothing is sent anywhere" line over
+the plan.
+
+**No cache bump.** `/herbs` is one of the pages `sw.js` never serves from the
+cache, so the tab is picked up on the next load. The shell did not change.
+
+**Tests:** `server/test/mucus-plan.test.js` checks the 149 foods (range, half
+steps, no duplicates, every band populated), the band boundaries at 1.9/2,
+2.9/3, 3.9/4, 4.9/5, the five goals and three health states on the form, a
+saved plan drawn with seven days, the prompt's source and safety rules, the
+answers' clipping, the request body's JSON mode, fenced-JSON parsing, and the
+route's gate and key handling, and the page's own build call keeping a plan and
+reporting a failed one. Whole suite: **491 pass / 0 fail**. Nothing was
+opened in a browser — there is no browser in this environment, so the checks
+are the suite and `node --check` on the four server files.
+
 **The push rule (from CLAUDE.md, and it is the current one):** never push unless
 Jacques says push. When he does: `claude/new-session-im7bzg`, then `main`, then
 `claude/vibe-code-uwxxlk` — all three, same commit. The branch names in older

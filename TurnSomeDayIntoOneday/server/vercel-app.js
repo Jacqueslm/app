@@ -35,6 +35,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const aiChatBody = require('./ai-chat-body');
 const keyReading = require('./key-reading');
+const mucusPlan = require('./mucus-plan');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -61,6 +62,8 @@ const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
 const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
 const KEY_READING_MAX_TOKENS = Number(process.env.KEY_READING_MAX_TOKENS || 6000);
 const KEY_READING_THINKING_LEVEL = process.env.KEY_READING_THINKING_LEVEL || 'MEDIUM';
+const MUCUS_PLAN_MAX_TOKENS = Number(process.env.MUCUS_PLAN_MAX_TOKENS || 5000);
+const MUCUS_PLAN_THINKING_LEVEL = process.env.MUCUS_PLAN_THINKING_LEVEL || 'LOW';
 const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 60);
 // Google's "high demand" no is worth asking again, but not forever: two more
 // asks, a second apart, then it is reported for what it is. Set either to 0 to
@@ -208,7 +211,13 @@ async function gemini({ key, model, body }) {
   // without it rather than reporting an error nobody can act on.
   if (r.status === 400) {
     const retry = JSON.parse(JSON.stringify(body));
-    if (retry.generationConfig) delete retry.generationConfig.thinkingConfig;
+    // Both optional fields are dropped on a bare 400. responseMimeType is only
+    // sent by the mucus plan, and a model or API surface that rejects it would
+    // otherwise fail the whole plan twice for the sake of a formatting hint.
+    if (retry.generationConfig) {
+      delete retry.generationConfig.thinkingConfig;
+      delete retry.generationConfig.responseMimeType;
+    }
     r = await post(retry);
   }
   const data = await r.json().catch(() => null);
@@ -260,6 +269,10 @@ function buildApp() {
   const keyLimiter = rateLimit({
     windowMs: 5 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false,
     message: { error: 'Slow down a moment — give it a minute between readings.' },
+  });
+  const planLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, max: 8, standardHeaders: true, legacyHeaders: false,
+    message: { error: 'Slow down a moment — a plan is a big answer. Give it a few minutes.' },
   });
   const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
@@ -411,6 +424,61 @@ function buildApp() {
     } catch (err) {
       res.status(502).json({
         error: 'The reading could not be written just now.',
+        ownerError: 'Could not reach Google: ' + ((err && err.message) || 'unknown error'),
+      });
+    }
+  });
+
+  // --- The mucus scale's seven-day plan. Same contract as Railway: the answers
+  // in, {plan, model} or an error the page can show. The prompt, the food list
+  // and the parser live in mucus-plan.js and are read from herbs.html, so this
+  // host and Railway cannot drift apart about the books' plate.
+  app.post('/api/mucus-plan', planLimiter, async (req, res) => {
+    const who = readSession(req);
+    if (!who || !allowed(who.email)) return res.status(401).json({ error: 'Not signed in.' });
+    if (!GEMINI_API_KEY) return res.status(503).json({ error: 'The plan cannot be written right now.' });
+    const answers = mucusPlan.answersFrom(req.body);
+    if (!mucusPlan.complete(answers)) {
+      return res.status(400).json({ error: 'Answer the goal, age, gender, race and health question first.' });
+    }
+    try {
+      const out = await gemini({
+        key: GEMINI_API_KEY,
+        model: GEMINI_MODEL,
+        body: JSON.parse(mucusPlan.requestBody({
+          answers,
+          model: GEMINI_MODEL,
+          maxTokens: MUCUS_PLAN_MAX_TOKENS,
+          thinkingLevel: MUCUS_PLAN_THINKING_LEVEL,
+          jsonMode: true,
+        })),
+      });
+      if (!out.ok) {
+        return res.status(502).json({
+          error: 'The plan could not be written just now. Try again in a moment.',
+          ownerError: providerReason(out),
+        });
+      }
+      if (!out.text) {
+        const why = (out.candidate && out.candidate.finishReason)
+          || (out.data && out.data.promptFeedback && out.data.promptFeedback.blockReason)
+          || 'no reason given';
+        return res.status(502).json({
+          error: 'The plan came back empty. Try again in a moment.',
+          ownerError: 'Gemini returned an empty plan (finishReason: ' + why + ').',
+        });
+      }
+      const plan = mucusPlan.parsePlan(out.text);
+      if (!plan) {
+        return res.status(502).json({
+          error: 'The plan came back unreadable. Try again.',
+          ownerError: 'Gemini returned a plan that could not be read as JSON.',
+        });
+      }
+      res.json({ plan, model: GEMINI_MODEL });
+    } catch (err) {
+      res.status(502).json({
+        error: 'The plan could not be written just now. Try again in a moment.',
         ownerError: 'Could not reach Google: ' + ((err && err.message) || 'unknown error'),
       });
     }

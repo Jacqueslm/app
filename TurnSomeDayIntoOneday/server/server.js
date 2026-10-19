@@ -64,6 +64,12 @@ const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
 // wants to be right.
 const KEY_READING_MAX_TOKENS = Number(process.env.KEY_READING_MAX_TOKENS || 6000);
 const KEY_READING_THINKING_LEVEL = process.env.KEY_READING_THINKING_LEVEL || 'MEDIUM';
+// The herb library's seven-day mucus plan (POST /api/mucus-plan). Seven days
+// with five parts each is a longer answer than a chat reply, so it gets its own
+// budget. LOW thinking keeps the wait down; the plan is written from a fixed
+// plate and a fixed food list, not from a long chain of reasoning.
+const MUCUS_PLAN_MAX_TOKENS = Number(process.env.MUCUS_PLAN_MAX_TOKENS || 5000);
+const MUCUS_PLAN_THINKING_LEVEL = process.env.MUCUS_PLAN_THINKING_LEVEL || 'LOW';
 
 // The Key's Gemini reading (POST /api/key-reading), for the private page at
 // /key. Mounted up here because server.js only reaches its AI code at the end
@@ -78,6 +84,21 @@ require('./key-reading-route').mount(app, {
     model: GEMINI_MODEL,
     maxTokens: KEY_READING_MAX_TOKENS,
     thinkingLevel: KEY_READING_THINKING_LEVEL,
+  },
+  ownerEmail: () => DIAG_OWNER_EMAIL,
+});
+
+// The mucus scale's seven-day plan (POST /api/mucus-plan), for the private
+// Mucus scale tab on /herbs. Mounted beside The Key's route for the same
+// reasons: it attaches its own parsers above the global ones, and its gate and
+// prompt live in their own modules so they can be tested directly.
+require('./mucus-plan-route').mount(app, {
+  isFriendlyRequest,
+  gemini: {
+    key: GEMINI_API_KEY,
+    model: GEMINI_MODEL,
+    maxTokens: MUCUS_PLAN_MAX_TOKENS,
+    thinkingLevel: MUCUS_PLAN_THINKING_LEVEL,
   },
   ownerEmail: () => DIAG_OWNER_EMAIL,
 });

@@ -22,7 +22,7 @@
 // programme on it. The tests below now hold the opposite thing: that the by-10
 // stays gone, that the ten-second rest it contributed is written into the
 // rotation, and that their information still comes first with the safety lines
-// still outranking it. certify.html is untouched - the Certification still has
+// still coming before it. certify.html is untouched - the Certification still has
 // its own trainer track - so this file no longer reads one against the other.
 //
 // That last part is the claim the page makes in its own words ("Everything here
@@ -218,13 +218,13 @@ test('the trainer page is the intake, and says what it is', () => {
   // which was true until the by-10 arrived. What matters now is the order it is
   // read in — their information, then the safety lines, then the programme.
   const atForm = html.indexOf('id="intake"');
-  const atSafety = html.indexOf("A doctor's rule wins over this page, always");
+  const atSafety = html.indexOf('The screening in their information is read first');
   const atProgramme = html.indexOf('<h2>The P90X rotation</h2>');
   assert.ok(atForm > -1, 'the form is on the page');
   assert.ok(atSafety > -1, 'so are the safety lines');
   assert.ok(atProgramme > -1, 'so is the P90X rotation');
   assert.ok(atSafety > atForm && atProgramme > atSafety,
-    'their information comes first, the safety lines outrank the programme, and the programme comes last');
+    'their information comes first, the safety lines come before the programme, and the programme comes last');
   // Every field the step is for is on the page.
   for (const id of TEXT_IDS) assert.match(html, new RegExp(`id="${id}"`), `the ${id} field is on the page`);
   for (const k of [...KIT, ...WANT, ...SCREEN]) assert.ok(html.includes(k), `${k} is offered on the page`);
@@ -640,11 +640,11 @@ test('the by-10 is off the Trainer, and P90X is the programme on it', () => {
     /a week of stretching/i,
     /the by-10 does not require them/i,
   ]) assert.match(html, re, `the by-10's rule is on the Trainer: ${re} is missing`);
-  // And the lines that outrank it still do.
-  assert.match(html, /The programme below is a workout, and two lines outrank it/,
+  // And the lines that come before it still do.
+  assert.match(html, /The programme below is a workout, and two lines come before it/,
     'the safety card says the programme answers to it, rather than the other way round');
-  assert.match(html, /A doctor's rule wins over this page, always/,
-    'a doctor comes first');
+  assert.match(html, /The screening in their information is read first/,
+    'the screening is still read before the programme');
   assert.match(html, /stop, on the day, if there is chest pain/i,
     'and it names the day it should stop');
 });

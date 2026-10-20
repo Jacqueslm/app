@@ -1500,10 +1500,8 @@ function todayHtml(R){
     <label for="bulk-text">One person per line &mdash; name, then birthday</label>
     <textarea id="bulk-text" spellcheck="false" placeholder="Ada Marchetti, 29 Nov 1988
 Bo Tran, 1991-04-07
-Cy Okonkwo, February 29 1996
-Dara Whitlock, 3/14
-Emeka Nwosu&#9;Oct 21, 1975"></textarea>
-    <div class="note" style="margin-top:9px">Accepts <code>1991-04-07</code>, <code>29 Nov 1988</code>, <code>Nov 29, 1988</code>, <code>3/14/1990</code> and <code>3/14</code>. Numeric dates are read month/day; the year is optional. Separate the name from the date with a comma or a tab.</div>
+Cy Okonkwo, 24-Dec-1991"></textarea>
+    <div class="note" style="margin-top:9px">Name, then a comma or a tab, then the date &mdash; any order: <code>1991-04-07</code>, <code>24 Dec 1991</code>, <code>24-Dec-91</code> or <code>3/14</code>.</div>
     <div class="actions">
       <button class="btn primary" id="btn-bulk-add">Add them all</button>
       <button class="btn ghost" id="btn-bulk-clear">Clear</button>
@@ -2623,30 +2621,49 @@ function monthFromWord(w){
   return i >= 0 ? i + 1 : 0;
 }
 
-/* Returns {month, day, year} or {error}. Accepts ISO, numeric and worded dates. */
+/* Returns {month, day, year} or {error}. The three parts may come in any
+   order and be separated by a space, comma, hyphen, slash or dot, so
+   24-December-1991, 1991/12/24, Dec 24 1991, 24 12 91 and 3/14 all read.
+   A four-digit number is the year, and so is any two-digit one too big to be
+   a day (91 -> 1991). Where two numbers both fit a day, the first is the
+   month, as the box says. */
 function parseBirthday(raw){
-  const s = String(raw).replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+  const s = String(raw).replace(/[\s,]+/g, ' ').replace(/\s*[\/.-]\s*/g, ' ').trim();
   if(!s) return {error:'no date'};
-  let m = 0, d = 0, y = null;
-
-  const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  const num = s.match(/^(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{4}))?$/);
-  if(iso){
-    y = +iso[1]; m = +iso[2]; d = +iso[3];
-  } else if(num){
-    m = +num[1]; d = +num[2]; y = num[3] ? +num[3] : null;
-    if(m > 12 && d <= 12){ const t = m; m = d; d = t; }   // clearly day/month
-  } else {
-    /* Strict: every token must be a month word, a year or a day. Skipping
-       unknown tokens would let a surname be swallowed into the date. */
-    for(const tok of s.split(' ')){
-      const w = monthFromWord(tok);
-      if(w){ if(m) return {error:'two months in one date'}; m = w; continue; }
-      if(/^\d{4}$/.test(tok)){ if(y !== null) return {error:'two years in one date'}; y = +tok; continue; }
-      if(/^\d{1,2}(st|nd|rd|th)?$/i.test(tok)){ if(d) return {error:'two days in one date'}; d = parseInt(tok, 10); continue; }
-      return {error:`could not read "${tok}"`};
+  const year4 = n => n < 30 ? 2000 + n : 1900 + n;
+  let m = 0, y = null;
+  const nums = [];
+  /* Strict: every token must be a month word, a year or a day. Skipping
+     unknown tokens would let a surname be swallowed into the date. */
+  for(const tok of s.split(' ')){
+    const w = monthFromWord(tok);
+    if(w){ if(m) return {error:'two months in one date'}; m = w; continue; }
+    if(/^\d{4}$/.test(tok)){ if(y !== null) return {error:'two years in one date'}; y = +tok; continue; }
+    if(/^\d{1,2}(st|nd|rd|th)?$/i.test(tok)){ nums.push(parseInt(tok, 10)); continue; }
+    return {error:`could not read "${tok}"`};
+  }
+  let d = 0;
+  if(m){
+    /* The day is taken first, so a day that is too big is reported as a bad
+       day rather than mistaken for a year. Whatever is left is the year. */
+    const at = nums.findIndex(n=>n <= 31);
+    d = nums.splice(at < 0 ? 0 : at, 1)[0] || 0;
+    if(nums.length > 1) return {error:'three numbers in one date'};
+    if(nums.length){
+      if(y !== null) return {error:'two years in one date'};
+      y = year4(nums[0]);
     }
-    if(!m) return {error:'no month found'};
+  } else {
+    if(nums.length < 2) return {error:'no month found'};
+    if(nums.length > 3) return {error:'three numbers in one date'};
+    if(nums.length === 3){
+      const at = nums.findIndex(n=>n > 31);
+      if(at < 0) return {error:'could not tell which number is the year'};
+      if(y !== null) return {error:'two years in one date'};
+      y = year4(nums.splice(at, 1)[0]);
+    }
+    m = nums[0]; d = nums[1];
+    if(m > 12 && d <= 12){ const t = m; m = d; d = t; }   // clearly day/month
   }
   if(!(m >= 1 && m <= 12)) return {error:'month out of range'};
   if(!(d >= 1 && d <= DIM[m-1])) return {error:`${MONTHS[m-1]} has no day ${d || '?'}`};
@@ -7033,7 +7050,7 @@ $('btn-bulk-add').addEventListener('click', ()=>{
   lines.forEach((line, i)=>{
     const r = parseBulkLine(line);
     if(r === null) return;
-    if(r.error){ failed.push(`line ${i+1}: ${esc(line.trim())} — ${r.error}`); return; }
+    if(r.error){ failed.push(`line ${i+1}: ${r.error}`); return; }
     if(isDuplicate(r)){ skipped.push(esc(r.name)); return; }
     const person = {id:newId(), name:r.name, month:r.month, day:r.day, year:r.year};
     PEOPLE.push(person); added.push(person);
@@ -7043,7 +7060,7 @@ $('btn-bulk-add').addEventListener('click', ()=>{
   const parts = [];
   if(added.length) parts.push(`<div class="ok">Added ${added.length}: ${added.map(p=>esc(p.name) + ' — ' + profileOf(p).per.n).join(', ')}</div>`);
   if(skipped.length) parts.push(`<div class="skip">Already saved, skipped ${skipped.length}: ${skipped.join(', ')}</div>`);
-  if(failed.length) parts.push(`<div class="no">Could not read ${failed.length}:<ul>${failed.map(f=>`<li>${f}</li>`).join('')}</ul></div>`);
+  if(failed.length) parts.push(`<div class="no">Could not add ${failed.length}:<ul>${failed.map(f=>`<li>${f}</li>`).join('')}</ul></div>`);
   $('bulk-report').innerHTML = parts.join('') || '<div class="skip">Nothing to add.</div>';
   if(added.length){ toast(`Added ${added.length} ${added.length === 1 ? 'person' : 'people'}`); $('bulk-text').value = ''; }
 });

@@ -382,7 +382,12 @@ test('the trainer has its door on the home screen, and the shell counts it', () 
   // moved with it. This assertion did the opposite job while the fight's door was
   // coming off the app; a door added on purpose has to change the number here,
   // which is exactly why the line is worth pinning rather than leaving to drift.
-  assert.match(HUB, /Five doors\. That is the whole app\./, 'the shell must count the five it holds');
+  //
+  // 21 Oct 2026: The Body and The Book of Spells made it seven, so the number
+  // moved again. The old counts are asserted absent, so a shell that says five
+  // while holding seven fails here rather than quietly lying on the home screen.
+  assert.match(HUB, /Seven doors\. That is the whole app\./, 'the shell must count the seven it holds');
+  assert.doesNotMatch(HUB, /Five doors/, 'nothing may still say five');
   assert.doesNotMatch(HUB, /Four doors/, 'nothing may still say four');
   assert.doesNotMatch(HUB, /Three doors/, 'nothing may still say three');
   // The Fight was one of those doors until 10 Oct 2026, when the whole thing
@@ -611,6 +616,84 @@ test('the certification has its door on the home screen', () => {
   assert.match(HUB, /The Certification/, 'and the shell must name it');
   assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'certify.html')),
     'certify.html must be in the repository, or the door leads nowhere');
+});
+
+// --- The Body and The Book of Spells, 21 Oct 2026 ---------------------------
+// Two pages added the same day, at "add a part on my app about the organs ... then
+// when you finish that research spells and write me a book of spells in the app
+// both using its on page". Each is a real FILE as well as a clean URL, so each
+// needs both addresses gated above express.static and both left out of the
+// worker's cache - exactly the reasons every page above them is checked.
+test('The Body and The Book of Spells are behind the door, at both addresses', () => {
+  for (const [url, file] of [
+    ['/body', 'body.html'], ['/body.html', 'body.html'],
+    ['/spells', 'spells.html'], ['/spells.html', 'spells.html'],
+  ]) {
+    assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
+    assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
+    const at = SRC.indexOf("app.get('" + url + "'");
+    assert.ok(at > -1, `the ${url} route must still be findable in server.js`);
+    const block = SRC.slice(at, at + 320);
+    assert.match(block, /isValidSession\(req\)/, `${url}: signed out gets nothing`);
+    assert.match(block, /isFriendlyRequest\(req\)/, `${url}: off the list gets nothing`);
+    assert.match(block, /res\.redirect\('\/app'\)/, `${url}: a page visit goes to the app, not JSON`);
+    assert.ok(
+      SRC.indexOf("app.get('" + url + "'") < SRC.indexOf('app.use(express.static('),
+      `${url} must be registered above static, which would serve the file itself`,
+    );
+    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', file)), `${file} must exist`);
+  }
+  const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
+  assert.match(SW,
+    /\['\/body', '\/body\.html', '\/spells', '\/spells\.html'\]\.includes\(url\.pathname\)\) return;/,
+    'all four addresses must be skipped by the worker');
+});
+
+test('a signed-out request for the body or the book of spells never gets the file', async () => {
+  // The test above reads the source. This one makes the request, because the
+  // failure it cannot see is the one that matters: if express.static ever got to
+  // answer first, the page would be served cold to anybody who typed the name.
+  const express = require('express');
+  const ROOT = path.join(__dirname, '..', '..');
+  const app = express();
+  const gate = (file) => (req, res) => {
+    if (req.get('x-signed-in') !== 'yes') return res.redirect('/app');
+    res.sendFile(path.join(ROOT, file));
+  };
+  const PAIRS = [
+    ['/body', 'body.html', '<h1>The Body</h1>'],
+    ['/body.html', 'body.html', '<h1>The Body</h1>'],
+    ['/spells', 'spells.html', '<h1>The Book of Spells</h1>'],
+    ['/spells.html', 'spells.html', '<h1>The Book of Spells</h1>'],
+  ];
+  for (const [url, file] of PAIRS) app.get(url, gate(file));
+  app.use(express.static(ROOT));
+  app.get('/app', (req, res) => res.type('text/plain').send('the app'));
+
+  const server = app.listen(0);
+  await new Promise((done) => server.once('listening', done));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const get = (p, signedIn) => fetch(base + p, {
+    redirect: 'manual',
+    headers: signedIn ? { 'x-signed-in': 'yes' } : {},
+  }).then(async (r) => ({ status: r.status, location: r.headers.get('location'), body: await r.text() }));
+  try {
+    for (const [url, file, title] of PAIRS) {
+      const cold = await get(url);
+      assert.strictEqual(cold.status, 302, `${url}: signed out must be redirected, not served`);
+      assert.strictEqual(cold.location, '/app', `${url}: and sent to the app`);
+      assert.ok(!cold.body.includes(title),
+        `${url}: no part of the page may come back with the redirect`);
+
+      assert.ok(fs.existsSync(path.join(ROOT, file)), `${file} must exist, or this test proves nothing`);
+
+      const warm = await get(url, true);
+      assert.strictEqual(warm.status, 200, `${url}: signed in and on the list gets the page`);
+      assert.ok(warm.body.includes(title), `${url}: and it is the page itself`);
+    }
+  } finally {
+    server.close();
+  }
 });
 
 test('the message says why, and claims nothing', () => {

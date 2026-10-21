@@ -1,0 +1,864 @@
+<!-- body page:private -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="cache-control" content="no-cache, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>The Body — private</title>
+<meta name="theme-color" content="#07060d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307060d'/%3E%3Cpath d='M32 13v38M20 24h24' stroke='%23e8c07a' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='19' r='5' fill='none' stroke='%23e8c07a' stroke-width='2.5'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#07060d; --bg2:#0d0b1a; --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.055);
+  --ink:#ece9f5; --dim:#a29cbb; --dimmer:#6f6890;
+  --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
+  --gold:#e8c07a; --violet:#a78bfa; --teal:#5fd9c4; --rose:#f0919f; --amber:#f0b862;
+  --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --r:18px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0; min-height:100dvh; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  display:flex; justify-content:center;
+  padding:calc(env(safe-area-inset-top,0px) + 22px) 18px calc(env(safe-area-inset-bottom,0px) + 40px);
+}
+.wrap{width:100%; max-width:600px}
+
+/* ── the top ──────────────────────────────────────────────────────────────── */
+.hdr{display:flex; align-items:center; gap:12px; margin-bottom:18px}
+.back{
+  flex:0 0 auto; width:38px; height:38px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; text-decoration:none;
+  border:1px solid var(--line); color:var(--dim); font-size:1.125rem;
+}
+.back:hover{color:var(--ink); border-color:var(--line2)}
+.titles{flex:1 1 auto; min-width:0}
+h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter-spacing:.01em; line-height:1.15}
+.titles p{margin:3px 0 0; color:var(--dimmer); font-size:.75rem; line-height:1.45}
+.eyebrow{
+  font-size:.6875rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--gold); font-weight:600; margin:0 0 8px;
+}
+.lede{font-family:var(--serif); font-size:1.0625rem; line-height:1.65; color:var(--dim); margin:0 0 16px}
+.lede b{color:var(--ink); font-weight:500}
+
+/* ── the voice ────────────────────────────────────────────────────────────── */
+.sayrow{display:flex; gap:8px; margin:0 0 20px}
+.saybtn{
+  background:none; border:1px solid var(--line); color:var(--dim);
+  font:inherit; font-size:.75rem; padding:8px 13px; border-radius:999px; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.saybtn:hover{color:var(--ink)}
+.saybtn.stop{border-color:rgba(232,192,122,.5); color:var(--gold)}
+
+/* ── the contents ─────────────────────────────────────────────────────────── */
+.toc{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 26px}
+.toc a{
+  font-size:.75rem; padding:7px 12px; border-radius:999px; text-decoration:none;
+  border:1px solid var(--line); color:var(--dim); background:var(--card);
+  -webkit-tap-highlight-color:transparent;
+}
+.toc a:hover{color:var(--ink); border-color:rgba(255,255,255,.2)}
+
+/* ── a part of the body ───────────────────────────────────────────────────── */
+.part{
+  border-top:1px solid var(--line); padding:26px 0 4px; scroll-margin-top:16px;
+}
+.part:first-of-type{border-top:none; padding-top:6px}
+.part h2{
+  margin:0 0 4px; font-family:var(--serif); font-size:1.375rem; font-weight:500;
+  line-height:1.2; display:flex; align-items:baseline; gap:10px;
+}
+.part h2 .n{
+  font-family:var(--sans); font-size:.6875rem; letter-spacing:.1em; color:var(--gold);
+  font-weight:600; flex:0 0 auto;
+}
+.part .sub{margin:0 0 14px; color:var(--dimmer); font-size:.8125rem; line-height:1.5}
+.part p{font-size:.9375rem; line-height:1.68; color:var(--dim); margin:0 0 12px}
+.part p b{color:var(--ink); font-weight:600}
+.part p i{color:var(--ink); font-style:italic}
+
+.facts{display:grid; gap:8px; margin:14px 0 6px}
+.fact{
+  border:1px solid var(--line); border-left:2px solid var(--line);
+  border-radius:0 12px 12px 0; background:var(--card); padding:13px 14px;
+}
+.fact h3{
+  margin:0 0 7px; font-size:.6875rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--dimmer); font-weight:700;
+}
+.fact.does{border-left-color:var(--gold)}
+.fact.does h3{color:var(--gold)}
+.fact.dmg{border-left-color:var(--rose)}
+.fact.dmg h3{color:var(--rose)}
+.fact.keep{border-left-color:var(--teal)}
+.fact.keep h3{color:var(--teal)}
+.fact ul{margin:0; padding:0; list-style:none}
+.fact li{
+  position:relative; padding:0 0 0 14px; margin:0 0 7px;
+  font-size:.875rem; line-height:1.55; color:var(--dim);
+}
+.fact li:last-child{margin-bottom:0}
+.fact li::before{content:"—"; position:absolute; left:0; color:var(--dimmer)}
+.fact li b{color:var(--ink); font-weight:600}
+
+/* ── the boxes ────────────────────────────────────────────────────────────── */
+.box{
+  border-radius:14px; padding:14px 15px; margin:14px 0; font-size:.875rem;
+  line-height:1.62; border:1px solid var(--line);
+}
+.box b{display:block; font-size:.75rem; letter-spacing:.09em; text-transform:uppercase; margin-bottom:6px}
+.box p{margin:0 0 9px; font-size:.875rem; line-height:1.62}
+.box p:last-child{margin-bottom:0}
+.box.claim{background:rgba(167,139,250,.09); border-color:rgba(167,139,250,.3); color:#cfc4f5}
+.box.claim b{color:var(--violet)}
+.box.anat{background:rgba(95,217,196,.08); border-color:rgba(95,217,196,.28); color:#bfeee5}
+.box.anat b{color:var(--teal)}
+.box.warn{background:rgba(240,145,159,.09); border-color:rgba(240,145,159,.3); color:#f6c9cf}
+.box.warn b{color:var(--rose)}
+.box.plain{background:rgba(232,192,122,.07); border-color:rgba(232,192,122,.26); color:#f0dcb6}
+.box.plain b{color:var(--gold)}
+
+/* ── the small table ──────────────────────────────────────────────────────── */
+.tbl{width:100%; border-collapse:collapse; margin:12px 0 4px; font-size:.8125rem}
+.tbl th{
+  text-align:left; font-size:.625rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--dimmer); font-weight:700; padding:0 10px 7px 0; border-bottom:1px solid var(--line);
+}
+.tbl td{
+  padding:9px 10px 9px 0; border-bottom:1px solid var(--line2); color:var(--dim);
+  line-height:1.5; vertical-align:top;
+}
+.tbl td:first-child{color:var(--ink); font-weight:600; white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+
+/* ── the closing ──────────────────────────────────────────────────────────── */
+.close{
+  margin-top:26px; padding:20px; border:1px solid rgba(232,192,122,.3);
+  border-radius:var(--r); background:rgba(232,192,122,.06);
+}
+.close h2{margin:0 0 8px; font-family:var(--serif); font-size:1.1875rem; font-weight:500; color:var(--gold)}
+.close p{margin:0 0 10px; font-size:.875rem; line-height:1.62; color:var(--dim)}
+.close p:last-child{margin-bottom:0}
+.next{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px}
+.next a{
+  flex:1 1 180px; text-decoration:none; color:inherit; background:var(--card);
+  border:1px solid var(--line); border-radius:14px; padding:14px 15px;
+}
+.next a:hover{background:var(--card2); border-color:rgba(255,255,255,.18)}
+.next b{display:block; font-family:var(--serif); font-size:1rem; font-weight:500; margin-bottom:3px}
+.next span{font-size:.75rem; color:var(--dimmer); line-height:1.45}
+
+.ft{
+  margin-top:28px; padding-top:18px; border-top:1px solid var(--line);
+  color:var(--dimmer); font-size:.75rem; line-height:1.6; text-align:center;
+}
+[hidden]{display:none !important}
+@media (min-width:560px){
+  .facts{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .toc a,.next a{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <a class="back" href="/app" title="Back to the app" aria-label="Back to the app">&#8592;</a>
+    <div class="titles">
+      <h1>The Body</h1>
+      <p>What each part does, and what it costs when it is damaged</p>
+    </div>
+  </header>
+
+  <p class="eyebrow">Read this first</p>
+  <p class="lede">Every part of you has <b>one job, a way of failing, and a price for that failure</b>. This page gives all three, part by part &mdash; the organs themselves, the muscle, the ropes and straps, the frame, the skin, the senses, the brain, the pipes, the mucus that lines every one of them, and the gut at the bottom of it all.</p>
+  <p class="lede">Where the books in this app make a claim that anatomy does not support, the claim is printed and named as a claim. <b>Both are here; neither is hidden.</b></p>
+
+  <div class="sayrow">
+    <button class="saybtn" id="sayBtn">Read it to me</button>
+    <button class="saybtn stop" id="sayStop" hidden>Stop</button>
+  </div>
+
+  <nav class="toc" aria-label="The parts">
+    <a href="#organs">The organs</a>
+    <a href="#muscle">Muscle</a>
+    <a href="#tendons">Tendons</a>
+    <a href="#bones">Bones</a>
+    <a href="#skin">Skin</a>
+    <a href="#senses">The senses</a>
+    <a href="#brain">The brain</a>
+    <a href="#vessels">Arteries</a>
+    <a href="#mucus">Mucus</a>
+    <a href="#gut">Constipation</a>
+    <a href="#causes">What causes disease</a>
+  </nav>
+
+  <!-- ═══ 01 · THE ORGANS ═══════════════════════════════════════════════════ -->
+  <section class="part" id="organs">
+    <h2><span class="n">01</span> The organs themselves</h2>
+    <p class="sub">The rooms the rest of this page is built around.</p>
+
+    <p>An organ is a place where one job is done so completely that nothing else can do it for you. That is why damage to an organ is different from damage to a muscle: the muscle can be rested and rebuilt, but a kidney that has stopped filtering does not come back &mdash; you replace the job, not the organ.</p>
+
+    <table class="tbl">
+      <thead><tr><th>Organ</th><th>Its job</th><th>When it fails</th></tr></thead>
+      <tbody>
+        <tr><td>Heart</td><td>Pumps about 5 litres a minute, 100,000 beats a day, so every cell is within a few cell-widths of blood.</td><td>Heart failure: breathless on stairs, swollen ankles, fluid in the lungs. A blocked artery kills the muscle it feeds and that muscle never regrows.</td></tr>
+        <tr><td>Lungs</td><td>Move 8,000&ndash;10,000 litres of air a day across 70 m&sup2; of membrane thinner than a soap bubble, and swap oxygen for carbon dioxide.</td><td>COPD and emphysema destroy the exchange surface permanently; pneumonia floods it; a clot blocks it. All three end as breathlessness.</td></tr>
+        <tr><td>Liver</td><td>The body's chemical works: 500 jobs, including cleaning the blood, storing glycogen, making bile, clotting factors and cholesterol, and breaking down drugs.</td><td>Cirrhosis scars it into a lump that cannot work &mdash; jaundice, bleeding, confusion, fluid in the belly. It also quietly fails with fat, not only alcohol.</td></tr>
+        <tr><td>Kidneys</td><td>Filter 180 litres of blood a day into about 1.5 litres of urine, and set blood pressure, salt, potassium, acid balance and vitamin D.</td><td>Chronic kidney disease is silent until most of it is gone; then fluid, poisons and potassium build up. Dialysis is the job done by a machine, not a cure.</td></tr>
+        <tr><td>Stomach</td><td>Stores food, churns it, and releases acid and pepsin strong enough to dissolve meat &mdash; and a mucus layer that stops it dissolving you.</td><td>Ulcers (often <i>H. pylori</i> or anti-inflammatories), bleeding, obstruction, and a barrier that leaks when the mucus fails.</td></tr>
+        <tr><td>Pancreas</td><td>Makes the enzymes that digest fat and protein, and insulin and glucagon, which decide what happens to every gram of sugar you eat.</td><td>Pancreatitis is agonising and can be fatal; when insulin fails, that is diabetes, and the damage lands in the eyes, kidneys, nerves and feet.</td></tr>
+        <tr><td>Intestines</td><td>Absorb nearly everything you eat across 40 m&sup2; of folded surface, hold 100 trillion microbes, and house most of the immune system.</td><td>Crohn's, coeliac and ulcerative colitis damage the lining; obstruction and perforation are emergencies; the damage often shows up far from the gut.</td></tr>
+        <tr><td>Thyroid</td><td>Sets the speed of the whole body with two hormones, T3 and T4.</td><td>Too little: cold, slow, heavy, constipated, depressed. Too much: hot, fast, thin, anxious, heart racing.</td></tr>
+        <tr><td>Spleen &amp; lymph</td><td>Filters blood, recycles old red cells, and is the barracks of the immune system.</td><td>A lost spleen means a lifetime of higher risk from certain bacteria; blocked lymph means swelling that does not go away.</td></tr>
+        <tr><td>Bladder</td><td>Stores urine at low pressure and empties on command, under two sets of nerves that must agree.</td><td>Incontinence, retention, infection; a bladder that never empties becomes a reservoir for bacteria.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box plain">
+      <b>The pattern worth seeing</b>
+      <p>The organs that fail quietly &mdash; kidneys, liver, arteries, bones &mdash; do it by losing capacity slowly, while the body compensates. You do not feel a kidney at 40% or a liver at 50%. What you feel is the day compensation runs out. That is the argument for measuring the boring numbers before you feel anything.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 02 · MUSCLE ═══════════════════════════════════════════════════════ -->
+  <section class="part" id="muscle">
+    <h2><span class="n">02</span> Muscle</h2>
+    <p class="sub">The engine, the furnace, and the largest glucose sink you own.</p>
+
+    <p>You have about 600 muscles and they are roughly 40% of your weight. They are not there only to lift things: every one of them is also a metabolic organ, a store of fuel, a store of protein, a pump for your veins and a heater.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What it does</h3>
+        <ul>
+          <li><b>Moves and holds you</b> &mdash; every step, every breath (the diaphragm is a muscle), every word.</li>
+          <li><b>Takes sugar out of the blood</b> &mdash; after a meal, most of the glucose cleared from your blood goes into muscle. It is the single biggest reason movement lowers blood sugar.</li>
+          <li><b>Holds protein for the whole body</b> &mdash; when you are ill or starving, muscle is broken down to keep the heart, the brain and the immune system supplied.</li>
+          <li><b>Pumps blood back up</b> &mdash; leg muscles squeeze the veins on every step, which is why standing still makes you faint and walking does not.</li>
+          <li><b>Makes heat</b> &mdash; shivering is muscle doing warmth by doing work with nothing to push.</li>
+          <li><b>Protects and braces</b> &mdash; the trunk muscles hold the spine; the pelvic floor holds the bladder and the gut.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When it is damaged</h3>
+        <ul>
+          <li><b>Atrophy</b> &mdash; unused muscle shrinks at roughly 1&ndash;3% a day in the first weeks of bed rest. Two weeks flat can cost more than a month of training gets back.</li>
+          <li><b>Sarcopenia</b> &mdash; from about 30, 3&ndash;8% a decade, faster after 60. It is the reason a fall at 75 is a different event from a fall at 25.</li>
+          <li><b>Strain and tear</b> &mdash; a pulled hamstring or calf; healing is scar, and scar is weaker and less elastic than what it replaced.</li>
+          <li><b>Rhabdomyolysis</b> &mdash; extreme exercise or a crush breaks muscle fibres into the blood, where myoglobin can block the kidneys. Dark urine after a brutal session is a reason to go to hospital, not to stretch.</li>
+          <li><b>The metabolic price</b> &mdash; less muscle means less room to put glucose, so blood sugar rises and the pancreas works harder.</li>
+        </ul>
+      </div>
+      <div class="fact keep">
+        <h3>What keeps it</h3>
+        <ul>
+          <li><b>Load, increased slowly</b> &mdash; the only signal that reliably says "build". Two to five sets, repetitions short of failure, a little more over months.</li>
+          <li><b>Enough total energy</b> &mdash; a muscle cannot be built in a deficit it did not ask for.</li>
+          <li><b>Sleep and rest days</b> &mdash; the growing happens between sessions, not during them.</li>
+          <li><b>Protein at about 1.6 g per kg of body weight a day</b> &mdash; more than that is burned or excreted, not turned into muscle.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box claim">
+      <b>What the teaching says</b>
+      <p>"Muscle grows by eating carbohydrates, not protein."</p>
+      <p>The kernel of it is true and it is the part people get wrong: <b>carbohydrate is the fuel and the signal that makes growth possible.</b> A hard session burns through muscle glycogen, and until it is refilled the muscle is flat, weak and in repair mode. Carbohydrate raises insulin, and insulin is one of the hormones that opens the muscle door to amino acids. Eat too little carbohydrate and the body will make glucose out of your own protein &mdash; including muscle &mdash; which is the opposite of growing.</p>
+    </div>
+
+    <div class="box anat">
+      <b>What the anatomy says</b>
+      <p>Muscle is built out of amino acids, and those come from protein. Training creates the demand; protein supplies the material; carbohydrate supplies the energy and the hormonal permission. Take any one of the three away and the other two stop working.</p>
+      <p>The practical version: <b>about 1.6 g of protein per kg a day, carbohydrate to fill the work you actually do, and a load that rises.</b> A 80 kg person needs roughly 130 g of protein &mdash; not 300 &mdash; and most people who train hard are short of carbohydrate long before they are short of protein.</p>
+      <p>Two more facts that decide the outcome: <b>you cannot out-eat a missing stimulus</b> (no load, no growth, whatever the plate), and <b>you cannot build in a large deficit</b> (the body will not spend scarce energy on new tissue it does not need).</p>
+    </div>
+  </section>
+
+  <!-- ═══ 03 · TENDONS AND LIGAMENTS ════════════════════════════════════════ -->
+  <section class="part" id="tendons">
+    <h2><span class="n">03</span> Tendons and ligaments</h2>
+    <p class="sub">The ropes and the straps. The part that heals slowest.</p>
+
+    <p>They look alike and do opposite jobs. A <b>tendon</b> joins muscle to bone and carries the pull. A <b>ligament</b> joins bone to bone and stops the joint going where it should not. Both are mostly collagen, both have very little blood supply, and both adapt on a timescale of months, not weeks.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What they do</h3>
+        <ul>
+          <li><b>Tendon: transmission</b> &mdash; your calf muscle can generate ten times the force your Achilles can safely take; the tendon is the rope that delivers it.</li>
+          <li><b>Tendon: spring</b> &mdash; the Achilles and the arch store and return elastic energy on every step. That recoil is free walking.</li>
+          <li><b>Ligament: restraint</b> &mdash; the ACL stops the shin sliding forward; the ankle ligaments stop the foot rolling.</li>
+          <li><b>Ligament: sensing</b> &mdash; ligaments are full of receptors that report joint position. They are part of how you know where your leg is without looking.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When they are damaged</h3>
+        <ul>
+          <li><b>Tendinopathy</b> &mdash; not inflammation but degeneration: the tendon thickens, loses its neat fibre pattern and hurts under load. It takes months, and rest alone does not fix it; graded load does.</li>
+          <li><b>Rupture</b> &mdash; a snap, often with a sound, and a muscle that no longer pulls. The Achilles and the quadriceps tendon are the classic two.</li>
+          <li><b>Sprain</b> &mdash; a stretched or torn ligament. Healing is by scar, and scar is looser than the original, which is why a badly sprained ankle sprains again.</li>
+          <li><b>Instability and arthritis</b> &mdash; a joint that moves too far wears out its cartilage. An ACL tear raises the risk of knee arthritis several-fold, years later.</li>
+          <li><b>Systemic weakness</b> &mdash; some antibiotics (fluoroquinolones), steroids, diabetes and age all make tendon rupture more likely.</li>
+        </ul>
+      </div>
+      <div class="fact keep">
+        <h3>What keeps them</h3>
+        <ul>
+          <li><b>Progressive load, including some slow heavy work</b> &mdash; tendons respond to tension held for time (isometrics, tempo work), not to being spared.</li>
+          <li><b>Protein and vitamin C</b> &mdash; collagen is built from amino acids, and the cross-linking needs vitamin C.</li>
+          <li><b>Patience measured in months</b> &mdash; tendons turn over far more slowly than muscle. A six-week programme is the beginning, not the end.</li>
+          <li><b>Warm-up before maximal effort</b> &mdash; most ruptures happen cold, tired, or on the first hard step.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box warn">
+      <b>The rule of the rope</b>
+      <p>Muscle is generous and tendon is stingy. You can gain strength in weeks and still be six months away from a tendon that tolerates it. When the muscle is ready and the tendon is not, the tendon loses &mdash; and it loses loudly.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 04 · BONES ════════════════════════════════════════════════════════ -->
+  <section class="part" id="bones">
+    <h2><span class="n">04</span> Bones</h2>
+    <p class="sub">Not scaffolding. A bank, a factory and an organ in its own right.</p>
+
+    <p>Bone is living tissue, rebuilt constantly by two cell types: <b>osteoblasts</b> lay new bone down, <b>osteoclasts</b> dissolve the old. About 10% of your skeleton is replaced each year. That is why bone responds to load at all &mdash; and why it wastes when the load stops.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What they do</h3>
+        <ul>
+          <li><b>Structure and levers</b> &mdash; hold you up and give muscles something to pull against.</li>
+          <li><b>Protection</b> &mdash; skull, ribs, pelvis and spine are armour for the organs that cannot be replaced.</li>
+          <li><b>The mineral bank</b> &mdash; 99% of the body's calcium and 85% of its phosphate. When blood calcium falls, bone is dissolved to bring it back, because the heart and nerves need calcium more than the skeleton does.</li>
+          <li><b>Blood</b> &mdash; the marrow inside makes red cells, white cells and platelets.</li>
+          <li><b>Buffering</b> &mdash; bone releases carbonate to neutralise acid, which is one reason a permanently acid diet costs bone.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When they are damaged</h3>
+        <ul>
+          <li><b>Fracture</b> &mdash; a break, then a cast, then a limb that is weaker and a bone that is thicker at the repair for a year.</li>
+          <li><b>Osteoporosis</b> &mdash; bone loses mass and architecture until it is honeycombed. It is painless until it breaks. A hip fracture after 65 carries roughly a 20&ndash;30% chance of death within a year, mostly through the immobility that follows.</li>
+          <li><b>Vertebral collapse</b> &mdash; a spinal bone crushes, and the spine curves forward. Height loss and a stoop are the visible sign.</li>
+          <li><b>Infection and cancer</b> &mdash; osteomyelitis needs weeks of antibiotics and sometimes surgery; bone is a favourite place for breast, prostate and lung cancer to settle.</li>
+        </ul>
+      </div>
+      <div class="fact keep">
+        <h3>What keeps them</h3>
+        <ul>
+          <li><b>Impact and load</b> &mdash; walking, stairs, jumping, lifting. Bone builds where it is bent.</li>
+          <li><b>Calcium, vitamin D, protein and vitamin K</b> &mdash; the material and the keys to using it. Roughly 1,000&ndash;1,200 mg calcium and enough sun or D to absorb it.</li>
+          <li><b>Not smoking, not drinking heavily</b> &mdash; both thin bone directly.</li>
+          <li><b>Knowing the number</b> &mdash; a bone density scan after menopause (or earlier with risk factors) tells you where you stand before the first break.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 05 · SKIN ═════════════════════════════════════════════════════════ -->
+  <section class="part" id="skin">
+    <h2><span class="n">05</span> Skin</h2>
+    <p class="sub">The largest organ, and the one the world meets first.</p>
+
+    <p>About 2 m&sup2; and 4&ndash;5 kg of it. Skin is a wall, a radiator, a factory and an immune organ, and it replaces itself roughly every month.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What it does</h3>
+        <ul>
+          <li><b>A barrier</b> &mdash; water stays in, microbes and chemicals stay out. The outer layer is dead cells packed in keratin and oil, and it is acid on purpose.</li>
+          <li><b>Temperature control</b> &mdash; sweat and widened vessels cool you; narrowed vessels and shivering keep heat in.</li>
+          <li><b>Vitamin D</b> &mdash; sunlight makes it in the skin, and it is needed for calcium and bone.</li>
+          <li><b>Immunity</b> &mdash; its own resident immune cells catch what gets through, and the microbiome on it competes with what does not belong.</li>
+          <li><b>Sensation</b> &mdash; touch, pressure, vibration, temperature, pain. The skin is the largest sensory organ you have.</li>
+          <li><b>Repair</b> &mdash; a cut is closed with a clot, then collagen, then a scar that is stronger than skin but never quite the same.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When it is damaged</h3>
+        <ul>
+          <li><b>Burns</b> &mdash; a large burn loses fluid, heat and the barrier at once, and infection is the killer. Anything bigger than the person's palm, or on the face, hands or genitals, is a hospital case.</li>
+          <li><b>Ulcers</b> &mdash; pressure sores and diabetic foot ulcers begin as skin that was not being felt or moved. They can reach bone.</li>
+          <li><b>Eczema and psoriasis</b> &mdash; a barrier that is already leaky, so irritants and microbes get in and water gets out.</li>
+          <li><b>Skin cancer</b> &mdash; the commonest cancer there is. A mole that changes shape, colour or size, or a sore that will not heal, is a reason to be seen.</li>
+          <li><b>Scarring</b> &mdash; a scar has no sweat glands, no hair and less sensation; a large one over a joint can tighten and limit movement.</li>
+        </ul>
+      </div>
+      <div class="fact keep">
+        <h3>What keeps it</h3>
+        <ul>
+          <li><b>Wash gently, moisturise</b> &mdash; the barrier is oil and water, and harsh soap removes both.</li>
+          <li><b>Sun in moderation</b> &mdash; enough for vitamin D, not enough to burn.</li>
+          <li><b>Move and check</b> &mdash; pressure sores are prevented by movement; diabetic feet by looking at them daily.</li>
+          <li><b>Water, protein, zinc and vitamin C</b> &mdash; wound healing is a building site, and it needs material.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 06 · THE SENSES ═══════════════════════════════════════════════════ -->
+  <section class="part" id="senses">
+    <h2><span class="n">06</span> The senses</h2>
+    <p class="sub">Sight, hearing, touch, taste, smell &mdash; and the two nobody counts.</p>
+
+    <p>A sense is a transducer: it turns one kind of energy into an electrical signal the brain can read. Each one has a small, fragile, non-renewable part at its centre, and that part is the reason most sensory loss is permanent.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>The eye &mdash; sight</h3>
+        <ul>
+          <li>About 120 million rods (light, movement, night) and 6 million cones (colour, detail) line the retina, and the whole image is carried down one nerve.</li>
+          <li>The lens focuses by changing shape; the iris controls how much light gets in; the cornea does most of the bending.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When sight is damaged</h3>
+        <ul>
+          <li><b>Cataract</b> &mdash; the lens clouds; reversible with surgery.</li>
+          <li><b>Glaucoma</b> &mdash; pressure quietly kills the optic nerve from the edge inwards. It has no symptoms until sight is already gone, and what is gone does not return.</li>
+          <li><b>Diabetic retinopathy</b> &mdash; high sugar damages the retina's tiny vessels, which leak or bleed.</li>
+          <li><b>Macular degeneration</b> &mdash; the centre of the picture goes, and faces and reading with it.</li>
+          <li><b>Detachment</b> &mdash; flashes and a curtain across the vision are an emergency; the retina is dying while you decide.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>The ear &mdash; hearing and balance</h3>
+        <ul>
+          <li>Sound funnels down the canal, moves the eardrum, and three tiny bones pass it to the cochlea, where about 16,000 hair cells bend and fire.</li>
+          <li>Those hair cells do not grow back. That single fact is why hearing loss from noise is permanent.</li>
+          <li>The same organ holds the vestibular system &mdash; three fluid-filled loops that report rotation and two sacs that report gravity.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When hearing is damaged</h3>
+        <ul>
+          <li><b>Noise</b> &mdash; damage begins around 85 dB for eight hours; a concert or a chainsaw reaches it in minutes. Ringing afterwards is the hair cells complaining.</li>
+          <li><b>Presbycusis</b> &mdash; age takes the high frequencies first, so speech becomes hard in a crowd before it is hard in a quiet room.</li>
+          <li><b>Tinnitus</b> &mdash; the brain filling in a missing frequency with a ring.</li>
+          <li><b>Vertigo</b> &mdash; a false sense of spinning from the balance organs; falls, nausea and fear of moving follow.</li>
+          <li><b>The cost of untreated loss</b> &mdash; isolation, depression, and a measurably higher risk of dementia. Hearing aids are one of the few things that change that curve.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>Touch, temperature, pain, position</h3>
+        <ul>
+          <li>Different receptors in the skin report different things: <b>Merkel</b> for fine edges, <b>Meissner</b> for flutter, <b>Pacinian</b> for vibration, <b>Ruffini</b> for stretch, and free nerve endings for heat, cold and pain.</li>
+          <li>Proprioception &mdash; receptors in muscle, tendon and joint reporting where the limb is &mdash; is the sense you use every second and never notice.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When touch is damaged</h3>
+        <ul>
+          <li><b>Neuropathy</b> &mdash; diabetes, chemotherapy, alcohol and vitamin B12 deficiency damage the longest nerves first, so the feet go numb before the hands.</li>
+          <li><b>The numb foot is the dangerous one</b> &mdash; you cannot feel the stone in the shoe, the hot bath or the blister, so the wound is found late, and that is how most diabetic amputations begin.</li>
+          <li><b>Phantom pain</b> &mdash; a limb that is gone still hurts, because the map in the brain is still there.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>Taste and smell</h3>
+        <ul>
+          <li>About 10,000 taste buds report five things: sweet, salt, sour, bitter, umami. Everything else you call "taste" is smell.</li>
+          <li>The olfactory nerve goes almost straight to the emotional brain, which is why a smell brings back a room from thirty years ago before you can name it.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When they are damaged</h3>
+        <ul>
+          <li><b>Lost smell</b> is a safety problem before it is a pleasure problem: gas, smoke and spoiled food stop announcing themselves.</li>
+          <li>It is also an early sign in Parkinson's and Alzheimer's, and a common lasting effect of some viral infections.</li>
+          <li><b>Lost taste</b> usually takes appetite with it, and in older people that means weight loss and weakness.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box plain">
+      <b>The senses nobody counts</b>
+      <p><b>Interoception</b> is the sense of your own inside: hunger, fullness, heartbeat, nausea, the need to breathe. It runs on the vagus nerve and the insula, and when it is blunted you stop noticing fullness and thirst before you notice anything else. <b>Nociception</b> is the warning system &mdash; pain is not the injury, it is the brain's decision about the injury, which is why it can be louder than the damage or quieter than it.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 07 · THE BRAIN ════════════════════════════════════════════════════ -->
+  <section class="part" id="brain">
+    <h2><span class="n">07</span> The brain and the nerves</h2>
+    <p class="sub">1.4 kg, 86 billion neurons, and a fifth of the oxygen you breathe.</p>
+
+    <p>The brain is 2% of your weight and takes 20% of your oxygen and about a quarter of your glucose, even while you sleep. It is protected by the skull, three membranes, a cushion of fluid and a barrier that lets only what it chooses out of the blood. Everything else &mdash; every organ on this page &mdash; is ultimately answering to it.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What it does</h3>
+        <ul>
+          <li><b>Keeps you alive without asking</b> &mdash; the brainstem runs breathing, heart rate, blood pressure, swallowing and temperature.</li>
+          <li><b>Makes sense of the senses</b> &mdash; the eye sends dots and edges; the brain builds a room.</li>
+          <li><b>Remembers and learns</b> &mdash; the hippocampus files new experience; repetition physically rewires connections.</li>
+          <li><b>Decides and inhibits</b> &mdash; the frontal lobes plan, judge and stop you doing the thing you would regret.</li>
+          <li><b>Coordinates</b> &mdash; the cerebellum times and smooths movement; the basal ganglia start and stop it.</li>
+          <li><b>Feels</b> &mdash; emotion, attachment and the physical sensation of both.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When it is damaged</h3>
+        <ul>
+          <li><b>Stroke</b> &mdash; a clot or a bleed cuts the blood supply. About 1.9 million neurons are lost a minute, which is why the time to treatment decides everything. Face, arm, speech, time.</li>
+          <li><b>Traumatic injury</b> &mdash; a blow, a fall, a shake. It can bleed, swell and bruise, and the effects on mood, sleep, memory and impulse can outlast the bruise by years.</li>
+          <li><b>Dementia</b> &mdash; Alzheimer's is 60&ndash;70% of it. It is not a normal part of ageing; it is a disease that erodes memory, language and self.</li>
+          <li><b>Parkinson's</b> &mdash; dopamine cells die, and movement becomes slow, stiff and shaky.</li>
+          <li><b>Epilepsy, MS, meningitis</b> &mdash; misfiring, scarred insulation, and infection of the membranes.</li>
+          <li><b>The consequences are specific</b> &mdash; the same stroke that weakens an arm can take the word for "cup", the ability to swallow safely, or the recognition of a face. Who a person is can change with a few cubic centimetres of damage.</li>
+        </ul>
+      </div>
+      <div class="fact keep">
+        <h3>What keeps it</h3>
+        <ul>
+          <li><b>Blood pressure and blood sugar in range</b> &mdash; the two biggest modifiable risks to the brain's vessels.</li>
+          <li><b>Sleep</b> &mdash; the brain clears waste and consolidates memory while you are out.</li>
+          <li><b>Movement</b> &mdash; exercise raises BDNF, a growth factor for neurons, and is the only thing so far that reliably lowers dementia risk.</li>
+          <li><b>Helmets, seatbelts, and not falling</b> &mdash; most traumatic brain injury is preventable in one second.</li>
+          <li><b>Use it and connect</b> &mdash; learning, company and purpose are protective, and the effect is measurable.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box anat">
+      <b>The hopeful fact</b>
+      <p>The brain does not regrow the cells it loses, but it rewires around them. Recovery after a stroke is not the return of dead tissue; it is the retraining of surviving tissue to do the job. That is why rehabilitation is work, why it takes months, and why it is not finished when the physiotherapist stops coming.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 08 · ARTERIES AND BLOOD VESSELS ═══════════════════════════════════ -->
+  <section class="part" id="vessels">
+    <h2><span class="n">08</span> Arteries and blood vessels</h2>
+    <p class="sub">About 100,000 km of pipe, lined with one layer of cells that decides how long you live.</p>
+
+    <p>Laid end to end, your vessels would go round the world twice and a half. The arteries carry blood out under pressure, the veins bring it back at almost none, and in between the capillaries are so fine that red cells pass through them in single file.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What they do</h3>
+        <ul>
+          <li><b>Delivery</b> &mdash; oxygen, glucose, fat, water, hormones and immune cells to every cell, and waste away from it.</li>
+          <li><b>The endothelium</b> &mdash; one cell thick, and it is not a lining but an organ: it makes nitric oxide to relax the vessel, controls clotting, and decides what may cross.</li>
+          <li><b>Pressure</b> &mdash; arterioles widen and narrow to set blood pressure and to send blood where it is needed. On demand, muscle can take five times the flow it gets at rest.</li>
+          <li><b>Heat</b> &mdash; skin vessels open to lose heat, close to keep it.</li>
+          <li><b>Repair and defence</b> &mdash; platelets plug leaks; white cells leave the blood through the vessel wall to reach an infection.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When they are damaged</h3>
+        <ul>
+          <li><b>Atherosclerosis</b> &mdash; fat and cholesterol lodge in the artery wall, inflame it, and form plaque. Plaque does not just narrow the pipe; it can crack and clot, and a clot is a heart attack or a stroke.</li>
+          <li><b>High blood pressure</b> &mdash; it has no symptoms and it damages everything: the heart thickens, the kidneys scar, the retina bleeds, the brain's vessels weaken.</li>
+          <li><b>Aneurysm and dissection</b> &mdash; a wall balloons or tears. A sudden tearing pain in the chest or back is an emergency, not a pulled muscle.</li>
+          <li><b>Peripheral artery disease</b> &mdash; narrowed leg arteries give cramping calves on walking, then pain at rest, then ulcers that will not heal. It is a warning about the heart and brain too.</li>
+          <li><b>Veins</b> &mdash; varicose veins, venous ulcers, and clots (DVT) that can travel to the lung. Sitting still for hours is the risk factor nobody respects.</li>
+          <li><b>The small vessels</b> &mdash; diabetes damages capillaries in the retina, kidney and nerve, which is why it is a disease of eyes, kidneys and feet.</li>
+        </ul>
+      </div>
+      <div class="fact keep">
+        <h3>What keeps them</h3>
+        <ul>
+          <li><b>Movement</b> &mdash; flowing blood drags on the endothelium and makes it release nitric oxide. That shear is the signal for a healthier lining.</li>
+          <li><b>Pressure and sugar in range</b> &mdash; the two numbers that matter most, and both are measurable at home.</li>
+          <li><b>Not smoking</b> &mdash; the single fastest improvement available to any vessel.</li>
+          <li><b>Fat quality, fibre, potassium</b> &mdash; less fried and processed fat, more plants, less salt.</li>
+          <li><b>Sleep and stress</b> &mdash; both move blood pressure more than most people expect.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 09 · MUCUS ════════════════════════════════════════════════════════ -->
+  <section class="part" id="mucus">
+    <h2><span class="n">09</span> Mucus, everywhere</h2>
+    <p class="sub">The body's first line, and the most misunderstood fluid it makes.</p>
+
+    <p>Mucus is a gel of water, salts, mucin proteins and antibodies. You make <b>one to two litres of it a day</b> and swallow almost all of it. It lines every surface that touches the outside world: the mouth, the nose, the sinuses, the throat, the lungs, the stomach, the whole intestine, the eyes, the cervix and the urinary tract.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What it does</h3>
+        <ul>
+          <li><b>Traps</b> &mdash; dust, pollen, smoke and microbes stick to it instead of to the cells underneath.</li>
+          <li><b>Moves</b> &mdash; in the airways, millions of cilia beat about a thousand times a minute and carry the sheet of mucus upwards to be swallowed. That escalator is why a healthy lung is sterile at the bottom.</li>
+          <li><b>Lubricates</b> &mdash; swallowing, speaking, the passage of stool, and sex all depend on it.</li>
+          <li><b>Protects</b> &mdash; the stomach's mucus layer is the only thing between acid at pH 1&ndash;2 and the stomach wall itself.</li>
+          <li><b>Keeps the microbiome at a distance</b> &mdash; in the colon there are two layers: the inner one is nearly sterile, the outer one is where the bacteria live. The barrier between them is the whole arrangement.</li>
+          <li><b>Carries immunity</b> &mdash; secretory IgA in mucus neutralises pathogens before they ever reach a cell.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When it goes wrong</h3>
+        <ul>
+          <li><b>Too thick</b> &mdash; dehydration, dry air, smoke, pollution and some infections turn the gel into glue. The cilia cannot move it, so it sits and grows things: sinusitis, otitis, bronchitis.</li>
+          <li><b>Too little</b> &mdash; dry eyes, dry mouth, nosebleeds, a raw throat, and a barrier that has thinned. Some autoimmune conditions attack the glands that make it.</li>
+          <li><b>Too much</b> &mdash; allergy, asthma, COPD and cystic fibrosis. In cystic fibrosis the mucus is so thick that the escalator fails permanently and infection becomes a way of life.</li>
+          <li><b>What the colour means</b> &mdash; clear is normal or allergic; white is congestion; yellow or green means immune cells have arrived (not automatically an antibiotic); brown or black is smoke or old blood; <b>red is blood and needs a doctor</b>.</li>
+        </ul>
+      </div>
+      <div class="fact keep">
+        <h3>What keeps it moving</h3>
+        <ul>
+          <li><b>Water first</b> &mdash; mucus is mostly water; nothing else works if you are dry.</li>
+          <li><b>Humidity and steam</b> &mdash; a hot shower loosens what a decongestant only squeezes.</li>
+          <li><b>Saline rinses</b> &mdash; salt water physically washes the sheet and its cargo away.</li>
+          <li><b>Movement</b> &mdash; walking and deep breathing move the escalator faster than sitting does.</li>
+          <li><b>Treat the cause</b> &mdash; allergy, reflux, smoking, a dry room. Decongestant sprays used more than three days make the congestion worse, not better.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box claim">
+      <b>What the books say</b>
+      <p>The tradition this library is built on &mdash; Ehret, Jensen, Afrika &mdash; teaches that mucus is the body's waste, that a diet of starch, dairy, sugar and processed food overfills it, that the overflow coats the organs and the tubes, and that disease begins where the coating settles. On this account, the runny nose, the catarrh, the coated tongue and the sluggish bowel are not separate complaints but one process with different addresses.</p>
+    </div>
+
+    <div class="box anat">
+      <b>What the anatomy says</b>
+      <p>Mucus is not waste. It is a designed secretion, and a body without it would be dead in days &mdash; the stomach would digest itself and the lungs would be colonised by the first breath. The idea of a "mucoid plaque" coating the bowel, which cleanses are sold to remove, has never been found in a single human being; what cleanses remove is what they put in.</p>
+      <p>What survives of the claim is the part that is useful: a diet heavy in refined starch, sugar and dairy, low in water and plants, does thicken and slow things down, and the fix the tradition prescribes &mdash; plants, water, movement, less of the rest &mdash; is sound. The mechanism is different from the one described, and the difference matters, because the mechanism tells you what to do when it does not work.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 10 · THE GUT AND CONSTIPATION ═════════════════════════════════════ -->
+  <section class="part" id="gut">
+    <h2><span class="n">10</span> The gut, and constipation</h2>
+    <p class="sub">Nine metres, forty square metres, and a nervous system of its own.</p>
+
+    <p>The gut is the largest surface you have, and the most heavily defended. It holds 100 trillion microbes, 70&ndash;80% of your immune cells, and about 500 million neurons &mdash; more than the spinal cord. It makes most of the body's serotonin, though almost none of that reaches the brain; it uses it locally, to move.</p>
+
+    <div class="facts">
+      <div class="fact does">
+        <h3>What the gut does</h3>
+        <ul>
+          <li><b>Digests and absorbs</b> &mdash; acid and enzymes break food down; 40 m&sup2; of folded surface takes it in.</li>
+          <li><b>Defends</b> &mdash; the lining is one cell thick and sealed by tight junctions, with mucus, antibodies and immune tissue behind it.</li>
+          <li><b>Houses the microbiome</b> &mdash; which ferments fibre into short-chain fatty acids that feed the colon's own cells and calm inflammation.</li>
+          <li><b>Talks to the brain</b> &mdash; the vagus nerve carries far more signals upward than downward. That is why the gut is felt in the mood.</li>
+          <li><b>Moves</b> &mdash; peristalsis is a wave of muscle, timed by the enteric nervous system, that runs without your permission.</li>
+        </ul>
+      </div>
+      <div class="fact dmg">
+        <h3>When the gut is damaged</h3>
+        <ul>
+          <li><b>Inflammatory bowel disease</b> &mdash; Crohn's and ulcerative colitis: ulcers, bleeding, pain, and damage that can spread to joints, skin and eyes.</li>
+          <li><b>Coeliac disease</b> &mdash; an immune attack on the small bowel triggered by gluten; the villi flatten and absorption falls.</li>
+          <li><b>A leaky barrier</b> &mdash; infection, alcohol, some drugs and severe stress loosen the junctions. It is a real phenomenon in intensive care and sepsis; the everyday version sold in supplements is largely a story.</li>
+          <li><b>Obstruction and perforation</b> &mdash; a blocked or burst bowel is a surgical emergency: pain, vomiting, a hard silent abdomen.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p><b>Constipation</b> is not one thing. Clinically it is fewer than three bowel movements a week, or hard lumpy stool, or straining, or a feeling of not finishing &mdash; and the stool chart (Bristol types 1&ndash;2) is the honest measure. It is also the most common complaint in the whole of medicine and the most casually dismissed.</p>
+
+    <table class="tbl">
+      <thead><tr><th>Cause</th><th>What is happening</th></tr></thead>
+      <tbody>
+        <tr><td>Too little fibre</td><td>No bulk, no water held in the stool, so the colon has to squeeze harder and longer.</td></tr>
+        <tr><td>Too little water</td><td>The colon takes water back out of the stool. Drink less and the stool gets drier.</td></tr>
+        <tr><td>Not moving</td><td>Movement speeds transit; stillness slows it. This is why hospital and long sitting are constipating.</td></tr>
+        <tr><td>Holding it</td><td>The signal to go is a reflex. Ignore it often enough and the reflex learns to whisper.</td></tr>
+        <tr><td>Medication</td><td>Opioids, iron, some antidepressants, calcium channel blockers, anticholinergics. Always ask a pharmacist.</td></tr>
+        <tr><td>Hormones</td><td>An underactive thyroid is a classic and easily missed cause.</td></tr>
+        <tr><td>Pelvic floor</td><td>The muscle that should relax to let stool out contracts instead. Common, rarely diagnosed, and treatable with physiotherapy.</td></tr>
+        <tr><td>Obstruction</td><td>A growth or a narrowing. This is why new constipation after 50 is not just a fibre problem.</td></tr>
+      </tbody>
+    </table>
+
+    <p><b>What constipation actually costs.</b> Straining makes haemorrhoids and anal fissures. Hard stool impacts and then leaks around itself &mdash; the "overflow" that looks like diarrhoea and is treated wrongly for months. It worsens diverticular disease, can cause rectal prolapse and urinary retention, and in an older person it can cause agitation, confusion and a refusal to eat that is put down to age. Severe impaction can perforate. None of that is mysterious, and all of it is treatable.</p>
+
+    <div class="box claim">
+      <b>What the books say</b>
+      <p>"Constipation is the root of disease." The tradition's argument: waste held in the colon ferments and putrefies, its poisons are reabsorbed, mucus is produced to wrap it, and that coating settles in the joints, the lungs, the skin and the blood. On this account, clean the bowel and the diseases that grew out of it clear.</p>
+    </div>
+
+    <div class="box anat">
+      <b>What the anatomy says</b>
+      <p>The colon does absorb water and some short-chain fatty acids, and it does host a huge bacterial population. It does not absorb "mucus" into the blood in the way the theory describes, and constipation is not the cause of arthritis, asthma, cancer or infection.</p>
+      <p>But the tradition has hold of something real, and it is worth naming precisely: <b>a slow, low-fibre, dehydrated, motionless gut is associated with worse outcomes across the board</b> &mdash; more inflammation, worse blood sugar, more diverticular disease, worse mood, and in hospital, more delirium and more infection. The relationship is real. The direction is not "constipation causes all disease"; it is that the same life that constipates you &mdash; little fibre, little water, little movement, poor sleep, high stress &mdash; is also the life that raises the risk of most chronic disease. Constipation is not the cause. <b>It is a sign, and one you can read every day.</b></p>
+    </div>
+
+    <div class="box anat">
+      <b>What actually causes infection</b>
+      <p>A pathogen, a route in, and a body that cannot stop it. The routes are the mouth, the air, broken skin, sexual contact and blood. What decides whether an exposure becomes an illness is the immune system's condition: sleep, nutrition, blood sugar, alcohol, smoking, steroids and age all move it. <b>The nearest true version of the books' claim</b> is that a severely blocked gut can stagnate and let bacteria overgrow or, in obstruction and critical illness, cross a failing barrier &mdash; which is a hospital emergency, not a daily explanation of disease.</p>
+    </div>
+
+    <div class="box warn">
+      <b>Go and be seen, not cleansed, if:</b>
+      <p>there is blood in the stool or on the paper; the stool is pencil-thin and stays that way; there is weight loss you did not intend; the change began after 50; there is iron-deficiency anaemia; there is pain that wakes you at night; or there is a family history of bowel cancer. These are not constipation &mdash; they are questions that need a doctor, and a cleanse only delays the answer.</p>
+    </div>
+
+    <div class="box plain">
+      <b>What actually helps, in order</b>
+      <p><b>Fibre, built up slowly</b> &mdash; 25&ndash;30 g a day from plants, with water to match, or it becomes worse before it becomes better. <b>Water.</b> <b>Movement every day.</b> <b>A routine</b> &mdash; the gut has a clock, and the hour after breakfast is the one it listens to. <b>Feet on a stool</b>, so the muscle can relax instead of fighting. <b>Kiwi, prunes and soaked linseed</b> have the best evidence of any food. <b>Ask about the medication list</b> before adding anything to it.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 11 · WHAT CAUSES DISEASE ══════════════════════════════════════════ -->
+  <section class="part" id="causes">
+    <h2><span class="n">11</span> So what does cause disease?</h2>
+    <p class="sub">The honest list, in the order it actually kills.</p>
+
+    <p>No single thing explains all disease, and any account that says one thing does is selling something. What the evidence supports is a short list of large causes, each of which shows up in the body as damage to a particular part.</p>
+
+    <table class="tbl">
+      <thead><tr><th>Cause</th><th>How it does its damage</th></tr></thead>
+      <tbody>
+        <tr><td>Blood pressure</td><td>Quietly damages arteries, heart, kidneys, eyes and brain for decades. The largest single modifiable risk of death worldwide.</td></tr>
+        <tr><td>Smoking</td><td>Damages the lining of every vessel, paralyses the cilia, and carries carcinogens into the lung. Nothing else is as bad for as many parts at once.</td></tr>
+        <tr><td>Blood sugar</td><td>Glycates proteins and destroys capillaries, which is why it takes eyes, kidneys, nerves and feet.</td></tr>
+        <tr><td>Infection</td><td>Bacteria, viruses, fungi and parasites &mdash; through the mouth, air, skin, sex and blood. The cause of most acute illness on earth.</td></tr>
+        <tr><td>What you eat and drink</td><td>Too much refined food, alcohol and salt; too little fibre and plants. It shows up as fat around the organs, inflammation and a gut that has lost its range.</td></tr>
+        <tr><td>Movement</td><td>Its absence is a cause in its own right &mdash; for muscle, bone, vessels, gut, mood and brain.</td></tr>
+        <tr><td>Sleep and stress</td><td>Short sleep and chronic stress raise blood pressure, cortisol and appetite, and lower immune function.</td></tr>
+        <tr><td>Genes and age</td><td>Load the gun. What pulls the trigger is almost always one of the lines above.</td></tr>
+        <tr><td>Chance</td><td>Accidents, some cancers, some autoimmune disease. Not everything is a lesson, and pretending otherwise is cruel.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box plain">
+      <b>The one-line version</b>
+      <p>The parts on this page fail for a small number of repeated reasons: <b>pressure, sugar, smoke, stillness, and what passes through the gut.</b> Everything else is detail, and the detail is where the help is.</p>
+    </div>
+
+    <div class="close">
+      <h2>One page to keep</h2>
+      <p><b>Muscle</b> grows from load, fed by carbohydrate, built from protein &mdash; all three, or none.</p>
+      <p><b>Tendon and ligament</b> heal in months and never quite to new; load them slowly and for longer than feels necessary.</p>
+      <p><b>Bone</b> is a bank: deposit with impact, calcium and vitamin D, and it pays out in the last twenty years of your life.</p>
+      <p><b>Skin</b> is a wall; a hole in it is an invitation. <b>Senses</b> are windows that do not regrow; protect the ears and the eyes while they still work.</p>
+      <p><b>Brain</b> runs on blood, sleep and use. <b>Vessels</b> are decided by pressure, sugar and smoke. <b>Mucus</b> is a defence, not a waste &mdash; water keeps it moving.</p>
+      <p><b>Constipation</b> is a sign you can read daily, not the cause of all disease &mdash; and it is worth taking seriously rather than mystically.</p>
+    </div>
+
+    <div class="next">
+      <a href="/spells"><b>The Book of Spells &rarr;</b><span>The workings that come out of this page: breath, food, sleep, naming, and the closing of a day.</span></a>
+      <a href="/herbs"><b>The Herbs &rarr;</b><span>What the plants do, and which ones belong beside which part of the body.</span></a>
+    </div>
+  </section>
+
+  <p class="ft">
+    The Body &mdash; private. Built for Jacques, beside <i>African Holistic Health</i>, <i>Nutricide</i><br>
+    and the Herb Library. Anatomy from the standard texts; the books' claims are printed as claims.<br>
+    Nothing here is a diagnosis, and nothing here replaces a doctor.
+  </p>
+</div>
+
+<script>
+/* ── THE VOICE ────────────────────────────────────────────────────────────────
+   The phone reads this page as it stands: the words on it, in the order they are
+   drawn, and never a control - a button is not a word. speechSynthesis is the
+   browser's own, so nothing leaves the phone, there is no key and no server, and
+   it works with no signal. The same reader the shell and the other pages carry. */
+(function(){
+  "use strict";
+  var ROOT = '.wrap';
+  var SKIP = /(^|\s)(sayrow|saybtn|saysaid|noprint|noSay|hide|tabs|controls|ask-chips|ask-badge|ask-chev)(\s|$)/;
+  var CONTROL = /^(BUTTON|INPUT|SELECT|TEXTAREA|OPTION|SCRIPT|STYLE|SVG|IMG|VIDEO|AUDIO|CANVAS)$/;
+  var BLOCK = /^(DIV|P|LI|UL|OL|H1|H2|H3|H4|TABLE|TR|TD|TH|SECTION|ARTICLE|FORM|LABEL|MAIN|HEADER|FOOTER|DETAILS|SUMMARY|ASIDE|NAV|BLOCKQUOTE|FIGURE|FIGCAPTION|DL|DT|DD)$/;
+  var SAYING = false;
+  function voiceOK(){
+    return typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
+  }
+  function speakable(s){
+    return String(s).split(/[ \t]*\n+[ \t]*/)
+      .map(function(x){ return x.replace(/[ \t]{2,}/g, ' ').trim(); })
+      .filter(function(x){ return x.length > 1; })
+      .join(' ');
+  }
+  function words(e){
+    var buf = '';
+    (function take(n){
+      var kids = n.childNodes;
+      for (var i = 0; i < kids.length; i++){
+        var c = kids[i];
+        if (c.nodeType === 3){ buf += c.nodeValue; continue; }
+        if (c.nodeType !== 1) continue;
+        if (c.hidden) continue;
+        if (SKIP.test(c.className || '')) continue;
+        if (CONTROL.test(c.tagName)) continue;
+        take(c);
+      }
+    })(e);
+    return buf;
+  }
+  function pageText(){
+    var root = document.querySelector(ROOT) || document.querySelector('.wrap') || document.body;
+    if (!root) return '';
+    var out = [];
+    (function walk(e){
+      var kids = e.children, deeper = false;
+      for (var i = 0; i < kids.length; i++){
+        var c = kids[i];
+        if (c.hidden) continue;
+        if (SKIP.test(c.className || '')) continue;
+        if (CONTROL.test(c.tagName)) continue;
+        if (!(c.textContent || '').trim()) continue;
+        if (BLOCK.test(c.tagName)){ deeper = true; walk(c); }
+      }
+      if (deeper) return;
+      var t = speakable(words(e));
+      if (t) out.push(t);
+    })(root);
+    return join(out);
+  }
+  function join(out){
+    var s = '';
+    for (var i = 0; i < out.length; i++){
+      if (i) s += /[.!?,;:]$/.test(s) ? ' ' : '. ';
+      s += out[i];
+    }
+    return s;
+  }
+  function sayStop(){
+    if (voiceOK()){ try { speechSynthesis.cancel(); } catch (e) {} }
+    SAYING = false;
+    var b = document.getElementById('sayBtn'); if (b) b.textContent = 'Read it to me';
+    var s = document.getElementById('sayStop'); if (s) s.hidden = true;
+  }
+  function say(){
+    var b = document.getElementById('sayBtn');
+    if (SAYING){ sayStop(); return; }
+    if (!voiceOK()){ if (b) b.textContent = 'This phone has no voice'; return; }
+    var text = pageText();
+    if (!text){ if (b) b.textContent = 'Nothing here to read yet'; return; }
+    sayStop();
+    var u = new SpeechSynthesisUtterance(text);
+    u.onend = function(){ if (SAYING) sayStop(); };
+    u.onerror = function(){ if (SAYING) sayStop(); };
+    SAYING = true;
+    if (b) b.textContent = 'Stop';
+    var s = document.getElementById('sayStop'); if (s) s.hidden = false;
+    try { speechSynthesis.speak(u); } catch (e) { sayStop() }
+  }
+  var sb = document.getElementById('sayBtn'); if (sb) sb.addEventListener('click', say);
+  var ss = document.getElementById('sayStop'); if (ss) ss.addEventListener('click', sayStop);
+  window.addEventListener('beforeunload', sayStop);
+  window.SAY = { text: pageText, say: say, stop: sayStop };
+})();
+</script>
+</body>
+</html>

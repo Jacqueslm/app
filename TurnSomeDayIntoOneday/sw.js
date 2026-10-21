@@ -91,7 +91,13 @@
 // that keeps its old shell has no panes on it at all. Note what this does NOT
 // change - the panes load the same gated routes a tap on a door loads, and the
 // skips below still keep every one of those pages out of the cache.
-const CACHE_NAME = 'tsid-shell-v3.6';
+//
+// 21 Oct 2026: The Body and The Book of Spells joined the app - two new doors on
+// the shell, and two more private pages for the skip list below. The name moves
+// to 3.7 with them, for the reason every bump above gives: an installed phone
+// that never rebuilds its shell never sees the two doors, and - worse - would
+// keep serving its old shell beside two pages it has no way to reach.
+const CACHE_NAME = 'tsid-shell-v3.7';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -220,6 +226,12 @@ self.addEventListener('fetch', (event) => {
   // and the offline fallback would hand it out unguarded. Both addresses again,
   // the clean URL and the file name.
   if (['/certify', '/certify.html'].includes(url.pathname)) return;
+
+  // The Body and The Book of Spells joined on 21 Oct 2026, for the reason every
+  // private page above is in this list: a cached copy would outlive the check
+  // that let it in, and the offline fallback would hand it out unguarded. Both
+  // addresses again - the clean URL and the file name reach the same gated route.
+  if (['/body', '/body.html', '/spells', '/spells.html'].includes(url.pathname)) return;
 
   // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
   // Its whole point is that it is read fresh - a cached "here is every track"

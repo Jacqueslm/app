@@ -4,7 +4,7 @@
   "outputDirectory": "webroot",
   "functions": {
     "api/index.js": {
-      "includeFiles": "{hub,key,herbs,tax,music,trainer,certify}.html"
+      "includeFiles": "{hub,key,herbs,tax,music,trainer,certify,body,spells}.html"
     }
   },
   "rewrites": [
@@ -22,6 +22,10 @@
     { "source": "/trainer.html", "destination": "/api/index.js" },
     { "source": "/certify", "destination": "/api/index.js" },
     { "source": "/certify.html", "destination": "/api/index.js" },
+    { "source": "/body", "destination": "/api/index.js" },
+    { "source": "/body.html", "destination": "/api/index.js" },
+    { "source": "/spells", "destination": "/api/index.js" },
+    { "source": "/spells.html", "destination": "/api/index.js" },
     { "source": "/api/(.*)", "destination": "/api/index.js" }
   ]
 }

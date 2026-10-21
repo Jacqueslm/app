@@ -119,6 +119,13 @@ const OPEN_PAGES = [
   // certify.html is a real file as well as a clean URL, and static would
   // otherwise serve the file name unguarded.
   '/certify', '/certify.html',
+  // The Body and The Book of Spells (21 Oct 2026): the organs and what damage
+  // costs, and twenty-four workings built out of the same research. Private like
+  // the rest, so they are listed here only so the request can reach their route.
+  // Both addresses each, because body.html and spells.html are real FILES as well
+  // as clean URLs and static would otherwise serve the names unguarded.
+  '/body', '/body.html',
+  '/spells', '/spells.html',
 ];
 // Addresses that carry a token or land somewhere else entirely, matched by
 // prefix: the API the app is nothing without, and a letter link (/l/<token>).

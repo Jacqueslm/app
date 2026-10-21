@@ -82,7 +82,11 @@ test('the other shipped HTML pages parse too', () => {
   // two ninety-day tracks, the quizzes, the tests and the certificate - so a
   // SyntaxError in it leaves a page that looks loaded and does nothing, which is
   // exactly the failure this list was written for.
-  const pages = ['key.html', 'herbs.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html', 'trainer.html', 'certify.html'];
+  // body.html and spells.html joined on 21 Oct 2026. body.html is mostly markup,
+  // but spells.html keeps his own workings on the phone, and a SyntaxError in
+  // the script that does the keeping would leave a form that looks fine and saves
+  // nothing - the same failure this list exists for.
+  const pages = ['key.html', 'herbs.html', 'letter.html', 'admin-stats.html', 'landing.html', 'tax.html', 'music.html', 'trainer.html', 'certify.html', 'body.html', 'spells.html'];
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-syntax-pages-'));
   try {
     for (const page of pages) {

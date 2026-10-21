@@ -51,6 +51,10 @@ const OWN_VOICE = {
 const SHARED = [
   'hub.html', 'letter.html', 'privacy.html', 'delete-account.html',
   'reset.html', 'tax.html', 'music.html',
+  // The Body and The Book of Spells (21 Oct 2026) share the same reader: both
+  // are long pages of words, and neither had a reason to grow a voice of its
+  // own when the whole app already had one that reads the screen in order.
+  'body.html', 'spells.html',
 ];
 
 // What the reader should say about the stand-in page below: the words on the

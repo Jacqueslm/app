@@ -221,12 +221,78 @@ unit drops by **about 60%** while your labor per unit stays exactly the same.
 | **Farmers market** | $10–$45 booth/day + your Saturday |
 | **Etsy** | $0.20 listing + 6.5% transaction + 3% + $0.25 processing ≈ **$1.80 (11%)** |
 | **Shopify** | $29/mo + 2.9% + $0.30 ≈ **$0.76 + platform** |
-| **Amazon** | $39.99/mo (or $0.99/item) + 15% referral + FBA ~$3/unit + 3.5% logistics surcharge from Apr 2026; **supplements require third-party testing documentation** |
+| **Amazon** | $39.99/mo (or $0.99/item) + 15% referral + FBA ~$3/unit + 3.5% logistics surcharge from Apr 2026; **supplements require third-party TIC verification + cGMP facility audit** |
+| **TikTok Shop** | 6–8% referral; **supplements are invite-only** and require cGMP + 180-day lab report; **homemade food/tea is prohibited** |
 | **Faire (wholesale)** | 15% + $10 on a new customer's first order + 2.4% processing ≈ **24% of a $150 opening order** |
 
 That Faire number matters: on a **$150 opening order** you pay about **$36.40 in
 fees**, so a $75 product-cost order nets you roughly $38 — before shipping. If
 your wholesale margin is already thin, Faire eats it.
+
+### Online channels in detail: Amazon, Shopify, Etsy, TikTok Shop
+
+The platform does not care that a product is "natural" — it cares which box your
+SKU sits in (**conventional food / tea**, **cosmetic / salve**, or **dietary
+supplement**), whether you made a medical claim, and where it was made.
+
+1. **Amazon is closed to home-made supplements — and expensive even for
+   co-packed ones.** Since April 2024, Amazon requires dietary supplements to be
+   verified directly through an Amazon-approved Third-Party Testing, Inspection,
+   and Certification (**TIC**) organization (such as NSF, Eurofins, or UL) inside
+   Seller Central's *Manage Your Compliance* dashboard — uploading a supplier's
+   COA PDF yourself no longer satisfies the check. Verification covers
+   contaminant panels (heavy metals, microbials), label-claim content, and an
+   **accredited third-party cGMP facility audit (21 CFR Part 111)** of the plant
+   that made it; trade reporting in *NutraIngredients* put small-brand verification
+   and testing costs around **$2,000–$2,500+ per SKU**. A tincture or capsule
+   bottled in a home kitchen cannot pass the facility-audit requirement.
+   - **What *can* go on Amazon early:** a plain **herbal tea** sold as a
+     conventional grocery beverage (no Supplement Facts panel, no health claims;
+     Amazon's Grocery approval can ask for production documentation or wholesale
+     invoices of 10+ units within 180 days, and does not waive state cottage-food
+     limits) or a **topical salve** marketed strictly as a moisturizing cosmetic
+     (MoCRA rules apply, though qualifying small businesses have a registration
+     exemption for ordinary topicals).
+2. **Shopify is the best home base — until a disease claim freezes your
+   payouts.** You own the customer list and pay no marketplace referral fee,
+   only **$29/mo + 2.9% + $0.30**. The trap is **Shopify Payments**: its
+   prohibited-business rules bar **"pseudo-pharmaceuticals"** — any product
+   making health or medical claims not verified by a regulator. A single landing
+   page, product title, or customer review claiming your herb treats anxiety,
+   pain, insomnia, or eczema can trigger a payout hold or processor shut-off
+   even while the storefront stays live. Keep every Shopify listing strictly on
+   culinary, cosmetic, or disclaimed structure/function language, and get written
+   support confirmation before launching edge-case botanicals.
+3. **Etsy is the cheapest online test bed for salves and teas.** No monthly fee
+   required to start, built-in search traffic for handmade balms and loose-leaf
+   botanical blends, and ~11% total fee per order. Etsy actively polices medical
+   claims and restricts certain herbs and supplement listings — treat your tags
+   and descriptions like an FDA label.
+4. **TikTok Shop is strict on where food and supplements are made.** In the US,
+   TikTok Shop's **Dietary Supplements** category is **invite-only** and requires
+   FDA facility registration, valid **21 CFR Part 111 cGMP** certification, and a
+   lab report less than **180 days old** (microbial, heavy metals, contaminants,
+   potency). Its **Shelf-Stable Food** policy (which covers herbs and teas)
+   explicitly lists **"homemade food or beverage products" as prohibited** and
+   can require FDA registration or 21 CFR Part 117 documentation. Its **Beauty &
+   Personal Care** category allows cosmetics with either FDA MoCRA registration
+   or a qualifying small-business self-attestation — making a **cosmetic salve**
+   the realistic entry SKU on TikTok Shop.
+5. **Shipping math kills single-item $14 orders online.** A packed 1–4 oz pouch
+   or small boxed jar ships via **USPS Ground Advantage** commercial rates
+   (Pirate Ship or Shopify Shipping) at roughly **$4.45–$5.20** across Zones 1–8;
+   once protective cardboard around a glass dropper bottle or salve jar pushes
+   packed weight into the **5–8 oz tier**, postage runs **$4.79–$5.55** plus
+   ~$0.50–$0.90 for the box and padding. Shipping a single $14 bag of tea with
+   "free shipping" eats two-thirds of your margin. Online, **either charge flat
+   $5 shipping under $40, or lead with a $42 three-piece bundle**.
+
+So the honest channel order is:
+
+> **1. Farmers market + Shopify + Etsy** for teas and salves from day one →
+> **2. Local shops (direct wholesale, not Faire)** once reorders prove out →
+> **3. Amazon and TikTok Shop for supplements only after** a single SKU does
+> enough volume to pay for a cGMP co-packer and a $2,000+ third-party lab panel.
 
 ### The two numbers that decide whether this is a business
 
@@ -340,6 +406,57 @@ samples $100, website $100.
 
 ---
 
+## 9. Moral rules for selling herbs
+
+Herbs sit right at the crossroads of people's pain, their money, and their hope.
+That makes it one of the easiest businesses in the world to run dishonestly — and
+one of the best to run clean. Seven rules that keep your conscience and your
+business intact:
+
+1. **Never sell hope to desperate people.** When someone comes to your table or
+   your inbox with cancer, kidney failure, diabetes, or severe depression, the
+   moral answer and the legal answer are the same: *do not position a $16 bottle
+   between them and their doctor.* Tell them plainly what an herb is good for
+   (comfort, routine, nourishment, skin, a calm evening cup) and what it is not.
+   You will lose a $16 sale and keep your soul.
+2. **Ask the two safety questions every time.** Before you hand someone an
+   internal herb, ask: *"Are you pregnant or nursing, and what medications are
+   you taking?"* Licorice raises blood pressure and depletes potassium; St.
+   John's wort clears birth control, blood thinners, and transplant drugs out of
+   the bloodstream; elderberry and echinacea are debated in autoimmune disease;
+   nettle and dandelion shift diuretic load. Knowing the contraindications of the
+   six herbs you sell better than anyone in the room is what separates an
+   herbalist from a hustler.
+3. **No fairy-dusting.** Big supplement brands put 500 mg of a cheap filler in a
+   capsule, sprinkle 5 mg of an expensive adaptogen on top so they can print the
+   name on the front, and hide behind a "Proprietary Blend." Print the actual
+   parts or milligrams of every plant in the jar, and use enough of the herb to
+   actually do the job.
+4. **Never pass off bought herbs as herbs you grew.** Buying from Starwest,
+   Frontier, or Monterey Bay is completely honorable — almost every apothecary in
+   the country does it. Pretending you harvested it yourself at a market table
+   is a lie that eventually gets caught when a customer asks to see your beds.
+   Say *"sourced from certified organic growers, blended and tinctured by hand in
+   small batches"* — that is true and respected.
+5. **Respect endangered and over-harvested wild plants.** Do not buy or sell
+   wild-harvested goldenseal, American ginseng, false unicorn, lady's slipper,
+   slippery elm bark, or osha unless it is verified cultivated or forest-grown
+   (check the **United Plant Savers** at-risk list). Common weeds and garden
+   herbs — nettle, dandelion, burdock, calendula, plantain, yarrow, tulsi,
+   peppermint, chamomile, mullein — are abundant, cheap, and work just as well.
+6. **Price fairly, not by fear.** A 1 oz tincture costs ~$2.35 in materials and
+   sells honestly for $15–$18 because of your labor, testing, bottles, insurance,
+   and booth. Charging $65 for the same ounce of weed extract by dressing it in
+   mystical scarcity language preys on people who cannot afford it. Keep your
+   flagship remedies reachable for working people.
+7. **Keep a batch notebook and throw out bad batches.** Every batch gets a date,
+   supplier lot number, weight, alcohol percentage, and a tasted/smelled check.
+   If an infused oil smells slightly rancid, or a salve got a drop of water in
+   the jar and spots mold, dump the whole batch in the trash. The batch that
+   hurts you is the one you talked yourself into selling anyway.
+
+---
+
 ## Sources
 
 Regulatory: [FDA — Q&A on dietary supplements](https://www.fda.gov/food/information-consumers-using-dietary-supplements/questions-and-answers-dietary-supplements) ·
@@ -351,6 +468,8 @@ Regulatory: [FDA — Q&A on dietary supplements](https://www.fda.gov/food/inform
 [FDA — small business nutrition labeling exemption](https://www.fda.gov/food/labeling-nutrition-guidance-documents-regulatory-information/small-business-nutrition-labeling-exemption-guide) ·
 [21 CFR Part 1 Subpart H (facility registration)](https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-1/subpart-H) ·
 [MoCRA](https://www.fda.gov/cosmetics/cosmetics-laws-regulations/modernization-cosmetics-regulation-act-2022-mocra) ·
+[FDA — Small Businesses & Homemade Cosmetics](https://www.fda.gov/cosmetics/resources-industry-cosmetics/small-businesses-homemade-cosmetics-fact-sheet) ·
+[FDA — Is it a cosmetic, a drug, or both?](https://www.fda.gov/cosmetics/cosmetics-laws-regulations/it-cosmetic-drug-or-both-or-it-soap) ·
 [TTB — extraction products](https://www.ttb.gov/extraction-products/extraction-products-faqs/print) ·
 [Washington cottage food](https://agr.wa.gov/cottagefood) ·
 [Minnesota cottage food](https://www.mda.state.mn.us/food-feed/cottage-food-law-guidance) ·
@@ -375,7 +494,17 @@ Manufacturing and certification: [Griffo Botanicals](https://griffobotanicals.co
 
 Channels and money: [Etsy fees](https://www.etsy.com/legal/fees/) ·
 [Amazon selling fees](https://sell.amazon.com/pricing) ·
+[Amazon — How to sell groceries](https://sell.amazon.com/blog/how-to-sell-groceries-amazon) ·
+[Certified Labs — Amazon supplement TIC testing requirements](https://certified-laboratories.com/blog/amazon-dietary-supplement-requirements-for-laboratory-testing/) ·
+[NutraIngredients — Amazon supplement verification costs](https://www.nutraingredients.com/Article/2024/08/08/Amazon-sellers-paying-the-high-price-of-updated-dietary-supplements-policy/) ·
 [Shopify pricing](https://www.shopify.com/pricing) ·
+[Shopify Payments eligibility & pseudo-pharmaceuticals](https://help.shopify.com/en/manual/payments/shopify-payments/onboarding/eligibility) ·
+[Shopify Payments account holds](https://help.shopify.com/en/manual/payments/shopify-payments/payouts/account-holds) ·
+[TikTok Shop US — Dietary Supplements](https://seller-us.tiktok.com/university/essay?knowledge_id=1411277869713198&lang=en) ·
+[TikTok Shop US — Shelf-Stable Food & Beverages](https://seller-us.tiktok.com/university/essay?knowledge_id=1427590502287146) ·
+[TikTok Shop US — Beauty & Personal Care](https://seller-us.tiktok.com/university/essay?knowledge_id=1789325403522858) ·
+[USPS Ground Advantage](https://www.usps.com/ship/ground-advantage.htm) ·
+[Pirate Ship Ground Advantage](https://www.pirateship.com/usps/ground-advantage) ·
 [Faire brand fees](https://www.faire.com/support/articles/360015893392) ·
 [Insureon — product liability cost](https://www.insureon.com/small-business-insurance/product-liability/cost) ·
 [Navion — supplement liability](https://navionins.com/liability-insurance-dietary-supplements-nutraceuticals/)

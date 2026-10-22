@@ -625,6 +625,44 @@ test('the herb library: what was left off is in — the chart, the remedies, the
   assert.match(stone.c, /not a reliable contraceptive/, 'the old practice is not sold as a method');
 });
 
+/* ------------------------------------------------ the claim, on every shelf
+   22 Oct 2026. Jacques: "Put the book claim where its missing throughout the app."
+   The tab was already built on the rule that a line says whose it is, but ten
+   shelves carried the book's rows with no box at the foot saying so - and some of
+   them under a heading that did not name the book either ("Blood cleansers",
+   "Immune system builders", "The doctrine of signatures"). Opened, each was a wall
+   of the book's lines with nothing on the screen to say whose they were. This
+   holds the rule to every shelf on the tab, so the next one cannot arrive unlabelled. */
+test('the herb library: every shelf on the From the books tab says whose claims it carries', () => {
+  const p = loadPage('herbs.html');
+  // The one shelf that is not the book's material: it is the index of where each
+  // part of the tab came from. That is provenance rather than a claim, and its own
+  // rows name the book and the page for every section, so it needs no box of its own.
+  const PROVENANCE = 'What came from where';
+  for (const b of p.sandbox.BOOKS) {
+    if (b.h === PROVENANCE) {
+      assert.ok(!b.note, 'the provenance shelf is not given a claim box it does not need');
+      continue;
+    }
+    assert.ok(b.note, `${b.h} carries a box saying whose claims these are`);
+    assert.match(b.note, /book|page|lecture|claim/i, `${b.h}'s box names the voice`);
+    // A box, not a last paragraph that can be scrolled past: warnbox where the
+    // line is a caution, okbox where the book's shelf is printed as it stands.
+    assert.match(b.noteCls || '', /^(warn|ok)box$/, `${b.h}'s box is drawn as a box, not as prose`);
+  }
+
+  // And the box reaches the screen, inside the shelf it belongs to.
+  p.sandbox.tab = 'books';
+  p.sandbox.render();
+  const html = p.els.get('view').innerHTML;
+  assert.match(html, /The book's shelf, printed as its claim/,
+    'the blood-cleanser shelf says so where it is read');
+  assert.match(html, /The doctrine is the book's, printed as its claim/,
+    'and so does the doctrine of signatures');
+  assert.match(html, /The book's own sentences, printed as the book's/,
+    "and so does the shelf of the book's own lines");
+});
+
 test('the herb library: searching finds a herb by the book words too', () => {
   const p = loadPage('herbs.html');
   // A word that appears only in a book line has to hit, or the material that

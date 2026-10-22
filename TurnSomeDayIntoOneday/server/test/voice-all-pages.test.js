@@ -57,6 +57,13 @@ const SHARED = [
   'body.html', 'spells.html',
 ];
 
+// The two pages long enough that the phone will not say them in one go. The Body
+// is 45,000 characters and the Book of Spells 27,000; Android's own voice takes an
+// utterance that long and says nothing at all, which is exactly what a dead
+// button looks like. Their reader cuts the page at its punctuation and queues the
+// pieces, so these two are held to that here.
+const CHUNKED = ['body.html', 'spells.html'];
+
 // What the reader should say about the stand-in page below: the words on the
 // screen, in the order they are drawn. The heading and its line, the card, the
 // steps of a list, the sentence with links in it, and the paragraph written
@@ -137,21 +144,34 @@ function loadVoice(page, opts) {
   assert.equal(blocks.length, 1, `${page}: exactly one voice script`);
   const said = [];
   const dom = standIn();
+  let pending = null;
   const sandbox = { document: dom.doc, console, Math, JSON, String, Array, Object, RegExp, Error };
   if (!(opts && opts.noVoice)) {
     sandbox.speechSynthesis = {
-      speak(u) { said.push(String(u.text)); },
-      cancel() {},
+      // A phone keeps the piece it was given until it has said it, then calls
+      // onend - and the reader uses that to queue the next piece. The stand-in
+      // holds it the same way, and finish() is the test saying "that one was
+      // spoken", so the reading can be walked through piece by piece rather
+      // than wished into existence.
+      speak(u) { said.push(String(u.text)); pending = u; },
+      cancel() { pending = null; },
     };
     sandbox.SpeechSynthesisUtterance = function (text) { this.text = text; };
   }
+  const finish = () => {
+    const u = pending;
+    pending = null;
+    if (!u) return false;
+    if (typeof u.onend === 'function') u.onend();
+    return true;
+  };
   // window.addEventListener, so the reader can unhook itself on the way out.
   sandbox.addEventListener = () => {};
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(blocks[0], sandbox, { filename: page });
-  return { sandbox, said, ...dom };
+  return { sandbox, said, finish, ...dom };
 }
 
 test('every page in the app is accounted for: a voice, or a reason it has none', () => {
@@ -189,7 +209,7 @@ test('every page with a voice has a control that starts it and one that stops it
 
 test('the shared reader reads the screen, in order, and never a control', () => {
   for (const page of SHARED) {
-    const { sandbox, said, btn, stop } = loadVoice(page);
+    const { sandbox, said, finish, btn, stop } = loadVoice(page);
     assert.ok(sandbox.SAY, `${page}: the reader is on the page`);
     assert.equal(sandbox.SAY.text(), EXPECTED, `${page}: the words on the screen, in order`);
     for (const never of NEVER) {
@@ -197,11 +217,40 @@ test('the shared reader reads the screen, in order, and never a control', () => 
     }
 
     btn.click();
-    assert.deepStrictEqual(said, [EXPECTED], `${page}: the whole page, once`);
+    // A tap speaks the first piece at once, and offers the way out while there is
+    // still something being said.
     assert.equal(btn.textContent, 'Stop', `${page}: the button becomes Stop`);
     assert.equal(stop.hidden, false, `${page}: and a way out is offered`);
+    assert.equal(said.length, 1, `${page}: one piece at a time, not the lot`);
 
+    // Then the phone says each piece and the reader queues the next, until the
+    // page is done and the reader puts itself away. The whole page is checked in
+    // order, and on the long pages no piece is allowed to be so long that the
+    // phone takes it and goes quiet - which is what a dead button looks like.
+    let guard = 0;
+    while (finish()) {
+      assert.ok(++guard < 500, `${page}: the reading ends`);
+    }
+    assert.equal(said.join(' '), EXPECTED, `${page}: the whole page, in order`);
+    if (CHUNKED.includes(page)) {
+      assert.ok(said.length > 1, `${page}: in pieces the phone will say`);
+      for (const piece of said) {
+        assert.ok(piece.trim().length > 0, `${page}: no empty piece`);
+        assert.ok(piece.length <= 200, `${page}: a piece short enough to be spoken (${piece.length})`);
+      }
+    } else {
+      assert.deepStrictEqual(said, [EXPECTED], `${page}: the whole page, once`);
+    }
+    assert.equal(btn.textContent, 'Read it to me', `${page}: done, and ready again`);
+    assert.equal(stop.hidden, true);
+
+    // And stopping in the middle keeps the rest of the page unspoken.
+    btn.click();
+    assert.equal(btn.textContent, 'Stop');
     stop.click();
+    const spoken = said.length;
+    assert.ok(!finish(), `${page}: nothing left to say once stopped`);
+    assert.equal(said.length, spoken, `${page}: and no piece follows it`);
     assert.equal(btn.textContent, 'Read it to me', `${page}: stopped, and ready again`);
     assert.equal(stop.hidden, true);
   }
@@ -227,6 +276,9 @@ test('the reader is given a page it can really find, on every page it was added 
     assert.ok(root, `${page}: the reader says where the page begins`);
     assert.ok(FOUND[root], `${page}: "${root}" is not a root this file knows how to find`);
     assert.match(html, FOUND[root], `${page}: "${root}" is really in the page`);
+    if (CHUNKED.includes(page)) {
+      assert.match(html, /var list = chunks\(text\)/, `${page}: the page is cut up before it is spoken`);
+    }
   }
 });
 

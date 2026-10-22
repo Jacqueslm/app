@@ -925,6 +925,28 @@ h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter
     var b = document.getElementById('sayBtn'); if (b) b.textContent = 'Read it to me';
     var s = document.getElementById('sayStop'); if (s) s.hidden = true;
   }
+  /* One utterance per sentence or two, not one for the whole page. A phone's own
+     voice will not say a page this long: handed 45,000 characters in one lump,
+     Android's engine takes the call and says nothing, and the button looks dead.
+     So the page is cut at its punctuation and each piece is queued after the one
+     before it - the reading sounds the same, and every phone will say it. */
+  function chunks(text, max){
+    var s = String(text).replace(/\s+/g, ' ').trim(), out = [];
+    max = max || 180;
+    while (s.length > max){
+      var cut = -1, marks = ['. ', '? ', '! ', '; ', ', '];
+      for (var i = 0; i < marks.length && cut === -1; i++){
+        var at = s.lastIndexOf(marks[i], max);
+        if (at > max * 0.4) cut = at + 1;
+      }
+      if (cut === -1) cut = s.lastIndexOf(' ', max);
+      if (cut < 1) cut = max;
+      out.push(s.slice(0, cut).trim());
+      s = s.slice(cut).trim();
+    }
+    if (s) out.push(s);
+    return out;
+  }
   function say(){
     var b = document.getElementById('sayBtn');
     if (SAYING){ sayStop(); return; }
@@ -932,13 +954,18 @@ h1{margin:0; font-family:var(--serif); font-size:1.5rem; font-weight:500; letter
     var text = pageText();
     if (!text){ if (b) b.textContent = 'Nothing here to read yet'; return; }
     sayStop();
-    var u = new SpeechSynthesisUtterance(text);
-    u.onend = function(){ if (SAYING) sayStop(); };
-    u.onerror = function(){ if (SAYING) sayStop(); };
+    var list = chunks(text), at = 0;
     SAYING = true;
     if (b) b.textContent = 'Stop';
     var s = document.getElementById('sayStop'); if (s) s.hidden = false;
-    try { speechSynthesis.speak(u); } catch (e) { sayStop() }
+    (function next(){
+      if (!SAYING) return;
+      if (at >= list.length){ sayStop(); return; }
+      var u = new SpeechSynthesisUtterance(list[at++]);
+      u.onend = next;
+      u.onerror = function(){ if (SAYING) sayStop(); };
+      try { speechSynthesis.speak(u); } catch (e) { sayStop() }
+    })();
   }
   var sb = document.getElementById('sayBtn'); if (sb) sb.addEventListener('click', say);
   var ss = document.getElementById('sayStop'); if (ss) ss.addEventListener('click', sayStop);

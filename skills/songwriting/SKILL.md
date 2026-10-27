@@ -18,6 +18,35 @@ When the user asks for a Suno prompt:
 - Also include the prompt inline in one fenced text block so it remains easy to copy if the file link does not work.
 - If a real downloadable attachment cannot be created in the current interface, say so plainly and provide the complete prompt in the copyable text block instead. Never claim that text is generated audio or a downloaded song.
 
+## Hard limits (never exceed)
+
+Suno has a character budget, and a sheet that ignores it cannot be pasted in. These are rules, not targets:
+
+- **Style of music / audio prompt: 1000 characters maximum**, spaces and line breaks included. Aim for 700–900.
+- **Lyrics: 5000 characters maximum**, section tags included. Aim for 2500–4000.
+- **Short fallback style: inside the same 1000 limit**, and normally around 200–350.
+- **Measure both before delivering** and write the count into the sheet's own heading, e.g. `STYLE OF MUSIC (paste into the Style box — 742 characters)`. A count he can see is a count that gets checked.
+- **When the direction will not fit, cut in this order:** decorative adjectives, production trivia, instrumental lists that repeat, then arrangement notes already implied by the section tags. Never cut the hook, the story, or the lines carrying the idea.
+- **Delivery counts too:** keep the chat copy and the `.txt` sheet identical and within the limits, so whichever he pastes is the legal version.
+
+## No religion
+
+He wants spiritual songs with no religion in them. Inner awareness, stillness, honesty, light, growth — all fine. Named faith is not.
+
+Never use, in lyrics, spoken lines, titles, or the style prompt's wording:
+
+- God, Lord, Jesus, Christ, Father, Holy, Spirit (as a deity — see below), Ghost, angels, saints, divine, heaven, hell, sin, salvation, redeemed, gospel, scripture, psalm, blessing, blessed, grace, sacred, holy, worship, faith, church, chapel, altar, preach, sermon, ministry, amen, hallelujah
+- praying, prayer, prayers, prayed, preach, testify, witness (as religious testimony), congregation, pastor, priest, disciple
+- any religious imagery standing in for feeling: lifted hands in worship, kneeling at an altar, being saved, being born again, a choir of angels, a calling from above
+
+Say the same things in plain, human words instead: quiet, still, awake, honest, whole, clear, grown, aware, at peace, in my own chest, the light in here. A line that needs a religious word has not finished being written.
+
+**No genre-name exception.** `gospel`, `church`, `gospel choir`, `gospel-soul` stay out of the style box too, and out of titles and tags. Describe the sound instead — organ, Hammond, choir, warm analog, uplifted, triumphant. An organ-and-choir soul ballad asks for the same thing a gospel-soul ballad does without putting a faith in the prompt.
+
+**Spirit and spiritual are fine as mood, not as deity.** Spiritual/spirit describing a person's own inner life or a song's feeling is allowed — `spiritual`, `a spiritual record`, `in his own spirit`. Banned only as a divine person or a practice: the Spirit, Holy Spirit, spirit-filled, spirit of God. `soul` in the musical sense is always fine; `saved`, `salvation`, `redeemed` in the religious sense are not.
+
+Check every sheet against this list before delivering, the same way you check the character limits, and say which check you ran.
+
 ## Creative direction
 
 For themes of self-discovery, healing, and winning in life:

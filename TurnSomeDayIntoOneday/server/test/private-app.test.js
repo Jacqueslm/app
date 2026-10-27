@@ -384,9 +384,12 @@ test('the trainer has its door on the home screen, and the shell counts it', () 
   // which is exactly why the line is worth pinning rather than leaving to drift.
   //
   // 21 Oct 2026: The Body and The Book of Spells made it seven, so the number
-  // moved again. The old counts are asserted absent, so a shell that says five
-  // while holding seven fails here rather than quietly lying on the home screen.
-  assert.match(HUB, /Seven doors\. That is the whole app\./, 'the shell must count the seven it holds');
+  // moved again. 27 Oct 2026: The Book of Spells came off the app at "Remove the
+  // book of spells", so it is six. The old counts are asserted absent, so a shell
+  // that says five while holding six fails here rather than quietly lying on the
+  // home screen.
+  assert.match(HUB, /Six doors\. That is the whole app\./, 'the shell must count the six it holds');
+  assert.doesNotMatch(HUB, /Seven doors/, 'nothing may still say seven');
   assert.doesNotMatch(HUB, /Five doors/, 'nothing may still say five');
   assert.doesNotMatch(HUB, /Four doors/, 'nothing may still say four');
   assert.doesNotMatch(HUB, /Three doors/, 'nothing may still say three');
@@ -618,16 +621,17 @@ test('the certification has its door on the home screen', () => {
     'certify.html must be in the repository, or the door leads nowhere');
 });
 
-// --- The Body and The Book of Spells, 21 Oct 2026 ---------------------------
-// Two pages added the same day, at "add a part on my app about the organs ... then
-// when you finish that research spells and write me a book of spells in the app
-// both using its on page". Each is a real FILE as well as a clean URL, so each
-// needs both addresses gated above express.static and both left out of the
-// worker's cache - exactly the reasons every page above them is checked.
-test('The Body and The Book of Spells are behind the door, at both addresses', () => {
+// --- The Body, 21 Oct 2026 --------------------------------------------------
+// Added at "add a part on my app about the organs ... then when you finish that
+// research spells and write me a book of spells in the app both using its on
+// page". The Body is a real FILE as well as a clean URL, so it needs both
+// addresses gated above express.static and left out of the worker's cache -
+// exactly the reasons every page above it is checked. The Book of Spells, which
+// arrived with it, came off the app on 27 Oct 2026 - "Remove the book of
+// spells" - so the last assertion here now holds the worker to the opposite.
+test('The Body is behind the door, at both addresses', () => {
   for (const [url, file] of [
     ['/body', 'body.html'], ['/body.html', 'body.html'],
-    ['/spells', 'spells.html'], ['/spells.html', 'spells.html'],
   ]) {
     assert.strictEqual(pageIsServed(url), true, `${url} must reach its own route`);
     assert.ok(OPEN_PAGES.includes(url), `${url} must be on the list of pages the gate lets through`);
@@ -645,11 +649,13 @@ test('The Body and The Book of Spells are behind the door, at both addresses', (
   }
   const SW = fs.readFileSync(path.join(__dirname, '..', '..', 'sw.js'), 'utf8');
   assert.match(SW,
-    /\['\/body', '\/body\.html', '\/spells', '\/spells\.html'\]\.includes\(url\.pathname\)\) return;/,
-    'all four addresses must be skipped by the worker');
+    /\['\/body', '\/body\.html'\]\.includes\(url\.pathname\)\) return;/,
+    'both body addresses must be skipped by the worker');
+  assert.doesNotMatch(SW, /'\/spells'/,
+    'the Book of Spells came off the app, so the worker holds up no page for it');
 });
 
-test('a signed-out request for the body or the book of spells never gets the file', async () => {
+test('a signed-out request for the body never gets the file', async () => {
   // The test above reads the source. This one makes the request, because the
   // failure it cannot see is the one that matters: if express.static ever got to
   // answer first, the page would be served cold to anybody who typed the name.
@@ -663,8 +669,6 @@ test('a signed-out request for the body or the book of spells never gets the fil
   const PAIRS = [
     ['/body', 'body.html', '<h1>The Body</h1>'],
     ['/body.html', 'body.html', '<h1>The Body</h1>'],
-    ['/spells', 'spells.html', '<h1>The Book of Spells</h1>'],
-    ['/spells.html', 'spells.html', '<h1>The Book of Spells</h1>'],
   ];
   for (const [url, file] of PAIRS) app.get(url, gate(file));
   app.use(express.static(ROOT));

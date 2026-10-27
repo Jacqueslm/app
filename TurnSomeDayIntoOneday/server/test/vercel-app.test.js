@@ -49,11 +49,12 @@ const vercelJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'u
 // trainings and the two certificates - and it is behind the door like every
 // other page here: both of its addresses are in GATED below and its file is in
 // PAGE_FILES, so the two tests that iterate these lists keep covering it.
-// body.html and spells.html joined on 21 Oct 2026 with The Body and The Book of
-// Spells. Both are behind the door like every other page here, so both are in
-// GATED below and both files are in PAGE_FILES, which is what keeps the two
-// iterating tests covering them without a second list to forget.
-const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'music.html', 'trainer.html', 'certify.html', 'body.html', 'spells.html'];
+// body.html joined on 21 Oct 2026 with The Body, beside the Book of Spells - which
+// came off the app on 27 Oct 2026, so its file is gone from this list with it. The
+// Body is behind the door like every other page here, so it is in GATED below and
+// its file is in PAGE_FILES, which is what keeps the two iterating tests covering
+// it without a second list to forget.
+const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'music.html', 'trainer.html', 'certify.html', 'body.html'];
 // fight.html and game3d.html were in both lists until 10 Oct 2026, when the
 // fight came off the app altogether - "delete the fight from everywhere". A page
 // that is gone cannot leak, so it is left out of the lists rather than named.
@@ -69,7 +70,7 @@ const PAGE_FILES = ['hub.html', 'key.html', 'herbs.html', 'tax.html', 'music.htm
 // form. Everything below is behind the door.
 const GATED = ['/key', '/herbs', '/herbs.html', '/tax', '/tax.html', '/music', '/music.html',
   '/trainer', '/trainer.html', '/certify', '/certify.html',
-  '/body', '/body.html', '/spells', '/spells.html'];
+  '/body', '/body.html'];
 
 let server, base;
 before(async () => {
@@ -541,7 +542,7 @@ test('every gated address is rewritten into the function, file names included', 
   const destinations = new Map(vercelJson.rewrites.map((r) => [r.source, r.destination]));
   for (const route of ['/app', '/key', '/key.html', '/herbs', '/herbs.html', '/tax', '/tax.html',
     '/music', '/music.html', '/trainer', '/trainer.html', '/certify', '/certify.html',
-    '/body', '/body.html', '/spells', '/spells.html', '/']) {
+    '/body', '/body.html', '/']) {
     assert.equal(destinations.get(route), '/api/index.js', `${route} must reach the function`);
   }
   assert.equal(destinations.get('/api/(.*)'), '/api/index.js', 'and so must the API');

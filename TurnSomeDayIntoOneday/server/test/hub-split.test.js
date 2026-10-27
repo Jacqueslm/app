@@ -129,10 +129,12 @@ const src = (els, i) => els['frame' + i].getAttribute('src');
 const chosen = (p) => Array.from(p.sandbox.SPLIT.chosen());
 
 test('the panes are filled from a table that matches the doors, exactly', () => {
-  // Seven since 21 Oct 2026, when The Body and The Book of Spells joined. The
-  // number is pinned on purpose: a door added without the panes learning about
-  // it is exactly the drift this file exists to catch.
-  assert.equal(DOORS.length, 7, 'the shell has seven doors');
+  // Seven from 21 Oct 2026, when The Body and The Book of Spells joined; six
+  // since 27 Oct 2026, when The Book of Spells came off the app ("Remove the book
+  // of spells"). The number is pinned on purpose: a door added or taken away
+  // without the panes learning about it is exactly the drift this file exists to
+  // catch.
+  assert.equal(DOORS.length, 6, 'the shell has six doors');
   assert.deepStrictEqual(PARTS.map((p) => p.href), DOORS,
     'every door must be offered in the panes, in the order the doors are in');
   assert.deepStrictEqual(PARTS.map((p) => p.name), DOOR_NAMES,

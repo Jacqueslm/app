@@ -188,7 +188,7 @@
     <span class="mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="21" r="13.5" stroke="currentColor" stroke-width="1.8"/><circle cx="20" cy="7.5" r="2.9" fill="currentColor"/></svg></span>
     <div class="names">
       <h1>The Truth</h1>
-      <p class="who" id="whoTag">Seven doors. That is the whole app.</p>
+      <p class="who" id="whoTag">Six doors. That is the whole app.</p>
     </div>
     <button class="quiet" id="signOut" hidden>Sign out</button>
   </header>
@@ -256,18 +256,6 @@
       <span class="txt">
         <h2 class="name">The Body</h2>
         <p class="note">Every organ, what it does, and what damage costs.</p>
-      </span>
-      <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
-    </a>
-
-    <!-- The Book of Spells joined the same day, at "research spells and write me
-         a book of spells in the app". Twenty-seven workings, each with the reason
-         it works, and a page at the end where he can write his own. -->
-    <a class="card s" href="/spells">
-      <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.2 5.9 5.9 2.2-5.9 2.2L12 19.7l-2.2-5.9L3.9 11.6l5.9-2.2z"/><path d="M18.5 16.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span>
-      <span class="txt">
-        <h2 class="name">The Book of Spells</h2>
-        <p class="note">Twenty-seven workings, and the body they work on.</p>
       </span>
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
@@ -419,7 +407,12 @@
   // and both offered in the two panes. A door added is a changed shell, so the
   // name moves to 3.7 with it, for the reason every bump above gives: an installed
   // phone that never rebuilds looks at a screen with no way to either part.
-  const APP_VERSION='3.7';
+  //
+  // 27 Oct 2026: The Book of Spells came off the app - "Remove the book of
+  // spells". A door removed is a changed shell exactly as a door added is, so the
+  // name moves to 3.8 for the same reason: an installed phone that never rebuilds
+  // would keep a shell offering a door that no longer opens.
+  const APP_VERSION='3.8';
 
   var locked = document.getElementById('locked');
   var open   = document.getElementById('open');
@@ -440,7 +433,7 @@
     // private page left open. The choice of parts is kept, so signing back in
     // lands on the same two. (Absent where there are no panes at all.)
     try { if (window.SPLIT) window.SPLIT.unload(); } catch (e) { /* no panes here */ }
-    whoTag.textContent = 'Seven doors. That is the whole app.';
+    whoTag.textContent = 'Six doors. That is the whole app.';
     try { emailEl.focus({ preventScroll: true }); } catch (e) { emailEl.focus(); }
   }
 
@@ -613,7 +606,6 @@
     { key: 'key',     name: 'The Zodiacs',       href: '/key' },
     { key: 'herbs',   name: 'The Herbs',         href: '/herbs' },
     { key: 'body',    name: 'The Body',          href: '/body' },
-    { key: 'spells',  name: 'The Book of Spells', href: '/spells' },
     { key: 'music',   name: 'The Player',        href: '/music' },
     { key: 'trainer', name: 'The Trainer',       href: '/trainer' },
     { key: 'certify', name: 'The Certification', href: '/certify' }
@@ -828,7 +820,7 @@
    words on it, in the order they are drawn, and never a control - a button is
    not a word. speechSynthesis is the browser's own, so nothing leaves the
    phone, there is no key and no server, and it works with no signal. Whatever
-   the screen happens to be - the way in or the seven doors - is what is read. */
+   the screen happens to be - the way in or the six doors - is what is read. */
 (function(){
   "use strict";
   var ROOT = '.wrap';

@@ -100,15 +100,14 @@ const PAGES = {
   // and a gate on one of them is a gate with a window open beside it.
   '/certify': 'certify.html',
   '/certify.html': 'certify.html',
-  // The Body and The Book of Spells joined on 21 Oct 2026, at "add a part on my
-  // app about the organs ... then ... write me a book of spells in the app both
-  // using its on page". Both addresses for each, for the reason every entry in
-  // this table has two: the clean URL and the file name both reach the file, and
-  // a gate on one of them is a gate with a window open beside it.
+  // The Body joined on 21 Oct 2026, at "add a part on my app about the organs ...
+  // then ... write me a book of spells in the app both using its on page". Both
+  // addresses, for the reason every entry in this table has two: the clean URL
+  // and the file name both reach the file, and a gate on one of them is a gate
+  // with a window open beside it. The Book of Spells came off the app on
+  // 27 Oct 2026, so it has no entries here any more.
   '/body': 'body.html',
   '/body.html': 'body.html',
-  '/spells': 'spells.html',
-  '/spells.html': 'spells.html',
 };
 
 // ----------------------------------------------------------------- the door --

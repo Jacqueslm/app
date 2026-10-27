@@ -51,18 +51,19 @@ const OWN_VOICE = {
 const SHARED = [
   'hub.html', 'letter.html', 'privacy.html', 'delete-account.html',
   'reset.html', 'tax.html', 'music.html',
-  // The Body and The Book of Spells (21 Oct 2026) share the same reader: both
-  // are long pages of words, and neither had a reason to grow a voice of its
-  // own when the whole app already had one that reads the screen in order.
-  'body.html', 'spells.html',
+  // The Body (21 Oct 2026) shares the same reader: it is a long page of words,
+  // and it had no reason to grow a voice of its own when the whole app already
+  // had one that reads the screen in order. The Book of Spells, which arrived
+  // with it, came off the app on 27 Oct 2026.
+  'body.html',
 ];
 
-// The two pages long enough that the phone will not say them in one go. The Body
-// is 45,000 characters and the Book of Spells 27,000; Android's own voice takes an
-// utterance that long and says nothing at all, which is exactly what a dead
-// button looks like. Their reader cuts the page at its punctuation and queues the
-// pieces, so these two are held to that here.
-const CHUNKED = ['body.html', 'spells.html'];
+// The page long enough that the phone will not say it in one go. The Body is
+// 45,000 characters; Android's own voice takes an utterance that long and says
+// nothing at all, which is exactly what a dead button looks like. Its reader cuts
+// the page at its punctuation and queues the pieces, so it is held to that here.
+// The Book of Spells was here beside it until it came off the app on 27 Oct 2026.
+const CHUNKED = ['body.html'];
 
 // What the reader should say about the stand-in page below: the words on the
 // screen, in the order they are drawn. The heading and its line, the card, the

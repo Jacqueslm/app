@@ -97,7 +97,12 @@
 // to 3.7 with them, for the reason every bump above gives: an installed phone
 // that never rebuilds its shell never sees the two doors, and - worse - would
 // keep serving its old shell beside two pages it has no way to reach.
-const CACHE_NAME = 'tsid-shell-v3.7';
+//
+// 27 Oct 2026: The Book of Spells came off the app - "Remove the book of spells".
+// Its door is gone from the shell, so the name moves to 3.8 with it, for the
+// reason every bump above gives: an installed phone that never rebuilds would
+// keep a shell with a door that no longer opens.
+const CACHE_NAME = 'tsid-shell-v3.8';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -227,11 +232,13 @@ self.addEventListener('fetch', (event) => {
   // the clean URL and the file name.
   if (['/certify', '/certify.html'].includes(url.pathname)) return;
 
-  // The Body and The Book of Spells joined on 21 Oct 2026, for the reason every
-  // private page above is in this list: a cached copy would outlive the check
-  // that let it in, and the offline fallback would hand it out unguarded. Both
-  // addresses again - the clean URL and the file name reach the same gated route.
-  if (['/body', '/body.html', '/spells', '/spells.html'].includes(url.pathname)) return;
+  // The Body joined on 21 Oct 2026, alongside The Book of Spells - which came
+  // back off the app on 27 Oct 2026, so only the body is left in this line. The
+  // reason is the one every private page above gives: a cached copy would
+  // outlive the check that let it in, and the offline fallback would hand it out
+  // unguarded. Both addresses again - the clean URL and the file name reach the
+  // same gated route.
+  if (['/body', '/body.html'].includes(url.pathname)) return;
 
   // The Music's scanner asks for the meditation folder's contents (7 Oct 2026).
   // Its whole point is that it is read fresh - a cached "here is every track"

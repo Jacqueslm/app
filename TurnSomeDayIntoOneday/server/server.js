@@ -401,17 +401,18 @@ app.get('/certify.html', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'certify.html'));
 });
 
-// The Body and The Book of Spells - added 21 Oct 2026. Jacques: "add a part on my
-// app about the organs what they do function and the consequences if their
-// damaged ... then when you finish that research spells and write me a book of
-// spells in the app both using its on page." Two pages, then: the body as a
-// reference, the workings as a book of their own.
+// The Body - added 21 Oct 2026. Jacques: "add a part on my app about the organs
+// what they do function and the consequences if their damaged ... then when you
+// finish that research spells and write me a book of spells in the app both
+// using its on page." Two pages arrived that day; the Book of Spells came off
+// the app on 27 Oct 2026 ("Remove the book of spells"), so the body is what is
+// left here.
 //
-// Same door as The Certification above, for the same reason: body.html and
-// spells.html are real files, so express.static below would hand them out by
-// name if only the clean URLs were gated. Signed in AND on the list, or you go
-// to /app without learning either page is there. Above express.static, or static
-// answers first and these routes are never reached.
+// Same door as The Certification above, for the same reason: body.html is a real
+// file, so express.static below would hand it out by name if only the clean URL
+// were gated. Signed in AND on the list, or you go to /app without learning the
+// page is there. Above express.static, or static answers first and these routes
+// are never reached.
 app.get('/body', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
@@ -421,16 +422,6 @@ app.get('/body.html', pageLimiter, (req, res) => {
   if (!isValidSession(req)) return res.redirect('/app');
   if (!isFriendlyRequest(req)) return res.redirect('/app');
   res.sendFile(path.join(__dirname, '..', 'body.html'));
-});
-app.get('/spells', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'spells.html'));
-});
-app.get('/spells.html', pageLimiter, (req, res) => {
-  if (!isValidSession(req)) return res.redirect('/app');
-  if (!isFriendlyRequest(req)) return res.redirect('/app');
-  res.sendFile(path.join(__dirname, '..', 'spells.html'));
 });
 
 // The Music's scanner (7 Oct 2026). The page cannot list a directory over the

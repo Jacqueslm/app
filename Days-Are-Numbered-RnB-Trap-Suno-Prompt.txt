@@ -1,41 +1,34 @@
-SUNO PROMPT — R&B TRAP WITH GOSPEL ELEMENTS
+SUNO PROMPT — R&B TRAP
 (pairs with the lyrics in Days-Are-Numbered-Suno-Prompt.txt)
 
-STYLE OF MUSIC (paste into the Style box)
-Modern R&B trap with gospel roots, 140 BPM in B-flat minor, half-time feel
-so the groove sits slow under fast hats. Tuned 808 with gliding slides
-carrying the bassline, rolling triplet hi-hats, crisp finger-snap claps and
-a hard, close snare; the drums stay sparse and let silence work. Warm
-Fender Rhodes and a filtered grand-piano loop as the harmonic bed, a small
-church organ that swells under every chorus, and wide, airy choir pads
-stacked in the background from the first bar. Live tambourine and handclaps
-on the turnarounds for the gospel feel, plus one real gospel choir answering
-the lead in call-and-response on the hook and taking the bridge alone.
-Close, breathy male R&B tenor — conversational and behind the beat in the
-verses, full and melismatic on the hook, natural runs with only a touch of
-pitch polish, double-tracked and harmony-stacked. Arrangement: organ-and-
-choir intro with no drums, drums drop on verse one, 808 and hats carry it,
-chorus opens up with choir and strings, verse two adds a counter-melody,
-bridge strips to organ, piano and choir, then the last chorus brings
-everything back and the outro fades on Rhodes and a hummed choir. Deep,
-warm, slightly saturated mix with the vocal forward, the 808 controlled and
-the cymbals soft; vinyl texture at the edges. Reverent and triumphant, a
-church service with a trap drum kit. Original lyrics, melody, vocal cadence,
-drum pattern and chord progression; do not recreate or closely imitate any
-existing song or artist.
+STYLE OF MUSIC (paste into the Style box — 951 characters)
+Modern R&B trap, 140 BPM, B-flat minor, half-time so the groove sits slow
+under fast hats. Tuned 808 gliding the bassline, rolling triplet hi-hats,
+snap claps, hard close snare, drums sparse with silence left to work. Warm
+Rhodes and a filtered grand-piano loop, organ swelling under each chorus, wide
+airy choir pads, tambourine and handclaps on the turnarounds; a small choir
+answers the hook in call-and-response and takes the bridge alone. Close,
+breathy male R&B tenor — conversational behind the beat, full and melismatic
+on the hook, natural runs, double-tracked and harmony-stacked. Organ-and-choir
+intro, drums drop on verse one, chorus opens with choir and strings, bridge
+strips to organ and piano, last chorus full, outro on Rhodes and a hummed
+choir. Deep warm slightly saturated mix,
+vocal forward, 808 controlled. Uplifted and triumphant. Original lyrics,
+melody, cadence, drums and chords; do not recreate or imitate any existing
+song.
 
-SHORT STYLE (use if the Style box rejects the long version)
-R&B trap with gospel, 140 BPM, Bb minor, half-time feel, gliding tuned 808,
-triplet hi-hats, snap claps, sparse hard drums, Rhodes and filtered piano,
-church organ swells, airy choir pads, tambourine and handclaps, real gospel
-choir in call-and-response, close breathy male R&B tenor with runs and
-stacked harmonies, organ-and-choir intro, stripped bridge, big out chorus.
-Warm saturated mix, vocal forward. Reverent, triumphant. Original song.
+SHORT STYLE (use if the Style box rejects the long version — 399 characters)
+R&B trap, 140 BPM, Bb minor, half-time feel, gliding tuned 808, triplet
+hi-hats, snap claps, sparse hard drums, Rhodes and filtered piano, organ
+swells, airy choir pads, tambourine, choir in call-and-response, close breathy
+male R&B tenor with runs and stacked harmonies, organ-and-choir intro,
+stripped bridge, big out chorus. Warm saturated mix, vocal forward. Uplifted,
+triumphant. Original song.
 
-TAGS (if the tool wants a comma list instead of prose)
-r&b trap, gospel choir, 140 bpm, half-time, 808 slides, triplet hi-hats,
-Rhodes, church organ, choir pads, tambourine, male tenor, melisma, stacked
-harmonies, warm analog mix, triumphant, spiritual
+TAGS (if the tool wants a comma list instead of prose — 198 characters)
+r&b trap, 140 bpm, half-time, 808 slides, triplet hi-hats, Rhodes, filtered
+piano, organ swells, choir pads, tambourine, male tenor, melisma, stacked
+harmonies, warm analog mix, triumphant, uplifted
 
 AVOID
 EDM drops, festival synths, hard aggressive rap delivery, heavy autotune

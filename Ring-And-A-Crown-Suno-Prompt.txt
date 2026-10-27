@@ -1,12 +1,12 @@
 SUNO PROMPT — ORIGINAL AFROBEATS-R&B "LADIES' NIGHT" ANTHEM
 
-STYLE OF MUSIC (paste into the Style box)
+STYLE OF MUSIC (paste into the Style box — 813 characters)
 Warm Afrobeats and R&B crossover at 104 BPM in A major: bouncy log-drum groove, live shaker, soft congas and a rounded sub-bass that walks under the kick. Clean electric-guitar arpeggio, bright plucked synth, airy pads and a two-chord piano lift under the hook. Smooth male tenor lead, close and conversational, answered by a small female group singing "ooh" harmonies and light call-and-response chants. Hook built on a handclap pattern and a four-note bell melody; one short percussion break before the final chorus, then a soft keys-and-guitar outro. Glossy, modern, radio-ready mix with the vocal forward and the bass warm, not distorted. Romantic, celebratory, respectful and clean throughout, with a queens-and-crowns mood rather than anything crude. Original lyrics, melody, vocal cadence and drum pattern.
 
-SHORT STYLE (use if the Style box rejects the long version)
+SHORT STYLE (use if the Style box rejects the long version — 259 characters)
 Warm Afrobeats-R&B, 104 BPM, A major, log drums, shaker, congas, rounded sub bass, clean guitar arpeggio, airy pads, smooth male tenor with female "ooh" harmonies and light chants, handclap hook, glossy modern mix. Romantic, celebratory, clean. Original song.
 
-LYRICS
+LYRICS (2307 characters)
 
 [Intro — spoken, soft, pads only]
 Ladies. This one's for you.

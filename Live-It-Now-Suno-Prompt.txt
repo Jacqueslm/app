@@ -1,12 +1,12 @@
 SUNO PROMPT — ORIGINAL CARNIVAL SOCA "LIVE IT NOW"
 
-STYLE OF MUSIC (paste into the Style box)
+STYLE OF MUSIC (paste into the Style box — 645 characters)
 High-energy modern soca at 135 BPM in D major: driving four-on-the-floor kick with syncopated soca snares, crisp hi-hats and rolling tambourine, a punchy bass locked to the kick, bright steel-pan-style synth melody, sharp horn-section stabs and short rising risers into each chorus. Chanting male lead with a full group answering in call-and-response, handclaps and "hey!" chants on the hook, a brief percussion-and-iron break before the final chorus. Big, bright Carnival mix, tight low end, brass cutting through. Joyful, celebratory and clean, built for jumping and waving on the road. Original lyrics, melody, vocal cadence and drum pattern.
 
-SHORT STYLE (use if the Style box rejects the long version)
+SHORT STYLE (use if the Style box rejects the long version — 279 characters)
 Modern soca, 135 BPM, D major, four-on-the-floor kick, syncopated soca snares, rolling tambourine, punchy bass, steel-pan synth melody, horn stabs, chanting male lead with group call-and-response, handclaps, big bright Carnival mix. Joyful, clean, made to jump to. Original song.
 
-LYRICS
+LYRICS (2260 characters)
 
 [Intro — chant, drums only]
 Everybody! (Hey!)

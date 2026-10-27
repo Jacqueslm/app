@@ -1,30 +1,25 @@
-SUNO PROMPT — ORIGINAL GOSPEL-SOUL R&B "MY DAYS ARE NUMBERED"
+SUNO PROMPT — ORIGINAL SOUL R&B "MY DAYS ARE NUMBERED"
 
-STYLE OF MUSIC (paste into the Style box)
-Warm, gospel-tinged soul R&B ballad at 74 BPM in B-flat major, built on a
-slow 6/8 shuffle. Fender Rhodes with gentle tremolo, upright bass walking
-under the changes, live drums with a brushed snare and rim clicks, and a
-Hammond organ swell that opens up under each chorus. Strings enter at the
-second chorus and stay, with a small gospel choir answering the lead in the
-final chorus and bridge. Close, breathy male soul tenor — conversational in
-the verses, full and open on the chorus, with natural runs and no tuning
-sheen — double-tracked on the hooks and harmony-stacked under the last
-chorus. Sparse first verse (Rhodes, bass, brushes), a fuller second, a
-stripped bridge of organ and choir, then the whole room on the out chorus
-before it falls back to Rhodes and a spoken last line. Wide, warm analog
-mix: vocal forward, bass round, cymbals soft. Celebratory and defiant
-rather than mournful — a man celebrating a life, not mourning one.
-Original lyrics, melody, vocal cadence and arrangement; do not recreate or
-closely imitate any existing song or artist.
+STYLE OF MUSIC (paste into the Style box — 952 characters)
+Warm soul R&B ballad at 74 BPM in B-flat major over a slow 6/8 shuffle. Fender
+Rhodes with gentle tremolo, upright bass walking the changes, live drums with
+brushed snare and rim clicks, and a Hammond organ swell under each chorus. Strings enter at the second chorus and stay; a small choir answers the
+lead in the final chorus and bridge. Close, breathy male soul tenor —
+conversational in the verses, full and open on the chorus, natural runs and no
+tuning sheen — double-tracked on hooks, harmony-stacked under the last chorus. Sparse first verse (Rhodes, bass, brushes), fuller second, stripped
+bridge of organ and choir, the whole room on the out chorus before it falls
+back to Rhodes and a spoken last line. Wide, warm analog mix: vocal forward,
+bass round, cymbals soft. Celebratory and defiant rather than mournful — a life
+celebrated, not mourned. Original lyrics, melody, cadence and arrangement; do
+not recreate or imitate any existing song.
 
-SHORT STYLE (use if the Style box rejects the long version)
-Gospel-soul R&B ballad, 74 BPM, Bb major, 6/8 shuffle, Rhodes, upright bass,
-brushed drums, Hammond organ, strings from the second chorus, gospel choir
-answering, close breathy male soul tenor with runs, stripped bridge then
-full out-chorus, warm analog mix. Celebratory, defiant, soulful. Original
-song.
+SHORT STYLE (use if the Style box rejects the long version — 306 characters)
+Organ-and-choir soul R&B ballad, 74 BPM, Bb major, 6/8 shuffle, Rhodes, upright
+bass, brushed drums, Hammond organ, strings from the second chorus, choir
+answering the lead, close breathy male soul tenor with runs, stripped bridge
+then full out-chorus, warm analog mix. Celebratory, defiant. Original song.
 
-LYRICS
+LYRICS (3425 characters)
 
 [Intro — spoken, Rhodes and upright bass only]
 They gave me the number. I wrote it on the back of a receipt.
@@ -37,7 +32,7 @@ Some came in quiet, some took their time
 I got a scar on my shoulder from a year I don't explain
 And a drawer full of medals that don't say my name
 I got a phone full of voices that'll never ring again
-And a mother still praying like the praying's gonna win
+And a mother still hoping like the hoping's gonna win
 So I don't waste a morning lying still in the dark
 If the clock's gonna run, then I'm gonna run it hard
 
@@ -59,7 +54,7 @@ I'ma celebrate the living while I'm living it out
 I had a door shut on me that I built with my own hands
 I had a friend go quiet and I still don't understand
 I had a year where the mirror was the hardest thing to face
-And a prayer that came back empty — and I prayed it anyways
+And a question that came back empty — and I asked it anyways
 But I learned how to stand in a room I couldn't leave
 And I learned how to ask for the things I couldn't keep
 So if the clock's still ticking, tell it take its time

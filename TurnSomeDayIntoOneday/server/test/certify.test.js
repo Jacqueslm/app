@@ -181,7 +181,7 @@ test('a certificate is written, and says honestly what it is not', () => {
   assert.match(HTML, /it is not one of those credentials and it is not a licence/);
 });
 
-test('the trainer track teaches the by-10 as a rule and P90X as the exercises', () => {
+test('the trainer track teaches the by-10 as a rule and P90X as the format only', () => {
   // 18 Oct 2026. Jacques, on what the by-10 actually is: "P90x is just the
   // exercises I'm using by 10 is the theory behind how I train because when I
   // actually train I reorganize p90x", and then the rule itself: "The by 10 is
@@ -191,10 +191,11 @@ test('the trainer track teaches the by-10 as a rule and P90X as the exercises', 
   // The track had grown a programme of its own out of the by-10 - rounds and
   // rotations, two levels with fixed rep counts, a timed last move, twenty
   // minutes of cardio, five cardio choices - none of which he ever gave, all of
-  // it stated as though it lived in the Trainer app. The exercises are P90X's
-  // and the app holds P90X's rotation; the by-10 is the rule applied to it. So
-  // the rule is required here, and the inventions are required to be gone, or
-  // the course is certifying a method that does not exist.
+  // it stated as though it lived in the Trainer app. The app holds P90X's
+  // rotation and the by-10 is the rule applied to it, but P90X did not invent
+  // the movements - they are plain ones, and nobody did - so only the format
+  // is P90X's. The rule is required here, and the inventions are required to
+  // be gone, or the course is certifying a method that does not exist.
   // 19 Oct 2026, the theory behind the rule, in his words: "traditional workouts
   // rest between 30 seconds to 2 minutes ... my by 10 cuts down workout duration
   // so and 1 hour workout becomes 30 minutes ... you do less reps in each set but
@@ -218,6 +219,14 @@ test('the trainer track teaches the by-10 as a rule and P90X as the exercises', 
   // day holds two sessions, a beginner's first week is stretching, and the
   // rest weeks are optional. Those are required now, and the claims they
   // replace are required gone.
+  //
+  // 27 Oct 2026, on the range and on the credits: "you dont do full range of
+  // motions you keep the intensity throughout the movement and take out those
+  // p90x moves those are plain exercises p90 didn't make up those exercises by
+  // 10 just uses p90 format structure". So the short range is now named as a
+  // rule - no full range of motion, the intensity kept on the muscle through
+  // the whole of the movement - and no line may credit P90X with a movement.
+  // The moves are plain and the format is P90X's; the two are asserted apart.
   assert.match(HTML, /by-10/);
   for (const re of [
     /The by-10 is not a list of exercises/,
@@ -237,6 +246,10 @@ test('the trainer track teaches the by-10 as a rule and P90X as the exercises', 
     /jump rope, a step session, walking, dancing/,
     /first week is stretching/,
     /the by-10 does not require them/,
+    /does not use a full range of motion/i,
+    /keeps the intensity on the muscle through the whole of the movement/,
+    /nobody invented them/,
+    /the format and not the movements/,
     /P90X/,
   ]) assert.match(HTML, re);
   for (const gone of [
@@ -258,6 +271,17 @@ test('the trainer track teaches the by-10 as a rule and P90X as the exercises', 
     /six days on and one off, the way the rotation runs/,
     /recovery weeks at weeks 4, 8 and 13 are the rotation's own way/,
     /A set of ten at a moderate load/,
+    // The movements are nobody's invention. Every line that handed them to
+    // P90X is required to stay out, so the course stops crediting a format with
+    // exercises it never made up.
+    /the movements are P90X's/i,
+    /They are P90X's -/,
+    /P90X's own menu/i,
+    /P90X, which supplies the exercises/,
+    /taken from P90X or/,
+    /movement content is P90X's/,
+    /from P90X's movements/,
+    /The movement lists are P90X's/,
   ]) assert.doesNotMatch(HTML, gone, `the by-10's superseded numbers are gone: ${gone} is back`);
   // And the accreditation ground beside it is unchanged.
   assert.match(HTML, /FITT-VP/);

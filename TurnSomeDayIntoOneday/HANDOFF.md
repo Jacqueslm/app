@@ -1354,3 +1354,38 @@ entry above was the total before this removal.
 **Not verified in a browser.** There is no browser in this environment. The
 checks are the suite above and `node --check` on the server; nothing was opened
 on a phone.
+
+**The range is not a full range, and P90X owns only the format — 27 Oct 2026.**
+Jacques: "in the by 10 method you dont do full range of motions you keep the
+intensity throughout the movement and take out those p90x moves those are plain
+exercises p90 didn't make up those exercises by 10 just uses p90 format
+structure".
+
+Two corrections, both in `certify.html`, and both were half-wrong before:
+
+- **The range is now stated as a rule.** Day 3 said each move "is not taken to
+  full extension" and the technique day (13) called the three-quarters "a range
+  decision", but neither named it plainly. Both now open with **"no move is
+  taken through its full range of motion"**, say why (a full rep hands the
+  muscle a rest at both ends) and say what it buys: **the intensity stays on the
+  muscle through the whole of the movement**, so the set is hard from the first
+  inch to the last without adding weight or reps. The trainer's introduction,
+  the track's own prospectus and the "what the by-10 is" list carry it too, so a
+  reader meets it before day 3.
+- **The movements are no longer credited to P90X.** The track had said in a
+  dozen places that the exercises were P90X's - "the movements are P90X's",
+  "P90X's own menu", "P90X, which supplies the exercises", "the movement content
+  is P90X's", and a quiz whose right answer was "the movements are P90X's". None
+  of them was true: a squat, a press, a row and a curl are plain movements and
+  P90X did not invent them. What the by-10 borrows is the **format** - the
+  rotation the Trainer page holds, its day names, its week - and that is all the
+  page now credits it with. The day 3 quiz was rewritten with it (the right
+  answer now runs "the sets, the twenty-rep cap, the ten seconds and the short
+  range; the moves are plain").
+
+`server/test/certify.test.js` was extended rather than relaxed: the test is now
+"the by-10 as a rule and P90X as the format only", it requires the full-range
+sentence and the "intensity ... through the whole of the movement" line, and it
+fails if any of the eight P90X-owns-the-movements phrasings comes back. All 27
+tests in that file pass; the wider suite was not run here (no `node_modules` in
+the workspace).

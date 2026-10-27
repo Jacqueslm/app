@@ -327,8 +327,19 @@ test('every place the song changes tells the lock screen too', () => {
 });
 
 test('nothing on the page stops the sound when the page is put away', () => {
-  assert.ok(!/visibilitychange/.test(PAGE), 'there is no hidden-page handler to pause the player');
-  assert.ok(!/document\.hidden/.test(PAGE), 'and nothing asks whether the page is being looked at');
+  // 27 Oct 2026: the page gained one visibility listener, and it is not this. It
+  // is the screen lock that keeps the screen lit while a page reads itself aloud
+  // - Jacques, "Fix all" - and it does nothing but ask the phone to stay awake
+  // while it speaks. So the check is what it always meant: no handler may pause,
+  // stop or fade the music when the phone is put away. Naming the event is not
+  // the fault; reaching for the player is.
+  const REACHES = /audio\.pause\(|mediaPlaying\(false\)|stopFade\(|clearInterval\(/;
+  const handlers = PAGE.match(/visibilitychange[\s\S]{0,300}/g) || [];
+  for (const handler of handlers) {
+    assert.ok(!REACHES.test(handler), 'a hidden-page handler never touches the sound');
+  }
+  assert.ok(!/document\.hidden[\s\S]{0,200}(audio\.pause|mediaPlaying\(false\))/.test(PAGE),
+    'and nothing asks whether the page is being looked at in order to stop it');
   assert.match(PAGE, /document\.addEventListener\('click', function\(\)\{ if \(fadeSec > 0\) ensureAudio\(\); \}, true\);/,
     'the sound goes through Web Audio only once a fade has actually been chosen — which is what silences it on an iPhone with the screen off');
   assert.match(PAGE, /Array\.prototype\.forEach\.call\(fadeChips, function\(c\)\{[\s\S]{0,400}ensureAudio\(\);/,

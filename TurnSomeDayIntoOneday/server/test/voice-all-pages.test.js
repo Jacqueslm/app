@@ -132,6 +132,8 @@ function standIn() {
     querySelector: (sel) => (sel === '.wrap' || sel === 'main' ? root : null),
     getElementById: (id) => (id === 'sayBtn' ? btn : id === 'sayStop' ? stop : null),
     body: el('BODY'),
+    hidden: false,
+    addEventListener() {},
   };
   return { root, btn, stop, doc };
 }
@@ -159,6 +161,24 @@ function loadVoice(page, opts) {
     };
     sandbox.SpeechSynthesisUtterance = function (text) { this.text = text; };
   }
+  // A phone that keeps its screen lit while it reads. opts.wake puts one under
+  // the reader, so the lock it asks for, and the moment it lets go, can be
+  // counted instead of taken on trust. Without it the page runs on a phone with
+  // no wake-lock at all, which is the case it has to survive.
+  const locks = { requests: 0, releases: 0 };
+  if (opts && opts.wake) {
+    sandbox.navigator = {
+      wakeLock: {
+        request() {
+          locks.requests += 1;
+          return Promise.resolve({ addEventListener() {}, release() { locks.releases += 1; } });
+        },
+      },
+    };
+    sandbox.setTimeout = setTimeout;
+    sandbox.clearTimeout = clearTimeout;
+    sandbox.Promise = Promise;
+  }
   const finish = () => {
     const u = pending;
     pending = null;
@@ -172,7 +192,7 @@ function loadVoice(page, opts) {
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(blocks[0], sandbox, { filename: page });
-  return { sandbox, said, finish, ...dom };
+  return { sandbox, said, finish, locks, ...dom };
 }
 
 test('every page in the app is accounted for: a voice, or a reason it has none', () => {
@@ -292,6 +312,48 @@ test('the letter page has the button on the letter, not beside it', () => {
   const btn = html.indexOf('id="sayBtn"');
   assert.ok(content > -1 && btn > content, 'the button sits inside the letter block');
   assert.ok(/textContent = d\.body/.test(html), 'and the letter itself is what is spoken');
+});
+
+/* Jacques, 27 Oct 2026: "Fix all". The Certification's lessons were the first
+   reading found cut off when the screen went black, and every other page that
+   reads itself aloud had the same fault for the same reason: a phone that locks
+   its screen suspends the voice. So every page with a voice has to ask for the
+   screen to stay lit, hold it while it reads, and let go the moment it stops. */
+test('a reading holds the screen awake, on every page that reads aloud', async () => {
+  for (const page of PAGES) {
+    if (VOICELESS[page]) continue;
+    const html = read(page);
+    assert.match(html, /navigator\.wakeLock/, `${page}: asks the phone to keep the screen lit`);
+    assert.match(html, /wakeAcquire\(/, `${page}: when a reading starts`);
+    assert.match(html, /wakeRelease\(/, `${page}: and lets go when it stops`);
+  }
+
+  // And on a page, not just in its text: the lock is asked for when the reading
+  // starts, given back when it is stopped, and given back when the phone says
+  // the last piece on its own.
+  const { btn, stop, finish, locks } = loadVoice('hub.html', { wake: true });
+  const settle = () => new Promise((r) => setTimeout(r, 5));
+  btn.click();
+  await settle();
+  assert.equal(locks.requests, 1, 'a reading asks for the lock');
+  assert.equal(locks.releases, 0, 'and holds it while it speaks');
+  stop.click();
+  assert.equal(locks.releases, 1, 'stopping gives it back');
+
+  const released = locks.releases;
+  btn.click();
+  await settle();
+  finish();
+  await settle();
+  assert.ok(locks.releases > released, 'a reading that ends on its own gives it back too');
+});
+
+test('a phone that cannot keep its screen lit still reads', () => {
+  const { btn, sandbox } = loadVoice('hub.html');
+  assert.equal(typeof sandbox.navigator, 'undefined', 'this phone has no wake-lock at all');
+  btn.click();
+  assert.equal(btn.textContent, 'Stop', 'the reading starts anyway');
+  assert.doesNotThrow(() => btn.click(), 'and stopping it does not throw');
 });
 
 test('a page that is hidden is not read, on the two pages that hide a whole screen', () => {

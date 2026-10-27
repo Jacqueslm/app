@@ -102,7 +102,14 @@
 // Its door is gone from the shell, so the name moves to 3.8 with it, for the
 // reason every bump above gives: an installed phone that never rebuilds would
 // keep a shell with a door that no longer opens.
-const CACHE_NAME = 'tsid-shell-v3.8';
+//
+// 27 Oct 2026: every page that reads itself aloud now holds the screen awake
+// while it reads - the Certification first, then "Fix all" for the rest, the
+// shell's own reading included. The shell changed, so the name moves to 3.9 for
+// the reason every bump above gives: an installed phone that never rebuilds
+// would keep a home screen whose reading still cuts off when the screen blacks
+// out.
+const CACHE_NAME = 'tsid-shell-v3.9';
 const SHELL_FILES = [
   '/',
   '/app',

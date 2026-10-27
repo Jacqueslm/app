@@ -96,6 +96,89 @@
   /* One leaf's words. A line break in the source is a line break, not a full
      stop: the sentences carry their own punctuation, and the layout is never
      read as punctuation it never had. */
+  // KEEPING THE SCREEN AWAKE
+  // A phone that locks its screen suspends the speech engine, so a reading stops
+  // partway through and looks like the page is broken. Jacques, 27 Oct 2026: "the
+  // certificate lessons cut off when the screen go black" - and then "Fix all",
+  // because every other page that reads itself aloud had the same fault.
+  //
+  // This is the manager from The Key and the Certification, unchanged. The lock is
+  // asked for while something is being read and let go the moment the reading
+  // stops, because one held for nothing is a flat battery. The system revokes it on
+  // every switch away, so it is taken again when the page is shown. A browser with
+  // no wake-lock support is left exactly as it was: the reading works, the screen
+  // may sleep.
+  var wakeNeeds = {}, wakeSentinel = null, wakeAsking = false;
+  function wakeWanted(){
+    for (var k in wakeNeeds){ if (wakeNeeds[k]) return true; }
+    return false;
+  }
+  function wakeAcquire(need){ wakeNeeds[need] = true; wakeEnsure(); }
+  function wakeRelease(need){
+    delete wakeNeeds[need];
+    if (wakeWanted()) return;
+    var s = wakeSentinel; wakeSentinel = null;
+    try{ if (s) s.release(); }catch(e){}
+  }
+  function wakeEnsure(){
+    if (typeof navigator === "undefined" || !navigator.wakeLock || !navigator.wakeLock.request) return;
+    if (!wakeWanted() || document.hidden || wakeSentinel || wakeAsking) return;
+    wakeAsking = true;
+    if (typeof Promise === "undefined"){ wakeAsking = false; return; }
+    new Promise(function(res){ res(navigator.wakeLock.request("screen")); })
+      .then(function(s){
+        // stopped while the request was in flight: hand it straight back
+        if (!wakeWanted()){ try{ if (s) s.release(); }catch(e){} }
+        else{
+          wakeSentinel = s;
+          if (s && s.addEventListener) s.addEventListener("release", function(){
+            // revoked by the system, not by us: take it back if still wanted
+            if (wakeSentinel === s){ wakeSentinel = null; wakeEnsure(); }
+          });
+        }
+        wakeAsking = false;
+      })
+      .catch(function(){ wakeAsking = false; });   // denied: the reading still works, the screen may sleep
+  }
+  if (document && typeof document.addEventListener === "function"){
+    document.addEventListener("visibilitychange", function(){ if (!document.hidden) wakeEnsure(); });
+  }
+  // This page hands its readings to the phone's own voice one sentence at a time,
+  // so the lock is taken and let go from the engine itself rather than from each
+  // button: whatever starts a reading holds the screen, and the screen is freed
+  // when the last sentence ends or the reading is stopped.
+  function wakeLater(fn){ if (typeof setTimeout === "function") setTimeout(fn, 0); else fn(); }
+  (function voiceKeepsScreen(){
+    if (typeof speechSynthesis === "undefined" || !speechSynthesis) return;
+    var KEY = "voice", realSpeak = speechSynthesis.speak, realCancel = speechSynthesis.cancel;
+    if (typeof realSpeak !== "function" || typeof realCancel !== "function") return;
+    function busy(){
+      try{ return !!(speechSynthesis.speaking || speechSynthesis.pending); }catch(e){ return false; }
+    }
+    speechSynthesis.speak = function(u){
+      wakeAcquire(KEY);
+      if (u && !u.__wake){
+        u.__wake = true;
+        var end = u.onend, err = u.onerror;
+        u.onend = function(){
+          var r = end ? end.apply(this, arguments) : undefined;
+          wakeLater(function(){ if (!busy()) wakeRelease(KEY); });
+          return r;
+        };
+        u.onerror = function(){
+          var r = err ? err.apply(this, arguments) : undefined;
+          wakeLater(function(){ if (!busy()) wakeRelease(KEY); });
+          return r;
+        };
+      }
+      return realSpeak.apply(speechSynthesis, arguments);
+    };
+    speechSynthesis.cancel = function(){
+      var r = realCancel.apply(speechSynthesis, arguments);
+      wakeRelease(KEY);           // stopped: nothing should keep the screen lit
+      return r;
+    };
+  })();
   function speakable(s){
     return String(s).split(/[ \t]*\n+[ \t]*/)
       .map(function(x){ return x.replace(/[ \t]{2,}/g, ' ').trim(); })

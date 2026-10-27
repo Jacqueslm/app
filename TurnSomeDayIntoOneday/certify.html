@@ -2164,6 +2164,7 @@ function dayRows(t, from, to){
 }
 
 /* ── THE VOICE ────────────────────────────────────────────────────────────────
+
    The phone reads the lesson out loud, with the voice already on it.
 
    speechSynthesis is built into the browser, so nothing leaves the phone,
@@ -2178,6 +2179,50 @@ function dayRows(t, from, to){
    is the one place a lesson is drawn — so every lesson on both is read. If the
    phone has no voice of its own, the button says so instead of doing nothing.
 ─────────────────────────────────────────────────────────────────────────── */
+/* KEEPING THE SCREEN AWAKE
+   A phone that locks its screen suspends the speech engine, so a reading stops
+   partway through and looks like the page is broken. Jacques, 27 Oct 2026: "the
+   certificate lessons cut off when the screen go black."
+
+   This is the manager from The Key, where the same fault was found on its own
+   reading. The lock is asked for while a lesson is being read and let go the
+   moment the reading stops, because one held for nothing is a flat battery. The
+   system revokes it on every tab switch, so it is retaken when the page is shown
+   again. A browser with no wake-lock support is left exactly as it was. */
+var wakeNeeds = {};
+var wakeSentinel = null, wakeAsking = false;
+function wakeWanted(){
+  for (var k in wakeNeeds){ if (wakeNeeds[k]) return true; }
+  return false;
+}
+function wakeAcquire(need){ wakeNeeds[need] = true; wakeEnsure(); }
+function wakeRelease(need){
+  delete wakeNeeds[need];
+  if (wakeWanted()) return;
+  var s = wakeSentinel; wakeSentinel = null;
+  try{ if (s) s.release(); }catch(e){}
+}
+function wakeEnsure(){
+  if (typeof navigator === "undefined" || !navigator.wakeLock || !navigator.wakeLock.request) return;
+  if (!wakeWanted() || document.hidden || wakeSentinel || wakeAsking) return;
+  wakeAsking = true;
+  new Promise(function(res){ res(navigator.wakeLock.request("screen")); })
+    .then(function(s){
+      /* stopped while the request was in flight: hand it straight back */
+      if (!wakeWanted()){ try{ if (s) s.release(); }catch(e){} }
+      else{
+        wakeSentinel = s;
+        if (s && s.addEventListener) s.addEventListener("release", function(){
+          /* revoked by the system, not by us: take it back if still wanted */
+          if (wakeSentinel === s){ wakeSentinel = null; wakeEnsure(); }
+        });
+      }
+      wakeAsking = false;
+    })
+    .catch(function(){ wakeAsking = false; });   /* denied: the reading still works, the screen may sleep */
+}
+document.addEventListener("visibilitychange", function(){ if (!document.hidden) wakeEnsure(); });
+
 var SAYING = false;
 function speechOK(){
   return typeof speechSynthesis !== "undefined" && typeof SpeechSynthesisUtterance !== "undefined";
@@ -2227,6 +2272,7 @@ document.addEventListener("click", function(e){
 function sayStop(){
   if (speechOK()){ try{ speechSynthesis.cancel(); }catch(e){} }
   SAYING = false;
+  wakeRelease("lesson");   /* nothing is speaking, so the screen may sleep */
   var b = id("sayBtn"); if (b) b.textContent = "Read it to me";
   var s = id("sayStop"); if (s) s.hidden = true;
   /* The bar under the screens that have no lesson on them — Jacques, 15 Oct
@@ -2257,6 +2303,7 @@ function sayLesson(){
   u.onend = function(){ if (SAYING) sayStop(); };
   u.onerror = function(){ if (SAYING) sayStop(); };
   SAYING = true;
+  wakeAcquire("lesson");   /* a lesson is being read: keep the screen lit */
   var btn = id("sayBtn"); if (btn) btn.textContent = "Stop";
   var st = id("sayStop"); if (st) st.hidden = false;
   try{ speechSynthesis.speak(u); }catch(e){ sayStop() }
@@ -2318,6 +2365,7 @@ function screenSay(){
   u.onend = function(){ if (SAYING) sayStop(); };
   u.onerror = function(){ if (SAYING) sayStop(); };
   SAYING = true;
+  wakeAcquire("lesson");   /* the screen is being read: keep it lit */
   var b = id("screenSayBtn"); if (b) b.textContent = "Stop";
   var s = id("screenSayStop"); if (s) s.hidden = false;
   try{ speechSynthesis.speak(u); }catch(e){ sayStop() }

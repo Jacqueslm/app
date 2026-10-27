@@ -368,6 +368,10 @@ function load(opts) {
   // opts.store seeds localStorage BEFORE the page's script runs, which is the
   // only way to check what the page does to a phone that already holds scores.
   const store = Object.assign({}, o.store || {});
+  // The screen lock (27 Oct 2026): what the page asked to hold and what it let
+  // go. Nothing is recorded unless a check asks for it, which is a phone that
+  // never grants one.
+  const locks = { asked: 0, released: 0, sentinels: [] };
   const sandbox = {
     document: doc, console,
     setTimeout, clearTimeout, setInterval, clearInterval,
@@ -393,17 +397,35 @@ function load(opts) {
   if (o.speech) {
     sandbox.speechSynthesis = {
       speaking: false,
-      speak(u) { said.push(String(u.text)); spoken.push(u); if (u.onend) u.onend(); },
+      speak(u) { said.push(String(u.text)); spoken.push(u); if (u.onend && !o.speechHold) u.onend(); },
       cancel() {}, pause() {}, resume() {},
       getVoices() { return []; }, addEventListener() {},
     };
     sandbox.SpeechSynthesisUtterance = function (text) { this.text = text; };
   }
+  // The screen lock itself, stubbed the way a browser hands it over: a request
+  // answers with a sentinel the page holds, and the sentinel is what is asked to
+  // let go. The request is asynchronous, as it is on a phone, so a check has to
+  // let the page finish asking before it looks at what was asked for.
+  if (o.wake) {
+    sandbox.navigator.wakeLock = {
+      request() {
+        locks.asked += 1;
+        const sentinel = {
+          handlers: {},
+          addEventListener(type, fn) { sentinel.handlers[type] = fn; },
+          release() { locks.released += 1; },
+        };
+        locks.sentinels.push(sentinel);
+        return Promise.resolve(sentinel);
+      },
+    };
+  }
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(blocks[0], sandbox, { filename: 'certify.html' });
-  return { sandbox, els, store, byId, made, drawn, said, spoken };
+  return { sandbox, els, store, byId, made, drawn, said, spoken, locks };
 }
 
 test('a day recorded against a different quiz opens again, and the tests on it with it', () => {
@@ -549,6 +571,48 @@ test('the teaching can be read slower or faster, and the choice is remembered', 
   home.sandbox.window.CERTIFY.go({ track: null, day: null, test: null, exam: false, cert: null });
   const mounted = v.insertions.map((i) => i.html).join('');
   assert.match(mounted, /data-sayrate="0\.9" aria-pressed="true"/, 'the screen bar offers the same speed choice');
+});
+
+test('a lesson holds the screen awake while it reads, and lets it go when it stops', async () => {
+  // 27 Oct 2026. Jacques: "the certificate lessons cut off when the screen go
+  // black." Nothing is wrong with the reading - a phone that locks its screen
+  // suspends the speech engine, so the lesson stops partway through and reads as
+  // a fault. The Key found the same thing on its own reading and holds the
+  // screen awake while it speaks; a lesson does the same now, for exactly as long
+  // as it is speaking and not one moment longer.
+  assert.match(HTML, /navigator\.wakeLock/, 'the page knows how to ask for the screen');
+  assert.match(HTML, /wakeLock\.request\("screen"\)/, 'and asks for the screen, not something else');
+  assert.equal((HTML.match(/wakeAcquire\("lesson"\)/g) || []).length, 2,
+    'both readings ask - the lesson and the bar the other screens carry');
+
+  // A tick is enough for the page's own request to land: the promise chain it
+  // waits on is all microtasks, and this runs after they have drained.
+  const tick = () => new Promise((r) => setTimeout(r, 0));
+  const held = load({ speech: true, speechHold: true, wake: true });
+  const C = held.sandbox.window.CERTIFY;
+  C.go({ track: 'herbalist', day: 1, test: null, exam: false, cert: null });
+  C.sayLesson();
+  await tick();
+  assert.equal(held.locks.asked, 1, 'the lesson asks the phone to keep the screen lit');
+  assert.equal(held.locks.released, 0, 'and keeps it while it is speaking');
+
+  // The system takes the lock back on a tab switch, so the page takes it again -
+  // a lesson interrupted by a glance at another app is still read to the end.
+  held.locks.sentinels[0].handlers.release();
+  await tick();
+  assert.equal(held.locks.asked, 2, 'and takes it back when the phone returns to the page');
+
+  C.sayStop();
+  assert.equal(held.locks.released, 1, 'stopping the reading lets the screen sleep again');
+
+  // A phone that has no wake lock at all is left exactly as it was: the reading
+  // reads, and it is only the screen that is allowed to go black.
+  const plain = load({ speech: true, speechHold: true });
+  const P = plain.sandbox.window.CERTIFY;
+  P.go({ track: 'herbalist', day: 1, test: null, exam: false, cert: null });
+  P.sayLesson();
+  await tick();
+  assert.equal(plain.said.length, 1, 'a phone without a wake lock reads as it always did');
 });
 
 test('every screen that is not a lesson or a quiz carries its own read-aloud bar', () => {

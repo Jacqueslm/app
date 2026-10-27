@@ -1,0 +1,10 @@
+# Bars, generated or downloaded. Regenerate with make-sample.js; real data is
+# large and does not belong in the repo.
+data/
+
+# Secrets never go in the repo.
+.env
+.env.*
+
+# Run logs
+*.log

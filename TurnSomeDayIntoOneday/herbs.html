@@ -83,6 +83,10 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
    own speech — nothing is sent anywhere, nothing is charged, and it works with
    no signal at all, which is the whole reason it is this and not a recording. */
 .saybar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+/* A hidden button stays hidden: the display rule on .txtbtn beats the hidden
+   attribute on its own, which left Stop sitting under every card doing nothing
+   and left no sign at all when a reading failed to start. */
+.saybar .txtbtn[hidden]{display:none}
 /* ── THE THIRTY DAYS ──────────────────────────────────────────────────────────
    A beginner course built out of the same two books, in the same voice as the
    rest of the page. Each day teaches, then asks. The answers are checked on the
@@ -4164,6 +4168,9 @@ document.querySelectorAll('.tab').forEach(function(el){
    voice of its own the button says so instead of doing nothing.
 --------------------------------------------------------------------------- */
 var SAY_BUSY=null;
+var SAY_TIMER=null;      // the moment a reading is checked on, if it never began
+var SAY_TRIED=0;         // 1 once the page has already tried it a second time
+var SAY_STARTED=null;    // the id whose voice was heard to begin
 
 /* The same on-device voice reads the rest of the page too, the book sections
    and the days of the course, so the whole library can be listened to, not only
@@ -4302,10 +4309,56 @@ function sayLabel(text){
   Array.prototype.forEach.call(document.querySelectorAll('[data-say]'),function(x){ x.textContent=text });
 }
 function sayStop(){
+  sayTimerStop();
   if(speechOK()){ try{ speechSynthesis.cancel() }catch(e){} }
-  SAY_BUSY=null;
+  SAY_BUSY=null; SAY_TRIED=0; SAY_STARTED=null;
   sayLabel('Read it to me');
   Array.prototype.forEach.call(document.querySelectorAll('[data-saystop]'),function(x){ x.hidden=true });
+}
+/* Is the phone's voice running, or waiting to start? */
+function sayRunning(){
+  try{ return !!(speechSynthesis.speaking || speechSynthesis.pending) }catch(e){ return false }
+}
+/* Chrome on Android stays paused after a reading is cancelled or the tab has
+   been hidden, and then speak() queues a sentence that never comes out - which
+   reads exactly like a dead button. Asking it to carry on first costs nothing. */
+function sayWake(){
+  try{ if(speechSynthesis.paused) speechSynthesis.resume() }catch(e){}
+}
+function sayTimerStop(){ if(SAY_TIMER){ clearTimeout(SAY_TIMER); SAY_TIMER=null } }
+/* One reading, handed to the phone's own voice. The start proves the voice really
+   began; the end and the error put the button back. */
+function saySpeak(id,text){
+  var u=new SpeechSynthesisUtterance(text);
+  u.onstart=function(){ SAY_STARTED=id; sayTimerStop() };
+  u.onend=function(){ if(SAY_BUSY===id) sayStop() };
+  u.onerror=function(){ if(SAY_BUSY===id) sayStop() };
+  try{ speechSynthesis.speak(u); return true }catch(e){ return false }
+}
+/* A voice that never starts: some phones take the sentence and stay quiet. A
+   moment later, if nothing has begun and nothing is waiting, the page tries once
+   more - and if it is still silent it says so on the button, rather than looking
+   like a tap that was ignored. */
+function sayWatch(id,text){
+  sayTimerStop();
+  SAY_TIMER=setTimeout(function(){
+    SAY_TIMER=null;
+    if(SAY_BUSY!==id || SAY_STARTED===id || sayRunning()) return;
+    if(SAY_TRIED){
+      SAY_BUSY=null; SAY_TRIED=0;
+      sayLabel('No sound came out \u2014 tap again');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-saystop]'),function(x){ x.hidden=true });
+      return;
+    }
+    SAY_TRIED=1;
+    try{ if(speechOK()) speechSynthesis.cancel() }catch(e){}
+    setTimeout(function(){
+      if(SAY_BUSY!==id) return;
+      sayWake();
+      if(!saySpeak(id,text)){ sayStop(); return }
+      sayWatch(id,text);
+    },140);
+  },1200);
 }
 /* The entry, word for word, in the order the card shows it. */
 function sayText(h){
@@ -4329,14 +4382,22 @@ function say(id){
   }
   if(!speechOK()){ sayLabel('This phone has no voice'); return; }
   if(SAY_BUSY===id){ sayStop(); return; }
-  try{ speechSynthesis.cancel() }catch(e){}
-  var u=new SpeechSynthesisUtterance(text);
-  u.onend=function(){ if(SAY_BUSY===id) sayStop() };
-  u.onerror=function(){ if(SAY_BUSY===id) sayStop() };
-  SAY_BUSY=id;
+  sayTimerStop();
+  SAY_BUSY=id; SAY_TRIED=0; SAY_STARTED=null;
   sayLabel('Read it to me');
   Array.prototype.forEach.call(document.querySelectorAll('[data-saystop]'),function(x){ x.hidden=false });
-  try{ speechSynthesis.speak(u) }catch(e){ sayStop() }
+  /* Cancel only what is really running. A cancel and a speak in the same beat is
+     the pair Chrome drops, so when something has to be stopped the new reading
+     waits a moment and starts on a clear engine instead of on top of the cancel. */
+  var wasRunning=sayRunning();
+  if(wasRunning){ try{ speechSynthesis.cancel() }catch(e){} }
+  function begin(){
+    if(SAY_BUSY!==id) return;
+    sayWake();
+    if(!saySpeak(id,text)){ sayStop(); return }
+    sayWatch(id,text);
+  }
+  if(wasRunning) setTimeout(begin,120); else begin();
 }
 
 /* The read-aloud button inside an open herb. The phone's own voice reads the

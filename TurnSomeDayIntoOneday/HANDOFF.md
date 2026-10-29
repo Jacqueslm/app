@@ -1415,3 +1415,20 @@ the fetch handler is network-first for pages, and `hub.html` did not change.
 `tools/apply-version-bump.js` refuses anyway: `package.json` and
 `server/package.json` sit at 2.0 while `sw.js` and `hub.html` are at 3.9 —
 pre-existing drift, left alone rather than papered over here.
+
+
+**The twenty-rep cap belongs to the dumbbells — 29 Oct 2026.** Jacques: "The rule
+dont do not recreate than 20 reps only applies to dumbells and straps bodyweight
+exercises can do as many as you can fix". The cap had been stated as a limit on
+every set. It is a limit on **loaded** sets only — a dumbbell or a strap — and a
+bodyweight move has no ceiling at all: it runs to as many good reps as the person
+has, and the set ends when the reps stop being good. Corrected in `certify.html`
+wherever the cap was stated: the page header, day 3 (the gist, the paragraph on
+when a set ends, and the quiz whose right answer names the cap), day 8's systems
+summary, day 31's two-limits lesson and its quiz, the FITT-VP day's intensity line
+and quiz, day 34 (the rule in full, the rest-and-cap paragraph and "what caps a
+set", now "what caps a set of dumbbell or strap work"), day 35, and the "going
+deeper" notes that repeat the rule. `trainer.html`'s rotation card says the same:
+twenty at most on a dumbbell or a strap, and a bodyweight move to as many good
+reps as they have. Nothing about the sets, the rests or the short range moved. The
+full suite is **505 tests, 505 pass, 0 fail**.

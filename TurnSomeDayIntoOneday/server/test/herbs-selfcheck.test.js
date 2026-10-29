@@ -128,8 +128,8 @@ test("the library: the Self Diagnosis summary is its own set of notes, with its 
   assert.match(html, /not a verbatim transcript/, "the summary keeps its attribution");
   assert.match(html, /This page’s own line/, "and the page keeps its own line beside it");
   assert.match(html, /data-h="self-note-1"/, "the first note renders");
-  assert.match(html, /data-h="self-note-5"/, "and the last one");
-  assert.strictEqual(p.sandbox.SELF_NOTES.length, 5, "five organized notes");
+  assert.match(html, /data-h="self-note-6"/, "and the last one");
+  assert.strictEqual(p.sandbox.SELF_NOTES.length, 6, "six organized notes");
   for (const n of p.sandbox.SELF_NOTES) {
     assert.ok(typeof n.t === "string" && n.t.length > 5, `a note is titled "${n.t}"`);
     assert.ok(Array.isArray(n.notes) && n.notes.length >= 3, `"${n.t}" carries its claims`);
@@ -143,7 +143,12 @@ test("the library: the correlation names quassia and glutamine, and refuses to b
   assert.match(data, /glutamine/, "and the nutrient the gut lining is built from");
   assert.match(data, /Nothing on the shelf is named by a sign/, "the sign is a direction, not a prescription");
   assert.match(data, /and it never says stop what you are taking/, "and never a reason to stop anything");
-  const own = p.sandbox.SELF_NOTES[3];
+  const politics = p.sandbox.SELF_NOTES.filter((n) => /cultural sovereignty/.test(n.t))[0];
+  assert.ok(politics, "the thesis's politics gets its own note");
+  assert.match(politics.notes.join(" "), /self-governance/, "it keeps the thesis's own goal in its own words");
+  assert.match(politics.notes.join(" "), /never a diagnosis/, "and refuses the conclusion that follows it");
+  const own = p.sandbox.SELF_NOTES.filter((n) => /The line this page keeps/.test(n.t))[0];
+  assert.ok(own, "the page's own line is still in the set");
   assert.match(own.notes.join(" "), /not a diagnosis/, "the page's own line is in the set");
   assert.match(own.notes.join(" "), /clinic can be replaced is not/, "and the thesis keeps its own position");
 });

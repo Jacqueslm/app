@@ -195,6 +195,11 @@ function track(bars, opts = {}) {
       ready: trend !== 'forming',
       high: lastHigh ? level(lastHigh) : null,
       low: lastLow ? level(lastLow) : null,
+      /* The swing before the last one on each side. A rule that trades back to
+         the high the market last made needs the one before it as well, so it is
+         reported here instead of being dug out of the swing list by hand. */
+      prevHigh: prevHigh ? level(prevHigh) : null,
+      prevLow: prevLow ? level(prevLow) : null,
       highBroken: firedHigh !== null && lastHigh !== null && firedHigh === lastHigh.index,
       lowBroken: firedLow !== null && lastLow !== null && firedLow === lastLow.index,
       event,

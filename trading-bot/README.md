@@ -721,7 +721,7 @@ and later could not be tested there at all — that is missing data, not a verdi
 1h rows rest on 40–78 trades, which is the same sample size that has misled this folder
 before.
 
-### The TBR scalp — retrace entries at 30, 50 and 70
+### The retrace entry — a limit at 30, 50 or 70
 
 The two candles, named on the New York clock: **09:00 and 15:00 Eastern**, which are
 08:00 and 14:00 Central. Same anchors as the sweep rule, and every trade from it is now

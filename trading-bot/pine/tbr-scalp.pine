@@ -1,0 +1,138 @@
+//@version=6
+// TBR scalp — the 08:00 and 14:00 Central candles, entered on the retrace.
+//
+// The rule, as the bot runs it (trading-bot/lib/sweep.js):
+//   - the anchor is the hour that OPENS at 08:00 and 14:00 Central (09:00 and
+//     15:00 Eastern); its high, low and close are fixed once it completes;
+//   - in the hour after it, price has to LEAVE the candle first — above the high
+//     is a short back toward the close, below the low is a long;
+//   - then price has to come BACK to the 30, 50 or 70 per cent retrace of the
+//     candle, counted in from the edge that was swept. That is a limit order;
+//   - the stop is the wick behind the sweep, the target is the candle's close,
+//     and everything is flat by the end of the action hour.
+//
+// This is a STRATEGY: TradingView can backtest it and fire alerts from it. It
+// cannot place an order by itself — an alert has to reach your broker through a
+// webhook bridge, and the bridge has to be able to REST a limit order, not just
+// send a market order, or the fill will not be this rule.
+strategy("TBR scalp 08:00/14:00 CT", overlay=true, initial_capital=10000, default_qty_type=strategy.fixed, default_qty_value=4, commission_type=strategy.commission.cash_per_contract, commission_value=0.35, slippage=1, process_orders_on_close=false, calc_on_every_tick=false)
+
+// -------------------------------------------------------------------- inputs
+tz          = input.string("America/Chicago", "Clock")
+morningHr   = input.int(8, "Morning candle hour (Central)", minval=0, maxval=22)
+afternoonHr = input.int(14, "Afternoon candle hour (Central)", minval=0, maxval=22)
+fibPct      = input.float(30, "Retrace depth (%)", minval=1, maxval=99, step=5)
+useSweep    = input.bool(true, "Fall back to the close-based sweep entry")
+sweepPct    = input.float(30, "Sweep entry: close back inside by (%)", minval=1, maxval=99, step=5)
+qty         = input.int(4, "Contracts", minval=1)
+
+// ----------------------------------------------------------- alert payloads
+// Built as one expression each, on one line: a wrapped string concatenation is
+// the easiest way to hand the Pine compiler an expression it cannot finish.
+jsonEntry(sym, sd, px, st, tg, q, id) => '{"type":"entry","symbol":"' + sym + '","side":"' + sd + '","order":"limit","entry":' + px + ',"stop":' + st + ',"target":' + tg + ',"qty":' + q + ',"id":"' + id + '"}'
+jsonFlat(sym, q, id) => '{"type":"flatten","symbol":"' + sym + '","side":"flat","qty":' + q + ',"id":"' + id + '"}'
+jsonCancel(sym, id) => '{"type":"cancel","symbol":"' + sym + '","order":"limit","id":"' + id + '"}'
+
+// The hour before this one, completed. lookahead_off plus the [1] offset is what
+// keeps a half-built hour out of the read.
+[prevHigh, prevLow, prevClose] = request.security(syminfo.tickerid, "60", [high[1], low[1], close[1]], lookahead=barmerge.lookahead_off)
+
+// --------------------------------------------------------------------- clock
+hr           = hour(time, tz)
+hrClose      = hour(time_close, tz)
+newHour      = ta.change(hr) != 0
+isAction     = hr == morningHr + 1 or hr == afternoonHr + 1
+isLastOfHour = not na(hrClose) and hrClose != hr
+
+// ------------------------------------------------------------- this candle
+var float aHigh     = na
+var float aLow      = na
+var float aClose    = na
+var bool  armed     = false
+var bool  wasAction = false
+var int   side      = 0      // 0 none, 1 low swept (long), 2 high swept (short)
+var float extreme   = na     // the wick the stop goes behind
+var int   sweepBar  = na
+var bool  done      = false  // one trade per candle
+var string orderId  = ""
+
+if newHour
+    strategy.cancel_all()
+    wasAction := isAction
+    armed     := isAction
+    side      := 0
+    extreme   := na
+    sweepBar  := na
+    done      := false
+    if isAction
+        aHigh  := prevHigh
+        aLow   := prevLow
+        aClose := prevClose
+
+rng = aHigh - aLow
+
+// ------------------------------------------------------------------ the trade
+if armed and not na(aHigh) and not na(aLow) and not na(aClose) and rng > 0 and not done and not isLastOfHour
+    if side == 0
+        if high > aHigh
+            side     := 2
+            extreme  := high
+            sweepBar := bar_index
+        else if low < aLow
+            side     := 1
+            extreme  := low
+            sweepBar := bar_index
+    // The bar that takes the edge cannot be the fill bar — the trade is the come
+    // back — so the level is only watched from the next bar on.
+    else if bar_index > sweepBar
+        if side == 2
+            extreme  := math.max(extreme, high)
+            fibLvl   := aHigh - rng * fibPct / 100
+            sweepLvl := aHigh - rng * sweepPct / 100
+            if low <= fibLvl and aClose < fibLvl and extreme > fibLvl and strategy.position_size == 0
+                orderId := syminfo.ticker + "-" + str.tostring(time) + "-sell"
+                strategy.entry("short", strategy.short, qty=qty, limit=fibLvl)
+                strategy.exit("short-x", "short", stop=extreme, limit=aClose)
+                done := true
+                alert(jsonEntry(syminfo.ticker, "sell", str.tostring(fibLvl, format.mintick), str.tostring(extreme, format.mintick), str.tostring(aClose, format.mintick), str.tostring(qty), orderId), alert.freq_once_per_bar_close)
+            else if useSweep and close <= sweepLvl and close > aClose and extreme > close and strategy.position_size == 0
+                orderId := syminfo.ticker + "-" + str.tostring(time) + "-sell"
+                strategy.entry("short", strategy.short, qty=qty)
+                strategy.exit("short-x", "short", stop=extreme, limit=aClose)
+                done := true
+                alert(jsonEntry(syminfo.ticker, "sell", "market", str.tostring(extreme, format.mintick), str.tostring(aClose, format.mintick), str.tostring(qty), orderId), alert.freq_once_per_bar_close)
+        else if side == 1
+            extreme  := math.min(extreme, low)
+            fibLvl   := aLow + rng * fibPct / 100
+            sweepLvl := aLow + rng * sweepPct / 100
+            if high >= fibLvl and aClose > fibLvl and extreme < fibLvl and strategy.position_size == 0
+                orderId := syminfo.ticker + "-" + str.tostring(time) + "-buy"
+                strategy.entry("long", strategy.long, qty=qty, limit=fibLvl)
+                strategy.exit("long-x", "long", stop=extreme, limit=aClose)
+                done := true
+                alert(jsonEntry(syminfo.ticker, "buy", str.tostring(fibLvl, format.mintick), str.tostring(extreme, format.mintick), str.tostring(aClose, format.mintick), str.tostring(qty), orderId), alert.freq_once_per_bar_close)
+            else if useSweep and close >= sweepLvl and close < aClose and extreme < close and strategy.position_size == 0
+                orderId := syminfo.ticker + "-" + str.tostring(time) + "-buy"
+                strategy.entry("long", strategy.long, qty=qty)
+                strategy.exit("long-x", "long", stop=extreme, limit=aClose)
+                done := true
+                alert(jsonEntry(syminfo.ticker, "buy", "market", str.tostring(extreme, format.mintick), str.tostring(aClose, format.mintick), str.tostring(qty), orderId), alert.freq_once_per_bar_close)
+
+// ------------------------------------------------------- the end of the window
+// Nothing is carried past the end of the action hour: the position is closed at
+// the next open, which is the hour boundary, and a limit that never filled is
+// cancelled and reported.
+if armed and isLastOfHour
+    strategy.cancel_all()
+    if strategy.position_size != 0
+        strategy.close_all("the hour is over")
+        alert(jsonFlat(syminfo.ticker, str.tostring(math.abs(strategy.position_size)), orderId), alert.freq_once_per_bar_close)
+    else if done
+        alert(jsonCancel(syminfo.ticker, orderId), alert.freq_once_per_bar_close)
+
+// -------------------------------------------------------------------- drawing
+plot(armed ? aHigh : na, "anchor high", color=color.new(color.gray, 40), style=plot.style_linebr)
+plot(armed ? aLow : na, "anchor low", color=color.new(color.gray, 40), style=plot.style_linebr)
+plot(armed and side != 0 ? aClose : na, "candle close (target)", color=color.new(color.blue, 30), style=plot.style_linebr)
+plot(armed and side == 2 ? aHigh - rng * fibPct / 100 : na, "short retrace", color=color.new(color.red, 0), style=plot.style_linebr)
+plot(armed and side == 1 ? aLow + rng * fibPct / 100 : na, "long retrace", color=color.new(color.green, 0), style=plot.style_linebr)

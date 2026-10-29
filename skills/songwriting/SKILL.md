@@ -18,6 +18,16 @@ When the user asks for a Suno prompt:
 - Also include the prompt inline in one fenced text block so it remains easy to copy if the file link does not work.
 - If a real downloadable attachment cannot be created in the current interface, say so plainly and provide the complete prompt in the copyable text block instead. Never claim that text is generated audio or a downloaded song.
 
+## The audio prompt and the lyrics stay separate
+
+Always two separate, clearly labeled prompts — never one combined block, never lyrics mixed into the sound description.
+
+- **Audio prompt: sound only.** Genre, tempo, key, groove, instruments, vocal type and delivery, mix, mood. No lyric lines, no hook lines, no section tags, no story text.
+- **Lyrics: words only.** Section tags and lines. No BPM, key, instrument, mix or production words.
+- **In chat, two fenced blocks**, each labeled on its own line, so either one can be copied without the other.
+- **In the `.txt` sheet, separate labeled sections in this order:** audio prompt, short fallback, lyrics. A divider line between them so the split is visible on the page.
+- **Each goes in its own box in Suno:** the audio prompt into the Style box, the lyrics into the Lyrics box. Say which is which.
+
 ## Hard limits (never exceed)
 
 Suno has a character budget, and a sheet that ignores it cannot be pasted in. These are rules, not targets:
@@ -25,7 +35,7 @@ Suno has a character budget, and a sheet that ignores it cannot be pasted in. Th
 - **Style of music / audio prompt: 1000 characters maximum**, spaces and line breaks included. Aim for 700–900.
 - **Lyrics: 5000 characters maximum**, section tags included. Aim for 2500–4000.
 - **Short fallback style: inside the same 1000 limit**, and normally around 200–350.
-- **Measure both before delivering** and write the count into the sheet's own heading, e.g. `STYLE OF MUSIC (paste into the Style box — 742 characters)`. A count he can see is a count that gets checked.
+- **Measure both before delivering** and write the count into the sheet's own heading, e.g. `AUDIO PROMPT (paste into the Style box — 742 characters)` and `LYRICS PROMPT (paste into the Lyrics box — 3474 characters)`. A count he can see is a count that gets checked.
 - **When the direction will not fit, cut in this order:** decorative adjectives, production trivia, instrumental lists that repeat, then arrangement notes already implied by the section tags. Never cut the hook, the story, or the lines carrying the idea.
 - **Delivery counts too:** keep the chat copy and the `.txt` sheet identical and within the limits, so whichever he pastes is the legal version.
 

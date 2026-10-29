@@ -20,6 +20,7 @@ const { loadCandles, isSynthetic } = require('./lib/candles');
 const { describeSession } = require('./lib/session');
 const { findTrades, stats } = require('./lib/reclaim');
 const { findSweepTrades } = require('./lib/sweep');
+const { findScalpSignals } = require('./lib/tbr-scalp');
 const { parseInterval, baseInterval, resample, nameOf } = require('./lib/structure');
 const { KNOWN } = require('./lib/contracts');
 
@@ -34,7 +35,8 @@ const HELP = `node strategy-one.js --data <file.csv> [options]
   --resample <tf>         build bigger bars from the file's own before running (e.g. 1h from 15m)
   --direction <tf>        1h by default — the trend and the two levels
   --bias <tf>             4h by default
-  --rule <name>           reclaim (default) or sweep — which of the two rules to run
+  --rule <name>           reclaim (default), sweep, or scalp — which rule to run
+  --stop-buffer <points>  scalp: points beyond the break candle's wick (default 0.25)
   --session <name>        asia, london or ny, on Central time (default ny)
   --anchor <times>        sweep/TBR only: the candles to read, 08:00,14:00 Central (09:00,15:00 Eastern)
   --retest <pct>          sweep/TBR only: how far back inside the candle a close must land (default 50)
@@ -211,6 +213,75 @@ function reportSweep(f, bars, directions, built) {
   console.log('this is what these rules would have done on these bars. it is not a prediction.');
 }
 
+/*
+ * The TBR scalp's report. Its clock is the session, not an anchor candle: the range
+ * is the session's own high and low, a close beyond it is the break, and the signal
+ * is the return into the 30, 50 or 70 per cent fib of that leg.
+ *
+ * The gating is findScalpSignals' own, read through inTbrSession in lib/session.js,
+ * so the window here is the same one the rest of the bot reads and there is no
+ * second copy of 09:00–15:00 anywhere.
+ */
+function reportScalp(f, bars, directions) {
+  const fibs = f.fib === undefined ? undefined : String(f.fib).split(',').map((p) => Number(p) / 100);
+  const result = findScalpSignals({
+    bars,
+    fibs,
+    stopBuffer: f['stop-buffer'] === undefined ? undefined : f['stop-buffer'],
+    directions,
+  });
+  const signals = result.signals;
+  const synthetic = isSynthetic(f.data);
+
+  if (f.json) {
+    console.log(JSON.stringify({
+      data: path.relative(process.cwd(), f.data),
+      rule: 'scalp',
+      synthetic,
+      window: result.window,
+      config: result.config,
+      signals,
+      rejections: result.rejections,
+    }, null, 2));
+    return;
+  }
+
+  const hhmm = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  const where = `${hhmm(result.window.et.open)}–${hhmm(result.window.et.close)} ${result.window.et.zone}`
+    + ` = ${hhmm(result.window.ct.open)}–${hhmm(result.window.ct.close)} ${result.window.ct.zone}`;
+
+  console.log('the TBR scalp — break the range, return into the fib, stop behind the wick');
+  console.log(`data      ${f.data}  (${result.config.bars} bars)`);
+  console.log(`clock     ${where}`);
+  console.log('          signals only fire while that window is open, both edges included');
+  console.log(`fibs      ${result.config.fibs.map((x) => `${Math.round(x * 100)}%`).join(', ')} of the break leg`);
+  console.log(`stop      the break candle's wick plus ${result.config.stopBuffer} point(s)`);
+  console.log('target    the break candle\'s close');
+  console.log('');
+  if (!signals.length) console.log('signals   none');
+  for (const s of signals) {
+    console.log(`signal    ${s.side.padEnd(5)} entry ${s.entry}  stop ${s.stop}  target ${s.target}`
+      + `  isScalp ${s.isScalp}  fib ${Math.round(s.fib * 100)}%  ${iso(s.time)}  window ${where}`);
+  }
+  const byReason = new Map();
+  for (const r of result.rejections) byReason.set(r.reason, (byReason.get(r.reason) || 0) + 1);
+  if (byReason.size) {
+    console.log('');
+  for (const [reason, count] of [...byReason].sort((a, b) => b[1] - a[1])) {
+    const first = result.rejections.find((x) => x.reason === reason);
+    console.log(`rejected  ${String(count).padStart(3)} — ${reason}`);
+    console.log(`          ${first.side} · isScalp ${first.isScalp} · no entry, stop or target: nothing was priced`
+      + ` · ${iso(first.time)} · window ${where}`);
+  }
+  }
+  console.log('');
+  console.log(`${signals.length} scalp signal(s), ${result.rejections.length} refused candidate(s).`);
+  const notes = [];
+  if (synthetic) notes.push('the bars are synthetic: this run tests the rule and says nothing about profit');
+  if (!signals.length) notes.push('no signal was taken, so nothing was measured');
+  for (const note of notes) console.log(`- ${note}`);
+}
+
 function main() {
   let args;
   try {
@@ -240,11 +311,12 @@ function main() {
 
   /* --fill is a TBR flag, so naming one is the same as asking for the TBR rule. */
   const rule = f.fill !== undefined ? 'sweep' : f.rule === undefined ? 'reclaim' : String(f.rule).trim().toLowerCase();
-  if (rule !== 'reclaim' && rule !== 'sweep') {
-    console.error(`--rule is reclaim or sweep, got ${JSON.stringify(f.rule)}`);
+  if (rule !== 'reclaim' && rule !== 'sweep' && rule !== 'scalp') {
+    console.error(`--rule is reclaim, sweep or scalp, got ${JSON.stringify(f.rule)}`);
     process.exitCode = 2;
     return;
   }
+  if (rule === 'scalp') { reportScalp(f, bars, directions); return; }
   if (rule === 'sweep') { reportSweep(f, bars, directions, built); return; }
 
   const result = findTrades({

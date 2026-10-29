@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper account — TBR candle</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #171a22;
+    --line: #262b36;
+    --text: #d7dae1;
+    --muted: #8a8f9c;
+    --green: #1f9d75;
+    --red: #c94a53;
+    --amber: #b98a2e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel);
+  }
+  h1 { font-size: 15px; margin: 0; letter-spacing: .04em; text-transform: uppercase; }
+  .flag { color: var(--amber); font-size: 12px; }
+  .feed { color: var(--muted); font-size: 12px; }
+  main { padding: 20px; display: grid; gap: 16px; max-width: 1100px; margin: 0 auto; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .card .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .card .v { font-size: 22px; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  section h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 7px 14px; text-align: right; font-size: 13px; border-bottom: 1px solid rgba(38,43,54,.55); }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .empty { padding: 14px; color: var(--muted); font-size: 13px; }
+  .pos { color: var(--green); } .neg { color: var(--red); }
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; border: 1px solid var(--line); color: var(--muted); }
+  .long { color: var(--green); border-color: rgba(31,157,117,.5); }
+  .short { color: var(--red); border-color: rgba(201,74,83,.5); }
+  ul.events { list-style: none; margin: 0; padding: 6px 0; }
+  ul.events li { padding: 4px 14px; color: var(--muted); font-size: 12px; display: flex; gap: 10px; }
+  ul.events time { color: #5e6472; min-width: 74px; }
+  .hint { color: var(--muted); font-size: 12px; padding: 0 20px 20px; max-width: 1100px; margin: 0 auto; }
+  code { background: #10131a; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Paper account <span class="flag">— no money, no broker</span></h1>
+  <div class="feed" id="feed">connecting…</div>
+</header>
+
+<main>
+  <div class="cards">
+    <div class="card"><div class="k">Equity</div><div class="v" id="equity">—</div></div>
+    <div class="card"><div class="k">Closed P&amp;L</div><div class="v" id="realized">—</div></div>
+    <div class="card"><div class="k">Open P&amp;L</div><div class="v" id="unrealised">—</div></div>
+    <div class="card"><div class="k">Commission paid</div><div class="v" id="fees">—</div></div>
+  </div>
+
+  <section>
+    <h2>Open position</h2>
+    <div id="position"></div>
+  </section>
+
+  <section>
+    <h2>Resting order</h2>
+    <div id="orders"></div>
+  </section>
+
+  <section>
+    <h2>Closed trades</h2>
+    <div id="trades"></div>
+  </section>
+
+  <section>
+    <h2>What the account did</h2>
+    <ul class="events" id="events"></ul>
+  </section>
+</main>
+
+<p class="hint">
+  Alerts arrive at <code>POST /alert</code>. Prices come from the delayed feed (about ten
+  minutes behind for futures), and a price is the only thing that fills anything here.
+</p>
+
+<script>
+  const money = (n) => (n === null || n === undefined || Number.isNaN(n))
+    ? '—'
+    : (n < 0 ? '-$' : '$') + Math.abs(n).toFixed(2);
+  const cls = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : '');
+  const clock = (ms) => new Date(ms).toLocaleTimeString('en-US', { hour12: false });
+
+  function positionView(p) {
+    if (!p) return '<div class="empty">Flat. Nothing is open.</div>';
+    return '<table><thead><tr><th>Market</th><th>Side</th><th>Qty</th><th>Entry</th>'
+      + '<th>Last</th><th>Stop</th><th>Target</th><th>Open P&amp;L</th></tr></thead><tbody><tr>'
+      + '<td>' + p.symbol + '</td>'
+      + '<td><span class="pill ' + p.side + '">' + p.side + '</span></td>'
+      + '<td>' + p.qty + '</td>'
+      + '<td>' + p.entry + '</td>'
+      + '<td>' + (p.last === null ? '—' : p.last) + '</td>'
+      + '<td>' + p.stop + '</td>'
+      + '<td>' + p.target + '</td>'
+      + '<td class="' + cls(p.unrealised) + '">' + money(p.unrealised) + '</td>'
+      + '</tr></tbody></table>';
+  }
+
+  function ordersView(orders) {
+    if (!orders.length) return '<div class="empty">No order resting.</div>';
+    return '<table><thead><tr><th>Market</th><th>Side</th><th>Type</th><th>Limit</th>'
+      + '<th>Stop</th><th>Target</th><th>Qty</th><th>Placed</th></tr></thead><tbody>'
+      + orders.map((o) => '<tr><td>' + o.symbol + '</td>'
+        + '<td><span class="pill ' + o.side + '">' + o.side + '</span></td>'
+        + '<td>' + o.order + '</td>'
+        + '<td>' + (o.limit === null ? '—' : o.limit) + '</td>'
+        + '<td>' + o.stop + '</td>'
+        + '<td>' + o.target + '</td>'
+        + '<td>' + o.qty + '</td>'
+        + '<td>' + clock(o.at) + '</td></tr>').join('')
+      + '</tbody></table>';
+  }
+
+  function tradesView(trades) {
+    if (!trades.length) return '<div class="empty">Nothing has closed yet.</div>';
+    return '<table><thead><tr><th>Closed</th><th>Market</th><th>Side</th><th>Qty</th>'
+      + '<th>Entry</th><th>Exit</th><th>Points</th><th>Fees</th><th>Dollars</th><th>Why</th></tr></thead><tbody>'
+      + trades.map((t) => '<tr>'
+        + '<td>' + clock(t.closedAt) + '</td>'
+        + '<td>' + t.symbol + '</td>'
+        + '<td><span class="pill ' + t.side + '">' + t.side + '</span></td>'
+        + '<td>' + t.qty + '</td>'
+        + '<td>' + t.entry + '</td>'
+        + '<td>' + t.exit + '</td>'
+        + '<td class="' + cls(t.points) + '">' + t.points + '</td>'
+        + '<td>' + money(t.fees) + '</td>'
+        + '<td class="' + cls(t.dollars) + '">' + money(t.dollars) + '</td>'
+        + '<td>' + t.reason + '</td></tr>').join('')
+      + '</tbody></table>';
+  }
+
+  function eventsView(events) {
+    if (!events.length) return '<li>nothing yet</li>';
+    return events.map((e) => '<li><time>' + clock(e.at) + '</time><span>' + e.text + '</span></li>').join('');
+  }
+
+  function render(s) {
+    document.getElementById('equity').textContent = money(s.equity);
+    document.getElementById('realized').className = 'v ' + cls(s.realized);
+    document.getElementById('realized').textContent = money(s.realized);
+    document.getElementById('unrealised').className = 'v ' + cls(s.unrealised);
+    document.getElementById('unrealised').textContent = money(s.unrealised);
+    document.getElementById('fees').textContent = money(s.fees);
+    document.getElementById('position').innerHTML = positionView(s.position);
+    document.getElementById('orders').innerHTML = ordersView(s.orders);
+    document.getElementById('trades').innerHTML = tradesView(s.trades);
+    document.getElementById('events').innerHTML = eventsView(s.events);
+
+    const feed = s.feed;
+    const el = document.getElementById('feed');
+    if (!feed) { el.textContent = 'waiting for a price'; return; }
+    el.textContent = (feed.error ? 'feed: ' + feed.error : 'feed: last check ' + clock(feed.at))
+      + ' · delayed, not tick data';
+  }
+
+  async function tick() {
+    try {
+      const res = await fetch('/state.json', { cache: 'no-store' });
+      render(await res.json());
+    } catch (err) {
+      document.getElementById('feed').textContent = 'cannot reach the paper server';
+    }
+  }
+  tick();
+  setInterval(tick, 2000);
+</script>
+</body>
+</html>

@@ -38,6 +38,20 @@ is committed or pushed until you ask for it.
    and a log of every order placed.
 6. **Running it** — where it lives, how it stays up, and how it tells you it died.
 
+## Paper trading — the alert receiver (built)
+
+`paper/` is a small server that takes the TradingView alert and keeps a paper
+account: a resting limit fills only when a price comes to it, the stop and the
+target are the ones the alert carried, and every fill is written down in dollars at
+four contracts. It holds one position at a time and can never reach a broker.
+
+```
+PAPER_TOKEN=make-up-a-long-word node paper/server.js
+```
+
+Read `paper/README.md` for the webhook address, the delayed price feed and the
+reasons those fills are a rehearsal rather than a quote.
+
 ## What a strategy is here
 
 A strategy is a module in `strategies/`. It exports a `name`, a `describe()`, and

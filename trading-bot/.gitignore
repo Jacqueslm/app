@@ -6,5 +6,9 @@ data/
 .env
 .env.*
 
+# The paper account's own ledger: a local record, not source.
+paper/state.json
+paper/state.json.tmp
+
 # Run logs
 *.log

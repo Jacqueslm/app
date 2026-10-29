@@ -477,11 +477,14 @@ test('workout entries capture sets, reps, weight, and stay per client', () => {
   assert.equal(p.box('workoutTitle').value, 'Strength session');
   assert.equal(p.box('exerciseSets').value, '2', 'the quick-add field returns to the usual two-set default');
   assert.equal(p.box('restTimer').hidden, false, 'logging an exercise starts the rest countdown');
-  assert.equal(p.box('restTimer').textContent, '10-second rest · 10');
+  // 29 Oct 2026, the second rest: "Another rule to the by 10 is 30 seconds rest
+  // moving to a new exercise". The countdown here is the move's rest, so it runs
+  // thirty seconds - the ten belongs between sets of one movement.
+  assert.equal(p.box('restTimer').textContent, '30-second rest · 30');
   assert.equal(p.intervalCallbacks.size, 1, 'only one rest countdown runs at a time');
-  for (let second = 0; second < 10; second++) p.intervalCallbacks.values().next().value();
+  for (let second = 0; second < 30; second++) p.intervalCallbacks.values().next().value();
   assert.equal(p.box('restTimer').textContent, 'Rest complete · ready for the next exercise');
-  assert.equal(p.intervalCallbacks.size, 0, 'the countdown stops after ten seconds');
+  assert.equal(p.intervalCallbacks.size, 0, 'the countdown stops after thirty seconds');
   assert.equal(T.openWorkout(1, 1), undefined);
   assert.equal(p.box('workoutTitle').value, 'Strength session', 'reopening shows the saved workout name');
   assert.equal(p.box('workoutDate').value, '2026-10-18', 'reopening shows the saved workout date');
@@ -622,8 +625,10 @@ test('the by-10 is off the Trainer, and P90X is the programme on it', () => {
   assert.match(html, /<h2>The P90X rotation<\/h2>/, 'P90X is the programme on the page');
   // The one part of the by-10 he kept - its rest period - is woven into the
   // rotation rather than left behind in a programme of its own.
-  assert.match(html, /ten seconds between exercises/i,
-    'the ten-second rest is written into the P90X rotation');
+  assert.match(html, /ten seconds between sets/i,
+    'the ten-second set rest is written into the P90X rotation');
+  assert.match(html, /thirty seconds<\/b> when moving on to a new exercise/i,
+    'and the thirty-second rest for a change of exercise is written beside it');
   // 19 Oct 2026, and the rest of the rule, in his words: "By 10 is not based on
   // how much weight you can lift ... 2 to 5 sets no matter your level for a
   // beginners 1 weeknof stretching first ... by 10 can be done everyday as long

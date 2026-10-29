@@ -1389,3 +1389,29 @@ sentence and the "intensity ... through the whole of the movement" line, and it
 fails if any of the eight P90X-owns-the-movements phrasings comes back. All 27
 tests in that file pass; the wider suite was not run here (no `node_modules` in
 the workspace).
+
+
+**The thirty seconds between exercises — 29 Oct 2026.** Jacques: "Another rule to
+the by 10 is 30 seconds rest moving to a new exercise". The by-10 had one rest;
+it has two now. **Ten seconds between the sets of one movement**, unchanged, and
+**thirty seconds when the list moves on to a new exercise** — the dumbbell
+swapped, the station set up, the breath back, which the set's ten never counted.
+The thirty is a second rest rather than a longer first one, and both are stated
+that way wherever the rule is taught: `certify.html` day 3 (a new paragraph on
+why the change of movement gets its own rest, and its quiz question folded into
+one that answers both numbers), day 8 (energy systems), day 34 (the rule in
+full), day 36 (the rest timer lesson) and day 37 (the full-body walk-through),
+plus the page header and the Trainer card's note. On `trainer.html` the rotation
+card says ten between sets and thirty before the next exercise, and the rest
+countdown — which only ever started after an exercise was logged, i.e. on a
+change of exercise — now runs thirty seconds and says "30-second rest".
+`server/test/certify.test.js` requires the rule; `server/test/trainer.test.js`
+drives the timer at thirty. The first full run was **505 tests, 504 pass, 1
+fail** — the new fourth quiz question broke the three-questions-a-lesson rule —
+and after folding both numbers into one question it is **505 pass, 0 fail**.
+
+No version bump. `/certify` and `/trainer` are gated routes outside the shell,
+the fetch handler is network-first for pages, and `hub.html` did not change.
+`tools/apply-version-bump.js` refuses anyway: `package.json` and
+`server/package.json` sit at 2.0 while `sw.js` and `hub.html` are at 3.9 —
+pre-existing drift, left alone rather than papered over here.

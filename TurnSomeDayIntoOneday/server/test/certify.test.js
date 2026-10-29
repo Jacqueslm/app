@@ -234,7 +234,16 @@ test('the trainer track teaches the by-10 as a rule and P90X as the format only'
     /dumbbell light enough to pump out the reps with/,
     /two to five sets/i,
     /never more than twenty/,
-    /ten seconds between one move and the next/,
+    /ten seconds between sets/,
+    // 29 Oct 2026, the second rest, in his words: "Another rule to the by 10 is
+    // 30 seconds rest moving to a new exercise". The ten is the set's rest and
+    // the thirty is the move's; both are required, and neither replaces the
+    // other - the rule is a second rest, not a longer first one.
+    /thirty seconds when you move on to a new exercise/,
+    /The thirty seconds is the second rest, and it is not the ten repeated/,
+    /The ten still belongs between the sets of the same movement/,
+    /thirty seconds before the next movement/,
+    /Ten seconds between sets, thirty between moves/,
     /The exercises are not the by-10's/,
     /thirty seconds to two minutes/,
     /an hour's workout becomes thirty minutes/,

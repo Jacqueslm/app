@@ -171,6 +171,8 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div class="tab on" data-t="az">A&#8211;Z</div>
     <div class="tab" data-t="need">By need</div>
     <div class="tab" data-t="books">From the books</div>
+    <div class="tab" data-t="sebi">Dr. Sebi</div>
+    <div class="tab" data-t="m21">21 days</div>
     <div class="tab" data-t="course">90 days</div>
     <div class="tab" data-t="mucus">Mucus scale</div>
     <div class="tab" data-t="meal">Meal plan</div>
@@ -1070,7 +1072,11 @@ var HERBS = [
 {n:"Glutamine",a:"L-glutamine, the amino acid the gut lining burns",u:"The gut lining and a body building back — a nutrient, not a herb",t:["digestion","energy"],
  d:"An amino acid, the most abundant one in the blood, made by the body and eaten in anything with protein in it — meat, fish, eggs, beans, cabbage. The lining of the gut burns it as fuel, which is why it sits on this shelf at all: on the self-check this page teaches, the tongue and the whole picture point at the gut, and glutamine is the building block that lining is repaired with rather than a plant that acts on it. It is a supplement sold in tubs, and it has no herbal tradition behind it.",
  h:"Food first — the amino acid comes with the protein in a meal. The studies that used the powder used about 5 grams a day, and that is a study regimen rather than a dose this page sets.",
- c:"The strongest evidence is for a person being fed by a drip in a hospital, and the weakest is where it is sold: for a leaky gut, for IBS, and for a healthy person training, the trials are small and the results mixed, and no regulator has approved it for any of that. It is not a treatment for coeliac disease, for an infection, or for a bowel that is bleeding. A kidney that is unwell handles the nitrogen load badly, and severe liver disease is the other place extra glutamine is a question for the prescriber rather than a tub. It is being studied alongside chemotherapy and with anti-seizure medicine, so ask before adding it to either. No regulator's dose. Not in pregnancy or while feeding without advice, and not for a child. Blood in the stool, weight going down without trying, a fever, or diarrhoea that has lasted more than a few days is not a glutamine question — that is a clinician's, and a tub is not a diagnosis."}
+ c:"The strongest evidence is for a person being fed by a drip in a hospital, and the weakest is where it is sold: for a leaky gut, for IBS, and for a healthy person training, the trials are small and the results mixed, and no regulator has approved it for any of that. It is not a treatment for coeliac disease, for an infection, or for a bowel that is bleeding. A kidney that is unwell handles the nitrogen load badly, and severe liver disease is the other place extra glutamine is a question for the prescriber rather than a tub. It is being studied alongside chemotherapy and with anti-seizure medicine, so ask before adding it to either. No regulator's dose. Not in pregnancy or while feeding without advice, and not for a child. Blood in the stool, weight going down without trying, a fever, or diarrhoea that has lasted more than a few days is not a glutamine question — that is a clinician's, and a tub is not a diagnosis."},
+{n:'Sarsaparilla',a:'Smilax, zarzaparrilla',u:'The blood, the skin, a spring clean',t:['blood','skin','liver'],
+ d:'A tropical vine root, taken as a decoction in the Caribbean and Central American tradition for the blood and the skin. It is one of the plants in his Bio Ferro, his Testo and his Maya Electra.',
+ h:'Dried root simmered 20 to 30 minutes; or a tincture.',
+ c:'The sarsaparilla of the old herbals is not the sassafras of root beer, and a bottle sold as sarsaparilla can be either. Not in pregnancy or while breastfeeding. It can upset the stomach, and it is not a blood test. Ask before combining it with a diuretic or digoxin.'},
 
 ];
 
@@ -2049,7 +2055,8 @@ var COURSE = [
  p:["Mucus is the book's own word, and the book means something specific by it: the slime that cooked, starchy, greasy, fiberless food leaves behind as it is eaten and not fully moved on.",
     "Its account of the body is that there are ordinary ways out — the bowel, the kidneys and the urine, and the breath — and that when those cannot keep pace with what is going in, the body uses the routes it has left. The skin, the nose, the throat and the lungs start moving things out instead.",
     "That is the hinge of a great deal of the book. What it says is happening in a cold, in a runny nose, in a cough that brings something up, is the body clearing. Its own name for the whole process is a cleansing, and it uses that name where the rest of the world says illness.",
-    "This page carries the idea and stops where the book does not stop. The book's further step, that these things are therefore not passed from person to person, does not travel to this page, and nothing on this shelf answers an infection — the same line that day 28 of the course opens with. What is left is the part a person can use: what goes in decides how much there is to clear."],
+    "This page carries the idea and stops where the book does not stop. The book's further step, that these things are therefore not passed from person to person, does not travel to this page, and nothing on this shelf answers an infection — the same line that day 28 of the course opens with. What is left is the part a person can use: what goes in decides how much there is to clear.",
+    "Dr. Sebi's version of this is on his own tab, and it is the same hinge in a different frame: he puts mucus beside acidity as the two roots of disease, and reads illness as what a body does with what it cannot move. The library keeps his line as his line \u2014 the frame, the plants he keeps and the four he calls acidic, card by card \u2014 and the page's own cautions still sit over all of it."],
  bk:"The internal organs, tissues, nerves and cells are clogged and activity-impaired with liquid, slimy manure called mucus or plaque.",
  q:[{q:"In the book, what is mucus?", k:0, a:["What cooked, starchy food leaves behind","A virus","A mineral","An infection"], w:"And the book has its own name for what the body then does about it."},
     {q:"Which are the ordinary ways out, in the book?", k:1, a:["The fingers and toes","The bowel, the kidneys and the breath","Only the skin","The hair"], w:"When those cannot keep pace, the body uses what it has left."},
@@ -2257,7 +2264,8 @@ var COURSE = [
     "Two: anything about inoculations and epidemics. The books make claims there. The page leaves them in the book and says nothing of its own about them, and it says so here rather than quietly hoping nobody noticed.",
     "Three: that a herb, a vitamin or a mineral protects a body from the harm of junk food. The book itself says no — its own line is that there is no miracle drug, herb or therapy that undoes junk food — and the page agrees with the book on that one.",
     "Four: the parts that blame a people rather than a system, and any line that turns the reader into the accused. That is not this page's voice and it is not going to become it.",
-    "The rest of what the two books claim, this page claims with them, and it says whose claim it is every single time."],
+    "The rest of what the two books claim, this page claims with them, and it says whose claim it is every single time.",
+    "There is a fifth set of claims now, and it belongs to the newest voice on this page rather than to the three books. Dr. Sebi taught that cellular acidity and mucus are the single root of disease, and that his herbs and his diet cure what medicine only manages \u2014 AIDS, diabetes, sickle cell, lupus. His frame and his plants are printed on the Dr. Sebi tab, in his own voice; the cure is not printed as this page's. Anybody on treatment for one of those stays on it."],
  note:"Four claims stay in the book: contagion, inoculations and epidemics, a herb undoing junk food, and blame on a people. The page says so out loud rather than leaving them to be noticed.",
  q:[{q:"Which claim about a cold or sore throat does the page refuse?", k:2, a:["That it involves mucus","That it has a name","That it is not passed from person to person","That it passes from person to person"], w:"That claim could make somebody sit too long with a chest that rattles."},
     {q:"Why does that matter?", k:3, a:["It is a legal point","It is longer that way","It changes nothing","Something that breathes badly can be sat with too long"], w:"So the page will not print the claim as a fact."},
@@ -3001,6 +3009,467 @@ function selfNoteCard(lesson,i){ return lectureCard('self',SELF_NOTES.length,les
    the book and are not made here in this page's own voice, and the first
    section says which four.
 --------------------------------------------------------------------------- */
+
+/* ---- HIS 21 DAYS ------------------------------------------------------------
+   Added 31 Oct 2026. His cleanse, as a tab of its own: three weeks of his
+   approved food in the shape he taught, his seven teas, his gallon of spring
+   water, and his compounds where a person is using them. Built only out of
+   what his guide approves; the printed menu is this page's arrangement of his
+   list and says so at the top of the tab.
+--------------------------------------------------------------------------- */
+var CLEANSE21 = [
+ {h:'His 21 days', s:'The cleanse, before day one',
+  rows:[
+   ['What it is','Three weeks on his guide and nothing else: no hybrid food, no animal product, no soy, no sugar, no alcohol, no vinegar, no rice, no wheat, no coffee, no tea that is not his seven, no seedless fruit, nothing canned and nothing out of a packet. Fruit in the morning, the raw plate at midday, steamed food at night, and a gallon of spring water a day.'],
+   ['Why twenty-one','Because three weeks is three moves, not one long one. Week one is the plateau, where the body lets go of what it was holding and the first days are the hardest. Week two is the deep clean, where the greens and the sea vegetables go up and the starch goes down. Week three is the rebuild, where the grain comes back at night and the body is put on the guide as a way of eating rather than a cleanse.'],
+   ['What is his and what is not','The foods, the seven teas, the water rule, the fruit morning and the compounds are his. A printed menu of twenty-one days is not in his literature — what circulates under his name is the guide plus the products — so the days below are built only out of what his guide approves, in the shape he taught, and they carry no ingredient he did not approve.'],
+   ['The three rules that do the work','Nothing that is not on the list. A gallon of spring water. And the plate before the bottle: the food is the cleanse, the compounds are the help.'],
+   ['How to use the tab','One day at a time. Nothing is timed and no day has to be done on the day it is numbered; start at day one and work down. A day that ends in the wrong food is a day, not a verdict — the next meal is the one that matters, and it starts in ten minutes.']],
+  note:'Twenty-one days, three weeks, and the guide at the end of it. The days are opened one at a time, and the phone can read each one out loud.',
+  noteCls:'okbox'},
+
+ {h:'Before day one', s:'Read this once, and twice if there is a condition in the house',
+  rows:[
+   ['The shop','One trip, the outside of the shop: greens, sea vegetables, fruit, roots, one grain, one bean, sesame and hemp seed, olive and sesame oil, the seven teas, and the seasonings. The full list is two shelves down.'],
+   ['The water','A gallon of spring water a day. Not tap. That is his first rule and the one most people skip.'],
+   ['The compounds','His small cleansing package is the three he built for this: Bio Ferro for the blood, Chelation 2 for the bowel, Viento for the cleanse and the energy, with Bromide Plus in the shake for the minerals. If you are not using them, the food still works and nothing on the days waits for a bottle.'],
+   ['Who should not do these three weeks','Not while pregnant or feeding. Not a child. Not somebody on medicine for diabetes, or with sugar in the urine, without whoever manages it — a diet that changes this much changes what that medicine does. Not with a kidney or a heart condition, or on a water tablet. Not in the week somebody is coming off alcohol or a drug: that week can kill and it is an emergency, not a cleanse.'],
+   ['When to stop and be seen','Dizzy on standing, fainting, a bowel that will not stop, a fever that will not come down, weight falling without trying, or a pulse that will not settle. Stop the cleanse and get looked at, whatever day it is.'],
+   ['What the first three days are like','A headache, a flat stretch, a temper, and an evening that wants sugar. Water, sleep, a walk, a cooked meal already in the fridge, and one other person who knows you are doing it. It passes, and it passes on its own.']],
+  note:'A condition in the house outranks every day on this tab. The cleanse is food, and food does not outrank a prescription.',
+  noteCls:'redbox'},
+
+ {h:'The three weeks', s:'What changes, and when',
+  rows:[
+   ['Week one · days 1 to 7','The plateau. Everything off the list goes, the fruit morning starts, the gallon starts, the teas start, and the evening is the hard part. Grain stays at night so the first week is not a shock.'],
+   ['Week two · days 8 to 14','The deep clean. The greens and the sea vegetables go up, the grain comes out of most evenings, the shake goes to twice a day, and Fucus and Chelation 1 join if you are using the compounds. This is the week people feel the most and quit the most.'],
+   ['Week three · days 15 to 21','The rebuild. The grain comes back at night, the roots come back, the minerals go up, and the last days are the guide cooked properly rather than a cleanse survived.'],
+   ['After day 21','The guide is the way of eating, not the cleanse. The cleanse is what a person walks once a season, or when the body has drifted.'],
+   ['What is not measured','Nothing on this tab is scored, weighed or counted, and no day has a quiz. It is a plan on a fridge, not a course.']],
+  note:'Three weeks, three moves. Nothing on the tab has to be bought except the food, the water and the teas.',
+  noteCls:'okbox'},
+
+ {h:'The day, in his shape', s:'Every one of the twenty-one is this, with different things on it',
+  rows:[
+   ['On waking','A glass of spring water before anything else. Then the seamoss, and the fruit.'],
+   ['Until midday','Fruit, and water. Nothing cooked, no cereal, no milk, no sugar, no bread.'],
+   ['Midday','The raw half, big: leaves, cucumber, tomato, sweet pepper, avocado, sea vegetables, with lemon or key lime, olive or sesame oil, sea salt and a herb.'],
+   ['Evening','The cooked half: steamed greens and vegetables, one root, and in weeks one and three a cup of one grain. Nothing fried, nothing with dairy on it.'],
+   ['Through the day','His seven teas, and the gallon of water. No coffee, no green tea, no black tea, no hibiscus, no rooibos, no peppermint.'],
+   ['The one thing to remember','The fruit morning is the whole change if nothing else changes. It is the part worth keeping after the twenty-one days are over.']],
+  note:'Fruit to midday, raw at midday, steamed at night, and the water all day. That is the whole architecture of the three weeks.',
+  noteCls:'okbox'},
+
+ {h:'The shop for the 21 days', s:'One trip, and it covers every day on the tab',
+  rows:[
+   ['Greens and leaves','Kale, callaloo (amaranth greens), dandelion greens, turnip greens, watercress, purslane, lettuce (not iceberg), poke salad greens, izote.'],
+   ['The raw plate','Cucumber, tomato (plum or cherry only), sweet pepper, avocado, chayote, zucchini, okra, nopales, onion, olives, mushrooms (not shiitake), squash, green banana.'],
+   ['Sea vegetables','Sea moss, bladderwrack, dulse, nori, kelp, wakame, arame, hijiki. This is the half of the plate his whole cabinet is built on.'],
+   ['Fruit','Apples, berries (not cranberries), mango, papaya, figs, dates, seeded grapes, seeded melon, key limes, soursop, tamarind, prickly pear, burro banana, soft jelly coconut, Seville orange.'],
+   ['Grains, beans and seeds','Quinoa, amaranth, teff, wild rice, spelt, kamut, rye, fonio; garbanzo beans; Brazil nuts, walnuts, raw sesame and tahini, hemp seed.'],
+   ['Oils and seasonings','Olive, sesame, avocado, grapeseed, hempseed, coconut (uncooked). Basil, bay, clove, dill, oregano, savory, tarragon, thyme, sage, achiote, cayenne, coriander and cilantro, habanero, onion powder, pure sea salt, powdered kelp or dulse or nori. Date sugar and cactus agave if something needs sweetening.'],
+   ['The teas','Burdock, chamomile, elderberry, fennel, ginger, raspberry leaf, tila.'],
+   ['Not in the basket','Anything animal, soy, sugar, honey, vinegar, alcohol, coffee, rice, wheat, oats, corn, peanuts, almonds, cashews, seedless fruit, cranberries, spinach, broccoli, cauliflower, carrots, celery, garlic, cabbage, collards, eggplant, radish, sweet potato, parsley, leek, beets. His list, and it is closed.']],
+  note:'If it is not on this list it is not in the basket. That is the whole of the shopping method.',
+  noteCls:'okbox'},
+
+ {h:'The seven teas and the compounds', s:'What is drunk, and what is taken',
+  rows:[
+   ['The seven teas','Burdock root for the blood and the skin; chamomile for the nerve and the evening; elderberry for a cold coming on; fennel seed for wind and the belly; ginger for a stomach that turns; raspberry leaf for the womb and the mineral; tila for the evening and the nerves. Every one of them is a card on this page.'],
+   ['The three of his package','Viento on waking for the cleanse and the energy. Bio Ferro before the midday plate for the blood. Chelation 2 at night for the bowel — his own design is three to six bowel movements a day, which is a great deal of cascara, and the card on this page says so.'],
+   ['The minerals','Bromide Plus in the shake, and Fucus through week two. Both are bladderwrack, both are iodine, and the iodine adds up — that is the one thing on this tab that can be got wrong by doing more rather than less.'],
+   ['The glandular three','Endocrine, or Estro, or Testo, in week three, according to who is doing it. His literature describes them; none of them is a thing to start without knowing what is in it.'],
+   ['No dose is printed here','His literature does not print one, and this page does not invent one. The cards carry the cautions, and the cautions are the part to read.']],
+  note:'The teas are food. The compounds are his products, and the cautions on the plant cards are the part that keeps a person out of trouble.',
+  noteCls:'warnbox'},
+
+ {h:'Day 1 · The fruit morning', s:'Day 1 of 21',
+  rows:[
+   ['Morning','On waking, a glass of water, then the seamoss: a tablespoon of the gel or a teaspoon of the powder stirred into a glass of spring water, with two dates or a fig. Fruit until the middle of the day.'],
+   ['Midday · the raw half','Kale, cucumber, plum tomato, avocado and dandelion greens, with key lime, a tablespoon of olive oil, sea salt and a quarter teaspoon of thyme.'],
+   ['Evening · the cooked half','Steamed zucchini, okra and callaloo with a cup of quinoa and a quarter teaspoon of dill.'],
+   ['The teas','Burdock in the morning, ginger after the midday plate, chamomile at night.'],
+   ['The compounds, if you are using them','Viento on waking, Bio Ferro before the plate, Chelation 2 at night, Bromide Plus in the shake.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'Day one is the fruit morning and the gallon. If nothing else changes today, that is the day done.',
+  noteCls:'okbox'},
+
+ {h:'Day 2 · The plate gets bigger', s:'Day 2 of 21',
+  rows:[
+   ['Morning','On waking, a glass of water, then the seamoss: a tablespoon of the gel or a teaspoon of the powder stirred into a glass of spring water, with two dates or a fig. Fruit until the middle of the day. Papaya with key lime after it.'],
+   ['Midday · the raw half','Watercress, purslane, sweet pepper, cucumber and avocado, with sesame oil, sea salt and a quarter teaspoon of basil.'],
+   ['Evening · the cooked half','Steamed chayote, green banana and kale with a cup of wild rice, a quarter teaspoon of thyme and a pinch of cayenne.'],
+   ['The teas','Burdock, fennel after the evening meal, tila at night.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 2, Bromide Plus in the shake.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 3 · The hard evening', s:'Day 3 of 21',
+  rows:[
+   ['Morning','On waking, a glass of water, then the seamoss: a tablespoon of the gel or a teaspoon of the powder stirred into a glass of spring water, with two dates or a fig. Fruit until the middle of the day. Seeded grapes and an apple after it.'],
+   ['Midday · the raw half','Cucumber and zucchini ribbons, plum tomato, purslane, avocado and hemp seed, with key lime, olive oil and sea salt.'],
+   ['Evening · the cooked half','Garbanzo beans with steamed okra, tomato and onion, a cup of teff, coriander and a quarter teaspoon of oregano.'],
+   ['The teas','Burdock in the morning, ginger in the afternoon, chamomile early.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 2, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'The evening of day three is the one people find hardest. Have somewhere to be, or somebody expecting to hear from you. It is minutes, not hours.',
+  noteCls:'okbox'},
+
+ {h:'Day 4 · Olives and a pot', s:'Day 4 of 21',
+  rows:[
+   ['Morning','On waking, a glass of water, then the seamoss: a tablespoon of the gel or a teaspoon of the powder stirred into a glass of spring water, with two dates or a fig. Fruit until the middle of the day. Figs and dates after it.'],
+   ['Midday · the raw half','Kale, dandelion greens, cucumber, plum tomato, olives and avocado, with lemon, olive oil and a quarter teaspoon of savory.'],
+   ['Evening · the cooked half','Steamed butternut squash, turnip greens and nopales with a cup of quinoa, sage and onion powder.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 2, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 5 · Mango morning', s:'Day 5 of 21',
+  rows:[
+   ['Morning','On waking, a glass of water, then the seamoss: a tablespoon of the gel or a teaspoon of the powder stirred into a glass of spring water, with two dates or a fig. Fruit until the middle of the day. A mango after it.'],
+   ['Midday · the raw half','Watercress, cucumber, sweet pepper and avocado with a tahini dressing, sea salt and a quarter teaspoon of coriander.'],
+   ['Evening · the cooked half','Garbanzo beans with steamed zucchini, mushrooms and kale, a cup of amaranth, thyme and a pinch of cayenne.'],
+   ['The teas','Burdock, ginger, chamomile.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 2, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 6 · Sea vegetables arrive', s:'Day 6 of 21',
+  rows:[
+   ['Morning','On waking a glass of water, then the seamoss, then soursop or berries.'],
+   ['Midday · the raw half','Kale, purslane, plum tomato and avocado with nori cut into strips, sesame oil, sea salt and a quarter teaspoon of dill.'],
+   ['Evening · the cooked half','Steamed callaloo, okra and chayote with a cup of wild rice, coriander and cayenne.'],
+   ['The teas','Burdock, elderberry in the afternoon, tila at night.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 2, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 7 · One week in', s:'Day 7 of 21',
+  rows:[
+   ['Morning','On waking, a glass of water, then the seamoss: a tablespoon of the gel or a teaspoon of the powder stirred into a glass of spring water, with two dates or a fig. Fruit until the middle of the day. Seeded melon after it.'],
+   ['Midday · the raw half','The big raw plate: kale, watercress, cucumber, plum tomato, sweet pepper, avocado, dulse, with key lime, olive oil and sea salt.'],
+   ['Evening · the cooked half','A sea vegetable pot: wakame and mushrooms simmered with onion and thyme, a cup of quinoa stirred through at the end.'],
+   ['The teas','Burdock, fennel, chamomile.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 2, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'Seven days. The fruit morning is the part that has changed the most, and it is the part worth keeping whether the other fourteen happen or not.',
+  noteCls:'okbox'},
+
+ {h:'Day 8 · The deep clean starts', s:'Day 8 of 21',
+  rows:[
+   ['Morning','On waking water, then the seamoss with bladderwrack stirred in, then fruit.'],
+   ['Midday · the raw half','Kale, dulse, cucumber, plum tomato and avocado, with key lime, olive oil and a quarter teaspoon of thyme.'],
+   ['Evening · the cooked half','Steamed callaloo, okra and zucchini, no grain tonight, with onion powder and cayenne.'],
+   ['The teas','Burdock in the morning, elderberry midday, ginger after the plate, chamomile at night.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 1, Fucus, Bromide Plus in the shake.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'Week two is where the starch comes down and the greens go up. If the evenings are thin, eat more at midday rather than adding a grain back.',
+  noteCls:'okbox'},
+
+ {h:'Day 9 · Two shakes', s:'Day 9 of 21',
+  rows:[
+   ['Morning','Seamoss and bladderwrack in water, fruit after it.'],
+   ['Midday · the raw half','Watercress, purslane, cucumber, sweet pepper, avocado and arame, with sesame oil and sea salt.'],
+   ['Evening · the cooked half','Steamed turnip greens, mushrooms and chayote, no grain, with a quarter teaspoon of sage.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 1, Fucus, Bromide Plus, and a second shake in the afternoon.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 10 · The middle of the middle week', s:'Day 10 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then papaya and key lime.'],
+   ['Midday · the raw half','Kale, dandelion greens, plum tomato, cucumber, avocado, olives, with lemon and olive oil.'],
+   ['Evening · the cooked half','Steamed okra, nopales and callaloo with a small cup of quinoa if the evening needs it, thyme and cayenne.'],
+   ['The teas','Burdock, elderberry, ginger, chamomile.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 1, Fucus, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'Day ten is the day to check the water. Most of what feels like hunger in this week is thirst and salt, and the gallon is the answer to both.',
+  noteCls:'okbox'},
+
+ {h:'Day 11 · Bitter greens', s:'Day 11 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then seeded grapes and an apple.'],
+   ['Midday · the raw half','Dandelion greens, watercress, cucumber, plum tomato and avocado, with key lime, sesame oil and a quarter teaspoon of savory.'],
+   ['Evening · the cooked half','Steamed callaloo and zucchini with mushrooms, no grain, coriander and a pinch of cayenne.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 1, Fucus, Bromide Plus, second shake in the afternoon.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 12 · The sea in the pot', s:'Day 12 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then mango.'],
+   ['Midday · the raw half','Kale, purslane, cucumber, sweet pepper and avocado with hijiki, olive oil and sea salt.'],
+   ['Evening · the cooked half','A pot of dulse, wakame and mushrooms with onion and thyme, no grain.'],
+   ['The teas','Burdock, elderberry, ginger, chamomile.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 1, Fucus, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 13 · A quiet day', s:'Day 13 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then berries and a fig.'],
+   ['Midday · the raw half','Watercress, cucumber, plum tomato, avocado and nori, with key lime, olive oil and dill.'],
+   ['Evening · the cooked half','Steamed okra, chayote and turnip greens, no grain, with sage and onion powder.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 1, Fucus, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 14 · Two weeks', s:'Day 14 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then seeded melon.'],
+   ['Midday · the raw half','The big raw plate with every sea vegetable you have, avocado, key lime and olive oil.'],
+   ['Evening · the cooked half','Steamed callaloo, zucchini and okra with a small cup of wild rice, thyme and cayenne.'],
+   ['The teas','Burdock, elderberry, ginger, chamomile.'],
+   ['The compounds, if you are using them','Viento, Bio Ferro, Chelation 1, Fucus, Bromide Plus.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'Fourteen days. The hard week is behind you, and the last week is the one where the food starts to taste like food again.',
+  noteCls:'okbox'},
+
+ {h:'Day 15 · The rebuild starts', s:'Day 15 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then fruit.'],
+   ['Midday · the raw half','Kale, watercress, cucumber, plum tomato, avocado and dulse, with lemon and olive oil.'],
+   ['Evening · the cooked half','Steamed butternut squash, callaloo and okra with a cup of quinoa, thyme and a quarter teaspoon of oregano.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Bio Ferro before the plate, Bromide Plus in the shake, Endocrine or Estro or Testo with the evening meal, Chelation 2 at night.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'The grain is back at night and the minerals go up. This is the week the cleanse turns into the way of eating.',
+  noteCls:'okbox'},
+
+ {h:'Day 16 · Roots return', s:'Day 16 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then papaya.'],
+   ['Midday · the raw half','Watercress, purslane, sweet pepper, cucumber and avocado with sesame oil and sea salt.'],
+   ['Evening · the cooked half','Steamed green banana, chayote and kale with a cup of amaranth, coriander and cayenne.'],
+   ['The teas','Burdock, ginger, chamomile.'],
+   ['The compounds, if you are using them','Bio Ferro, Bromide Plus, Endocrine or Estro or Testo, Chelation 2.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 17 · A cooked evening worth eating', s:'Day 17 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then figs and dates.'],
+   ['Midday · the raw half','Kale, dandelion greens, plum tomato, olives and avocado, with key lime and olive oil.'],
+   ['Evening · the cooked half','Garbanzo beans with steamed zucchini, mushrooms and turnip greens, a cup of wild rice, sage and onion powder.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Bio Ferro, Bromide Plus, Endocrine or Estro or Testo, Chelation 2.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 18 · The plate, settled', s:'Day 18 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then seeded grapes and an apple.'],
+   ['Midday · the raw half','The big raw plate with sea vegetables, avocado, key lime and sesame oil.'],
+   ['Evening · the cooked half','Steamed callaloo, okra and squash with a cup of quinoa, thyme and cayenne.'],
+   ['The teas','Burdock, elderberry, ginger, chamomile.'],
+   ['The compounds, if you are using them','Bio Ferro, Bromide Plus, Endocrine or Estro or Testo, Chelation 2.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'Day eighteen is the day to notice what has changed: the tongue, the skin, the sleep, the mornings. Write it in the notes on any card, because it is the part the next three weeks are built on.',
+  noteCls:'okbox'},
+
+ {h:'Day 19 · Almost', s:'Day 19 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then mango.'],
+   ['Midday · the raw half','Watercress, cucumber, plum tomato, sweet pepper and avocado, with lemon, olive oil and dill.'],
+   ['Evening · the cooked half','Steamed turnip greens, green banana and mushrooms with a cup of teff, sage and a pinch of cayenne.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Bio Ferro, Bromide Plus, Endocrine or Estro or Testo, Chelation 2.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 20 · The last cooked night', s:'Day 20 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then berries.'],
+   ['Midday · the raw half','Kale, purslane, cucumber, plum tomato and avocado with nori, key lime and sesame oil.'],
+   ['Evening · the cooked half','Steamed callaloo, okra and chayote with a cup of wild rice, coriander and thyme.'],
+   ['The teas','Burdock, elderberry, ginger, chamomile.'],
+   ['The compounds, if you are using them','Bio Ferro, Bromide Plus, Endocrine or Estro or Testo, Chelation 2.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  noteCls:'okbox'},
+
+ {h:'Day 21 · The twenty-first day', s:'Day 21 of 21',
+  rows:[
+   ['Morning','Seamoss shake, then fruit, slowly, with the day in front of you.'],
+   ['Midday · the raw half','The biggest raw plate of the three weeks, every sea vegetable you have, avocado, key lime, olive oil and sea salt.'],
+   ['Evening · the cooked half','Steamed greens, a root and a cup of grain, seasoned the way the guide seasons: a quarter teaspoon of a herb for four servings.'],
+   ['The teas','Burdock, fennel, tila.'],
+   ['The compounds, if you are using them','Viento on waking, Bio Ferro before the plate, Chelation 2 only if the bowel needs it, Bromide Plus in the shake.'],
+   ['Water','A gallon of spring water through the day, and a glass before anything else in the morning.']],
+  note:'Twenty-one days. What comes after is the guide as the way of eating, and the cleanse walked again in a season — not as a punishment, but as the tune-up it is.',
+  noteCls:'okbox'}
+];
+
+/* ---- DR. SEBI ---------------------------------------------------------------
+   His shelf, 31 Oct 2026. This is the one place in the library where his word
+   is the text rather than a quotation inside somebody else's, and it is built
+   in that order: his framework, his lists, his food, his compounds, then one
+   shelf at the end for the analysis that was handed to the page and the line
+   that does not move whatever anybody believes.
+
+   The food list and the product descriptions come from what his company
+   publishes and from the copies that circulate under his name; his own books
+   are not in this house, and where the versions disagree the shelf says so.
+--------------------------------------------------------------------------- */
+var SEBI_HERB = {
+ 'Burdock root':'Kept. One of the three cleansers on his list, and one of the four plants in his Bio Ferro. The card\u2019s own line above is the one to follow for a dose.',
+ 'Yellow dock':'Kept. The bitter root he pairs with burdock, and one of the four plants in his Bio Ferro.',
+ 'Elderberry':'Kept. One of his seven teas and one of the plants in his Bio Ferro and his Banju.',
+ 'Sea moss':'Kept, and the centre of his cabinet: the mineral food in his Bromide Plus, his Seamoss Bladderwrack Mix and his Testo. It is the seaweed he pairs with bladderwrack.',
+ 'Bladderwrack':'Kept. The second seaweed, and the whole of his Fucus and half of his Bromide Plus. It is the iodine in his mineral argument.',
+ 'Dandelion':'Kept, on the nourishing side of his list: the liver and the spring clean.',
+ 'Nettle':'Kept. One of the nourishing plants, and an ingredient in his Green Food Plus.',
+ 'Chamomile':'Kept. One of his seven approved teas, and the nerve tea in his own line.',
+ 'Fennel seed':'Kept. One of his seven approved teas.',
+ 'Ginger':'Kept. One of his seven approved teas.',
+ 'Raspberry leaf':'Kept. One of his seven approved teas.',
+ 'Cascara sagrada':'Kept, and it is half of his Chelation 2. The whole of his use of it is short-term.',
+ 'Chaparral':'Kept. One of the plants in his Viento, his Bio Ferro, his Iron Plus and his Chelation.',
+ 'Linden':'Kept as tila, one of his seven approved teas.',
+ 'Garlic':'Called acidic and left off his list. This library keeps it, and it is the most studied antiseptic plant on the shelf.',
+ 'Peppermint':'Called acidic. He kept it off his list and out of his teas; the library keeps it for wind and a tight headache.',
+ 'Aloe vera':'Called acidic. The library keeps the gel for a burn, on the outside of the body, where his verdict does not reach.',
+ 'Comfrey':'Called acidic, and this card\u2019s caution is stronger than his verdict: not by mouth, at all.',
+ 'Turmeric':'Not on his list at all. It is one of the herbs most often attributed to him and it appears on none of his lists.',
+ 'Ashwagandha':'Not on his list. The tradition he worked in is the Americas, not India, and this root is not in his cabinet.',
+ 'Licorice root':'Not on his list, and it is named on the unapproved list that circulates under his name.',
+ 'Echinacea':'Not on his list; named among the unapproved.',
+ 'Goldenseal':'Not on his list; named among the unapproved.',
+ 'St John’s wort':'Not on his list; named among the unapproved.',
+ 'Rose hips':'Named among the unapproved, though the hips of the wild rose are hard to call hybrid.',
+ 'Hibiscus':'Not one of his teas. He kept green tea, black tea, rooibos and hibiscus all off the list.',
+ 'Moringa':'Named among the unapproved. It is a popular \u2019alkaline\u2019 leaf and it is not his.',
+ 'Mullein':'Not his cabinet, though the cold-and-cough tea sold under his name is mullein, or gordolobo.',
+ 'Neem':'Not on his list. It is the Indian cabinet, not the one he worked from.',
+ 'Milk thistle':'Not on his list, and it is one of the herbs most often attributed to him wrongly.'
+};
+var SEBI_COUNT = 30;
+var SEBI = [
+ {h:'This is his shelf, in his voice', s:'How to read it',
+  rows:[
+   ['Whose teaching this is','Dr. Sebi — Alfredo Bowman, born in Honduras, a steam engineer in Los Angeles before he was a healer. What follows is his teaching, stated the way he stated it, and this shelf is the one place in the library where his word is the text rather than a quotation inside somebody else\u2019s.'],
+   ['The rule of the guide','His nutritional guide is a closed list. If a food is not on it, it is not recommended: no hybrid food, nothing seedless, nothing canned, no animal product, no soy, no processed or genetically modified food, and a gallon of spring water a day.'],
+   ['Where the words come from','His own books are not in this house. The framework, the food list and the product literature here are taken from what his company publishes and from the copies of the guide and the product list that circulate under his name, and the differences between those versions are printed where they fall.'],
+   ['The one section that is not his','The last shelf on this tab is the analysis the page was handed, and the line this page keeps whatever anybody believes. Everything above that shelf is his.']],
+  note:'His shelf, his voice. The page does not argue with him here; the argument is kept in one place at the end, where a reader can see both.',
+  noteCls:'okbox'},
+
+ {h:'The boiler and the body', s:'Where the frame came from',
+  rows:[
+   ['The boiler','As a steam engineer in Los Angeles he watched scale and mineral deposit form inside boiler tubes, and watched it turn on the pH of the water. Neutral or slightly alkaline water kept the tubes clean; acid water scaled and corroded them.'],
+   ['The body','A body is a set of pipes, and what runs through them decides whether they fur up. An alkaline internal state prevents disease and cellular degeneration. An acid one produces both.'],
+   ['The image that carries it','The pipes are the strongest picture in his teaching, and it is why the word alkaline followed him for forty years.']],
+  noteCls:'warnbox'},
+
+ {h:'The root cause', s:'Acidity and mucus',
+  rows:[
+   ['One cause','All disease has a single root: cellular acidity and the mucus that settles behind it. There are not hundreds of diseases with hundreds of causes, there is one process showing in hundreds of places.'],
+   ['How it moves','What the body cannot move on becomes mucus, and mucus in tissue is where degeneration starts. His herbs are cleansers because that is what there is to do: move it out and stop putting it in.'],
+   ['Food first','The removal is done with food before it is done with a plant. That ordering is the first rule of this library too, and it is the one place his teaching and the books behind this page agree without a seam.']],
+  noteCls:'warnbox'},
+
+ {h:'The acid and alkaline herb list', s:'Kept and called acidic',
+  rows:[
+   ['Kept','Burdock root, yellow dock and elderberry are his cleansers. Sea moss and bladderwrack are his minerals. Dandelion, nettle, chamomile, fennel, ginger, raspberry leaf and tila are his teas and his nourishers. Sarsaparilla, chaparral, cascara sagrada and the Latin American roots are the working plants of his compounds.'],
+   ['Called acidic','Garlic, peppermint, aloe vera and comfrey. He argued that these popular remedies are acid-forming and damaging, and put them off his list.'],
+   ['Why the four cards stayed','Because his verdict is his and the library\u2019s own line is the library\u2019s. Garlic is the most studied antiseptic plant on this shelf. Peppermint is the ordinary tea for wind. Aloe is the burn gel in every kitchen. Comfrey\u2019s caution here is stronger than his verdict on it: not by mouth, at all.'],
+   ['Not his, though the internet says so','Turmeric, ashwagandha, moringa, milk thistle, neem, echinacea, goldenseal, St John\u2019s wort, licorice and hibiscus all appear on lists attributed to him and on none of his own. Their cards now say so, in his name.']],
+  note:'Every plant above is a card on this page. Open one and his line sits under the card\u2019s own.',
+  noteCls:'okbox'},
+
+ {h:'The diseases he named', s:'Diabetes, sickle cell, lupus, AIDS',
+  rows:[
+   ['His claim','Chronic illness is not a set of separate genetic or infectious entities. Diabetes, sickle cell anaemia and lupus are varying manifestations of local acid accumulation and mucus inflammation — one process showing in three places.'],
+   ['What he said publicly','That his method cured them, and AIDS with them. He said it in the interview this shelf is built from, and he said it in courtrooms and on stages for thirty years.'],
+   ['Why he was prosecuted','His practice in New York was prosecuted, and he read the prosecutions as the price of a non-pharmacological, indigenous modality rather than as a verdict on his method.'],
+   ['The promise he made','That a person who follows the guide and takes the compounds does not need to manage a disease for life, because the disease is the body\u2019s condition and the condition can be changed.']],
+  note:'This is the row the analysis at the end of the tab is about. It is printed here as he taught it, and it is the only place in this library where his cure claim is stated without a counter-line beside it.',
+  noteCls:'warnbox'},
+
+ {h:'Hybrid food, and diet as heritage', s:'The part that is not about chemistry',
+  rows:[
+   ['His claim','Peoples have distinct physiological requirements set by where their ancestors lived. Foods hybridised or moved out of that setting are, in his word, genetically incompatible, and eating them undermines health and neurological stability.'],
+   ['Where he took it','To the health of marginalised communities: centuries of an acidic, non-native diet, he argued, worked on the central nervous system and helped produce both the health disparities and the social fragmentation.'],
+   ['What it asks of a person','Read the label, read the PLU code, buy the seeded fruit and the original vegetable, and treat a food invented in the last century as a question rather than a staple.'],
+   ['Why it lands','Because it is not only a diet. It is a claim that a people\u2019s health was taken from them and can be taken back, and that is why the teaching outlived the man.']],
+  noteCls:'warnbox'},
+
+ {h:'The institutions', s:'Why he was loud',
+  rows:[
+   ['His charge','Mainstream medicine is a profit-driven structure built to manage symptoms rather than remove disease. He named the food industry and the disease industry together, and he did not soften it.'],
+   ['His evidence','His own prosecutions, his lack of institutional support, and the fact that nobody with a licence would test what he did.'],
+   ['What he asked for','Not a licence. He asked for the right to practise what his tradition practised, and he asked it in court.']],
+  noteCls:'warnbox'},
+
+ {h:'The food list: what is approved', s:'The closed list, category by category',
+  rows:[
+   ['Vegetables','Amaranth greens (callaloo), avocado, bell peppers, chayote, cucumber, dandelion greens, garbanzo beans, green banana, izote, kale, lettuce (all but iceberg), mushrooms (all but shiitake), nopales, okra, olives, onions, poke salad greens, purslane, squash, tomato (cherry and plum only), tomatillo, turnip greens, watercress, zucchini.'],
+   ['Sea vegetables','Arame, dulse, hijiki, nori, wakame, kelp, sea moss and bladderwrack — the mineral half of the plate, and the half his own products are built on.'],
+   ['Fruits','Apples, burro and baby bananas, berries (all but cranberries), cantaloupe, cherries, currants, dates, figs, seeded grapes, key limes, mango, seeded melons, Seville or sour orange, papayas, peaches, pears, plums, prickly pear, prunes, seeded raisins, soft jelly coconuts, soursop, tamarind. Nothing canned, nothing seedless.'],
+   ['Grains','Amaranth, fonio, kamut, quinoa, rye, spelt, tef, wild rice. No wheat, no white or brown rice, no oats, no barley, no corn.'],
+   ['Nuts and seeds','Brazil nuts, hemp seeds, raw sesame seeds, raw sesame tahini, walnuts. No almonds, cashews, peanuts, pecans, pine nuts, flax or chia.'],
+   ['Oils','Avocado, coconut (uncooked), grapeseed, hempseed, olive, sesame.'],
+   ['Teas','Burdock, chamomile, elderberry, fennel, ginger, raspberry leaf, tila. No green tea, no black tea, no peppermint, no rooibos, no hibiscus.'],
+   ['Seasonings','Basil, bay leaf, cloves, dill, oregano, savory, sweet basil, tarragon, thyme; achiote, cayenne, coriander and cilantro, habanero, onion powder, sage; pure sea salt, and powdered kelp, dulse or nori.'],
+   ['Sweeteners','Date sugar, and 100% agave from cactus. No honey, no cane sugar, no maple.']],
+  note:'The list is closed. A food that is not named here is not approved, which is the rule that makes the rest of it work.',
+  noteCls:'okbox'},
+
+ {h:'The food list: what is out', s:'The hybrid and the forbidden',
+  rows:[
+   ['The named hybrids','Broccoli, cauliflower, carrots, spinach, celery, garlic, cabbage, collard greens, eggplant, radishes, sweet potato, parsley, leek, beets, corn.'],
+   ['Fruits out','Cranberries, seedless grapes, seedless watermelon, pineapple, most bananas, most oranges.'],
+   ['Grains out','Wheat, white and brown rice, oats, barley, corn.'],
+   ['Everything animal, and the rest','Meat, poultry, fish, shellfish, dairy, eggs and honey. Soy, alcohol, yeast, baking powder, vinegar of every kind, tap water, and any added sugar.'],
+   ['The longer list that circulates','A separate document sold and shared as his unapproved list adds about a hundred more: plantains, almonds, cashews, peanuts, pecans, pine nuts, flax, chia, black seed oil, maple, cane sugar, coffee, green tea, chocolate, spirulina, wheatgrass, turmeric, paprika, peppermint, nutmeg, cinnamon, licorice, ginseng, echinacea, goldenseal, St John\u2019s wort, comfrey, ashwagandha, aloe vera, moringa, maca, kombucha, shiitake and rosehips. It is a follower compilation and it is not in the guide, so it is printed here as that rather than as his.']],
+  note:'Two versions of the guide disagree on a handful of things — asparagus, almonds, corn, jicama, spinach, string beans, cumin and maple — and the printed copies differ from the company\u2019s current page. Where they disagree, this shelf says so rather than picking a side.',
+  noteCls:'warnbox'},
+
+ {h:'The compounds', s:'His products, by name',
+  rows:[
+   ['Viento','His energiser, cleanser and revitaliser: oxygen-rich iron to the brain, the nervous system and the lymph, the kidneys and the respiratory system, and in his literature the one that combats the craving for addictive substances. Sapo, contribo, chaparral, valerian, sea moss.'],
+   ['Bio Ferro','His blood nourisher and purifier. Yellow dock, burdock, elderberry, cocolmeca, sarsaparilla.'],
+   ['Bromide Plus','The multi-mineral powder for shakes and teas: bones and thyroid, the breath, the bowel, and a natural diuretic. Bladderwrack and sea moss.'],
+   ['Chelation 1 and 2','The cleansers: toxins, acids and mucus out, minerals in. Chelation 1 is cardo santo; Chelation 2 is cascara sagrada, prodigiosa, pau pereira and rhubarb, and it is built to move the bowel three to six times a day.'],
+   ['Fucus','Bladderwrack and nothing else: a diuretic that flushes stagnant fluid, high in magnesium, calcium and phosphate.'],
+   ['Lily of the Valley','The heart and the central nervous system. Lily of the valley, and nothing else.'],
+   ['Lymphalin','The calcification remover, built on the mineral gold: hortensia, pushiana, red clover, palo mulato.'],
+   ['Banju','The brain and nervous system tonic, made for children with A.D.D. and A.D.H.D.: elderberry, blue vervain, burdock, valerian, bugleweed.'],
+   ['Iron Plus','Iron for the blood, the brain and the nervous system, and against inflammation: chaparral, blessed thistle, contribo, quassia, ortiga, bugleweed.'],
+   ['Green Food Plus','The chlorophyll and mineral formula, and his appetite suppressant: linden, stinging nettle, nopal, bladderwrack, lily of the valley.'],
+   ['Endocrine, Estro and Testo','The glandular three: the pancreas with guaco, nopal, prodigiosa, huereque and contribo; the female side with damiana, hortensia, sarsaparilla and sea moss; the male side with sarsaparilla, yohimbe, locust bark, capadulla and sea moss.'],
+   ['Maya Electra','The fourteen-plant iron formula: burdock, bugleweed, salsify, centaury, sarsaparilla.'],
+   ['Seamoss Bladderwrack Mix','The two seaweeds powdered together. His figure for it is 102 minerals.'],
+   ['The rest of the cabinet','Lupulo for inflammation and pain; Eva salve for the skin; the eye wash with eyebright; the tooth powder with myrrh and oak bark; the uterine wash and oil; the hair oils; and Tonic Electra, the iron formula with a probiotic.'],
+   ['The packages','The small cleansing package (Bio Ferro, Chelation 2, Viento), the advanced package of ten, the twenty-product packages for a man and for a woman, and the seven-product booster.'],
+   ['What is not a product','Rhodium is a mineral in his table of the 102, not a bottle. It is sold online as though it were his product and it never was.']],
+  note:'These descriptions are his own product literature as it is reproduced, not a formula this page can stand behind. The company he founded still sells a subset of them and says the formulas have not changed. No dose is printed here, because his literature does not print one.',
+  noteCls:'warnbox'},
+
+ {h:'Where he sits on this page', s:'The correlation, card by card',
+  rows:[
+   ['His plants','30 cards carry his line: the ones he kept, the four he called acidic, and the famous herbs wrongly attributed to him. Search sebi on the A–Z tab and they come up.'],
+   ['His 21 days','The next tab is his cleanse, day by day: three weeks of his approved food in the shape he taught, his seven teas, his gallon of spring water, and his compounds where a person is using them.'],
+   ['The ninety days','Day 32 names his version of mucus, and day 49 names the cure claims this page leaves with him.'],
+   ['The Mucus scale and the Meal plan','His food doctrine and the Afrika scale are not the same system, and they land in the same place: raw, water-rich, whole food first; cooked starch, grease, dairy and refined food last.'],
+   ['The Certification','The herbalist track\u2019s mucus day points here, so the two herb tracks read side by side the way the two ninety-day courses already are.']],
+  note:'His is the newest shelf, not the loudest. Where he and the books disagree — on garlic, on hybrid food, on what a cure is — both are printed.',
+  noteCls:'okbox'},
+
+ {h:'What the analysis says, and the line that does not move', s:'The one shelf that is not his',
+  rows:[
+   ['The paper\u2019s finding on pH','The blood holds itself between about 7.35 and 7.45 whatever is eaten, defended by buffers, the lungs and the kidneys, and food does not move it. An engineering analogy is a picture of the body, not a mechanism inside it.'],
+   ['The paper\u2019s finding on plants','There is no acid and alkaline division of plants by what they do inside a body. A lemon is acid on the tongue, a spinach leaf is not, and neither changes blood pH.'],
+   ['The paper\u2019s finding on disease','Diabetes, sickle cell anaemia, lupus and HIV have specific causes — a changed haemoglobin, an immune attack on the body or on the cells that make insulin, a retrovirus — and none of them is resolved by changing systemic pH or by a plant. The paper names the absence of peer-reviewed trials as the barrier, not a conspiracy.'],
+   ['The paper\u2019s finding on the man','The critique of profit and access is a real argument and the paper says so; the cure claims are not evidence and the paper says that too. The framework is read as cultural self-preservation as much as therapy, and that is the fairest sentence in it.'],
+   ['The line this page keeps','Nobody on treatment for diabetes, sickle cell, lupus or HIV stops it for this shelf. An infection, a fever that will not come down, a chest that is filling, a lump, blood where it should not be, weight gone without trying — those are a clinician\u2019s, today. That is the oldest line in this library and no shelf above it changes it.']],
+  note:'This is the only shelf on the tab that argues with him, and it is kept to one place on purpose: so a person can read his teaching whole, and then read what medicine says about it, and see both.',
+  noteCls:'warnbox'}
+];
+
 var DEEP = [
  {h:"What this tab is, and whose words these are", s:"Read this one first",
   rows:[
@@ -3630,7 +4099,7 @@ function mucusScaleView(){
   SAY_TEXT['mucus']=mucusSayText();
   var out='<div class="big okbox mu-intro"><b>Every food, 1 to 5</b>'
    +'The left of the scale is the books\u2019 plate; the right is what they leave out. One is safe. Three is risky. Five is dangerous. The bands catch everything in between: 1.0\u20131.9 is Safe, 2.0\u20132.9 Low, 3.0\u20133.9 Risky, 4.0\u20134.9 High, and 5.0 Dangerous. '
-   +'The books do not print a table like this, so the number is this page\u2019s reading of their principle \u2014 raw, water-rich, fibre-rich food leaves less behind; cooked starch, grease, dairy and refined food leaves more \u2014 and not a quotation from the book.</div>'
+   +'The books do not print a table like this, so the number is this page\u2019s reading of their principle \u2014 raw, water-rich, fibre-rich food leaves less behind; cooked starch, grease, dairy and refined food leaves more \u2014 and not a quotation from the book. Dr. Sebi\u2019s version of the same idea is on the Dr. Sebi tab, printed as his claim.</div>'
    +'<div class="sec-hd">How to read it</div><div class="card" style="padding:2px 14px">';
   MUCUS_BANDS.forEach(function(b){
     out+='<div class="mu-leg"><span class="mu-badge b'+b.n+'">'+b.n+'</span>'
@@ -4054,6 +4523,14 @@ function render(){
     out='<div class="sec">'+BOOKS.map(function(b,i){ return bsec(b,i) }).join('')+'</div>';
   }
 
+  if(tab==='sebi'){
+    out='<div class="sec">'+SEBI.map(function(b,i){ return bsec(b,i,'sb') }).join('')+'</div>';
+  }
+
+  if(tab==='m21'){
+    out='<div class="sec">'+CLEANSE21.map(function(b,i){ return bsec(b,i,'c21') }).join('')+'</div>';
+  }
+
   if(tab==='course'){
     out=courseView();
   }
@@ -4119,7 +4596,7 @@ function render(){
 }
 
 function match(h){
-  var hay=[h.n,h.a,h.u,h.d,h.h,h.c,h.bk].join(' ').toLowerCase();
+  var hay=[h.n,h.a,h.u,h.d,h.h,h.c,h.bk,(SEBI_HERB[h.n]?'dr sebi ':'')+(SEBI_HERB[h.n]||'')].join(' ').toLowerCase();
   return hay.indexOf(q)>-1;
 }
 
@@ -4136,6 +4613,7 @@ function card(h){
   +(h.h?'<div class="lbl">How it is traditionally taken</div><p>'+esc(h.h)+'</p>':'')
   +(h.c?'<div class="lbl">Caution</div><p>'+esc(h.c)+'</p>':'')
   +(h.bk?'<div class="lbl">From the books</div><p>'+esc(h.bk)+'</p>':'')
+  +(SEBI_HERB[h.n]?'<div class="lbl">Dr. Sebi</div><p>'+esc(SEBI_HERB[h.n])+'</p>':'')
   +saybarHTML(h.id)
   +'<div class="lbl">What your book says</div>'
   +'<div class="note"><textarea data-note="'+esc(h.id)+'" placeholder="As you read, put it here — the page and the words.">'+esc(noteOf(h.id))+'</textarea><div class="saved">Saved on this phone as you type. Nothing is sent anywhere.</div></div>'
@@ -4418,6 +4896,7 @@ function sayText(h){
   if(h.h) s+='How it is traditionally taken: '+h.h+' ';
   if(h.c) s+='Caution: '+h.c+' ';
   if(h.bk) s+='From the books: '+h.bk+' ';
+  if(SEBI_HERB[h.n]) s+='Dr. Sebi: '+SEBI_HERB[h.n]+' ';
   return s;
 }
 function say(id){
@@ -4465,7 +4944,7 @@ document.getElementById('view').addEventListener('click',function(e){
 
 /* ── THE DEEP LINK ─────────────────────────────────────────────────────────────
    A link from the Certification lands here: #course, #d28, #d12, #az,
-   #books, #need, #meal, #deep, or ?tab=course&day=12. The hash opens the tab
+   #books, #need, #sebi, #m21, #meal, #deep, or ?tab=course&day=12. The hash opens the tab
    and the day; the query is the shape a shared link travels in. Read once at
    boot, so an unknown address leaves the library on its ordinary A–Z tab.
 --------------------------------------------------------------------------- */
@@ -4487,7 +4966,7 @@ function applyDeepLink(){
     if(mp){ plant=mp[1]; }
     else if(m){ tab='course'; openId='d'+m[1]; }
     else if(h==='plan'){ tab='mucus'; mucusSub='plan'; openId=null; }
-    else if(['az','need','books','course','meal','mucus','deep','mine'].indexOf(h)>-1){ tab=h; openId=null; }
+    else if(['az','need','books','sebi','m21','21','cleanse','course','meal','mucus','deep','mine'].indexOf(h)>-1){ tab=h; openId=null; }
   }
   /* A plant's own address (13 Oct 2026): /herbs#p-garlic, or ?plant=garlic,
      opens the A-Z tab on that card. A name the library does not have leaves the

@@ -1,5 +1,11 @@
 # Songs
 
+> **RULE: never mix music with the app.** Not a file, not a folder, not a link,
+> not a build step, not a page. The app is `TurnSomeDayIntoOneday/` and it knows
+> nothing about this folder; this folder knows nothing about the app except that
+> it is not here. Nothing gets imported either way, and no song is ever shipped
+> inside the app or served from it.
+
 Songs are not the app. The app is `TurnSomeDayIntoOneday/`, this folder is the
 songs, and neither one reads the other: no page, no route and no test in the app
 opens anything in here, and nothing in here imports the app. Two separate

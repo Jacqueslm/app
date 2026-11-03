@@ -23,6 +23,7 @@ Each file is a complete paste-in block for Suno, in the same shape:
 
 | File | Song |
 |---|---|
+| `I-Can-Change-You-Can-Change-Suno-Prompt.txt` | I Can Change, You Can Change — two tracks, one song: 8 rappers, 16 bars each, 5 singers and 8 choruses, 92 then 104 BPM |
 | `Day-One-Suno-Prompt.txt` | Day One — Jersey-club rap anthem, 138 BPM, C minor |
 | `Days-Are-Numbered-Suno-Prompt.txt` | Days Are Numbered |
 | `Days-Are-Numbered-RnB-Trap-Suno-Prompt.txt` | Days Are Numbered — R&B/trap version, pairs with the lyrics above |

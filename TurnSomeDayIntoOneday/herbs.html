@@ -3726,7 +3726,7 @@ var MEALP = [
    ["Between meals","Fruit, or nuts and seeds, or water. Not a biscuit, which is flour and sugar, and not a bottle of anything sweet."],
    ["Two things off the table","No dairy and no fried food. Those are the book's own two exclusions and the plan keeps them."],
    ["Three things off the list","White sugar, white flour and white salt. The book's rule of thumb for a label is the shortest rule on this page."],
-   ["Water","Through the day, and a glass before anything else in the morning."]],
+   ["Water","A gallon through the day, and a glass before anything else in the morning. The books' figure is a gallon, not a glass count."]],
   note:"<b>Raw where it can be, steamed where it cannot</b>A pot of water at home is not what the books are against. A factory that takes the colour out and puts it back is.",
   noteCls:"okbox"},
 
@@ -3805,10 +3805,89 @@ var MEALP = [
   noteCls:"okbox"}
 ];
 
+/* THE FOUR WEEKS
+   Everything on this tab runs in sevens. The books' order is a crossover: the
+   mucus food comes out before the raw half goes back, the organs doing the
+   clearing get their week, and then the plate is held long enough to be the
+   habit. The division into four weeks, and the fifth week after them, is this
+   page's arrangement of the books' order - the books print no four-week table -
+   and the tab says so in its own voice rather than dressing it as a quotation.
+*/
+var MEAL_STAGES = [
+ {from:1, to:7, w:"Week one", t:"Taking it out",
+  s:"The three whites, the dairy and the fried food come out of the house this week, and the fruit morning and the water go in. Nothing else is added yet, and nothing is weighed.",
+  rows:[
+   ["What comes out","White sugar, white flour and white salt, dairy, and anything fried. The books call those the mucus food, and this is the week they leave the cupboard rather than the week they are cut down."],
+   ["What goes in","Water before anything else in the morning, and fruit for the morning meal. That is the whole of the first week."],
+   ["What is not done","No calorie count, no fast, no substitute powder, no cleanse bought in a bottle. The books do not run on any of them and this page does not add them."],
+   ["If the week is hard","The evening is the part people lose. Have somewhere to be at that hour, or somebody who is expecting to hear from you."]],
+  note:"<b>Week one is subtraction, not measurement</b>Nothing is counted this week. What comes out of the house is the work."},
+ {from:8, to:14, w:"Week two", t:"Putting the raw half back",
+  s:"The midday plate becomes a big raw plate, the evening keeps one whole grain or one bean and one root, and the seasoning is measured the book's way.",
+  rows:[
+   ["The midday plate","Leaves, cucumber, tomato, sweet pepper, carrot, celery, beet and avocado, in a quantity that fills the plate. Lemon juice and a measured seasoning rather than a bottle of dressing."],
+   ["The evening","Lightly steamed vegetables, one whole grain or one bean, one root. Nothing fried and nothing with dairy on it."],
+   ["Food combining","Starch and protein stay apart at the same meal, which is the book's law and the reason its plate is built the way it is."],
+   ["Between meals","Fruit, nuts and seeds, or water. Not a biscuit, which is flour and sugar, and not a bottle of anything sweet."]],
+  note:"<b>Week two is the week the plate gets its shape</b>Week one took the food out. This week is what stands in its place."},
+ {from:15, to:21, w:"Week three", t:"The organs doing the clearing",
+  s:"The plate does not change this week. What the week is for is the organs the books name as the ones doing the clearing, fed with raw food and water rather than with a product.",
+  rows:[
+   ["The organs the books name","The liver, the pancreas, the kidneys and the bowel. The books' order of elimination is bowel, then skin, then lungs, and a bowel that is not moving is where the books say the trouble starts."],
+   ["What the week adds","Nothing bought. More water, more raw food, and the same plate seven days running so the body is not asked to handle something new every day."],
+   ["What the week does not do","No flush, no enema, no tea that promises to clean anything. This page has never printed a cleanse protocol and does not start one here."],
+   ["If something hurts","A bowel that has changed, blood in the stool, a pain that wakes somebody at night, or weight going without trying is not a food question in any week."]],
+  note:"<b>Week three is the plainest week of the four</b>It is deliberately the least interesting. Repetition is the point of it."},
+ {from:22, to:28, w:"Week four", t:"Holding it",
+  s:"The same plate, varied across the seven days, with nothing new added. This is the week the food stops being a plan and becomes what the house eats.",
+  rows:[
+   ["Variety, not novelty","Different fruit, different leaves, different roots, different seasonings, the same three parts of the day."],
+   ["The shopping","One list, one shop, and the house eating the same food as the person on the plan. A plan the rest of the house is not on is a plan that ends in week two."],
+   ["What to look at","What comes out, how the morning feels, how sleep went, and whether the clothes sit differently. None of those is a number on a scale."]],
+  note:"<b>Four weeks is the length of the arrangement, not a promise</b>The books give no rate of loss and this page prints none."},
+ {from:29, to:30, w:"Week five and after", t:"The ladder does not restart",
+  s:"Day thirty is not a finish line and not a loop back to day one. The plate holds, the season changes what is on it, and the four weeks can be walked again by anybody who wants the structure of them.",
+  rows:[
+   ["What holds","The fruit morning, the raw midday, the steamed evening, the water, and the three whites staying out of the house."],
+   ["What changes","What is in season, what the shop has, and what the house will actually cook."],
+   ["What never changes","No calorie count, no fast without whoever manages a condition saying so first, and no return to the food that was taken out."]],
+  note:"<b>Thirty days, and no ceremony</b>The next thirty are the same thirty, held."}
+];
+
+function mealStageFor(d){
+  for(var i=0;i<MEAL_STAGES.length;i++){
+    var st=MEAL_STAGES[i];
+    if(d>=st.from && d<=st.to) return st;
+  }
+  return null;
+}
+
+function mealStageHTML(st){
+  var id='mst'+st.from;
+  SAY_TEXT[id]=st.w+'. '+st.t+'. '+st.s+' '+(st.rows||[]).map(function(r){ return r[0]+'. '+r[1]+'. ' }).join('')+' '+String(st.note||'').replace(/<[^>]*>/g,' ');
+  var out='<div class="card" data-h="'+id+'">'
+   +'<div class="row"><div class="row-txt"><div class="dayno">'+esc(st.w)+'</div><b>'+esc(st.t)+'</b>'
+   +'<span>'+esc(st.s)+'</span></div><div class="chev">&#8250;</div></div><div class="body">';
+  (st.rows||[]).forEach(function(r){ out+='<p><b>'+esc(r[0])+'</b> &mdash; '+esc(r[1])+'</p>' });
+  if(st.note) out+='<div class="big okbox">'+st.note+'</div>';
+  out+=saybarHTML(id);
+  return out+'</div></div>';
+}
+
+function mealDaysHTML(){
+  var out='';
+  MEALS.forEach(function(m){
+    var st=mealStageFor(m.d);
+    if(st && st.from===m.d) out+=mealStageHTML(st);
+    out+=mealDay(m);
+  });
+  return out;
+}
+
 /* The thirty days. b morning · l midday · dn evening · sk between meals ·
    dr drink · note the page's own line, where the day has one. */
 var MEALS = [
-{d:1, t:"The fruit morning", b:"Water first, then six figs and four dates.", l:"Spinach, rocket, cucumber, tomato, sweet pepper, carrot, with lemon juice and a quarter teaspoon of marjoram.", dn:"Lightly steamed broccoli and carrots with a cup of brown rice, a quarter teaspoon of dill seed and a quarter of dry mustard stirred in at the end.", sk:"Half a melon.", dr:"Water through the day, two litres of it.", note:"Day one is the fruit morning. If nothing else changes today, that is the day done."},
+{d:1, t:"The fruit morning", b:"Water first, then six figs and four dates.", l:"Spinach, rocket, cucumber, tomato, sweet pepper, carrot, with lemon juice and a quarter teaspoon of marjoram.", dn:"Lightly steamed broccoli and carrots with a cup of brown rice, a quarter teaspoon of dill seed and a quarter of dry mustard stirred in at the end.", sk:"Half a melon.", dr:"Water through the day, a gallon of it.", note:"Day one is the fruit morning. If nothing else changes today, that is the day done."},
 {d:2, t:"Leaves in the middle of the day", b:"Water, then two oranges and a handful of berries.", l:"Kale, lettuce, celery, radish, beet, avocado, with lemon juice and a quarter teaspoon of basil.", dn:"Steamed cauliflower, green beans and a sweet potato, with a cup of millet and a quarter teaspoon of thyme.", sk:"An apple.", dr:"Water, and a glass before each meal."},
 {d:3, t:"The hard evening", b:"Water, then melon.", l:"A big plate of raw leaves, tomato, cucumber and sweet pepper, with lemon juice, a quarter teaspoon of marjoram and an eighth of a teaspoon of dry mustard.", dn:"Black beans and brown rice with steamed cabbage and carrot, a quarter teaspoon of garlic powder and a quarter of oregano.", sk:"Water, and a walk if the evening is the hard part.", dr:"Water, and nothing sweet.", note:"Day three's evening is the one people find hardest. Have somewhere to be, or somebody expecting to hear from you."},
 {d:4, t:"Beans in the evening", b:"Water, then grapes and a pear.", l:"Spinach, cucumber, tomato, carrot, spring onion, with lemon juice and a quarter teaspoon of dill seed.", dn:"Lentils with steamed courgette, aubergine and tomato, a quarter teaspoon of basil and a quarter of marjoram.", sk:"Walnuts.", dr:"Water, and a glass on waking."},
@@ -3820,24 +3899,24 @@ var MEALS = [
 {d:10, t:"Oats in the morning? No — fruit", b:"Water, then grapes and an apple.", l:"Lettuce, tomato, cucumber, carrot, beet, with lemon juice and a quarter teaspoon of caraway.", dn:"Steamed asparagus and courgette with millet and chickpeas, a quarter teaspoon of thyme and a quarter of basil.", sk:"A handful of pumpkin seed.", dr:"Water, and a glass on waking.", note:"The book puts whole grains in the cooked part of the day, and the morning is the fruit half of its clock. Oats are for the evening if they are wanted at all."},
 {d:11, t:"Cabbage and beans", b:"Water, then melon and berries.", l:"Cabbage, carrot, celery and tomato raw, grated or sliced thin, with lemon juice and a quarter teaspoon of dill seed.", dn:"Steamed cabbage and green beans with kidney beans and brown rice, a quarter teaspoon of oregano and a quarter of marjoram.", sk:"An orange.", dr:"Water through the day."},
 {d:12, t:"A raw plate, a cooked plate", b:"Water, then two oranges.", l:"Spinach, rocket, tomato, cucumber, pepper, avocado, with lemon juice, a quarter teaspoon of basil and an eighth of dry mustard.", dn:"Steamed broccoli, squash and carrot with quinoa, a quarter teaspoon of turmeric and a quarter of ginger.", sk:"An apple.", dr:"Water, and a glass before the evening meal."},
-{d:13, t:"Two weeks", b:"Water, then figs and dates.", l:"A big plate of raw leaves with beet, radish and avocado, lemon juice and a quarter teaspoon of marjoram.", dn:"Steamed greens and a yam with black beans, a quarter teaspoon of thyme and a quarter of savory.", sk:"Watermelon.", dr:"Water through the day.", note:"A fortnight in. The flat stretch is behind you and the taste for the real food is usually back by now."},
-{d:14, t:"The example day", b:"Water, then half a melon.", l:"Spinach, rocket, cucumber, tomato, pepper, carrot and avocado, with lemon juice, a quarter teaspoon of marjoram and an eighth of dry mustard.", dn:"Steamed broccoli, courgette and carrot with brown rice, a quarter teaspoon of dill seed and a quarter of dry mustard at the end.", sk:"An apple, or walnuts, or water and a walk.", dr:"Water.", note:"This is the day built out in full on the rules above. Every other day is this one with different things on it."},
+{d:13, t:"Two weeks", b:"Water, then figs and dates.", l:"A big plate of raw leaves with beet, radish and avocado, lemon juice and a quarter teaspoon of marjoram.", dn:"Steamed greens and a yam with black beans, a quarter teaspoon of thyme and a quarter of savory.", sk:"Watermelon.", dr:"Water through the day.", note:"Day thirteen. Nothing new is added today. The flat stretch is behind you, and the fortnight mark is tomorrow."},
+{d:14, t:"The example day", b:"Water, then half a melon.", l:"Spinach, rocket, cucumber, tomato, pepper, carrot and avocado, with lemon juice, a quarter teaspoon of marjoram and an eighth of dry mustard.", dn:"Steamed broccoli, courgette and carrot with brown rice, a quarter teaspoon of dill seed and a quarter of dry mustard at the end.", sk:"An apple, or walnuts, or water and a walk.", dr:"Water.", note:"Two weeks. This is the day built out in full on the rules above, and every other day is this one with different things on it. Week two is finished."},
 {d:15, t:"Sesame and greens", b:"Water, then grapes.", l:"Lettuce, cucumber, tomato, carrot, spring onion, with lemon juice, a quarter teaspoon of basil and a sprinkling of sesame seed.", dn:"Steamed kale and squash with a sweet potato and lentils, a quarter teaspoon of caraway and a quarter of marjoram.", sk:"A pear.", dr:"Water, and a glass on waking."},
 {d:16, t:"Okra and beans", b:"Water, then melon.", l:"Celery, radish, tomato, cucumber, avocado, with lemon juice and a quarter teaspoon of dill seed.", dn:"Steamed okra, tomato and courgette with black-eyed peas and millet, a quarter teaspoon of paprika.", sk:"Berries.", dr:"Water through the day."},
 {d:17, t:"Aubergine and rice", b:"Water, then two oranges.", l:"Kale, spinach, beet, carrot, with lemon juice and a quarter teaspoon of caraway.", dn:"Steamed aubergine, green beans and carrot with brown rice, a quarter teaspoon of oregano and a quarter of basil.", sk:"Almonds.", dr:"Water, and a glass before the evening meal."},
 {d:18, t:"Turnip and chickpeas", b:"Water, then dates.", l:"A big raw plate with tomato, cucumber, pepper, radish and avocado, lemon juice and a quarter teaspoon of marjoram.", dn:"Steamed turnip, turnip greens and courgette with chickpeas, a quarter teaspoon of turmeric and a quarter of ginger.", sk:"An orange.", dr:"Water through the day."},
 {d:19, t:"Cauliflower and millet", b:"Water, then melon and berries.", l:"Spinach, lettuce, cucumber, carrot, celery, with lemon juice and a quarter teaspoon of dill seed.", dn:"Steamed cauliflower, cabbage and carrot with millet and butter beans, a quarter teaspoon of thyme.", sk:"A handful of sunflower seed.", dr:"Water, and a glass on waking."},
-{d:20, t:"Twenty days", b:"Water, then figs and an apple.", l:"Rocket, tomato, cucumber, beet, avocado, with lemon juice, a quarter teaspoon of basil and an eighth of dry mustard.", dn:"Steamed greens, squash and a yam with brown rice, a quarter teaspoon of allspice and a quarter of cinnamon.", sk:"Watermelon.", dr:"Water through the day.", note:"Twenty days. If the plan has held this far, the shopping and the seasoning are habit by now and the rest is repetition."},
-{d:21, t:"Asparagus and quinoa", b:"Water, then two oranges.", l:"Lettuce, cucumber, tomato, spring onion, carrot, with lemon juice and a quarter teaspoon of dill seed.", dn:"Steamed asparagus, broccoli and carrot with quinoa and kidney beans, a quarter teaspoon of marjoram and a quarter of savory.", sk:"An apple.", dr:"Water, and a glass before the evening meal."},
+{d:20, t:"Twenty days", b:"Water, then figs and an apple.", l:"Rocket, tomato, cucumber, beet, avocado, with lemon juice, a quarter teaspoon of basil and an eighth of dry mustard.", dn:"Steamed greens, squash and a yam with brown rice, a quarter teaspoon of allspice and a quarter of cinnamon.", sk:"Watermelon.", dr:"Water through the day.", note:"Day twenty. If the plan has held this far, the shopping and the seasoning are habit by now, and the three-week mark is tomorrow."},
+{d:21, t:"Asparagus and quinoa", b:"Water, then two oranges.", l:"Lettuce, cucumber, tomato, spring onion, carrot, with lemon juice and a quarter teaspoon of dill seed.", dn:"Steamed asparagus, broccoli and carrot with quinoa and kidney beans, a quarter teaspoon of marjoram and a quarter of savory.", sk:"An apple.", dr:"Water, and a glass before the evening meal.", note:"Three weeks. This is the week the books give to the organs doing the clearing, and the plate does not change for it. Water, raw food and the fruit morning are what the week is made of."},
 {d:22, t:"Grated root, steamed leaf", b:"Water, then grapes and berries.", l:"Grated carrot, beet and cabbage with lemon juice and a quarter teaspoon of caraway.", dn:"Steamed collard greens and green beans with a sweet potato and black beans, a quarter teaspoon of oregano.", sk:"Walnuts.", dr:"Water through the day."},
 {d:23, t:"Cabbage and lentils", b:"Water, then melon.", l:"A raw plate of leaves with tomato, cucumber, pepper and avocado, lemon juice and a quarter teaspoon of thyme.", dn:"Steamed cabbage, courgette and carrot with lentils and brown rice, a quarter teaspoon of basil and a quarter of marjoram.", sk:"A pear.", dr:"Water, and a glass on waking."},
 {d:24, t:"Squash and chickpeas", b:"Water, then dates and figs.", l:"Spinach, radish, cucumber, tomato, carrot, with lemon juice and a quarter teaspoon of dill seed.", dn:"Steamed squash, greens and a yam with chickpeas, a quarter teaspoon of ginger and an eighth of allspice.", sk:"Berries.", dr:"Water through the day."},
 {d:25, t:"Aubergine and butter beans", b:"Water, then two oranges.", l:"Kale, lettuce, tomato, cucumber, beet, avocado, with lemon juice, a quarter teaspoon of basil and an eighth of garlic powder.", dn:"Steamed aubergine, tomato and okra with butter beans and millet, a quarter teaspoon of paprika.", sk:"Almonds.", dr:"Water, and a glass before the evening meal."},
 {d:26, t:"Greens and a pot of beans", b:"Water, then melon and berries.", l:"A big raw plate with celery, cucumber, tomato, pepper and avocado, lemon juice and a quarter teaspoon of savory.", dn:"Steamed turnip greens, broccoli and carrot with black-eyed peas and brown rice, a quarter teaspoon of thyme.", sk:"An orange.", dr:"Water through the day."},
 {d:27, t:"Cauliflower and quinoa", b:"Water, then grapes.", l:"Rocket, spinach, cucumber, carrot, spring onion, with lemon juice and a quarter teaspoon of caraway.", dn:"Steamed cauliflower, green beans and a sweet potato with quinoa and kidney beans, a quarter teaspoon of turmeric and a quarter of ginger.", sk:"A handful of pumpkin seed.", dr:"Water, and a glass on waking."},
-{d:28, t:"Four weeks", b:"Water, then figs and dates.", l:"A raw plate of leaves, tomato, cucumber, pepper, beet and avocado, lemon juice and a quarter teaspoon of marjoram.", dn:"Steamed cabbage, courgette and carrot with lentils and brown rice, a quarter teaspoon of oregano and a quarter of basil.", sk:"Watermelon.", dr:"Water through the day.", note:"Four weeks. That is long enough that the plate is the habit and the old food is the exception, which is the whole thing the books' diet is after."},
+{d:28, t:"Four weeks", b:"Water, then figs and dates.", l:"A raw plate of leaves, tomato, cucumber, pepper, beet and avocado, lemon juice and a quarter teaspoon of marjoram.", dn:"Steamed cabbage, courgette and carrot with lentils and brown rice, a quarter teaspoon of oregano and a quarter of basil.", sk:"Watermelon.", dr:"Water through the day.", note:"Four weeks, and the fourth of the four is done. That is long enough that the plate is the habit and the old food is the exception, which is the whole thing the books' diet is after. Week five is the same plate held."},
 {d:29, t:"The last cooking day", b:"Water, then two oranges.", l:"Spinach, rocket, tomato, cucumber, pepper, carrot, avocado, with lemon juice, a quarter teaspoon of basil and an eighth of dry mustard.", dn:"Steamed broccoli, squash and greens with a yam and chickpeas, a quarter teaspoon of thyme and a quarter of savory.", sk:"An apple, or walnuts.", dr:"Water, and a glass before the evening meal."},
-{d:30, t:"Day thirty, and after it", b:"Water, then melon.", l:"A big raw plate, everything that is in the house and raw, with lemon juice and a quarter teaspoon of marjoram.", dn:"Steamed greens, roots and courgette with black beans and brown rice, a quarter teaspoon of dill seed and a quarter of dry mustard.", sk:"Fruit.", dr:"Water through the day.", note:"Thirty days, and no ceremony. Go back to day one and start again with the fruit that is in season now, or keep the fruit morning alone. Both of those are the plan working."}
+{d:30, t:"Day thirty, and after it", b:"Water, then melon.", l:"A big raw plate, everything that is in the house and raw, with lemon juice and a quarter teaspoon of marjoram.", dn:"Steamed greens, roots and courgette with black beans and brown rice, a quarter teaspoon of dill seed and a quarter of dry mustard.", sk:"Fruit.", dr:"Water through the day.", note:"Thirty days, and no ceremony, and no going back to day one. Week five keeps this plate and changes only what is in season and what the house can buy. The ladder does not restart; it holds."}
 ];
 
 /* Twelve questions on the plan and the books behind it. Same shape as a course
@@ -3870,6 +3949,89 @@ var MEAL_QUIZ = [
    lists. Keep it one object a line, double-quoted, and leave the \n]; ending
    alone — that is the edge the server's parser finds.
 --------------------------------------------------------------------------- */
+/* WEIGHT, IN THE BOOKS' OWN WORDS
+   Built from Nutricide's "Weight, Over Waste (Overweight) And Lies", p334 and
+   the weight chart after it, with the books' material on water, the clock, the
+   organs doing the clearing and the fast. Every argument here is printed as the
+   books' claim, because that is what it is. The page adds only the lines it
+   labels as its own. Nothing on the shelf is a target, a rate or a promise.
+*/
+var WEIGHT = [
+ {h:"The weight chart is not your body", s:"Nutricide, Weight, Over Waste (Overweight) And Lies, p334",
+  rows:[
+   ["What the book says the chart is","A normal body weight chart formulated in 1959 by insurance companies and set low for the height, then applied to African people as though a Caucasian standard were a universal one. Printed here as the book's claim."],
+   ["Why it was set low","In the book's account it was to the insurance companies' economic advantage: an overweight person pays a higher rate, so a table that finds more people overweight finds more money."],
+   ["The 1990 table","The chart was reformulated in 1990 to reflect the true weight for height of Caucasians, the book says, and the vast majority of practitioners and drug companies still use the 1959 figures, which classifies more people as ill and increases what is prescribed."],
+   ["The other half of the argument","The book adds that the bodies are not built alike: its line is that Caucasians generally carry more muscle mass and Africans more skin surface, which changes what heat and weight do in the body. Printed as its claim."],
+   ["The page's own line","A chart is an insurance table and not a reading of a body. Nothing on this tab turns one into a target, and this library prints no goal weight for anybody."]],
+  note:"<b>The book's claim, printed as the book's claim</b>This is Dr. Afrika's argument in his own terms. The page keeps it whole and does not sharpen it into a medical fact."},
+ {h:"Three heavy bodies: water, waste and fat", s:"Nutricide p334, the distinction the chapter turns on",
+  rows:[
+   ["Water","An overweight person can be carrying water retention, edema, and no excess fat at all. The book separates that from the other two on the same page."],
+   ["Waste","Or a body can hold seven to fifteen pounds of feces, caked, impacted or coated in the digestive tract. The book's word for that is over-waste, and its word for the weight is over-weight."],
+   ["Fat","An obese person has excess body fat. The book's point is that a person can be overweight and have obesity at the same time, and can be one without the other."],
+   ["Why the distinction is the chapter","Because the three are not the same problem and do not answer to the same thing. A scale reads one number for all three, which is the reason the book refuses the scale as the measure."]],
+  note:"<b>Seven to fifteen pounds of it</b>That is the book's own figure for what can sit in a digestive tract, printed without a study attached, exactly as the rest of this library prints its numbers."},
+ {h:"What the books say makes the waste", s:"Nutricide and African Holistic Health, in their own terms",
+  rows:[
+   ["The food that constipates","White flour, white sugar and fried food are the books' own list of what holds a bowel still. That is why the three whites and the frying come out in week one and not later."],
+   ["Excess protein","The book's line is that protein beyond what the body can use is converted into fat rather than passed. It is the reason its plate is built from fruit, leaves, roots, grains and beans."],
+   ["Cow's milk","The books call cow's milk indigestible for a human being and put dairy on the exclusion list outright, which the plan keeps as one of its two exclusions."],
+   ["Starch with protein","The combining law: starch and protein are not eaten at the same meal, because the book says the two need different digestion and the one that waits spoils."],
+   ["The order waste leaves in","Bowel first, then skin, then lungs, in the books' order. A body that is not eliminating through the first is asked to do the work through the other two."]],
+  note:"<b>Food, and the books' claims about it</b>Everything in this section is the books' position. The page's own tested line sits on the course day for each subject."},
+ {h:"The food that was taken, and the food that replaced it", s:"The cultural argument, printed as the book's",
+  rows:[
+   ["The book's claim","That a people's diet belongs to its culture, and that a diet severed from where a people come from produces illness in the people who eat it. That is the argument and not a footnote to it."],
+   ["The three it names","Refined sugar, bleached white flour and commercial dairy, in the African American diet, with the rates of obesity, diabetes and high blood pressure that follow them in the book's account."],
+   ["What the book is not saying","It does not say one race is healthier than another, and this page does not print that either. It says a standard and a food supply were imposed, and that the body pays for it."],
+   ["Where else it is on this page","Course day 56 is the book's own line that a people eats what grows where it is, and the deep story keeps the passage whole. It is the same argument as this one, in the book's words rather than in a summary."],
+   ["What the page adds","The reader's own food is not in this app, because this app was built from three books by one man and not from a family's kitchen. Where a food from home fits the books' rules, it fits the plate."]],
+  note:"<b>The plate is not foreign and it is not new</b>Fruit, leaves, roots, whole grains and beans are older than any diet company."},
+ {h:"Water, and the clock", s:"African Holistic Health and Nutricide, the daily rules",
+  rows:[
+   ["How much","A gallon of water a day. That is the books' figure and it is a gallon, not a glass count, and the plan on this tab asks for the same gallon through the day. Most people skip it, which is why it is the first rule rather than the last."],
+   ["When","Water first, before anything else in the morning, and the book's own gap of thirty to forty minutes before the first food. The fruit morning is what comes after it."],
+   ["The clock","Four in the morning to twelve noon is the cleansing half of the book's twenty-four hour cycle, which is why its morning food is fruit and why a cooked breakfast sits where fruit would have moved."],
+   ["Between meals","Fruit, nuts and seeds, or water. The books put nothing else there, and a biscuit is flour and sugar in the same mouthful."]],
+  note:"<b>A gallon, and a gap</b>A gallon through the day, water before anything in the morning, and the book's own thirty to forty minutes before the first food. That is the whole of the hydration rule, and it is the cheapest line in this library."},
+ {h:"The organs that do the clearing", s:"African Holistic Health, and the books' order of elimination",
+  rows:[
+   ["Liver and pancreas","The books' sequence is that sugar overstimulates both, that the oversecretion of insulin that follows turns sugar into fat, and that the same swing later leaves too little sugar in the blood."],
+   ["Kidneys","Water is the books' answer to the kidneys, and the reason the water rule is a rule rather than a suggestion."],
+   ["The bowel","The first of the three doors waste leaves by. A bowel held still by white flour, sugar and fried food is the book's picture of where the waste accumulates."],
+   ["What the books give them","Their own shelf of blood cleansers and bitter herbs, which this library carries on the course's blood-cleanser day rather than as a product to buy."]],
+  note:"<b>Week three is this section's week</b>The four weeks give the organs a week of the same plain plate. Nothing bought is added to it."},
+ {h:"Fasting, in the books' own two tiers", s:"African Holistic Health, the African-Centered Fast, p384",
+  rows:[
+   ["What the book has","A written guide with a beginner's tier and an advanced one, under the name the African-Centered Fast, and the claim that resting the digestive system lets the body do its own work."],
+   ["What this page does","It prints the claim and does not put anybody on a fast from a page. The course's own line is that this library will not start one for a reader it cannot see."],
+   ["Who does not fast","Anybody on medicine for diabetes, anybody pregnant or feeding, a child, anybody coming off alcohol or a drug, and anybody with a condition a clinician is managing. That week is not a page's week."],
+   ["What replaces it","The fruit morning and the water. Both are in the books, both are in week one, and neither needs a decision about safety."]],
+  note:"<b>The fast is in the book, and it stays in the book</b>That is the same line this library takes on the claims it will not turn into an instruction."},
+ {h:"No calories, anywhere", s:"What the books never do, and this page does not add",
+  rows:[
+   ["The books","Neither book prints a calorie figure, a calorie target or a rate of loss. The argument is waste, water, food combining and the clock, and never arithmetic."],
+   ["The plan on this tab","The seven-day plan is written by a model that is told, in its own prompt, that a calorie target is another system's idea and not Afrika's, and is forbidden from using one."],
+   ["Why that is kept","Because a calorie count is the one thing a person can be made to feel guilty about every single day, and the books do not ask for it."],
+   ["What is measured instead","What comes out, how the morning feels, how sleep went, and whether the clothes sit differently. None of those needs a number."]],
+  note:"<b>No target weight, no rate, no arithmetic</b>If a day goes wrong, the next meal is the one that matters. That is this app's line everywhere and it holds here."},
+ {h:"The four weeks, and why they run in sevens", s:"The crossover, arranged from the books' order",
+  rows:[
+   ["What the books give","A diet that changes over time rather than overnight: the mucus food out first, the raw half back next, the organs given their stretch, and the plate held after that. Every step of it is measured in days of eating, not in weeks of weighing."],
+   ["Why sevens","A week is the shortest span in which a plate can be shopped, cooked and repeated, and the longest in which a change can still be remembered. The books' own fast guide counts its days the same way."],
+   ["What the page arranges","The division into four weeks, and the fifth week that holds, is this page's arrangement of that order. The books print no four-week table, and the tab says whose arrangement it is."],
+   ["What never moves","The two exclusions and the three whites. A week changes what is added or held, and never the shape of the plate."]],
+  note:"<b>Week one is subtraction. Week two is shape. Week three is the organs. Week four holds.</b>The four are written out above the thirty days on this tab, in full."},
+ {h:"How to know it is working without a scale", s:"This page's own line, not the books'",
+  rows:[
+   ["What to look at in week one","The bowel, mostly. The books' whole claim about waste is that it moves or it sits, and a week of fruit and water tells a person which one is happening."],
+   ["What to look at by week four","Energy on waking, sleep, the taste for the real food coming back, bread tasting sweet, and clothes that sit differently before any number moves."],
+   ["What not to do","Do not weigh daily. A body is water, waste and fat in three different proportions on three different mornings, which is the book's own point, and a daily number reads the water."],
+   ["When a number does matter","Weight going without trying, dizzy on standing, or a bowel that has changed for weeks is a clinician's question and not a plan's."]],
+  note:"<b>A condition in the house outranks this shelf</b>Diabetes, pregnancy, a child, a prescription, a heart or a kidney, or anybody coming off alcohol or a drug reads the conditions section first. It is above this on the same tab."}
+];
+
 var MUCUS_FOODS = [
 {"n":"Watermelon","s":1,"c":"Fruit","w":"Water and fruit sugar, eaten raw. The book's morning food."},
 {"n":"Melon","s":1,"c":"Fruit","w":"Water first, fibre with it. The same morning half of the day."},
@@ -4058,6 +4220,9 @@ var PLAN_RACES = [
  'East or Southeast Asian','White','Indigenous','Other','Prefer not to say'
 ];
 var PLAN_HEALTH = ['Healthy','In between','Unhealthy'];
+/* The four weeks run in sevens, so a plan is written for the week the person
+   is actually in rather than for a generic week one. 5+ is past the four. */
+var PLAN_WEEKS = ['1','2','3','4','5+'];
 
 /* The whole plan: the rules, the shopping list, the thirty days, and twelve
    questions on it. Nothing on it is sent anywhere and nothing is timed. */
@@ -4102,6 +4267,8 @@ function mealView(){
   var out='<div class="sec">'
    +'<div class="big okbox"><b>Thirty days on the books\u2019 own diet</b>A fruit morning, a raw middle and a steamed evening, with the books\u2019 own seasonings and their two exclusions. Nothing is timed, nothing is scored, and every day reads out loud. For a week built around your own goal, age and health, the Mucus scale tab asks five questions and writes one.</div>'
    +MEALP.map(function(b,i){ return bsec(b,i,'mp') }).join('')
+   +'<div class="sec-hd">Weight, in the books&#8217; own words</div>'
+   +WEIGHT.map(function(b,i){ return bsec(b,i,'wt') }).join('')
    +'<div class="sec-hd">'+head+'</div>';
   MEAL_QUIZ.forEach(function(q,i){
     var p=mealPicked(i);
@@ -4113,8 +4280,8 @@ function mealView(){
     out+='</div>';
   });
   if(s.done) out+='<div class="big '+(s.right>=MEAL_PASS?'okbox':'redbox')+'"><b>'+(s.right>=MEAL_PASS?'Passed':'Not yet')+'</b>'+s.right+' of '+s.total+'. '+(s.right>=MEAL_PASS?'The plan is yours.':'The pass is '+MEAL_PASS+'. Read the sections again and take it as many times as you like.')+'</div>';
-  out+='<div class="sec-hd">The thirty days</div>'
-   +MEALS.map(mealDay).join('')
+  out+='<div class="sec-hd">The thirty days, in four weeks</div>'
+   +mealDaysHTML()
    +'</div>';
   return out;
 }
@@ -4203,6 +4370,8 @@ function mucusPlanForm(){
    +'The answers go to Gemini, Google\u2019s model, once, when you press the button. Nothing else leaves this phone, and the plan comes back here and is kept on it.</div>'
    +'<div class="addf"><div class="mfield">'
    +'<label>What are you after?</label>'+planChips('goal',PLAN_GOALS,a.goal)
+   +'<label>Which week of the four are you on?</label>'+planChips('week',PLAN_WEEKS,a.week)
+   +'<div class="hint">Week one takes the food out, week two puts the raw half back, week three is the organs doing the clearing, week four holds it. Pick where you actually are, or <b>5+</b> if you are past the four. Left blank, the plan is written as week one.</div>'
    +'<label>Age</label><input id="plan-age" type="number" inputmode="numeric" min="13" max="100" placeholder="e.g. 42" value="'+esc(a.age||'')+'">'
    +'<div class="hint">Thirteen and over. A plan for a child or a pregnancy belongs with a clinician, not a page.</div>'
    +'<label>Gender</label>'+planChips('gender',PLAN_GENDERS,a.gender)
@@ -4227,18 +4396,22 @@ async function buildMucusPlan(){
   if(!a.health){ planError='Say how your health is right now.'; render(); return }
   planBusy=true; planError=''; render();
   try{
+    var wk=Number(String(a.week||'').replace('+',''))||0;
+    var body={goal:a.goal, age:Number(a.age), gender:a.gender, race:a.race, health:a.health, notes:a.notes||''};
+    /* The week is only sent when the person picked one. A plan written with no
+       week is week one, and the prompt says so; sending a zero would be a
+       question nobody was asked. */
+    if(wk) body.week=wk;
     var r=await fetch('/api/mucus-plan',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        goal:a.goal, age:Number(a.age), gender:a.gender, race:a.race, health:a.health, notes:a.notes||''
-      })
+      body:JSON.stringify(body)
     });
     var d=null; try{ d=await r.json() }catch(e){ d=null }
     if(!r.ok){
       throw new Error((d&&d.error) || (r.status===401?'Your sign-in has expired. Open /app and sign in again.':'The plan could not be written just now.'));
     }
     if(!d || !d.plan) throw new Error('The plan came back empty. Try again.');
-    store.plan={answers:{goal:a.goal,age:Number(a.age),gender:a.gender,race:a.race,health:a.health,notes:a.notes||''},plan:d.plan,model:d.model||'',at:new Date().toISOString()};
+    store.plan={answers:{goal:a.goal,age:Number(a.age),gender:a.gender,race:a.race,health:a.health,notes:a.notes||'',week:a.week||''},plan:d.plan,model:d.model||'',at:new Date().toISOString()};
     save();
   }catch(err){ planError=String((err&&err.message)||'The plan could not be written just now.'); }
   planBusy=false; render();
@@ -4286,7 +4459,7 @@ function mucusPlanResult(){
   if(p.caution) out+='<div class="sec-hd">Before you start</div><div class="big redbox"><b>Read this one first</b>'+esc(p.caution)+'</div>';
   var a=saved.answers||{};
   out+='<div class="sec-hd">Built from your answers</div><div class="big warnbox"><b>'+esc(a.goal||'A goal')+'</b>'
-   +esc([a.age?('Age '+a.age):'',a.gender,a.race,a.health].filter(Boolean).join(' \u00b7 '))
+   +esc([a.age?('Age '+a.age):'',a.gender,a.race,a.health,a.week?('Week '+a.week+' of the four'):''].filter(Boolean).join(' \u00b7 '))
    +(a.notes?'<br><br><b>Worked around</b>'+esc(a.notes):'')+'</div>'
    +'<button class="txtbtn" id="mclear">Clear this plan</button>';
   return out;

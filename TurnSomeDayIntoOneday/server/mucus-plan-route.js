@@ -49,10 +49,10 @@ function mount(app, deps) {
     } catch (_) { return false; }
   };
 
-  async function ask(answers, jsonMode, thinking) {
+  async function ask(answers, week, jsonMode, thinking) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
     const headers = { 'Content-Type': 'application/json', 'x-goog-api-key': key };
-    const body = mucusPlan.requestBody({ answers, model, maxTokens, thinkingLevel, jsonMode, thinking });
+    const body = mucusPlan.requestBody({ answers, week, model, maxTokens, thinkingLevel, jsonMode, thinking });
     let r = await fetch(url, { method: 'POST', headers, body });
     // Google's "high demand" no is a queue, not a verdict. Two more asks, a
     // second apart, is the same patience the other AI routes use.
@@ -78,6 +78,9 @@ function mount(app, deps) {
       }
 
       const answers = mucusPlan.answersFrom(req.body);
+      // The week of the four-week crossover, if the page sent one. It changes what
+      // is added or held, never the plate's shape. 0 means "not given".
+      const week = Number(req.body && req.body.week) || 0;
       if (!mucusPlan.complete(answers)) {
         return res.status(400).json({
           error: 'Answer the goal, age, gender, race and health question first.',
@@ -90,9 +93,9 @@ function mount(app, deps) {
         // or an API surface that rejects an optional generation field with a
         // bare "invalid argument". Ask again without the optional parts rather
         // than handing the person an error nobody can act on.
-        let r = await ask(answers, true, true);
-        if (r.status === 400) r = await ask(answers, false, true);
-        if (r.status === 400) r = await ask(answers, false, false);
+        let r = await ask(answers, week, true, true);
+        if (r.status === 400) r = await ask(answers, week, false, true);
+        if (r.status === 400) r = await ask(answers, week, false, false);
         const data = await r.json().catch(() => null);
 
         if (!r.ok) {

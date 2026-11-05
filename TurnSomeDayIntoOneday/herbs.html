@@ -177,6 +177,7 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
     <div class="tab" data-t="mucus">Mucus scale</div>
     <div class="tab" data-t="meal">Meal plan</div>
     <div class="tab" data-t="deep">The deep story</div>
+    <div class="tab" data-t="rest">Rest, sleep, clothing</div>
     <div class="tab" data-t="mine">My notes</div>
   </div>
 
@@ -271,6 +272,19 @@ body{display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
    somebody they are finished, and nothing here talks somebody out of what they take.
    Infections are the line in the sand — an infection is not a herb job, and the
    page says so in the middle of the herb list, not in small print.
+   And one more, from 5 Nov 2026 (his words: "Just dont add anything against
+   the belief system of the app"). Nothing goes in from here on that argues
+   with what the books teach. Where an outside source disagrees - a trial, a
+   monograph, a paper - its numbers are not printed as a correction to a shelf,
+   and the books' claim is never softened to agree with it. Anything that would
+   read as a verdict on the books stays out, however well sourced. What is
+   already here stays exactly as it is, the Dr. Sebi shelf that argues with him
+   in one place included.
+   On 5 Nov 2026 the Rest, sleep, clothing tab was added, from a paper on his
+   teaching of food combining, rest, sleep and clothing. Only the three subjects
+   the page had no shelf for were taken, and only the part that agrees with the
+   books; the paper's trial on food combining and its line on racial biology were
+   left out, because both argue with a book. The tab is this page's own voice.
 --------------------------------------------------------------------------- */
 
 /* n name · a also called · u what it does · d what it does
@@ -4714,6 +4728,65 @@ function courseView(){
    +'</div>';
 }
 
+/* ---------------------------------------------------------------------------
+   REST, SLEEP, CLOTHING - added 5 Nov 2026.
+
+   From a research paper on Dr. Afrika's teaching of food combining, rest, sleep
+   and clothing. Only the three subjects the page had no shelf for were taken,
+   and only the part that agrees with the books: rest as the other half of the
+   twenty-four hour clock, the light that sets a body's day, and what cloth does
+   to heat. The paper's trial on food combining and its line on racial biology
+   were left out, because both argue with a book, and nothing here argues with
+   a book. This tab is this page's own voice, not the books'.
+--------------------------------------------------------------------------- */
+var REST = [
+{h:"Rest is part of the day, not a reward for finishing it", s:"The other half of the books' clock",
+ rows:[
+  ["The day has a shape","Noon to seven is the ingestion phase in the books, seven at night to four is assimilation, and four in the morning to noon is cleansing. The clock is not only about when food goes in: two of its three halves are the body working on what it was given, and that work is done at rest."],
+  ["What rest is","Lying down, sitting still, a slow walk, an early night. Not a reward for finishing the list and not something to be earned, because the body does that work either way and does it worse when it is tired."],
+  ["Work and worry spend the same body","Strain, a long day on your feet, and a night of chewing something over all come out of the same account the evening meal is meant to put back. That is why a person can eat well and still feel emptied."],
+  ["The night is where the repair is done","The books give the night to assimilation. The plain version of the same thing: growth, repair and the sorting of everything learned that day happen while a person is asleep. A short night is not a missing hour, it is a missing repair."],
+  ["What a stimulant actually does","It moves the bill. It does not make rest, and it does not do the repair the night was for. That is the whole reason this page puts sleep beside the clock rather than against it."]],
+ note:"<b>This page's own line</b>No herb on any shelf here stands in for sleep, and nothing here is a reason to push through a tiredness that will not lift. Tiredness that lasts for weeks, breathlessness, or weight going without trying is a clinician's, today."
+},
+
+{h:"Sleep, and the light that sets it", s:"The body's own clock, kept the books' way",
+ rows:[
+  ["The body keeps a clock of about a day","It is set mostly by light: bright light in the morning, and less of it at night. That is the machinery under the books' twenty-four hour cycle - the same day, divided the same way, with the body told which half of it it is in."],
+  ["Morning light is the setting hand","A few minutes of daylight early is worth more than anything in a bottle for telling a body what time it is. A dark morning indoors leaves the clock to guess."],
+  ["Strong light at night holds the day open","A screen in a dark room is the usual one, and a bright kitchen at eleven at night does the same job. The clock reads light, not intentions."],
+  ["Melatonin is the signal, not the switch","The books name melatonin as the hormone of the dark half. The plain version: it announces that night has come. It does not put a person under, and a tablet of it is not the same thing as a dark room."],
+  ["The hour matters as much as the length","A night that starts at ten and a night that starts at one are not the same night, and moving the hour by two every weekend leaves the week to catch up. Keeping the hour is the cheapest thing on this page."],
+  ["For tonight","The room dim for the last hour, the phone out of the bed, the last cup of anything with caffeine before six, and the same hour tomorrow as tonight."]],
+ note:"<b>This page's own line</b>Snoring that stops and starts, falling asleep in the daytime, or a night that has been broken for months is not a tea's job. That is a clinician's, and it is worth saying out loud rather than buying another bottle."
+},
+
+{h:"Clothing, and what it does to the body", s:"The body's own weather, and the night",
+ rows:[
+  ["Clothing has a physical job","It is not only appearance. It holds heat in, lets heat out, and moves water away from the skin. Everything else a garment does, it does on top of that."],
+  ["Heat leaves the body four ways","In the breath, in sweat, through the skin's blood vessels opening, and into the air held next to the skin. Cloth decides the last one, which is the only one a person can change in a minute."],
+  ["The fibres, plainly","Cotton takes water in and keeps it, so wet cotton stays wet and then cold. Wool holds warmth even when it is damp. Linen is cool and dries quickly. Polyester can move water away from the skin very well or not at all, depending on how it is woven and knitted. The fibre's name is not the answer; the weave, the thickness and the fit are."],
+  ["At night","The body loses heat while it sleeps, so what a person wears to bed and what is over them are part of the night, not decoration. A warm room and a heavy cover undo each other, and a body too hot or too cold spends half the night awake without knowing it."],
+  ["What the research on night fabrics can say, and cannot","There is a small body of work on sleepwear and bedding fibres and it does not agree with itself yet: some studies find one fabric helps a person settle faster or sleep cooler, and the most recent review of the field said the studies were too different from one another to name a best material. What is settled is the plain part - too hot, too cold, or damp disturbs a night."],
+  ["What to do with that","Dress for the room and the weather, keep the skin dry, and change out of anything wet. A body fighting its clothing is spending on heat what it could be spending elsewhere."]],
+ note:"<b>This page's own line</b>No fabric is a medicine and nothing here prevents anything. A rash that spreads, blisters, or comes with a fever is not a laundry question, it is a clinician's."
+}
+];
+
+function restSec(b, i){
+  var id = 'rs' + i;
+  var s = (b.h ? b.h + '. ' : ' ') + (b.s ? b.s + '. ' : '');
+  (b.rows || []).forEach(function(r){ s += r[0] + '. ' + r[1] + '. ' });
+  if(b.note) s += ' ' + String(b.note).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  SAY_TEXT[id] = s;
+  var out = '<div class="card" data-h="' + id + '">'
+    + '<div class="row"><div class="row-txt"><b>' + esc(b.h) + '</b><span>' + esc(b.s) + '</span></div><div class="chev">&#8250;</div></div><div class="body">';
+  (b.rows || []).forEach(function(r){ out += '<p><b>' + esc(r[0]) + '</b> &mdash; ' + esc(r[1]) + '</p>' });
+  if(b.note) out += '<div class="big okbox">' + b.note + '</div>';
+  out += saybarHTML(id);
+  return out + '</div></div>';
+}
+
 function render(){
   var v=document.getElementById('view'), out='';
   var list=allHerbs();
@@ -4775,6 +4848,10 @@ function render(){
 
   if(tab==='deep'){
     out='<div class="sec">'+DEEP.map(function(b,i){ return bsec(b,i,'dp') }).join('')+'</div>';
+  }
+
+  if(tab==='rest'){
+    out='<div class="sec">'+REST.map(function(b,i){ return restSec(b,i) }).join('')+'</div>';
   }
 
   if(tab==='mine'){

@@ -103,3 +103,6 @@ node_modules/
 # Vercel build output - regenerate with the build command (node vercel-build.js).
 # Only public assets land here; a page in this folder is a page served to the world.
 TurnSomeDayIntoOneday/webroot/
+
+# installed python libraries used while building the handover images
+artifacts/pylibs/

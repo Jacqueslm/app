@@ -23,7 +23,9 @@ Each file is a complete paste-in block for Suno, in the same shape:
 
 | File | Song |
 |---|---|
-| `I-Can-Change-You-Can-Change-Suno-Prompt.txt` | I Can Change, You Can Change — two tracks, one song: 8 rappers, 16 bars each, 5 singers and 8 choruses, 92 then 104 BPM |
+| `I-Can-Change-You-Can-Change-Suno-Prompt.txt` | I Can Change, You Can Change — two tracks, one song: 6 rappers, 8 bars each, 5 singers and 8 choruses, 92 then 104 BPM |
+| `I-Can-Change-One-Track-Suno-Prompt.txt` | I Can Change, You Can Change - single-generation version: same six verses and six rappers at 96 BPM, 4 full choruses and 2 half choruses, one Suno run |
+| `You-Are-Not-A-Sewer-Suno-Prompt.txt` | You Are Not a Sewer - the speech as a spoken-word soul-rap record: 6 spoken verses, 3 choruses, final chorus, bridge, outro, 88 BPM |
 | `Day-One-Suno-Prompt.txt` | Day One — Jersey-club rap anthem, 138 BPM, C minor |
 | `Days-Are-Numbered-Suno-Prompt.txt` | Days Are Numbered |
 | `Days-Are-Numbered-RnB-Trap-Suno-Prompt.txt` | Days Are Numbered — R&B/trap version, pairs with the lyrics above |

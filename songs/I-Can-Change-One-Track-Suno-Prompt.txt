@@ -1,0 +1,152 @@
+SUNO PROMPT - ORIGINAL HIP HOP ANTHEM "I CAN CHANGE, YOU CAN CHANGE"
+One track, one generation at 96 BPM. Six verses of eight bars, six rappers, five
+singers, plain human words only - nothing borrowed from any belief system.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 952 characters)
+------------------------------------------------------------------------
+Hip hop anthem at 96 BPM in A minor, one continuous record whose beat switches lane by lane: dusty boom-bap breakbeat, trap-soul 808s, fat West Coast funk bass, Afrobeats log drums with shaker and congas, Latin trap with a flute line, then a soul finish on warm Hammond organ with an uplifted choir. Deep kick, tight cracking snares, filtered vinyl texture, round sub bass, Rhodes chords, plucked synth, clean electric-guitar arpeggio. Six male rap voices, one per verse: clipped street reporter, slow Southern drawl, laid-back West Coast flow, Afrobeats melodist, Latin trap flow in Spanish and English, soul-rap closer. Hook sung by five singers - alto lead, two tenors, soprano, baritone underneath - stacked three-part harmonies, handclaps, answered ad-libs between the lines. Cinematic, heavy, then triumphant, hands in the air, never shouting. Original lyrics, melody, vocal cadence and drum pattern; do not recreate or imitate any existing song.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 280 characters)
+------------------------------------------------------------------------
+96 BPM hip hop anthem, A minor, beat switches through boom-bap, trap-soul, West Coast funk, Afrobeat, Latin trap and a soul finish with organ and choir. Six male rap voices, one per verse. Hook: five singers, stacked harmonies, handclaps. Cinematic then triumphant. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3605 characters)
+------------------------------------------------------------------------
+
+[Intro - spoken, baritone, no drums]
+Two songs used to live in me. Now it's one.
+Six voices, one hook, one people.
+
+[Chorus - five singers, harmonized, ad-libs under]
+I can change, you can change
+Let's not keep playing games
+I'm a fool, you's a fool
+The system used us as a damn tool
+Divide and conquer, keep us separated and sedated
+Let's wake up, take a stand
+Hold hands with love for humanity
+And unite as one
+
+[Verse 1 - street reporter, boom-bap, eight bars]
+Drew a line, called it a border
+Same hand took both pockets
+Flag up, rent still climbing
+Ate the fear, paid the tax
+Mad at a nation that's absent
+Never once checked the ranks
+No enemy in another skin
+My enemy is greed - that's it
+
+[Chorus - five singers, harmonized, ad-libs under]
+I can change, you can change
+Let's not keep playing games
+I'm a fool, you's a fool
+The system used us as a damn tool
+Divide and conquer, keep us separated and sedated
+Let's wake up, take a stand
+Hold hands with love for humanity
+And unite as one
+
+[Verse 2 - slow Southern drawl, trap-soul 808s, eight bars]
+Grandma worked her whole life
+Same ache, new disease
+Sent the young for a line
+Came home, taps run dry
+Hospital shut, prison wide
+Who eats off a people asleep
+Sedated on screens and pills
+I been a fool - I'll say it
+
+[Chorus - five singers, half length, ad-libs under]
+I can change, you can change
+Let's not keep playing games
+I'm a fool, you's a fool
+The system used us as a damn tool
+
+[Verse 3 - West Coast, fat funk bass, eight bars]
+Same sun, same sea, same boat
+Different flag, still refugee
+Bomb for a pipeline, send the bill
+Called it truth, called it peace
+Seen a city unite in a flood
+Strangers with boats, state wouldn't
+Can't divide a hand already holding
+Bass up - fear don't live here
+
+[Verse 4 - Afrobeats melodist, log drums and shaker, eight bars]
+Call me brother, say it loud
+Continent, islands, the south
+Whole before a border was a thing
+Same drum, same spice, new name
+Bringing my neighbours all in
+The drum is the law, truth the friend
+Out of many, one - the creed
+Power to the people, people are we
+
+[Chorus - five singers, harmonized, ad-libs under]
+I can change, you can change
+Let's not keep playing games
+I'm a fool, you's a fool
+The system used us as a damn tool
+Divide and conquer, keep us separated and sedated
+Let's wake up, take a stand
+Hold hands with love for humanity
+And unite as one
+
+[Verse 5 - Latin trap, Spanish and English, eight bars]
+Hundred flags, one sky above
+Hundred tongues, one word: love
+Wall where a river used to roll
+Pero mira - plaza, the drums
+No passport for the human heart
+Why fence the one thing that's art
+Shake the soul of the powers that be
+Can't dance to a war - walls awake
+
+[Chorus - five singers, half length, ad-libs under]
+I can change, you can change
+Let's not keep playing games
+I'm a fool, you's a fool
+The system used us as a damn tool
+
+[Verse 6 - soul closer, choir rising, eight bars]
+Choir's waiting, night is done
+Every nation close as they are
+I was a tool, the tool got a soul
+Now the tool is a voice - control
+Not a fist, not a flag, not a throne
+Just a people who know they're not alone
+Love for humanity, that's the anthem
+One nation on earth - say it plain
+
+[Final chorus - five singers, choir and all six rappers ad-libbing]
+I can change, you can change
+Let's not keep playing games
+I'm a fool, you's a fool
+The system used us as a damn tool
+Divide and conquer, keep us separated and sedated
+Let's wake up, take a stand
+Hold hands with love for humanity
+And unite as one
+
+[Outro - choir and five singers, fading]
+One nation, one people...
+I can change, you can change...
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Style box - 204 characters)
+------------------------------------------------------------------------
+gangster posturing, gun threats, drill menace, auto-tuned warble on the hook, screamo, distorted 808 clipping, comedy, parody, mumble, ad-libs that drown the lead vocal, any named artist or song imitation
+
+------------------------------------------------------------------------
+WHAT THIS VERSION IS
+------------------------------------------------------------------------
+The whole song in one Suno run at 96 BPM in A minor: 4 full choruses and 2
+half choruses instead of eight full ones, because eight full choruses plus six
+verses runs past the length of one generation. 94 bars, about 3:55 at 96 BPM.
+All six rap lanes are in it, one per verse, in order: boom-bap, trap-soul, West
+Coast funk, Afrobeats, Latin trap, soul closer. The two-track version stays in
+I-Can-Change-You-Can-Change-Suno-Prompt.txt for 92 then 104 BPM.

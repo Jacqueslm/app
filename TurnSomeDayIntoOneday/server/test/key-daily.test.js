@@ -123,7 +123,7 @@ function sandbox(){
 
   vm.runInContext('var LORE={},PORTRAIT={},WELLBEING={},DESTINY={},PLANET_LORE={};', ctx);
   ['PERIODS', 'SIGNS', 'NUMBERS', 'TAROT', 'EL_REL', 'Q_REL', 'MONTHS',
-   'SEASONS', 'SEASON_PLACE', 'SIGN_BODY', 'BIRTHSTONE', 'DAYS']
+   'SEASONS', 'SEASON_PLACE', 'SIGN_BODY', 'BIRTHSTONE', 'DAYS', 'WAYS', 'WAYREAD']
     .forEach((n) => vm.runInContext(`var ${n} = ${grabConst(n)};`, ctx, { filename: n + '.js' }));
   [
     /const SIGN_SEASON = \{\};\nObject\.entries\(SEASONS\)\.forEach[^\n]*/,
@@ -139,6 +139,10 @@ function sandbox(){
     /function tarotIndex\([^\n]*/,
     /function tarotFor\([^\n]*/,
     /function findPeriod\(month, day\)\{[\s\S]*?\n\}/,
+    /function dayNumber\([^)]*\)\{[\s\S]*?\n\}/,
+    /function nodeLongitude\([^)]*\)\{[\s\S]*?\n\}/,
+    /function wayBucket\([^)]*\)\{[\s\S]*?\n\}/,
+    /function wayOf\([^)]*\)\{[\s\S]*?\n\}/,
     /function profileOf\(person\)\{[\s\S]*?\n\}/,
   ].forEach((re) => vm.runInContext(grabFn(re), ctx, { filename: 'page-helper.js' }));
   vm.runInContext(engineSource(), ctx, { filename: 'today-engine.js' });

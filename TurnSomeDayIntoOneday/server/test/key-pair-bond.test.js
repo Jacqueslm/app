@@ -70,7 +70,8 @@ const S = (() => {
   // here instead of printing an undefined.
   vm.runInContext('var LORE={},PORTRAIT={},WELLBEING={},PLANET_LORE={};', ctx);
   for(const name of ['PERIODS','SIGNS','NUMBERS','TAROT','EL_REL','Q_REL',
-                     'SIGN_BODY','BIRTHSTONE','DEPTH','DESTINY','BOND_FRAME','DOMAINS'])
+                     'SIGN_BODY','BIRTHSTONE','DEPTH','DESTINY','BOND_FRAME','DOMAINS',
+                     'WAYS','WAYREAD'])
     vm.runInContext(`var ${name} = ${literal(name)};`, ctx, { filename: name + '.js' });
   [
     [/const relKey = [^\n]*/, 'relKey'],
@@ -79,6 +80,7 @@ const S = (() => {
     [/const firstName = [^\n]*/, 'firstName'],
   ].forEach(([re, what]) => vm.runInContext(oneLine(re, what), ctx, { filename: what + '.js' }));
   for(const name of ['reduceNum','digitSum','tarotIndex','tarotFor','findPeriod',
+                     'dayNumber','nodeLongitude','wayBucket','wayOf',
                      'profileOf','pairContext','bondFrame','pairThird'])
     vm.runInContext(fnSource(name), ctx, { filename: name + '.js' });
   // One pairing, read the way the Pair tab reads it: the fifth room's own

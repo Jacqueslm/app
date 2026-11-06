@@ -526,7 +526,7 @@ ol.steps li b{color:var(--gold); font-weight:600}
   /* The tabs that had no bar of their own. The birthday and The Key keep
      theirs — they came first, and their copies are written for a long read.
      Today joined on 19 Sep 2026 and takes this bar like the rest. */
-  const BARS = ['panel-today', 'panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel', 'panel-cards'];
+  const BARS = ['panel-today', 'panel-people', 'panel-pair', 'panel-matrix', 'panel-game', 'panel-wheel', 'panel-ways', 'panel-cards'];
   const BAR =
     '<div class="tools">'
     + '<button class="btn ghost sm speak-btn" data-act="speak">Read it to me</button>'
@@ -550,6 +550,7 @@ ol.steps li b{color:var(--gold); font-weight:600}
     'panel-matrix': 'matrix-box',
     'panel-game':   'game-box',
     'panel-wheel':  'wheel-list',
+    'panel-ways':   'ways-list',
     'panel-cards':  'cards-result',
   };
 
@@ -1441,6 +1442,7 @@ function todayHtml(R){
   <button role="tab" id="tab-game"   aria-selected="false" data-panel="panel-game">Learn</button>
   <button role="tab" id="tab-key"    aria-selected="false" data-panel="panel-key">The Key</button>
   <button role="tab" id="tab-wheel"  aria-selected="false" data-panel="panel-wheel">The 48</button>
+  <button role="tab" id="tab-ways"   aria-selected="false" data-panel="panel-ways">The Ways</button>
   <button role="tab" id="tab-cards"  aria-selected="false" data-panel="panel-cards">The cards</button>
 </nav>
 
@@ -1577,6 +1579,15 @@ Cy Okonkwo, 24-Dec-1991"></textarea>
 <section class="panel" id="panel-wheel" role="tabpanel" hidden>
   <div class="note">All 48 periods of the year, in order. Click any one to read it from its first day.</div>
   <div class="people" id="wheel-list"></div>
+</section>
+
+<!-- THE WAYS — the year-dependent layer, given a door of its own.
+     It lived only inside a reading, under Layer III, which is a long scroll
+     and needs a year typed before it says anything at all. Same list
+     treatment as The 48 beside it. -->
+<section class="panel" id="panel-ways" role="tabpanel" hidden>
+  <div class="note">All forty-eight Ways, in the order the Moon&rsquo;s node passes through them. One lasts about four and a half months, and the whole circle comes round every eighteen and a half years &mdash; so the same calendar day in a different year is a different Way. The dates below are the ones the cycle is in now.</div>
+  <div class="people" id="ways-list"></div>
 </section>
 
 <!-- THE CARDS — the reading.
@@ -6700,6 +6711,7 @@ function showTab(id, silent){
   if(id === 'tab-game') renderGame();
   if(id === 'tab-matrix') renderMatrix();
   if(id === 'tab-wheel') renderWheel();
+  if(id === 'tab-ways') renderWays();
   if(id === 'tab-cards') prepareCards();
   if(id === 'tab-key') primeKey();
 }
@@ -6861,6 +6873,66 @@ $('wheel-list').addEventListener('click', e=>{
   showTab('tab-read'); doRead();
 });
 
+
+/* ============================================================
+   THE WAYS — the same forty-eight the reading uses, listed.
+
+   The order is the node's own: bucket 0 to 47. The dates are
+   computed from the node rather than typed in, so this list
+   cannot drift from the reading that puts a person on one.
+   ============================================================ */
+function waySpans(){
+  const spans = [];
+  let cur = null;
+  const end = new Date();
+  end.setFullYear(end.getFullYear() + 2);
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 20, 0, 1);
+  while(d <= end){
+    const b = wayBucket(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    if(!cur || cur.b !== b){
+      if(cur){ const t = new Date(d); t.setDate(t.getDate() - 1); cur.to = t; }
+      cur = { b, from: new Date(d.getFullYear(), d.getMonth(), d.getDate()) };
+      spans.push(cur);
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  if(cur) cur.to = end;
+  /* The two ends of the window are half a Way each — one that began before it
+     opened, and one that will not finish before it closes. Neither has real
+     dates to show, so neither is ever picked. There is always a whole
+     occurrence of every Way inside a window longer than one full cycle. */
+  if(spans.length){ spans[0].cut = true; spans[spans.length - 1].cut = true; }
+  return spans;
+}
+const wayDay = d => d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+
+function renderWays(){
+  const spans = waySpans();
+  const now = new Date();
+  const todayB = wayBucket(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  const pick = {};
+  spans.forEach(sp=>{
+    if(sp.cut) return;
+    const mid = sp.from.getTime();
+    const holds = sp.b === todayB && sp.from <= now && now <= sp.to;
+    const held = pick[sp.b];
+    if(!held || holds || (!held.holds && Math.abs(mid - now.getTime()) < Math.abs(held.mid - now.getTime())))
+      pick[sp.b] = { sp, mid, holds };
+  });
+  $('ways-list').innerHTML = WAYS.map((name, i)=>{
+    const got = pick[i];
+    const R = WAYREAD[name] || {};
+    const sp = got && got.sp;
+    const days = sp ? Math.round((sp.to - sp.from) / 864e5) + 1 : 0;
+    return `<div class="pcard">
+      <div class="pn" style="font-size:17px">The Way of ${esc(name)}</div>
+      <div class="pt">${esc(R.s || '')}</div>
+      <div class="pp" style="margin-top:8px">${sp ? wayDay(sp.from) + ' &ndash; ' + wayDay(sp.to) : ''}</div>
+      <div class="chips"><span class="chip">${days} days</span>${got && got.holds ? '<span class="chip">you are here</span>' : ''}</div>
+    </div>`;
+  }).join('');
+}
 
 /* ============================================================
    THE CARDS — the reading.

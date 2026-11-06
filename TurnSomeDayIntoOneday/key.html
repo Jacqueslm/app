@@ -1303,6 +1303,11 @@ function todayHtml(R){
 
   function load(){
     fillOptions();
+    /* The day list is built here rather than only in fillFields(), because a
+       phone with nobody saved yet has no saved person to fill from. Without
+       this the DAY select is empty on a first visit and the form reads 0/0,
+       which is nobody: pressing Show today then does nothing at all. */
+    daysFor(+(el('td-month').value) || 1);
     const saved = storedPerson();
     if(saved) fillFields(saved);
     show();
@@ -1312,6 +1317,7 @@ function todayHtml(R){
     const month = el('td-month');
     if(!month) return;                       /* the panel is not on this page */
     fillOptions();
+    daysFor(+month.value || 1);
     month.addEventListener('change', () => { daysFor(+month.value); show(); });
     ['td-day','td-year','td-name'].forEach(id => el(id).addEventListener('change', show));
     el('td-show').addEventListener('click', show);

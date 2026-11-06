@@ -3894,6 +3894,10 @@ function renderPairStub(P){
 
 function wayBlock(P){
   const n = esc(firstName(P.person.name));
+  /* This block builds its own boxes. The helper used to be borrowed from a
+     renderer further up, so the whole reading threw the moment a birth year
+     was given and this layer actually rendered. */
+  const box = (t, b) => b ? `<div class="dp"><div class="dt">${t}</div><div class="db">${b}</div></div>` : '';
   let owner = n + '&rsquo;s';
   if(n === 'They') owner = 'the';
   const w = P.way;

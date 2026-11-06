@@ -1584,9 +1584,22 @@ Cy Okonkwo, 24-Dec-1991"></textarea>
 <!-- THE WAYS — the year-dependent layer, given a door of its own.
      It lived only inside a reading, under Layer III, which is a long scroll
      and needs a year typed before it says anything at all. Same list
-     treatment as The 48 beside it. -->
+     treatment as The 48 beside it, with the finder first: a Way is decided by
+     the YEAR, so a date without one says nothing. -->
 <section class="panel" id="panel-ways" role="tabpanel" hidden>
-  <div class="note">All forty-eight Ways, in the order the Moon&rsquo;s node passes through them. One lasts about four and a half months, and the whole circle comes round every eighteen and a half years &mdash; so the same calendar day in a different year is a different Way. The dates below are the ones the cycle is in now.</div>
+  <div class="card">
+    <h2 class="ktitle">Find your Way</h2>
+    <p class="note" style="margin:0 0 4px">The Way comes from the birth year, not the day of the year. The Moon&rsquo;s node travels backwards through the zodiac once every eighteen and a half years, so the same calendar date in a different year is a different Way. Put the year in and this says which one you are on and the dates it held.</p>
+    <div class="form-grid">
+      <div><label for="wy-month">Birth month</label><select id="wy-month"></select></div>
+      <div><label for="wy-day">Day</label><select id="wy-day"></select></div>
+      <div><label for="wy-year">Year</label><input id="wy-year" type="text" inputmode="numeric" maxlength="4" placeholder="1976" autocomplete="off"></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="wy-find">Find it</button></div>
+    <div class="err" id="wy-err"></div>
+    <div id="wy-out"></div>
+  </div>
+  <div class="note">All forty-eight, in one continuous run, oldest first, with the whole reading on every one. Tap a card to open it.</div>
   <div class="people" id="ways-list"></div>
 </section>
 
@@ -6907,32 +6920,103 @@ function waySpans(){
 }
 const wayDay = d => d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
 
-function renderWays(){
-  const spans = waySpans();
-  const now = new Date();
-  const todayB = wayBucket(now.getFullYear(), now.getMonth() + 1, now.getDate());
-  const pick = {};
-  spans.forEach(sp=>{
-    if(sp.cut) return;
-    const mid = sp.from.getTime();
-    const holds = sp.b === todayB && sp.from <= now && now <= sp.to;
-    const held = pick[sp.b];
-    if(!held || holds || (!held.holds && Math.abs(mid - now.getTime()) < Math.abs(held.mid - now.getTime())))
-      pick[sp.b] = { sp, mid, holds };
-  });
-  $('ways-list').innerHTML = WAYS.map((name, i)=>{
-    const got = pick[i];
-    const R = WAYREAD[name] || {};
-    const sp = got && got.sp;
-    const days = sp ? Math.round((sp.to - sp.from) / 864e5) + 1 : 0;
-    return `<div class="pcard">
-      <div class="pn" style="font-size:17px">The Way of ${esc(name)}</div>
-      <div class="pt">${esc(R.s || '')}</div>
-      <div class="pp" style="margin-top:8px">${sp ? wayDay(sp.from) + ' &ndash; ' + wayDay(sp.to) : ''}</div>
-      <div class="chips"><span class="chip">${days} days</span>${got && got.holds ? '<span class="chip">you are here</span>' : ''}</div>
-    </div>`;
-  }).join('');
+/* The span a given day falls in, found by walking out of it one day at a time
+   — the same arithmetic the reading uses, so the two cannot disagree. */
+function waySpanAt(y, m, d){
+  const b = wayBucket(y, m, d);
+  const from = new Date(y, m - 1, d), to = new Date(y, m - 1, d);
+  for(let i = 0; i < 200; i++){
+    const p = new Date(from); p.setDate(p.getDate() - 1);
+    if(wayBucket(p.getFullYear(), p.getMonth() + 1, p.getDate()) !== b) break;
+    from.setDate(from.getDate() - 1);
+  }
+  for(let i = 0; i < 200; i++){
+    const n = new Date(to); n.setDate(n.getDate() + 1);
+    if(wayBucket(n.getFullYear(), n.getMonth() + 1, n.getDate()) !== b) break;
+    to.setDate(to.getDate() + 1);
+  }
+  return { b, from, to };
 }
+
+/* One Way, whole. The reading is the same text Layer III uses, so a card here
+   and the block in a birthday cannot say different things. */
+function wayCard(name, from, to, flag){
+  const R = WAYREAD[name] || {};
+  const days = Math.round((to - from) / 864e5) + 1;
+  return `<details class="pcard">
+    <summary style="cursor:pointer">
+      <div class="pn" style="font-size:17px">The Way of ${esc(name)}${flag ? ` &middot; ${flag}` : ''}</div>
+      <div class="pp">${wayDay(from)} &ndash; ${wayDay(to)} &middot; ${days} days</div>
+    </summary>
+    <p class="pt">${esc(R.s || '')}</p>
+    <p>${esc(R.say || '')}</p>
+    <div class="journey">
+      <div><div class="jk">The south node &mdash; what arrives with you</div><div class="jv">${esc(cap(R.s || ''))}</div></div>
+      <div class="arrow">&rarr;</div>
+      <div><div class="jk">The north node &mdash; what you are headed for</div><div class="jv">${esc(cap(R.t || ''))}</div></div>
+    </div>
+    <h4>The lesson</h4>
+    <p>${esc(cap(R.l || ''))}.</p>
+    <h4>The goal</h4>
+    <p>${esc(cap(R.g || ''))}.</p>
+    <h4>The pitfall</h4>
+    <p>${esc(cap(R.p || ''))}.</p>
+    <p><strong>The gift that comes with it:</strong> ${esc(R.gift || '')}</p>
+    <p><strong>Where to begin:</strong> ${esc(R.step || '')}</p>
+  </details>`;
+}
+
+/* The list is ONE cycle, not a sample of cycles. Picking each Way's nearest
+   occurrence to today was the fault: forty-eight different cycles side by
+   side, so the dates made no sense together and the run somebody was born
+   into was nowhere on the page. It is anchored on the Way running today and
+   grown outwards until all forty-eight have been used once, then sorted into
+   time order — the node runs backwards, so the Ways arrive in reverse. */
+function renderWays(){
+  const spans = waySpans().filter(s=>!s.cut);
+  const now = new Date();
+  const at = spans.findIndex(s=>s.from <= now && now <= s.to);
+  const anchor = at === -1 ? 0 : at;
+  const seen = new Set();
+  const cycle = [];
+  for(let i = anchor; i < spans.length && cycle.length < 48; i++){
+    if(seen.has(spans[i].b)) break;
+    seen.add(spans[i].b); cycle.push(spans[i]);
+  }
+  for(let i = anchor - 1; i >= 0 && cycle.length < 48; i--){
+    if(seen.has(spans[i].b)) break;
+    seen.add(spans[i].b); cycle.unshift(spans[i]);
+  }
+  cycle.sort((x, y)=>x.from - y.from);
+  $('ways-list').innerHTML = cycle.map(sp=>
+    wayCard(WAYS[sp.b], sp.from, sp.to, sp.from <= now && now <= sp.to ? 'now' : '')
+  ).join('');
+  fillWaysForm();
+}
+
+function fillWaysForm(){
+  const mm = $('wy-month'), dd = $('wy-day');
+  if(!mm || mm.options.length) return;
+  mm.innerHTML = MONTHS.map((m, i)=>`<option value="${i+1}">${m}</option>`).join('');
+  dd.innerHTML = Array.from({length: 31}, (_, i)=>`<option value="${i+1}">${i+1}</option>`).join('');
+}
+
+function findWay(){
+  const err = $('wy-err'), out = $('wy-out');
+  const y = +$('wy-year').value.trim(), m = +$('wy-month').value, d = +$('wy-day').value;
+  const bad = why => { err.textContent = why; out.innerHTML = ''; };
+  if(!y || y < 1800 || y > 2200) return bad('A birth year between 1800 and 2200, please. The Way is decided by the year.');
+  if(!(m >= 1 && m <= 12)) return bad('Choose a month.');
+  if(!(d >= 1 && d <= 31)) return bad('Choose a day.');
+  if(d > DIM[m-1]) return bad('That day is not in that month.');
+  if(m === 2 && d === 29 && !isLeap(y)) return bad('There is no 29 February in ' + y + '.');
+  err.textContent = '';
+  const sp = waySpanAt(y, m, d);
+  out.innerHTML = `<p class="note" style="margin:14px 0 6px">Born ${d} ${MONTHS[m-1]} ${y}. The Way running then:</p>`
+    + wayCard(WAYS[sp.b], sp.from, sp.to, 'their Way');
+  out.querySelector('details').open = true;
+}
+$('wy-find').addEventListener('click', findWay);
 
 /* ============================================================
    THE CARDS — the reading.

@@ -3579,6 +3579,12 @@ function renderCrest(P){
 /* The third book's angle, taken from the pair engine rather than written
    again — this is literally how this period resolves against every element. */
 function relSpread(P){
+  /* The line under Relationships is the period's own account of what it does
+     with another person, taken from the relationship layer, not a formula
+     about elements. The element spread is only a fallback if a period is
+     ever missing from that layer. */
+  const R = PAIRREAD[P.per.n];
+  if(R) return `${R.b} What they need back is ${R.n.charAt(0).toLowerCase() + R.n.slice(1)}`;
   const mine = P.elements[0];
   const by = {easy:[], complementary:[], charged:[]};
   ['Fire','Earth','Air','Water'].forEach(e=>by[EL_REL[relKey(mine, e)].mode].push(e));

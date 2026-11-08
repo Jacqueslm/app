@@ -5,6 +5,10 @@
 > nothing about this folder; this folder knows nothing about the app except that
 > it is not here. Nothing gets imported either way, and no song is ever shipped
 > inside the app or served from it.
+>
+> **RULE: every song gets a sheet here the same session it is written.**
+> Nothing stays chat-only. Before writing anything new, read the register below
+> and pick a lane, tempo and key that no existing song already owns.
 
 Songs are not the app. The app is `TurnSomeDayIntoOneday/`, this folder is the
 songs, and neither one reads the other: no page, no route and no test in the app
@@ -35,7 +39,46 @@ Each file is a complete paste-in block for Suno, in the same shape:
 | `Ring-And-A-Crown-Suno-Prompt.txt` | Ring And A Crown — Afrobeats/R&B "Ladies' Night", 104 BPM, A major |
 | `Same-Light-Suno-Prompt.txt` | Same Light |
 | `Same-Light-HipHop-Suno-Prompt.txt` | Same Light — hip-hop version |
+| `Cant-Look-Away-Suno-Prompt.txt` | Can't Look Away — R&B into hip-hop, 74 BPM, B-flat minor: female lead and wide soul choir, melodic rap with one double-time break, spoken bridge |
 | `Two-Step-Suno-Prompt.txt` | Two Step |
+
+## The register — read this before writing anything new
+
+Every song that exists, with the lane it already occupies. A new song picks a
+lane, tempo and key that no row here already holds, and a hook idea that is not
+already spent.
+
+| Song | Lane | Tempo / key | Sheet |
+|---|---|---|---|
+| Can't Look Away | R&B into hip-hop: female lead, wide soul choir, one double-time rap break, spoken bridge | 74, B-flat minor | saved |
+| Day One | Jersey-club rap anthem | 138, C minor | saved |
+| Days Are Numbered | Soul R&B ballad, slow 6/8 shuffle | 74, B-flat major | saved |
+| Days Are Numbered (R&B/trap) | R&B trap, half-time | 140, B-flat minor | saved |
+| I Can Change, You Can Change | Hip-hop, six rappers and eight choruses | 92 then 104, A minor | saved |
+| I Can Change, You Can Change (one track) | Same song, single generation | 96, A minor | saved |
+| Jersey Club | Jersey-club rap cypher | 136, no key named | saved |
+| Live It Now | Soca | 135, D major | saved |
+| Past The Shine | Slow, spacious hip-hop | 82, minor | saved |
+| Ring And A Crown | Afrobeats/R&B, ladies' night | 104, A major | saved |
+| Same Light | Soul ballad | 70, D major | saved |
+| Same Light (hip-hop) | Mid-90s Chicago soul boom-bap | 90, C minor | saved |
+| Two Step | Early-'90s West Coast pop-rap | 102, G major | saved |
+| You Are Not a Sewer | Spoken-word soul-rap | 88, D minor | saved |
+| Living It Up (Putting It Down) | — | — | chat only |
+| Freedom LLC | — | 90 (beat exists in `artifacts/`), no key named | chat only |
+| U R Loved | — | — | chat only |
+| Say It Back | — | — | chat only |
+| How Many Wanna Die for the Revolution | Also a 174 BPM jungle remix | 174 (remix) | chat only |
+| Willing to Die for the Revolution | — | — | chat only |
+| Selling Your Crown | Soul version and trap version | — | chat only |
+| Turn A Blind Eye | — | — | chat only |
+| I Love You (Better Place) | — | — | chat only |
+| Are You Really Ready | — | — | chat only |
+| Wrong Hands | — | — | chat only |
+
+Note: Can't Look Away and Days Are Numbered share 74 BPM but not a key and not a
+groove (minor, hip-hop turn and full choir against a major-key 6/8 soul ballad).
+If a future song wants 74, take a different key and a different backbeat.
 
 ## Not in here yet
 

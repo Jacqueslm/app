@@ -1,0 +1,111 @@
+SUNO PROMPT — "CAN'T LOOK AWAY"
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 840 characters)
+------------------------------------------------------------------------
+An R&B record that turns into hip-hop at 74 BPM in B-flat minor. Black female lead, warm and conversational behind the beat, holding back until the final chorus where she opens into a full gritty belt; melisma only at the ends of phrases. Massed soul choir, wide and cinematic, wordless oohs and stacked three-part harmonies, no organ and no handclaps. Male rapper who rhymes melodically in harmony stacks, letting the group finish his lines, then drops into a tight double-time burst with crisp consonants before returning to normal time. Live drums, finger snaps, round upright-tone bass, felt piano, low strings swelling under the last chorus, which lifts a whole step. Sparse top, full and triumphant end, warm analog mix with space around the voice. Exhausted, defiant, hopeful. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 335 characters)
+------------------------------------------------------------------------
+R&B that turns into hip-hop, 74 BPM, B-flat minor. Conversational female lead who belts only in the last chorus, wide cinematic soul choir with wordless oohs and three-part harmony, melodic male rapper with harmony stacks and one double-time burst, live drums, snaps, piano, low strings. Warm analog mix, sparse to full. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3056 characters)
+------------------------------------------------------------------------
+
+[Intro]
+I don't sleep with my eyes closed
+I don't sleep with my eyes closed
+
+[Verse 1]
+I was seven years old with a fist full of thunder
+Thought the world would move if I asked it twice
+Thought the good got rich and the rich stayed tender
+Thought the door swung open if you paid the price
+Mama said, "Baby, put it down, it ain't yours"
+But the weight don't drop when you know what you know
+So I'm up at 3 a.m. with the news on low
+Watching grown folks learn what the children know
+
+[Pre-Chorus]
+And every answer that they handed me came with a bill
+And every hero that they buried got buried for real
+
+[Chorus]
+It's all a lie, wrapped in gold and televised
+"Be patient, baby," while they're selling you the cold
+And I can't look away
+No, I can't look away
+It's all a lie, and the truth don't pay the rent
+So I carry it alone like a bullet that was sent
+And I can't look away
+Still, I can't look away
+
+[Verse 2]
+The system ain't a wall, it's a hall with a hundred doors
+Every door got a landlord, every landlord got laws
+And the ones who tried to change it? They got erased
+'Cause a true revolutionary don't negotiate
+He don't compromise, he don't take the check
+So they take his whole life and they call it respect
+You get a hundred followers, a thousand, a mil'
+And the machine just absorbs 'em, keeps the wheel on the wheel
+I ain't never had a silver spoon, only a spoon of truth
+Chewed it up, swallowed it, it's poison in the booth
+Every bar is a bill, every bill is a lie
+Every lie got a logo, every logo got a tie
+And I'm tired, I'm wired, I'm a wire with a spark
+I'm a man with a mirror in a room with no dark
+So I scribble it and flip it and I flip it again
+'Til the pen and the pain and the page are the same
+
+[Bridge]
+The truth is the truth to me
+It ain't personal
+It's not a biography
+It's the school that's a slave camp with a mascot
+It's the tax on the air, the tax on the bread, the tax on the hope
+It's me, poisoning myself with the information
+Because I can't unsee it
+And I like everything's cool
+I just want to be left alone
+But I can't look away
+
+[Verse 3]
+It costs me so much energy, this knowing
+It takes a toll, it takes my sleep, it takes my friends
+They tell you "it's a game," so I bought me a jersey
+Thought the boss was a title, thought the money was mercy
+I abuse myself with everything I'm holding
+And still the world just keeps on making sense to them
+But the boss is a bill and the bill is a debt
+And the debt is a life that you ain't lived yet
+And I thought I could get rich by doing good
+Without stepping on a soul, without staining my hands
+But the good don't get paid in this neighborhood
+So I'm singing to whoever understands
+
+[Final Chorus]
+It's all a lie, wrapped in gold and televised
+"Be patient, baby," while they're selling you the cold
+And I can't look away
+No, I can't look away
+It's all a lie, and the truth don't pay the rent
+So I carry it alone like a bullet that was sent
+And I can't look away
+Still, I can't look away
+
+[Outro]
+Can't look away
+Can't look away
+Can't look away
+Can't look away
+I can't look away
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 92 characters)
+------------------------------------------------------------------------
+handclaps, organ, autotune, EDM, trap hi-hats, spoken-word intro over drums, male lead vocal
+
+------------------------------------------------------------------------

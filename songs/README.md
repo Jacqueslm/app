@@ -51,6 +51,7 @@ already spent.
 | Song | Lane | Tempo / key | Sheet |
 |---|---|---|---|
 | Can't Look Away | R&B into hip-hop: female lead, wide soul choir, one double-time rap break, spoken bridge | 74, B-flat minor | saved |
+| Egyptian Symbol | Hip-hop Egyptian dance craze: chant hook, claps-only breakdown, dance challenge | 90 into 120, E Phrygian dominant, last chorus to F-sharp minor | saved |
 | Day One | Jersey-club rap anthem | 138, C minor | saved |
 | Days Are Numbered | Soul R&B ballad, slow 6/8 shuffle | 74, B-flat major | saved |
 | Days Are Numbered (R&B/trap) | R&B trap, half-time | 140, B-flat minor | saved |

@@ -90,13 +90,13 @@ date,title,title_in_book,description_length,description_overlap,description_stat
 3-29,The Day of the Observer,yes,2858,0.83,book,0,not in book,0.8,0.75,0,0
 3-30,The Day of Uncompromising Vision,yes,3135,0.89,book,0,not in book,1,1,0,0
 3-31,The Day of Tenacity,yes,2726,0.83,book,0,not in book,1,1,0.11,0
-4-1,The Day of Dignity,yes,574,0.02,app-written,0,not in book,0.6,0.5,0,0
-4-2,The Day of the Idealist,yes,519,0,app-written,0,not in book,0.6,0.5,0.4,0
-4-3,The Day of the Fulcrum,yes,568,0,app-written,0,not in book,0.4,0.75,0,0.22
-4-4,The Day of Initiative,yes,488,0,app-written,0,not in book,0.6,1,0.27,0
-4-5,The Day of Consequence,yes,547,0.02,app-written,0,not in book,0.8,0.75,0.75,0
+4-1,The Day of Dignity,yes,574,0.02,app-written,1,book,0.6,0.5,0,0
+4-2,The Day of the Idealist,yes,519,0,app-written,1,book,0.6,0.5,0.4,0
+4-3,The Day of the Fulcrum,yes,568,0,app-written,1,book,0.4,0.75,0,0.22
+4-4,The Day of Initiative,yes,488,0,app-written,1,book,0.6,1,0.27,0
+4-5,The Day of Consequence,yes,547,0.02,app-written,1,book,0.8,0.75,0.75,0
 4-6,The Day of the Experimenter,yes,2826,1,book,1,book,1,1,1,1
-4-7,The Day of Enthusiastic Belief,yes,569,0,app-written,0,not in book,0.8,1,0.4,0
+4-7,The Day of Enthusiastic Belief,yes,569,0,app-written,1,book,0.8,1,0.4,0
 4-8,The Day of Conscience,yes,2313,0.73,book,0.25,noise,0.8,0.33,0,0.21
 4-9,The Day of Excess,yes,2472,0.69,book,0,not in book,0.6,1,0.21,0.2
 4-10,The Day of Daring,yes,2293,0.7,book,0.25,noise,0.6,0.5,0.57,0.18
@@ -149,7 +149,7 @@ date,title,title_in_book,description_length,description_overlap,description_stat
 5-27,The Day of Driven Dedication,yes,2625,1,book,1,book,1,1,1,1
 5-28,The Day of the Innovative Trailblazer,no,1638,0.9,book,0,not in book,0.8,0.75,0.17,0
 5-29,The Day of Quicksilver,yes,1463,0.82,book,0,not in book,0.8,0.5,0.14,0.14
-5-30,The Day of the Second Thought,no,748,0,app-written,0,not in book,0.5,0.2,0,0.1
+5-30,The Day of the Second Thought,no,748,0,app-written,1,book,0.5,0.2,0,0.1
 5-31,The Day of the Cutting Edge,yes,1564,0.82,book,0,not in book,0.6,0.5,0,0
 6-1,The Day of the Popular Eye,yes,1369,0.83,book,0,not in book,0.6,0.5,0.14,0
 6-2,The Day of the Problem Solvers,yes,1286,0.84,book,0,not in book,0.8,0.25,0,0
@@ -226,8 +226,8 @@ date,title,title_in_book,description_length,description_overlap,description_stat
 8-12,The Day of Convention,yes,2407,0.84,book,0.2,noise,1,0.75,0.36,0
 8-13,The Day of Long Odds,no,2997,0.82,book,0,not in book,0.4,0.75,0.11,0.13
 8-14,The Day of the Mortal Mirror,yes,2873,0.83,book,0.25,noise,0.6,0.75,0,0
-8-15,The Day of the Held Crown,no,703,0,app-written,0,not in book,0.17,0.2,0,0
-8-16,The Day of the Fallen Position,no,808,0,app-written,0,not in book,0.67,0.2,0,0
+8-15,The Day of the Held Crown,no,703,0,app-written,1,book,0.17,0.2,0,0
+8-16,The Day of the Fallen Position,no,808,0,app-written,1,book,0.67,0.2,0,0
 8-17,The Day of Explosive Power,yes,2792,0.83,book,0,not in book,0.8,0.5,0.38,0
 8-18,The Day of Endurance,yes,2394,1,book,1,book,1,1,1,1
 8-19,The Day of Startling Surprises,yes,2824,1,book,1,book,1,1,1,1
@@ -312,7 +312,7 @@ date,title,title_in_book,description_length,description_overlap,description_stat
 11-6,The Day of Rousing Vigor,yes,2806,0.86,book,0,not in book,0.2,0.5,0.27,0.22
 11-7,The Day of Discovery,yes,3021,0.84,book,0,not in book,0.8,0.75,0.2,0
 11-8,The Day of the Borderline,yes,2783,0.85,book,0,not in book,0.6,0.25,0.18,0
-11-9,The Day of the Sealed Chapter,no,684,0,app-written,0,not in book,0.17,0.2,0,0
+11-9,The Day of the Sealed Chapter,no,684,0,app-written,1,book,0.17,0.2,0,0
 11-10,The Day of Metamorphosis,yes,2869,0.83,book,0,not in book,0.6,1,0,0
 11-11,The Day of the Underground,yes,2828,0.82,book,0,not in book,0.6,0.5,0.18,0
 11-12,The Day of Sensual Charisma,yes,2779,0.84,book,0,not in book,0.4,0.25,0.2,0

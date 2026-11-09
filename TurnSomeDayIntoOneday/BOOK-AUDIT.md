@@ -1,6 +1,6 @@
 # Book audit — *The Secret Language of Birthdays*
 
-**9 Nov 2026.** `key.html` (4,588,226 bytes at the audit; 4,663,474 after the 26 repairs and the twelve clean spreads) audited against the book text
+**9 Nov 2026.** `key.html` (4,588,226 bytes at the audit; 4,682,521 after the 26 repairs and the additional spreads) audited against the book text
 `727171169-The-Secret-Language-of-Birthdays.txt` (5,098,309 bytes, 65,303 lines).
 Every one of the 366 birthdays was checked. The per-day scores are in
 [BOOK-AUDIT.csv](BOOK-AUDIT.csv).
@@ -10,7 +10,7 @@ Every one of the 366 birthdays was checked. The per-day scores are in
 The app is not built from one book. At the audit, **the description on most days
 was the book's text** — 340 of 366 — and all 26 fabricated pages have
 since been replaced, bringing the current count to 366. Almost everything the
-page presents around the description is the app's own writing: **362 of the 366 meditation lines do not appear in the book at all**, 343
+page presents around the description is the app's own writing: **340 of the 366 meditation lines do not appear in the book at all**, 343
 advice lines and 365 health lines are summaries, and the twelve "Where it shows"
 boxes (4,392 lines) have no source in the book at all.
 
@@ -48,7 +48,7 @@ used here: **≥0.5 book text, <0.1 app-written.**
 | Period, element, number, card | header of every page | one generated line | period found in **331 of 344** checked headers; card name found on **296 of 344** pages |
 | Strengths | printed list | 366 | **181 match, 157 partial, 28 app-written** |
 | Weaknesses | printed list | 366 | **58 match, 229 partial, 79 app-written** |
-| Meditation | one line per day | 366 | **1 exact (May 14), 3 partial, 362 not in the book** |
+| Meditation | one line per day | 366 | **26 now from the book; 340 not in the book** |
 | Advice | a paragraph per day | 366 | **2 quoted, 21 partial, 343 app summaries** |
 | Health | a section per day | 366 | **1 quoted (May 14), 365 app summaries** |
 | Tarot paragraph | a paragraph per day (352 pages legible) | only the card's name | **missing** |
@@ -119,17 +119,18 @@ fabricated pages.
 
 ## The meditation line, which is what was heard on May 14
 
-The app has a one-line meditation for every day, and **only May 14's is the
-book's**:
+At the audit, the app had a one-line meditation for every day, and **only May
+14's was the book's**:
 
 - May 14, before 9 Nov: *"Be modern, and be moderate."* — not in the book.
 - May 14, now: *"Study the past, live the present, prepare for the future."* —
   the book's line, word for word.
 
-Three more show a partial match: **24 February** (*"Many tragedies are done in the
-name of love."*) and **9 March** (*"Reach for the stars, and know the way
-home."*), and **10 July** (*"Retreat, and then emerge in strength."*). The remaining 362 are the app's own. Examples of what is being read
-in the book's place:
+Three showed a partial match at the audit: **24 February** (*"Many tragedies are done in the
+name of love."*), **9 March** (*"Reach for the stars, and know the way
+home."*) and **10 July** (*"Retreat, and then emerge in strength."*). The
+remaining 340 are still the app's own; the 26 transcribed pages now use the
+book's line. Examples of what is still stored for the other days:
 
 - 1 January: *"Make the plan, and then say what you feel."*
 - 1 February: *"Prove it to yourself once, and then stop proving it."*
@@ -162,15 +163,15 @@ those cuts before 9 Nov: 1,355 characters of a 2,966-character page.
 
 1. **The 26 fabricated pages were the first repair.** All 26 are done. They are the pages where
    the app is not a condensation of the book but a replacement for it.
-2. **The 362 missing meditations are next, and they are small.** A line a day is
-   about 15 KB — it fits in the remaining 130 KB without the per-day data file.
+2. **The 340 missing meditations are next, and they are small.** A line a day is
+   about 15 KB — it fits in the remaining 36 KB without the per-day data file.
 3. **Advice and Health need a decision:** quote the book's sections, or keep the
    summaries and label them as summaries. What they must not do is sit under a
    heading that says "the book's page" without saying they are the app's.
 4. **The twelve boxes are the app's reading**, not the book's. They can stay, but
    the page should say so once, plainly.
 5. **Tarot paragraphs and the Born lists need the per-day data file**, because
-   the book's pages are ~5 MB and the page has 130,366 bytes of headroom.
+   the book's pages are ~5 MB and the page has 36,071 bytes of headroom.
 
 ## What changed on 9 Nov 2026
 
@@ -181,16 +182,21 @@ those cuts before 9 Nov: 1,355 characters of a 2,966-character page.
   book's.
 - The Destiny paragraph is no longer rendered in the pair reading. The 48-entry
   table is still in the file, unused.
-- The twelve clean spreads now carry the book's meditation, Tarot, Numbers and
-  Born on this day list; four more carry the book's meditation. On days without
-  a transcribed meditation, the book's page no longer shows the app's invented
-  practice line as if it were the book's.
-- **Not done:** word-for-word transcription of 350 meditations. The scan
-  interleaves its two columns and drops page titles; an automated pass returned
-  the wrong page for some days (January 3 for January 7, January 25 for August
-  19), so it was not shipped. Those need a clean text source or a page-by-page
-  transcription. The remaining ten of the 26 transcribed pages still lack the
-  extra sections.
+- The twelve clean spreads carry the book's meditation, Tarot, Numbers and
+  Born on this day list. Ten more transcribed pages now carry the same full
+  sections, and October 14 now carries its Numbers, Tarot and Born list. Four
+  more carry the book's meditation. On days without a transcribed meditation,
+  the book's page no longer shows the app's invented practice line as if it
+  were the book's.
+- August 21 and September 15 carry the book's meditation, Numbers and Tarot,
+  but their left-hand Born lists are missing from the scan. August 20 has only
+  the book's meditation; its right-hand page is missing from the scan.
+- **Not done:** word-for-word transcription of the other 340 meditations. The
+  scan interleaves its two columns and drops page titles; an automated pass
+  returned the wrong page for some days (January 3 for January 7, January 25
+  for August 19), so it was not shipped. Those need a clean text source or a
+  page-by-page transcription. All 26 transcribed pages now carry the book's
+  meditation; 23 carry the full extra sections.
 
 ## Limits
 

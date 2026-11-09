@@ -1,0 +1,367 @@
+date,title,title_in_book,description_length,description_overlap,description_status,meditation_overlap,meditation_status,strengths_overlap,weaknesses_overlap,advice_overlap,health_overlap
+1-1,The Day of the Emotional Organizer,yes,2964,0.84,book,0,not in book,1,0.75,0,0.27
+1-2,The Day of Self-Requirement,yes,2687,0.85,book,0,not in book,0.4,0.75,0,0
+1-3,The Day of Total Involvement,yes,2978,0.8,book,0,not in book,1,0.25,0,0
+1-4,The Day of the Formulators,yes,2982,0.81,book,0,not in book,1,0.25,0.1,0.13
+1-5,The Day of Recovery,yes,2425,0.82,book,0,not in book,1,0.5,0,0
+1-6,The Day of Substantiation,yes,2648,1,book,1,book,1,1,1,1
+1-7,The Day of Unusual Interests,yes,2554,1,book,1,book,1,1,1,1
+1-8,The Day of the Big Bang,yes,2321,1,book,1,book,1,1,1,1
+1-9,The Day of Ambition,yes,2456,0.84,book,0,not in book,0.6,0,0.3,0
+1-10,The Day of the Hard Look,yes,3009,0.88,book,0,not in book,0.6,1,0,0
+1-11,The Day of Evaluation,yes,2879,0.81,book,0,not in book,0.6,0.75,0.13,0
+1-12,The Day of the Wild Call,yes,2714,0.88,book,0,not in book,0.6,0.75,0.22,0
+1-13,The Day of Upward Mobility,yes,2882,0.83,book,0,not in book,0.8,0.25,0.33,0
+1-14,The Day of the Integrator,yes,2885,1,book,1,book,1,1,1,1
+1-15,The Day of Heroic Inevitability,yes,2820,0.83,book,0,not in book,0.6,0.25,0,0.11
+1-16,The Day of Fulfillment,yes,2662,0.82,book,0,not in book,0.6,0.25,0.3,0.18
+1-17,The Day of the Heavyweight,yes,2724,0.78,book,0,not in book,0.8,0.75,0.13,0.1
+1-18,The Day of Childlike Fancy,yes,2870,0.87,book,0,not in book,0.6,0.75,0.09,0
+1-19,The Day of Dreams and Visions,yes,2732,0.79,book,0,not in book,0.6,0.5,0,0.11
+1-20,The Day of the Freewheeler,yes,2642,0.81,book,0,not in book,0.6,0.75,0,0.09
+1-21,The Day of the Front Runner,yes,2700,0.85,book,0,not in book,0.6,0.75,0,0.09
+1-22,The Day of the Vortex,yes,2775,0.83,book,0,not in book,0.6,0.75,0,0
+1-23,The Day of Character,yes,3027,0.83,book,0.17,noise,0.8,0.25,0.14,0
+1-24,The Day of the Aloof Icon,yes,2780,0.8,book,0,not in book,0.2,1,0,0
+1-25,The Day of Destiny,yes,2690,0.82,book,0,not in book,0.4,1,0,0.2
+1-26,The Day of Striking Deeds,yes,2494,0.82,book,0,not in book,0.6,0.75,0,0
+1-27,The Day of Precocity,yes,2987,0.83,book,0,not in book,0.8,0.75,0.09,0.11
+1-28,The Day of Outstanding Achievements,yes,2711,0.82,book,0,not in book,1,0.75,0.18,0.13
+1-29,The Day of the Compassionate Combatant,yes,2516,0.85,book,0,not in book,0.8,0.5,0.29,0.11
+1-30,The Day of Take Charge,yes,2764,0.84,book,0.2,noise,1,0.25,0.13,0
+1-31,The Day of Poetic Song,yes,2717,0.83,book,0,not in book,0.8,0.25,0.3,0
+2-1,The Day of Willfulness,yes,2838,0.85,book,0,not in book,1,1,0.1,0.3
+2-2,The Day of Class,yes,3073,0.8,book,0.25,noise,0.6,0.75,0,0
+2-3,The Day of Exacting Realism,yes,2804,1,book,1,book,1,1,1,1
+2-4,The Day of the Curveballer,yes,2800,0.83,book,0,not in book,0.4,0.5,0,0
+2-5,The Day of Quiet Eloquence,yes,2649,0.82,book,0,not in book,0.6,0.75,0,0
+2-6,The Day of Popularity,yes,2658,0.86,book,0,not in book,0.2,0.5,0,0
+2-7,The Day of Utopia,yes,2697,0.83,book,0,not in book,0.8,0.25,0,0
+2-8,The Day of Precognition,yes,3003,0.84,book,0,not in book,0.8,0.5,0,0.1
+2-9,The Day of Vibrancy,yes,2736,0.8,book,0,not in book,0.6,0.5,0.11,0
+2-10,The Day of Acclaim,yes,2789,0.84,book,0.29,noise,0.8,0.75,0.22,0
+2-11,The Day of Improved Comfort,yes,2837,0.81,book,0,not in book,0.8,0.5,0.22,0
+2-12,The Day of the Unifier,yes,2762,0.81,book,0,not in book,0.4,0.75,0,0
+2-13,The Day of Liveliness,yes,2813,0.87,book,0,not in book,0.8,0.5,0.55,0
+2-14,The Day of the Cool Quip,yes,2721,0.8,book,0,not in book,0.6,1,0.14,0.1
+2-15,The Day of Inventiveness,yes,3146,0.8,book,0,not in book,0.8,0.5,0.08,0
+2-16,The Day of Animation,yes,2889,0.82,book,0,not in book,1,0.5,0,0
+2-17,The Day of the Battler,yes,2820,0.74,book,0.17,noise,0.6,0.75,0,0.1
+2-18,The Day of the Complete Picture,yes,2632,0.88,book,0,not in book,0.8,1,0.4,0
+2-19,The Day of the Explorer,yes,2792,0.84,book,0,not in book,1,0.5,0,0
+2-20,The Day of the Impression,yes,2702,0.84,book,0,not in book,0.6,0.75,0,0.1
+2-21,The Day of Intimacy,yes,2738,0.83,book,0,not in book,0.6,0.5,0,0
+2-22,The Day of Universality,yes,2798,0.82,book,0,not in book,0.8,0.25,0.38,0
+2-23,The Day of the Viable Candidate,yes,2774,0.8,book,0,not in book,0.6,0.75,0.3,0
+2-24,The Day of Sacrifice,yes,2886,1,book,1,book,1,1,1,1
+2-25,The Day of the Higher Cause,yes,2647,0.82,book,0,not in book,0.6,1,0.56,0
+2-26,The Day of Arousal,yes,2900,0.82,book,0,not in book,1,0.75,0.18,0
+2-27,The Day of the Reality Masters,yes,2822,0.82,book,0,not in book,1,0.25,0.18,0
+2-28,The Day of Zest,yes,2621,0.82,book,0,not in book,0.8,0.75,0.1,0
+2-29,The Day of Eternal Youth,yes,2974,0.8,book,0,not in book,0.6,0.5,0.2,0
+3-1,The Day of Artistic Sensibilities,yes,2632,0.84,book,0,not in book,1,0.75,0.13,0
+3-2,The Day of Undying Loyalty,yes,2533,0.8,book,0,not in book,0.6,0.75,0.43,0
+3-3,The Day of Design,yes,2707,0.82,book,0,not in book,0.8,0.5,0,0
+3-4,The Day of Creative Isolation,yes,2439,0.86,book,0,not in book,1,0.25,0.38,0
+3-5,The Day of Heaven and Hell,yes,2883,0.84,book,0,not in book,0.6,1,0.22,0
+3-6,The Day of the Beauty Lovers,yes,2721,0.86,book,0,not in book,0.8,0.5,0.27,0.09
+3-7,The Day of Abstract Structure,yes,3032,0.79,book,0,not in book,0.8,0.75,0.13,0.08
+3-8,The Day of Nonconformity,yes,2794,0.8,book,0,not in book,0.8,1,0,0
+3-9,The Day of the Space Voyager,yes,2949,0.85,book,0.4,partial,1,0.75,0,0
+3-10,The Day of the Soul Searchers,yes,2820,0.81,book,0,not in book,1,1,0,0
+3-11,The Day of Progressive Intuition,yes,3029,0.84,book,0,not in book,0.6,0.5,0.33,0
+3-12,The Day of the Great Leap,yes,2764,1,book,1,book,1,1,1,1
+3-13,The Day of Fateful Prediction,yes,2654,0.83,book,0,not in book,0.6,0.5,0,0
+3-14,The Day of Relativity,yes,2651,0.85,book,0,not in book,0.6,0.5,0,0.08
+3-15,The Day of the Heights,yes,3011,0.79,book,0,not in book,0.4,0.5,0,0
+3-16,The Day of Realistic Inspiration,yes,2867,0.8,book,0.2,noise,0.6,0,0.11,0
+3-17,The Day of the Aerialist,yes,2915,0.85,book,0,not in book,0.8,0.5,0.11,0
+3-18,The Day of Return,yes,2664,0.81,book,0,not in book,0.8,0.25,0.3,0
+3-19,The Day of Dogged Persistence,yes,2650,0.86,book,0,not in book,0.8,0.5,0.14,0
+3-20,The Day of the Labyrinth,yes,2784,0.81,book,0,not in book,0.8,1,0.2,0
+3-21,The Day of Clarity,yes,2855,0.89,book,0.33,noise,1,1,0,0
+3-22,The Day of Direct Current,yes,2614,0.87,book,0,not in book,0.8,1,0,0
+3-23,The Day of Curiosity,yes,2731,0.82,book,0,not in book,0.8,1,0,0
+3-24,The Day of Beguiling Simplicity,yes,2534,0.9,book,0,not in book,1,1,0.3,0
+3-25,The Day of Dynamism,yes,2871,0.87,book,0,not in book,1,0.75,0,0
+3-26,The Day of Integrity,yes,2648,0.89,book,0.2,noise,0.6,0.75,0,0
+3-27,The Day of the Originator,yes,3021,0.88,book,0,not in book,1,1,0,0.11
+3-28,The Day of Innocence,yes,3150,0.82,book,0,not in book,0.8,0.5,0,0
+3-29,The Day of the Observer,yes,2858,0.83,book,0,not in book,0.8,0.75,0,0
+3-30,The Day of Uncompromising Vision,yes,3135,0.89,book,0,not in book,1,1,0,0
+3-31,The Day of Tenacity,yes,2726,0.83,book,0,not in book,1,1,0.11,0
+4-1,The Day of Dignity,yes,574,0.02,app-written,0,not in book,0.6,0.5,0,0
+4-2,The Day of the Idealist,yes,519,0,app-written,0,not in book,0.6,0.5,0.4,0
+4-3,The Day of the Fulcrum,yes,568,0,app-written,0,not in book,0.4,0.75,0,0.22
+4-4,The Day of Initiative,yes,488,0,app-written,0,not in book,0.6,1,0.27,0
+4-5,The Day of Consequence,yes,547,0.02,app-written,0,not in book,0.8,0.75,0.75,0
+4-6,The Day of the Experimenter,yes,2826,1,book,1,book,1,1,1,1
+4-7,The Day of Enthusiastic Belief,yes,569,0,app-written,0,not in book,0.8,1,0.4,0
+4-8,The Day of Conscience,yes,2313,0.73,book,0.25,noise,0.8,0.33,0,0.21
+4-9,The Day of Excess,yes,2472,0.69,book,0,not in book,0.6,1,0.21,0.2
+4-10,The Day of Daring,yes,2293,0.7,book,0.25,noise,0.6,0.5,0.57,0.18
+4-11,The Day of the Policymakers,yes,1810,0.76,book,0.09,not in book,0.8,0.5,0,0
+4-12,The Day of Societal Awareness,yes,1733,0.74,book,0,not in book,0.4,0.5,0,0
+4-13,The Day of the Iconoclast,yes,1790,0.79,book,0,not in book,0.6,0.5,0.09,0
+4-14,The Day of Tradition,yes,1868,0.81,book,0,not in book,0.6,0.75,0,0.18
+4-15,The Day of Human Definition,yes,1876,0.81,book,0.17,noise,0.8,0.75,0.27,0.09
+4-16,The Day of Cosmic Comedy,yes,1709,0.79,book,0,not in book,0.6,0.5,0,0
+4-17,The Day of Serious Purpose,yes,1784,0.82,book,0.25,noise,0.6,0.5,0.33,0
+4-18,The Day of Vigorous Defense,yes,1841,0.8,book,0,not in book,0.6,0.5,0.1,0
+4-19,The Day of Solid Control,yes,1691,0.74,book,0,not in book,0.6,0.25,0.17,0
+4-20,The Day of Worldly Challenge,yes,1797,0.83,book,0.13,noise,0.6,0.5,0,0
+4-21,The Day of Professional Commitment,yes,1999,0.83,book,0,not in book,0.6,0.25,0.22,0
+4-22,The Day of Established Presence,yes,1844,0.8,book,0.11,noise,0.6,0.5,0,0.11
+4-23,The Day of Adopted Security,yes,1943,0.86,book,0,not in book,0.4,0.75,0,0.13
+4-24,The Day of the Protective Chronicler,yes,1658,0.79,book,0,not in book,0.6,0.25,0,0
+4-25,The Day of Physical Substance,yes,1669,0.89,book,0,not in book,0.8,0.75,0.25,0.33
+4-26,The Day of the Cultivator,yes,1604,0.82,book,0,not in book,0.6,0.75,0.08,0
+4-27,The Day of Self-Sufficiency,yes,1473,0.74,book,0,not in book,0.6,0.25,0.09,0
+4-28,The Day of Steadfastness,yes,1478,0.8,book,0,not in book,0.8,1,0,0
+4-29,The Day of the Heavy Image,yes,1452,0.84,book,0,not in book,0.4,0.5,0,0
+4-30,The Day of Dutiful Overload,yes,1434,0.77,book,0,not in book,0.6,0.5,0,0
+5-1,The Day of Ironic Insight,yes,1375,0.81,book,0,not in book,0.8,0.5,0.11,0
+5-2,The Day of Human Observation,yes,1502,0.85,book,0.2,noise,0.8,0.5,0,0
+5-3,The Day of the Social Realist,yes,1360,0.83,book,0,not in book,1,0.5,0,0
+5-4,The Day of Nurturing Support,yes,1570,0.92,book,0,not in book,0.8,1,0.22,0
+5-5,The Day of Practical Awakening,yes,1335,0.8,book,0.33,noise,0.6,0.75,0,0
+5-6,The Day of Materialized Fantasy,yes,1279,0.84,book,0,not in book,0.8,0.5,0,0
+5-7,The Day of Devotion,yes,1408,0.81,book,0,not in book,0.8,0.75,0,0
+5-8,The Day of the Outspoken Spokesperson,yes,1534,0.85,book,0,not in book,1,0.75,0,0
+5-9,The Day of Moral Courage,yes,1409,0.77,book,0.14,noise,1,0.67,0.1,0
+5-10,The Day of Lone Movers,yes,1361,0.78,book,0,not in book,0.8,0.5,0,0
+5-11,The Day of the Frequent Flier,yes,1619,0.81,book,0,not in book,0.2,0.5,0,0
+5-12,The Day of the Mischievous Maverick,yes,1353,0.84,book,0,not in book,0.8,0.5,0.1,0
+5-13,The Day of Natural Appeal,yes,1414,0.86,book,0,not in book,0.8,0.5,0.11,0.14
+5-14,The Day of the Modern Irrepressibles,yes,2966,0.81,book,1,book,1,1,1,0.82
+5-15,The Day of the Dreamweavers,yes,1471,0.92,book,0,not in book,0.6,0.5,0.13,0
+5-16,The Day of Outrageous Flair,yes,1401,0.88,book,0,not in book,1,0.25,0.1,0
+5-17,The Day of the Bottom Line,yes,1623,0.91,book,0,not in book,0.8,0.25,0.43,0.17
+5-18,The Day of Established Activism,yes,1348,0.81,book,0,not in book,0.6,1,0,0
+5-19,The Day of Heartfelt Persuasion,yes,1391,0.78,book,0,not in book,0.4,0.25,0,0.11
+5-20,The Day of Prolific Expression,yes,1405,0.81,book,0,not in book,0.6,0.25,0,0
+5-21,The Day of Unfailing Vision,yes,1364,0.82,book,0,not in book,0.6,0,0,0
+5-22,The Day of the Serial Epic,yes,1456,0.78,book,0,not in book,1,0.5,0.25,0
+5-23,The Day of Energetic Transmission,yes,1315,0.83,book,0,not in book,0.8,0.5,0,0
+5-24,The Day of the Magnifier,yes,1323,0.83,book,0,not in book,1,0.5,0,0
+5-25,The Day of the Bold One,yes,1547,0.83,book,0,not in book,0.6,0.5,0.4,0
+5-26,The Day of the Stalwart Protector,yes,1488,0.86,book,0.2,noise,0.8,0.75,0,0
+5-27,The Day of Driven Dedication,yes,2625,1,book,1,book,1,1,1,1
+5-28,The Day of the Innovative Trailblazer,no,1638,0.9,book,0,not in book,0.8,0.75,0.17,0
+5-29,The Day of Quicksilver,yes,1463,0.82,book,0,not in book,0.8,0.5,0.14,0.14
+5-30,The Day of the Second Thought,no,748,0,app-written,0,not in book,0.5,0.2,0,0.1
+5-31,The Day of the Cutting Edge,yes,1564,0.82,book,0,not in book,0.6,0.5,0,0
+6-1,The Day of the Popular Eye,yes,1369,0.83,book,0,not in book,0.6,0.5,0.14,0
+6-2,The Day of the Problem Solvers,yes,1286,0.84,book,0,not in book,0.8,0.25,0,0
+6-3,The Day of Fluent Expression,yes,1335,0.73,book,0,not in book,0.6,0.5,0,0
+6-4,The Day of Critical Expertise,yes,1276,0.87,book,0,not in book,0.8,0.75,0,0
+6-5,The Day of the Brilliant Path,yes,1333,0.8,book,0,not in book,0.4,0.25,0,0
+6-6,The Day of the Visionary,yes,1253,0.87,book,0,not in book,0.6,1,0,0
+6-7,The Day of the Entertainer,yes,1242,0.87,book,0,not in book,0.8,0.75,0.1,0
+6-8,The Day of Influential Individualism,yes,1256,0.81,book,0.17,noise,0.8,0.25,0.2,0
+6-9,The Day of Mental Insistence,yes,1311,0.84,book,0,not in book,0.6,0.75,0,0
+6-10,The Day of Laughter and Sadness,yes,1285,0.8,book,0,not in book,0.6,0.25,0.2,0
+6-11,The Day of the Limit Pushers,yes,1345,0.86,book,0,not in book,1,0.5,0.1,0.11
+6-12,The Day of Buoyant Optimism,yes,1182,0.76,book,0,not in book,0.6,0,0,0
+6-13,The Day of Far-Off Adventure,yes,1383,0.76,book,0,not in book,0.4,0.5,0,0
+6-14,The Day of Gutsy Confrontation,yes,1279,0.84,book,0.17,noise,0.8,1,0,0
+6-15,The Day of Pleasant Seduction,yes,1192,0.89,book,0,not in book,0.4,0.5,0,0
+6-16,The Day of Capital Investment,yes,1321,0.81,book,0,not in book,0.6,0.5,0,0
+6-17,The Day of Artful Force,yes,1374,0.87,book,0,not in book,1,0.5,0.2,0
+6-18,The Day of Financial Security,yes,1208,0.81,book,0,not in book,0.4,0,0,0
+6-19,The Day of the Spark,yes,1212,0.84,book,0,not in book,0.8,0.75,0,0
+6-20,The Day of Ecstatic Appeal,yes,1161,0.81,book,0,not in book,0.2,0.5,0,0.14
+6-21,The Day of Worldly Rapture,yes,1239,0.85,book,0,not in book,1,1,0.13,0
+6-22,The Day of Romantic Exaltation,yes,1248,0.8,book,0,not in book,1,0.5,0.1,0
+6-23,The Day of Interpersonal Enchantment,yes,1161,0.87,book,0.14,noise,0.4,1,0,0
+6-24,The Day of the Blissful Wizard,yes,1132,0.93,book,0,not in book,1,0.67,0,0
+6-25,The Day of the Sensitive Receptor,yes,1133,0.89,book,0,not in book,1,0.75,0.18,0
+6-26,The Day of Stamina,yes,1316,0.87,book,0.2,noise,1,0.5,0,0
+6-27,The Day of the Defensive Developer,yes,1251,0.94,book,0,not in book,0.8,0,0.17,0
+6-28,The Day of Emotional Stimulation,yes,1177,0.82,book,0,not in book,0.6,0.5,0,0
+6-29,The Day of Airborne Dreamers,yes,1189,0.85,book,0,not in book,0.6,0.5,0,0
+6-30,The Day of Motivation,yes,1138,0.84,book,0,not in book,1,0.67,0,0
+7-1,The Day of Emancipation,yes,1175,0.83,book,0,not in book,0.8,0.75,0,0
+7-2,The Day of the Disconnected Unconscious,yes,1172,0.84,book,0,not in book,0.8,0.5,0,0
+7-3,The Day of the Commemorator,yes,1185,0.86,book,0,not in book,0.6,0.25,0,0
+7-4,The Day of the Group Representative,yes,1087,0.85,book,0,not in book,0.8,0,0,0
+7-5,The Day of the Showman,yes,1043,0.86,book,0,not in book,1,0.25,0,0
+7-6,The Day of Magnetic Desire,yes,1352,0.93,book,0,not in book,0.4,0.25,0,0
+7-7,The Day of Imaginative Revelations,yes,1151,0.81,book,0,not in book,0.6,0.5,0,0
+7-8,The Day of the Dark Pragmatist,yes,1147,0.85,book,0,not in book,0.6,0.75,0.11,0
+7-9,The Day of Wonder,yes,2640,0.86,book,0,not in book,0.8,0.5,0,0
+7-10,The Day of Passive-Active Duality,yes,2596,0.83,book,0.4,partial,1,0.8,0,0
+7-11,The Day of the Unsolicited Opinion,yes,2768,0.88,book,0,not in book,0,1,0,0
+7-12,The Day of the Persuasive Presence,yes,2668,0.81,book,0,not in book,0.8,0.75,0,0.1
+7-13,The Day of Taken Opportunity,yes,2687,0.81,book,0.13,noise,0.8,0.25,0.11,0
+7-14,The Day of the Convincing Storyteller,yes,2587,0.84,book,0,not in book,1,0.75,0.11,0
+7-15,The Day of Material Inducers,yes,2532,0.87,book,0,not in book,0.6,0.8,0,0
+7-16,The Day of the Rising Tide,yes,2952,0.83,book,0,not in book,1,0.75,0,0.11
+7-17,The Day of Career Concerns,yes,2749,0.84,book,0,not in book,0.75,0.25,0,0
+7-18,The Day of Conviction,yes,2638,0.84,book,0,not in book,0.8,0.25,0.11,0
+7-19,The Day of Controlled Movement,yes,2851,0.87,book,0,not in book,0.6,0.75,0.08,0
+7-20,The Day of Ups and Downs,yes,2854,0.83,book,0,not in book,0.6,0.5,0,0
+7-21,The Day of Tragicomic Controversy,yes,2641,0.86,book,0,not in book,0.2,0.5,0.1,0.13
+7-22,The Day of Occupational Fluctuation,yes,2699,0.86,book,0.33,noise,0.6,0.5,0,0
+7-23,The Day of Uncertainty Resolvers,yes,3056,0.87,book,0,not in book,1,0.5,0,0.1
+7-24,The Day of Exciting Instability,yes,2965,0.85,book,0,not in book,0.6,0.75,0.1,0
+7-25,The Day of Quixotic Exploits,yes,2937,0.82,book,0,not in book,1,0.25,0,0
+7-26,The Day of the Symbolic Herald,yes,2682,1,book,1,book,1,1,1,1
+7-27,The Day of the Decision Makers,yes,2970,0.83,book,0,not in book,0.8,0.75,0,0
+7-28,The Day of the Winner,yes,2667,0.84,book,0,not in book,0.8,0.5,0.2,0
+7-29,The Day of Cultural Assessment,yes,2629,0.88,book,0,not in book,0.8,0.5,0,0
+7-30,The Day of Tangible Presence,yes,2993,0.85,book,0,not in book,1,0.75,0,0.29
+7-31,The Day of the Human Portrait,yes,2528,0.83,book,0,not in book,0.8,0.75,0.1,0
+8-1,The Day of Original Style,yes,2834,0.81,book,0,not in book,0.8,0.75,0,0
+8-2,The Day of the Versatile Signature,yes,2878,0.84,book,0,not in book,0.6,0.75,0.1,0
+8-3,The Day of the Dangerous Quest,yes,2746,0.82,book,0.14,noise,0.6,0.5,0.1,0
+8-4,The Day of the Guiding Light,yes,2852,0.82,book,0,not in book,1,1,0,0.13
+8-5,The Day of Resolute Composure,yes,2875,0.87,book,0,not in book,1,0.25,0,0
+8-6,The Day of Unique Happenings,yes,2649,0.84,book,0,not in book,0.8,0.25,0,0
+8-7,The Day of the Double Agent,yes,2590,0.89,book,0,not in book,0.4,0.25,0,0
+8-8,The Day of the Roleplayers,yes,2592,0.82,book,0,not in book,0.8,0.5,0,0
+8-9,The Day of Psychological Leverage,yes,2613,0.82,book,0,not in book,0.6,0.5,0,0.13
+8-10,The Day of the Velvet Voice,yes,2973,0.82,book,0,not in book,0.6,0.75,0.33,0
+8-11,The Day of Validation,yes,2961,0.83,book,0,not in book,0.6,0.25,0,0
+8-12,The Day of Convention,yes,2407,0.84,book,0.2,noise,1,0.75,0.36,0
+8-13,The Day of Long Odds,no,2997,0.82,book,0,not in book,0.4,0.75,0.11,0.13
+8-14,The Day of the Mortal Mirror,yes,2873,0.83,book,0.25,noise,0.6,0.75,0,0
+8-15,The Day of the Held Crown,no,703,0,app-written,0,not in book,0.17,0.2,0,0
+8-16,The Day of the Fallen Position,no,808,0,app-written,0,not in book,0.67,0.2,0,0
+8-17,The Day of Explosive Power,yes,2792,0.83,book,0,not in book,0.8,0.5,0.38,0
+8-18,The Day of Endurance,yes,2394,1,book,1,book,1,1,1,1
+8-19,The Day of Startling Surprises,yes,2824,1,book,1,book,1,1,1,1
+8-20,The Day of the Cryptic Secret,yes,2841,1,book,1,book,1,1,1,1
+8-21,The Day of the Standout,yes,2889,1,book,1,book,1,1,1,1
+8-22,The Day of Seasoned Experience,yes,2917,0.84,book,0,not in book,1,0.75,0,0
+8-23,The Day of Lively Precision,yes,2689,0.84,book,0,not in book,0.8,1,0.11,0.14
+8-24,The Day of Astute Examination,yes,2623,0.86,book,0,not in book,0.2,1,0.13,0.11
+8-25,The Day of the Unabashed Extrovert,yes,2544,0.82,book,0.2,noise,0.8,1,0,0
+8-26,The Day of the Supportive Partner,yes,2542,0.82,book,0,not in book,0.6,0.25,0,0
+8-27,The Day of Social Ideals,yes,2871,0.85,book,0,not in book,0.6,0.25,0.22,0.29
+8-28,The Day of Language,yes,2905,0.81,book,0,not in book,0.8,0.75,0,0
+8-29,The Day of Structured Action,yes,2864,0.84,book,0,not in book,0.6,0.5,0,0
+8-30,The Day of the Rock,yes,2626,0.87,book,0,not in book,0.8,0.75,0,0
+8-31,The Day of the Public Appearance,yes,2954,0.82,book,0,not in book,0.8,0.75,0,0
+9-1,The Day of No Nonsense,yes,2891,0.86,book,0,not in book,1,0.25,0.33,0.29
+9-2,The Day of the Businesslike Attitude,yes,2918,0.85,book,0,not in book,1,0.75,0,0
+9-3,The Day of the Mold Breakers,yes,2960,0.79,book,0,not in book,0.8,0.5,0,0
+9-4,The Day of the Builder,yes,2604,0.88,book,0,not in book,0.8,0,0,0
+9-5,The Day of the Fanciful Sovereign,yes,2533,0.82,book,0,not in book,0.6,0.75,0.4,0
+9-6,The Day of Unpredictable Fate,yes,2552,0.84,book,0,not in book,1,0.75,0,0
+9-7,The Day of Success Seekers,yes,2952,0.83,book,0,not in book,1,0,0.11,0
+9-8,The Day of the Puzzling Purist,yes,2848,0.83,book,0,not in book,0.6,0.75,0.11,0
+9-9,The Day of Difficult Demand,yes,2779,0.82,book,0,not in book,0.8,0.75,0.5,0
+9-10,The Day of Private Goals,yes,2714,0.85,book,0,not in book,0.8,0.5,0,0
+9-11,The Day of Dramatic Choice,yes,2943,0.85,book,0,not in book,0.8,0.75,0.14,0
+9-12,The Day of the Fearless Crusader,yes,3013,0.81,book,0.33,noise,0.6,1,0,0
+9-13,The Day of Passionate Care,yes,3011,0.84,book,0,not in book,1,1,0.13,0.14
+9-14,The Day of the Perceptive Critic,yes,2784,0.87,book,0,not in book,0.8,1,0.14,0.25
+9-15,The Day of Mastery,yes,2806,1,book,1,book,1,1,1,1
+9-16,The Day of Spirited Energies,yes,2542,0.83,book,0,not in book,1,1,0.33,0.13
+9-17,The Day of Perseverance,yes,2884,0.81,book,0,not in book,1,0.5,0,0.11
+9-18,The Day of Internal Mystery,yes,2438,0.88,book,0,not in book,0.6,0.75,0,0
+9-19,The Day of Fine Appearance,yes,2790,0.82,book,0,not in book,0.4,0.5,0,0
+9-20,The Day of the Managers,yes,2776,0.82,book,0,not in book,0.4,0.5,0,0
+9-21,The Day of Current Taste,yes,2835,0.81,book,0,not in book,0.6,0.5,0.3,0
+9-22,The Day of Restless Drive,yes,2973,0.83,book,0,not in book,0.6,0.5,0.3,0.13
+9-23,The Day of the Breakthrough,yes,2844,0.84,book,0.14,noise,0.8,0.75,0.44,0.11
+9-24,The Day of the Wanderer,yes,2797,0.84,book,0,not in book,0.6,0.5,0,0
+9-25,The Day of the Symbiotic Satirist,yes,2643,0.84,book,0.2,noise,0.4,0.25,0,0
+9-26,The Day of Patient Practice,yes,2633,0.84,book,0,not in book,0.4,1,0,0
+9-27,The Day of the Ambiguous Hero,yes,2645,0.83,book,0,not in book,0.8,0.75,0.09,0.11
+9-28,The Day of the Heartbreakers,yes,2939,0.84,book,0,not in book,0.8,0.75,0,0
+9-29,The Day of the Charged Reactor,yes,2878,0.85,book,0.11,noise,1,0.25,0.2,0.22
+9-30,The Day of Glaring Truth,yes,2882,0.82,book,0,not in book,0.8,1,0.45,0
+10-1,The Day of the Top Dog,yes,2866,0.84,book,0,not in book,1,0.5,0,0
+10-2,The Day of Verbal Acuity,yes,2886,0.76,book,0,not in book,0.8,0.75,0.22,0
+10-3,The Day of the Trendsetters,yes,2879,0.82,book,0.17,noise,0.8,0.75,0,0
+10-4,The Day of the Incorrigibles,yes,2804,0.86,book,0,not in book,0.6,0.5,0,0
+10-5,The Day of the Just Cause,yes,3045,0.81,book,0,not in book,0.8,0.5,0.18,0
+10-6,The Day of the Good Life,yes,2816,0.78,book,0,not in book,0.6,1,0.11,0
+10-7,The Day of Defiance,yes,2926,0.85,book,0,not in book,0.8,0.5,0,0
+10-8,The Day of High Romance,yes,3072,0.84,book,0,not in book,0.8,0.5,0,0
+10-9,The Day of the Penetrating Gaze,yes,2952,0.81,book,0,not in book,0.8,0.75,0.33,0
+10-10,The Day of Prudent Economy,yes,3011,0.8,book,0,not in book,0.8,0.5,0,0
+10-11,The Day of Gracious Ease,yes,2767,0.82,book,0,not in book,0.8,0.75,0.11,0
+10-12,The Day of the Grand Gesture,yes,2691,0.85,book,0,not in book,0.2,0.75,0.11,0
+10-13,The Day of the Tough Cookie,yes,2828,0.82,book,0,not in book,0.2,0.5,0.22,0.11
+10-14,The Day of Moderation,yes,2971,1,book,1,book,1,1,1,1
+10-15,The Day of the World's Stage,yes,2823,0.83,book,0,not in book,0.4,1,0.11,0
+10-16,The Day of Essential Judgment,yes,2943,0.85,book,0,not in book,0.8,1,0,0
+10-17,The Day of Precarious Balance,yes,2930,0.83,book,0,not in book,0.8,0.75,0.33,0
+10-18,The Day of Personal Leadership,yes,2735,0.82,book,0,not in book,0.4,0.25,0.4,0
+10-19,The Day of the Projector,yes,2566,0.86,book,0,not in book,0.8,1,0.33,0
+10-20,The Day of Vogue,yes,2360,0.8,book,0,not in book,0.6,0.75,0.14,0.25
+10-21,The Day of Singularity,yes,2982,0.82,book,0,not in book,0.8,0.5,0,0
+10-22,The Day of Allure,yes,2603,0.81,book,0,not in book,0.6,1,0.09,0
+10-23,The Day of Conflicting Karma,yes,2802,0.84,book,0,not in book,0.8,0.75,0.29,0.29
+10-24,The Day of Sensational Detail,yes,2661,0.82,book,0,not in book,0.6,0.75,0,0
+10-25,The Day of Substantive Form,yes,2754,0.88,book,0,not in book,0.6,0.25,0.13,0.18
+10-26,The Day of Organizational Cohesion,yes,2987,0.81,book,0,not in book,0.8,0.75,0.2,0
+10-27,The Day of Impulse,yes,2410,0.77,book,0,not in book,1,0.75,0,0
+10-28,The Day of Research,yes,2752,0.81,book,0,not in book,0.4,0.5,0.25,0
+10-29,The Day of New Ideas,yes,2832,0.82,book,0,not in book,0.6,0.75,0.45,0
+10-30,The Day of the Overseer,yes,3004,0.83,book,0,not in book,0.6,0.5,0.1,0
+10-31,The Day of Attentiveness,yes,2951,0.85,book,0,not in book,0.6,0.5,0.08,0
+11-1,The Day of Onslaught,yes,2620,0.81,book,0,not in book,0.8,0.25,0.22,0.13
+11-2,The Day of Transformation,yes,2572,0.81,book,0,not in book,0.8,0.6,0,0
+11-3,The Day of the Long Breath,yes,2783,0.8,book,0,not in book,0.8,0.5,0.11,0
+11-4,The Day of the Provocateur,yes,2879,0.82,book,0,not in book,0.4,0.5,0.33,0.25
+11-5,The Day of Actuality,yes,2698,0.85,book,0,not in book,0.6,0.75,0.5,0
+11-6,The Day of Rousing Vigor,yes,2806,0.86,book,0,not in book,0.2,0.5,0.27,0.22
+11-7,The Day of Discovery,yes,3021,0.84,book,0,not in book,0.8,0.75,0.2,0
+11-8,The Day of the Borderline,yes,2783,0.85,book,0,not in book,0.6,0.25,0.18,0
+11-9,The Day of the Sealed Chapter,no,684,0,app-written,0,not in book,0.17,0.2,0,0
+11-10,The Day of Metamorphosis,yes,2869,0.83,book,0,not in book,0.6,1,0,0
+11-11,The Day of the Underground,yes,2828,0.82,book,0,not in book,0.6,0.5,0.18,0
+11-12,The Day of Sensual Charisma,yes,2779,0.84,book,0,not in book,0.4,0.25,0.2,0
+11-13,The Day of the Commentator,yes,2873,0.85,book,0,not in book,0.8,0.5,0.25,0
+11-14,The Day of the Investigator,yes,2878,0.85,book,0,not in book,0.8,0.5,0.09,0
+11-15,The Day of Encounter,yes,2798,0.89,book,0.17,noise,0.6,1,0,0
+11-16,The Day of the Boss,yes,2658,0.85,book,0.13,noise,0.8,0.5,0.11,0
+11-17,The Day of the Bridge,yes,2675,0.82,book,0,not in book,0.8,0.5,0.09,0
+11-18,The Day of Temperament,yes,2633,0.88,book,0,not in book,0.6,0.75,0,0.29
+11-19,The Day of the Reformer,yes,2736,0.82,book,0,not in book,0.8,0.5,0.17,0
+11-20,The Day of the Scrambler,yes,2639,0.82,book,0,not in book,0.8,0.75,0.17,0.22
+11-21,The Day of Elegance,yes,2757,0.86,book,0,not in book,0.6,1,0,0
+11-22,The Day of the Liberator,yes,2803,0.87,book,0,not in book,0.6,0.75,0.33,0
+11-23,The Day of Irreverence,yes,2963,0.83,book,0,not in book,0.6,0.75,0,0
+11-24,The Day of Contentious Conviviality,yes,2707,0.81,book,0,not in book,0.8,0.5,0,0.09
+11-25,The Day of Sustained Effort,yes,2875,0.82,book,0,not in book,0.4,0.5,0.11,0
+11-26,The Day of Distinctive Manner,yes,2908,0.83,book,0,not in book,0.6,0.5,0.09,0
+11-27,The Day of Electrifying Excitement,yes,2907,0.82,book,0,not in book,0.8,0.5,0,0
+11-28,The Day of the Lone Wolf,yes,3069,0.83,book,0.29,noise,0.6,1,0,0.13
+11-29,The Day of the Instigator,yes,2586,0.82,book,0,not in book,0.6,0.75,0.88,0.09
+11-30,The Day of Measured Attack,yes,2892,0.78,book,0,not in book,0.4,0.75,0.22,0
+12-1,The Day of Mirthful License,yes,2939,0.84,book,0,not in book,0.6,0.5,0.22,0
+12-2,The Day of Larger-Than-Life,yes,2753,0.81,book,0,not in book,0.2,1,0,0
+12-3,The Day of Ingenuity,yes,2502,0.84,book,0,not in book,0.8,1,0.1,0
+12-4,The Day of Fortitude,yes,2783,0.83,book,0,not in book,0.6,0.75,0.08,0
+12-5,The Day of Confidence,yes,2709,0.87,book,0,not in book,0.6,0.25,0.11,0
+12-6,The Day of Extraction,yes,2881,0.82,book,0,not in book,0.8,0.5,0.4,0
+12-7,The Day of Idiosyncrasy,yes,3040,0.8,book,0.14,noise,0.4,1,0,0
+12-8,The Day of Abandon,yes,2969,0.83,book,0.11,noise,0.8,0.5,0.5,0.1
+12-9,The Day of Flamboyance,yes,2806,0.79,book,0,not in book,0.8,1,0.36,0
+12-10,The Day of Inner Fervor,yes,2698,0.88,book,0,not in book,0.6,0.75,0.3,0
+12-11,The Day of Intensity,yes,2805,0.84,book,0,not in book,1,0.5,0.25,0
+12-12,The Day of Body Language,yes,2800,0.81,book,0,not in book,0.6,1,0,0
+12-13,The Day of Exacting Craft,yes,2790,0.81,book,0.25,noise,0.4,0.75,0,0.1
+12-14,The Day of the Selective Exhibitionist,yes,2342,0.82,book,0,not in book,1,0.75,0,0
+12-15,The Day of Expansion,yes,2753,0.82,book,0,not in book,0.8,0.25,0.25,0
+12-16,The Day of Soaring Imagination,yes,2718,0.83,book,0,not in book,0.6,0.5,0.17,0
+12-17,The Day of Earthy Chemistry,yes,2420,0.83,book,0,not in book,0.8,0.5,0.1,0
+12-18,The Day of Mammoth Projects,yes,2588,0.8,book,0,not in book,0.6,0.75,0.1,0
+12-19,The Day of the Hellraisers,yes,2690,0.83,book,0,not in book,0.6,0.5,0.1,0
+12-20,The Day of the Generator,yes,2688,0.83,book,0,not in book,0.6,0.5,0,0
+12-21,The Day of the Great Enigma,yes,2601,0.86,book,0,not in book,0.8,0.75,0.43,0
+12-22,The Day of Continuity,yes,2838,0.85,book,0,not in book,0.4,1,0,0
+12-23,The Day of the Groundbreakers,yes,2586,0.81,book,0,not in book,0.6,0,0.13,0
+12-24,The Day of Complex Emotions,yes,3158,0.81,book,0,not in book,0.8,0.25,0,0.11
+12-25,The Day of the Supernatural,yes,2554,0.8,book,0,not in book,0.4,0.5,0.22,0
+12-26,The Day of the Indomitable One,yes,2585,0.85,book,0,not in book,0.8,0.5,0,0
+12-27,The Day of the Clever Contributor,yes,2783,0.79,book,0,not in book,0.8,0.25,0.09,0
+12-28,The Day of Simple Sophistication,yes,3033,0.84,book,0,not in book,0.6,0.25,0.33,0
+12-29,The Day of Preeminence,yes,2588,0.84,book,0,not in book,0.8,0.5,0,0.08
+12-30,The Day of Laconic Authority,yes,2797,0.87,book,0,not in book,0.6,0.5,0.18,0
+12-31,The Day of Aesthetic Promotion,yes,2739,0.88,book,0.14,noise,0.8,1,0,0

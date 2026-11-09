@@ -3692,6 +3692,9 @@ function renderDepth(P){
   if(!D) return '';
   const L = P.lore;
   const n = esc(firstName(P.person.name));
+  const key = P.person.month + '-' + P.person.day;
+  const day = DAYS[key] || {};
+  const bk = BOOK_EXTRA[key] || {};
   /* only render what has been written, so a period mid-rewrite shows no empty boxes */
   const box = (t, b) => b ? `<div class="dp"><div class="dt">${t}</div><div class="db">${b}</div></div>` : '';
   return `
@@ -3702,7 +3705,7 @@ function renderDepth(P){
       <h4>Where the three books meet</h4>
       <div class="books">
         <div><small>Birthdays &mdash; who this is</small><span>${esc(P.per.n)}, ${esc(P.per.t.replace(/^The /,'the '))}. ${L.k}</span></div>
-        <div><small>The book's line</small><span>${esc((DAYS[P.person.month + '-' + P.person.day] || {}).me || '')}</span></div>
+        <div><small>${bk.med ? "The book's line" : "The app's line"}</small><span>${esc(bk.med || day.me || '')}</span></div>
         <div><small>Relationships &mdash; what it does to other people</small><span>${relSpread(P)}</span></div>
       </div>
       <p>${D.hinge}</p>
@@ -4061,7 +4064,7 @@ function renderPath(P){
     <h3>The book's page <small>the page ${esc(MONTHS[P.person.month - 1])} ${P.person.day} carries</small></h3>
     <div class="layer-body">
       ${APP_WRITTEN.has(key) ? `<p class="disclaim"><strong>This birthday's page has not been transcribed from the book.</strong> The text below is the app's own, not the book's.</p>` : ''}
-      ${BX.med ? `<div class="pull epigram">${esc(BX.med)}</div><p class="note">The book's meditation for this day.</p>` : `<p class="note">The book's meditation for this day has not been transcribed yet. The app's own practice line is not shown here.</p>`}
+      ${BX.med ? `<div class="pull epigram">${esc(BX.med)}</div><p class="note">The book's meditation for this day.</p>` : day.me ? `<div class="pull epigram">${esc(day.me)}</div><p class="note">The app's own meditation; the book's line for this day has not been transcribed.</p>` : `<p class="note">The book's meditation for this day has not been transcribed yet.</p>`}
       <h4>The card and the number</h4>
       <p>${esc(day.m)}</p>
       ${BX.bd ? `<h4>Born on this day</h4><p>${esc(BX.bd)}</p>` : ''}
@@ -4075,7 +4078,7 @@ function renderPath(P){
         <div><div class="dt">Strengths</div><div class="tagrow good">${list(day.st)}</div></div>
         <div><div class="dt">Weaknesses</div><div class="tagrow bad">${list(day.we)}</div></div>
       </div>
-      <p class="note">Health, advice, strengths and weaknesses are the book's text on the 26 transcribed days; on the other days they are the app's condensation. Born on this day, Numbers and planets, Tarot and the meditation are the book's where they appear. <strong>May 14 is word for word throughout.</strong></p>
+      <p class="note">Health, advice, strengths and weaknesses are the book's text on the 26 transcribed days; on the other days they are the app's condensation. Born on this day, Numbers and planets and Tarot are the book's where they appear; the meditation is the book's on 27 days and is otherwise the app's own line, labelled as such. <strong>May 14 is word for word throughout.</strong></p>
     </div>
   </div>`;
 }

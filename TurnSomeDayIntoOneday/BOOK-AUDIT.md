@@ -1,6 +1,6 @@
 # Book audit — *The Secret Language of Birthdays*
 
-**9 Nov 2026.** `key.html` (4,588,226 bytes at the audit; 4,682,609 after the 26 repairs and the additional spreads) audited against the book text
+**9 Nov 2026.** `key.html` (4,588,226 bytes at the audit; 4,682,916 after the 26 repairs and the additional spreads) audited against the book text
 `727171169-The-Secret-Language-of-Birthdays.txt` (5,098,309 bytes, 65,303 lines).
 Every one of the 366 birthdays was checked. The per-day scores are in
 [BOOK-AUDIT.csv](BOOK-AUDIT.csv).
@@ -130,7 +130,8 @@ Three showed a partial match at the audit: **24 February** (*"Many tragedies are
 name of love."*), **9 March** (*"Reach for the stars, and know the way
 home."*) and **10 July** (*"Retreat, and then emerge in strength."*). The
 remaining 339 are still the app's own; the 26 transcribed pages now use the
-book's line. Examples of what is still stored for the other days:
+book's line, and the book page labels the app's line as the app's. Examples of
+what is still stored for the other days:
 
 - 1 January: *"Make the plan, and then say what you feel."*
 - 1 February: *"Prove it to yourself once, and then stop proving it."*
@@ -186,8 +187,8 @@ those cuts before 9 Nov: 1,355 characters of a 2,966-character page.
   Born on this day list. Ten more transcribed pages now carry the same full
   sections, and October 14 now carries its Numbers, Tarot and Born list. Four
   more carry the book's meditation. On days without a transcribed meditation,
-  the book's page no longer shows the app's invented practice line as if it
-  were the book's.
+  the book's page shows the app's own line, labelled as the app's, rather
+  than presenting it as the book's.
 - August 21 and September 15 carry the book's meditation, Numbers and Tarot,
   but their left-hand Born lists are missing from the scan. August 20 has only
   the book's meditation; its right-hand page is missing from the scan.
@@ -197,7 +198,7 @@ those cuts before 9 Nov: 1,355 characters of a 2,966-character page.
   for August 19), so it was not shipped. Those need a clean text source or a
   page-by-page transcription. All 26 transcribed pages now carry the book's
   meditation, and May 14 carries its book meditation; 23 carry the full extra
-  sections.
+  sections. The other 339 days show the app's own line, labelled as the app's.
 
 ## Limits
 

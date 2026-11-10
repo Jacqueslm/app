@@ -1,0 +1,138 @@
+SUNO PROMPT — ORIGINAL SOUTHERN COUNTRY-SOUL "I'M HERE TO MAKE YOU REMEMBER"
+A family account book, not a lecture. Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 705 characters)
+------------------------------------------------------------------------
+Slow-burning deep Southern country-soul at 84 BPM in E minor, straight 4/4 with a deep pocket and a slight behind-the-beat pull. Tremolo electric guitar, Wurlitzer, upright piano, Hammond organ, upright bass, brushed drums, tambourine, muted trumpet and low tenor sax. Female lead, low and close, conversational in the verses, opening into a worn but clear chorus; a weathered male harmony joins on the hook, with a small mixed group on the final chorus. Sparse verses, horns entering on the chorus, a bass-and-voice bridge before the last chorus. Warm 1970s analog mix, dry vocal, tape hiss, no pop polish. Intimate, haunted, defiant and cinematic. Original lyrics, melody, vocal cadence and arrangement.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 324 characters)
+------------------------------------------------------------------------
+Deep Southern country-soul, 84 BPM, E minor. Tremolo guitar, Wurlitzer, Hammond organ, upright bass, brushed drums, muted trumpet. Low female lead, weathered male harmony, small group on the last chorus. Sparse verses, horn-lit chorus, bass-and-voice bridge, warm analog mix, tape hiss. Intimate, haunted, defiant. Original.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3499 characters)
+------------------------------------------------------------------------
+[Intro]
+The house is sold.
+The closet is empty except for a blue tin box.
+Inside, her account book.
+The first page says, "For whoever comes after."
+
+[Verse 1]
+I read the first page by the window:
+rice, dried beans, a coupon for bread.
+The sales slip underneath it says otherwise—
+two packs of wings, a case of soda, no greens.
+The corner store had what the chain wouldn't stock.
+The chain left when the rent went up.
+She wrote "eat" on the back of a clinic bill,
+then crossed it out and wrote "pay first."
+The clinic called it hypertension.
+She called it Tuesday.
+The doctor wrote "diet and rest."
+She had two jobs and a stove with one eye.
+The pills came with a warning.
+The warning came with a price.
+
+[Pre-Chorus]
+Every page had a number.
+Every number had a name.
+Every name had a reason
+that never made the news.
+
+[Chorus]
+I'm here to make you remember
+The woman behind the bill
+The town behind the headline
+The hand behind the deal
+I'm here to make you remember
+Not the myth, not the frame
+I'm here to make you remember
+Till the record says her name
+
+[Verse 2]
+Page two was a time card from the laundry:
+eighty hours, forty paid, "seasonal."
+A company-store book with the balance carried forward,
+the same ink they used on a bill of sale.
+A county letter with a highway drawn through our block.
+The highway took the houses where the grocery stood.
+The clinic moved out past the county line.
+The campaign card was a bookmark in the deed—
+same smile, same suit, same year, same name.
+The deed had a line about who could buy.
+The line was crossed out. The line was still there.
+The name on the deed was a company.
+The name on the campaign card was a man.
+
+[Pre-Chorus]
+Every page had a number.
+Every number had a name.
+Every name had a reason
+that never made the news.
+
+[Chorus]
+I'm here to make you remember
+The woman behind the bill
+The town behind the headline
+The hand behind the deal
+I'm here to make you remember
+Not the myth, not the frame
+I'm here to make you remember
+Till the record says her name
+
+[Verse 3]
+Page three was a schoolbook with the middle torn out,
+a map of the Congo with a rubber company's name,
+a postcard from Haiti, the stamp cut away,
+and a photograph of a woman who looked like my mother.
+The book said we started in a boat.
+The postcard said we started before the boat.
+The map said the wealth was natural.
+The company said the loss was acceptable.
+A memo called the water "within limits."
+A county map called the block "surplus."
+The paper called it a rumor. The memo called it a plan.
+One name on the water, the power, the paper, the land.
+
+[Bridge]
+Then I found the tape.
+Her voice, small and clear:
+"Baby, they can burn the papers.
+They can change the name on the street.
+But they can't burn the names you carry.
+Write them down. Read them out. Keep the book.
+Don't let them divide you by the block or the shade.
+They color the map, then call the color earned.
+The hand that signs the check
+is the hand that draws the line.
+When they call a neighborhood surplus,
+ask who counted, and who got the profit."
+"Miss Ada," I said, "I'm listening."
+
+[Final Chorus]
+I'm here to make you remember
+The woman behind the bill
+The town behind the headline
+The hand behind the deal
+I'm here to make you remember
+Not the myth, not the frame
+I'm here to make you remember
+Till the record says her name
+
+[Outro]
+I closed the book.
+I wrote my name under hers.
+The last page said, "For whoever comes after."
+The house is sold.
+The book stays with me.
+I'm here to make you remember.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 122 characters)
+------------------------------------------------------------------------
+autotune, trap, drill, EDM, pop polish, fast rapping, guitar solos, bright synths, massed voices, stadium drums, profanity
+
+------------------------------------------------------------------------

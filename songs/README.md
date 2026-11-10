@@ -41,6 +41,7 @@ Each file is a complete paste-in block for Suno, in the same shape:
 | `Same-Light-HipHop-Suno-Prompt.txt` | Same Light — hip-hop version |
 | `Cant-Look-Away-Suno-Prompt.txt` | Can't Look Away — R&B into hip-hop, 74 BPM, B-flat minor: female lead and wide soul choir, melodic rap with one double-time break, spoken bridge |
 | `Two-Step-Suno-Prompt.txt` | Two Step |
+| `Stop-It-Suno-Prompt.txt` | Stop It — hardcore Down South protest rap, 76 BPM, F minor |
 
 ## The register — read this before writing anything new
 
@@ -64,6 +65,7 @@ already spent.
 | Same Light | Soul ballad | 70, D major | saved |
 | Same Light (hip-hop) | Mid-90s Chicago soul boom-bap | 90, C minor | saved |
 | Two Step | Early-'90s West Coast pop-rap | 102, G major | saved |
+| Stop It | Hardcore Down South protest rap, slow half-time 808, chant hook | 76, F minor | saved |
 | You Are Not a Sewer | Spoken-word soul-rap | 88, D minor | saved |
 | Living It Up (Putting It Down) | — | — | chat only |
 | Freedom LLC | — | 90 (beat exists in `artifacts/`), no key named | chat only |

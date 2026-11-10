@@ -1,0 +1,146 @@
+SUNO PROMPT — ORIGINAL DOWN SOUTH "STOP IT"
+Late-'90s Down South hardcore lane. Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 723 characters)
+------------------------------------------------------------------------
+Slow, late-'90s Down South hardcore protest rap at 76 BPM in F minor, half-time so the 808 drags. Trunk-rattling sub-bass, lazy kick, sharp snares, tight triplet hi-hats, dark minor-key Rhodes, dirty wah guitar, low brass swells and vinyl crackle. Deep male lead, conversational and behind the beat, almost spoken in the verses, doubled low on the chant hook; a small male group answers in call-and-response, with a distant female hum under the bridge. Sparse arrangement with big empty space, one abrupt drop to sub-bass and voice before the final hook. Warm analog mix, low end forward, dry close vocal, no bright pop polish. Serious, defiant, heavy and cinematic. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 349 characters)
+------------------------------------------------------------------------
+Slow late-'90s Down South hardcore protest rap, 76 BPM, F minor. Dragging 808, lazy kick, sharp snares, triplet hats, dark Rhodes, dirty wah guitar, low brass, vinyl. Deep conversational male lead, low doubled chant hook with a small male group answering, distant female hum, sub-bass drop, warm analog mix. Heavy, defiant, cinematic. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 4869 characters)
+------------------------------------------------------------------------
+[Intro]
+Yeah.
+This ain't a lecture. This ain't a trend.
+This is outcast research from the deep end.
+They want you comfortable, confused, and consuming.
+I got one command for the whole machine:
+Stop it.
+
+[Chorus]
+Stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+
+[Verse 1]
+Meat on the plate, sugar, salt, flour in the mix,
+Processed, junk, fast food—every meal a quick fix.
+Liquor, soda, sweet teas, honey by the spoon,
+Not a gallon of water—I was dry by noon.
+Doctor with a title turned my question into fear,
+Wrote a script, set a date, never asked me what got here.
+I ain't saying every doctor is a villain in a coat,
+But a title ain't a halo, and a script ain't a vote.
+Diagnosed the symptom, never touched the root,
+Then billed my insurance for the cost of the truth.
+The man with the book said be patient, take the pill and pay the fee,
+But a cage don't get clean just because it's comforting me.
+I ain't saying lose your hope, I'm saying use your eyes,
+Don't let a suit or a pill prescribe your life.
+A gallon of water minimum, I'm flushing out the lie.
+
+[Chorus]
+Stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+
+[Verse 2]
+Government say they got our best interests—the fine print say they don't,
+A lying politician's promise is a loan you'll never own.
+They say a conspiracy theory is paranoia in the brain,
+But paranoia is a warning when the pattern's in the frame.
+I don't believe in accidents when the profit's in a line,
+And the same hand owns the paper and the pen that writes the crime.
+They taught us our story started in a slave ship's hold,
+But we were kings, we were builders, we were science, we were gold.
+Timbuktu to the Nile, Caribbean to the coast,
+Not just America, not just Africa—we global, and they know.
+They sold us a history with a hole in the page,
+Then called us dangerous when we started turning the page.
+They say the past is over, but the past is in the rent,
+In the school, in the bank, in the food, in the president.
+
+[Chorus]
+Stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+
+[Verse 3]
+Same corporation making genocide profits,
+Selling poison in the corner and the closet.
+Poor quality food on the shelf, low price,
+Cheap labor overseas, unfair wages, cold rice.
+They call it a job, I call it modern slave labor camps,
+The same plantation with a barcode and a stamp.
+They whisper 'New World Order,' I say same old hand,
+Systematic racism ain't a feeling, it's a system,
+In the loan, in the school, in the prison, in the symptom.
+Division among the people is the product they sell,
+Keep us pointing at each other while they build their cell.
+Black on Black, block on block, they love that we collide,
+That's the division crisis—and a house divided can't step outside.
+They call it population control—due diligence, design—
+Wipe us off the face of the earth and call it decline.
+But they keep a few around, 'cause the machine needs a face,
+They need a few of us left just to keep the white race alive,
+To keep the power structure humming, keep the lie in their eyes.
+I ain't talking 'bout every white face, I'm talking 'bout the throne—
+The ones who built the machine and swear they built it alone.
+This ain't war on a people, it's a war on a machine;
+One builds a world, the other builds a screen.
+
+[Chorus]
+Stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+You better stop it stop it stop it
+
+[Bridge]
+I ain't perfect—I still got sugar in my blood,
+Still got fear in my chest, still got habits in the mud.
+But the first step is a question, the second is a no,
+The third is a gallon and a mirror—watch it go.
+They can sell you a sickness, they can sell you a cure,
+But they can't sell you a mind that's finally sure.
+So I research, I question, I don't bow to the state,
+And I look at the machine and I don't call it fate.
+They call me outcast, radical, a threat to the peace,
+But a mind that can't be bought is a mind they can't lease.
+
+[Outro]
+Stop it.
+Before the next plate, before the next pill,
+Ask who eats, who profits, who pays,
+Who builds the cage and who calls it a day.
+Stop it.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 114 characters)
+------------------------------------------------------------------------
+autotune, EDM, pop polish, fast rapping, bright pianos, guitar solos, modern trap, drill, mumble vocals, profanity
+
+------------------------------------------------------------------------

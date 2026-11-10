@@ -12,7 +12,7 @@ SHORT STYLE (Style box if the long one is rejected - 349 characters)
 Slow late-'90s Down South hardcore protest rap, 76 BPM, F minor. Dragging 808, lazy kick, sharp snares, triplet hats, dark Rhodes, dirty wah guitar, low brass, vinyl. Deep conversational male lead, low doubled chant hook with a small male group answering, distant female hum, sub-bass drop, warm analog mix. Heavy, defiant, cinematic. Original song.
 
 ------------------------------------------------------------------------
-LYRICS (paste into the Lyrics box - 4869 characters)
+LYRICS (paste into the Lyrics box - 4599 characters)
 ------------------------------------------------------------------------
 [Intro]
 Yeah.
@@ -24,13 +24,13 @@ Stop it.
 
 [Chorus]
 Stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
+They killing us
 
 [Verse 1]
 Meat on the plate, sugar, salt, flour in the mix,
@@ -51,13 +51,13 @@ A gallon of water minimum, I'm flushing out the lie.
 
 [Chorus]
 Stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
+They killing us
 
 [Verse 2]
 Government say they got our best interests—the fine print say they don't,
@@ -77,13 +77,13 @@ In the school, in the bank, in the food, in the president.
 
 [Chorus]
 Stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
+They killing us
 
 [Verse 3]
 Same corporation making genocide profits,
@@ -111,13 +111,13 @@ One builds a world, the other builds a screen.
 
 [Chorus]
 Stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
+They killing us
 You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
-You better stop it stop it stop it
+They killing us
 
 [Bridge]
 I ain't perfect—I still got sugar in my blood,
@@ -133,10 +133,12 @@ But a mind that can't be bought is a mind they can't lease.
 
 [Outro]
 Stop it.
+They killing us.
 Before the next plate, before the next pill,
 Ask who eats, who profits, who pays,
 Who builds the cage and who calls it a day.
 Stop it.
+They killing us.
 
 ------------------------------------------------------------------------
 EXCLUDE STYLES (paste into the Exclude styles box - 114 characters)

@@ -43,6 +43,7 @@ Each file is a complete paste-in block for Suno, in the same shape:
 | `Two-Step-Suno-Prompt.txt` | Two Step |
 | `Stop-It-Suno-Prompt.txt` | Stop It — hardcore Down South protest rap, stop/they-killing-us chant, 76 BPM, F minor |
 | `Im-Here-To-Make-You-Remember-Suno-Prompt.txt` | I'm Here to Make You Remember — Southern country-soul memory ballad, 84 BPM, E minor |
+| `Free-Your-Mind-Suno-Prompt.txt` | Free Your Mind — slow late-'60s soul-funk, direct named-belief seduction, 69 BPM, A-flat minor |
 
 ## The register — read this before writing anything new
 
@@ -68,6 +69,7 @@ already spent.
 | Two Step | Early-'90s West Coast pop-rap | 102, G major | saved |
 | Stop It | Hardcore Down South protest rap, slow half-time 808, stop/they-killing-us chant | 76, F minor | saved |
 | I'm Here to Make You Remember | Southern country-soul, family account-book narrative, female lead and male harmony | 84, E minor | saved |
+| Free Your Mind | Slow late-'60s soul-funk, spoken-sung male lead, female answer, direct named-belief critique | 69, A-flat minor | saved |
 | You Are Not a Sewer | Spoken-word soul-rap | 88, D minor | saved |
 | Living It Up (Putting It Down) | — | — | chat only |
 | Freedom LLC | — | 90 (beat exists in `artifacts/`), no key named | chat only |

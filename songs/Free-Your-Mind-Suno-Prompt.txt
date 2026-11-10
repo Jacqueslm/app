@@ -1,0 +1,164 @@
+SUNO PROMPT — ORIGINAL SLOW SOUL-FUNK "FREE YOUR MIND"
+A slow-burn seduction, not a lecture. Named-belief version at the artist's request. Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 721 characters)
+------------------------------------------------------------------------
+Slow late-'60s soul-funk ballad at 69 BPM in A-flat minor, straight 4/4 with a heavy, behind-the-beat pocket. Deep electric bass, dry drums, sharp horn stabs, Hammond organ, tremolo guitar, upright piano and tambourine. Male lead, low and close, spoken-sung verses that open into a raw, pleading chorus; a female voice answers him in the bridge, with a small mixed group on the final chorus. Sparse verses, horns swelling on the hook, a bass-and-voice break before the last chorus. Warm analog mix, room mics, tape hiss, no modern polish. Intimate, tense, sensual, curious, respectful, slow-burn heat, with a slow, deliberate build and a dry, conversational vocal. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 337 characters)
+------------------------------------------------------------------------
+Slow late-'60s soul-funk ballad, 69 BPM, A-flat minor. Deep bass, drums, horn stabs, Hammond organ, tremolo guitar. Low spoken-sung male lead, female answer in the bridge, small group on the last chorus. Sparse verses, horn-lit hook, bass-and-voice break, analog mix, tape hiss. Intimate, sensual. Original lyrics, melody, vocal cadence.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3881 characters)
+------------------------------------------------------------------------
+[Intro]
+(spoken, low)
+Take your coat off. Or don't.
+I'm not here to tell you what to do.
+I'm here to ask one question:
+who told you the story was true?
+
+[Verse 1]
+You keep your voice down like the walls might judge you
+You keep your eyes low like the floor might crack
+You've been good for so long, you forgot what you wanted
+You've been strong for so long, you forgot how to want
+You say you know the truth, but you know the rules
+There's a difference, baby, and it's not small
+They taught you your body was a debt to be paid
+Every hunger a warning, every mirror a case
+They told you the sickness was your own fault
+Then sold you the cure and the cause in one place
+They told you the food was the reason you're dying
+Then sold you the fear and called it a plan
+I'm not here to tell you what's in your cup
+I'm here to ask who profits when you're ashamed
+I'm not your doctor, I'm not your judge
+I'm a man who can see the chain
+
+[Pre-Chorus]
+So take my hand, not my word
+Ask me what I mean
+You can say no, you can say not yet
+I'll go as slow as you need
+But don't ask me to lie
+
+[Chorus]
+Free your mind
+Let me love what's left when the lie is gone
+Free your mind
+I want the woman behind the performance
+Free your mind
+Let me meet you where the fear ends
+Free your mind
+No rush, no pressure, no price
+Take your time, take your time with me
+
+[Verse 2]
+Jesus ain't real, that's what I'm telling you
+Christianity is a lie they sold you
+A book of fear with a lock on the cover
+And they called the lock love
+They told you the man in the sky was watching
+Then told you the watch was a gift
+They told you the doubt was a dirty word
+Then taught you to doubt your own mind
+They keep us tired so we don't ask questions
+They keep us sick so we buy what they sell
+They keep us fighting our neighbor for a crumb of the story
+While they eat the whole table upstairs
+The plan is to keep us in debt and call it freedom
+Keep us asleep with the lights on
+Keep us docile and call it tradition
+Keep us too scared to ask who wrote it
+
+[Pre-Chorus]
+So take my hand, not my word
+Ask me what I mean
+You can say no, you can say not yet
+I'll go as slow as you need
+But don't ask me to lie
+
+[Chorus]
+Free your mind
+Let me love what's left when the lie is gone
+Free your mind
+I want the woman behind the performance
+Free your mind
+Let me meet you where the fear ends
+Free your mind
+No rush, no pressure, no price
+Take your time, take your time with me
+
+[Bridge]
+(She speaks)
+If I let go of the story, what's left?
+(He speaks)
+You. The part that already knows.
+(She speaks)
+What if I'm wrong?
+(He speaks)
+Then you're wrong with your own mind, not right with theirs.
+(She speaks)
+Don't lie to me.
+(He speaks)
+I won't. And I won't rush you.
+(She speaks)
+What do you want?
+(He speaks)
+I want to watch you think.
+I want to hear you say "I want" and not flinch.
+I want to feel your pulse under my thumb.
+I want to kiss the lie off your lips.
+I want to hear the sound you make when you stop pretending.
+I want to undress the lie, not you.
+I want to be the proof that you can say no and still be held.
+I want to be the proof that you can say yes and still be free.
+(She speaks)
+That's a lot.
+(He speaks)
+You're worth a lot.
+(She speaks)
+Tell me more.
+(He speaks)
+Not yet. First, tell me what you want.
+(She speaks)
+I want to stop pretending.
+(He speaks)
+Then we've already started.
+
+[Final Chorus]
+Free your mind
+Let me love what's left when the lie is gone
+Free your mind
+I want the woman behind the performance
+Free your mind
+Let me meet you where the fear ends
+Free your mind
+No rush, no pressure, no price
+Take your time, take your time with me
+I'm not here to own you
+I'm here to know you
+
+[Outro]
+(spoken, low)
+The book is still on the table.
+The fear is still in the room.
+But you're looking at me like you're listening.
+That's enough to start.
+No rush.
+No pressure.
+No price.
+Just you.
+Just your mind.
+Just free.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 148 characters)
+------------------------------------------------------------------------
+autotune, trap, drill, EDM, pop polish, fast rapping, guitar solos, bright synths, stadium drums, profanity, explicit sex, modern R&B, falsetto runs
+
+------------------------------------------------------------------------

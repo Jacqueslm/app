@@ -1,0 +1,169 @@
+SUNO PROMPT — ORIGINAL HBCU MARCHING-BAND "INFORMED CONSENT"
+A fictional hearing-room debate on medical racism, consent and accountability. Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 789 characters)
+------------------------------------------------------------------------
+HBCU-style marching-band protest rap at 94 BPM in G minor. Live snare-line cadence, sousaphone bass on the downbeat, quad drums, brass stabs, cymbal crashes, stomp-and-clap field chant, one gavel hit. Male and female rappers trade hard, conversational bars; a cold, bureaucratic WHO representative answers in a flat, measured tone. The band chants the hook and punctuates each verse; no trap, no auto-tune, no EDM. Tight stadium room, close vocals, brass and drums forward, a stripped cadence under the bridge, full band on the last hook. The march is press-forward, not a bounce: kick on the floor, snares on the backbeat, sousaphone under the kick, and a brass answer after every rapper's turn. Defiant, forensic, cinematic, live. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 316 characters)
+------------------------------------------------------------------------
+HBCU-style marching-band protest rap, 94 BPM, G minor. Live snare cadence, sousaphone, quads, brass, cymbal crashes, stomp-clap chant, gavel hit. Male and female rappers trade forensic bars; a cold WHO representative answers flat; band chants the hook. No trap, no auto-tune. Defiant, cinematic, live. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3980 characters)
+------------------------------------------------------------------------
+[Intro — drumline cadence, one gavel strike]
+KADEEM: State your name for the record.
+DR. MERCER: Dr. Mercer. World Health Organization.
+KADEEM: We have questions.
+
+[Chorus — Kadeem, Nia, band chant]
+Informed consent
+Show me the whole file
+Informed consent
+Show me the harm
+Informed consent
+Show me who profits
+Then ask me again
+Then ask me again
+
+[Verse 1 — Kadeem]
+You flew in from Geneva with a folder and a flag.
+You want to talk science? Cool. Let's talk.
+Start with Tuskegee, 1932:
+forty years of lies in a government coat.
+Start with Henrietta, cells in a jar,
+a woman's body turned into a patent.
+Start with the women they sterilized
+and filed under "public health."
+Don't start the story at the needle.
+Start at the hand that held it.
+
+[WHO Representative — Dr. Mercer]
+Those are graves in our history. We don't deny them.
+But vaccines are tested. The FDA approves. The CDC recommends.
+Federal, state, local—every hand points to the next.
+We don't design medicine to harm.
+
+[Kadeem]
+Then why does the harm keep the same address?
+
+[Verse 2 — Nia]
+You poisoned the water in Flint and called it a pipe.
+You put the plant in Cancer Alley and called it a job.
+You closed the hospital in my neighborhood and called it a budget.
+You drew the redline and called it a map.
+You want to talk about a slow kill?
+It's not a secret syringe.
+It's a ZIP code.
+Mind, body, soul—you poisoned all three,
+then filed it under "health disparity."
+You pledged war on our communities with a pen, not an army.
+
+[WHO Representative — Dr. Mercer]
+Those are housing, labor, environment. Not WHO.
+We issue guidance. We don't run cities.
+
+[Nia]
+Right. Everybody's a messenger.
+Nobody's the hand.
+
+[Chorus — Kadeem, Nia, band chant]
+Informed consent
+Show me the whole file
+Informed consent
+Show me the harm
+Informed consent
+Show me who profits
+Then ask me again
+Then ask me again
+
+[Verse 3 — Kadeem]
+You say the vaccine is safe. I'm not saying it isn't.
+I'm saying I've seen the bill before the cure.
+I'm saying "trust me" is not a study.
+I'm saying "rare" depends on who's counting.
+You want my arm? Show me the trial.
+Show me the adverse events, all of them.
+Show me the contract with the company.
+Show me the price you charge the poor.
+Then ask me again.
+
+[WHO Representative — Dr. Mercer]
+That's fair. Transparency is fair.
+We've made mistakes. We've changed protocols.
+
+[Nia]
+You've changed protocols.
+You haven't changed power.
+
+[Verse 4 — Nia]
+Ask the Philippines. Ask Guatemala. Ask the Inuit.
+Ask the Māori. Ask the women who woke up without a womb.
+Ask the mother who died in a hallway because the ward was closed.
+Ask the child with the asthma and the plant next door.
+You didn't have to aim a needle.
+You just had to look away.
+You want to call our vaccines lethal?
+I'll call your record lethal. There's a difference.
+You want a lethal injection?
+Try a lethal ZIP code.
+
+[WHO Representative — Dr. Mercer]
+That's not the same.
+
+[Kadeem]
+You're right. It's legal.
+
+[Bridge — band drops to sousaphone and snare]
+DR. MERCER: What do you want from me?
+KADEEM: A receipt.
+NIA: An apology with a budget.
+KADEEM: A study that includes us.
+NIA: A hospital that stays open.
+KADEEM: A form that says "no" is allowed.
+NIA: And a system that hears it.
+DR. MERCER: That's a lot.
+KADEEM: It's the bare minimum.
+
+[WHO Representative — Dr. Mercer]
+You want me to say the science is a lie. I won't.
+Vaccines save lives. That's real.
+
+[Kadeem and Nia]
+We didn't ask you to lie.
+We asked you to account.
+
+[Verdict — both rappers, band quiet]
+The science is real.
+The accountability is not.
+The needle didn't kill my grandmother.
+The closed hospital did.
+The plant did.
+The redline did.
+The bill did.
+You didn't have to inject us.
+You just had to forget us.
+Case closed.
+
+[Final Chorus — full band]
+Informed consent
+Show me the whole file
+Informed consent
+Show me the harm
+Informed consent
+Show me who profits
+
+[Outro — gavel, drumline]
+DR. MERCER: We're done here.
+NIA: No. It's just getting started.
+[Band hit]
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 168 characters)
+------------------------------------------------------------------------
+trap, drill, auto-tune, EDM, pop polish, mumble rap, gangster posturing, gun threats, profanity, conspiracy parody, minstrel dialect, any named artist or song imitation
+
+------------------------------------------------------------------------

@@ -1,0 +1,172 @@
+SUNO PROMPT — ORIGINAL SLOW HIP-HOP LOVE SONG "JUST ME AND YOU"
+A husband-and-wife push-and-pull, with whispered taunts and ad-libs throughout.
+Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 796 characters)
+------------------------------------------------------------------------
+Slow hip-hop love song at 72 BPM in D minor. Dusty boom-bap drums, deep sub bass, warm Rhodes, muted guitar, vinyl crackle, finger snaps, soft 808. Male lead in a low, intimate delivery; female counter-voice and whispered background taunts. Call-and-response chorus, ad-libs all through, close-mic vocals, wide stereo warmth, a stripped bridge, full beat on the last chorus. The groove is a slow head-nod pocket, not trap: kick and snare lean back, bass under the voice, Rhodes and guitar in the gaps. Rain-on-the-window texture, late-night phone-line intimacy, a dusty sample chop under the Rhodes, and a low male harmony on the last chorus. Sensual, honest, cold when it needs to be, then warm again. No auto-tune, no EDM, no pop polish. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 319 characters)
+------------------------------------------------------------------------
+Slow hip-hop love song, 72 BPM, D minor. Dusty boom-bap, sub bass, Rhodes, muted guitar, vinyl, snaps, soft 808. Male lead, female counter-voice, whispered taunts, ad-libs throughout. Call-and-response chorus, stripped bridge, full beat last chorus. Sensual, honest, cold then warm. No auto-tune, no EDM. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3631 characters)
+------------------------------------------------------------------------
+[Intro — slow Rhodes, vinyl crackle, soft 808]
+(Yeah)
+(Just me and you)
+Carol...
+(Just me and you)
+I know we ain't perfect.
+(No)
+But I ain't going nowhere.
+(Nowhere)
+Eyes on me.
+
+[Verse 1 — male lead]
+I met you with a smart mouth and a cheap coat,
+you met me with a guard up and a good joke.
+We built a house out of coffee and arguments,
+learned each other's scars like a map in the dark.
+I know how you take your tea, how you lie when you're tired,
+how you say "I'm fine" when you're one word from fire.
+You know my silence, you know my pride,
+you know when I'm wrong and I still won't apologize.
+(Yeah)
+That's the truth.
+
+[Pre-Chorus]
+For better or for worse, I'm in it.
+(For better or worse)
+Through the bad and the good, I'm in it.
+(All of it)
+Agreement and disagreement, I'm in it.
+(Say it again)
+We don't run from the work, we gon' work it out.
+(Work)
+
+[Chorus — male lead, female background taunts]
+Just me and you
+(Just me and you)
+Through the bad and the good
+(Forever)
+Just me and you
+(Passionate)
+When the cold comes through
+(Everlasting)
+Just me and you
+(You ain't going nowhere)
+Just me and you
+(Mine)
+
+[Verse 2 — male lead]
+When it's bad, it's bad, and we both can be cold,
+cut a sentence so sharp it leave the room old.
+You go quiet for days, I go hard in my head,
+you sleep on your side, I sleep on the edge.
+We can be merciless, both of us know,
+I can make you feel small, you can make me feel slow.
+We can punish with silence, punish with pride,
+punish with the truth that we both tried to hide.
+(Yeah)
+That's the worst of it.
+
+[Pre-Chorus]
+For better or for worse, I'm in it.
+(For better or worse)
+Through the bad and the good, I'm in it.
+(All of it)
+Agreement and disagreement, I'm in it.
+(Say it again)
+We don't run from the work, we gon' work it out.
+(Work)
+
+[Chorus — male lead, female background taunts]
+Just me and you
+(Just me and you)
+Through the bad and the good
+(Forever)
+Just me and you
+(Passionate)
+When the cold comes through
+(Everlasting)
+Just me and you
+(You ain't going nowhere)
+Just me and you
+(Mine)
+
+[Bridge — slow, intimate, male and Carol]
+Put the phone down, put your back on the door.
+(Don't run)
+Let the argument sweat out on the floor.
+(Come here)
+I'll kiss the fight off your mouth, make you forget the score.
+(Yeah)
+The God and the goddess in this room, no war.
+(No war)
+Your hand in my hair, my name in your throat.
+(Say it)
+We don't make sense till we make up, and we know.
+(We know)
+So take the cold off, let the heat speak.
+(Heat)
+Tonight we don't win, we just keep.
+(Keep)
+
+[Carol — spoken-sung]
+You think I'm cold? You built the winter.
+(Oh)
+You think I'm cruel? You taught me the knife.
+(I know)
+But I still choose you, even when I don't like you.
+(Still)
+So don't you dare give up on this life.
+(Don't you dare)
+
+[Verse 3 — male lead]
+Carol, you're my wife, not my enemy,
+but I can be a storm and you can be the sea.
+We can flood the whole house, then learn how to swim,
+make a truce on the pillow, start again in the morning.
+(Yeah)
+I love you in the light, I love you in the rain,
+I love you when it's easy, I love you when it's pain.
+For better or for worse, I'll take the worse with you,
+through the bad and the good, I'll work it out with you.
+(With you)
+
+[Final Chorus — both, full]
+Just me and you
+(Just me and you)
+Through the bad and the good
+(Forever)
+Just me and you
+(Passionate)
+When the cold comes through
+(Everlasting)
+Just me and you
+(You ain't going nowhere)
+Just me and you
+(Mine)
+(No one else)
+(Just me and you)
+(Forever)
+(Everlasting)
+
+[Outro — soft 808, Rhodes, whispers]
+(Just me and you)
+(Just me and you)
+Carol...
+(Forever)
+(Passionate)
+(Just me and you)
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 136 characters)
+------------------------------------------------------------------------
+trap, drill, EDM, auto-tune, pop polish, country, rock, screaming, profanity, explicit sexual detail, any named artist or song imitation
+
+------------------------------------------------------------------------

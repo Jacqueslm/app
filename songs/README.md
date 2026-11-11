@@ -42,7 +42,7 @@ Each file is a complete paste-in block for Suno, in the same shape:
 | `Cant-Look-Away-Suno-Prompt.txt` | Can't Look Away — R&B into hip-hop, 74 BPM, B-flat minor: female lead and wide soul choir, melodic rap with one double-time break, spoken bridge |
 | `Two-Step-Suno-Prompt.txt` | Two Step |
 | `Stop-It-Suno-Prompt.txt` | Stop It — hardcore Down South protest rap, stop/they-killing-us chant, 76 BPM, F minor |
-| `Informed-Consent-Suno-Prompt.txt` | Informed Consent — HBCU marching-band hearing rap, male/female cross-examination, 94 BPM, G minor |
+| `Informed-Consent-Suno-Prompt.txt` | Informed Consent — HBCU marching-band hearing rap, extended cut with a vaccine-injury compensation round and a maternal-mortality verse, 94 BPM, G minor |
 | `Im-Here-To-Make-You-Remember-Suno-Prompt.txt` | I'm Here to Make You Remember — Southern country-soul memory ballad, 84 BPM, E minor |
 | `Free-Your-Mind-Suno-Prompt.txt` | Free Your Mind — slow late-'60s soul-funk, direct named-belief seduction, 69 BPM, A-flat minor |
 
@@ -71,7 +71,7 @@ already spent.
 | Stop It | Hardcore Down South protest rap, slow half-time 808, stop/they-killing-us chant | 76, F minor | saved |
 | I'm Here to Make You Remember | Southern country-soul, family account-book narrative, female lead and male harmony | 84, E minor | saved |
 | Free Your Mind | Slow late-'60s soul-funk, spoken-sung male lead, female answer, direct named-belief critique | 69, A-flat minor | saved |
-| Informed Consent | HBCU marching-band protest rap, hearing-room debate, male and female rappers vs. a WHO representative | 94, G minor | saved |
+| Informed Consent | HBCU marching-band protest rap, hearing-room debate, male and female rappers vs. a WHO representative; extended cut adds a compensation round and a maternal-mortality verse | 94, G minor | saved |
 | You Are Not a Sewer | Spoken-word soul-rap | 88, D minor | saved |
 | Living It Up (Putting It Down) | — | — | chat only |
 | Freedom LLC | — | 90 (beat exists in `artifacts/`), no key named | chat only |

@@ -1,5 +1,8 @@
-SUNO PROMPT — ORIGINAL HBCU MARCHING-BAND "INFORMED CONSENT"
-A fictional hearing-room debate on medical racism, consent and accountability. Two separate prompts: Style box, then Lyrics box.
+SUNO PROMPT — ORIGINAL HBCU MARCHING-BAND "INFORMED CONSENT" (EXTENDED CUT)
+A fictional hearing-room debate on medical racism, consent and accountability.
+Extended cut: a second round on vaccine-injury compensation and informed consent,
+plus a maternal-mortality verse for Nia.
+Two separate prompts: Style box, then Lyrics box.
 
 ------------------------------------------------------------------------
 STYLE OF MUSIC (paste into the Style box - 789 characters)
@@ -12,32 +15,25 @@ SHORT STYLE (Style box if the long one is rejected - 316 characters)
 HBCU-style marching-band protest rap, 94 BPM, G minor. Live snare cadence, sousaphone, quads, brass, cymbal crashes, stomp-clap chant, gavel hit. Male and female rappers trade forensic bars; a cold WHO representative answers flat; band chants the hook. No trap, no auto-tune. Defiant, cinematic, live. Original song.
 
 ------------------------------------------------------------------------
-LYRICS (paste into the Lyrics box - 3980 characters)
+LYRICS (paste into the Lyrics box - 3986 characters)
 ------------------------------------------------------------------------
 [Intro — drumline cadence, one gavel strike]
 KADEEM: State your name for the record.
 DR. MERCER: Dr. Mercer. World Health Organization.
-KADEEM: We have questions.
+NIA: Round two. We brought receipts.
 
 [Chorus — Kadeem, Nia, band chant]
 Informed consent
 Show me the whole file
-Informed consent
 Show me the harm
-Informed consent
 Show me who profits
-Then ask me again
 Then ask me again
 
 [Verse 1 — Kadeem]
 You flew in from Geneva with a folder and a flag.
-You want to talk science? Cool. Let's talk.
-Start with Tuskegee, 1932:
-forty years of lies in a government coat.
-Start with Henrietta, cells in a jar,
-a woman's body turned into a patent.
-Start with the women they sterilized
-and filed under "public health."
+Tuskegee, 1932: forty years of lies in a government coat.
+Henrietta's cells in a jar, a body turned into a patent.
+Women sterilized and filed under "public health."
 Don't start the story at the needle.
 Start at the hand that held it.
 
@@ -51,16 +47,15 @@ We don't design medicine to harm.
 Then why does the harm keep the same address?
 
 [Verse 2 — Nia]
-You poisoned the water in Flint and called it a pipe.
+You poisoned Flint and called it a pipe.
 You put the plant in Cancer Alley and called it a job.
-You closed the hospital in my neighborhood and called it a budget.
+You closed the hospital and called it a budget.
 You drew the redline and called it a map.
-You want to talk about a slow kill?
 It's not a secret syringe.
 It's a ZIP code.
 Mind, body, soul—you poisoned all three,
 then filed it under "health disparity."
-You pledged war on our communities with a pen, not an army.
+You pledged war with a pen, not an army.
 
 [WHO Representative — Dr. Mercer]
 Those are housing, labor, environment. Not WHO.
@@ -70,42 +65,59 @@ We issue guidance. We don't run cities.
 Right. Everybody's a messenger.
 Nobody's the hand.
 
-[Chorus — Kadeem, Nia, band chant]
-Informed consent
-Show me the whole file
-Informed consent
-Show me the harm
-Informed consent
-Show me who profits
-Then ask me again
-Then ask me again
-
-[Verse 3 — Kadeem]
-You say the vaccine is safe. I'm not saying it isn't.
-I'm saying I've seen the bill before the cure.
-I'm saying "trust me" is not a study.
-I'm saying "rare" depends on who's counting.
-You want my arm? Show me the trial.
-Show me the adverse events, all of them.
-Show me the contract with the company.
-Show me the price you charge the poor.
-Then ask me again.
+[Round Two — Kadeem]
+You say the science is safe. I'm not saying it isn't.
+"Trust me" is not a study.
+Show me the trial, the adverse events,
+the contract, the price.
+If the injury is rare, why is there a compensation court?
+Why does the table pick which harm counts?
+Why does the family carry the burden?
 
 [WHO Representative — Dr. Mercer]
-That's fair. Transparency is fair.
-We've made mistakes. We've changed protocols.
+Compensation exists because harm exists.
+No system is perfect. The table is reviewed.
+We can't adjudicate every case at WHO.
 
 [Nia]
-You've changed protocols.
-You haven't changed power.
+Then perfect it. Fund it. Publish it.
+Stop making the injured carry the whole case.
 
-[Verse 4 — Nia]
-Ask the Philippines. Ask Guatemala. Ask the Inuit.
-Ask the Māori. Ask the women who woke up without a womb.
-Ask the mother who died in a hallway because the ward was closed.
-Ask the child with the asthma and the plant next door.
-You didn't have to aim a needle.
-You just had to look away.
+[Kadeem]
+Informed consent means I can say no
+and still get care.
+
+[Nia]
+It means the form is in my language
+and the door stays open.
+
+[WHO Representative — Dr. Mercer]
+Consent forms are required.
+
+[Kadeem]
+A signature is not consent
+if the only hospital for miles is closing.
+
+[Verse 3 — Nia]
+Ask the mother who bled through the shift
+while the monitor called and nobody came.
+Ask the mother who drove two counties
+because the ward closed in her own.
+Ask the mother told "calm down"
+while her pressure climbed past the chart.
+Ask the mother who signed a form
+she couldn't read, in a room she couldn't choose.
+They call it maternal mortality.
+I call it a door that closed.
+
+[WHO Representative — Dr. Mercer]
+Those are health systems. Not WHO.
+
+[Nia]
+You issue guidance.
+We issue obituaries.
+
+[Kadeem]
 You want to call our vaccines lethal?
 I'll call your record lethal. There's a difference.
 You want a lethal injection?
@@ -121,10 +133,8 @@ You're right. It's legal.
 DR. MERCER: What do you want from me?
 KADEEM: A receipt.
 NIA: An apology with a budget.
-KADEEM: A study that includes us.
-NIA: A hospital that stays open.
-KADEEM: A form that says "no" is allowed.
-NIA: And a system that hears it.
+KADEEM: A hospital that stays open.
+NIA: A form that says "no" is allowed.
 DR. MERCER: That's a lot.
 KADEEM: It's the bare minimum.
 
@@ -144,6 +154,7 @@ The closed hospital did.
 The plant did.
 The redline did.
 The bill did.
+The form did.
 You didn't have to inject us.
 You just had to forget us.
 Case closed.
@@ -151,9 +162,7 @@ Case closed.
 [Final Chorus — full band]
 Informed consent
 Show me the whole file
-Informed consent
 Show me the harm
-Informed consent
 Show me who profits
 
 [Outro — gavel, drumline]

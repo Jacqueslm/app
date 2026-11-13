@@ -1,0 +1,117 @@
+SUNO PROMPT — ORIGINAL INDUSTRIAL PROTEST RAP "HOMICIDE ON A PLATE"
+A direct, graphic indictment of the food industry and the eater's part in it.
+Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 715 characters)
+------------------------------------------------------------------------
+Industrial boom-bap / horrorcore protest rap at 96 BPM in E-flat minor. Dirty kick, cracked snare, metallic percussion, factory clanks, sub bass, distorted 808, fridge hum, meat-grinder rhythm. Male lead with a cold, precise, close-mic delivery; no melody, no auto-tune, no pop polish. Call-and-response hook, hard cuts, sudden silence, a raw chant on the last hook. The groove is a slow head-nod stomp, not trap: kick on the floor, snare on the backbeat, bass under the voice, metal in the gaps. A kitchen-sink percussion loop and a low male chant under the verses. Graphic, forensic, confrontational, not cartoonish. No comedy, no parody. Raw, human anger. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 299 characters)
+------------------------------------------------------------------------
+Industrial boom-bap/horrorcore protest rap, 96 BPM, E-flat minor. Dirty kick, cracked snare, metal clanks, sub bass, distorted 808, fridge hum. Male lead, cold and close; call-and-response hook, hard cuts, raw chant. Slow head-nod stomp, not trap. Graphic, confrontational, no comedy. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3077 characters)
+------------------------------------------------------------------------
+[Intro — factory clank, sub bass]
+Homicide on a plate.
+Suicide with a fork.
+
+[Verse 1]
+This is murder with a menu.
+The drive-thru is a grave with a smile.
+The fryer is a vat of liquid plaque.
+The burger is a corpse dressed in cheese.
+The soda is a syrup that eats the pancreas.
+Processed meat: pink paste, salt, smoke,
+pressed into a circle and sold as a meal.
+Fast food is slow death on layaway,
+a heart attack with a toy in the bag.
+Liquor on the corner, liver in the drain,
+they sell you the bottle and the ambulance ride.
+
+[Chorus — repeat 4x]
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+
+[Verse 2]
+Salt, sugar, flour—three whites, one war.
+Salt raises the pressure, sugar rots the core,
+flour turns the gut into a paste,
+and the label says "natural" on the front of the case.
+Diet soda: a lab in a can,
+aspartame aftertaste, kidney on the ropes.
+Sugar-free juice: candy with a health claim,
+the same sweet poison with a different name.
+They call the seed a threat, sell the seedless fruit,
+patent the tree, own the root.
+The produce aisle is a museum of what they took.
+
+[Bridge]
+The supplement aisle is a casino with capsules.
+The steroid is a shortcut with a receipt.
+The surgery is a quick fix with a scar.
+The gym is overrated; the fork is the real surgery.
+You can't out-exercise a bad diet.
+You can't out-lift a loaf.
+You can't outrun the three whites.
+You can't out-sweat a stroke.
+
+[Verse 3]
+Thirty brands, one boardroom, one set of hands.
+Ten different labels, same command.
+The "healthy" line and the "value" line are cousins,
+the "organic" sticker is a tax on the same dozen.
+Organic is bullshit with a green stamp,
+same corporation, different mask.
+Veggie meat is a salt block in disguise,
+high sodium, low truth, and it looks you in the eyes.
+The ingredient list is a dictionary of lies:
+sodium benzoate, potassium sorbate, maltodextrin,
+carrageenan, cellulose, titanium dioxide,
+"natural flavor"—a word that means nothing.
+A name you can't pronounce is a door they hide behind.
+
+[Verse 4]
+They put the liquor store on the corner,
+the dialysis clinic next door,
+the fast food on both sides,
+and call it a neighborhood.
+That's not a coincidence; that's a business model.
+Nutricide: the slow destruction of the Black race,
+sold as convenience, priced as survival.
+The illusion of choice is the oldest trick:
+thirty brands, one owner, one grave.
+
+[Chorus — repeat 4x]
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+Fuck that, they know what they doing
+Fuck this, I know I can do better
+
+[Outro]
+Nutricide in broad daylight.
+The receipt is in your bloodstream.
+The corporation is the dealer.
+The label is the alibi.
+Homicide on a plate.
+Suicide with a fork.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 109 characters)
+------------------------------------------------------------------------
+trap, drill, auto-tune, EDM, pop polish, comedy, parody, minstrel dialect, any named artist or song imitation
+
+------------------------------------------------------------------------

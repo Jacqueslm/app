@@ -1,0 +1,153 @@
+SUNO PROMPT — ORIGINAL CINEMATIC CONSCIOUS HIP-HOP "MASS OVERDOSE"
+A slow-building awakening anthem about a world overdosing on poison and numbness.
+Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 773 characters)
+------------------------------------------------------------------------
+Cinematic conscious hip-hop at 80 BPM in F-sharp minor. Opens with a heartbeat, vinyl dust, lone piano and spoken word; builds through kick, snare, sub bass, strings, brass and a wide call-and-response choir. Male lead with a low, measured delivery that rises to a shout; female and crowd chants on the hook. Ad-libs all through: whispers, wake-up calls, count-offs. The beat is a slow, heavy head-nod, not trap. Strings swell, timpani enters, the final chorus is full band with double-time handclaps and a crowd chant. A low male hum under the first verse, a female answer on the pre-chorus, and a final a cappella chant before the last drop. Dark, urgent, uplifting, no comedy. No auto-tune, no EDM, no pop polish. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 299 characters)
+------------------------------------------------------------------------
+Cinematic conscious hip-hop, 80 BPM, F-sharp minor. Heartbeat, piano, strings, brass, sub bass, wide choir. Male lead rises from measured to shout; female and crowd chants, ad-libs throughout. Slow head-nod build, full band final chorus. Dark, urgent, uplifting. No auto-tune, no EDM. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3419 characters)
+------------------------------------------------------------------------
+[Intro — heartbeat, vinyl dust, lone piano, spoken]
+Mass overdose.
+Not one needle. Not one bottle.
+The whole arrangement.
+Hear the alarm.
+
+[Verse 1 — low, measured]
+Mass overdose, and the needle is a menu.
+The sugar in the sauce, the lie in the label,
+the screen in the crib, the pill in the bottle,
+the liquor on the corner, the credit in the mail,
+the fear in the feed, the war in the weather.
+We are not dying of one thing;
+we are dying of the whole arrangement.
+The body keeps the receipt.
+The body keeps the score.
+The body says enough.
+
+[Pre-Chorus — build]
+They call it normal; I call it a coma.
+They call it living; I call it a slow dose.
+The alarm is ringing in the marrow of the world.
+Can you hear it? Can you hear it?
+
+[Chorus — lead, crowd chants]
+Here is your awakening
+(Here is your awakening)
+Are you ready to awaken?
+(Are you ready?)
+(Wake up)
+(Wake up)
+(Open your eyes)
+(Open your eyes)
+
+[Verse 2 — sharper, drums enter]
+The pharmacist counts the refills, the clinic counts the beds,
+the school counts the bodies, the prison counts the heads.
+The grocery store is a desert with a neon sign,
+the liquor store is a pharmacy with a longer line.
+They sell you the poison and the cure in the same bag,
+then charge you for the bag and call it freedom.
+The news is a narcotic, the feed is a drip,
+the mall is a morgue with a loyalty chip.
+You are not crazy for feeling like you're drowning;
+you are sane in a room full of smoke.
+
+[Pre-Chorus — strings rise]
+They call it normal; I call it a coma.
+They call it living; I call it a slow dose.
+The alarm is ringing in the marrow of the world.
+Can you hear it? Can you hear it?
+
+[Chorus — lead, crowd chants]
+Here is your awakening
+(Here is your awakening)
+Are you ready to awaken?
+(Are you ready?)
+(Wake up)
+(Wake up)
+(Open your eyes)
+(Open your eyes)
+
+[Bridge — spoken, then shouted]
+Count the bodies.
+(Count the bodies)
+Count the lies.
+(Count the lies)
+Count the prescriptions.
+(Count the prescriptions)
+Count the goodbyes.
+(Count the goodbyes)
+Now count the mornings you woke up numb.
+Now count the nights you swallowed the hum.
+The overdose is not a stranger;
+it is the air in the room.
+It is the rent.
+It is the shift.
+It is the school.
+It is the screen.
+It is the smile on the commercial.
+Here is your awakening.
+Are you ready to awaken?
+
+[Verse 3 — full band, rising]
+I put the bottle down. I read the label.
+I turned the screen off. I sat at the table.
+I learned the names of the things I eat.
+I learned the names of the things that eat me.
+I found the door behind the advertisement.
+I found the pulse under the pavement.
+The opposite of overdose is not a dose;
+it is a decision.
+The opposite of numb is not a feeling;
+it is attention.
+I am not here to save you.
+I am here to stand next to you
+while you save yourself.
+
+[Verse 4 — quiet, then rising]
+They overdosed the water.
+They overdosed the food.
+They overdosed the news.
+They overdosed the school.
+They overdosed the corner.
+They overdosed the womb.
+They overdosed the silence.
+Now they're overdosing the room.
+
+[Final Chorus — full band, crowd, chants]
+Here is your awakening
+(Here is your awakening)
+Are you ready to awaken?
+(Are you ready?)
+(Wake up)
+(Wake up)
+(Rise up)
+(Rise up)
+(No more)
+(No more)
+(Here is your awakening)
+(Here is your awakening)
+
+[Outro — heartbeat, piano, spoken]
+Mass overdose.
+The alarm is not outside you.
+It is in your chest.
+Wake up.
+Wake up.
+Here is your awakening.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 108 characters)
+------------------------------------------------------------------------
+trap, drill, auto-tune, EDM, pop polish, comedy, parody, religious choir, any named artist or song imitation
+
+------------------------------------------------------------------------

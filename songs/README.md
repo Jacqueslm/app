@@ -45,6 +45,7 @@ Each file is a complete paste-in block for Suno, in the same shape:
 | `Informed-Consent-Suno-Prompt.txt` | Informed Consent — HBCU marching-band hearing rap, extended cut with a vaccine-injury compensation round and a maternal-mortality verse, 94 BPM, G minor |
 | `Just-Me-and-You-Suno-Prompt.txt` | Just Me and You — slow hip-hop love song, husband-and-wife push-and-pull, 72 BPM, D minor |
 | `Homicide-on-a-Plate-Suno-Prompt.txt` | Homicide on a Plate — industrial boom-bap/horrorcore protest rap, food-industry indictment, 96 BPM, E-flat minor |
+| `Mass-Overdose-Suno-Prompt.txt` | Mass Overdose — cinematic conscious hip-hop, awakening chant, 80 BPM, F-sharp minor |
 | `Im-Here-To-Make-You-Remember-Suno-Prompt.txt` | I'm Here to Make You Remember — Southern country-soul memory ballad, 84 BPM, E minor |
 | `Free-Your-Mind-Suno-Prompt.txt` | Free Your Mind — slow late-'60s soul-funk, direct named-belief seduction, 69 BPM, A-flat minor |
 
@@ -76,6 +77,7 @@ already spent.
 | Informed Consent | HBCU marching-band protest rap, hearing-room debate, male and female rappers vs. a WHO representative; extended cut adds a compensation round and a maternal-mortality verse | 94, G minor | saved |
 | Just Me and You | Slow hip-hop love song, husband-and-wife push-and-pull, whispered taunts and ad-libs | 72, D minor | saved |
 | Homicide on a Plate | Industrial boom-bap/horrorcore protest rap, direct food-industry indictment | 96, E-flat minor | saved |
+| Mass Overdose | Cinematic conscious hip-hop, mass-poisoning indictment and awakening chant | 80, F-sharp minor | saved |
 | You Are Not a Sewer | Spoken-word soul-rap | 88, D minor | saved |
 | Living It Up (Putting It Down) | — | — | chat only |
 | Freedom LLC | — | 90 (beat exists in `artifacts/`), no key named | chat only |

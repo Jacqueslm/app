@@ -1,0 +1,184 @@
+SUNO PROMPT — ORIGINAL R&B SOUL TRAP / AFROBEATS "MISERY"
+A confession about porn, food, binge-watching and the loop that keeps repeating.
+Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 737 characters)
+------------------------------------------------------------------------
+R&B soul trap with Afrobeats elements at 100 BPM in G minor. Warm Rhodes, muted guitar, log drums, congas, shakers, syncopated kick, deep 808, soft trap hi-hats. Layered male/female harmonies on every section; a tired, intimate male lead, a female answer, and a screechy rapper on the bridge. Melodic R&B hook over an Afrobeat pocket, dark and confessional, with a slow harmonic build, a stripped bridge, and a final chant. Rain on the window, phone buzz, room tone, close-mic vocals, wide stereo harmonies, bass under the voice. A slow 100 BPM pocket: syncopated kick, log-drum bounce, trap hats in the gaps, 808 under the harmony stack. No hard auto-tune, no EDM, no pop polish. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 293 characters)
+------------------------------------------------------------------------
+R&B soul trap with Afrobeats elements, 100 BPM, G minor. Rhodes, muted guitar, log drums, congas, shakers, 808, soft trap hats. Layered male/female harmonies throughout; tired male lead, female answer, screechy rap bridge. Dark, confessional, melodic. No hard auto-tune, no EDM. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3983 characters)
+------------------------------------------------------------------------
+[Intro — Rhodes, rain, harmonies]
+Misery...
+(Oh, misery)
+I know this room.
+I know this loop.
+(Same loop)
+Same me, same screen, same morning.
+(Again)
+
+[Verse 1 — tired, intimate]
+I wake up to a phone I don't remember choosing,
+a plate I don't taste, a show I don't finish.
+Porn at 2 a.m., then a scroll I don't need,
+a promise in my notes that I'll never read.
+I dropped my principles by the door with my coat,
+traded the man I was for a dopamine note.
+Food past the hunger, then I hate the plate,
+then I hate the mirror, then I hate the wait.
+Binge-watch the night till the sun cuts through,
+then press repeat like it's the only thing I know.
+
+[Pre-Chorus — harmonies build]
+Misery loves me; I keep the door open.
+(Misery)
+Misery knows me; I keep the bed warm.
+(Misery)
+I say tomorrow, tomorrow, tomorrow—
+then tomorrow comes and I'm still in the storm.
+
+[Chorus — lead, harmonies]
+I wake up, repeat, and do the same thing
+(Same thing)
+How can I expect to ever make a change?
+(No change)
+Sitting in my sorrows, drowning in my tears
+(Drowning)
+Keep fucking up like there is no tomorrow
+(No tomorrow)
+Time-time-time, I keep wasting it
+(Time)
+Time-time-time, like I got plenty of it
+(Plenty)
+But I only have so many tomorrows left
+(So many)
+If I don't change soon, I'll be saying hello to death
+(Hello, death)
+Because of my addictions
+(Addiction)
+
+[Verse 2 — sharper, harmonies]
+I got a list of the things I'll never do again,
+then I do them by noon, then I write the list again.
+I tell myself "just once," then once turns to ten,
+then ten turns to a week, then I'm back in the den.
+I let the screen autoplay my life away,
+I let the food sedate what I can't say.
+I let the porn teach me how to be alone,
+then I wonder why real touch feels like a phone.
+I broke every promise I made to myself,
+then blamed the whole world for the hand I was dealt.
+
+[Pre-Chorus — harmonies]
+Misery loves me; I keep the door open.
+(Misery)
+Misery knows me; I keep the bed warm.
+(Misery)
+I say tomorrow, tomorrow, tomorrow—
+then tomorrow comes and I'm still in the storm.
+
+[Chorus — lead, harmonies]
+I wake up, repeat, and do the same thing
+(Same thing)
+How can I expect to ever make a change?
+(No change)
+Sitting in my sorrows, drowning in my tears
+(Drowning)
+Keep fucking up like there is no tomorrow
+(No tomorrow)
+Time-time-time, I keep wasting it
+(Time)
+Time-time-time, like I got plenty of it
+(Plenty)
+But I only have so many tomorrows left
+(So many)
+If I don't change soon, I'll be saying hello to death
+(Hello, death)
+Because of my addictions
+(Addiction)
+
+[Bridge — screechy rap, harmonies behind]
+I'm not okay, and I'm tired of pretending.
+(Not okay)
+I'm not okay, and I'm tired of the ending.
+Every night I swear it's over,
+every morning I'm back in the same corner.
+(Same corner)
+I can hear my own voice cracking in the mirror,
+telling me to get up, telling me to get nearer.
+(Get up)
+I don't want to say hello to death.
+I don't want to die; I want to break the loop.
+(Break it)
+But the loop knows my name,
+and it knows where I sleep.
+(It knows)
+One more tomorrow—
+(One more)
+one more tomorrow—
+(One more)
+I'm running out of tomorrows.
+(Running out)
+
+[Final Chorus — full, harmonies]
+I wake up, repeat, and do the same thing
+(Same thing)
+How can I expect to ever make a change?
+(No change)
+Sitting in my sorrows, drowning in my tears
+(Drowning)
+Keep fucking up like there is no tomorrow
+(No tomorrow)
+Time-time-time, I keep wasting it
+(Time)
+Time-time-time, like I got plenty of it
+(Plenty)
+But I only have so many tomorrows left
+(So many)
+If I don't change soon, I'll be saying hello to death
+(Hello, death)
+Because of my addictions
+(Addiction)
+
+[Addiction Chant — 16x, harmonies]
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+Addiction
+
+[Outro — Rhodes, rain, harmonies]
+Misery...
+(Oh, misery)
+Same me.
+(Same me)
+Same loop.
+(Same loop)
+One more tomorrow.
+(One more)
+I don't want to lose it.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 100 characters)
+------------------------------------------------------------------------
+drill, hard trap, EDM, pop polish, country, rock, comedy, parody, any named artist or song imitation
+
+------------------------------------------------------------------------

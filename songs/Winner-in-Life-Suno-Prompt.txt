@@ -4,9 +4,9 @@ Chants and ad-libs run through it; the seven-line "I am winner" chant starts ove
 Two separate prompts: Style box, then Lyrics box.
 
 ------------------------------------------------------------------------
-STYLE OF MUSIC (paste into the Style box - 849 characters)
+STYLE OF MUSIC (paste into the Style box - 834 characters)
 ------------------------------------------------------------------------
-Heartfelt triumphant hip-hop at 88 BPM in B minor. Starts with cracked piano, rain, a heartbroken spoken intro; verses in a fast tongue-twister pocket over soul-trap drums, 808, snare rolls and a warm vocal sample; the chorus drops to half-time with wide harmonies, brass, stadium drums and a crowd chant. A stadium-sized chorus with choir-like harmonies, brass swells and a crowd chant. Piano and strings under the last chorus, then a bare vocal tag. The last chorus adds strings, timpani and a crowd. Crowd chants and ad-libs throughout; a seven-line "I am winner" chant after the first and final choruses, then it starts over. Male lead rises from wounded to victorious; ad-libs and doubled vocals. The beat is a slow head-nod with fast verses, not trap. No auto-tune, no EDM, no pop polish. Original lyrics, melody, vocal cadence and drum pattern.
+Heartfelt triumphant hip-hop at 88 BPM in B minor. Starts with cracked piano, rain, a heartbroken spoken intro; verses in a fast tongue-twister pocket over soul-trap drums, 808, snare rolls and a warm vocal sample; the chorus drops to half-time with wide harmonies, brass, stadium drums and a crowd chant. A stadium-sized chorus with choir-like harmonies, brass swells and a crowd chant. Piano and strings under the last chorus, then a bare vocal tag. The last chorus adds strings, timpani and a crowd. Crowd chants and ad-libs throughout; a seven-line "I am winner" chant after each chorus, then it starts over. Male lead rises from wounded to victorious; ad-libs and doubled vocals. The beat is a slow head-nod with fast verses, not trap. No auto-tune, no EDM, no pop polish. Original lyrics, melody, vocal cadence and drum pattern.
 
 ------------------------------------------------------------------------
 SHORT STYLE (Style box if the long one is rejected - 306 characters)
@@ -14,7 +14,7 @@ SHORT STYLE (Style box if the long one is rejected - 306 characters)
 Heartfelt triumphant hip-hop, 88 BPM, B minor. Cracked piano, rain, soul-trap drums, 808, warm vocal sample, brass, stadium drums, wide harmonies. Fast tongue-twister verses, half-time chorus, crowd chant, ad-libs. Seven-line "I am winner" chant. Wounded to victorious. No auto-tune, no EDM. Original song.
 
 ------------------------------------------------------------------------
-LYRICS (paste into the Lyrics box - 3912 characters)
+LYRICS (paste into the Lyrics box - 4040 characters)
 ------------------------------------------------------------------------
 [Intro — cracked piano, rain, spoken]
 (Chant: I am winner)
@@ -106,6 +106,16 @@ I beat the game
 It can no longer fool me
 Joke on you, stock market
 (I am winner)
+[Start over]
+
+[Chant — 7x, then start over]
+I am winner
+I am winner
+I am winner
+I am winner
+I am winner
+I am winner
+I am winner
 [Start over]
 
 [Bridge — spoken, then rising]

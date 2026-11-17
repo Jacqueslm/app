@@ -1,0 +1,189 @@
+SUNO PROMPT — ORIGINAL MULTI-REGION HARDCORE RAP "WALKING DEAD"
+A mental exorcism: the old self speaks, then the pattern is put in the ground.
+Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 761 characters)
+------------------------------------------------------------------------
+Hardcore multi-region rap at 140 BPM in D minor. Beat switches: East Coast boom-bap intro with scratched vocal and gritty kick; West Coast G-funk synth whine and deep bounce; Down South 808 triplets and screwed ad-libs; Up North cold synth pulse and fast percussive bars; UK drill sliding 808 and dark piano; Brazilian baile-funk tamborzão and shaker swing. One raw, close, aggressive male voice throughout, rising from a disgusted mutter to a shout. Hard snare cracks, sub drops, crowd chants, ad-libs. The beat changes every section; the voice does not. Hard beat-switch drops, no crossfades; the vocal stays raw and front-loaded, with crowd answers on the hook. No auto-tune, no pop polish, no comedy. Original lyrics, melody, vocal cadence and drum pattern.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 288 characters)
+------------------------------------------------------------------------
+Hardcore multi-region rap, 140 BPM, D minor. East Coast boom-bap, West Coast G-funk, Down South 808, Up North cold synth, UK drill, Brazilian baile-funk. Raw male voice, disgusted to shout, ad-libs and crowd chants. Beat switches every section. No auto-tune, no pop polish. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 3982 characters)
+------------------------------------------------------------------------
+[Intro — East Coast boom-bap, spoken word]
+Every day I wake up thinking different.
+But by the middle of the day,
+by the end of the day,
+I'm doing the same shit.
+Every day.
+I wake up and give myself these elaborate speeches:
+"Today is the day."
+But it's been a whole fucking year.
+What am I talking about?
+I'm trying to manipulate myself.
+I'm already confused.
+The system? I'm done with that shit.
+The people I've been around? Done.
+The environments I live in, I visit, I'm aware of? Done.
+And on top of that, I add more confusion.
+More bullshit in my head.
+The movies, the TV, the mad amounts of bullshit going in.
+The food is fucking ridiculous.
+And oh, the pornography—sexualizing people.
+I've been doing that shit over thirty years.
+"I'm going to quit." All these broken promises.
+Every day: I'll do this, I'll do that.
+I think I can fix it physically with working out.
+"I'ma work out hard. I'ma do a double workout."
+Or watch videos on health.
+"Today's the day. This weekend I'ma fast."
+I ain't going to accept it.
+I have become so fucking weak.
+But I've always been weak.
+I haven't really stepped away.
+Look at my mouth. My teeth are fucked up.
+I fucked my whole appearance.
+My physical abilities are shot.
+My workout performance is wack.
+And I hide behind clothes, hats, glasses, jewelry, cologne.
+I am dying.
+But have I ever been alive?
+I am the walking dead.
+
+[Chorus — UK drill switch]
+A mental exorcism is what I need
+(What I need)
+My physical presence is what I believe
+(What I believe)
+My spiritual discipline is in need
+(In need)
+Total suicide is what I need to overcome myself
+(That's the old me talking)
+
+[Post-Chorus — spoken]
+Not true.
+That's the lie.
+I don't need to die.
+I need to kill the pattern.
+
+[Verse 1 — West Coast G-funk]
+I'm sick of my own excuses.
+I'm sick of the same loop.
+I'm sick of the mirror lying,
+sick of the cheap suit.
+I'm sick of the drive-thru,
+sick of the screen,
+sick of the man I become
+when I'm chasing the beam.
+I'm sick of the promise
+I break by noon,
+sick of the "tomorrow"
+that never comes soon.
+
+[Verse 2 — Down South 808]
+I'm tired of the broken promises,
+tired of the "tomorrow,"
+tired of the binge,
+tired of the borrowed.
+I'm tired of the porn,
+tired of the plate,
+tired of the workout
+that can't outrun the fate.
+I'm tired of the clothes,
+tired of the mask,
+tired of the cologne
+on the corpse I drag.
+
+[Bridge — Brazilian baile funk]
+Another part of me must stand out and be the firing squad.
+Not at this body—at the old me.
+Commit homicide on the pattern.
+Put the loop in the ground.
+Not this body. Not this breath.
+The pattern. The loop. The lie.
+I'm reaching out. I really need some help.
+
+[Verse 3 — Up North cold synth]
+I'm done with the system.
+I'm done with the crowd.
+I'm done with the environment
+that keeps me down.
+I'm done with the clothes,
+the hat, the glasses,
+the cologne on the corpse
+of a man who's been passive.
+I'm done with the excuses.
+I'm done with the fear.
+I'm done with the "tomorrow"
+that never gets here.
+
+[Final Chorus — all regions]
+A mental exorcism is what I need
+(What I need)
+My physical presence is what I believe
+(What I believe)
+My spiritual discipline is in need
+(In need)
+The death of the old me is what I need to overcome myself
+(Not this body)
+
+[Walking Dead Chant — 30x]
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+Walking dead
+
+[Outro — spoken, beat drops]
+Even though I'm breathing,
+speaking,
+seeing,
+hearing,
+touching,
+awake,
+I'm really the walking dead.
+But I'm reaching out.
+If I don't change, the bill comes due:
+staggering,
+unfortunate,
+unforgiving,
+dementia knocking at the door of my being.
+I'm not staying walking dead.
+I'm choosing to wake up.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 104 characters)
+------------------------------------------------------------------------
+auto-tune, pop polish, comedy, parody, fake accent, minstrel dialect, any named artist or song imitation
+
+------------------------------------------------------------------------

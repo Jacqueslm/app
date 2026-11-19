@@ -49,7 +49,7 @@ Each file is a complete paste-in block for Suno, in the same shape:
 | `Misery-Suno-Prompt.txt` | Misery — R&B soul trap with Afrobeats elements, addiction loop, 100 BPM, G minor |
 | `Walking-Dead-Suno-Prompt.txt` | Walking Dead — multi-region hardcore rap, mental-exorcism spoken word, 140 BPM, D minor |
 | `Winner-in-Life-Suno-Prompt.txt` | Winner in Life — triumphant trading anthem with 7x "I am winner" chants and ad-libs, fast verses and half-time chorus, 88 BPM, B minor |
-| `God-Queen-Suno-Prompt.txt` | God Queen — Black-woman rebirth anthem, spoken-word verses, four-cycle chant chorus, distorted male voice, 91 BPM, C-sharp minor |
+| `God-Queen-Suno-Prompt.txt` | God Queen — seductive, synthesizer-free Black-woman rebirth anthem, spoken-word verses, four-cycle chant chorus, distorted male voice, 91 BPM, C-sharp minor |
 | `Im-Here-To-Make-You-Remember-Suno-Prompt.txt` | I'm Here to Make You Remember — Southern country-soul memory ballad, 84 BPM, E minor |
 | `Free-Your-Mind-Suno-Prompt.txt` | Free Your Mind — slow late-'60s soul-funk, direct named-belief seduction, 69 BPM, A-flat minor |
 
@@ -85,7 +85,7 @@ already spent.
 | Misery | R&B soul trap with Afrobeats elements, addiction loop, layered harmonies and screechy bridge rap | 100, G minor | saved |
 | Walking Dead | Multi-region hardcore rap (East Coast, West Coast, Down South, Up North, UK drill, Brazilian baile funk), mental-exorcism spoken word | 140, D minor | saved |
 | Winner in Life | Triumphant trading anthem, heartbroken-to-victorious, fast tongue-twister verses, half-time chorus, 7x "I am winner" chant and ad-libs | 88, B minor | saved |
-| God Queen | Black-woman rebirth anthem, spoken-word verses, four-cycle "wake the fuck up" chant chorus, distorted male voice | 91, C-sharp minor | saved |
+| God Queen | Seductive, synthesizer-free Black-woman rebirth anthem, spoken-word verses, four-cycle "wake the fuck up" chant chorus, distorted male voice | 91, C-sharp minor | saved |
 | You Are Not a Sewer | Spoken-word soul-rap | 88, D minor | saved |
 | Living It Up (Putting It Down) | — | — | chat only |
 | Freedom LLC | — | 90 (beat exists in `artifacts/`), no key named | chat only |

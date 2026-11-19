@@ -1,17 +1,17 @@
 SUNO PROMPT — ORIGINAL BLACK-WOMAN REBIRTH ANTHEM "GOD QUEEN"
 The original God Queen, the abuse and erasure, the false savior and the system,
-then the detox and the return home to herself.
+then the detox and the return home to herself. Seductive, synthesizer-free.
 Two separate prompts: Style box, then Lyrics box.
 
 ------------------------------------------------------------------------
-STYLE OF MUSIC (paste into the Style box - 712 characters)
+STYLE OF MUSIC (paste into the Style box - 809 characters)
 ------------------------------------------------------------------------
-Inspirational female hip-hop with Black power energy at 91 BPM in C-sharp minor. Hardcore R&B trap drums, deep 808, trap hi-hats, warm Hammond organ, cinematic strings, boom-bap undertow and a bassline like a heartbeat. A Black woman leads with spoken-word verses and a sung, chanting chorus; a massed female choir answers behind her. The four-part chorus lands like a roll call; a low, distorted male voice repeats a wake-up warning underneath, half-buried in the mix. The beat starts still and sparse, then opens into a hard, triumphant trap-soul groove. Mood: grief turning to rage, then clarity and rebirth. No auto-tune, no pop polish, no minstrelsy. Original lyrics, melody, vocal cadence and drum pattern.
+Seductive inspirational female hip-hop at 91 BPM in C-sharp minor. Slow-burn R&B groove with live drums, deep upright bass, trap hi-hats, warm Hammond organ, muted trumpet, cinematic strings, finger snaps and a bassline like a heartbeat. A Black woman leads with close-mic, breathy, commanding spoken-word verses and a sung, chanting chorus; a massed female choir answers like a whisper behind her. The four-part chorus lands like a slow roll call; a low, distorted male voice repeats a wake-up warning underneath, half-buried in the mix. The beat starts still and sparse, then opens into a hard, triumphant trap-soul groove. Mood: grief turning to rage, then clarity and rebirth. No synthesizer of any kind, no auto-tune, no pop polish, no minstrelsy. Original lyrics, melody, vocal cadence and drum pattern.
 
 ------------------------------------------------------------------------
-SHORT STYLE (Style box if the long one is rejected - 325 characters)
+SHORT STYLE (Style box if the long one is rejected - 342 characters)
 ------------------------------------------------------------------------
-Inspirational Black-woman hip-hop, 91 BPM, C-sharp minor. Hardcore R&B trap, 808, trap hats, warm organ, strings, boom-bap undertow. Spoken-word verses, sung chant chorus, massed female choir. Four cycles; low distorted male voice under chorus. Grief to rage to clarity to rebirth. No auto-tune, no pop polish. Original song.
+Seductive Black-woman hip-hop, 91 BPM, C-sharp minor. Slow-burn R&B, live drums, upright bass, trap hats, organ, muted trumpet, strings, snaps. Close-mic breathy spoken-word verses, sung chant chorus, massed female choir. Four cycles; low distorted male voice. Grief to rage to clarity to rebirth. No synthesizer, no auto-tune. Original song.
 
 ------------------------------------------------------------------------
 LYRICS (paste into the Lyrics box - 4965 characters)
@@ -152,8 +152,8 @@ The matrix is a lie.
 Wake the fuck up.
 
 ------------------------------------------------------------------------
-EXCLUDE STYLES (paste into the Exclude styles box - 92 characters)
+EXCLUDE STYLES (paste into the Exclude styles box - 142 characters)
 ------------------------------------------------------------------------
-auto-tune, pop polish, minstrelsy, drill, comedy, parody, any named artist or song imitation
+auto-tune, pop polish, minstrelsy, drill, comedy, parody, synthesizer, synth bass, synth pads, synth leads, any named artist or song imitation
 
 ------------------------------------------------------------------------

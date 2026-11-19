@@ -1,0 +1,155 @@
+SUNO PROMPT — ORIGINAL WEDDING DUET "OUR VOWS"
+A piano ballet duet for Jessica and Kourtney, written as two love letters:
+Kourtney to Jessica, then Jessica to Kourtney, then the vows they make together.
+Soulful male tenor and female alto, live piano and strings, no drums.
+Two separate prompts: Style box, then Lyrics box.
+
+------------------------------------------------------------------------
+STYLE OF MUSIC (paste into the Style box - 734 characters)
+------------------------------------------------------------------------
+Piano-led ballet waltz at 68 BPM in E-flat major, 3/4 time. Solo grand piano carries the melody like a dance, with warm string quartet, harp, soft timpani and a final rise of strings. A soulful male tenor and female alto trade love-letter verses and join in close harmony on the chorus. The vocal is intimate and passionate, never shouted; the piano stays under every word. The arrangement moves from one piano and one voice to a full, tender duet, then returns to piano and whispered vows. A ballet pulse, not a pop beat; rubato at the turnarounds, a gentle lift into each chorus. Mood: elegant, romantic, grateful, forever. No drum kit, no synth, no auto-tune, no pop polish. Original lyrics, melody, vocal cadence and piano figure.
+
+------------------------------------------------------------------------
+SHORT STYLE (Style box if the long one is rejected - 246 characters)
+------------------------------------------------------------------------
+Piano-led ballet waltz, 68 BPM, E-flat major, 3/4. Grand piano, strings, harp, soft timpani. Soulful male tenor and female alto trade verses, harmonize on the chorus. Intimate, passionate, elegant. No drums, no synth, no auto-tune. Original song.
+
+------------------------------------------------------------------------
+LYRICS (paste into the Lyrics box - 4277 characters)
+------------------------------------------------------------------------
+[Intro — solo piano]
+
+[Verse 1 — male, tender]
+Dear Jessica,
+I had already closed the door on love,
+called it a lesson I was done learning from.
+I told myself the cards were never mine,
+that some people get forever and I got the lesson in time.
+Then you looked at me like I was worth the wait,
+and the whole room went quiet in a way I can't explain.
+You showed me a love I never knew existed,
+a love that stayed when I was distant.
+You are my motivation when the road gets steep,
+the voice in my chest that says I still have something to give.
+My shining star, my guiding light,
+my whole heart in the middle of the night.
+
+[Pre-Chorus — male]
+I don't have to prove I'm strong enough,
+I just have to let you in and trust
+that this is real, that this is us,
+that love can be the softest kind of rush.
+
+[Chorus — duet, harmony]
+Our vows, our vows,
+more than the words we say out loud.
+Our vows, our vows,
+a promise that we'll stay and figure it out.
+I choose you in the morning,
+I choose you in the rain,
+I choose you when it's easy,
+and I choose you through the pain.
+Our vows, our vows,
+love is forever, say it again.
+
+[Verse 2 — female, tender]
+Dear Kourtney,
+I stopped looking for a love that felt like home,
+thought the cards were stacked and I was meant to be alone.
+Then you walked in with that jolly teddy bear smile,
+and I forgot every reason I had built a wall around.
+You are my favorite person in the whole wide world,
+my huggable protector, my delicious treat, my safe place.
+You taught me things I never knew existed,
+showed me a world I never knew existed.
+You are my whole heart inside out,
+my road to happiness, my joy, my bliss,
+my everlasting love, my tender love,
+with tenderness and acts of kindness enough.
+
+[Pre-Chorus — female]
+I don't have to hide the parts of me
+that used to feel too much, too deep.
+You hold them all and let them breathe,
+and somehow you bring out the best in me.
+
+[Chorus — duet, harmony]
+Our vows, our vows,
+more than the words we say out loud.
+Our vows, our vows,
+a promise that we'll stay and figure it out.
+I choose you in the morning,
+I choose you in the rain,
+I choose you when it's easy,
+and I choose you through the pain.
+Our vows, our vows,
+love is forever, say it again.
+
+[Verse 3 — male, rising]
+Dear Jessica,
+I don't need a map when I'm holding your hand,
+you understand the man behind the man.
+You know my silence, you know my fear,
+you know when to hold me and when to let me hear.
+You help me find the meaning of loving someone true,
+not just the easy parts, but the whole way through.
+I love you from the depths of my soul,
+until eternity and beyond, until I'm old.
+Even when the last breath leaves my body,
+my love will still be standing where you are.
+You are the reason I believe in forever,
+the reason I stopped running from the weather.
+
+[Verse 4 — female, rising]
+Dear Kourtney,
+you bring out the best version of me,
+the woman I was afraid I'd never be.
+You see my dreams and you don't look away,
+you learn me new things every single day.
+You are my favorite hello, my softest place,
+my huggable protector, my saving place.
+You are my whole heart inside out,
+my road to happiness, my joy, my bliss, my shout.
+A tender love with tenderness and acts of kindness,
+a love that understands before I say it.
+You are my favorite person in the whole wide world,
+and I will love you until the last page is turned.
+
+[Bridge — duet, close]
+I gave up on love, and you gave it back.
+I stopped believing, and you met me where I was at.
+We found each other when the cards were on the floor,
+and we learned to love by learning each other more.
+You understand me, and I understand you,
+and every day we find something new.
+I never knew love could feel like this,
+a steady hand, a home, a kiss.
+So take my hand, and I'll take yours,
+and we'll keep choosing this, over and over, forever.
+
+[Final Chorus — duet, full strings]
+Our vows, our vows,
+more than the words we say out loud.
+Our vows, our vows,
+a promise that we'll stay and figure it out.
+I choose you in the morning,
+I choose you in the rain,
+I choose you when it's easy,
+and I choose you through the pain.
+Our vows, our vows,
+love is forever, say it again.
+
+[Outro — duet, piano only]
+Our vows, our vows...
+Love is forever...
+Dear Jessica...
+Dear Kourtney...
+I do.
+I do.
+
+------------------------------------------------------------------------
+EXCLUDE STYLES (paste into the Exclude styles box - 94 characters)
+------------------------------------------------------------------------
+auto-tune, pop polish, country, rap, drill, comedy, parody, any named artist or song imitation
+
+------------------------------------------------------------------------

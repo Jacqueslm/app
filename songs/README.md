@@ -53,6 +53,7 @@ Each file is a complete paste-in block for Suno, in the same shape:
 | `Im-Here-To-Make-You-Remember-Suno-Prompt.txt` | I'm Here to Make You Remember — Southern country-soul memory ballad, 84 BPM, E minor |
 | `Free-Your-Mind-Suno-Prompt.txt` | Free Your Mind — slow late-'60s soul-funk, direct named-belief seduction, 69 BPM, A-flat minor |
 | `Rise-Black-Women-Suno-Prompt.txt` | Rise Black Women — militant all-female soul march, universal sisterhood, concealed-history truth-telling, 98 BPM, F minor |
+| `Our-Vows-Suno-Prompt.txt` | Our Vows — piano ballet wedding duet for Jessica and Kourtney, two love letters, soulful male/female harmony, 68 BPM, E-flat major |
 
 ## The register — read this before writing anything new
 
@@ -88,6 +89,7 @@ already spent.
 | Winner in Life | Triumphant trading anthem, heartbroken-to-victorious, fast tongue-twister verses, half-time chorus, 7x "I am winner" chant and ad-libs | 88, B minor | saved |
 | God Queen | Seductive, synthesizer-free, all-female Black-woman rebirth anthem, spoken-word verses, four-cycle "wake the fuck up" chant chorus, female choir | 91, C-sharp minor | saved |
 | Rise Black Women | Militant all-female soul march, universal sisterhood, concealed-history truth-telling, call-and-response choir | 98, F minor | saved |
+| Our Vows | Piano ballet wedding duet, two love letters, soulful male/female harmony, 3/4 | 68, E-flat major | saved |
 | You Are Not a Sewer | Spoken-word soul-rap | 88, D minor | saved |
 | Living It Up (Putting It Down) | — | — | chat only |
 | Freedom LLC | — | 90 (beat exists in `artifacts/`), no key named | chat only |

@@ -1,18 +1,18 @@
-SUNO PROMPT — ORIGINAL WEDDING DUET "OUR VOWS"
+SUNO PROMPT — ORIGINAL R&B SOUL TRAP PIANO BALLET WEDDING DUET "OUR VOWS"
 A piano ballet duet for Jessica and Kourtney, written as two love letters:
 Kourtney to Jessica, then Jessica to Kourtney, then the vows they make together.
-Soulful male tenor and female alto, live piano and strings, no drums.
+R&B soul trap drums and 808 under live piano and strings; soulful male tenor and female alto.
 Two separate prompts: Style box, then Lyrics box.
 
 ------------------------------------------------------------------------
-STYLE OF MUSIC (paste into the Style box - 734 characters)
+STYLE OF MUSIC (paste into the Style box - 706 characters)
 ------------------------------------------------------------------------
-Piano-led ballet waltz at 68 BPM in E-flat major, 3/4 time. Solo grand piano carries the melody like a dance, with warm string quartet, harp, soft timpani and a final rise of strings. A soulful male tenor and female alto trade love-letter verses and join in close harmony on the chorus. The vocal is intimate and passionate, never shouted; the piano stays under every word. The arrangement moves from one piano and one voice to a full, tender duet, then returns to piano and whispered vows. A ballet pulse, not a pop beat; rubato at the turnarounds, a gentle lift into each chorus. Mood: elegant, romantic, grateful, forever. No drum kit, no synth, no auto-tune, no pop polish. Original lyrics, melody, vocal cadence and piano figure.
+R&B soul trap wedding ballad at 68 BPM in E-flat major, with piano ballet at its center. Grand piano arpeggios and a soft string quartet move like a dance over slow half-time trap drums, double-time hi-hats, deep 808 and finger snaps. A soulful male tenor and female alto trade love-letter verses and join in close harmony on the chorus. The vocal is intimate, passionate and melismatic, never shouted; the piano stays under every word. The arrangement moves from solo piano and one voice into a full duet with 808 and strings, then returns to piano and whispered vows. Mood: elegant, romantic, devoted, forever. No pop polish, no EDM, no auto-tune. Original lyrics, melody, vocal cadence and drum pattern.
 
 ------------------------------------------------------------------------
-SHORT STYLE (Style box if the long one is rejected - 246 characters)
+SHORT STYLE (Style box if the long one is rejected - 281 characters)
 ------------------------------------------------------------------------
-Piano-led ballet waltz, 68 BPM, E-flat major, 3/4. Grand piano, strings, harp, soft timpani. Soulful male tenor and female alto trade verses, harmonize on the chorus. Intimate, passionate, elegant. No drums, no synth, no auto-tune. Original song.
+R&B soul trap wedding ballad, 68 BPM, E-flat major. Piano ballet arpeggios, strings, half-time trap drums, double-time hats, 808, snaps. Soulful male tenor and female alto trade verses, harmonize on chorus. Intimate, passionate, elegant. No pop polish, no auto-tune. Original song.
 
 ------------------------------------------------------------------------
 LYRICS (paste into the Lyrics box - 4288 characters)
@@ -149,8 +149,8 @@ I do.
 I do.
 
 ------------------------------------------------------------------------
-EXCLUDE STYLES (paste into the Exclude styles box - 94 characters)
+EXCLUDE STYLES (paste into the Exclude styles box - 99 characters)
 ------------------------------------------------------------------------
-auto-tune, pop polish, country, rap, drill, comedy, parody, any named artist or song imitation
+pop, pop polish, EDM, country, drill, comedy, parody, auto-tune, any named artist or song imitation
 
 ------------------------------------------------------------------------

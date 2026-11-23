@@ -47,6 +47,16 @@
   let examTimer = null;
   let toastTimer = null;
 
+  const speechSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  const speech = {
+    token: 0,
+    queue: [],
+    index: 0,
+    speaking: false,
+    paused: false,
+    context: null
+  };
+
   const app = document.getElementById("main");
   const toast = document.getElementById("toast");
 
@@ -179,6 +189,10 @@
       startExam();
     } else if (action === "open-lesson") {
       openLesson(id);
+    } else if (action === "toggle-speech") {
+      toggleSpeech(target.dataset.context);
+    } else if (action === "stop-speech") {
+      stopSpeech();
     } else if (action === "mark-complete") {
       toggleLesson(id);
     } else if (action === "next-lesson") {
@@ -293,6 +307,9 @@
   function render(options) {
     const opts = options || {};
     if (view !== "exam") clearExamTimer();
+    if (speech.speaking && speech.context !== getSpeechContext()) {
+      stopSpeech();
+    }
 
     const navKey = view === "lesson" ? "study" : view === "quiz-result" ? "quiz" : view === "exam-result" ? "exam" : view;
     document.querySelectorAll("[data-nav]").forEach(function (button) {
@@ -553,7 +570,7 @@
       '<div class="breadcrumb"><button type="button" data-action="nav" data-view="study">Study plan</button><span>/</span><span>Lesson ' + (index + 1) + '</span></div>' +
       '<section class="lesson-hero">' +
         '<div><div class="eyebrow">' + esc(topic.name) + '</div><h1>' + esc(lesson.title) + '</h1><p>' + esc(lesson.summary) + '</p></div>' +
-        '<div class="lesson-hero-side"><span class="chip">' + lesson.minutes + ' min</span><span class="chip ' + (isDone ? "is-green" : "is-yellow") + '">' + (isDone ? "Complete" : "Not complete") + '</span></div>' +
+        '<div class="lesson-hero-side"><span class="chip">' + lesson.minutes + ' min</span><span class="chip ' + (isDone ? "is-green" : "is-yellow") + '">' + (isDone ? "Complete" : "Not complete") + '</span>' + speechControls("lesson:" + lesson.id) + '</div>' +
       '</section>' +
       '<div class="lesson-layout">' +
         '<article class="lesson-body">' +
@@ -708,7 +725,7 @@
         '<div class="quiz-meta"><span class="chip is-yellow">Question ' + (quiz.index + 1) + ' of ' + quiz.questions.length + '</span><span class="chip">' + esc(topic.name) + '</span><span class="chip">' + progressPercent + '%</span></div>' +
         '<div class="progress-track" style="margin-bottom:18px"><div class="progress-fill" style="width:' + progressPercent + '%"></div></div>' +
         '<div class="quiz-card">' +
-          '<div class="question-kicker"><span>' + esc(topic.name) + '</span><span>' + (revealed ? (selected === q.answer ? "Correct" : "Review the answer") : "Select one") + '</span></div>' +
+          '<div class="question-kicker"><span>' + esc(topic.name) + '</span><div class="question-kicker-tools">' + speechControls("quiz:" + q.id) + '<span>' + (revealed ? (selected === q.answer ? "Correct" : "Review the answer") : "Select one") + '</span></div></div>' +
           '<h2 class="question-text">' + esc(q.q) + '</h2>' +
           '<div class="options">' +
             q.options.map(function (option, index) {
@@ -875,7 +892,7 @@
           '<div class="quiz-meta"><span class="chip is-yellow">Question ' + (exam.index + 1) + ' of ' + exam.questions.length + '</span><span class="chip">' + esc(topic.name) + '</span><span class="chip">' + answered + ' answered</span></div>' +
           '<div class="progress-track" style="margin-bottom:18px"><div class="progress-fill" style="width:' + percent + '%"></div></div>' +
           '<div class="quiz-card">' +
-            '<div class="question-kicker"><span>' + esc(topic.name) + '</span><button class="button small ghost" type="button" data-action="exam-flag" aria-pressed="' + (exam.flags[exam.index] ? "true" : "false") + '">' + (exam.flags[exam.index] ? "Flagged" : "Flag for review") + '</button></div>' +
+            '<div class="question-kicker"><span>' + esc(topic.name) + '</span><div class="question-kicker-tools">' + speechControls("exam:" + q.id) + '<button class="button small ghost" type="button" data-action="exam-flag" aria-pressed="' + (exam.flags[exam.index] ? "true" : "false") + '">' + (exam.flags[exam.index] ? "Flagged" : "Flag for review") + '</button></div></div>' +
             '<h2 class="question-text">' + esc(q.q) + '</h2>' +
             '<div class="options">' +
               q.options.map(function (option, index) {
@@ -1091,6 +1108,254 @@
     if (!el || !exam || exam.submitted) return;
     const seconds = Math.max(0, Math.floor((Date.now() - exam.startedAt) / 1000));
     el.textContent = formatTime(seconds);
+  }
+
+  function getSpeechContext() {
+    if (view === "lesson" && currentLesson) return "lesson:" + currentLesson;
+    if (view === "quiz" && quiz && !quiz.finished) {
+      const q = quiz.questions[quiz.index];
+      return q ? "quiz:" + q.id : null;
+    }
+    if (view === "exam" && exam && !exam.submitted) {
+      const q = exam.questions[exam.index];
+      return q ? "exam:" + q.id : null;
+    }
+    return null;
+  }
+
+  function speechControls(context) {
+    if (!speechSupported) return "";
+    const active = speech.speaking && speech.context === context;
+    return '<div class="speech-controls" data-speech-controls="' + esc(context) + '">' +
+      '<button class="button small" type="button" data-action="toggle-speech" data-context="' + esc(context) + '">' + (active ? (speech.paused ? "Resume" : "Pause") : "Read aloud") + '</button>' +
+      '<button class="button small ghost" type="button" data-action="stop-speech"' + (active ? "" : " hidden") + '>Stop</button>' +
+    '</div>';
+  }
+
+  function toggleSpeech(context) {
+    if (!speechSupported) {
+      showToast("Read aloud is not supported in this browser.");
+      return;
+    }
+
+    if (speech.speaking && speech.context === context) {
+      if (speech.paused) {
+        window.speechSynthesis.resume();
+        speech.paused = false;
+      } else {
+        window.speechSynthesis.pause();
+        speech.paused = true;
+      }
+      updateSpeechButtons();
+      return;
+    }
+
+    const text = speechTextFor(context);
+    if (text) startSpeech(text, context);
+  }
+
+  function startSpeech(text, context) {
+    const chunks = chunkForSpeech(text);
+    if (!chunks.length) return;
+
+    stopSpeech();
+    const token = speech.token + 1;
+    speech.token = token;
+    speech.queue = chunks;
+    speech.index = 0;
+    speech.speaking = true;
+    speech.paused = false;
+    speech.context = context;
+    updateSpeechButtons();
+
+    // Chrome can drop an utterance queued in the same tick as cancel().
+    window.setTimeout(function () {
+      if (token === speech.token) speakChunk(token);
+    }, 60);
+  }
+
+  function speakChunk(token) {
+    if (token !== speech.token || !speech.speaking) return;
+    if (speech.index >= speech.queue.length) {
+      finishSpeech();
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(speech.queue[speech.index]);
+    utterance.lang = "en-US";
+    utterance.rate = 0.95;
+    const voice = pickSpeechVoice();
+    if (voice) utterance.voice = voice;
+
+    utterance.onend = function () {
+      if (token !== speech.token || !speech.speaking) return;
+      speech.index += 1;
+      speakChunk(token);
+    };
+
+    utterance.onerror = function (event) {
+      if (token !== speech.token) return;
+      if (event.error === "interrupted" || event.error === "canceled") return;
+      finishSpeech();
+      showToast("Read aloud could not start. Try another browser voice.");
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function stopSpeech() {
+    speech.token += 1;
+    speech.queue = [];
+    speech.index = 0;
+    speech.speaking = false;
+    speech.paused = false;
+    speech.context = null;
+    if (speechSupported) window.speechSynthesis.cancel();
+    updateSpeechButtons();
+  }
+
+  function finishSpeech() {
+    speech.token += 1;
+    speech.queue = [];
+    speech.index = 0;
+    speech.speaking = false;
+    speech.paused = false;
+    speech.context = null;
+    updateSpeechButtons();
+  }
+
+  function updateSpeechButtons() {
+    document.querySelectorAll("[data-speech-controls]").forEach(function (container) {
+      const active = speech.speaking && speech.context === container.dataset.speechControls;
+      const toggle = container.querySelector('[data-action="toggle-speech"]');
+      const stop = container.querySelector('[data-action="stop-speech"]');
+      if (toggle) toggle.textContent = active ? (speech.paused ? "Resume" : "Pause") : "Read aloud";
+      if (stop) stop.hidden = !active;
+    });
+
+    const dock = document.getElementById("speech-dock");
+    if (!dock) return;
+    dock.hidden = !speech.speaking;
+    const status = document.getElementById("speech-dock-status");
+    const toggle = document.getElementById("speech-dock-toggle");
+    if (status) status.textContent = speech.paused ? "Paused" : "Reading aloud";
+    if (toggle) {
+      toggle.dataset.context = speech.context || "";
+      toggle.textContent = speech.paused ? "Resume" : "Pause";
+    }
+  }
+
+  function speechTextFor(context) {
+    if (context.indexOf("lesson:") === 0) {
+      const lesson = LESSONS.find(function (item) { return "lesson:" + item.id === context; });
+      return lesson ? lessonSpeechText(lesson) : "";
+    }
+
+    if (context.indexOf("quiz:") === 0) {
+      const q = quiz && quiz.questions[quiz.index];
+      if (!q || "quiz:" + q.id !== context) return "";
+      return questionSpeechText(q, quiz.revealed[quiz.index], quiz.answers[quiz.index]);
+    }
+
+    if (context.indexOf("exam:") === 0) {
+      const q = exam && exam.questions[exam.index];
+      if (!q || "exam:" + q.id !== context) return "";
+      return questionSpeechText(q, false, null);
+    }
+
+    return "";
+  }
+
+  function lessonSpeechText(lesson) {
+    const parts = [lesson.title + ". " + lesson.summary];
+    lesson.sections.forEach(function (section) {
+      if (section.h) parts.push(section.h + ".");
+      if (section.p) section.p.forEach(function (paragraph) { parts.push(paragraph); });
+      if (section.bullets) section.bullets.forEach(function (bullet) { parts.push(bullet); });
+      if (section.note) parts.push("Test trap. " + section.note);
+      if (section.table) parts.push(tableSpeechText(section.table));
+    });
+    if (lesson.table) parts.push(tableSpeechText(lesson.table));
+    if (lesson.keyFacts && lesson.keyFacts.length) {
+      parts.push("Key facts.");
+      lesson.keyFacts.forEach(function (fact) { parts.push(fact); });
+    }
+    return parts.join(" ");
+  }
+
+  function tableSpeechText(table) {
+    const parts = [];
+    if (table.caption) parts.push(table.caption + ".");
+    table.rows.forEach(function (row) {
+      parts.push(table.headers.map(function (header, index) {
+        return header + ": " + row[index];
+      }).join(". ") + ".");
+    });
+    return parts.join(" ");
+  }
+
+  function questionSpeechText(q, reveal, selected) {
+    const parts = ["Question. " + q.q, "Options."];
+    q.options.forEach(function (option, index) {
+      parts.push(LETTERS[index] + ". " + option);
+    });
+    if (reveal) {
+      parts.push("Correct answer. " + LETTERS[q.answer] + ". " + q.options[q.answer]);
+      if (selected !== null && selected !== undefined && selected !== q.answer) {
+        parts.push("Your answer. " + LETTERS[selected] + ". " + q.options[selected]);
+      }
+      if (q.explain) parts.push(q.explain);
+    }
+    return parts.join(" ");
+  }
+
+  function chunkForSpeech(text) {
+    const clean = String(text || "").replace(/\s+/g, " ").trim();
+    if (!clean) return [];
+
+    const sentences = clean.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) || [clean];
+    const chunks = [];
+    let current = "";
+
+    function add(piece) {
+      const trimmed = piece.trim();
+      if (!trimmed) return;
+      if (current && current.length + trimmed.length + 1 > 220) {
+        chunks.push(current);
+        current = trimmed;
+      } else {
+        current = current ? current + " " + trimmed : trimmed;
+      }
+    }
+
+    sentences.forEach(function (sentence) {
+      if (sentence.length <= 220) {
+        add(sentence);
+        return;
+      }
+
+      let rest = sentence.trim();
+      while (rest.length > 220) {
+        let cut = rest.lastIndexOf(", ", 220);
+        if (cut < 120) cut = rest.lastIndexOf(" ", 220);
+        if (cut <= 0) cut = 220;
+        add(rest.slice(0, cut + 1));
+        rest = rest.slice(cut + 1).trim();
+      }
+      add(rest);
+    });
+
+    if (current) chunks.push(current);
+    return chunks;
+  }
+
+  function pickSpeechVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    return voices.find(function (voice) { return /^en[-_]US/i.test(voice.lang) && voice.localService; }) ||
+      voices.find(function (voice) { return /^en[-_]US/i.test(voice.lang); }) ||
+      voices.find(function (voice) { return /^en/i.test(voice.lang); }) ||
+      null;
   }
 
   function progressBar(percent) {

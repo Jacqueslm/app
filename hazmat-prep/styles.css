@@ -587,6 +587,16 @@ h3 {
   transform: none;
 }
 
+.speech-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.speech-controls [hidden] {
+  display: none !important;
+}
+
 .section {
   margin-top: 32px;
 }
@@ -1139,6 +1149,14 @@ h3 {
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.question-kicker-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .question-text {
@@ -2001,12 +2019,71 @@ kbd {
   }
 }
 
+.speech-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 80;
+  width: min(540px, calc(100% - 24px));
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 212, 59, 0.32);
+  border-radius: 14px;
+  background: rgba(16, 27, 36, 0.96);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  padding: 10px 12px;
+}
+
+.speech-dock[hidden] {
+  display: none;
+}
+
+.speech-dock-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.speech-dock-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.speech-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 0 0 0 4px rgba(255, 212, 59, 0.12);
+  animation: speech-pulse 1.6s ease-in-out infinite;
+}
+
+.speech-dock-actions {
+  display: flex;
+  gap: 6px;
+}
+
+@keyframes speech-pulse {
+  50% {
+    box-shadow: 0 0 0 7px rgba(255, 212, 59, 0);
+  }
+}
+
 @media print {
   .topbar,
   .site-footer,
   .toast,
   .button,
-  .lesson-aside {
+  .lesson-aside,
+  .speech-dock {
     display: none !important;
   }
 

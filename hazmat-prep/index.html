@@ -49,6 +49,16 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
+  <div id="speech-dock" class="speech-dock" hidden>
+    <div class="speech-dock-inner">
+      <span class="speech-dock-label"><span class="speech-dot" aria-hidden="true"></span><span id="speech-dock-status" aria-live="polite">Reading aloud</span></span>
+      <div class="speech-dock-actions">
+        <button class="button small" type="button" data-action="toggle-speech" data-context="" id="speech-dock-toggle">Pause</button>
+        <button class="button small ghost" type="button" data-action="stop-speech">Stop</button>
+      </div>
+    </div>
+  </div>
+
   <script src="data.js"></script>
   <script src="questions.js"></script>
   <script src="app.js"></script>

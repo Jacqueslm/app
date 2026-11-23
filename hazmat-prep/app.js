@@ -56,6 +56,10 @@
     paused: false,
     context: null
   };
+  const wakeLockSupported = "wakeLock" in navigator;
+  let speechWakeLock = null;
+  let speechWantsWakeLock = false;
+  let speechWakeNotified = false;
 
   const app = document.getElementById("main");
   const toast = document.getElementById("toast");
@@ -121,6 +125,7 @@
 
   document.addEventListener("click", handleClick);
   document.addEventListener("keydown", handleKeydown);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 
   render();
 
@@ -1142,9 +1147,11 @@
       if (speech.paused) {
         window.speechSynthesis.resume();
         speech.paused = false;
+        requestSpeechWakeLock();
       } else {
         window.speechSynthesis.pause();
         speech.paused = true;
+        releaseSpeechWakeLock();
       }
       updateSpeechButtons();
       return;
@@ -1166,6 +1173,7 @@
     speech.speaking = true;
     speech.paused = false;
     speech.context = context;
+    requestSpeechWakeLock();
     updateSpeechButtons();
 
     // Chrome can drop an utterance queued in the same tick as cancel().
@@ -1211,6 +1219,7 @@
     speech.paused = false;
     speech.context = null;
     if (speechSupported) window.speechSynthesis.cancel();
+    releaseSpeechWakeLock();
     updateSpeechButtons();
   }
 
@@ -1221,6 +1230,7 @@
     speech.speaking = false;
     speech.paused = false;
     speech.context = null;
+    releaseSpeechWakeLock();
     updateSpeechButtons();
   }
 
@@ -1238,11 +1248,55 @@
     dock.hidden = !speech.speaking;
     const status = document.getElementById("speech-dock-status");
     const toggle = document.getElementById("speech-dock-toggle");
-    if (status) status.textContent = speech.paused ? "Paused" : "Reading aloud";
+    if (status) status.textContent = speech.paused ? "Paused" : (speechWakeLock ? "Reading aloud · screen on" : "Reading aloud");
     if (toggle) {
       toggle.dataset.context = speech.context || "";
       toggle.textContent = speech.paused ? "Resume" : "Pause";
     }
+  }
+
+  function requestSpeechWakeLock() {
+    speechWantsWakeLock = true;
+    if (!wakeLockSupported || document.visibilityState !== "visible" || speechWakeLock) return;
+    navigator.wakeLock.request("screen").then(function (lock) {
+      speechWakeLock = lock;
+      lock.addEventListener("release", function () {
+        speechWakeLock = null;
+        updateSpeechButtons();
+      });
+      updateSpeechButtons();
+    }).catch(function () {
+      speechWakeLock = null;
+      if (speech.speaking && document.visibilityState === "visible" && !speechWakeNotified) {
+        speechWakeNotified = true;
+        showToast("This browser cannot keep the screen on. Set a longer screen timeout while listening.");
+      }
+    });
+  }
+
+  function releaseSpeechWakeLock() {
+    speechWantsWakeLock = false;
+    if (!speechWakeLock) return;
+    const lock = speechWakeLock;
+    speechWakeLock = null;
+    lock.release().catch(function () {});
+    updateSpeechButtons();
+  }
+
+  function handleVisibilityChange() {
+    if (document.visibilityState !== "visible" || !speech.speaking) return;
+    if (speechWantsWakeLock) requestSpeechWakeLock();
+    if (speech.paused) return;
+
+    // Mobile browsers can suspend speech when the page is hidden. Nudge it
+    // back, and restart the current chunk if the browser cancelled it.
+    window.speechSynthesis.resume();
+    window.setTimeout(function () {
+      if (!speech.speaking || speech.paused || document.visibilityState !== "visible") return;
+      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+        speakChunk(speech.token);
+      }
+    }, 350);
   }
 
   function speechTextFor(context) {

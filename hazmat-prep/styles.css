@@ -2052,9 +2052,10 @@ kbd {
   color: var(--muted);
   font-family: var(--mono);
   font-size: 10px;
+  line-height: 1.4;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .speech-dot {

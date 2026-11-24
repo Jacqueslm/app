@@ -61,6 +61,10 @@
   let speechWantsWakeLock = false;
   let speechWakeNotified = false;
 
+  const SPEECH_RATE_KEY = "hazmat-h-speech-rate-v1";
+  const SPEECH_RATES = [0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.25, 1.5];
+  let speechRate = loadSpeechRate();
+
   const app = document.getElementById("main");
   const toast = document.getElementById("toast");
 
@@ -125,9 +129,11 @@
 
   document.addEventListener("click", handleClick);
   document.addEventListener("keydown", handleKeydown);
+  document.addEventListener("change", handleChange);
   document.addEventListener("visibilitychange", handleVisibilityChange);
 
   render();
+  syncSpeechRateSelect();
 
   function loadProgress() {
     try {
@@ -252,6 +258,12 @@
       toggleCheck(id);
     } else if (action === "reset-progress") {
       resetProgress();
+    }
+  }
+
+  function handleChange(event) {
+    if (event.target && event.target.id === "speech-rate") {
+      setSpeechRate(event.target.value);
     }
   }
 
@@ -1191,7 +1203,7 @@
 
     const utterance = new SpeechSynthesisUtterance(speech.queue[speech.index]);
     utterance.lang = "en-US";
-    utterance.rate = 0.95;
+    utterance.rate = speechRate;
     const voice = pickSpeechVoice();
     if (voice) utterance.voice = voice;
 
@@ -1252,6 +1264,47 @@
     if (toggle) {
       toggle.dataset.context = speech.context || "";
       toggle.textContent = speech.paused ? "Resume" : "Pause";
+    }
+  }
+
+  function syncSpeechRateSelect() {
+    const select = document.getElementById("speech-rate");
+    if (select) select.value = String(speechRate);
+  }
+
+  function setSpeechRate(value) {
+    const rate = Number(value);
+    if (SPEECH_RATES.indexOf(rate) === -1) return;
+    speechRate = rate;
+    saveSpeechRate();
+    syncSpeechRateSelect();
+    if (!speech.speaking || speech.paused) return;
+
+    // An utterance's rate is fixed once it starts, so restart the current
+    // chunk at the new speed.
+    const token = speech.token + 1;
+    speech.token = token;
+    window.speechSynthesis.cancel();
+    window.setTimeout(function () {
+      if (token === speech.token && speech.speaking && !speech.paused) speakChunk(token);
+    }, 60);
+  }
+
+  function loadSpeechRate() {
+    try {
+      const stored = Number(localStorage.getItem(SPEECH_RATE_KEY));
+      if (SPEECH_RATES.indexOf(stored) !== -1) return stored;
+    } catch (error) {
+      // Ignore storage errors; fall back to the default speed.
+    }
+    return 0.8;
+  }
+
+  function saveSpeechRate() {
+    try {
+      localStorage.setItem(SPEECH_RATE_KEY, String(speechRate));
+    } catch (error) {
+      // Ignore storage errors; the in-memory speed still applies.
     }
   }
 

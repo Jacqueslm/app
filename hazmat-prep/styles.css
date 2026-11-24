@@ -2047,7 +2047,9 @@ kbd {
 
 .speech-dock-label {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
+  min-width: 0;
   gap: 8px;
   color: var(--muted);
   font-family: var(--mono);
@@ -2069,7 +2071,28 @@ kbd {
 
 .speech-dock-actions {
   display: flex;
+  flex: 0 0 auto;
   gap: 6px;
+}
+
+.speech-rate {
+  flex: 0 0 auto;
+  min-height: 36px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 6px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.speech-rate:hover {
+  border-color: #3e5666;
+  background: var(--panel-3);
 }
 
 @keyframes speech-pulse {

@@ -1,802 +1,802 @@
 window.HAZMAT_DATA.QUESTIONS = [
   {
     topic: "process",
-    q: "How many questions are on Missouri's HAZMAT knowledge test?",
-    options: ["20", "25", "50", "30"],
-    answer: 3,
-    explain: "Missouri's rule sets the Hazardous Materials Test at 30 questions.",
-    source: "12 CSR 10-24.300; Missouri CDL Manual, Section 14"
+    q: "What must you have before you drive any size vehicle used to transport hazardous material as defined in 49 CFR 383.5?",
+    options: ["A CDL with a hazardous materials endorsement", "A commercial learner permit with an X endorsement", "A TWIC card on its own", "A state hazardous materials permit"],
+    answer: 0,
+    explain: "The manual requires a CDL with a hazardous materials endorsement before you drive any size vehicle used to transport hazardous material.",
+    source: "Section 9 — introduction (p. 9-1)"
   },
   {
     topic: "process",
-    q: "What score do you need to pass the Missouri HAZMAT knowledge test?",
-    options: ["70%", "75%", "80%", "90%"],
+    q: "Who is required to provide hazardous materials training and testing for drivers?",
+    options: ["The state highway patrol", "The shipper named on the shipping paper", "The employer or a designated representative", "The driver, at a school of their own choosing"],
     answer: 2,
-    explain: "You need at least 80%, which is 24 correct answers out of 30.",
-    source: "12 CSR 10-24.300; Missouri CDL Manual, Section 14"
+    explain: "The employer or a designated representative must provide the training and testing, and the employer keeps the record.",
+    source: "Section 9 — introduction (p. 9-2)"
   },
   {
     topic: "process",
-    q: "What is the minimum age for a Missouri HAZMAT endorsement?",
-    options: ["18", "19", "25", "21"],
-    answer: 3,
-    explain: "Missouri requires H applicants to be at least 21 years old.",
-    source: "Missouri CDL Manual, Section 14"
+    q: "How often must hazardous materials employees be trained and tested?",
+    options: ["Once, when first hired", "At least once every three years", "Every year", "Every five years"],
+    answer: 1,
+    explain: "The regulations require hazardous materials employees to be trained and tested at least once every three years.",
+    source: "Section 9 — introduction (p. 9-2)"
   },
   {
     topic: "process",
-    q: "Which status is required for a Missouri HAZMAT endorsement?",
-    options: ["U.S. citizen or lawful permanent resident", "Any valid work visa", "A Canadian commercial license", "A TWIC card only"],
-    answer: 0,
-    explain: "Federal and Missouri rules require U.S. citizenship or lawful permanent resident status.",
-    source: "Missouri DOR HME page; Missouri CDL Manual, Section 14"
+    q: "How long must an employer keep a training record for an employee who works with hazardous materials?",
+    options: ["One year from the hire date", "Two years from the training date", "Thirty days after the employee leaves", "As long as the employee works with hazardous materials, plus 90 days"],
+    answer: 3,
+    explain: "The record is kept for as long as the employee is working with hazardous materials and for 90 days afterward.",
+    source: "Section 9 — introduction (p. 9-2)"
   },
   {
     topic: "process",
-    q: "What must a first-time H applicant complete before taking the H knowledge test?",
-    options: ["A tank vehicle skills test", "H ELDT theory from a TPR-listed provider", "A Missouri motorcycle endorsement", "A passport application"],
-    answer: 1,
-    explain: "A first-time H applicant must complete H theory training from an FMCSA Training Provider Registry provider before the knowledge test.",
-    source: "49 CFR 380.609; Missouri CDL Manual, Section 14"
+    q: "What security training must every hazardous materials driver receive?",
+    options: ["How to recognize and respond to possible security threats", "Firearms handling and use of force", "How to run a background investigation", "Cyber security for onboard computers"],
+    answer: 0,
+    explain: "All drivers must be trained in the security risks of hazardous materials transportation, including how to recognize and respond to possible security threats.",
+    source: "Section 9 — introduction (p. 9-2)"
   },
   {
     topic: "process",
-    q: "Where is the Missouri HAZMAT written test administered?",
-    options: ["A Missouri State Highway Patrol examination station", "A local license office", "Any Missouri police station", "An FMCSA office"],
-    answer: 0,
-    explain: "The H written test is taken at a Missouri State Highway Patrol examination station.",
-    source: "Missouri DOR HME FAQs"
+    q: "Which drivers need special training beyond the general hazardous materials course?",
+    options: ["Only drivers who cross state lines", "Only drivers under 25 years old", "Drivers carrying certain flammable gases, highway route controlled quantities of radioactive material, cargo tanks or portable tanks", "Only drivers hauling hazardous waste"],
+    answer: 2,
+    explain: "Special training is required before driving certain flammable gas materials or highway route controlled quantities of radioactive material, and cargo tank and portable tank drivers get specialized training.",
+    source: "Section 9 — introduction (p. 9-2)"
   },
   {
     topic: "process",
-    q: "Can Missouri issue an H endorsement on a commercial learner permit?",
-    options: ["No; H cannot be placed on a CLP", "Yes, after the general knowledge test", "Yes, if the CLP is from Missouri", "Only with an X endorsement"],
-    answer: 0,
-    explain: "The CLP can carry only the P, S, and N endorsements. H is added to a CDL, not a CLP.",
-    source: "Missouri CDL Manual, Section 14; 49 CFR 383.93"
+    q: "What does the manual say about permits and special routes?",
+    options: ["They are identical in every state", "Some places require permits for certain explosives or bulk hazardous waste, and states and counties may require special routes", "Permits are only needed for radioactive loads", "Route restrictions apply only to oversize loads"],
+    answer: 1,
+    explain: "Some locations require permits to transport certain explosives or bulk hazardous wastes, and states and counties may require drivers to follow special hazardous materials routes.",
+    source: "Section 9 — introduction (p. 9-2)"
   },
   {
     topic: "process",
-    q: "Which agency runs the HAZMAT endorsement security threat assessment?",
-    options: ["FMCSA", "Missouri DOR", "TSA", "PHMSA"],
-    answer: 2,
-    explain: "TSA runs the Hazardous Materials Endorsement Threat Assessment Program.",
-    source: "TSA HAZMAT endorsement page"
+    q: "What are the containment rules for?",
+    options: ["Deciding which placards to display", "Setting the emergency response telephone number", "Choosing a route around tunnels", "Telling shippers how to package safely and drivers how to load, transport and unload"],
+    answer: 3,
+    explain: "Containment rules tell shippers how to package the materials safely and drivers how to load, transport and unload them.",
+    source: "Section 9 — 9.1.1 (p. 9-2)"
   },
   {
     topic: "process",
-    q: "How often must you retake the Missouri HAZMAT written test?",
-    options: ["Only once, when first issued", "Each renewal or when adding endorsements", "Every 10 years", "Only if the CDL class changes"],
-    answer: 1,
-    explain: "Missouri requires the H written test each time you renew or add additional endorsements to your CDL.",
-    source: "Missouri DOR HME FAQs"
+    q: "When law enforcement stops a placarded vehicle, what may the officer check?",
+    options: ["Shipping papers, placards, the hazardous materials endorsement, and your knowledge of hazardous materials", "Only the driver license and registration", "Only the cargo tank retest date", "Only the bill of lading"],
+    answer: 0,
+    explain: "Officers may stop and inspect your vehicle and check shipping papers, vehicle placards, the hazardous materials endorsement, and your knowledge of hazardous materials.",
+    source: "Section 9 — 9.1.3 (p. 9-2)"
   },
   {
     topic: "process",
-    q: "Which endorsement combines hazardous materials and tank vehicle authority?",
-    options: ["H only", "H plus N", "N only", "P plus S"],
+    q: "According to Section 9, what is the purpose of the hazardous materials regulations?",
+    options: ["To raise revenue through fines", "To replace employer training programs", "To standardize placard colors nationwide", "To protect you, the people around you, and the environment"],
+    answer: 3,
+    explain: "The regulations are intended to protect you, those around you, and the environment.",
+    source: "Section 9 — 9.1.1 (p. 9-2)"
+  },
+  {
+    topic: "rules",
+    q: "Which parts of Title 49 of the Code of Federal Regulations contain the Hazardous Materials Regulations?",
+    options: ["Parts 100 to 185", "Parts 171 to 180", "Parts 350 to 399", "Parts 40 to 99"],
     answer: 1,
-    explain: "The X endorsement combines H (hazardous materials) and N (tank vehicle).",
-    source: "49 CFR 383.93; Missouri CDL Manual, Section 14"
+    explain: "The Hazardous Materials Regulations are found in parts 171 to 180 of title 49 of the Code of Federal Regulations.",
+    source: "Section 9 — introduction (p. 9-1)"
   },
   {
     topic: "rules",
-    q: "Where are the federal Hazardous Materials Regulations found?",
-    options: ["49 CFR Parts 1–99", "49 CFR Parts 300–399", "49 CFR Parts 171–180", "49 CFR Parts 500–599"],
+    q: "Who determines a shipment's identification number, proper shipping name, hazard class, packing group, packaging, labels and placards?",
+    options: ["The carrier", "The driver", "The shipper", "The consignee"],
     answer: 2,
-    explain: "The HMR are in 49 CFR Parts 171 through 180.",
-    source: "Missouri CDL Manual, Section 9"
+    explain: "The shipper uses the regulations to determine those items, then packages, marks, labels and prepares the shipping papers.",
+    source: "Section 9 — 9.2.1 (p. 9-2)"
   },
   {
     topic: "rules",
-    q: "What are the three purposes of the HAZMAT regulations?",
-    options: ["Contain, communicate, assure safe drivers and equipment", "Reduce cost, increase speed, limit paperwork", "Tax, inspect, punish", "Package, advertise, sell"],
+    q: "What must a carrier do before transporting a hazardous materials shipment?",
+    options: ["Check that the shipper described, marked and labeled it correctly, and refuse improper shipments", "Repackage every shipment to its own standard", "Test the material in its own lab", "Apply its own placards regardless of the shipper"],
     answer: 0,
-    explain: "The rules contain the material, communicate the risk, and assure safe drivers and equipment.",
-    source: "Missouri CDL Manual, Section 9.1"
+    explain: "The carrier checks that the shipper correctly described, marked, labeled and otherwise prepared the shipment, and refuses improper shipments.",
+    source: "Section 9 — 9.2.2 (p. 9-2)"
   },
   {
     topic: "rules",
-    q: "Who classifies the hazardous material and prepares the shipping paper?",
-    options: ["The receiver", "The shipper", "The driver", "The mechanic"],
+    q: "You are offered a package that is leaking. What must the driver do?",
+    options: ["Load it last so it does not contaminate other cargo", "Tape the leak and note it on the shipping paper", "Load it and drive straight to the consignee", "Refuse the leaking package and the shipment"],
+    answer: 3,
+    explain: "The driver refuses leaking packages and shipments.",
+    source: "Section 9 — 9.2.3 (p. 9-2)"
+  },
+  {
+    topic: "rules",
+    q: "Which three lists does the manual say to check to identify a hazardous material?",
+    options: ["The ERG, the placard table, and the carrier tariff", "The Hazardous Materials Table, the List of Hazardous Substances and Reportable Quantities, and the List of Marine Pollutants", "The bill of lading, the manifest, and the route plan", "The DOT register, the EPA list, and the state permit list"],
     answer: 1,
-    explain: "The shipper determines the proper description and prepares the shipment, papers, emergency information, and certification.",
-    source: "Missouri CDL Manual, Section 9.2.1"
+    explain: "Always check Section 172.101 (the Hazardous Materials Table), Appendix A (hazardous substances and reportable quantities), and Appendix B (marine pollutants).",
+    source: "Section 9 — 9.3.3 (p. 9-4)"
   },
   {
     topic: "rules",
-    q: "What is the carrier's main responsibility before transporting a HAZMAT shipment?",
-    options: ["Package and label every shipment", "Sign the shipper's certification", "Check the shipment and refuse improper shipments", "Set the route for every load"],
+    q: "What does Column 3 of the Hazardous Materials Table show?",
+    options: ["The packing group in Roman numerals", "The required labels", "The hazard class or division, or the word Forbidden", "The packaging exceptions"],
     answer: 2,
-    explain: "The carrier checks that the shipper correctly described, marked, labeled, and prepared the shipment, and refuses improper shipments.",
-    source: "Missouri CDL Manual, Section 9.2.2"
+    explain: "Column 3 shows the hazard class or division, or the entry Forbidden. Never transport a Forbidden material.",
+    source: "Section 9 — 9.3.3 (p. 9-5)"
   },
   {
     topic: "rules",
-    q: "Which set of duties belongs to the driver?",
-    options: ["Verify the shipment, refuse leaks, placard, and carry papers", "Classify the material and choose the packaging", "Prepare the shipping paper and certification", "Design the package specification"],
+    q: "What does the symbol (G) in Column 1 of the Hazardous Materials Table mean?",
+    options: ["A generic shipping name that must be accompanied by a technical name", "The material is good for domestic transport only", "The entry applies to air shipments only", "The material is a hazardous waste"],
     answer: 0,
-    explain: "The driver verifies the shipment, refuses leaks, placards when required, transports safely, keeps papers accessible, and reports incidents.",
-    source: "Missouri CDL Manual, Section 9.2.3"
+    explain: "G marks a generic shipping name, which must be accompanied by a technical name on the shipping paper.",
+    source: "Section 9 — 9.3.3 (p. 9-4)"
   },
   {
     topic: "rules",
-    q: "How often must HAZMAT employees be trained and tested?",
-    options: ["Every year", "Every 3 years", "Every 2 years", "Every 5 years"],
-    answer: 1,
-    explain: "The regulations require HAZMAT employees to be trained and tested at least once every three years.",
-    source: "Missouri CDL Manual, Section 9"
+    q: "What do the letters NA before an identification number indicate?",
+    options: ["The material is non-hazardous", "The number was assigned by the EPA", "The shipment needs no placards", "The shipping name is used only within the United States and to and from Canada"],
+    answer: 3,
+    explain: "NA is associated with proper shipping names used only within the United States and to and from Canada.",
+    source: "Section 9 — 9.3.3 (p. 9-5)"
   },
   {
     topic: "rules",
-    q: "How long must an employer keep a HAZMAT employee's training record after employment ends?",
-    options: ["30 days", "1 year", "Forever", "90 days"],
-    answer: 3,
-    explain: "The record is kept while the employee works with hazardous materials and for 90 days afterward.",
-    source: "Missouri CDL Manual, Section 9"
+    q: "In Column 7 of the Hazardous Materials Table, what do the numbers 1 through 6 mean?",
+    options: ["The material needs six labels", "The material is a poison inhalation hazard with special paper, marking and placard rules", "The material may be carried in any quantity", "The material is forbidden by highway"],
+    answer: 1,
+    explain: "The numbers 1 through 6 in Column 7 mean the material is a poison inhalation hazard (PIH), which has special shipping paper, marking and placard requirements.",
+    source: "Section 9 — 9.3.3 (p. 9-6)"
   },
   {
     topic: "rules",
-    q: "How long must a shipper keep a copy of a HAZMAT shipping paper?",
-    options: ["1 year", "3 years", "2 years", "5 years"],
+    q: "Are proper shipping names ever printed in italics in the Hazardous Materials Table?",
+    options: ["Yes, italics mark the international names", "Yes, if the entry is preceded by UN", "No, italicized names are not proper shipping names", "Only for domestic entries"],
     answer: 2,
-    explain: "Shippers keep shipping papers or electronic images for 2 years after the initial carrier accepts the material.",
-    source: "Missouri CDL Manual, Section 9.3.5"
+    explain: "The table shows proper shipping names in regular type; names shown in italics are not proper shipping names.",
+    source: "Section 9 — 9.3.3 (p. 9-4)"
   },
   {
-    topic: "rules",
-    q: "How long are hazardous waste shipping records kept?",
-    options: ["1 year", "3 years", "2 years", "5 years"],
+    topic: "classes",
+    q: "How many hazard classes does the manual list?",
+    options: ["Five", "Nine", "Twelve", "Fifteen"],
     answer: 1,
-    explain: "Hazardous waste records are kept for 3 years.",
-    source: "Missouri CDL Manual, Section 9.3.5"
-  },
-  {
-    topic: "rules",
-    q: "What can happen for noncompliance with the HAZMAT regulations?",
-    options: ["Only a warning", "Only a civil penalty for the shipper", "No consequence if the load is delivered", "Fines and jail"],
-    answer: 3,
-    explain: "The manual states that noncompliance can result in fines and jail.",
-    source: "Missouri CDL Manual, Section 9.1.3"
+    explain: "A material's hazard class reflects its risks, and there are nine different hazard classes.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
   },
   {
     topic: "classes",
-    q: "How many hazard classes are there?",
-    options: ["7", "8", "9", "12"],
+    q: "Which division of Class 1 is the mass explosion hazard?",
+    options: ["1.1", "1.2", "1.3", "1.4"],
+    answer: 0,
+    explain: "Division 1.1 is mass explosion; 1.2 is a projection hazard, 1.3 is a fire hazard, and 1.4 is a minor explosion.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
+  },
+  {
+    topic: "classes",
+    q: "What is Division 2.3?",
+    options: ["Non-flammable gas", "Flammable gas", "Oxidizing gas", "Poisonous or toxic gas"],
+    answer: 3,
+    explain: "Class 2 covers gases: 2.1 flammable, 2.2 non-flammable, and 2.3 poisonous or toxic gas.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
+  },
+  {
+    topic: "classes",
+    q: "What is Division 4.3?",
+    options: ["Flammable solid", "Spontaneously combustible", "Dangerous when wet", "Organic peroxide"],
     answer: 2,
-    explain: "There are nine hazard classes. ORM-D and combustible liquids are additional categories, not classes.",
-    source: "Missouri CDL Manual, Section 9.3.1"
+    explain: "Class 4 splits into 4.1 flammable solids, 4.2 spontaneously combustible, and 4.3 dangerous when wet.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
   },
   {
     topic: "classes",
-    q: "Which divisions belong to Class 1 explosives?",
-    options: ["1.1 through 1.4 only", "2.1 through 2.3", "4.1 through 4.3", "1.1 through 1.6"],
-    answer: 3,
-    explain: "Class 1 has divisions 1.1 through 1.6, from mass explosion to extremely insensitive.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "classes",
-    q: "Division 2.3 is best described as:",
-    options: ["Poisonous/toxic gas", "Flammable gas", "Non-flammable gas", "Oxidizer"],
-    answer: 0,
-    explain: "Class 2.1 is flammable, 2.2 is non-flammable, and 2.3 is poisonous/toxic gas.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "classes",
-    q: "Gasoline belongs to which hazard class?",
-    options: ["Class 3", "Class 1", "Class 2", "Class 8"],
-    answer: 0,
-    explain: "Gasoline is a Class 3 flammable liquid.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "classes",
-    q: "Sodium, which reacts dangerously with water, is what division?",
-    options: ["4.1", "4.3", "4.2", "5.1"],
+    q: "What is Division 5.2?",
+    options: ["Oxidizer", "Organic peroxide", "Infectious substance", "Corrosive"],
     answer: 1,
-    explain: "Division 4.3 is dangerous when wet. Sodium is a classic example.",
-    source: "Missouri CDL Manual, Figure 9.1"
+    explain: "Class 5 covers oxidizers in 5.1 and organic peroxides in 5.2.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
   },
   {
     topic: "classes",
-    q: "Ammonium nitrate is commonly used as an example of a(n):",
-    options: ["Flammable solid", "Oxidizer", "Corrosive", "Radioactive material"],
-    answer: 1,
-    explain: "Ammonium nitrate is a Class 5.1 oxidizer.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "classes",
-    q: "Anthrax virus is an example of which division?",
-    options: ["6.1", "7", "6.2", "8"],
-    answer: 2,
-    explain: "Division 6.2 covers infectious substances.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "classes",
-    q: "Uranium and plutonium are examples of which class?",
-    options: ["Class 5", "Class 6", "Class 7", "Class 8"],
-    answer: 2,
-    explain: "Class 7 covers radioactive materials.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "classes",
-    q: "Battery fluid and hydrochloric acid are examples of which class?",
-    options: ["Class 3", "Class 5", "Class 9", "Class 8"],
-    answer: 3,
-    explain: "Class 8 covers corrosive materials.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "classes",
-    q: "PCBs and asbestos are examples of which class?",
-    options: ["Class 1", "Class 6", "Class 3", "Class 9"],
-    answer: 3,
-    explain: "Class 9 is miscellaneous hazardous materials.",
-    source: "Missouri CDL Manual, Figure 9.1"
-  },
-  {
-    topic: "papers",
-    q: "What is the correct order of a hazardous materials basic description?",
-    options: ["Proper shipping name, ID number, packing group, hazard class", "Hazard class, ID number, proper shipping name, packing group", "ID number, proper shipping name, hazard class, packing group", "Packing group, hazard class, ID number, proper shipping name"],
-    answer: 2,
-    explain: "The basic description order is identification number, proper shipping name, hazard class or division, and packing group, if any.",
-    source: "Missouri CDL Manual, Section 9.3.5"
-  },
-  {
-    topic: "papers",
-    q: "Who is responsible for providing the emergency response telephone number on the shipping paper?",
-    options: ["The driver", "The carrier", "The shipper", "The receiver"],
-    answer: 2,
-    explain: "The emergency response telephone number is the shipper's responsibility, unless an exception applies.",
-    source: "Missouri CDL Manual, Section 9.3.5"
-  },
-  {
-    topic: "papers",
-    q: "How must hazardous materials be identified on a paper that also lists non-hazardous freight?",
-    options: ["Listed after all non-hazardous items", "Hidden in an attachment", "Written in code", "Entered first, highlighted, or marked with an X in the HM column"],
-    answer: 3,
-    explain: "Hazardous materials must be entered first, highlighted in contrasting color, or marked with an X in the HM column.",
-    source: "Missouri CDL Manual, Section 9.3.5"
-  },
-  {
-    topic: "papers",
-    q: "What does RQ mean on a shipping paper?",
-    options: ["Reportable quantity", "Radioactive quantity", "Required packaging", "Restricted quantity"],
+    q: "What is Division 6.2?",
+    options: ["Infectious substance", "Poison", "Radioactive material", "Miscellaneous hazardous material"],
     answer: 0,
-    explain: "RQ stands for reportable quantity. It triggers reporting requirements for certain spills.",
-    source: "Missouri CDL Manual, Section 9.3.5"
+    explain: "Class 6 is poison in 6.1 and infectious substances in 6.2.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
   },
   {
-    topic: "papers",
-    q: "Where does the word WASTE appear for a hazardous waste shipment?",
-    options: ["After the hazard class", "In the emergency phone number", "Only on the package", "Before the proper shipping name"],
+    topic: "classes",
+    q: "Which material is the example given for Class 7?",
+    options: ["Battery fluid", "Ammonium nitrate", "Uranium", "White phosphorus"],
+    answer: 2,
+    explain: "Class 7 is radioactive material, and the manual's example is uranium.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
+  },
+  {
+    topic: "classes",
+    q: "Which material is the example given for Class 8?",
+    options: ["Propane", "Gasoline", "Sodium", "Battery fluid"],
     answer: 3,
-    explain: "The word WASTE goes before the proper shipping name, for example: UN1090, Waste Acetone, 3, PG II.",
-    source: "Missouri CDL Manual, Section 9.3.5"
+    explain: "Class 8 is corrosives, and the manual's example is battery fluid.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
   },
   {
-    topic: "papers",
-    q: "Which item is not required in the emergency response information?",
-    options: ["Immediate health hazards", "The driver's home address", "Fire or explosion risks", "Initial spill or leak methods"],
+    topic: "classes",
+    q: "What does ORM-D stand for?",
+    options: ["Other Regulated Material - Division", "Other Regulated Material - Domestic", "Organic Reactive Material - Diluted", "Over-Road Miscellaneous - Dry"],
     answer: 1,
-    explain: "The emergency response information covers the material and the response, not the driver's home address.",
-    source: "Missouri CDL Manual, Section 9.3.5"
+    explain: "ORM-D means Other Regulated Material - Domestic, a category listed with Class 9.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
   },
   {
-    topic: "papers",
-    q: "Where should the driver keep hazardous materials shipping papers?",
-    options: ["In a pouch on the driver's door, within immediate reach, or on the driver's seat", "In the trailer with the cargo", "In the glove box, folded", "Mailed to the receiver"],
-    answer: 0,
-    explain: "Keep the papers in the door pouch, in clear view within immediate reach while belted, or on the driver's seat when out of the vehicle.",
-    source: "Missouri CDL Manual, Sections 9.3.1 and 9.6.10"
-  },
-  {
-    topic: "papers",
-    q: "Which statement about a hazardous waste manifest is correct?",
-    options: ["It replaces the shipping paper", "It is signed by hand by the shipper and each carrier", "It does not require EPA numbers", "It is kept only by the receiver"],
-    answer: 1,
-    explain: "The shipper prepares, dates, and signs the manifest by hand; each carrier signs by hand. Treat it as a shipping paper.",
-    source: "Missouri CDL Manual, Section 9.3.9"
-  },
-  {
-    topic: "papers",
-    q: "Which situation is an exception to the shipper's certification requirement?",
-    options: ["A private carrier transporting its own product", "A common carrier hauling for a shipper", "A tank truck delivering gasoline", "A package shipped by air"],
-    answer: 0,
-    explain: "The main exceptions are a private carrier transporting its own product and a package provided by the carrier, such as a cargo tank.",
-    source: "Missouri CDL Manual, Section 9.3.6"
-  },
-  {
-    topic: "papers",
-    q: "How are proper shipping names shown in the Hazardous Materials Table?",
-    options: ["Italics", "Bold underlined type", "All lowercase", "Roman type"],
+    topic: "classes",
+    q: "Gasoline is an example of which hazard class?",
+    options: ["Class 2", "Class 4", "Class 6", "Class 3"],
     answer: 3,
-    explain: "Proper shipping names are shown in Roman type. Names in italics are not proper shipping names.",
-    source: "Missouri CDL Manual, Section 9.3.3"
+    explain: "Class 3 is flammable liquids, and the manual's example is gasoline.",
+    source: "Section 9 — 9.3.1, Figure 9.1 (p. 9-3)"
+  },
+  {
+    topic: "papers",
+    q: "What is the correct order for the basic description on a shipping paper?",
+    options: ["Identification number, proper shipping name, hazard class or division, packing group", "Proper shipping name, quantity, identification number, packing group", "Hazard class, identification number, packing group, proper shipping name", "Packing group, hazard class, proper shipping name, identification number"],
+    answer: 0,
+    explain: "The basic description is the identification number, proper shipping name, hazard class or division, and packing group, in that order.",
+    source: "Section 9 — 9.3.5 (p. 9-7)"
+  },
+  {
+    topic: "papers",
+    q: "Where must you keep the shipping papers while you are driving?",
+    options: ["In the trailer with the cargo", "In your pocket", "In a pouch on the driver's door or in clear view within immediate reach while your seat belt is fastened", "Locked in the cab's glove box"],
+    answer: 2,
+    explain: "While driving, papers go in a pouch on the driver's door or in clear view within immediate reach while the seat belt is fastened.",
+    source: "Section 9 — 9.3.1 (p. 9-3)"
+  },
+  {
+    topic: "papers",
+    q: "A shipping paper has more than one page. What must the first page show?",
+    options: ["The shipper's phone number", "The total number of pages, such as Page 1 of 4", "The driver's signature", "The route plan"],
+    answer: 1,
+    explain: "Page numbers are required, and the first page must tell the total number of pages.",
+    source: "Section 9 — 9.3.4 (p. 9-7)"
+  },
+  {
+    topic: "papers",
+    q: "What do the letters RQ on a shipping paper mean?",
+    options: ["The load needs a route permit", "The material is radioactive", "The shipment is exempt from placarding", "A reportable quantity of a hazardous substance is present"],
+    answer: 3,
+    explain: "RQ means reportable quantity. It appears on the shipping paper and package when the material is in a reportable quantity or greater in one package.",
+    source: "Section 9 — 9.3.3, Appendix A (p. 9-6)"
+  },
+  {
+    topic: "papers",
+    q: "Who is responsible for the emergency response telephone number on the shipping paper?",
+    options: ["The shipper", "The driver", "The consignee", "The fire department"],
+    answer: 0,
+    explain: "The emergency response telephone number is the responsibility of the shipper.",
+    source: "Section 9 — 9.3.5 (p. 9-7)"
+  },
+  {
+    topic: "papers",
+    q: "How long must a shipper keep a copy of a hazardous materials shipping paper that is not hazardous waste?",
+    options: ["90 days", "1 year", "5 years", "2 years"],
+    answer: 3,
+    explain: "Shippers keep a copy of shipping papers for 2 years after the material is accepted by the initial carrier, and 3 years for hazardous waste.",
+    source: "Section 9 — 9.3.5 (p. 9-8)"
+  },
+  {
+    topic: "papers",
+    q: "How long must shipping papers for hazardous waste be kept?",
+    options: ["6 months", "3 years", "2 years", "10 years"],
+    answer: 1,
+    explain: "The retention period is 3 years for hazardous waste, compared with 2 years for other hazardous materials.",
+    source: "Section 9 — 9.3.5 (p. 9-8)"
+  },
+  {
+    topic: "papers",
+    q: "What word must appear before the proper shipping name of a hazardous waste?",
+    options: ["RQ", "RESIDUE", "SCRAP", "WASTE"],
+    answer: 3,
+    explain: "The shipper of hazardous waste must put the word WASTE before the proper shipping name, for example UN1090, Waste Acetone, 3, PG II.",
+    source: "Section 9 — 9.3.5 (p. 9-8)"
+  },
+  {
+    topic: "papers",
+    q: "A shipping paper lists both hazardous and non-hazardous freight. How must the hazardous entries be shown?",
+    options: ["Entered first and highlighted, or marked with an X in the HM column", "Entered last and double spaced", "On a separate page only", "In pencil so they can be corrected"],
+    answer: 0,
+    explain: "Hazardous materials are entered first and either highlighted in a contrasting color or identified with an X in a column captioned HM.",
+    source: "Section 9 — 9.3.5 (p. 9-7)"
+  },
+  {
+    topic: "papers",
+    q: "Who must sign the Uniform Hazardous Waste Manifest by hand?",
+    options: ["Only the shipper", "Only the disposal facility", "The shipper and each carrier that handles the shipment", "Only the last carrier"],
+    answer: 2,
+    explain: "Shippers prepare, date and sign by hand, and each carrier transporting the shipment must also sign by hand.",
+    source: "Section 9 — 9.3.9 (p. 9-8)"
   },
   {
     topic: "placards",
-    q: "How many placards must a placarded vehicle have?",
-    options: ["Four: front, rear, and both sides", "One on the rear", "Two on the sides", "Six: one on every side and both doors"],
-    answer: 0,
-    explain: "A placarded vehicle must have at least four identical placards: front, rear, and both sides.",
-    source: "Missouri CDL Manual, Section 9.3.3"
-  },
-  {
-    topic: "placards",
-    q: "What is the minimum size of a placard?",
-    options: ["100 mm / 3.9 inches", "250 mm / 9.84 inches", "150 mm / 5.9 inches", "500 mm / 19.7 inches"],
+    q: "What is the minimum number of identical placards a placarded vehicle must display?",
+    options: ["Two", "Four", "Three", "Six"],
     answer: 1,
-    explain: "Placards must be at least 250 mm (9.84 inches) square on point.",
-    source: "Missouri CDL Manual, Section 9.3.3"
+    explain: "A placarded vehicle must have at least four identical placards, on the front, rear, and both sides.",
+    source: "Section 9 — 9.3.3 (p. 9-4)"
   },
   {
     topic: "placards",
-    q: "Which placard table applies to any amount of the material?",
-    options: ["Table 2", "ORM-D", "Class 9 only", "Table 1"],
+    q: "How large must a placard be?",
+    options: ["At least 12 inches square", "At least 6 inches on a side", "At least 18 inches square", "At least 250 mm (9.84 inches) square, on point"],
     answer: 3,
+    explain: "Placards are at least 250 mm (9.84 inches) square, square-on-point, in a diamond shape.",
+    source: "Section 9 — 9.3.3 (p. 9-4)"
+  },
+  {
+    topic: "placards",
+    q: "What three things do you need to know to decide which placards to use?",
+    options: ["The material's hazard class, the amount being shipped, and the amount of all hazardous materials of all classes on the vehicle", "The route, the weather, and the time of day", "The shipper's name, the carrier's name, and the consignee", "The packing group, the package size, and the driver's experience"],
+    answer: 0,
+    explain: "Placarding depends on the hazard class, the amount being shipped, and the total amount of all hazard classes on the vehicle.",
+    source: "Section 9 — 9.3.3 (p. 9-5)"
+  },
+  {
+    topic: "placards",
+    q: "Table 1 materials must be placarded in what quantity?",
+    options: ["1,001 pounds or more", "Only when carried in bulk", "Any amount", "2,205 pounds or more"],
+    answer: 2,
     explain: "Table 1 materials must be placarded whenever any amount is transported.",
-    source: "Missouri CDL Manual, Section 9.3.11"
+    source: "Section 9 — 9.3.11 (p. 9-9)"
   },
   {
     topic: "placards",
-    q: "What is the general Table 2 placarding threshold?",
-    options: ["501 pounds", "2,205 pounds", "1,001 pounds", "5,000 pounds"],
-    answer: 2,
-    explain: "Except for bulk packaging, Table 2 classes need placards when the total amount is 1,001 pounds or more, including the package.",
-    source: "Missouri CDL Manual, Section 9.3.11"
-  },
-  {
-    topic: "placards",
-    q: "A liquid bulk package is generally a container with a capacity greater than:",
-    options: ["55 gallons", "119 gallons", "500 gallons", "1,000 gallons"],
+    q: "Except for bulk packaging, when do Table 2 hazard classes need placards?",
+    options: ["At any amount", "When the total amount is 1,001 pounds or more including the package", "When the total amount is 500 pounds or more", "Only when carried in a cargo tank"],
     answer: 1,
-    explain: "A bulk packaging for a liquid has a maximum capacity greater than 119 gallons.",
-    source: "Missouri CDL Manual, Section 9.3.11 and glossary"
+    explain: "Table 2 classes need placards when the total amount transported is 1,001 pounds or more, adding up all Table 2 products on board.",
+    source: "Section 9 — 9.3.11 (p. 9-9)"
   },
   {
     topic: "placards",
     q: "When may you use the DANGEROUS placard instead of separate Table 2 placards?",
-    options: ["With 1,001 pounds of two or more Table 2 classes and no 2,205 pounds of one class at one place", "With any amount of one Table 2 class", "Only for Class 9 materials", "Only when the vehicle is empty"],
-    answer: 0,
-    explain: "DANGEROUS is an option when you have 1,001 pounds or more of two or more Table 2 classes, and no single Table 2 class loaded at one place reaches 2,205 pounds.",
-    source: "Missouri CDL Manual, Section 9.3.11"
-  },
-  {
-    topic: "placards",
-    q: "If INHALATION HAZARD appears on the shipping paper or package, what must you do?",
-    options: ["Display the poison gas or poison inhalation placard in addition to other required placards", "Display it instead of the primary placard", "Ignore it if the load is under 1,000 pounds", "Use it only for Class 9"],
-    answer: 0,
-    explain: "The inhalation hazard placard is additional, and the 1,000-pound exception does not apply.",
-    source: "Missouri CDL Manual, Section 9.3.11"
-  },
-  {
-    topic: "placards",
-    q: "Which statement about the Class 9 placard is correct under the manual?",
-    options: ["It is required on every domestic load", "It is not required for domestic transportation under the manual", "It is required only for radioactive loads", "It replaces the shipping paper"],
-    answer: 1,
-    explain: "The manual states that the Class 9 placard is not required for domestic transportation.",
-    source: "Missouri CDL Manual, Section 9.3.11"
-  },
-  {
-    topic: "placards",
-    q: "How far must a placard be from other markings?",
-    options: ["At least 1 inch", "At least 12 inches", "At least 3 inches", "No distance is required"],
-    answer: 2,
-    explain: "Placards must be at least three inches away from any other markings.",
-    source: "Missouri CDL Manual, Section 9.3.10"
-  },
-  {
-    topic: "placards",
-    q: "How many digits are in a hazardous materials identification number?",
-    options: ["Two", "Three", "Six", "Four"],
+    options: ["Any time two hazard classes are on board", "Only for bulk shipments", "Only when the load is under 1,001 pounds", "With 1,001 pounds or more of two or more Table 2 classes needing different placards, and no 2,205 pounds or more of any one class at one place"],
     answer: 3,
-    explain: "Identification numbers are four-digit codes, often preceded by UN or NA.",
-    source: "Missouri CDL Manual, Section 9.3.3"
+    explain: "The DANGEROUS placard is an option when you have 1,001 pounds or more of two or more Table 2 classes requiring different placards and have not loaded 2,205 pounds or more of any one Table 2 class at one place.",
+    source: "Section 9 — 9.3.11 (p. 9-9)"
   },
   {
-    topic: "loading",
-    q: "What should you do before loading or unloading hazardous materials?",
-    options: ["Leave the engine running", "Set the parking brake and make sure the vehicle will not move", "Open all packages", "Remove the placards"],
-    answer: 1,
-    explain: "Set the parking brake and secure the vehicle before loading or unloading.",
-    source: "Missouri CDL Manual, Section 9.4.1"
-  },
-  {
-    topic: "loading",
-    q: "Around which classes must you never smoke?",
-    options: ["Classes 6, 7, 8, and 9", "Only Class 9", "Classes 1, 2.1, 3, 4, and 5", "Only Class 8"],
-    answer: 2,
-    explain: "No smoking around explosives, flammable gases, flammable liquids, flammable solids, or oxidizers.",
-    source: "Missouri CDL Manual, Section 9.4.1"
-  },
-  {
-    topic: "loading",
-    q: "Which classes should not be loaded into a cargo space with a heater or air-conditioner unit unless you have read the rules?",
-    options: ["Classes 6, 7, and 8", "Classes 4 and 9", "Classes 1, 2.1, and 3", "All classes equally"],
-    answer: 2,
-    explain: "Special cargo heater rules apply to Class 1 explosives, Class 2.1 flammable gases, and Class 3 flammable liquids.",
-    source: "Missouri CDL Manual, Section 9.4.1"
-  },
-  {
-    topic: "loading",
-    q: "What must you do with the engine before loading or unloading explosives?",
-    options: ["Leave it running to power the lights", "Turn it off", "Use metal hooks", "Drop packages onto the floor"],
-    answer: 1,
-    explain: "Turn the engine off before loading or unloading any explosives.",
-    source: "Missouri CDL Manual, Section 9.4.1"
-  },
-  {
-    topic: "loading",
-    q: "What kind of floor liner is required for Division 1.1, 1.2, or 1.3 explosives?",
-    options: ["Stainless steel", "Any ferrous metal", "A non-metallic material or non-ferrous metal", "Wet wood"],
-    answer: 2,
-    explain: "The floor must be tight, and the liner must be non-metallic or non-ferrous metal.",
-    source: "Missouri CDL Manual, Section 9.4.1"
-  },
-  {
-    topic: "loading",
-    q: "Which condition means you must not transport a package of explosives?",
-    options: ["Dampness or an oily stain", "A clean, dry package", "A new label", "A shipper's certification"],
+    topic: "placards",
+    q: "If the words INHALATION HAZARD appear on the shipping paper or package, what must you do?",
+    options: ["Display POISON GAS or POISON INHALATION HAZARD placards in addition to the hazard class placard, even for small amounts", "Use only the hazard class placard", "Add a DANGEROUS placard only", "Nothing extra if the load is under 1,001 pounds"],
     answer: 0,
-    explain: "Never transport damaged explosives or packages showing dampness or an oily stain.",
-    source: "Missouri CDL Manual, Section 9.4.1"
+    explain: "POISON GAS or POISON INHALATION HAZARD placards are required in addition to the hazard class placard, and the 1,000 pound exception does not apply.",
+    source: "Section 9 — 9.3.11 (p. 9-9)"
   },
   {
-    topic: "loading",
-    q: "How must Class 4 flammable solids and Class 5 oxidizers be loaded?",
-    options: ["Left open to the air", "Loaded only on the tailgate", "Stacked above the cab", "Completely enclosed or covered securely"],
-    answer: 3,
-    explain: "Class 4 and Class 5 materials must be completely enclosed in a vehicle or covered securely.",
-    source: "Missouri CDL Manual, Section 9.4.1"
+    topic: "placards",
+    q: "A bulk package has a capacity greater than 119 gallons. What does that mean for placarding?",
+    options: ["Placards are optional if the tank is empty", "Only the tractor needs placards", "The bulk package and the vehicle must be placarded, even if it holds only residue", "Only a label is required"],
+    answer: 2,
+    explain: "Bulk packaging is a single container with a capacity greater than 119 gallons, and a bulk package and its vehicle must be placarded even with only residue inside.",
+    source: "Section 9 — 9.3.11 (p. 9-10)"
   },
   {
-    topic: "loading",
-    q: "Which rule applies to nitric acid?",
-    options: ["Always load nitric acid above food", "Load nitric acid with cyanides", "Load nitric acid in the cab", "Never load nitric acid above any other product"],
-    answer: 3,
-    explain: "Do not load nitric acid above any other product. It is also incompatible with several materials in the Do Not Load table.",
-    source: "Missouri CDL Manual, Sections 9.4.1 and 9.4.2"
-  },
-  {
-    topic: "loading",
-    q: "Where may you never load a package labeled POISON or POISON INHALATION HAZARD?",
-    options: ["In the trailer on a pallet", "In the cab or sleeper, or with food", "In a closed cargo space", "On a truck with placards"],
+    topic: "placards",
+    q: "How are identification numbers displayed on cargo tanks and other bulk packaging?",
+    options: ["Stenciled in red on the cab door", "In black 100 mm (3.9 inch) numbers on placards, orange panels, or a white diamond-shaped background", "In white letters on the rear bumper only", "They are written on the shipping paper only"],
     answer: 1,
-    explain: "Never load poison or poison inhalation hazard packages in the driver's cab or sleeper, or with food for humans or animals.",
-    source: "Missouri CDL Manual, Section 9.4.1"
+    explain: "Bulk packaging displays the identification number in black 100 mm (3.9 inch) numbers on orange panels, placards, or a white diamond-shaped background if no placards are required.",
+    source: "Section 9 — 9.5.1 (p. 9-13)"
+  },
+  {
+    topic: "placards",
+    q: "Is the Class 9 placard required for domestic transportation?",
+    options: ["Yes, at any amount", "Yes, above 1,001 pounds", "Only in bulk", "No, it is not required for domestic transportation"],
+    answer: 3,
+    explain: "The Class 9 placard is not required for domestic transportation.",
+    source: "Section 9 — 9.3.11, Figure 9.8 (p. 9-10)"
   },
   {
     topic: "loading",
-    q: "What is the maximum total transport index for radioactive packages in one vehicle?",
-    options: ["50", "25", "100", "500"],
+    q: "Before loading or unloading hazardous materials, what must you do?",
+    options: ["Open all package vents", "Check the shipping paper at the end of the load", "Set the parking brake and make sure the vehicle will not move", "Leave the engine running to keep the cab warm"],
+    answer: 2,
+    explain: "Before loading or unloading, set the parking brake and make sure the vehicle will not move.",
+    source: "Section 9 — 9.4.1 (p. 9-10)"
+  },
+  {
+    topic: "loading",
+    q: "Around which hazard classes must you never smoke?",
+    options: ["Classes 1, 2.1, 3, 4 and 5", "Only Class 3", "Only Classes 1 and 2", "All nine classes"],
     answer: 0,
-    explain: "The total transport index of all radioactive packages in a single vehicle must not exceed 50.",
-    source: "Missouri CDL Manual, Section 9.4.1"
+    explain: "Never smoke around Class 1 explosives, Class 2.1 flammable gas, Class 3 flammable liquids, Class 4 flammable solids, or Class 5 oxidizers.",
+    source: "Section 9 — 9.4.1 (p. 9-10)"
+  },
+  {
+    topic: "loading",
+    q: "Which three hazard classes should not be loaded into a cargo space with a heater or air conditioner unit unless you know the rules?",
+    options: ["Classes 4, 5 and 6", "Classes 2.2, 4.1 and 8", "Classes 7, 8 and 9", "Classes 1, 2.1 and 3"],
+    answer: 3,
+    explain: "Special cargo heater rules apply to Class 1 explosives, Class 2.1 flammable gas, and Class 3 flammable liquids; the rules usually forbid the heater.",
+    source: "Section 9 — 9.4.1 (p. 9-10)"
+  },
+  {
+    topic: "loading",
+    q: "Which classes cannot have overhang or tailgate loads and must be in a closed cargo space?",
+    options: ["Classes 1, 4 and 5", "Classes 2, 3 and 8", "Classes 6, 7 and 9", "Classes 3, 5 and 6"],
+    answer: 1,
+    explain: "Class 1 explosives, Class 4 flammable solids and Class 5 oxidizers go in a closed cargo space unless every package is fire and water resistant or covered with a fire and water resistant tarp.",
+    source: "Section 9 — 9.4.1 (p. 9-10)"
+  },
+  {
+    topic: "loading",
+    q: "What kind of floor lining is required for Division 1.1, 1.2 or 1.3 explosives?",
+    options: ["Stainless steel only", "Any painted plywood", "Non-metallic material or non-ferrous metal", "Aluminum tread plate"],
+    answer: 2,
+    explain: "The floors must be tight and the liner must be non-metallic material or non-ferrous metal, which contains no iron or iron alloys.",
+    source: "Section 9 — 9.4.1 (p. 9-11)"
+  },
+  {
+    topic: "loading",
+    q: "A package of explosives shows dampness or an oily stain. What do you do?",
+    options: ["Do not take it; never transport damaged packages of explosives", "Load it in front so you can watch it", "Wipe it down and load it", "Load it if the shipper signs the paper"],
+    answer: 0,
+    explain: "Never transport damaged packages of explosives, and do not take a package that shows any dampness or oily stain.",
+    source: "Section 9 — 9.4.1 (p. 9-11)"
+  },
+  {
+    topic: "loading",
+    q: "What is the rule for loading nitric acid?",
+    options: ["Load it above other products to save space", "Load it beside corrosives only", "Load it on the tailgate", "Do not load nitric acid above any other product"],
+    answer: 3,
+    explain: "Do not load nitric acid above any other product.",
+    source: "Section 9 — 9.4.1 (p. 9-11)"
+  },
+  {
+    topic: "loading",
+    q: "When may cylinders of compressed gas be loaded horizontally?",
+    options: ["Never", "Only if the tank is designed so the relief valve is in the vapor space", "Only in an open trailer", "Only when they are empty"],
+    answer: 1,
+    explain: "Cylinders may be loaded lying down if the tank is designed so the relief valve is in the vapor space.",
+    source: "Section 9 — 9.4.1 (p. 9-11)"
+  },
+  {
+    topic: "loading",
+    q: "What is the maximum total transport index of all Class 7 packages loaded in a single vehicle?",
+    options: ["10", "25", "50", "100"],
+    answer: 2,
+    explain: "The total transport index of all packages in a single vehicle must not exceed 50.",
+    source: "Section 9 — 9.4.1 (p. 9-12)"
+  },
+  {
+    topic: "loading",
+    q: "May you load a package labeled POISON in the driver's cab or with food for people or animals?",
+    options: ["No, never", "Yes, if the package is small", "Yes, if the cab is ventilated", "Only on short trips"],
+    answer: 0,
+    explain: "Never load a package labeled POISON or POISON INHALATION HAZARD in the cab or sleeper, or with food for human or animal consumption.",
+    source: "Section 9 — 9.4.1 (p. 9-12)"
   },
   {
     topic: "bulk",
     q: "What is a cargo tank?",
-    options: ["A tank permanently attached to or forming part of the vehicle", "A tank loaded and unloaded off the vehicle", "A package under 119 gallons", "A cylinder only"],
-    answer: 0,
-    explain: "A cargo tank is bulk packaging intended for liquids or gases that is permanently attached to the vehicle, or loaded and unloaded without being removed.",
-    source: "Missouri CDL Manual, Section 9.5"
-  },
-  {
-    topic: "bulk",
-    q: "What is a portable tank?",
-    options: ["A permanently attached cargo tank", "A non-bulk box", "A fuel tank", "Bulk packaging designed to be loaded onto or temporarily attached to a vehicle"],
-    answer: 3,
-    explain: "A portable tank is bulk packaging designed to be loaded onto or temporarily attached to a vehicle, and it is loaded or unloaded off the vehicle.",
-    source: "Missouri CDL Manual, Section 9.5"
-  },
-  {
-    topic: "bulk",
-    q: "A liquid bulk package has a capacity greater than:",
-    options: ["55 gallons", "119 gallons", "1,000 gallons", "Any size"],
+    options: ["Any tank carried on a flatbed", "Bulk packaging permanently attached to a vehicle, or loaded and unloaded without being removed from it", "A portable tank under 119 gallons", "The fuel tank on the tractor"],
     answer: 1,
-    explain: "For a liquid, bulk packaging means a maximum capacity greater than 119 gallons.",
-    source: "Missouri CDL Manual, Glossary"
+    explain: "Cargo tanks are bulk packaging permanently attached to a vehicle, and they stay on the vehicle when loaded and unloaded.",
+    source: "Section 9 — 9.5 (p. 9-12)"
   },
   {
     topic: "bulk",
-    q: "Where must the person watching a cargo tank transfer be?",
-    options: ["Within 100 feet, in the cab", "Within 300 feet, on the phone", "Within 25 feet, alert, with a clear view, and authorized to move the tank", "Anywhere on the property"],
-    answer: 2,
-    explain: "The watcher must be alert, have a clear view, be within 25 feet of the tank, know the hazards, and be authorized and able to move it.",
-    source: "Missouri CDL Manual, Section 9.5.2"
+    q: "How is a portable tank different from a cargo tank?",
+    options: ["It is always smaller than 119 gallons", "It must be placarded on the cab only", "It cannot carry hazardous materials", "It is not permanently attached, and it is loaded or unloaded while off the vehicle"],
+    answer: 3,
+    explain: "Portable tanks are bulk packaging not permanently attached to a vehicle; the product is loaded or unloaded while the tank is off the vehicle, then the tank is put on for transport.",
+    source: "Section 9 — 9.5 (p. 9-12)"
   },
   {
     topic: "bulk",
-    q: "What must be done with manholes and valves before moving a cargo tank?",
-    options: ["Close all manholes and valves", "Open all valves to vent", "Leave the dome cover open", "Remove the placards"],
+    q: "Which cargo tanks does the manual name as the most common?",
+    options: ["MC306 for liquids and MC331 for gases", "MC300 for solids and MC340 for liquids", "DOT407 for liquids and DOT412 for gases", "MC312 only"],
     answer: 0,
-    explain: "Close all manholes and valves before moving a cargo tank, even for a short distance or a small amount.",
-    source: "Missouri CDL Manual, Section 9.5.2"
+    explain: "The most common cargo tanks are MC306 for liquids and MC331 for gases.",
+    source: "Section 9 — 9.5 (p. 9-12)"
   },
   {
     topic: "bulk",
-    q: "When should a cargo tank be grounded when filling through an open filling hole?",
-    options: ["Only after the tank is full", "Only when the engine is running", "Never; grounding is optional", "Before opening the filling hole and until after it is closed"],
-    answer: 3,
-    explain: "Ground the tank before opening the filling hole and maintain the ground until after the filling hole is closed.",
-    source: "Missouri CDL Manual, Section 9.5.3"
+    q: "The person watching a cargo tank being loaded or unloaded must stay within what distance?",
+    options: ["100 feet", "50 feet", "25 feet", "10 feet"],
+    answer: 2,
+    explain: "The watcher must be alert, have a clear view, be within 25 feet of the tank, know the hazards and emergency procedures, and be authorized to move the tank.",
+    source: "Section 9 — 9.5.2 (p. 9-13)"
   },
   {
     topic: "bulk",
-    q: "If the engine runs a pump for compressed gas transfer, when should you turn it off?",
-    options: ["Before starting the transfer", "After product transfer, before unhooking the hose", "Only after the truck is moving", "When the tank is empty"],
+    q: "Special attendance rules apply to cargo tanks carrying which products?",
+    options: ["Gasoline and diesel", "Propane and anhydrous ammonia", "Chlorine and nitric acid", "Asphalt and tar"],
     answer: 1,
-    explain: "Turn the engine off after product transfer and before unhooking the hose. Unhook all connections before moving the tank.",
-    source: "Missouri CDL Manual, Section 9.5.4"
+    explain: "There are special attendance rules for cargo tanks transporting propane and anhydrous ammonia.",
+    source: "Section 9 — 9.5.2 (p. 9-13)"
   },
   {
     topic: "bulk",
-    q: "What should you do with trailers and semitrailers when they are uncoupled?",
-    options: ["Leave the wheels free", "Disconnect the brakes", "Raise the landing gear only", "Chock them to prevent motion"],
+    q: "Before moving a cargo tank, what must be done with the manholes and valves?",
+    options: ["They may stay open if the tank is under half full", "Only the rear valve must be closed", "They may stay open for short moves", "All manholes and valves must be closed"],
     answer: 3,
-    explain: "Always chock trailers and semitrailers to prevent motion when uncoupled from the power unit.",
-    source: "Missouri CDL Manual, Section 9.5.4"
+    explain: "Close all manholes and valves before moving a tank of hazardous materials, no matter how small the amount or how short the distance.",
+    source: "Section 9 — 9.5.2 (p. 9-13)"
   },
   {
     topic: "bulk",
-    q: "Which cargo tank types are common for liquids and gases?",
-    options: ["MC306 for gases and MC331 for liquids", "Both are for solids", "MC306 for liquids and MC331 for gases", "Both are for radioactive materials"],
-    answer: 2,
-    explain: "The manual identifies MC306 as a common liquid cargo tank and MC331 as a common gas cargo tank.",
-    source: "Missouri CDL Manual, Section 9.5"
+    q: "When filling a cargo tank through an open filling hole, when do you ground the tank?",
+    options: ["Ground before opening the filling hole and keep the ground on until after it is closed", "Ground after the product is flowing", "Ground only if the tank is aluminum", "Grounding is not required for diesel"],
+    answer: 0,
+    explain: "Ground the tank before opening the filling hole and maintain the ground until after closing the filling hole.",
+    source: "Section 9 — 9.5.3 (p. 9-13)"
   },
   {
     topic: "bulk",
-    q: "Where must identification numbers appear on a portable tank of 1,000 gallons or more?",
-    options: ["Only the rear", "Only the cab", "Each side and each end", "Only the shipping paper"],
+    q: "What do you do with the engine while loading or unloading flammable liquids?",
+    options: ["Leave it running to keep the pump warm", "Run it at high idle", "Turn it off, running it only if needed to operate a pump", "Turn it off only after the hose is disconnected"],
     answer: 2,
-    explain: "For 1,000 gallons or more, the identification number must appear on each side and each end. For less than 1,000 gallons, two opposing sides.",
-    source: "Missouri CDL Manual, Section 9.5.1"
+    explain: "Turn off your engine before loading or unloading any flammable liquids, and run it only if needed to operate a pump.",
+    source: "Section 9 — 9.5.3 (p. 9-13)"
+  },
+  {
+    topic: "bulk",
+    q: "What is the rule for liquid discharge valves on a compressed gas tank?",
+    options: ["They stay open for quick delivery", "They stay closed except when loading and unloading", "They are removed during transport", "They are opened whenever the engine runs"],
+    answer: 1,
+    explain: "Keep liquid discharge valves on a compressed gas tank closed except when loading and unloading.",
+    source: "Section 9 — 9.5.4 (p. 9-13)"
+  },
+  {
+    topic: "bulk",
+    q: "When must loading and unloading connections be unhooked?",
+    options: ["After the vehicle starts moving", "Only after the next delivery", "Whenever convenient", "Before coupling, uncoupling or moving a cargo tank"],
+    answer: 3,
+    explain: "Unhook all loading and unloading connections before coupling, uncoupling, or moving a cargo tank.",
+    source: "Section 9 — 9.5.4 (p. 9-13)"
   },
   {
     topic: "driving",
-    q: "Where may you never park with Division 1.1, 1.2, or 1.3 explosives?",
-    options: ["Within 10 feet of the road and 100 feet of a building", "Within 25 feet of the road and 500 feet of a crowd", "Anywhere if the parking brake is set", "Within 5 feet of the traveled road, or within 300 feet of a bridge, tunnel, building, crowd, or open fire"],
+    q: "How close to the traveled part of the road may you park with Division 1.1, 1.2 or 1.3 explosives?",
+    options: ["Within 50 feet", "Within 10 feet", "Not within 5 feet", "Anywhere if you stay in the cab"],
+    answer: 2,
+    explain: "Never park with Division 1.1, 1.2 or 1.3 explosives within five feet of the traveled part of the road.",
+    source: "Section 9 — 9.6.1 (p. 9-13)"
+  },
+  {
+    topic: "driving",
+    q: "How close may you park to a bridge, tunnel, building, place where people gather, or an open fire with those explosives?",
+    options: ["Not within 300 feet, except for short necessities such as fueling", "Not within 50 feet", "Not within 1,000 feet", "There is no distance rule"],
+    answer: 0,
+    explain: "Except for short periods needed for vehicle operation necessities such as fueling, do not park within 300 feet of a bridge, tunnel, building, a place where people gather, or an open fire.",
+    source: "Section 9 — 9.6.1 (p. 9-13)"
+  },
+  {
+    topic: "driving",
+    q: "What does attending a parked placarded vehicle require?",
+    options: ["Staying in the sleeper berth with the engine running", "Being within 500 feet with the vehicle in sight", "Checking on the vehicle every hour", "Being in the vehicle awake and not in the sleeper berth, or within 100 feet with a clear view"],
     answer: 3,
-    explain: "Never park within 5 feet of the traveled road. Except for brief operational stops, do not park within 300 feet of a bridge, tunnel, building, crowd, or open fire.",
-    source: "Missouri CDL Manual, Section 9.6.1"
+    explain: "The person attending must be in the vehicle awake and not in the sleeper berth, or within 100 feet of it with it in clear view, and must know the hazards and how to move it.",
+    source: "Section 9 — 9.6.3 (p. 9-14)"
   },
   {
     topic: "driving",
     q: "What is a safe haven?",
-    options: ["A rest area with a restaurant", "A tunnel with security", "An approved place to park unattended vehicles loaded with explosives", "A fuel island"],
-    answer: 2,
+    options: ["A rest area with security cameras", "An approved place for parking unattended vehicles loaded with explosives", "Any fenced truck stop", "A state weigh station"],
+    answer: 1,
     explain: "A safe haven is an approved place for parking unattended vehicles loaded with explosives, usually designated by local authorities.",
-    source: "Missouri CDL Manual, Section 9.6.1"
+    source: "Section 9 — 9.6.1 (p. 9-14)"
   },
   {
     topic: "driving",
-    q: "Where must the attendant of a parked placarded vehicle be?",
-    options: ["Within 500 feet", "In the sleeper berth", "Within 100 feet with a clear view, or in the vehicle awake", "Anywhere if the doors are locked"],
+    q: "Which warning devices must you use if you break down with hazardous materials?",
+    options: ["Burning flares", "Fuses", "Reflective triangles or red electric lights", "Road flares for Class 3 only"],
     answer: 2,
-    explain: "The attendant must be in the vehicle awake and not in the sleeper, or within 100 feet with the vehicle in clear view.",
-    source: "Missouri CDL Manual, Section 9.6.3"
+    explain: "Use reflective triangles or red electric lights; never use burning signals such as flares or fuses around flammable or explosive cargo.",
+    source: "Section 9 — 9.6.4 (p. 9-14)"
   },
   {
     topic: "driving",
-    q: "What should you use instead of flares around a flammable cargo tank or explosives load?",
-    options: ["Reflective triangles or red electric lights", "Road flares", "A burning fuse", "A cigarette lighter"],
+    q: "How far must you stay from a placarded cargo tank carrying Class 3 liquids or Division 2.1 gas if you smoke?",
+    options: ["At least 25 feet", "At least 10 feet", "At least 50 feet", "Smoking is allowed if you stand upwind"],
     answer: 0,
-    explain: "Never use burning signals such as flares or fuses around a Class 3 or 2.1 tank, or a vehicle loaded with 1.1, 1.2, or 1.3 explosives. Use reflective triangles or red electric lights.",
-    source: "Missouri CDL Manual, Section 9.6.4"
-  },
-  {
-    topic: "driving",
-    q: "Which load requires a written route plan?",
-    options: ["Division 1.1, 1.2, or 1.3 explosives", "Class 9 miscellaneous materials", "ORM-D only", "Empty cargo tanks"],
-    answer: 0,
-    explain: "For Division 1.1, 1.2, or 1.3 explosives, you must have a written route plan and follow it.",
-    source: "Missouri CDL Manual, Section 9.6.5"
-  },
-  {
-    topic: "driving",
-    q: "How close may you smoke to a placarded cargo tank used for Class 3 or Division 2.1 materials?",
-    options: ["No closer than 50 feet", "No closer than 100 feet", "No closer than 300 feet", "No closer than 25 feet"],
-    answer: 3,
     explain: "Do not smoke within 25 feet of a placarded cargo tank used for Class 3 flammable liquids or Division 2.1 gases.",
-    source: "Missouri CDL Manual, Section 9.6.6"
+    source: "Section 9 — 9.6.6 (p. 9-14)"
   },
   {
     topic: "driving",
-    q: "What must you do before fueling a vehicle containing hazardous materials?",
-    options: ["Turn off the engine and keep someone at the nozzle", "Leave the engine running", "Use a flare for light", "Fill the tank while smoking"],
-    answer: 0,
-    explain: "Turn the engine off before fueling, and keep someone at the nozzle controlling the flow.",
-    source: "Missouri CDL Manual, Section 9.6.7"
+    q: "What fire extinguisher must the power unit of a placarded vehicle carry?",
+    options: ["Any 2 B:C extinguisher", "A 5 B:C extinguisher", "A water can only", "One with a UL rating of 10 B:C or more"],
+    answer: 3,
+    explain: "The power unit of a placarded vehicle must have a fire extinguisher with a UL rating of 10 B:C or more.",
+    source: "Section 9 — 9.6.8 (p. 9-14)"
   },
   {
     topic: "driving",
-    q: "What fire extinguisher rating must the power unit of a placarded vehicle have?",
-    options: ["2 A only", "5 B only", "Any fire extinguisher", "10 B:C or more"],
-    answer: 3,
-    explain: "The power unit must have a fire extinguisher with a UL rating of 10 B:C or more.",
-    source: "Missouri CDL Manual, Section 9.6.8"
+    q: "How far before the nearest rail must you stop at a railroad crossing when a stop is required?",
+    options: ["5 to 10 feet", "15 to 50 feet", "60 to 100 feet", "Exactly 25 feet"],
+    answer: 1,
+    explain: "Stop 15 to 50 feet before the nearest rail, proceed only when you are sure no train is coming, and do not shift gears while crossing.",
+    source: "Section 9 — 9.6.12 (p. 9-15)"
   },
   {
     topic: "driving",
-    q: "How often should you examine the tires on a HAZMAT vehicle?",
-    options: ["Once a week", "At the beginning of each trip and each time the vehicle is parked", "Only before a long trip", "Only when a tire looks low"],
-    answer: 1,
-    explain: "Examine each tire at the beginning of each trip and each time the vehicle is parked. Use a tire pressure gauge.",
-    source: "Missouri CDL Manual, Section 9.6.9"
+    q: "When must you stop before a railroad crossing?",
+    options: ["Only when carrying explosives", "Only when the crossing has no gates", "When placarded, carrying any amount of chlorine, or hauling cargo tanks loaded or empty", "Only when the tank is full"],
+    answer: 2,
+    explain: "Stop if your vehicle is placarded, carries any amount of chlorine, or has cargo tanks used for hazardous materials whether loaded or empty.",
+    source: "Section 9 — 9.6.12 (p. 9-15)"
   },
   {
     topic: "driving",
-    q: "Where must you stop before a railroad crossing when your vehicle is placarded?",
-    options: ["5 to 10 feet before the nearest rail", "15 to 50 feet before the nearest rail", "50 to 100 feet after the rail", "Directly on the tracks"],
-    answer: 1,
-    explain: "Stop 15 to 50 feet before the nearest rail. Proceed only when you can clear the tracks without stopping, and do not shift gears while crossing.",
-    source: "Missouri CDL Manual, Section 9.6.12"
-  },
-  {
-    topic: "emergency",
-    q: "How is the Emergency Response Guidebook indexed?",
-    options: ["Driver's license number and plate number", "Shipper's address and phone number", "Proper shipping name and identification number", "Tire size and axle weight"],
-    answer: 2,
-    explain: "The ERG is indexed by proper shipping name and hazardous materials identification number.",
-    source: "Missouri CDL Manual, Section 9.7.1"
-  },
-  {
-    topic: "emergency",
-    q: "What is your job at the scene of a HAZMAT crash or incident?",
-    options: ["Move the material into a storm drain", "Let bystanders inspect the leak", "Keep people away, limit the spread only if safe, and communicate the danger", "Leave without warning anyone"],
-    answer: 2,
-    explain: "Keep people away, limit the spread only if you can safely do so, and communicate the danger to responders.",
-    source: "Missouri CDL Manual, Section 9.7.2"
-  },
-  {
-    topic: "emergency",
-    q: "What is the National Response Center phone number?",
-    options: ["800-424-8802", "911 only", "800-424-9300", "855-347-8371"],
+    q: "How often must you examine the tires on a placarded vehicle?",
+    options: ["At the beginning of each trip and each time the vehicle is parked", "Once a day", "Only before a long trip", "Every 100 miles"],
     answer: 0,
-    explain: "The National Response Center is 800-424-8802. CHEMTREC is 800-424-9300.",
-    source: "Missouri CDL Manual, Section 9.7.5"
+    explain: "Examine each tire at the beginning of each trip and each time the vehicle is parked, and use a tire pressure gauge, the only acceptable way to check pressure.",
+    source: "Section 9 — 9.6.9 (p. 9-14)"
   },
   {
     topic: "emergency",
-    q: "What estimated property damage triggers a required National Response Center call?",
-    options: ["$5,000", "$50,000", "$10,000", "$500,000"],
+    q: "What is the Emergency Response Guidebook indexed by?",
+    options: ["Carrier name and DOT number", "Proper shipping name and identification number", "Placard color and shape", "Shipper address and phone"],
     answer: 1,
-    explain: "A HAZMAT incident must be reported when estimated property damage exceeds $50,000.",
-    source: "Missouri CDL Manual, Section 9.7.5"
+    explain: "The ERG is indexed by proper shipping name and hazardous materials identification number, which is why the papers, labels and placards must be correct.",
+    source: "Section 9 — 9.7.1 (p. 9-15)"
   },
   {
     topic: "emergency",
-    q: "A public evacuation for longer than what period triggers a National Response Center call?",
-    options: ["30 minutes", "2 hours", "24 hours", "1 hour"],
-    answer: 3,
-    explain: "The trigger is a general public evacuation for more than one hour.",
-    source: "Missouri CDL Manual, Section 9.7.5"
-  },
-  {
-    topic: "emergency",
-    q: "If a Class 3 flammable liquid is leaking, what should you do?",
-    options: ["Open the tank to inspect it", "Keep bystanders away, warn of the danger, and keep people from smoking", "Transfer the liquid on the roadway", "Drive faster to the nearest station"],
-    answer: 1,
-    explain: "For a Class 3 leak, warn people, keep them from smoking, get off the roadway if safe, and do not transfer flammable liquid between vehicles on a public roadway except in an emergency.",
-    source: "Missouri CDL Manual, Section 9.7.3"
-  },
-  {
-    topic: "emergency",
-    q: "What should you do with a smoldering package of flammable solids?",
-    options: ["Open it to let the smoke out", "Throw it off a bridge", "Load it next to oxidizers", "Do not open it; remove it if you can do so safely"],
-    answer: 3,
-    explain: "Do not open smoldering packages of flammable solids. Remove them from the vehicle if safe, and remove unbroken packages if that reduces the fire hazard.",
-    source: "Missouri CDL Manual, Section 9.7.3"
-  },
-  {
-    topic: "emergency",
-    q: "After a leak of Division 2.3 or 6.1 material, what must be done before the vehicle is used again?",
-    options: ["Have it checked for stray poison", "Use it immediately for food", "Wash it with acid", "Leave it open overnight"],
-    answer: 0,
-    explain: "A vehicle involved in a leak of Division 2.3 poison gas or Division 6.1 poison must be checked for stray poison before reuse.",
-    source: "Missouri CDL Manual, Section 9.7.3"
-  },
-  {
-    topic: "emergency",
-    q: "After a radioactive leak or broken package, when may the vehicle be used again?",
-    options: ["After it is cleaned and checked with a survey meter", "Immediately", "After washing it with water only", "After covering the package with a tarp"],
-    answer: 0,
-    explain: "Do not use the vehicle until it is cleaned and checked with a survey meter.",
-    source: "Missouri CDL Manual, Section 9.7.3"
-  },
-  {
-    topic: "emergency",
-    q: "How soon must a carrier make a detailed written report after an incident?",
-    options: ["60 days", "90 days", "30 days", "1 year"],
+    q: "At the scene of a hazardous materials crash, what is your job?",
+    options: ["Move the cargo to the shoulder", "Take photographs for the carrier", "Keep people away, limit the spread if you can do so safely, and give responders the papers and emergency information", "Wait in the cab for instructions"],
     answer: 2,
-    explain: "Carriers must make detailed written reports within 30 days of an incident.",
-    source: "Missouri CDL Manual, Section 9.7.5"
+    explain: "Keep people away from the scene, limit the spread of material only if you can safely do so, communicate the danger, and provide the shipping papers and emergency response information.",
+    source: "Section 9 — 9.7.2 (p. 9-15)"
   },
   {
-    topic: "security",
-    q: "What must HAZMAT security training teach drivers?",
-    options: ["Only how to load cargo", "Only how to file taxes", "Only how to change tires", "How to recognize and respond to possible security threats"],
-    answer: 3,
-    explain: "All HAZMAT drivers must be trained in security risks, including how to recognize and respond to possible threats.",
-    source: "Missouri CDL Manual, Section 9"
-  },
-  {
-    topic: "security",
-    q: "What should you do if you see suspicious activity around your HAZMAT vehicle?",
-    options: ["Ignore it unless someone is hurt", "Report it through company procedures and law enforcement if needed", "Post the load details online", "Confront the person alone"],
-    answer: 1,
-    explain: "Report suspicious activity through your employer's procedure, and call law enforcement if there is an immediate threat.",
-    source: "Missouri CDL Manual, Section 9"
-  },
-  {
-    topic: "security",
-    q: "What should you do before releasing a HAZMAT load at delivery?",
-    options: ["Assume anyone at the dock is authorized", "Give the load to the first person who asks", "Leave the paperwork in the cab", "Verify identity and paperwork"],
-    answer: 3,
-    explain: "Verify identities and paperwork at pickup and delivery, and follow the consignee's security procedure.",
-    source: "Missouri CDL Manual, Section 9"
-  },
-  {
-    topic: "security",
-    q: "How should you park a HAZMAT vehicle when it is unattended?",
-    options: ["In a secure, well-lit area, locked", "Leave the engine running", "Park in an isolated area", "Leave the keys in the ignition"],
+    topic: "emergency",
+    q: "You feel the trailer doors and they are hot. What should you do?",
+    options: ["Do not open them; there may be a cargo fire and air can make it flare up", "Open them quickly to let the heat out", "Spray water on the doors and open them", "Open one door and stand back"],
     answer: 0,
-    explain: "Secure and lock the vehicle when unattended, and choose a controlled, well-lit area when possible.",
-    source: "Missouri CDL Manual, Section 9"
+    explain: "If the doors are hot you may have a cargo fire and should not open them, because opening the doors lets air in and may make the fire flare up.",
+    source: "Section 9 — 9.7.3 (p. 9-16)"
   },
   {
-    topic: "security",
-    q: "What should you check before moving a sealed HAZMAT load?",
-    options: ["Cut the seal to inspect the cargo", "Ignore the seal", "The seal and signs of tampering", "Replace the seal with tape"],
-    answer: 2,
-    explain: "Check seals and look for signs of tampering before you move the load.",
-    source: "Missouri CDL Manual, Section 9"
-  },
-  {
-    topic: "security",
-    q: "How should you handle questions about your load, route, or schedule?",
-    options: ["Share the route on social media", "Do not discuss them with strangers", "Tell everyone at the truck stop", "Post the shipping paper"],
-    answer: 1,
-    explain: "Limit information about the load, route, and schedule. Do not discuss them with strangers or post them publicly.",
-    source: "Missouri CDL Manual, Section 9"
-  },
-  {
-    topic: "security",
-    q: "If you are confronted by someone who wants your HAZMAT vehicle, what is the safest response?",
-    options: ["Fight back immediately", "Do not escalate; protect yourself, note details, and report when safe", "Follow the person's instructions to drive off route", "Abandon the vehicle and leave the keys"],
-    answer: 1,
-    explain: "Do not escalate. Protect yourself, note details, and report to law enforcement and your employer as soon as it is safe.",
-    source: "Missouri CDL Manual, Section 9"
-  },
-  {
-    topic: "security",
-    q: "Where should shipping papers and delivery information be kept?",
-    options: ["Out of public view", "On the dashboard", "Posted on the outside of the trailer", "Thrown away at the first stop"],
-    answer: 0,
-    explain: "Keep shipping papers and delivery information out of public view, while still following the rules for keeping them accessible to responders.",
-    source: "Missouri CDL Manual, Sections 9.3 and 9.6.10"
-  },
-  {
-    topic: "security",
-    q: "What should you do with an unattended HAZMAT vehicle?",
-    options: ["Leave it open for ventilation", "Leave the keys in it", "Remove the placards and leave", "Lock and secure it"],
+    topic: "emergency",
+    q: "How should you identify a leaking material?",
+    options: ["By its smell", "By tasting a sample", "By opening the package", "By using the shipping papers, labels or package location, never by smell"],
     answer: 3,
-    explain: "Lock and secure the vehicle when unattended, and follow the parking and attendance rules for the load.",
-    source: "Missouri CDL Manual, Section 9"
+    explain: "Identify the material from shipping papers, labels or package location. Do not try to identify it by smell, because toxic gases can destroy your sense of smell.",
+    source: "Section 9 — 9.7.3 (p. 9-16)"
+  },
+  {
+    topic: "emergency",
+    q: "Hazardous materials are spilling from your vehicle. When may you move it?",
+    options: ["Never, under any circumstances", "Only if you can move off the road and away from people without danger", "As soon as you see the leak", "Only to reach the nearest truck stop"],
+    answer: 1,
+    explain: "Do not move the vehicle more than safety requires; you may move off the road and away from places where people gather if doing so serves safety.",
+    source: "Section 9 — 9.7.3 (p. 9-16)"
+  },
+  {
+    topic: "emergency",
+    q: "Your vehicle carrying explosives is in a collision. Where do you place the explosives before separating the vehicles?",
+    options: ["Inside the cab", "Under the trailer", "At least 200 feet from the vehicles and occupied buildings", "Just behind the wreckage"],
+    answer: 2,
+    explain: "Remove all explosives before separating vehicles involved in a collision and place them at least 200 feet from the vehicles and occupied buildings.",
+    source: "Section 9 — 9.7.4 (p. 9-17)"
+  },
+  {
+    topic: "emergency",
+    q: "Compressed gas is involved in an accident. Who must be notified?",
+    options: ["The shipper", "Only the insurance company", "No one if there is no leak", "The consignee only"],
+    answer: 0,
+    explain: "You must notify the shipper if compressed gas is involved in any accident.",
+    source: "Section 9 — 9.7.4 (p. 9-17)"
+  },
+  {
+    topic: "emergency",
+    q: "What property damage estimate triggers a call to the National Response Center?",
+    options: ["Any damage at all", "More than $1,000", "More than $10,000", "More than $50,000"],
+    answer: 3,
+    explain: "You or your employer must phone the National Response Center when estimated property damage exceeds $50,000, along with the other listed incident conditions.",
+    source: "Section 9 — 9.7.5 (p. 9-17)"
+  },
+  {
+    topic: "emergency",
+    q: "What is the National Response Center number?",
+    options: ["(800) 424-9300", "(800) 424-8802", "(800) 555-1212", "(888) 424-8802"],
+    answer: 1,
+    explain: "The National Response Center maintains the 24-hour toll-free line (800) 424-8802.",
+    source: "Section 9 — 9.7.5 (p. 9-17)"
+  },
+  {
+    topic: "emergency",
+    q: "What is CHEMTREC?",
+    options: ["A carrier dispatch service", "A federal inspection program", "A 24-hour line providing technical information about the physical properties of hazardous materials", "The hazardous waste manifest registry"],
+    answer: 2,
+    explain: "CHEMTREC, at (800) 424-9300, was created to provide emergency personnel with technical information about the physical properties of hazardous materials.",
+    source: "Section 9 — 9.7.5 (p. 9-18)"
   },
   {
     topic: "security",
-    q: "What should you do with a suspicious person asking detailed questions about your cargo?",
-    options: ["Wait until the end of the week", "Handle it yourself without telling anyone", "Report the activity to your supervisor and law enforcement", "Ignore it if the load is sealed"],
+    q: "What must security training for hazardous materials drivers cover?",
+    options: ["How to recognize and respond to possible security threats", "How to negotiate with hijackers", "How to inspect a TWIC card", "How to disable a vehicle tracker"],
+    answer: 0,
+    explain: "Security training must include how to recognize and respond to possible security threats.",
+    source: "Section 9 — introduction (p. 9-2)"
+  },
+  {
+    topic: "security",
+    q: "Before driving which loads is special training required?",
+    options: ["Any load over 1,001 pounds", "Only hazardous waste", "Certain flammable gas materials and highway route controlled quantities of radioactive material", "Only cargo tank loads of diesel"],
     answer: 2,
-    explain: "Report suspicious interest in the cargo through company procedures and to law enforcement when appropriate.",
-    source: "Missouri CDL Manual, Section 9"
+    explain: "Drivers need special training before driving a vehicle transporting certain flammable gas materials or highway route controlled quantities of radioactive materials.",
+    source: "Section 9 — introduction (p. 9-2)"
+  },
+  {
+    topic: "security",
+    q: "Someone else may watch your parked vehicle loaded with Division 1.1, 1.2 or 1.3 explosives only if it is where?",
+    options: ["At any truck stop", "On the shipper's, carrier's or consignee's property", "Within 100 feet of a police station", "In any safe haven"],
+    answer: 1,
+    explain: "You may let someone else watch the vehicle only if it is on the shipper's property, the carrier's property, or the consignee's property.",
+    source: "Section 9 — 9.6.1 (p. 9-14)"
+  },
+  {
+    topic: "security",
+    q: "Where may you leave a vehicle loaded with explosives unattended?",
+    options: ["At a rest area", "On the shoulder with the flashers on", "In a fenced lot of your choice", "Only in a safe haven approved for unattended explosive loads"],
+    answer: 3,
+    explain: "You are allowed to leave the vehicle unattended only in a safe haven, an approved place for parking unattended vehicles loaded with explosives.",
+    source: "Section 9 — 9.6.1 (p. 9-14)"
+  },
+  {
+    topic: "security",
+    q: "How must shipments of explosives be delivered?",
+    options: ["Only to authorized persons, or left in locked rooms designed for explosives storage", "To anyone who signs the manifest", "To the nearest police station", "Left on the dock if no one is there"],
+    answer: 0,
+    explain: "Deliver shipments of explosives only to authorized persons or leave them in locked rooms designed for explosives storage.",
+    source: "Section 9 — 9.6.5 (p. 9-14)"
+  },
+  {
+    topic: "security",
+    q: "May you uncouple a trailer loaded with hazardous materials and leave it on a public street?",
+    options: ["Yes, if the landing gear is down", "Yes, for less than an hour", "No", "Yes, if the trailer is placarded"],
+    answer: 2,
+    explain: "Do not uncouple a trailer and leave it with hazardous materials on a public street.",
+    source: "Section 9 — 9.6.2 (p. 9-14)"
+  },
+  {
+    topic: "security",
+    q: "Which loads require a written route plan that the driver keeps in the vehicle?",
+    options: ["All placarded loads", "Division 1.1, 1.2 and 1.3 explosives", "Radioactive loads only", "Any bulk tank load"],
+    answer: 1,
+    explain: "If transporting Division 1.1, 1.2 or 1.3 explosives you must have a written route plan and follow it, keeping a copy with you.",
+    source: "Section 9 — 9.6.5 (p. 9-14)"
+  },
+  {
+    topic: "security",
+    q: "For a placarded radioactive shipment, what must the carrier do?",
+    options: ["Let the driver choose any route", "Use the shortest route regardless of population", "Avoid telling the driver what is on board", "Choose the safest route, tell the driver about the material, and show the route plan"],
+    answer: 3,
+    explain: "A carrier must choose the safest route for placarded radioactive materials, then tell the driver about the materials and show the route plan.",
+    source: "Section 9 — 9.6.5 (p. 9-14)"
+  },
+  {
+    topic: "security",
+    q: "Permits may be required to transport which of the following?",
+    options: ["Certain explosives or bulk hazardous wastes", "Any load over 500 pounds", "Only corrosive liquids", "Only loads crossing a state line"],
+    answer: 0,
+    explain: "Some locations require permits to transport certain explosives or bulk hazardous wastes.",
+    source: "Section 9 — introduction (p. 9-2)"
+  },
+  {
+    topic: "security",
+    q: "You must park a vehicle loaded with Division 1.1 explosives. When may you park on private property?",
+    options: ["Never", "Only with a police escort", "Only if the owner is aware of the danger", "Anytime, if you stay with the vehicle"],
+    answer: 2,
+    explain: "Do not park on private property unless the owner is aware of the danger.",
+    source: "Section 9 — 9.6.1 (p. 9-13)"
   }
 ];

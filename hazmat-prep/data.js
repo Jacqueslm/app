@@ -1,7 +1,7 @@
 const TOPICS = {
   process: {
-    name: "Missouri process",
-    short: "ELDT before the test, TSA before issuance",
+    name: "Getting the H",
+    short: "CDL, training, testing and permits",
     color: "#ffd43b"
   },
   rules: {
